@@ -725,7 +725,7 @@
       "lang": "RU",
       "title": "В наборе кончился один товар",
       "steps": [
-        "В панели поставить одному товару из набора «Нет в наличии».",
+        "В панели поставить одному товару из набора «Нет» в «Наличии» (у посчитанного — «Не продавать»).",
         "Открыть этот набор в магазине, ничего не перезагружая.",
         "Вернуть товар в продажу.",
         "На «Складе» выписать ноль тому объёму товара, который записан в наборе; второй объём не трогать.",
@@ -746,7 +746,7 @@
       "en": {
         "title": "One product in a set has run out",
         "steps": [
-          "In the panel set one of the set's products to «Нет в наличии».",
+          "In the panel set one of the set's products to «Нет» in «Наличие» («Не продавать» if counted).",
           "Open that set in the shop, reloading nothing.",
           "Put the product back on sale.",
           "On «Склад» write zero for the volume the set names; leave the other volume alone.",
@@ -762,7 +762,7 @@
         ],
         "why": "A set sold without one of its bottles is an order you cannot pack."
       },
-      "markedAt": "2026-09-19T00:00:00.000Z"
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "shop-gift-page",
@@ -5480,10 +5480,10 @@
       "title": "Письмо «Товар снова в наличии»",
       "steps": [
         "Открыть «Ещё» → «Маркетинг» → «Письма» и включить «Товар снова в наличии».",
-        "Товару поставить «Нет в наличии» и подписаться на него из магазина («Сообщить о наличии»).",
+        "Непосчитанному товару поставить «Нет» в «Наличии» и подписаться на него из магазина («Сообщить о наличии»).",
         "В панели поставить этому товару «Мало» и проверить почту.",
         "Переключить его на «В наличии», потом снова на «Мало», и проверить почту.",
-        "Повторить с другим товаром: «Нет в наличии» → подписка → «В наличии».",
+        "Повторить с другим товаром: «Нет» → подписка → «В наличии».",
         "Повторить с товаром, у которого на «Складе» посчитан ноль."
       ],
       "expect": [
@@ -5502,10 +5502,10 @@
         "title": "The «Товар снова в наличии» letter",
         "steps": [
           "Open «Ещё» → «Маркетинг» → «Письма» and switch on «Товар снова в наличии».",
-          "Set a product to «Нет в наличии» and subscribe to it from the shop («Сообщить о наличии»).",
+          "Set an uncounted product's «Наличие» to «Нет» and subscribe to it from the shop («Сообщить о наличии»).",
           "In the panel set that product to «Мало» (low) and check your mail.",
           "Switch it to «В наличии», then back to «Мало», and check your mail.",
-          "Repeat with another product: «Нет в наличии» → subscribe → «В наличии».",
+          "Repeat with another product: «Нет» → subscribe → «В наличии».",
           "Repeat with a product counted down to zero on «Склад»."
         ],
         "expect": [
@@ -5518,7 +5518,7 @@
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       },
-      "markedAt": "2026-09-24T07:00:15.191Z"
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "mail-abandoned",
@@ -6701,7 +6701,7 @@
       "lang": "RU",
       "title": "Штрихкод товара, снятого с продажи",
       "steps": [
-        "Поставить одному товару «Нет в наличии» в «Товарах» и запомнить его штрихкод.",
+        "Непосчитанному товару поставить «Нет» в «Наличии» в «Товарах» и запомнить его штрихкод.",
         "Открыть «Салон» и вписать этот штрихкод в поиск.",
         "Нажать на кнопку с объёмом.",
         "Другому товару выключить «Показывать в магазине» и вписать его штрихкод.",
@@ -6718,11 +6718,11 @@
       "risk": "med",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-09-18T12:20:00.000Z",
+      "markedAt": "2026-09-25T10:44:55.950Z",
       "en": {
         "title": "The barcode of a product taken off sale",
         "steps": [
-          "In «Товары» set one product to «Нет в наличии» and note its barcode.",
+          "In «Товары» set an uncounted product's «Наличие» to «Нет» and note its barcode.",
           "Open «Салон» and type that barcode into the search.",
           "Press the size button.",
           "On another product switch «Показывать в магазине» off and type its barcode.",
@@ -6792,47 +6792,43 @@
       "title": "Поменять цену товара",
       "steps": [
         "Открыть «Товары» → «Каталог» и нажать на строку товара.",
-        "Изменить «Цена, €» у первого объёма на вкладке «Размеры и цены».",
-        "Нажать «Сохранить».",
-        "Открыть товар в магазине и посмотреть цену.",
-        "Положить его в корзину.",
-        "Поменять цену и нажать «← Товары», не сохраняя.",
-        "Снова поменять цену и нажать «Заказы» в меню внизу (на компьютере — слева)."
+        "В «Объёмы и цены» изменить «Цена, €» у первого объёма.",
+        "Нажать мимо поля — кнопки «Сохранить» больше нет.",
+        "Открыть товар в магазине, посмотреть цену и положить его в корзину.",
+        "В панели вписать в цену «abc» и нажать «← Товары».",
+        "Нажать «Остаться», исправить цену и снова нажать «← Товары»."
       ],
       "expect": [
-        "В магазине у товара стоит новая цена.",
-        "В корзине та же самая цена.",
-        "В итоге заказа та же самая сумма.",
-        "И на «←», и на кнопке раздела панель спросит, выходить ли без сохранения.",
-        "Вопрос о несохранённом заметен: цвет, подложка и две разные кнопки.",
-        "«Выйти без сохранения» после кнопки раздела открывает этот раздел."
+        "Вверху: «Сохраняем…», потом «Сохранено ✓».",
+        "В магазине и в корзине одна и та же новая цена.",
+        "«abc» не сохраняется: рыжая рамка и строка-подсказка под полем.",
+        "С такой ценой «← Товары» спрашивает, выйти ли без сохранения.",
+        "После исправления «← Товары» закрывает товар без вопроса."
       ],
-      "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба.",
+      "why": "Разные цены на странице и в корзине — это ваш убыток или жалоба. Цена теперь сохраняется сама, как только вы ушли из поля.",
       "risk": "high",
       "writes": true,
       "en": {
         "title": "Changing a product's price",
         "steps": [
           "Open «Товары» → «Каталог» and tap the product's row.",
-          "On the «Размеры и цены» (sizes and prices) tab change «Цена, €» for the first size.",
-          "Press «Сохранить».",
-          "Open the product in the shop and look at the price.",
-          "Put it in the cart.",
-          "Change the price and press «← Товары» without saving.",
-          "Change the price again and press «Заказы» in the bottom bar (on a computer, in the sidebar)."
+          "In «Объёмы и цены» (sizes and prices) change «Цена, €» for the first size.",
+          "Tap outside the box — there is no «Сохранить» button any more.",
+          "Open the product in the shop, look at the price and put it in the cart.",
+          "In the panel type «abc» as the price and press «← Товары».",
+          "Press «Остаться» (stay), fix the price and press «← Товары» again."
         ],
         "expect": [
-          "The shop shows the new price on the product.",
-          "The cart shows the same price.",
-          "The order total uses the same price.",
-          "Both on «←» and on a section button the panel asks whether to leave unsaved.",
-          "The unsaved-work question stands out: colour, a ground and two different buttons.",
-          "«Выйти без сохранения» after a section button opens that section."
+          "At the top: «Сохраняем…» (saving), then «Сохранено ✓» (saved).",
+          "The shop and the cart show the same new price.",
+          "«abc» is not saved: a rust border and a hint line under the box.",
+          "With that price «← Товары» asks whether to leave without saving.",
+          "Once fixed, «← Товары» closes the product without a question."
         ],
-        "why": "A price that differs in the cart costs you money or a complaint."
+        "why": "A price that differs in the cart costs you money or a complaint. The price now saves itself as soon as you leave the box."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:54:34.627Z"
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "goods-sizes",
@@ -6842,43 +6838,46 @@
       "lang": "RU",
       "title": "Добавить и убрать объём",
       "steps": [
-        "Открыть товар, вкладка «Размеры и цены», нажать «+ Размер».",
-        "Вписать объём и цену.",
+        "Открыть товар и в «Объёмы и цены» нажать «+ Объём».",
+        "Вписать объём и цену, нажать мимо поля.",
         "Нажать «Сканер» у поля «Штрихкод» и навести камеру на код с упаковки.",
-        "Нажать «Сохранить» (на телефоне — вверху экрана).",
+        "Нажать «Отвязать код», потом «Вернуть» на полоске внизу.",
         "Открыть товар в магазине и выбрать новый объём.",
-        "Вернуться, убрать этот объём крестиком и сохранить снова."
+        "Вернуться, нажать × у этого объёма и на вопросе нажать «Убрать»."
       ],
       "expect": [
-        "Код с упаковки встал в поле «Штрихкод» сам, без набора руками.",
-        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; снизу ничего не закрыто.",
-        "Цена не число — редактор сам открывает «Размеры и цены» и называет поле.",
-        "Новый объём виден в магазине со своей ценой, его можно положить в корзину.",
-        "После удаления объём пропал со страницы товара, выбрать его больше нельзя."
+        "Код с упаковки встал в «Штрихкод» и сохранился сам.",
+        "«Отвязать код» сразу освобождает код; «Вернуть» привязывает его обратно.",
+        "Цена не число — рыжая рамка и подсказка; такая цена не уходит.",
+        "Новый объём виден в магазине со своей ценой и кладётся в корзину.",
+        "После «Убрать» объём пропал со страницы товара, выбрать его нельзя.",
+        "«Салон, €» у объёмов ниже первого серый — он считается сам."
       ],
       "why": "Объём, который есть на полке, но не в магазине, — потерянная продажа. Убранный объём остаётся строкой на «Складе» — вместе с остатком и штрихкодом.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
       "en": {
         "title": "Adding and removing a size",
         "steps": [
-          "Open a product, the «Размеры и цены» tab, press «+ Размер».",
-          "Type in the size and the price.",
+          "Open a product and in «Объёмы и цены» press «+ Объём».",
+          "Type in the size and the price, then tap outside the box.",
           "Press «Сканер» next to «Штрихкод» and point the camera at the packaging's code.",
-          "Press «Сохранить» (on the phone — at the top of the screen).",
+          "Press «Отвязать код» (unbind), then «Вернуть» (undo) on the strip below.",
           "Open the product in the shop and choose the new size.",
-          "Go back, remove that size with the cross and save again."
+          "Go back, press × on that size and answer «Убрать» (remove)."
         ],
         "expect": [
-          "The code from the packaging landed in «Штрихкод» by itself, nothing typed.",
-          "On the phone «Сохранить» and «Отмена» sit in the header; nothing is covered below.",
-          "A price that is not a number opens «Размеры и цены» itself and names the box.",
+          "The packaging's code landed in «Штрихкод» and saved itself.",
+          "«Отвязать код» frees the code at once; «Вернуть» binds it back.",
+          "A price that is not a number: rust border and hint; nothing is sent.",
           "The new size shows in the shop at its own price and goes into the cart.",
-          "After deleting, the size is gone from the product page and cannot be chosen."
+          "After «Убрать» the size is gone from the product page and cannot be chosen.",
+          "«Салон, €» below the first size is grey — it works itself out."
         ],
         "why": "A size on the shelf but not in the shop is a lost sale. A removed size stays as a row on «Склад» — with its stock and its barcode."
-      }
+      },
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "goods-hide",
@@ -6888,12 +6887,12 @@
       "lang": "RU",
       "title": "Снять товар с продажи",
       "steps": [
-        "Выключить «Показывать в магазине» в редакторе товара и сохранить.",
+        "В карточке товара выключить «Показывать в магазине» — сохранять не нужно.",
         "Открыть адрес этого товара в магазине.",
         "Поискать его в магазине через поиск и в разделе.",
         "В панели открыть «Товары» и нажать чип «Скрытые».",
         "Перейти на вкладку «Склад» и нажать «Мало», потом «Нет».",
-        "Вернуть переключатель обратно."
+        "Включить его обратно — на компьютере прямо переключателем в строке каталога."
       ],
       "expect": [
         "По старой ссылке открывается «Страница не найдена».",
@@ -6907,16 +6906,16 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-18T12:20:00.000Z",
+      "markedAt": "2026-09-25T10:44:55.950Z",
       "en": {
         "title": "Taking a product off sale",
         "steps": [
-          "In the product editor switch «Показывать в магазине» (show in the shop) off and save.",
+          "In the product's card switch «Показывать в магазине» (show in the shop) off — no saving needed.",
           "Open that product's address in the shop.",
           "Look for it in the search and in its catalogue section.",
           "In the panel open «Товары» and press the «Скрытые» chip.",
           "Go to the «Склад» tab and press «Мало», then «Нет».",
-          "Switch the toggle back on."
+          "Switch it back on — on a computer, with the switch right in the catalogue row."
         ],
         "expect": [
           "The old link answers «Страница не найдена».",
@@ -6938,21 +6937,21 @@
       "title": "Ручная отметка наличия",
       "steps": [
         "Взять товар, который на «Складе» ещё не считали.",
-        "Поставить «Нет в наличии» на вкладке «Основное» и сохранить.",
-        "Открыть товар в магазине.",
-        "Поставить «Мало», потом «В наличии».",
-        "То же самое проделать с товаром, у которого остаток посчитан.",
-        "Открыть «Каталог», нажать чип «Нет в наличии» и прочитать значки строк."
+        "В карточке, в «В магазине», выбрать у «Наличия» «Нет».",
+        "Открыть товар в магазине и оставить почту в «Сообщить о наличии».",
+        "Вернуться в панель, посмотреть под «Наличием», выбрать «Мало», потом «В наличии».",
+        "Открыть товар с посчитанным остатком и включить «Не продавать».",
+        "Открыть «Каталог», нажать чип «Кончаются» и прочитать значки строк."
       ],
       "expect": [
         "У непосчитанного товара надпись в магазине меняется вслед за отметкой.",
-        "При «нет в наличии» кнопка «В корзину» пропадает.",
-        "Вместо неё появляется «Сообщить о наличии».",
-        "У посчитанного товара «Нет в наличии» тоже останавливает продажу.",
-        "А «Мало» и «В наличии» у него перебиваются тем, что посчитано.",
-        "Под «Нет в наличии» — только товары, которые магазин не продаёт; у каждого значок «Нет»."
+        "При «Нет» кнопка «В корзину» пропадает, появляется «Сообщить о наличии».",
+        "Под «Наличием» в панели: «1 человек ждёт — получит письмо» (или что письмо выключено).",
+        "У посчитанного товара — один переключатель «Не продавать»: он останавливает продажу.",
+        "Под «Кончаются» — товары, у которых хоть один объём на исходе или закончился.",
+        "Каждое нажатие сохраняется сразу; «Вернуть» на полоске внизу его отменяет."
       ],
-      "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали.",
+      "why": "Без этой отметки нельзя остановить продажу товара, который ещё не считали. Строка «ждут» подсказывает, что вернуть товар стоит: люди узнают сами.",
       "risk": "med",
       "writes": true,
       "mark": "redo",
@@ -6960,23 +6959,23 @@
         "title": "Setting availability by hand",
         "steps": [
           "Take a product nobody has counted on «Склад».",
-          "In the editor, on «Основное», set «Нет в наличии» and save.",
-          "Open the product in the shop.",
-          "Set «Мало» (low), then «В наличии» (in stock).",
-          "Do the same on a product whose stock has been counted.",
-          "Open the catalogue, tap its «Нет в наличии» chip and read the rows' badges."
+          "In its card, under «В магазине», set «Наличие» to «Нет» (none).",
+          "Open the product in the shop and leave an address in «Сообщить о наличии».",
+          "Back in the panel, look under «Наличие», then choose «Мало» (low), then «В наличии».",
+          "Open a product whose stock is counted and switch on «Не продавать» (do not sell).",
+          "Open «Каталог», tap the «Кончаются» (running low) chip and read the rows' badges."
         ],
         "expect": [
           "On an uncounted product the line in the shop follows the setting.",
-          "With «нет в наличии» the «В корзину» button goes.",
-          "«Сообщить о наличии» appears in its place.",
-          "On a counted product «Нет в наличии» stops the sale too.",
-          "But its «Мало» and «В наличии» are overruled by the count.",
-          "Under «Нет в наличии» only products the shop will not sell, each with a «Нет» badge."
+          "With «Нет» the «В корзину» button goes; «Сообщить о наличии» appears.",
+          "Under «Наличие»: «1 человек ждёт — получит письмо» (or that the letter is off).",
+          "A counted product has one switch, «Не продавать»: it stops the sale.",
+          "Under «Кончаются»: products with any size running low or gone.",
+          "Every tap saves at once; «Вернуть» on the strip below takes it back."
         ],
-        "why": "Without it you cannot stop sales of stock nobody has counted yet."
+        "why": "Without it you cannot stop sales of stock nobody has counted yet. The «waiting» line says bringing it back is worth it: those people hear by themselves."
       },
-      "markedAt": "2026-09-24T17:41:02.129Z"
+      "markedAt": "2026-09-25T13:51:49.084Z"
     },
     {
       "id": "goods-photo",
@@ -6986,22 +6985,21 @@
       "lang": "RU",
       "title": "Загрузить фотографию товара",
       "steps": [
-        "Открыть «Фото и видео» и нажать «+ Фото с телефона».",
+        "В карточке товара, в «Фото», нажать «Фото с телефона».",
         "Выбрать фотографию из галереи — можно большую, с камеры.",
-        "Нажать «Убрать фон» (ножницы) на одной плитке.",
+        "Нажать ✂ (убрать фон) на одной плитке.",
         "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
-        "Дождаться конца, сохранить и открыть товар в магазине.",
-        "На новом товаре выбрать фото на шаге «Фото» до сохранения.",
-        "Нажать ★ у другого фото или переставить стрелками: вверху должно появиться «Не сохранено».",
-        "На подписи главного фото должны стоять и размеры, которые его показывают."
+        "Переставить фото стрелками, удалить одно × и нажать «Вернуть».",
+        "На «Новом товаре» выбрать фото в шаге «Фото» до «Добавить товар».",
+        "Открыть оба товара в магазине."
       ],
       "expect": [
-        "Фотография загрузилась и встала первой; тост просит нажать «Сохранить».",
+        "Фото загрузилось и сохранилось само; внизу полоска «Фото добавлено».",
         "Плитка, с которой работает сервер, гаснет и пишет «Убираем фон…».",
         "Вырезанное фото встало на своё место, соседнее не пропало.",
-        "На телефоне у каждой фотографии свой ряд кнопок, ничего не наезжает.",
-        "В магазине фотографии листаются пальцем.",
-        "На новом товаре выбор фото сам сохраняет товар; фото встаёт на него."
+        "Каждая кнопка сохраняет сразу; «Вернуть» возвращает удалённое фото.",
+        "На новом товаре фото ждёт в черновике и уходит вместе с товаром.",
+        "В магазине фотографии в том же порядке и листаются пальцем."
       ],
       "why": "Товар без фотографии почти не покупают.",
       "risk": "med",
@@ -7009,27 +7007,26 @@
       "en": {
         "title": "Uploading a product photo",
         "steps": [
-          "In the editor open «Фото и видео» and press «+ Фото с телефона».",
+          "In the product's card, under «Фото», press «Фото с телефона».",
           "Pick a photo from the gallery — a big one straight from the camera is fine.",
-          "Press «Убрать фон» (the scissors) on one tile.",
+          "Press ✂ (remove the background) on one tile.",
           "While it is being cut out, make another photo the main one with the star.",
-          "Wait for it to finish, save and open the product in the shop.",
-          "On a new product pick a photo on the «Фото» step before saving.",
-          "Press ★ on another photo, or reorder with the arrows: the top bar must say it is unsaved.",
-          "The main photo's tag must also carry the sizes that show it."
+          "Reorder with the arrows, delete one with × and press «Вернуть» (undo).",
+          "On «Новый товар» pick a photo in the «Фото» step before «Добавить товар».",
+          "Open both products in the shop."
         ],
         "expect": [
-          "The photo uploaded and sits first; a toast asks to press «Сохранить».",
+          "The photo uploaded and saved itself; the strip below says «Фото добавлено».",
           "The tile the server is working on dims and says «Убираем фон…».",
           "The cut-out lands on its own photo; the neighbouring one is not lost.",
-          "On the phone each photo has its own row of buttons; nothing overlaps.",
-          "In the shop the photos swipe with a finger.",
-          "On a new product picking a photo saves the product itself; the photo lands on it."
+          "Every button saves at once; «Вернуть» brings the deleted photo back.",
+          "On a new product the photo waits in the draft and goes with it.",
+          "In the shop the photos keep that order and swipe with a finger."
         ],
         "why": "A product with no photo is barely bought at all."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:48:59.431Z"
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "goods-video",
@@ -7039,15 +7036,17 @@
       "lang": "RU",
       "title": "Видео на странице товара",
       "steps": [
-        "Вставить ссылку на видео с YouTube на вкладке «Фото и видео».",
-        "Сохранить и открыть товар в магазине.",
+        "В карточке товара, в «Видео», вставить ссылку на ролик YouTube.",
+        "Нажать мимо поля и открыть товар в магазине.",
         "Нажать на видео.",
-        "В редакторе нажать «Загрузить» и выбрать ролик больше 4 МБ."
+        "В «Видео» нажать «Загрузить» и выбрать ролик больше 4 МБ.",
+        "Нажать «Убрать видео», потом «Вернуть» на полоске внизу."
       ],
       "expect": [
         "Видео видно на странице товара.",
         "По нажатию оно начинает играть.",
-        "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему."
+        "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему.",
+        "«Вернуть» ставит ту же ссылку обратно."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -7055,20 +7054,22 @@
       "en": {
         "title": "Video on a product page",
         "steps": [
-          "In the editor, on the «Фото и видео» tab, paste a link to a YouTube video.",
-          "Save and open the product in the shop.",
+          "In the product's card, under «Видео», paste a link to a YouTube video.",
+          "Tap outside the box and open the product in the shop.",
           "Press the video.",
-          "In the editor press «Загрузить» and pick a clip over 4 MB."
+          "Under «Видео» press «Загрузить» (upload) and pick a clip over 4 MB.",
+          "Press «Убрать видео» (remove), then «Вернуть» (undo) on the strip below."
         ],
         "expect": [
           "The video is there on the product page.",
           "Pressing it starts the video playing.",
-          "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason."
+          "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason.",
+          "«Вернуть» puts the same link back."
         ],
         "why": "A styling video sells a wax better than any description."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:33:35.367Z"
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "goods-new",
@@ -7080,17 +7081,17 @@
       "steps": [
         "Открыть «Товары» и нажать «+ Товар».",
         "Вписать бренд — выбрать из списка под полем или вписать новый.",
-        "Вписать название и раздел, нажать «Дальше — цена →».",
-        "Вписать цену, добавить второй объём, нажать «Сохранить товар».",
-        "На шаге «Фото» выбрать фотографию и нажать «Сохранить».",
+        "Вписать название, раздел, цену и второй объём.",
+        "Выбрать фото в шаге «Фото», уйти в «Заказы» и вернуться через «+ Товар».",
+        "Нажать «Добавить товар».",
         "Найти товар в магазине через поиск и купить его."
       ],
       "expect": [
         "Под полем «Бренд» — список брендов магазина, набранное подчёркнуто; системного списка нет.",
-        "Полоса шагов «Основное · Цена · Фото» показывает, где вы; описание и Google — «потом».",
-        "«Сохранить товар» без цены сам открывает шаг «Цена» и называет поле.",
-        "После сохранения товар сразу в магазине, открылся шаг «Фото».",
-        "На телефоне «Сохранить товар» и «Отмена» — в шапке экрана; кружок помощника спрятан.",
+        "Одна страница, три шага; описание и Google свёрнуты — «можно потом».",
+        "Пока полей не хватает, строка «Осталось заполнить» их называет.",
+        "После возврата всё на месте: «Черновик от …» и «Начать заново».",
+        "После «Добавить товар» товар сразу в магазине, открылась его карточка.",
         "Поиск находит товар, он кладётся в корзину и покупается."
       ],
       "why": "Новинки, которых нет в старом каталоге, продавать иначе нечем.",
@@ -7101,21 +7102,23 @@
         "steps": [
           "Open «Товары» and press «+ Товар».",
           "Brand: pick from the list under the box or type a new one.",
-          "Type the name and section, press «Дальше — цена →».",
-          "Type a price, add a second size, press «Сохранить товар».",
-          "On the «Фото» step pick a photo and press «Сохранить».",
+          "Type the name, the section, a price and a second size.",
+          "Pick a photo in the «Фото» step, go to «Заказы» and come back through «+ Товар».",
+          "Press «Добавить товар» (add the product).",
           "Find the product in the shop through the search and buy it."
         ],
         "expect": [
           "Under «Бренд» — the shop's own brand list, typed part marked; no OS popup.",
-          "The «Основное · Цена · Фото» strip shows where you are; description and Google marked optional.",
-          "«Сохранить товар» without a price opens the «Цена» step and names the box.",
-          "After saving the product is in the shop at once; the «Фото» step opened.",
-          "On the phone «Сохранить товар» and «Отмена» sit in the header; the assistant circle is hidden.",
+          "One page, three steps; description and Google folded as «можно потом».",
+          "While boxes are missing, the «Осталось заполнить» line names them.",
+          "Back again, everything is there: «Черновик от …» and «Начать заново».",
+          "After «Добавить товар» the product is in the shop at once; its card opened.",
           "The search finds it; it goes into the cart and can be bought."
         ],
         "why": "New arrivals missing from the old catalogue cannot be sold any other way."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "bundles-create",
@@ -7879,16 +7882,16 @@
       "lang": "RU",
       "title": "Помощник пишет описание товара",
       "steps": [
-        "Открыть товар без описания и вкладку «Описание».",
+        "Открыть товар без описания и дойти до «Описание».",
         "Нажать «Написать черновик» и подождать.",
         "Прочитать текст и поправить своими словами.",
-        "Нажать «Сохранить» и открыть товар в магазине."
+        "Подождать, пока вверху не встанет «Сохранено ✓», и открыть товар в магазине."
       ],
       "expect": [
         "В поле появился связный русский текст про этот товар.",
         "Текст читается как ваш, а не как реклама.",
         "Нет выдуманных обещаний: сроков, гарантий, лечения.",
-        "После «Сохранить» тот же текст виден в магазине."
+        "Черновик и правки сохраняются сами — в магазине тот же текст."
       ],
       "why": "Товар без описания не находится поиском по фразам вроде «перхоть».",
       "risk": "low",
@@ -7896,19 +7899,21 @@
       "en": {
         "title": "The assistant writes a product description",
         "steps": [
-          "Open a product with no description, on the «Описание» tab.",
+          "Open a product with no description and scroll to «Описание».",
           "Press «Написать черновик» — write a draft — and wait.",
           "Read the text and fix it in your own words.",
-          "Press «Сохранить» and open the product in the shop."
+          "Wait for «Сохранено ✓» at the top, then open the product in the shop."
         ],
         "expect": [
           "A readable Russian text about this product appears in the box.",
           "It reads like your shop, not like an advert.",
           "No invented promises: no deadlines, guarantees or cures.",
-          "After «Сохранить» the same text shows in the shop."
+          "The draft and your edits save themselves — the shop shows the same text."
         ],
         "why": "A product with no description is not found by a phrase like «перхоть»."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "ai-translate",
@@ -7918,15 +7923,15 @@
       "lang": "RU",
       "title": "Перевод описания на два языка",
       "steps": [
-        "В том же товаре нажать «Перевести с русского».",
+        "В том же товаре, на «RU», нажать «Перевести на ET и EN».",
         "Открыть эстонский, потом английский, и прочитать оба.",
-        "Сохранить и открыть товар в магазине по-эстонски."
+        "Открыть товар в магазине по-эстонски."
       ],
       "expect": [
         "В эстонском поле стоит эстонский текст.",
         "В английском поле стоит английский текст.",
         "Русских слов в переводах не осталось.",
-        "На эстонской странице товара виден эстонский текст."
+        "На эстонской странице товара виден эстонский текст — сохранять не нужно."
       ],
       "why": "Русское описание на эстонской странице — это покупатель, решивший, что магазин не для него.",
       "risk": "low",
@@ -7934,18 +7939,20 @@
       "en": {
         "title": "Translating the description into two languages",
         "steps": [
-          "In the same product press «Перевести с русского» — translate from Russian.",
+          "In the same product, on «RU», press «Перевести на ET и EN» — translate into ET and EN.",
           "Open Estonian, then English, and read both.",
-          "Save and open the product in the Estonian shop."
+          "Open the product in the Estonian shop."
         ],
         "expect": [
           "The Estonian box holds Estonian text.",
           "The English box holds English text.",
           "No Russian words are left in either translation.",
-          "The Estonian product page shows the Estonian text."
+          "The Estonian product page shows the Estonian text — nothing to save."
         ],
         "why": "A Russian description on an Estonian page loses that buyer for good."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
       "id": "ai-seo",
@@ -7955,17 +7962,19 @@
       "lang": "RU",
       "title": "Заголовок и описание для Google",
       "steps": [
-        "Открыть товар и вкладку «Google».",
-        "Нажать «Заполнить автоматически», потом «все три языка».",
-        "Прочитать «Заголовок для Google» и «Описание для Google».",
-        "Нажать «Сохранить»."
+        "Открыть товар и развернуть «Для Google» внизу.",
+        "Нажать «✨ Заполнить автоматически · все три языка».",
+        "Прочитать «Заголовок» и «Описание» на RU, ET и EN.",
+        "На вкладке English стереть заголовок и нажать «✨ Заполнить только по-английски».",
+        "Посмотреть вверх: там «Сохранено ✓» — «Сохранить» больше нет."
       ],
       "expect": [
         "Заголовок помещается в одну строчку.",
         "В заголовке есть название товара.",
         "Описание — одно-два предложения, не оборванных на середине.",
         "Цены в этих двух строчках нет.",
-        "Обещаний доставки в них тоже нет."
+        "Обещаний доставки в них тоже нет.",
+        "«Заполнить только по-английски» меняет лишь английскую пару."
       ],
       "why": "По этим строчкам человек в Google решает, зайти к вам или нет.",
       "risk": "low",
@@ -7973,20 +7982,24 @@
       "en": {
         "title": "The title and description for Google",
         "steps": [
-          "Open a product and its «Google» tab.",
-          "Press «Заполнить автоматически», then «все три языка» — all three languages.",
-          "Read «Заголовок для Google» and «Описание для Google».",
-          "Press «Сохранить»."
+          "Open a product and unfold «Для Google» at the bottom.",
+          "Press «✨ Заполнить автоматически · все три языка» — fill all three languages.",
+          "Read «Заголовок» and «Описание» (title, description) in RU, ET and EN.",
+          "On the English tab clear the title and press «✨ Заполнить только по-английски» (English only).",
+          "Look at the top: it says «Сохранено ✓» — there is no «Сохранить» any more."
         ],
         "expect": [
           "The title fits on one line.",
           "The title carries the product name.",
           "The description is one or two sentences, not cut off.",
           "Neither line names a price.",
-          "Neither line promises a delivery."
+          "Neither line promises a delivery.",
+          "«Заполнить только по-английски» changes the English pair alone."
         ],
         "why": "These are the lines a person in Google decides by."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T13:51:49.084Z"
     },
     {
       "id": "ai-blog-outline",

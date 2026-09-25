@@ -106,6 +106,9 @@ function editor(loaded = true): Env {
      function admAutosaveFlush() { FLUSH(); }
      function admAutosaveSpec() {}
      function admFoldToggle() {}
+     // …and the product card closing: its fields forget, «Новый товар» keeps its draft
+     function edAsForget() {}
+     function goodsNewSave() {}
      function mailSendToast() {}
      function vidReset() {}
      function goodsEditDirty() { return false; }

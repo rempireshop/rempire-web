@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { adminLang, adminSection, ipHeaders } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
+import { openCard, settled, typeAndLeave } from "./goods-helpers";
 
 /**
  * Renat's acceptance run, 13.09.2026 — the two findings about the change log
@@ -61,23 +62,17 @@ test.describe("admin — a price change on the owner's own product is in the jou
     await page.locator("[data-edbrand]").fill(BRAND);
     await page.locator("[data-edname]").fill("Cheap price");
     await page.locator("[data-edcat]").selectOption("beard");
-    await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").fill("14,90");
     await page.locator('[data-admsavegoods="new"]').click();
-    expect(await toastText(page)).toMatch(/Товар создан/);
+    expect(await toastText(page)).toMatch(/Товар добавлен/);
     await clearToast(page);
-    id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
-    expect(id, "the editor did not reopen on the created product").toMatch(/^c-davines-/);
+    id = (await page.locator("[data-edfor]:not([data-edfor='new'])").getAttribute("data-edfor")) || "";
+    expect(id, "the card did not open on the created product").toMatch(/^c-davines-/);
 
     try {
-      // ---- the price change the owner made ------------------------------
-      await page.locator('[data-edtab="sizes"]').click();
-      await page.locator("[data-edprice]").fill("9,90");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      // ---- the price change the owner made — saved when the box is left (1a) ----
+      await typeAndLeave(page, page.locator("[data-edprice]"), "9,90");
       await expect.poll(() => rowPrice(page, id), { timeout: 20_000 }).toBe(9.9);
-      // the save's own bar offers the same undo, without a trip to the journal
-      await expect(page.locator("[data-admtoastundo]"),
-        "the save toast carries no «Отменить»").toBeVisible();
       await clearToast(page);
 
       await settings(page, "journal");
@@ -108,14 +103,15 @@ test.describe("admin — a price change on the owner's own product is in the jou
       }).toBe(14.9);
       await clearToast(page);
 
-      // ---- and a save that moves nothing leaves no line at all -----------
-      await tab(page, "goods");
-      await page.locator("[data-goodsq]").fill(id);
-      await page.locator(`[data-admgoods="${id}"]`).click();
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
-      expect(await toastText(page), "a save that changed nothing still wrote a journal line")
-        .toMatch(/Изменений нет/);
-      await clearToast(page);
+      // ---- and a box left as it was leaves no line at all ------------------
+      await settings(page, "journal");
+      const topWas = (await jrow(page, 0).textContent()) || "";
+      await openCard(page, id);
+      await page.locator("[data-edprice]").focus();
+      await page.locator("[data-edprice]").blur();
+      await settled(page);
+      await settings(page, "journal");
+      expect((await jrow(page, 0).textContent()) || "", "a box left as it was still wrote a journal line").toBe(topWas);
     } finally {
       // off the shelf, so the specs that count the catalogue never see it
       await page.request.delete(`/api/admin/products/${encodeURIComponent(id)}/`);
@@ -135,11 +131,10 @@ test.describe("admin — a price change on the owner's own product is in the jou
     await page.locator("[data-edbrand]").fill(BRAND);
     await page.locator("[data-edname]").fill("Cheap price");
     await page.locator("[data-edcat]").selectOption("beard");
-    await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").fill("14,90");
     await page.locator('[data-admsavegoods="new"]').click();
     await clearToast(page);
-    id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+    id = (await page.locator("[data-edfor]:not([data-edfor='new'])").getAttribute("data-edfor")) || "";
 
     try {
       /* One list since 1a (q7): a server row that is this browser's own line
@@ -151,9 +146,8 @@ test.describe("admin — a price change on the owner's own product is in the jou
       expect(pricing, "the suite's shop has no stored pricing to write back").toBeTruthy();
       expect((await page.request.put("/api/admin/settings/", { data: { pricing } })).ok()).toBe(true);
 
-      await page.locator('[data-edtab="sizes"]').click();
-      await page.locator("[data-edprice]").fill("9,90");
-      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      // the price change the owner made — saved when the box is left (1a)
+      await typeAndLeave(page, page.locator("[data-edprice]"), "9,90");
       await expect.poll(() => rowPrice(page, id), { timeout: 20_000 }).toBe(9.9);
       await clearToast(page);
 

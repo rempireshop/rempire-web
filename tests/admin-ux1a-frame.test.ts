@@ -193,7 +193,8 @@ describe("one way back per screen — the card's own «← X» steps aside for t
 
   it("the set editor's «← Наборы» and the product card's «← Товары» are the same kind of link", () => {
     expect(fn("bundleFormHTML")).toContain(`'<button type="button" class="adm-seted__close' + admPageBackCls("Наборы") + '" data-bundlecancel>`);
-    expect(app).toContain(`'<button class="adm-link adm-link--back' + admPageBackCls("Товары") + '" data-admclose>← Товары</button>'`);
+    // the product card and «Новый товар» (which also hide it themselves on a phone, .adm-ed__back)
+    expect(app.split(`'<button class="adm-link adm-link--back adm-ed__back' + admPageBackCls("Товары") + '" data-admclose>← Товары</button>'`)).toHaveLength(3);
     expect(fn("admBackHTML")).toContain("admPageBackCls(label)");
   });
 });

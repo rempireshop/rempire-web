@@ -3,6 +3,7 @@ import {
   adminSection, cardBack, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
 } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
+import { closeCard, openCard, toSection } from "./goods-helpers";
 
 /**
  * 1a (ADM_SAVE_POLICY): a letter's switch and its two birthday selects save
@@ -170,26 +171,27 @@ test.describe("admin — the browser's Back closes an open card", () => {
     await expect(page.locator('[data-admsetpage="journal"]'), "Back left the panel altogether").toBeVisible();
     await assertClean(page, w, "Back on a settings page");
 
-    // a product editor: two layers deep — the editor, then a confirm card over it
-    await tab(page, "goods");
-    const first = page.locator("[data-admgoods]").first();
-    await first.click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator("[data-admgoodspull]").click();
+    /* a product card: two layers deep — the card, then a confirm sheet over it
+       (1a: removing a size is one of the few things that asks — README rule 4) */
+    await openCard(page, PRODUCT.id);
+    await toSection(page, "sizes");
+    await page.locator('[data-edsizedel="2"]').click();
     await expect(page.locator(".adm-confirm")).toBeVisible();
     await parked(page);
 
     // one Back closes the confirm and leaves the editor open…
     await page.goBack();
     await expect(page.locator(".adm-confirm"), "Back did not close the confirm card").toHaveCount(0);
-    await expect(page.locator("[data-admsavegoods]"), "Back closed the editor too").toBeVisible();
+    await expect(page.locator("[data-edfor]"), "Back closed the card too").toBeVisible();
+    await expect(page.locator("[data-edsizedel]"), "Back removed the size it was asking about").toHaveCount(3);
     // the editor is still open, so the panel parks the entry again
     await parked(page);
 
     // …the next one closes the editor and still keeps the panel
     await page.goBack();
-    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-edfor]"), "Back did not close the card").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel").toBeVisible();
+    const first = page.locator("[data-admgoods]").first();
     await assertClean(page, w, "Back through the editor");
 
     /* Closing with the button leaves no press that does nothing: the next
@@ -198,9 +200,9 @@ test.describe("admin — the browser's Back closes an open card", () => {
        than out of the panel (app.js ADM_TRAIL); either way the goods list is
        gone, which is what a press that did something means here. */
     await first.click();
-    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-    await page.locator("[data-admclose]").first().click();
-    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await expect(page.locator("[data-edfor]")).toBeVisible();
+    await closeCard(page);
+    await expect(page.locator("[data-edfor]")).toHaveCount(0);
     await page.goBack();
     await expect(page.locator("[data-admgoods]"), "Back after a button-close did nothing").toHaveCount(0);
   });
@@ -531,11 +533,10 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
 
       await adminSection(page, "goods");
-      const first = page.locator("[data-admgoods]").first();
-      await first.click();
-      await page.locator('[data-edtab="sizes"]').click();
+      await page.locator("[data-admgoods]").first().click();
+      await toSection(page, "sizes");
       await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
-      await page.locator("[data-admclose]").first().click();
+      await closeCard(page);
 
       await expect.poll(async () => (await feed()).partnersOn,
         { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
@@ -556,9 +557,9 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
 
       await adminSection(page, "goods");
       await page.locator("[data-admgoods]").first().click();
-      await page.locator('[data-edtab="sizes"]').click();
+      await toSection(page, "sizes");
       await expect(page.locator("[data-edproprice]"), "the «Салон, €» column did not come back").toBeVisible();
-      await page.locator("[data-admclose]").first().click();
+      await closeCard(page);
       await assertClean(page, w, "«Партнёры и баллы» on");
     } finally {
       // the suite's shop has the programme on — leave it exactly as found

@@ -236,15 +236,13 @@ test.describe("admin", () => {
       await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
 
       try {
-        // The price lives on the editor's «Размеры и цены» tab (ED_TABS in app.js).
-        await page.locator('[data-edtab="sizes"]').click();
+        // 1a: the card saves the price when the box is left — wait for that write,
+        // the storefront visit below reads the server
         await page.locator("[data-edprice]").fill(newPrice);
-        // The toast is optimistic; the PUT to /api/admin/overrides/ lands after
-        // it. The storefront visit below reads the server, so wait for the write.
         const put = page.waitForResponse((r) => r.url().includes("/api/admin/overrides/") && r.request().method() === "PUT");
-        await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-        await expect(page.getByRole("status")).toBeVisible();
+        await page.locator("[data-edprice]").blur();
         expect((await put).ok()).toBe(true);
+        await expect(page.locator("[data-admsavest]").first()).not.toHaveAttribute("data-st", "saving");
 
         // A separate, logged-out storefront visit in its own browser context
         // — not just a new page — see freshStorefrontPage()'s own comment.
@@ -262,12 +260,11 @@ test.describe("admin", () => {
         await goodsTab(page).click();
         await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
         await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
-        await page.locator('[data-edtab="sizes"]').click();
         await page.locator("[data-edprice]").fill(String(PRODUCT_2.price));
         // …and wait for this write too, or the context is torn down with the
         // request in flight and the next spec file sees the changed price.
         const back = page.waitForResponse((r) => r.url().includes("/api/admin/overrides/") && r.request().method() === "PUT");
-        await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
+        await page.locator("[data-edprice]").blur();
         await back;
       }
     });

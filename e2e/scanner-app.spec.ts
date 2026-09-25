@@ -131,15 +131,19 @@ async function doubleTap(page: Page): Promise<void> {
   });
 }
 
-/** «Товары» → the product → «Размеры и цены» (admin-editor.spec.ts's own two
- *  helpers, kept local so the two specs do not share a fixture). */
+/** «Товары» → the product's card → «Объёмы и цены» (1a: one page, no tabs). */
 async function openSizes(page: Page, id: string): Promise<void> {
   await tab(page, "goods");
   await page.locator("[data-goodsq]").fill(id);
   await page.locator(`[data-admgoods="${id}"]`).click();
-  await expect(page.locator("[data-admsavegoods]")).toBeVisible();
-  await page.locator('[data-edtab="sizes"]').click();
-  await expect(page.locator('[data-edtab="sizes"][aria-current="true"]')).toBeVisible();
+  await expect(page.locator(`[data-edfor="${id}"]`)).toBeVisible();
+  await page.locator('[data-edsec="sizes"]').scrollIntoViewIfNeeded();
+}
+/** The card's one save status has settled: nothing in the air, nothing failed. */
+async function cardSettled(page: Page): Promise<void> {
+  const st = page.locator("[data-admsavest]").first();
+  await expect.poll(async () => st.getAttribute("data-st"), { timeout: 20_000 }).not.toBe("saving");
+  expect(await st.getAttribute("data-st")).not.toBe("error");
 }
 
 test.describe("scanner app", () => {
@@ -640,19 +644,25 @@ test.describe("scanner app", () => {
     await expect(unbindBtn, "a bound size has no «Отвязать»").toBeVisible();
     await assertClean(page, w, "editor: a size with a code");
 
-    // «Отвязать» only empties the box — nothing is freed until «Сохранить»
+    /* «Отвязать код» frees the code at once — and «Вернуть» on the toast
+       binds it back (Dim 25.09.2026, q20: it used to wait for «Сохранить»,
+       so a mis-tap cost nothing; the undo is what makes it cost nothing now) */
     await unbindBtn.click();
     await expect(cell).toHaveValue("");
-    expect(await toastText(page), "«Отвязать» said nothing about saving").toMatch(/Сохранить/);
-    await clearToast(page);
-    expect(await stockEan(page, PRODUCT_2.id, VARIANT),
-      "«Отвязать» freed the code before «Сохранить» was pressed").toBe(ean);
-
-    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    await cardSettled(page);
+    expect(await toastText(page), "«Отвязать код» said nothing").toMatch(/Код отвязан/);
     await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
-      { timeout: 15_000, message: "«Сохранить» after «Отвязать» left the code on the size" }).toBe("");
+      { timeout: 15_000, message: "«Отвязать код» left the code on the size" }).toBe("");
+    await page.locator(".adm-toast__undo").click();
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
+      { timeout: 15_000, message: "«Вернуть» did not bind the code back" }).toBe(ean);
+    await clearToast(page);
+    // …and freed for good this time
+    await openSizes(page, PRODUCT_2.id);
+    await unbindBtn.click();
+    await cardSettled(page);
+    await clearToast(page);
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT), { timeout: 15_000 }).toBe("");
 
     // …and now it says so, instead of sitting empty and mute
     await openSizes(page, PRODUCT_2.id);
@@ -661,9 +671,10 @@ test.describe("scanner app", () => {
     await expect(unbindBtn, "a size with no code still offers «Отвязать»").toHaveCount(0);
     /* The hint changed with the «Сканер» button beside the box (Dim's phone
        test, 09.09.2026): a code is read into this very field now, not only
-       bound on «Склад». */
-    await expect(page.locator('[data-edpane="sizes"]'),
-      "the grid never says where a barcode comes from").toContainText("Штрихкод можно считать прямо здесь");
+       bound on «Склад». 1a: the line is behind the section's «?». */
+    await page.locator('[data-admhelp="ed-sizes"]').click();
+    await expect(page.locator("#admhelp-ed-sizes"),
+      "the grid never says where a barcode comes from").toContainText("Штрихкод считывает кнопка сканера");
     await assertClean(page, w, "editor: a size with no code");
 
     /* Dim was asked whether this cell should go read-only now that the
@@ -672,9 +683,8 @@ test.describe("scanner app", () => {
        given up, is the last way in — so it has to actually save. */
     const typed = `28${Date.now().toString().slice(-10)}`;
     await cell.fill(typed);
-    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
-    expect(await toastText(page)).toMatch(/Сохранено/);
-    await clearToast(page);
+    await cell.blur();
+    await cardSettled(page);
     await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
       { timeout: 15_000, message: "a barcode typed into the editor by hand never reached the warehouse" }).toBe(typed);
     // …and the scanner finds the bottle by it, which is the whole point

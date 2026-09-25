@@ -52,11 +52,9 @@ function el(value = "") {
   };
 }
 
+// the product card's own buttons save at once since 1a — see the describe below
 const BRANCHES = [
-  "if (d.edvidkind !== undefined)", "if (d.edvidclear !== undefined)", "if (d.edunbind !== undefined)",
-  "if (d.galcut !== undefined)", "if (d.galmain !== undefined)", "if (d.vpick !== undefined)",
-  "if (d.admdescgen !== undefined)", "if (d.admtranslate !== undefined)", "if (d.ednamespark !== undefined)",
-  "if (d.admdescundo !== undefined)", "if (d.herospark !== undefined)",
+  "if (d.herospark !== undefined)",
   "if (d.promokind)", "if (d.promoscope)", "if (d.promoprodpick)", "if (d.promoproddel !== undefined)",
   /* The set form left this list with the 1a redesign: it saves itself now,
      so its buttons schedule a save instead of lighting a bar — see
@@ -196,99 +194,39 @@ function editor(): Env {
   };
 }
 
-describe("the product editor: a button edit is an unsaved edit", () => {
-  it("starts quiet", () => {
-    const e = editor();
-    expect(e.dirty()).toBe(false);
-    expect(e.bar()).toBe("");
+/* 1a (README § 2): the product card has no draft to be «unsaved» any more —
+   every one of the buttons this file was written for now SAVES what it
+   changed, at once, with «Вернуть» on the toast. What each one hands the
+   save to is checked here; how the save behaves (the one write in flight,
+   «Сохранено ✓» after the 2xx, the undo) is tests/admin-ux1a-product.test.ts. */
+describe("the product card: a button edit is saved at once", () => {
+  const branch = (head: string) => src.slice(src.indexOf(head), src.indexOf(head) + 2600);
+  it.each([
+    ["if (d.galmove !== undefined || d.galmain !== undefined || d.galdel !== undefined)", "edGallerySave(gP, gMsg)"],
+    ["if (d.galreset !== undefined)", "edGallerySave(grP,"],
+    ["if (d.galcut !== undefined)", "edGallerySave(cp, \"Фон убран · оригинал сохранён\")"],
+    ["if (d.vpick !== undefined)", "edInstant(edAsKey(vpP, \"varimg\")"],
+    ["if (d.edvidclear !== undefined)", "admAutosave(vcKey, \"\", \"enter\""],
+    ["if (d.edunbind !== undefined)", "admAutosave(unKey, \"\", \"enter\")"],
+    ["if (d.admdescgen !== undefined)", "edAsTextNow(\"desc\", \"Черновик написан — прочитайте и поправьте\")"],
+    ["if (d.admtranslate !== undefined)", "edAsTextNow(\"desc\", trMsg)"],
+    ["if (d.ednamespark !== undefined)", "edAsPoke(nnEl, true)"],
+    ["if (d.edhidden !== undefined)", "goodsVisToggle(d.edhidden)"],
+    ["if (d.edstock !== undefined)", "edInstant(edAsKey(skP, \"stock\")"],
+  ])("%s → %s", (head, save) => {
+    expect(src.indexOf(head), head).toBeGreaterThan(-1);
+    expect(branch(head)).toContain(save);
   });
 
-  it("★ — a new main photo", () => {
-    const e = editor();
-    e.click({ galmain: "1" });
-    expect(e.dirty(), "★ left the way out unguarded").toBe(true);
-    expect(e.bar()).toBe("dirty");
-  });
-
-  it("…and ★ pressed back to how it was is quiet again", () => {
-    const e = editor();
-    e.click({ galmain: "1" });
-    e.click({ galmain: "1" });
-    expect(e.dirty()).toBe(false);
-  });
-
-  it("✂ — the cut-out that replaced a photo", async () => {
-    const e = editor();
-    e.click({ galcut: "0" });
-    await flush(); await flush();
-    expect(e.GAL.list[0].url).toBe("https://cdn/cut.png");
-    expect(e.dirty()).toBe(true);
-  });
-
-  it("a photo uploaded — the button and a drop both come through galUpload()", async () => {
-    const e = editor();
-    e.f.galUpload([{ name: "p.jpg", size: 1000 }], e.f.galDraft && { id: "azur", sizes: ["100 ml", "400 ml"], varImg: [], video: "" });
-    await flush(); await flush();
-    expect(e.GAL.list).toHaveLength(3);
-    expect(e.dirty()).toBe(true);
-  });
-
-  it("a size's own photo", () => {
-    const e = editor();
-    e.click({ vpick: "1:1" });
-    expect(e.dirty(), "the size photo was not counted").toBe(true);
-    expect(e.bar()).toBe("dirty");
-  });
-
-  it("the video: «Загрузить», × and a chip", async () => {
-    const up = editor();
-    up.f.videoUpload([{ name: "v.mp4", size: 1000 }], { id: "azur" });
-    await flush(); await flush();
-    expect(up.dirty(), "an uploaded video was not counted").toBe(true);
-
-    const cleared = editor();
-    cleared.DEMO.video.azur = "https://youtu.be/abcdefghijk";
-    cleared.click({ edvidclear: "" });
-    expect(cleared.dirty(), "× on a saved video was not counted").toBe(true);
-
-    // a chip only changes which door is shown: the address is the same, so nothing to save
-    const chip = editor();
-    chip.click({ edvidkind: "ig" });
-    expect(chip.dirty()).toBe(false);
-  });
-
-  it("«Отвязать» and a code from the scanner", () => {
-    const un = editor();
-    un.els['[data-edean="azur 100 ml"]'].value = "4740001000017";
-    un.click({ edunbind: "azur 100 ml" }, );
-    expect(un.dirty(), "«Отвязать» was not counted").toBe(true);
-
-    const scan = editor();
-    scan.S.scanFor = "azur 100 ml";
-    scan.f.scanToEditor("4740001000017");
-    expect(scan.els['[data-edean="azur 100 ml"]'].value).toBe("4740001000017");
-    expect(scan.dirty(), "a scanned code was not counted").toBe(true);
-  });
-
-  it("every AI fill: «Написать», «Перевести», Google, the name, and «Отменить»", async () => {
-    const presses: Array<Record<string, string>> = [
-      { admdescgen: "azur" }, { admtranslate: "azur" }, { admseogen: "" }, { ednamespark: "" }, { admdescundo: "" },
-    ];
-    for (const d of presses) {
-      const e = editor();
-      e.els["[data-eddescru]"].value = "Русское описание";   // what «Перевести» translates
-      if ("admseogen" in d) e.f.admSeoFill({ name: "Azur", brand: "Proraso", cat: "beard" }, ["RU"], { textContent: "", disabled: false });
-      else e.click(d);
-      await flush(); await flush();
-      expect(e.dirty(), `${Object.keys(d)[0]} was not counted`).toBe(true);
-    }
-  });
-
-  it("a brand picked from the list (a new product)", () => {
-    const e = editor();
-    e.S.adminEdit = "new"; e.S.goodsNew = { brand: "", name: "", cat: "hair" };
-    e.f.edBrandPick("Proraso");
-    expect(e.dirty()).toBe(true);
+  it("the photo uploaded, the video uploaded, the code scanned, the Google texts filled", () => {
+    const at = (name: string) => fn(name);
+    expect(at("galUpload")).toContain("edGallerySave(cur,");
+    expect(at("videoUpload")).toContain('admAutosave(vKey, r.url, "enter", vSpec)');
+    expect(at("scanToEditor")).toContain("edEanScanned(");
+    expect(at("admSeoFill")).toContain('edAsTextNow("seo",');
+    expect(at("edBrandPick")).toContain("edAsPoke(e.input, true)");
+    // nothing about the card's media is «unsaved» any more
+    expect(at("edMediaDirty")).toContain("return false;");
   });
 });
 
