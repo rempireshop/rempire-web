@@ -339,8 +339,23 @@ describe("ADM_SAVE — «Сохранено ✓» only after the server said so"
     const p = panel();
     const html = p.slotHTML("adm-savest--top");
     expect(html).toMatch(/^<span class="adm-savest adm-savest--top" data-admsavest data-st="idle">/);
-    // no live region: the toast is the one thing in the panel that announces itself
-    expect(html).not.toMatch(/role="status"|aria-live/);
+    // the slot itself is no live region — it would read out every «Сохраняем…»
+    expect(html).not.toMatch(/role="status"|role="alert"|aria-live/);
+  });
+
+  it("only the error is announced: role=\"alert\" on its line — «Сохраняем…» and «Сохранено ✓» stay silent", () => {
+    const p = panel();
+    for (const state of ["idle", "saving", "saved"]) {
+      p.SAVE.state = state;
+      expect(p.statusHTML(), state).not.toMatch(/role=|aria-live/);
+    }
+    p.SAVE.state = "error";
+    const html = p.statusHTML();
+    expect(html).toContain('<span class="adm-savest__t adm-savest__t--err" role="alert">Не сохранилось — проверьте интернет</span>');
+    expect(html.match(/role="alert"/g), "one announcement, not two").toHaveLength(1);
+    // «Повторить» stands beside the alert, not inside it: the sentence is what is read out
+    expect(html).toMatch(/<\/span><button class="adm-savest__retry" type="button" data-admsaveretry>Повторить<\/button>$/);
+    expect(p.slotHTML("adm-savest--page")).toContain('role="alert"');
   });
 });
 
