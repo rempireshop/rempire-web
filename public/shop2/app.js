@@ -1028,7 +1028,7 @@
       "Заполнено на трёх языках": "Täidetud kolmes keeles",
       "Черновик готов — прочитайте и поправьте": "Mustand on valmis — lugege läbi ja parandage",
       "Фото добавлены": "Fotod lisatud", "Фото добавлено": "Foto lisatud", "Видео загружено": "Video on üles laaditud",
-      "Начните вводить — например, Proraso": "Hakake kirjutama — näiteks Proraso",
+      "Начните вводить, например Proraso": "Hakake kirjutama, nt Proraso",
       "Остаток — целое число от 0.": "Jääk on täisarv alates nullist.",
       "Код считан и привязан": "Kood loetud ja seotud", "Код считан": "Kood loetud", "Код отвязан": "Kood lahti seotud",
       "Линейка латиницей, тип по-русски. Эстонский и английский — сами.":
@@ -1600,7 +1600,7 @@
       "Фото по объёмам": "Fotod mahtude kaupa",
       "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
         "Millist fotot iga mahu juures näidatakse. Täidetakse poe andmetest automaatselt; siin saab käsitsi parandada.",
-      "Kevin.Murphy … купить в Таллинне | Rempire": "Kevin.Murphy … osta Tallinnas | Rempire",
+      "Kevin.Murphy … купить в Таллинне": "Kevin.Murphy … osta Tallinnas",
       "Короткое продающее описание для сниппета Google": "Lühike müüv kirjeldus Google'i otsingutulemuse jaoks",
       "SEO для Google": "SEO Google'i jaoks",
       "Заголовок (до 60 знаков)": "Pealkiri (kuni 60 tähemärki)",
@@ -2069,7 +2069,7 @@
       "EAN / штрихкод": "EAN / triipkood", "нет штрихкода": "triipkoodi pole",
       "Порог «мало»": "Läve «vähe»", "Остаток сейчас": "Jääk praegu",
       "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
-      "например: пересчёт на полке": "näiteks: ülelugemine riiulil",
+      "пересчёт полки": "riiuli ülelugemine",
       "Свернуть": "Ahenda", "Править": "Muuda",
       // r16: the open slide of «Главный баннер» — the badge on its row and the
       // ✕ at the top of its pane (heroRowHTML / heroFormHTML)
@@ -2462,7 +2462,7 @@
       "Наборов пока нет": "Komplekte veel pole",
       "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение.":
         "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks.",
-      "Спросите обычными словами": "Küsi tavaliste sõnadega",
+      "Ваш вопрос": "Teie küsimus",
       "Закрыть помощника": "Sulge abiline",
       "Подтвердите изменение": "Kinnita muudatus",
       "Все клиенты": "Kõik kliendid",
@@ -3096,7 +3096,7 @@
       "как его рисует сервер": "nagu server selle joonistab",
       "Прислать мне пример": "Saada mulle näidis",
       "Письма подписчикам": "Kirjad tellijatele",
-      "о чём письмо — новинки, скидка 10 %…": "millest kiri räägib — uudised, soodustus 10 %…",
+      "о чём: новинки, скидка 10 %…": "teema: uudised, soodustus 10 %…",
       "Помощник:": "Abiline:",
       "Прислать мне тест": "Saada mulle test",
       "Не сохранено: в тексте была незаконченная вставка «{…}»": "Ei salvestatud: tekstis oli lõpetamata sisestus «{…}»",
@@ -3316,7 +3316,7 @@
       "«Розница» выключает цены для салонов со следующего заказа, без письма.": "„Jaemüük“ lülitab salongihinnad välja järgmisest tellimusest, ilma kirjata.",
       "Плюс — начислить, минус — списать; причина видна в истории.": "Pluss — lisa, miinus — võta maha; põhjus on ajaloos näha.",
       "Баллы уходят через 5 секунд — до этого можно «Вернуть».": "Punktid lähevad teele 5 sekundi pärast — seni saab „Taasta“.",
-      "за что — например, извинение за задержку": "mille eest — näiteks vabandus viivituse pärast", "За что": "Mille eest",
+      "за что — извинение": "mille eest — vabandus", "За что": "Mille eest",
       "Видна только вам — например: постоянный клиент, оптовик": "Näete ainult teie — näiteks: püsiklient, hulgiostja",
       "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — ответьте прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
         "Partnerlustaotlus tuleb ostja kontolt (nupp „Hakka partneriks“) ja ilmub siia märkega „Pro taotlus“ — vastake otse real või lisage partner ise nupuga „+ Partner“.",
@@ -3623,11 +3623,11 @@
       "Раздел — где набор стоит в магазине. Адрес набора пишется сам из русского названия, латиницей, и после первой записи не меняется:": "Rubriik — kus komplekt poes asub. Komplekti aadress kirjutatakse ise venekeelsest nimest ladina tähtedega ega muutu pärast esimest salvestamist:",
       "Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.": "Mustand — salvestub ise, peidetuna, kui on olemas nimi, kaks toodet ja hind.",
       "Начать заново": "Alusta uuesti",
-      "Название — например, Борода — стартовый набор": "Nimi — näiteks Habe — algkomplekt",
+      "Например: Борода — стартовый набор": "Näiteks: Habe — algkomplekt",
       "Название набора": "Komplekti nimi",
       "Описание набора": "Komplekti kirjeldus",
       "✨ Написать черновик": "✨ Kirjuta mustand",
-      "Добавить товар: название или бренд": "Lisa toode: nimi või bränd",
+      "Добавить: название или бренд": "Lisa toode: nimi või bränd",
       "Добавить товар": "Lisa toode",
       "или скидка, %": "või allahindlus, %",
       "Показать в магазине можно, когда набор сохранится.": "Poes saab näidata, kui komplekt on salvestatud.",
@@ -4544,7 +4544,7 @@
       "Заполнено на трёх языках": "Filled in in three languages",
       "Черновик готов — прочитайте и поправьте": "The draft is ready — read it and correct it",
       "Фото добавлены": "Photos added", "Фото добавлено": "Photo added", "Видео загружено": "Video uploaded",
-      "Начните вводить — например, Proraso": "Start typing — for example, Proraso",
+      "Начните вводить, например Proraso": "Start typing, e.g. Proraso",
       "Остаток — целое число от 0.": "Stock is a whole number from 0.",
       "Код считан и привязан": "Code read and linked", "Код считан": "Code read", "Код отвязан": "Code unlinked",
       "Линейка латиницей, тип по-русски. Эстонский и английский — сами.":
@@ -5111,7 +5111,7 @@
       "Фото по объёмам": "Photos per size",
       "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
         "Which photo is shown for each size. Filled in automatically from the shop's data; you can correct it by hand here.",
-      "Kevin.Murphy … купить в Таллинне | Rempire": "Kevin.Murphy … buy in Tallinn | Rempire",
+      "Kevin.Murphy … купить в Таллинне": "Kevin.Murphy … buy in Tallinn",
       "Короткое продающее описание для сниппета Google": "A short selling description for the Google snippet",
       "SEO для Google": "SEO for Google",
       "Заголовок (до 60 знаков)": "Title (up to 60 characters)",
@@ -5562,7 +5562,7 @@
       "EAN / штрихкод": "EAN / barcode", "нет штрихкода": "no barcode",
       "Порог «мало»": "«Low» threshold", "Остаток сейчас": "Current stock",
       "Причина (видна в истории)": "Reason (shown in the history)",
-      "например: пересчёт на полке": "e.g. recount on the shelf",
+      "пересчёт полки": "shelf recount",
       "Свернуть": "Collapse", "Править": "Edit",
       // r16: the open slide of «Главный баннер» — see the ET table above
       "открыт": "open", "Закрыть слайд": "Close the slide",
@@ -5951,7 +5951,7 @@
       "Наборов пока нет": "No sets yet",
       "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение.":
         "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval.",
-      "Спросите обычными словами": "Ask in plain words",
+      "Ваш вопрос": "Your question",
       "Закрыть помощника": "Close the assistant",
       "Подтвердите изменение": "Confirm the change",
       "Все клиенты": "All customers",
@@ -6580,7 +6580,7 @@
       "как его рисует сервер": "as the server draws it",
       "Прислать мне пример": "Send me a sample",
       "Письма подписчикам": "Letters to subscribers",
-      "о чём письмо — новинки, скидка 10 %…": "what the letter is about — new arrivals, 10 % off…",
+      "о чём: новинки, скидка 10 %…": "about: new arrivals, 10 % off…",
       "Помощник:": "Assistant:",
       "Прислать мне тест": "Send me a test",
       "Не сохранено: в тексте была незаконченная вставка «{…}»": "Not saved: the text had an unfinished insert «{…}»",
@@ -6800,7 +6800,7 @@
       "«Розница» выключает цены для салонов со следующего заказа, без письма.": "«Retail» turns salon prices off from the next order, with no letter.",
       "Плюс — начислить, минус — списать; причина видна в истории.": "Plus adds, minus takes off; the reason shows in the history.",
       "Баллы уходят через 5 секунд — до этого можно «Вернуть».": "Points go in 5 seconds — until then you can press «Restore».",
-      "за что — например, извинение за задержку": "what for — e.g. an apology for a delay", "За что": "What for",
+      "за что — извинение": "what for — an apology", "За что": "What for",
       "Видна только вам — например: постоянный клиент, оптовик": "Only you see it — e.g. regular customer, wholesale buyer",
       "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — ответьте прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
         "A partner request comes from the customer's account (the «Become a partner» button) and shows here marked «Pro request» — answer it right in the row, or add a partner yourself with «+ Partner».",
@@ -7106,11 +7106,11 @@
       "Раздел — где набор стоит в магазине. Адрес набора пишется сам из русского названия, латиницей, и после первой записи не меняется:": "Section — where the set sits in the shop. The set's address is written by itself from the Russian name, in Latin letters, and never changes once it is first saved:",
       "Черновик — сохранится сам, скрытым, когда будут название, два товара и цена.": "Draft — it saves itself, hidden, once it has a name, two products and a price.",
       "Начать заново": "Start over",
-      "Название — например, Борода — стартовый набор": "Name — e.g. Beard — starter set",
+      "Например: Борода — стартовый набор": "E.g. Beard — starter set",
       "Название набора": "Set name",
       "Описание набора": "Set description",
       "✨ Написать черновик": "✨ Write a draft",
-      "Добавить товар: название или бренд": "Add a product: name or brand",
+      "Добавить: название или бренд": "Add a product: name or brand",
       "Добавить товар": "Add a product",
       "или скидка, %": "or discount, %",
       "Показать в магазине можно, когда набор сохранится.": "It can be shown in the shop once the set is saved.",
@@ -7736,7 +7736,7 @@
     [/^Цены и остатки — на вкладке «Размеры и цены»\. Салон платит на ([\d.,]+) % меньше, если для товара не задана своя цена\.$/,
       { ET: "Hinnad ja jäägid on vahekaardil «Suurused ja hinnad». Salong maksab $1 % vähem, kui tootele pole oma hinda pandud.",
         EN: "Prices and stock are on the «Sizes and prices» tab. A salon pays $1 % less unless the product has a price of its own." }],
-    [/^(.+) … купить в Таллинне \| Rempire$/, { ET: "$1 … osta Tallinnas | Rempire", EN: "$1 … buy in Tallinn | Rempire" }],
+    [/^(.+) … купить в Таллинне$/, { ET: "$1 … osta Tallinnas", EN: "$1 … buy in Tallinn" }],
     [/^Принять \+(\d+)$/, { ET: "Võta vastu +$1", EN: "Take in +$1" }],
     [/^Списать −(\d+)$/, { ET: "Kanna maha −$1", EN: "Write off −$1" }],
     // scanner: a candidate size that already carries a code, by its last four characters
@@ -23643,7 +23643,10 @@
       '<button class="adm-asst__miclang" data-admvoicelang title="Язык голосового ввода">' +
       esc(admVoiceLang()) + "</button></span>";
   }
-  function admVoicePlaceholder() { return admVoice ? "Слушаю…" : "Спросите обычными словами"; }
+  /* «Ваш вопрос», not «Спросите обычными словами»: the pane's own first line
+     already says «обычными словами», and the box beside the clip, the mic and
+     the language has 114 px on a desktop — the longer one read «Спросите обычі» */
+  function admVoicePlaceholder() { return admVoice ? "Слушаю…" : "Ваш вопрос"; }
   /* the button and the placeholder, patched in place — a full render would
      take the caret out of the box the owner is about to edit */
   function admVoicePaint() {
@@ -27176,7 +27179,7 @@
     return '<div class="adm-newsai">' +
       '<div class="adm-newsai__row"><label class="adm-newsai__l" for="newsbrief">Помощник:</label>' +
         '<input class="adm-input" id="newsbrief" data-newsbrief value="' + esc(brief) +
-        '" placeholder="о чём письмо — новинки, скидка 10 %…"' + (genBusy ? " disabled" : "") + ">" +
+        '" placeholder="о чём: новинки, скидка 10 %…"' + (genBusy ? " disabled" : "") + ">" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newswrite' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать") + "</button>" +
         admHelpBtnHTML("news-ai") + "</div>" +
       admHelpHTML("news-ai", "Тема и текст — по-русски, потом на эстонском и английском. Текст встанет в конец письма, товары письма — карточками; передвиньте блоки стрелками. Черновик сохранится сам.") +
@@ -35103,7 +35106,7 @@
       /* The name comes first (Dim, 19.09.2026): the address is written from it. */
       '<input class="adm-input adm-seted__name" data-bundlef="title" data-bundlel="' + lang + '" maxlength="120" aria-label="Название набора"' +
         (nameBad && lang === "RU" ? ' aria-invalid="true"' : "") + ' value="' + esc(f.title[lang] || "") +
-        '" placeholder="' + (lang === "RU" ? "Название — например, Борода — стартовый набор" : esc(f.title.RU || "")) + '">' +
+        '" placeholder="' + (lang === "RU" ? "Например: Борода — стартовый набор" : esc(f.title.RU || "")) + '">' +
       '<span class="adm-ashint" data-bundlenamehint' + (nameBad ? "" : " hidden") + ">" + BUNDLE_SAVE_ERRS.bad_name + "</span>" +
       '<textarea class="adm-input adm-seted__desc" rows="3" maxlength="1000" data-bundlef="desc" data-bundlel="' + lang + '" placeholder="' +
         (lang === "RU" ? "Описание — две-три простые фразы" : esc(f.desc.RU || "")) + '" aria-label="Описание набора">' +
@@ -35115,7 +35118,7 @@
       bundleItemRowsHTML() +
       (f.items.length < 2 ? '<p class="adm-ashint adm-seted__few">' + BUNDLE_SAVE_ERRS.few_items + "</p>" : "") +
       '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
-      admSearchHTML('<input class="adm-input adm-seted__q" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Добавить товар: название или бренд" aria-label="Добавить товар">') +
+      admSearchHTML('<input class="adm-input adm-seted__q" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Добавить: название или бренд" aria-label="Добавить товар">') +
       '<div class="adm-setpicks" id="bundlepicks">' + bundlePickRows() + "</div>" + bundleOwnHint() +
       admSecHeadHTML("Цена") +
       '<div class="adm-seted__money">' +
@@ -35826,7 +35829,7 @@
         '<input class="adm-input adm-cpts__n" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="text" autocomplete="off" ' +
           'placeholder="+10 / −5" aria-label="Баллы" aria-describedby="admcustpts-h"' + (err ? ' aria-invalid="true"' : "") + ">" +
         '<input class="adm-input adm-cpts__r" data-admcustnote value="' + esc(S.admCustNote) + '" autocomplete="off" ' +
-          'placeholder="за что — например, извинение за задержку" aria-label="За что">' +
+          'placeholder="за что — извинение" aria-label="За что">' +
       "</div>" +
       '<span class="adm-ashint" id="admcustpts-h" data-admcustptshint' + (err ? "" : " hidden") + ">" + esc(err) + "</span>" +
       '<button class="adm-btn adm-btn--ghost adm-cpts__go' + (ready ? " is-ready" : "") + '" data-admcustadjust="' + esc(c.id) + '">' +
@@ -37011,7 +37014,7 @@
     if (open) { EDB.rows = rows; EDB.ix = -1; }
     var shown = open && rows.length > 0;
     return '<div class="adm-combo" data-edbrandbox>' +
-      '<input class="adm-input" id="edbrand" data-edbrand' + (extra || "") + ' value="' + esc(value) + '" maxlength="60" placeholder="Начните вводить — например, Proraso"' +
+      '<input class="adm-input" id="edbrand" data-edbrand' + (extra || "") + ' value="' + esc(value) + '" maxlength="60" placeholder="Начните вводить, например Proraso"' +
         ' autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="' + shown + '" aria-controls="edbrandlist">' +
       '<div class="adm-combo__list" id="edbrandlist" role="listbox" aria-label="Бренды"' + (shown ? "" : " hidden") + ">" +
         (shown ? edBrandRowsHTML(rows, value) : "") + "</div>" +
@@ -38036,7 +38039,7 @@
         }).join("") + "</div>" +
       '<label class="adm-field"' + (vk === "up" ? " hidden" : "") + "><span>" + (vk === "ig" ? "Ссылка на reel или пост" : "Ссылка на видео") + "</span>" +
         '<input class="adm-input adm-mono" data-edvideo' + edAsAttr(p, "video") + ' value="' + esc(vurl) + '" placeholder="' +
-        (vk === "ig" ? "https://www.instagram.com/reel/…" : "https://youtu.be/… · https://vimeo.com/…") + '">' +
+        (vk === "ig" ? "instagram.com/reel/…" : "youtu.be/… · vimeo.com/…") + '">' +
         admAutosaveHintHTML(edAsKey(p, "video")) + "</label>" +
       (vk === "up"
         /* q21: «до 4 МБ» — the platform refuses a bigger body (VIDEO_SEND_MAX) */
@@ -38108,7 +38111,7 @@
       '<div class="adm-edseofill"><button class="adm-link" type="button" data-admseogen="' + esc(p.id) + '" data-edseofill="' + code + '">' +
         ED_SEO_FILL[code] + "</button></div>" +
       '<label class="adm-field"><span>Заголовок</span>' +
-        '<input class="adm-input" ' + tHook + ' maxlength="70" value="' + esc(v.t || "") + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
+        '<input class="adm-input" ' + tHook + ' maxlength="70" value="' + esc(v.t || "") + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне"></label>' +
       '<label class="adm-field"><span>Описание</span>' +
         '<textarea class="adm-input adm-area adm-area--sm" ' + dHook + ' rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(v.d || "") + "</textarea></label>" +
       "</div>";
@@ -39224,7 +39227,7 @@
           ' value="' + esc(lowNow) + '" inputmode="numeric" maxlength="6">' + admAutosaveHintHTML(kl) + "</label>" +
       '<label class="adm-field adm-stk__xw"><span class="adm-stk__xl">Причина — видна в истории</span>' +
         '<input class="adm-input" data-stockreasoninput="' + esc(key) + '" value="' + esc(STOCK_WHY[key] || "") +
-          '" placeholder="например: пересчёт на полке" maxlength="200"></label>' +
+          '" placeholder="пересчёт полки" maxlength="200"></label>' +
       '<button type="button" class="adm-link adm-link--muted adm-stk__xc" data-stockedit="">Свернуть</button>' +
     "</div>";
   }

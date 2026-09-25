@@ -130,7 +130,7 @@ test.describe("admin assistant — the microphone", () => {
     // the second tap stops; the words stay in the box for the owner to fix
     await mic.click();
     await expect(mic).toHaveAttribute("aria-pressed", "false");
-    await expect(box).toHaveAttribute("placeholder", "Спросите обычными словами");
+    await expect(box).toHaveAttribute("placeholder", "Ваш вопрос");
     expect(await page.evaluate(() => (window as unknown as W).__rec.stopped)).toBe(1);
     await expect(box).toHaveValue("Привет какие заказы ждут отправки");
     await expect(page.locator(".adm-msg--me")).toHaveCount(0);
@@ -334,7 +334,7 @@ test.describe("admin assistant — a refused microphone", () => {
     // to three lines) — the one-line cut lost exactly the half that said where
     expect(await status.locator(".adm-toast__t").evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
     await expect(mic).toHaveAttribute("aria-pressed", "false");
-    await expect(panel.locator("[data-admq]")).toHaveAttribute("placeholder", "Спросите обычными словами");
+    await expect(panel.locator("[data-admq]")).toHaveAttribute("placeholder", "Ваш вопрос");
   });
 });
 
