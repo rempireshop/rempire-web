@@ -194,6 +194,10 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     const post = await makePost(page, `Обложка ${Date.now().toString().slice(-6)}`, "full");
 
     await edit(page, post.id);
+    /* 1a: the frames are in the fold under the cover tile (Dim, 18–23.09.2026:
+       kept, each moved and zoomed on its own) — a toggle, opened when shut */
+    const fold = page.locator('[data-admfold="blog-cover"]');
+    if ((await fold.getAttribute("aria-expanded")) !== "true") await fold.click();
 
     const see = page.locator(".adm-see");
     await expect(see, "the cover preview is not on the screen").toBeVisible();
@@ -290,14 +294,16 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     await page.locator('[data-figmove="down"]').click();
     expect(await kids()).toEqual(["p", "p", "figure", "p", "h2", "p"]);
 
-    /* …and the move is in what gets SAVED, not only on the screen. The bar is
-       inside the box while all this happens, so this is also the check that
+    /* …and the move is in what gets SAVED, not only on the screen — by
+       itself since 1a, a second after the last move. The bar is inside the
+       box while all this happens, so this is also the check that
        blogBoxHtml() keeps it out of the body. */
-    await page.locator("[data-admblogsave]").click();
-    await expect(page.locator("[data-blogdirty]")).toBeHidden();
-    const back = await page.request.get(`/api/admin/blog/?id=${post.id}`);
-    expect(back.status()).toBe(200);
-    const saved = (await back.json()).post.body.RU as string;
+    let saved = "";
+    await expect.poll(async () => {
+      const back = await page.request.get(`/api/admin/blog/?id=${post.id}`);
+      saved = (await back.json()).post.body.RU as string;
+      return saved.slice(0, saved.indexOf("<figure")).split("<p>").length - 1;
+    }, { timeout: 15_000, message: "the move never saved itself" }).toBe(2);
     expect(saved, "an editor control was saved into the article").not.toContain("data-figui");
     expect(saved, "the selection ring was saved into the article").not.toContain("is-figon");
     expect(saved.indexOf("<figure"), "the picture did not keep its new place").toBeGreaterThan(saved.indexOf("</p>"));

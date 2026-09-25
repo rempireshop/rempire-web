@@ -182,7 +182,12 @@ test.describe("admin — «Подключения» tells the truth about the mo
 
     await adminSection(page, "apps");
 
-    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    /* 1a (screen 18; Dim, q19): no model is not a problem — the row stands
+       under «Работает · N», folded, grey — and is never one of the problem
+       cards the count above them is made of. */
+    await expect(page.locator(".adm-appcard", { hasText: "ИИ-помощник" }), "the assistant with no model was counted as a problem").toHaveCount(0);
+    await page.locator('[data-admfold="apps-ok"]').click();
+    const row = page.locator(".adm-approw", { hasText: "ИИ-помощник" }).first();
     await expect(row).toBeVisible();
     await expect(row, "the row no longer says the model is off").toContainText("Модель не подключена");
     // the square is grey, not the green every working row wears
@@ -199,7 +204,8 @@ test.describe("admin — «Подключения» tells the truth about the mo
     });
     await openAdmin(page);
     await adminSection(page, "apps");
-    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    await page.locator('[data-admfold="apps-ok"]').click();
+    const row = page.locator(".adm-approw", { hasText: "ИИ-помощник" }).first();
     await expect(row).toContainText("Модель подключена");
     await expect(row.locator(".adm-dot--off"), "a working model still shows the grey square").toHaveCount(0);
   });
@@ -729,24 +735,23 @@ test.describe("admin — a warehouse row and the blog card say when they are sav
     await clearToast(page);
   });
 
-  test("the blog's «Публикация» card says whether the article is saved", async ({ page }) => {
+  /* 1a: the article saves itself, so the line at its foot says where it
+     stands in the shop, and «Сохраняем… / Сохранено ✓» is the header's —
+     shown only after the server said yes (README § 2). */
+  test("the blog's line says where the article stands, and the header says when it is saved", async ({ page }) => {
     test.setTimeout(120_000);
     await loginAsAdmin(page);
     await adminSection(page, "blog");
     await page.locator("[data-admblognew]").click();
     const state = page.locator("[data-blogpubstate]");
-    await expect(state).toHaveText("Ещё не сохранено");
+    await expect(state).toHaveText("○ Новая статья — сохранится, как только будет заголовок");
     await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации");
-    await expect(state, "a new post has nothing on the server yet").toHaveText("Ещё не сохранено");
-    await page.locator("[data-admblogsave]").click();
-    await expect(page.getByRole("status")).toContainText("Черновик сохранён");
-    await expect(state).toHaveText("Сохранено ✓");
-    await clearToast(page);
-    await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации, правка");
-    await expect(state).toHaveText("Есть несохранённые изменения");
-    // tidy up through the same card
+    await expect(page.locator("[data-admsavest]:visible").first(), "the header never said it saved").toContainText("Сохранено ✓", { timeout: 15_000 });
+    await expect(state, "a saved draft is still called new").toHaveText("○ Черновик — в магазине не видно");
+    // tidy up: «⋯» → «Удалить статью» → the sheet → held, with «Вернуть»
+    await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
-    await page.locator("[data-admblogdelyes]").click();
+    await page.locator(".adm-confirm [data-admapply]").click();
     await expect(page.getByRole("status")).toContainText("Статья удалена");
   });
 });
