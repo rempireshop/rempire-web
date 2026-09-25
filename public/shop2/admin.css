@@ -176,6 +176,22 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   .adm-main { padding-right: var(--a-strip); }
   .adm2--asst .adm-main { padding-right: var(--a-asst); }
 }
+/* …and the page's own width is what its layouts answer to. A breakpoint
+   written for the WINDOW was right only with the assistant folded: open, it
+   takes 328 px more, and a 1440 window left the page what a 1110 one does
+   while every screen still drew its 1440 layout (the polish pass, 25.09.2026).
+   So on a desktop the page is a size container (`admpage`) and each
+   desktop-range breakpoint below has its container twin, converted at
+   «page content = window − 232 sidebar − 52 strip − 96 margins», i.e.
+   window − 380 while the page is under its 1000-px cap: 1180 → 800,
+   1200 → 820, 1209 → 829, 1239 → 859, 1000 → 620. With the assistant folded
+   and the sidebar open nothing moves; open, the same layouts arrive at the
+   same page width. A phone has no container: its layout is the window's.
+   (`container-type` makes no containing block for the page's fixed pieces —
+   the «⋯» scrims still cover the window; checked in Chromium and WebKit.) */
+@media (min-width: 900px) {
+  .adm-page { container-type: inline-size; container-name: admpage; }
+}
 .adm-page { max-width: 1000px; margin: 0 auto; padding: 32px 48px 140px; }
 .adm-screen { display: flex; flex-direction: column; gap: 28px; }
 /* The fade-in plays ONCE, when the owner moves to another section: app.js
@@ -205,6 +221,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
 .adm-cols--wide { grid-template-columns: minmax(0, 1fr) 360px; }
 @media (max-width: 1180px) { .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
+@container admpage (max-width: 800px) { .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
 /* Two fields that belong together — «Скидка, €» and «Минимальный заказ» on the
    promo form. It used to be `.adm-cols` with the two columns written into a
    style attribute, which beats any media query: on a phone that left each
@@ -616,6 +633,9 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 @media (max-width: 1180px) {
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
 }
+@container admpage (max-width: 800px) {
+  .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
+}
 
 /* ---------- Заказ: the 4-step strip --------------------------------------- */
 
@@ -748,6 +768,9 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 @media (max-width: 1180px) {
   .adm-ov__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "sales" "recent"; gap: 28px; }
 }
+@container admpage (max-width: 800px) {
+  .adm-ov__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "sales" "recent"; gap: 28px; }
+}
 /* a row of «Сделать сегодня»: the big number, the words and whose, the chevron */
 .adm2 .adm-todo {
   display: grid; grid-template-columns: 44px minmax(0, 1fr) 14px; gap: 12px; align-items: center;
@@ -759,6 +782,10 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-ov .adm-sales { border-top: 0; margin-top: 0; grid-template-columns: 1fr; }
 .adm-ov .adm-sales__cell:last-child { border-bottom: 0; }
 @media (max-width: 1180px) {
+  .adm-ov .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .adm-ov .adm-sales__cell { border-bottom: 0; padding-top: 12px; }
+}
+@container admpage (max-width: 800px) {
   .adm-ov .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 16px; }
   .adm-ov .adm-sales__cell { border-bottom: 0; padding-top: 12px; }
 }
@@ -781,7 +808,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
    share of the header row. On a phone it is the row: `flex: 1 1 auto` — it
    used to be sized by a later «Товары» rule to its own content, 228 px of a
    358-px row, and the placeholder stopped at «телефон и» */
-.adm-orders__acts .adm-search { flex: 0 1 340px; min-width: 240px; }
+.adm-orders__acts .adm-search { flex: 0 1 340px; min-width: 320px; }   /* its whole placeholder */
 /* «Открыть первый: <имя>» — a name is as long as the customer typed it, and
    a pin that would not shrink pushed the search over «Заказы» (1440) and
    both of them over the sidebar (1024). It gives way now; the name ends
@@ -829,7 +856,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
    word. The step's column is the widest step label (EN «Handed to the
    customer», 181 px at 13 px) — so the table needs 1200 px: below that the
    buyer and «Что и куда» would be squeezed to nothing. */
-@media (min-width: 1200px) {
+@container admpage (min-width: 820px) {
   .adm-olist__head {
     display: grid; grid-template-columns: 84px 44px minmax(0, 1fr) minmax(0, 1.4fr) 136px 96px 184px; column-gap: 12px;
     padding: 12px 0 8px; border-bottom: 1px solid var(--a-ink);
@@ -854,7 +881,16 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 /* …a narrower desktop keeps the two lines of the phone, and the step stands
    beside them in a column of its own (one width for every row, so the sums
    still line up), centred — no third line under the row */
-@media (min-width: 900px) and (max-width: 1199px) {
+/* a narrow page puts the search and the dark button on a row of their own
+   under «Заказы», as a phone does: beside the title «Открыть первый:» had no
+   room left for the name it opens */
+@container admpage (max-width: 819px) {
+  /* nowrap: a wrapping column sizes its line to the widest item, not to the page */
+  .adm-orders .adm-head { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 14px; }
+  .adm-orders__acts { flex: none; }
+  .adm-orders__acts .adm-search { flex: 1 1 auto; }
+}
+@container admpage (max-width: 819px) {
   .adm2 .adm-olist--table .adm-orow {
     grid-template-columns: minmax(0, 1fr) auto 184px; grid-template-areas: "body amt acts" "body tag acts";
   }
@@ -2268,7 +2304,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    the row — the glass would push the end of «Название, бренд, штрихкод» out
    of the box beside «Сканировать» (the one search here whose words must all
    show: they say a barcode works too); the glass steps aside there. */
-@media (max-width: 389px), (min-width: 900px) and (max-width: 1180px) {
+@media (max-width: 389px) {
+  .adm-salon__q .adm-search__i { display: none; }
+  .adm2 .adm-salon__q > .adm-input { padding-left: 10px; }
+}
+@container admpage (max-width: 800px) {
   .adm-salon__q .adm-search__i { display: none; }
   .adm2 .adm-salon__q > .adm-input { padding-left: 10px; }
 }
@@ -2285,8 +2325,14 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
     font-size: 11px; line-height: 13px; font-weight: 500;
   }
 }
-@media (min-width: 900px) and (max-width: 1180px) {
-  .adm-input--find { font-size: 15px; }
+@container admpage (max-width: 800px) {
+  .adm-salon__grid { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 24px; }
+  .adm-salon__find { gap: 6px; }
+  .adm-input--find { padding: 0 10px; font-size: 15px; }
+  .adm-posscan {
+    width: 78px; padding: 0 2px; flex-direction: column; gap: 2px;
+    font-size: 11px; line-height: 13px; font-weight: 500;
+  }
 }
 
 /* a product: the photo, the brand over the name, and a chip per size — the
@@ -2790,7 +2836,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-crow__acts { flex: none; }
 .adm2 .adm-crow__yes { font-weight: 600; }
 .adm-ctable__h { display: none; }
-@media (min-width: 1200px) {
+@container admpage (min-width: 820px) {
   .adm-ctable { border-top: 0; margin-top: 0; }
   .adm-ctable__h, .adm2 .adm-crow {
     display: grid; align-items: center; column-gap: 12px;
@@ -2812,7 +2858,22 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm2 .adm-crow__acts .adm-btn { height: auto; min-height: 44px; padding: 4px 12px; white-space: normal; line-height: 17px; text-align: center; }
   .adm2 .adm-crow__acts .adm-crow__yes { flex: 1 1 auto; max-width: 118px; }
 }
-@media (max-width: 1199px) {
+@media (max-width: 899px) {
+  .adm2 .adm-crow {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 10px; align-items: start;
+    padding: 12px 0;
+  }
+  .adm-crow__co { display: none; }
+  .adm-crow__meta { display: block; }
+  .adm-crow__tags { grid-column: 2; grid-row: 1; padding-top: 1px; }
+  .adm-crow__acts {
+    grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 12px; background: var(--a-panel);
+  }
+  .adm-crow__reqco { display: block; grid-column: 1 / -1; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+  .adm2 .adm-crow__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; font-size: 14.5px; white-space: normal; line-height: 18px; }
+}
+@container admpage (max-width: 819px) {
   .adm2 .adm-crow {
     display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 10px; align-items: start;
     padding: 12px 0;
@@ -2841,6 +2902,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-pform .adm-err.adm-ashint { font-size: 12.5px; line-height: 16px; }
 .adm-pform__n { margin: 0; }
 @media (max-width: 1199px) {
+  .adm-pform__f { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .adm-pform__f > .adm-field:first-child { grid-column: 1 / -1; }
+  .adm-pform__acts { grid-column: 1 / -1; padding-top: 0; }
+}
+@container admpage (max-width: 819px) {
   .adm-pform__f { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .adm-pform__f > .adm-field:first-child { grid-column: 1 / -1; }
   .adm-pform__acts { grid-column: 1 / -1; padding-top: 0; }
@@ -4559,10 +4625,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-rt .adm-rates__c--none .adm-hint--cell { grid-column: 2 / -1; }
 .adm-rt .adm-rates__c:last-child { border-top: 1px solid var(--a-rule); margin-top: 4px; padding-top: 10px; }
 .adm-rt .adm-rates__c:last-child .adm-tariffs__l { font-weight: 600; }
-/* the table from 1000 px: under it (a narrow desktop, where «Настройки» shows
-   one pane at a time — below) the page is 520–620 px and seven columns drew
-   price boxes that showed one digit; the country rows fold as on a phone */
-@media (min-width: 1000px) {
+/* the table from a 620-px page (a 1000-px window with the assistant folded):
+   under it seven columns drew price boxes that showed one digit, so the
+   country rows fold as on a phone */
+@container admpage (min-width: 620px) {
   .adm-rt__head, .adm-rt__row {
     display: grid; grid-template-columns: minmax(120px, 1.3fr) repeat(6, minmax(0, 1fr)); gap: 8px 8px;
   }
@@ -4668,12 +4734,13 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-push__dot.is-on { background: var(--a-green); border-color: var(--a-green); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   A narrow desktop — 900 to 1209/1239 px: a 1024 laptop, an iPad on its side.
-   The sidebar (232), the assistant's strip (52) and the page's margins (96)
-   leave 520–830 px of page, and three screens were drawn for more (the
-   polish pass's overflow sweep, 25.09.2026, at 1024 × 800):
+   A narrow page on a desktop — a 1024 laptop, an iPad on its side, or any
+   window up to ≈ 1560 px with the assistant open: 520–860 px of page, and
+   four screens were drawn for more (the polish pass's overflow sweep,
+   25.09.2026, at 1024 × 800 and at 1440 with the assistant). By the page's
+   width (`admpage`, above): 859 = a 1239 window, 829 = a 1209 one.
    ═══════════════════════════════════════════════════════════════════════ */
-@media (min-width: 900px) and (max-width: 1239px) {
+@container admpage (max-width: 859px) {
   /* «Настройки»: the index beside a page left the page 354 px. One pane at a
      time, as on a phone — the index, or the page with its «← Настройки». */
   .adm-set { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
@@ -4681,7 +4748,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm-set--open .adm-set__col { display: none; }
   .adm-set:not(.adm-set--open) .adm-set__main { display: none; }
 }
-@media (min-width: 900px) and (max-width: 1209px) {
+@container admpage (max-width: 829px) {
   /* «Каталог»: five fixed columns took 614 px and gave the name 15 — one word
      a line, under the sizes. The sizes go under the name instead, as the
      phone has them, and «Объёмы» leaves the header. */
