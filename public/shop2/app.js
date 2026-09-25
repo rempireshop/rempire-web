@@ -1610,6 +1610,76 @@
       "Статья снята с публикации ✓": "Artikkel võetud avaldamisest maha ✓",
       "Черновик сохранён ✓": "Mustand salvestatud ✓",
       "Изменения сохранены ✓": "Muudatused salvestatud ✓",
+      /* 1a — «Блог», «Аналитика», «Подключения», «Вход» (ux1a-blog) */
+      "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст.": "Artikli eestikeelne tekst on tühi — eestikeelsel lehel näeb ostja venekeelset teksti.",
+      "Английский текст статьи пустой — на английской странице покупатель увидит русский текст.": "Artikli ingliskeelne tekst on tühi — ingliskeelsel lehel näeb ostja venekeelset teksti.",
+      "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст.": "Artikli eesti- ja ingliskeelne tekst on tühjad — nendel lehtedel näeb ostja venekeelset teksti.",
+      "Новая статья — сохранится, как только будет заголовок": "Uus artikkel — salvestub kohe, kui sellel on pealkiri",
+      "Опубликована — правки видны сразу": "Avaldatud — muudatused on kohe näha",
+      "Черновик — в магазине не видно": "Mustand — poes ei ole näha",
+      "Переписать опубликованную статью?": "Kirjutada avaldatud artikkel ümber?",
+      "Помощник заменит текст, который сейчас видят покупатели, и правка сразу сохранится в магазине.": "Assistent asendab teksti, mida ostjad praegu näevad, ja muudatus salvestub poodi kohe.",
+      "Переписать": "Kirjuta ümber",
+      "Заполнено для трёх языков — проверьте": "Täidetud kolmes keeles — kontrollige",
+      "Готово — проверьте текст.": "Valmis — kontrollige teksti.",
+      "Опубликовать без перевода?": "Avaldada ilma tõlketa?",
+      "Статья удалена": "Artikkel kustutatud",
+      "Статья на месте": "Artikkel on tagasi",
+      "Статья не удалилась — она снова в списке.": "Artiklit ei kustutatud — see on jälle nimekirjas.",
+      "Выберите статью слева": "Valige vasakult artikkel",
+      "Ещё действия": "Veel toiminguid",
+      "Заголовок статьи": "Artikli pealkiri",
+      "Пусто — покажем русский": "Tühi — näitame venekeelset",
+      "Две строки — видно в списке статей и в поиске": "Kaks rida — näha artiklite loendis ja otsingus",
+      "Товары в статье — покажем карточками внизу": "Artikli tooted — näitame all kaartidena",
+      "В статье уже 12 товаров — больше не поместится.": "Artiklis on juba 12 toodet — rohkem ei mahu.",
+      "✨ Помощник напишет статью": "✨ Assistent kirjutab artikli",
+      "по-русски, потом на ET и EN": "vene keeles, siis ET ja EN",
+      "Адрес статьи": "Artikli aadress",
+      "Для Google": "Google'i jaoks",
+      "Адрес, автор, теги и Google": "Aadress, autor, sildid ja Google",
+      "адрес, автор, теги, текст для Google": "aadress, autor, sildid, tekst Google'i jaoks",
+      "Сначала напишите русский текст — переводим с него.": "Kirjutage esmalt venekeelne tekst — tõlgime sellest.",
+      "Товар убран из статьи": "Toode eemaldati artiklist",
+      "Обложка убрана": "Kaanepilt eemaldati",
+      "Удалить статью?": "Kustutada artikkel?",
+      "Статья исчезнет из блога на всех трёх языках.": "Artikkel kaob blogist kõigis kolmes keeles.",
+      "Поменять адрес статьи?": "Muuta artikli aadressi?",
+      "Старые ссылки на статью перестанут открываться.": "Vanad lingid artiklile lakkavad avanema.",
+      "Поменять адрес": "Muuda aadressi",
+      "На этом телефоне вход запомнится на 30 дней.": "Selles telefonis jääb sisselogimine meelde 30 päevaks.",
+      "На этом устройстве вход запомнится на 30 дней.": "Selles seadmes jääb sisselogimine meelde 30 päevaks.",
+      "Заказы, склад и салон — в одном месте.": "Tellimused, ladu ja salong — ühes kohas.",
+      "к стольким же часам до полуночи": "võrreldes sama arvu tundidega enne keskööd",
+      "к прошлой неделе": "võrreldes eelmise nädalaga",
+      "к прошлому месяцу": "võrreldes eelmise kuuga",
+      "к прошлым 90 дням": "võrreldes eelmise 90 päevaga",
+      "нет данных для сравнения": "võrdlemiseks andmed puuduvad",
+      "Покупают": "Ostavad",
+      "Отчёт для бухгалтера (XLSX, CSV) — в «Настройки → О компании»": "Aruanne raamatupidajale (XLSX, CSV) — «Seaded → Ettevõttest»",
+      "Что искали и не нашли": "Mida otsiti ja ei leitud",
+      "С телефона или с компьютера. Справа — доля и сколько человек.": "Telefonist või arvutist. Paremal — osakaal ja inimeste arv.",
+      "Корзины, подарочные карты и чат": "Ostukorvid, kinkekaardid ja vestlus",
+      "Вернулись по письму": "Tulid kirja peale tagasi",
+      "Получили письмо о брошенной корзине и потом оформили заказ.": "Said hüljatud ostukorvi kirja ja vormistasid seejärel tellimuse.",
+      "Не подключено — подключает Дим": "Ühendamata — ühendab Dim",
+      "Нет ответа от Google": "Google ei vasta",
+      "Показов пока нет": "Näitamisi veel pole",
+      "Открыть «Подключения»": "Ava «Liidestused»",
+      "Войдите в Montonio Partner System и включите для магазина продукт «Bank payments». Как только Montonio его включит, эта строка станет зелёной — она проверяется каждый раз, когда вы открываете этот экран.": "Logige sisse Montonio Partner Systemi ja lülitage poe jaoks sisse toode «Bank payments». Kohe kui Montonio selle sisse lülitab, muutub see rida roheliseks — seda kontrollitakse iga kord, kui te selle ekraani avate.",
+      "Войдите в Montonio Partner System и включите продукт «Refundable bank payments» — он включается только в боевом режиме. Строка станет зелёной после первой оплаты банковской ссылкой: у Montonio это видно только по оплаченному заказу.": "Logige sisse Montonio Partner Systemi ja lülitage sisse toode «Refundable bank payments» — see lülitatakse sisse ainult päris režiimis. Rida muutub roheliseks pärast esimest pangalingiga makset: Montonios on see näha ainult makstud tellimuse pealt.",
+      "Войдите в Montonio Partner System, раздел Shipping, и включите перевозчиков — договор Montonio или свой. Потом откройте этот экран ещё раз.": "Logige sisse Montonio Partner Systemi, jaotis Shipping, ja lülitage vedajad sisse — Montonio leping või enda oma. Seejärel avage see ekraan uuesti.",
+      "Проверить оплату": "Kontrolli makset",
+      "Открыть заказ": "Ava tellimus",
+      "Как включить": "Kuidas sisse lülitada",
+      "Всё работает ✓": "Kõik töötab ✓",
+      "Проверить ещё раз": "Kontrolli uuesti",
+      "Ещё проверяем:": "Veel kontrollime:",
+      "Работает": "Töötab",
+      "Что-то непонятно — напишите Диму:": "Midagi on ebaselge — kirjutage Dimile:",
+      "Оплата работает — банки пришли ✓": "Maksmine töötab — pangad tulid ✓",
+      "Банки так и не пришли — напишите Диму": "Pangad ei tulnudki — kirjutage Dimile",
+      "Проверяем ещё раз…": "Kontrollime uuesti…",
       "Статья удалена ✓": "Artikkel kustutatud ✓",
       "Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть.":
         "Kas kindlasti kustutada see artikkel? See läheb mustandisse — tekst jääb alles, kuid poes seda enam ei näe.",
@@ -4659,6 +4729,76 @@
       "Статья снята с публикации ✓": "Article unpublished ✓",
       "Черновик сохранён ✓": "Draft saved ✓",
       "Изменения сохранены ✓": "Changes saved ✓",
+      /* 1a — «Блог», «Аналитика», «Подключения», «Вход» (ux1a-blog) */
+      "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст.": "The Estonian text of the article is empty — on the Estonian page the customer will see the Russian text.",
+      "Английский текст статьи пустой — на английской странице покупатель увидит русский текст.": "The English text of the article is empty — on the English page the customer will see the Russian text.",
+      "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст.": "The Estonian and English texts of the article are empty — on those pages the customer will see the Russian text.",
+      "Новая статья — сохранится, как только будет заголовок": "New article — it saves as soon as it has a title",
+      "Опубликована — правки видны сразу": "Published — changes show at once",
+      "Черновик — в магазине не видно": "Draft — not visible in the shop",
+      "Переписать опубликованную статью?": "Rewrite the published article?",
+      "Помощник заменит текст, который сейчас видят покупатели, и правка сразу сохранится в магазине.": "The assistant will replace the text customers see now, and the change is saved to the shop at once.",
+      "Переписать": "Rewrite",
+      "Заполнено для трёх языков — проверьте": "Filled in for three languages — please check",
+      "Готово — проверьте текст.": "Done — please check the text.",
+      "Опубликовать без перевода?": "Publish without a translation?",
+      "Статья удалена": "Article deleted",
+      "Статья на месте": "The article is back",
+      "Статья не удалилась — она снова в списке.": "The article was not deleted — it is back in the list.",
+      "Выберите статью слева": "Pick an article on the left",
+      "Ещё действия": "More actions",
+      "Заголовок статьи": "Article title",
+      "Пусто — покажем русский": "Empty — the Russian one is shown",
+      "Две строки — видно в списке статей и в поиске": "Two lines — seen in the article list and in search",
+      "Товары в статье — покажем карточками внизу": "Products in the article — shown as cards at the bottom",
+      "В статье уже 12 товаров — больше не поместится.": "The article already has 12 products — no more fit.",
+      "✨ Помощник напишет статью": "✨ The assistant writes the article",
+      "по-русски, потом на ET и EN": "in Russian, then ET and EN",
+      "Адрес статьи": "Article address",
+      "Для Google": "For Google",
+      "Адрес, автор, теги и Google": "Address, author, tags and Google",
+      "адрес, автор, теги, текст для Google": "address, author, tags, text for Google",
+      "Сначала напишите русский текст — переводим с него.": "Write the Russian text first — we translate from it.",
+      "Товар убран из статьи": "Product removed from the article",
+      "Обложка убрана": "Cover removed",
+      "Удалить статью?": "Delete the article?",
+      "Статья исчезнет из блога на всех трёх языках.": "The article disappears from the blog in all three languages.",
+      "Поменять адрес статьи?": "Change the article's address?",
+      "Старые ссылки на статью перестанут открываться.": "Old links to the article will stop opening.",
+      "Поменять адрес": "Change address",
+      "На этом телефоне вход запомнится на 30 дней.": "This phone will stay signed in for 30 days.",
+      "На этом устройстве вход запомнится на 30 дней.": "This device will stay signed in for 30 days.",
+      "Заказы, склад и салон — в одном месте.": "Orders, stock and the salon — in one place.",
+      "к стольким же часам до полуночи": "vs. the same number of hours before midnight",
+      "к прошлой неделе": "vs. the week before",
+      "к прошлому месяцу": "vs. the month before",
+      "к прошлым 90 дням": "vs. the 90 days before",
+      "нет данных для сравнения": "nothing to compare with yet",
+      "Покупают": "Buying",
+      "Отчёт для бухгалтера (XLSX, CSV) — в «Настройки → О компании»": "Report for the accountant (XLSX, CSV) — in «Settings → About the company»",
+      "Что искали и не нашли": "Searched for and not found",
+      "С телефона или с компьютера. Справа — доля и сколько человек.": "From a phone or a computer. On the right — the share and how many people.",
+      "Корзины, подарочные карты и чат": "Baskets, gift cards and chat",
+      "Вернулись по письму": "Came back from the letter",
+      "Получили письмо о брошенной корзине и потом оформили заказ.": "Got the abandoned-basket letter and then placed an order.",
+      "Не подключено — подключает Дим": "Not connected — Dim connects it",
+      "Нет ответа от Google": "No answer from Google",
+      "Показов пока нет": "No impressions yet",
+      "Открыть «Подключения»": "Open «Integrations»",
+      "Войдите в Montonio Partner System и включите для магазина продукт «Bank payments». Как только Montonio его включит, эта строка станет зелёной — она проверяется каждый раз, когда вы открываете этот экран.": "Sign in to the Montonio Partner System and switch on the «Bank payments» product for the shop. As soon as Montonio switches it on, this row turns green — it is checked every time you open this screen.",
+      "Войдите в Montonio Partner System и включите продукт «Refundable bank payments» — он включается только в боевом режиме. Строка станет зелёной после первой оплаты банковской ссылкой: у Montonio это видно только по оплаченному заказу.": "Sign in to the Montonio Partner System and switch on the «Refundable bank payments» product — it can only be switched on in live mode. The row turns green after the first bank-link payment: Montonio shows this only on a paid order.",
+      "Войдите в Montonio Partner System, раздел Shipping, и включите перевозчиков — договор Montonio или свой. Потом откройте этот экран ещё раз.": "Sign in to the Montonio Partner System, the Shipping section, and switch the carriers on — Montonio's contract or your own. Then open this screen again.",
+      "Проверить оплату": "Check payments",
+      "Открыть заказ": "Open order",
+      "Как включить": "How to switch on",
+      "Всё работает ✓": "Everything works ✓",
+      "Проверить ещё раз": "Check again",
+      "Ещё проверяем:": "Still checking:",
+      "Работает": "Working",
+      "Что-то непонятно — напишите Диму:": "Something unclear — write to Dim:",
+      "Оплата работает — банки пришли ✓": "Payments work — the banks arrived ✓",
+      "Банки так и не пришли — напишите Диму": "The banks still did not arrive — write to Dim",
+      "Проверяем ещё раз…": "Checking again…",
       "Статья удалена ✓": "Article deleted ✓",
       "Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть.":
         "Delete this article? It goes back to drafts — the text stays, but it will not be visible in the shop.",
@@ -9428,11 +9568,12 @@
     adminBlogErr: "",
     adminBlogTopic: "",    // «Тема статьи» in the editor's assistant card — prefilled from the title
     adminBlogGen: null,    // the article generator's progress: {step, msg, err} while «Написать статью целиком» runs
-    adminBlogConfirmDelete: false,
-    /* The «эстонский текст пустой — всё равно опубликовать?» question while
-       it is on screen: the sentence itself, so the buttons under it and the
-       reason for them can never drift apart. "" = nothing to ask. */
-    adminBlogConfirmPublish: "",
+    /* 1a: «⋯» over the open article («Снять с публикации», «Удалить статью»)
+       is open; and «+ Товар» has opened the product search under the list of
+       the article's products. The «пустой язык» and «удалить?» questions are
+       the confirm sheet now (pendingAction), not flags of their own. */
+    adminBlogMenu: false,
+    adminBlogProdOpen: false,
     /* The editor's toolbar sheet: "" | "link" | "image" | "product". It is
        drawn into its own slot by hand rather than by render(), because a
        render() would rebuild the contenteditable and take the caret (and the
@@ -15393,13 +15534,17 @@
   var BLOG_OPEN_ERR = "Не получилось открыть статью — попробуйте ещё раз.";
   function openBlogEditor(id) {
     if (S.adminBlogEditBusy) return;
+    /* The article on screen gives way first — on a desktop both panes are
+       up, and one article is opened over another. Whatever it owed has gone
+       by now (the callers send it: blogAutosave("change")). */
+    S.adminBlogEdit = null; S.adminBlogMenu = false; S.adminBlogProdOpen = false; S.adminBlogConfirmBack = false;
     S.adminBlogEditBusy = true; render();
     apiJson("/api/admin/blog/?id=" + encodeURIComponent(id)).then(function (r) {
       S.adminBlogEditBusy = false;
       if (r.status === 200 && r.body.ok && r.body.post) {
         S.adminBlogEdit = blogDraftFromPost(r.body.post);
         blogMarkSaved(S.adminBlogEdit);   // nothing typed yet — see blogDirty()
-        S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+        S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogErr = "";
         S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
         S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
         /* …and at the top of the article, like «+ Написать» beside it and like
@@ -15499,9 +15644,11 @@
      shop's articles are written, Russian first and translated after. So this
      is a question, asked once at the moment of publishing, and never a rule:
      it names the language that is empty, says what the reader gets there,
-     and the next press publishes anyway (Dim, 08.09.2026). Not a line that
-     appears and disappears under the keyboard — the language strip already
-     carries «пусто» on the tab, all the time, for that.
+     and the next press publishes anyway (Dim, 08.09.2026). Since 1a it is
+     asked on the panel's one confirm sheet (README rule 4): the title is the
+     question, the sentence below says which language and what its reader
+     sees, «Опубликовать всё равно» publishes. The language strip carries
+     «пусто» on the tab all the time besides.
 
      One whole sentence per case rather than one with the language plugged
      into a hole, for the same reason as BLOG_LANG_NOTE: translateTree() and
@@ -15513,15 +15660,15 @@
     if (!blogTextLen(d.body.RU)) return [];
     return ["ET", "EN"].filter(function (l) { return !blogTextLen(d.body[l]); });
   }
-  var BLOG_PUBLISH_WARN = {
-    ET: "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст. Всё равно опубликовать?",
-    EN: "Английский текст статьи пустой — на английской странице покупатель увидит русский текст. Всё равно опубликовать?",
-    "ET,EN": "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст. Всё равно опубликовать?"
+  var BLOG_PUBLISH_EMPTY = {
+    ET: "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст.",
+    EN: "Английский текст статьи пустой — на английской странице покупатель увидит русский текст.",
+    "ET,EN": "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст."
   };
   function blogPublishWarnText(d) {
-    return BLOG_PUBLISH_WARN[blogEmptyLangs(d).join(",")] || "";
+    return BLOG_PUBLISH_EMPTY[blogEmptyLangs(d).join(",")] || "";
   }
-  /** Everything «Сохранить» would send — the yardstick for «не сохранено». */
+  /** Everything a save sends — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
     return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt, d.coverFocus,
       d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
@@ -15542,20 +15689,25 @@
   function blogMarkSaved(d, sig) {
     S.adminBlogSaved = typeof sig === "string" ? sig : (d ? blogDraftSig(d) : "");
     S.adminBlogConfirmBack = false;
-    S.adminBlogConfirmPublish = "";
   }
+  /* An article left with words that could not be saved (no Russian title
+     yet), after the question said so, simply goes: its autosave can never
+     send it (the title check refuses), and nothing else holds it. */
   function blogCloseEditor() {
     S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
-    S.adminBlogConfirmPublish = ""; S.adminBlogPlaced = null;
+    S.adminBlogPlaced = null; S.adminBlogMenu = false; S.adminBlogProdOpen = false;
     BLOGSEL = null; BLOGCARET = null; render();
   }
   function blogDirty() {
     var d = S.adminBlogEdit;
     return !!(d && S.adminBlogSaved !== undefined && blogDraftSig(d) !== S.adminBlogSaved);
   }
-  /* Typing must not cost the caret, so the three tab states and the «not
-     saved» line repaint themselves instead of going through render() — the
-     same idiom paintMailPreview() uses for the letter. */
+  /* Typing must not cost the caret, so the three tab states, the article's
+     line at the foot and the refusal line repaint themselves instead of
+     going through render() — the idiom paintMailPreview() uses for the
+     letter. And every change that reaches here IS a change to the article —
+     the box (blogSync), every field, the cover's frames — so this is where
+     it is handed to the autosave, once, for all of them. */
   function blogPaintState() {
     var d = S.adminBlogEdit;
     if (!d) return;
@@ -15565,25 +15717,103 @@
       slot.innerHTML = admLangStateHTML(blogLangWords(d, l[0]));
       translateTree(slot);
     });
-    var dirty = document.querySelector("[data-blogdirty]");
-    if (dirty) dirty.hidden = !blogDirty();
-    // the card's Save buttons carry the state too — they are this editor's bar
-    var saves = document.querySelectorAll("[data-admblogsave]");
-    for (var si = 0; si < saves.length; si++) admDirtyMark(saves[si], blogDirty());
-    // …and the «Публикация» card's own line (blogPubStateHTML), which sits
-    // beside the buttons it is about
     var pub = document.querySelector("[data-blogpubstate]");
-    if (pub) { pub.innerHTML = blogPubStateHTML(d, !!S.adminBlogBusy); translateTree(pub); }
+    if (pub) { pub.innerHTML = blogPubStateHTML(d); translateTree(pub); }
+    blogPaintErr();
+    blogAutosave("input");
   }
-  /** The state line of the «Публикация» card: whether what is on screen is
-      what the server holds. A new post has nothing on the server yet, so it
-      says so instead of a «Сохранено ✓» it has not earned. */
-  function blogPubStateHTML(d, busy) {
-    if (busy) return "<span>Сохраняем…</span>";
-    // the solid chip the save bars use for the same state (admDirtyNoteHTML)
-    if (!d.id) return '<span class="adm-dirtyword">Ещё не сохранено</span>';
-    if (blogDirty()) return '<span class="adm-dirtyword">Есть несохранённые изменения</span>';
-    return '<span class="adm-hint--ok">Сохранено ✓</span>';
+  function blogPaintErr() {
+    var el = document.querySelector("[data-blogerr]");
+    if (!el) return;
+    el.textContent = S.adminBlogErr ? trText(S.adminBlogErr, S.lang) : "";
+    el.hidden = !S.adminBlogErr;
+  }
+  /** The article's line at the foot of the editor (screen 16): where it
+      stands in the shop. Whether it is saved is the header's status
+      («Сохраняем… / Сохранено ✓», ADM_SAVE), not this line's. */
+  function blogPubStateHTML(d) {
+    if (!d.id) return '<span aria-hidden="true">○</span> <span>Новая статья — сохранится, как только будет заголовок</span>';
+    return d.status === "published"
+      ? '<span class="adm-blog2__on" aria-hidden="true">●</span> <span>Опубликована — правки видны сразу</span>'
+      : '<span aria-hidden="true">○</span> <span>Черновик — в магазине не видно</span>';
+  }
+
+  /* ---- the article saves itself (1a, README § 2; Dim 25.09.2026, q5) --------
+     One field of the panel's shared autosave (admAutosave) per open article,
+     and its value is the whole article's signature: a word saves a second
+     after the typing stops (ADM_SAVE_POLICY.text), a pick — a product, the
+     cover, a frame's mode — at once, and whatever is owed goes on Back, on
+     the nav, when another article opens and when the page is hidden. The
+     write is the one this editor has always made — PATCH /api/admin/blog/
+     with every field (blogFieldsPayload), no new route — and it is refused
+     before it leaves for an article with no Russian title: the line under
+     the title says so, and it goes the moment there is one. A published
+     article saves straight into the shop too (q5), with the two guards the
+     answer came with: its address changes only after a question (the
+     [data-blogslug] focusout), and the assistant asks before it writes over
+     its text (blogAiAsks). */
+  var BLOG_AS_N = 0;
+  function blogAsKey(d) {
+    if (!d._as) d._as = "blog:" + (++BLOG_AS_N);
+    return d._as;
+  }
+  function blogAutosave(ev) {
+    var d = S.adminBlogEdit;
+    if (!d || d.gone || S.adminTab !== "blog") return false;
+    var key = blogAsKey(d);
+    if (!ADM_AS_SPEC[key]) {
+      admAutosaveSpec(key, {
+        kind: "text",
+        validate: function () { return blogTitleMissing(d) ? BLOG_TITLE_NEEDED : ""; },
+        send: function (v, opts) { return blogAutosaveSend(d, opts); }
+      });
+    }
+    return admAutosave(key, blogDraftSig(d), ev || "input");
+  }
+  function blogAutosaveSend(d, opts) {
+    if (d.gone) return Promise.resolve(true);
+    // a word typed and taken back: the server already holds exactly this
+    if (d === S.adminBlogEdit && !blogDirty()) return Promise.resolve(true);
+    return saveBlogFields(d, opts).then(function () {
+      if (d === S.adminBlogEdit && S.adminBlogErr) { S.adminBlogErr = ""; blogPaintErr(); }
+      return true;
+    }, function (e) {
+      if (e && e.message === "unauthorized") return { status: 401 };
+      /* the one refusal with a reason the owner can act on stays under the
+         editor as well — «Статья слишком длинная…» — and the header's
+         «Не сохранилось · Повторить» says a save is owed */
+      if (d === S.adminBlogEdit) { S.adminBlogErr = blogSaveErrText(e); blogPaintErr(); }
+      return false;
+    });
+  }
+  /** Can this article be saved as it is? Everything but the Russian title
+      is optional — the server's rule, asked for in Russian by the panel. */
+  function blogSavesItself(d) { return !!d && !blogTitleMissing(d); }
+  /** «+ Статья» again, or «Написать статью» from the chat: a fresh draft. */
+  function blogStartNew() {
+    S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+    S.adminBlogErr = ""; S.adminBlogMenu = false; S.adminBlogProdOpen = false;
+    S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
+    S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
+  }
+  /* The assistant writes over the text it is given — «Написать статью
+     целиком», «Только план по теме», both translations, «Заполнить
+     автоматически». On a published article that text is what readers see,
+     and a second later it is saved into the shop (q5: «the AI asks before it
+     overwrites»). So it asks, once, on the confirm sheet, and «Переписать»
+     presses the very button that asked (`sel`) with BLOG_AI_SURE letting it
+     through. A draft is nobody's page yet: written straight away, as before. */
+  var BLOG_AI_SURE = false;
+  function blogAiAsks(sel) {
+    if (BLOG_AI_SURE) { BLOG_AI_SURE = false; return false; }
+    var d = S.adminBlogEdit;
+    if (!d || d.status !== "published") return false;
+    pendingAction = {
+      type: "blog_ai", overlay: true, sel: sel, title: "Переписать опубликованную статью?",
+      detail: "Помощник заменит текст, который сейчас видят покупатели, и правка сразу сохранится в магазине.", ok: "Переписать"
+    };
+    render(); refocus("[data-admapply]");
+    return true;
   }
 
   /* ---- the Google pair, written from the article ---------------------------
@@ -15627,7 +15857,9 @@
     var done = function () {
       if (--left) return;
       btn.disabled = false; btn.textContent = label;
-      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
+      // what landed saves itself (1a) — nothing is left for the owner to press
+      if (okN && S.adminBlogEdit === d) blogAutosave("change");
+      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте" : "Готово — проверьте текст.");
       else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
       else toast("Не получилось — попробуйте ещё раз");
     };
@@ -15774,6 +16006,8 @@
     var paint = function () { if (S.adminBlogEdit === d) render(); };
     var step = function (s) { S.adminBlogGen = { d: d, step: s, err: "" }; paint(); };
     S.adminBlogErr = "";
+    // the progress line is in the assistant's fold (1a): open it, so the article is seen being written
+    if (!ADM_FOLD["blog-ai"]) admFoldToggle("blog-ai");
     step("ru");
     apiSend("/api/admin/ai/text/", "POST", {
       task: "post_full", lang: "RU",
@@ -15811,15 +16045,40 @@
       paint();
     });
   }
-  function saveBlogFields(draft) {
+  /* One write at a time per article, in the order they were asked for — the
+     autosave, the assistant's own save at the end of «Написать статью
+     целиком», «Опубликовать»: two PATCHes of the whole article in the air at
+     once are settled by whichever COMMITS last, not by whichever left last.
+     Each builds its body when its turn comes (blogSaveOnce), so the last one
+     carries the article as it is then. `opts.keepalive` — the page is going
+     away (admAutosaveFlush on pagehide): no queue to wait in, and a request
+     that outlives the page. */
+  function saveBlogFields(draft, opts) {
     var d = draft || S.adminBlogEdit;
     if (!d) return Promise.reject(new Error("no_draft"));
+    var run = function () { return blogSaveOnce(d, opts); };
+    if (opts && opts.keepalive) return run();
+    var p = (d._chain || Promise.resolve()).then(run, run);
+    d._chain = p.then(noop, noop);
+    return p;
+  }
+  /** The same write with `keepalive`, while it fits the 64 KB a browser allows one. */
+  function blogSendKeepalive(url, method, body, idemKey) {
+    var json = JSON.stringify(body || {});
+    if (json.length > 60000 || typeof fetch !== "function") return apiSend(url, method, body, idemKey);
+    var head = { "content-type": "application/json" };
+    if (idemKey) head["idempotency-key"] = idemKey;
+    return fetch(url, { method: method, headers: head, body: json, keepalive: true }).then(function (res) {
+      return res.json().then(function (b) { return { status: res.status, body: b || {} }; });
+    });
+  }
+  function blogSaveOnce(d, opts) {
     /* Deliberately no blogReadForm() here: this is also the assistant's save
        (admBlogWriteFull), which has just written a whole article into the
        draft and asked for a repaint — reading the screen back at that moment
        could hand it the text from before. The screen is read where the owner
-       acts on it instead: saveBlogDraft, publishBlogPost, the language bar
-       and the way out of the editor. */
+       acts on it instead: «Опубликовать», the language bar and every way out
+       of the editor. */
     var body = blogFieldsPayload(d);
     /* What LEFT, not what is in the draft when the answer lands. «Сохранено ✓»
        is blogDraftSig(d) === S.adminBlogSaved, and that yardstick used to be
@@ -15830,21 +16089,65 @@
        with the server over text the server had never seen, walked out of the
        editor without asking, and the word was gone. */
     var sent = blogDraftSnap(d);
-    var req = d.id
-      ? apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body))
-      : apiSend("/api/admin/blog/", "POST", body);
+    var send = opts && opts.keepalive ? blogSendKeepalive : apiSend;
+    var req, replay = false;
+    if (d.id) req = send("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body));
+    else {
+      /* ONE «Создать», ONE ARTICLE (src/app/api/admin/blog/route.ts). The key
+         is minted with the first attempt and every retry carries it — and
+         the SAME body, for as long as nobody knows what became of the first
+         (no answer, or «ещё идёт»): the server replays its answer only for
+         the fingerprint it stored. The article as it is now follows as an
+         edit the moment the id is known. A refusal releases the key on the
+         server (src/lib/idempotency.ts), so the corrected draft goes next,
+         under the same key. */
+      var c = d.create;
+      if (c && c.body) { body = c.body; sent = c.sent; replay = true; }
+      /* a COPY: the payload holds the draft's own title/body objects, which
+         the next keystroke changes — the stored first request must not */
+      else d.create = c = { key: (c && c.key) || idemNewKey(), body: JSON.parse(JSON.stringify(body)), sent: sent };
+      req = send("/api/admin/blog/", "POST", c.body, c.key);
+    }
     return req.then(function (r) {
-      if (!(r.status === 200 && r.body.ok && r.body.post)) throw blogHttpErr(r);
+      if (!(r.status === 200 && r.body.ok && r.body.post)) {
+        if (!d.id && d.create && r.status !== 409) d.create.body = null;
+        throw blogHttpErr(r);
+      }
       var p = r.body.post;
+      d.create = null;
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
       // …the one field the row decides and not the draft: an auto slug is the
       // server's word, so the yardstick carries the server's word too
       sent.slug = p.slug;
       if (d === S.adminBlogEdit) blogMarkSaved(d, blogDraftSig(sent));   // «не сохранено» is answered
-      S.adminBlog = null; // the list is stale now
-      blogForget();       // …and so is this tab's copy of the shop's blog
+      blogListUpsert(p);   // the list, in place — see there
+      blogForget();        // …and this tab's copy of the shop's blog is stale
+      // a create replayed from before: the article has moved on since, and that goes next
+      if (replay && blogDraftSig(d) !== blogDraftSig(sent)) return blogSaveOnce(d, opts);
       return p;
     });
+  }
+  /** A saved article into «Блог»'s list, in place. The list used to be
+      dropped and fetched again after every «Сохранить» — once a second is
+      not what that was for — and its pane repaints on its own
+      (blogPaintList), because a render() reaches the box being typed in. */
+  function blogListUpsert(p) {
+    if (!p || !p.id || !S.adminBlog) return;
+    var row = {}, i;
+    for (var k in p) if (Object.prototype.hasOwnProperty.call(p, k) && k !== "body") row[k] = p[k];
+    for (i = 0; i < S.adminBlog.length; i++) if (S.adminBlog[i].id === p.id) break;
+    if (i < S.adminBlog.length) S.adminBlog[i] = row; else S.adminBlog.unshift(row);
+    blogPaintList();
+  }
+  function blogListDrop(id) {
+    if (S.adminBlog) S.adminBlog = S.adminBlog.filter(function (x) { return x.id !== id; });
+  }
+  function blogPaintList() {
+    if (typeof document === "undefined") return;
+    var el = document.querySelector("[data-bloglist]");
+    if (!el) return;
+    el.innerHTML = admBlogListHTML();
+    translateTree(el);
   }
   // A post with nothing in its Russian title is not a post yet — the slug
   // would fall back to the bare word "post" and the list would show it as
@@ -15854,7 +16157,7 @@
   }
   // Errors show two ways on purpose: a toast (matches every other admin
   // action in this file) for the moment it happens, and S.adminBlogErr —
-  // inline, under the buttons — because a toast fades in a few seconds and
+  // inline, under the editor — because a toast fades in a few seconds and
   // "try again" is exactly when a retry needs the reason to still be on
   // screen. Both read the same sentence.
   var BLOG_SAVE_ERR = "Не получилось сохранить — попробуйте ещё раз.";
@@ -15891,78 +16194,140 @@
     S.adminBlogErr = msg;
     toast(msg);
   }
+  /** «Сохранить» is gone from the editor (it saves itself); the hook it had
+      now means «send what is owed, now» — for anything that still presses it. */
   function saveBlogDraft() {
-    if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    if (!S.adminBlogEdit) return;
     blogReadForm();   // before the title is judged, not after
-    if (blogTitleMissing(S.adminBlogEdit)) {
-      S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
-    }
-    S.adminBlogBusy = true; S.adminBlogErr = ""; render();
-    saveBlogFields().then(function (p) {
-      S.adminBlogBusy = false;
-      toast(p.status === "published" ? "Изменения сохранены ✓" : "Черновик сохранён ✓");
-      render();
-    }).catch(function (e) {
-      S.adminBlogBusy = false; blogFail(e); render();
-    });
+    if (blogTitleMissing(S.adminBlogEdit)) { S.adminBlogErr = BLOG_TITLE_NEEDED; blogPaintErr(); return; }
+    blogAutosave("change");
   }
-  /** `confirmed` — the second press, the one that answers blogPublishWarnText(). */
+  /** «Опубликовать» — the one dark button (README rule 2). The article goes
+      as it is on screen: the form is read, what is owed is saved first, then
+      the status moves. `confirmed` — the answer to the «пустой язык»
+      question. «Вернуть» on the toast takes it out of the shop again. */
   function publishBlogPost(confirmed) {
-    if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    var d = S.adminBlogEdit;
+    if (S.adminBlogBusy || !d) return;
     /* …and before blogPublishWarnText() reads the three bodies: an Estonian
        text typed but not yet in the draft would have been called «пусто». */
     blogReadForm();
-    if (blogTitleMissing(S.adminBlogEdit)) {
-      S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
+    if (blogTitleMissing(d)) {
+      S.adminBlogErr = BLOG_TITLE_NEEDED; render(); refocus('[data-blogf="title"]'); return;
     }
-    var warn = confirmed ? "" : blogPublishWarnText(S.adminBlogEdit);
-    if (warn) { S.adminBlogConfirmPublish = warn; S.adminBlogErr = ""; render(); return; }
-    S.adminBlogConfirmPublish = "";
+    var warn = confirmed ? "" : blogPublishWarnText(d);
+    if (warn) {
+      pendingAction = { type: "blog_publish", overlay: true, title: "Опубликовать без перевода?", detail: warn, ok: "Опубликовать всё равно" };
+      S.adminBlogErr = ""; render(); refocus("[data-admapply]"); return;
+    }
     S.adminBlogBusy = true; S.adminBlogErr = ""; render();
-    saveBlogFields().then(function (p) {
+    saveBlogFields(d).then(function (p) {
       return apiSend("/api/admin/blog/", "PATCH", { id: p.id, publish: true });
     }).then(function (r) {
       S.adminBlogBusy = false;
-      if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
-        S.adminBlogEdit.status = r.body.post.status; S.adminBlogEdit.publishedAt = r.body.post.publishedAt;
-        toast("Статья опубликована ✓");
+      if (r.status === 200 && r.body.ok && r.body.post) {
+        d.status = r.body.post.status; d.publishedAt = r.body.post.publishedAt;
+        blogListUpsert(r.body.post);
+        toast("Статья опубликована ✓", { prev: true, undo: function () { blogSetPublished(d, false, false); } });
       } else blogFail(blogHttpErr(r));
-      S.adminBlog = null; blogForget();
+      blogForget();
       render();
     }).catch(function (e) {
       S.adminBlogBusy = false; blogFail(e); render();
     });
   }
+  /** «Снять с публикации» (in «⋯»), and «Вернуть» on either toast. The date
+      it was first published is kept (publishPost, src/lib/blog.ts), so out
+      and back in again is the same article, not a new one. `undoable` — the
+      owner's own press, whose toast offers the way back; a «Вернуть» does
+      not offer another. */
+  function blogSetPublished(d, on, undoable) {
+    if (!d || !d.id) return;
+    S.adminBlogErr = "";
+    apiSend("/api/admin/blog/", "PATCH", { id: d.id, publish: on }).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.post) {
+        d.status = r.body.post.status; d.publishedAt = r.body.post.publishedAt;
+        blogListUpsert(r.body.post);
+        toast(on ? "Статья опубликована ✓" : "Статья снята с публикации ✓",
+          undoable ? { prev: true, undo: function () { blogSetPublished(d, !on, false); } } : null);
+      } else blogFail(blogHttpErr(r));
+      blogForget();
+      render();
+    }).catch(function (e) { blogFail(e); render(); });
+  }
   function unpublishBlogPost() {
     var d = S.adminBlogEdit;
-    if (!d || !d.id || S.adminBlogBusy) return;
-    S.adminBlogBusy = true; S.adminBlogErr = ""; render();
-    apiSend("/api/admin/blog/", "PATCH", { id: d.id, publish: false }).then(function (r) {
-      S.adminBlogBusy = false;
-      if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
-        S.adminBlogEdit.status = r.body.post.status;
-        toast("Статья снята с публикации ✓");
-      } else blogFail(blogHttpErr(r));
-      S.adminBlog = null; blogForget();
-      render();
-    }).catch(function () {
-      S.adminBlogBusy = false; blogFail(); render();
-    });
+    S.adminBlogMenu = false;
+    if (!d || !d.id || S.adminBlogBusy) { render(); return; }
+    blogSetPublished(d, false, true);
   }
-  function deleteBlogPost() {
-    var d = S.adminBlogEdit;
-    if (!d || !d.id || S.adminBlogBusy) return;
-    S.adminBlogBusy = true; render();
-    apiJson("/api/admin/blog/?id=" + encodeURIComponent(d.id), { method: "DELETE" }).then(function (r) {
-      S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
-      if (r.status === 200 && r.body.ok) {
-        toast("Статья удалена ✓");
-        S.adminBlog = null; S.adminBlogEdit = null; blogForget();
-      } else blogFail(blogHttpErr(r));
+  /* «Удалить статью» (README rule 4; Dim 25.09.2026, q8): asked on the
+     confirm sheet, then HELD. The article leaves the list and the editor at
+     once and «Вернуть» is on the toast; the DELETE goes when the toast's time
+     is up — ADM_UNDO_MS, the whole of the offer, so a «Вернуть» that is on
+     screen can never come too late. A page closing with one held sends it
+     then: a delete that was confirmed goes. */
+  var BLOG_HELD = {};     // post id → true while its delete waits
+  var BLOG_HOLDS = [];
+  function blogDeleteHold(d) {
+    if (!d || !d.id || BLOG_HELD[d.id]) return;
+    var saved = S.adminBlogSaved, lang = S.adminBlogLang;
+    d.gone = true;
+    BLOG_HELD[d.id] = true;
+    if (S.adminBlogEdit === d) {
+      S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
+      S.adminBlogProdOpen = false; BLOGSEL = null; BLOGCARET = null;
+    }
+    S.adminBlogMenu = false;
+    var h = { done: false, timer: 0 };
+    var drop = function () { BLOG_HOLDS = BLOG_HOLDS.filter(function (x) { return x !== h; }); };
+    h.fire = function (keepalive) {
+      if (h.done) return;
+      h.done = true; clearTimeout(h.timer); drop();
+      deleteBlogPost(d, keepalive);
+    };
+    h.timer = setTimeout(function () { h.fire(false); }, ADM_UNDO_MS);
+    BLOG_HOLDS.push(h);
+    render();
+    toast("Статья удалена", { prev: true, undo: function () {
+      if (h.done) return;
+      h.done = true; clearTimeout(h.timer); drop();
+      delete BLOG_HELD[d.id]; d.gone = false;
+      // back where it was — and open again, when nothing else has been opened since
+      if (S.adminTab === "blog" && !S.adminBlogEdit && !S.adminBlogEditBusy) {
+        S.adminBlogEdit = d; S.adminBlogSaved = saved; S.adminBlogLang = lang || "RU";
+      }
+      toast("Статья на месте");
+      render();
+    } });
+  }
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("pagehide", function () { BLOG_HOLDS.slice().forEach(function (h) { h.fire(true); }); });
+  }
+  /** The DELETE itself, after the hold — behind any save of the same article still in the air. */
+  function deleteBlogPost(d, keepalive) {
+    var url = "/api/admin/blog/?id=" + encodeURIComponent(d.id);
+    var go = function () {
+      return keepalive && typeof fetch === "function"
+        ? fetch(url, { method: "DELETE", keepalive: true }).then(function (res) {
+            return res.json().then(function (b) { return { status: res.status, body: b || {} }; });
+          })
+        : apiJson(url, { method: "DELETE" });
+    };
+    (keepalive ? go() : (d._chain || Promise.resolve()).then(go, go)).then(function (r) {
+      delete BLOG_HELD[d.id];
+      if (r.status === 200 && r.body.ok) { blogListDrop(d.id); blogForget(); }
+      else {
+        var why = blogHttpErr(r);
+        if (why.message === "unauthorized") blogFail(why);
+        else toast("Статья не удалилась — она снова в списке.");
+        loadAdminBlog(true);
+      }
       render();
     }).catch(function () {
-      S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
-      blogFail(); render();
+      delete BLOG_HELD[d.id];
+      toast("Статья не удалилась — она снова в списке.");
+      loadAdminBlog(true); render();
     });
   }
 
@@ -19069,8 +19434,16 @@
         '<div class="adm-gate">' + admGateMarkHTML(title) + '<div class="adm-skel"><i></i><i></i><i></i></div>' +
         '<p class="adm-hint">Проверяем…</p></div></div></div></div></div>';
   }
+  /* 1a (screen 19): the card on the paper, and on a desktop a dark panel
+     beside it with what the panel is for. Restyled only — README § 5 keeps
+     today's sign-in: the owner's password, «Войти», the same inline errors
+     (admLogin), not the design's e-mail code. The panel's words are the
+     design's with «салон» for its «касса», which the Glossary does not allow
+     (docs/GLOSSARY.md). The 30-day line is true (SESSION_DAYS in
+     src/lib/auth.ts); a phone says «телефон», anything else «устройство»,
+     and admin.css shows the one that fits. */
   function admLoginScreen(title) {
-    return '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+    return '<div class="adm2 adm2--gate"><div class="adm-login"><div class="adm-login__main">' +
         '<div class="adm-gate">' + admGateMarkHTML(title) +
           '<h1 class="adm-h1">Вход в админку</h1>' +
           '<p class="adm-hint">Пароль владельца. Магазин работает и без входа — здесь только управление.</p>' +
@@ -19079,8 +19452,13 @@
           (SRV.err ? '<div class="err adm-err" role="alert">' + esc(SRV.err) + "</div>" : "") +
           '<button class="adm-btn" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
             (SRV.busy ? "Проверяем…" : "Войти") + "</button>" +
+          '<p class="adm-gate__keep"><span class="adm-gate__keep--phone">На этом телефоне вход запомнится на 30 дней.</span>' +
+            '<span class="adm-gate__keep--desk">На этом устройстве вход запомнится на 30 дней.</span></p>' +
           admGateFootHTML() +
-        "</div></div></div></div></div>";
+        "</div></div>" +
+        '<div class="adm-login__brand" aria-hidden="true"><div class="adm-login__claim">Заказы, склад и салон — в одном месте.</div>' +
+          '<div class="adm-login__addr">Rempire · Mardi 1, Tallinn</div></div>' +
+      "</div></div>";
   }
 
   /* ---------- analytics agent: «Аналитика» ---------------------------------
@@ -23729,222 +24107,286 @@
     });
   }
 
-  /* ---------- Блог: список и редактор -------------------------------------
-     The block editor itself is untouched — the same contenteditable box, the
-     same toolbar commands, the same «Товар»/«Картинка» sheets and the same
-     save/publish/delete calls straight to /api/admin/blog/. What phase 3 does
-     is the layout the spec asks for: the article on the left under an Oswald
-     title and a cover zone, and two small cards on the right — «Публикация»
-     and «Помощник». */
+  /* ---------- Блог: список и редактор (1a) --------------------------------
+     design_handoff_admin_ux README § 5 «Блог», screen 16. One screen: the
+     articles on the left and the one open article beside them wherever the
+     column is wide enough for both (the container query in admin.css), one
+     or the other where it is not — a phone, or a desktop with the assistant
+     open. The editor is the block editor it always was — the same box, the
+     same toolbar with «Отменить», the same «Ссылка»/«Картинка»/«Товар»
+     sheets and the same picture bar in the text. What changed is around it:
+       · it saves itself (README § 2; Dim 25.09.2026, q5) — a draft and a
+         published article alike, a second after the typing stops, the whole
+         article each time (a blog PATCH replaces every field it is given),
+         and the one «Создать» carries an Idempotency-Key, so a retry cannot
+         leave a twin draft (saveBlogFields);
+       · a published article's address changes only after a question, and
+         the assistant asks before it writes over a published text
+         (blogAiAsks, the slug's own focusout);
+       · «Опубликовать» is the one dark button — «Открыть в магазине ↗» once
+         the article is out; «Снять с публикации» and «Удалить статью» are in
+         «⋯»; a delete is asked first and then held for as long as «Вернуть»
+         is on the toast (q8);
+       · the cover's three frames, its caption and «Удалить обложку» are one
+         fold under the cover (Dim 18–23.09.2026); the assistant and the
+         address, tags and Google lines are folds of their own. */
+  /** The one refusal the panel makes itself, before anything is sent. */
+  var BLOG_TITLE_NEEDED = "Заполните заголовок хотя бы на русском.";
+  /* The sentences of two of the editor's questions, whole keys of their own:
+     each is a line of an assembled detail (admDetailHTML splits on «\n»). */
+  var BLOG_DEL_WARN = "Статья исчезнет из блога на всех трёх языках.";
+  var BLOG_SLUG_WARN = "Старые ссылки на статью перестанут открываться.";
   function admBlogScreen() {
-    if (S.adminBlogEdit) return admBlogEditorScreen(S.adminBlogEdit);
-    if (S.adminBlogEditBusy) {
-      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Блог", "") +
-        '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    var d = S.adminBlogEdit, open = !!d || !!S.adminBlogEditBusy;
+    return '<div class="adm-screen adm-screen--tight adm-blog2' + (open ? " adm-blog2--ed" : "") + '">' +
+      admBlogHeadHTML(d) +
+      '<div class="adm-blog2__cols">' +
+        '<div class="adm-blog2__list" data-bloglist>' + admBlogListHTML() + "</div>" +
+        '<div class="adm-blog2__ed">' + (d
+          ? admBlogEditorScreen(d)
+          : S.adminBlogEditBusy
+            ? '<div class="adm-skel"><i></i><i></i><i></i></div>'
+            /* the right pane before an article is picked — two panes only; a
+               single column shows the list instead (admin.css) */
+            : S.adminBlog && S.adminBlog.length ? '<div class="adm-blog2__none">Выберите статью слева</div>' : "") +
+        "</div>" +
+      "</div></div>";
+  }
+  /** Where a published article is read — in the panel's own language, the
+      way the owner would open it himself. */
+  function blogShopPath(slug) {
+    return "/shop2" + (SEG_OF_LANG[S.lang] || "") + "/blog/" + encodeURIComponent(slug) + "/";
+  }
+  /** «Блог», and the header's right side: «+ Статья» and the ONE dark button
+      (README rule 2) — «+ Статья» itself while no article is open,
+      «Опубликовать» on a draft, «Открыть в магазине ↗» on a published one —
+      with «⋯» beside it. The dark one stands in `.adm-pin`, which a phone
+      pins above the tab bar (admPinnedHTML's element, admin.css). */
+  function admBlogHeadHTML(d) {
+    var right;
+    if (!d) {
+      right = '<div class="adm-pin"><button class="adm-btn adm-pin__btn" type="button" data-admblognew>+ Статья</button></div>';
+    } else {
+      var busy = !!S.adminBlogBusy;
+      var main = d.id && d.status === "published" && d.slug
+        ? '<a class="adm-btn adm-pin__btn" href="' + esc(blogShopPath(d.slug)) + '" target="_blank" rel="noopener" data-admblogview>Открыть в магазине ↗</a>'
+        : '<button class="adm-btn adm-pin__btn" type="button" data-admblogpublish' + (busy ? " disabled" : "") + ">" +
+            (busy ? "Сохраняем…" : "Опубликовать") + "</button>";
+      right = '<div class="adm-blog2__acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--head adm-blog2__new" type="button" data-admblognew>+ Статья</button>' +
+        '<div class="adm-pin adm-pin--blog">' + admBlogMenuHTML(d) + main + "</div></div>";
     }
+    return admHead("", "Блог", right);
+  }
+  /** «⋯»: the two rare ones — «Снять с публикации» on a published article
+      and «Удалить статью» on one the server has. A list under the button on
+      a desktop, over it on a phone, where the button is pinned at the
+      bottom. A new article has neither: nothing to unpublish, nothing on the
+      server to delete. */
+  function admBlogMenuHTML(d) {
+    var items = [];
+    if (d.id && d.status === "published") {
+      items.push('<button class="adm-bmenu__i" type="button" role="menuitem" data-admblogunpublish>Снять с публикации</button>');
+    }
+    if (d.id) items.push('<button class="adm-bmenu__i adm-bmenu__i--warn" type="button" role="menuitem" data-admblogdel>Удалить статью</button>');
+    if (!items.length) return "";
+    var open = !!S.adminBlogMenu;
+    return '<div class="adm-bmenu' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-btn adm-btn--ghost adm-bmenu__btn" type="button" data-admblogmenu aria-haspopup="menu" aria-expanded="' + open +
+        '" aria-label="Ещё действия" title="Ещё действия"><span aria-hidden="true">⋯</span></button>' +
+      (open ? '<div class="adm-bmenu__list" role="menu" aria-label="Ещё действия">' + items.join("") + "</div>" : "") +
+      "</div>";
+  }
+  /* The list did not load — say so instead of showing the empty blog's
+     invitation over articles that are still there (loadAdminBlog above).
+     Same line and same «Повторить» «Обзор» and «Заказы» use. An article
+     whose delete is held (blogDeleteHold) is already gone from it. */
+  function admBlogListHTML() {
     var posts = S.adminBlog;
-    var head = '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Блог", '<button class="adm-btn adm-btn--head" data-admblognew>+ Статья</button>');
-    if (!posts) return head + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
-    /* The list did not load — say so instead of showing the empty blog's
-       invitation over articles that are still there (loadAdminBlog above).
-       Same line and same «Повторить» «Обзор» and «Заказы» use. */
+    if (!posts) return '<div class="adm-skel"><i></i><i></i><i></i></div>';
     var listErr = S.adminBlogListErr
       ? '<div class="adm-error"><span>Статьи не загрузились — попробуйте ещё раз.</span>' +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="blog">Повторить</button></div>'
       : "";
-    if (!posts.length) {
-      return head + (listErr || '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div>') + "</div>";
-    }
-    return head + listErr + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
+    var shown = posts.filter(function (p) { return !BLOG_HELD[p.id]; });
+    if (!shown.length) return listErr || '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div>';
+    return listErr + '<div class="adm-blist">' + shown.map(admBlogRowHTML).join("") + "</div>";
   }
   /* The list has no bodies in it (GET /api/admin/blog/ leaves them out), so
-     what a row can honestly say about the three languages is whether each
-     has a title. Worth saying: an empty Estonian version is not a blank
-     page, it is the Russian article shown to an Estonian reader
-     (pickLang(), src/lib/blog.ts) — which is a thing to decide, not a thing
-     to discover. */
-  function admBlogCoverageHTML(p) {
+     what a row can honestly say about the three languages is which of them
+     has a title — «RU · ET · EN», the design's line, in place of the old
+     «только по-русски» badge that sat where «Черновик» sits and was read as
+     one. An empty Estonian version is not a blank page: it is the Russian
+     article shown to an Estonian reader (pickLang(), src/lib/blog.ts). */
+  function admBlogRowLangs(p) {
     var t = p.title || {};
-    var has = LANGS.filter(function (l) { return String(t[l[0]] || "").trim(); }).length;
-    if (has >= LANGS.length) return "";
-    return '<span class="adm-badge adm-badge--sm adm-badge--quiet">' +
-      (has <= 1 && String(t.RU || "").trim() ? "только по-русски" : "не на всех языках") + "</span>";
+    return LANGS.filter(function (l) { return String(t[l[0]] || "").trim(); }).map(function (l) { return l[0]; }).join(" · ");
   }
   function admBlogRowHTML(p) {
     // the panel's own language first — an Estonian panel lists the Estonian titles
-    var title = p.title[S.lang] || p.title.RU || p.title.ET || p.title.EN || p.slug;
-    var ex = p.excerpt && (p.excerpt[S.lang] || p.excerpt.RU || p.excerpt.ET || p.excerpt.EN) || "";
-    var date = p.publishedAt ? blogDate(p.publishedAt) : "черновик";
-    return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admblogedit="' + esc(p.id) + '">' +
-      '<span class="adm-thumb" style="width:72px;height:48px' +
-        (p.coverUrl ? ";background-image:url('" + esc(p.coverUrl) + "');background-size:cover;background-position:center" : "") +
-        '"></span>' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(title) + "</span>" +
-        '<span class="adm-row__sub adm-row__sub--one">' + esc(date) + (ex ? " · " + esc(ex) : "") + "</span></span>" +
-      // the chips have the third line on every row — never beside a short title
-      '<span class="adm-row__line">' + admBlogCoverageHTML(p) +
-      '<span class="adm-badge adm-badge--sm ' + (p.status === "published" ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
-        (p.status === "published" ? "Опубликована" : "Черновик") + "</span></span></button>";
+    var t = p.title || {};
+    var title = t[S.lang] || t.RU || t.ET || t.EN || p.slug;
+    var date = blogDate(p.publishedAt || p.updatedAt || "");
+    var langs = admBlogRowLangs(p);
+    var on = !!(S.adminBlogEdit && S.adminBlogEdit.id && S.adminBlogEdit.id === p.id);
+    var pub = p.status === "published";
+    return '<button class="adm-brow' + (on ? " is-on" : "") + '" type="button" data-admblogedit="' + esc(p.id) + '"' +
+        (on ? ' aria-current="true"' : "") + ">" +
+      '<span class="adm-brow__img"' + (p.coverUrl ? " style=\"background-image:url('" + esc(p.coverUrl) + "')\"" : "") + "></span>" +
+      '<span class="adm-brow__body"><span class="adm-brow__t">' + esc(title) + "</span>" +
+        '<span class="adm-brow__m">' + (date ? "<span>" + date + "</span>" : "") + (date && langs ? " · " : "") +
+          (langs ? "<span>" + langs + "</span>" : "") + "</span>" +
+        admTagHTML(pub ? "ok" : "quiet", pub ? "Опубликована" : "Черновик") +
+      "</span></button>";
   }
   var ADM_BLOG_TOOLS = [
     ["h2", "Заголовок"], ["bold", "B"], ["italic", "I"], ["ul", "• Список"],
     ["link", "Ссылка"], ["image", "Картинка"], ["product", "Товар"]
   ];
   function admBlogEditorScreen(d) {
-    var L = S.adminBlogLang || "RU";
-    var busy = S.adminBlogBusy;
+    var L = S.adminBlogLang || "RU", ru = L === "RU";
     var gen = S.adminBlogGen && S.adminBlogGen.d === d ? S.adminBlogGen : null, genBusy = !!(gen && !gen.err);
     var placedLine = S.adminBlogPlaced && S.adminBlogPlaced.d === d ? "Добавлены товары: " + S.adminBlogPlaced.names.join(", ") : "";
     blogKeepCaret();   // this render is about to replace the box being typed in
     blogMediaAsk();    // «+ Обложка» and «Картинка» are on this screen
+    var as = blogAsKey(d);
     var picked = productsById(d.products);
     var q = (S.adminBlogQ || "").trim().toLowerCase();
     var matches = q ? CATALOGUE.filter(function (p) {
       return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
     }).slice(0, 8) : [];
-
-    var left =
-      /* The strip that used to be three bare words. It now names itself,
-         says what each of the three versions holds and — under it — that
-         these are three texts and not the panel's own language. See
-         admLangBarHTML() and docs/audit/2026-09-07-blog-language.md. */
-      admLangBarHTML("data-admbloglang", LANGS, L, "Язык статьи", function (code) {
-        return blogLangWords(d, code);
-      }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU) +
-      admDirtyNoteHTML("data-blogdirty", blogDirty()) +
-      '<input class="adm-title-in" data-blogf="title" data-blogl="' + L + '" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
-      admBlogCoverHTML(d) +
-      '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
-        return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
-      }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
-      '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
-      /* `placeholder` on a div is not a real one — the CSS prints it with
-         content: attr(placeholder). Written that way so translateTree()
-         rewrites it like any other placeholder in this panel. */
-      /* Not `.acc__rich`: the shop's rich-text rules set headings in uppercase
-         letter-spaced Oswald, which is the one thing the redesign bans
-         everywhere (README). `.adm-canvas` carries the same shapes in the
-         panel's own type instead. */
-      /* Every per-language field says which of the three it was drawn for
-         (data-blogl, and data-blogbody's own value for the box): blogSync()
-         and blogReadForm() file what they read under the name the markup
-         carries, never under whatever S has moved on to since. */
-      '<div class="adm-canvas" contenteditable="true" data-blogbody="' + L + '" role="textbox" aria-multiline="true" ' +
-        'aria-label="Текст статьи" placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
-        (d.body[L] || "") + "</div>" +
-      '<label class="adm-field">Анонс — две строки в списке и в поиске' +
-        '<textarea class="adm-input" rows="2" maxlength="500" data-blogf="excerpt" data-blogl="' + L + '">' + esc(d.excerpt[L]) + "</textarea></label>" +
-      '<label class="adm-field">Подпись к обложке' +
-        '<input class="adm-input" data-blogf="coverAlt" data-blogl="' + L + '" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
-      '<label class="adm-field">Теги — через запятую' +
-        '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
-      '<div><div class="adm-sec__t">Товары в статье</div>' +
-        (picked.length ? '<div class="adm-acts" style="margin:8px 0">' + picked.map(function (p) {
-          return '<span class="adm-badge">' + esc(p.brand + " " + p.name) +
-            ' <button class="adm-link" data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
-        }).join("") + "</div>" : "") +
-        '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию">' +
-        '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div></div>" +
-      /* `open` follows S.adminBlogMore (the toggle listener next to the input
-         handler): the language pill re-renders this whole screen, and the
-         block used to fold shut exactly when the owner had opened it to
-         compare the Google lines of the three languages. */
-      '<details class="adm-fold" data-blogseo' + (S.adminBlogMore ? " open" : "") + '>' +
-        '<summary class="adm-link" data-blogmore>Адрес, автор и текст для Google</summary>' +
-        '<div style="padding-top:12px">' +
-          /* The pair below is the language the pill is on — so are the two
-             buttons: «Заполнить автоматически» writes that language from the
-             article's own text, «все три языка» asks thrice. The same pair
-             the goods editor's Google tab has; see admBlogSeoFill(). */
-          '<div class="adm-acts" style="margin-bottom:10px">' +
-            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogseogen>Заполнить автоматически</button>' +
-            '<button class="adm-link adm-link--muted" data-admblogseoall>все три языка</button>' +
-          "</div>" +
-          '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
-            (d.seoTitle[L] || "").length + "/70</span>" +
-            '<input class="adm-input" data-blogf="seoTitle" data-blogl="' + L + '" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
-          '<label class="adm-field" style="margin-top:10px">Описание для Google · <span data-blogcount="seoDesc">' +
-            (d.seoDesc[L] || "").length + "/170</span>" +
-            '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc" data-blogl="' + L + '">' + esc(d.seoDesc[L]) + "</textarea></label>" +
-          '<p class="adm-hint" style="margin:8px 0 0">Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.</p>' +
-          '<label class="adm-field" style="margin-top:10px">Адрес страницы' +
-            '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
-            esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '"></label>' +
-          '<label class="adm-field" style="margin-top:10px">Автор' +
-            '<input class="adm-input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
-        "</div></details>" +
-      (S.adminBlogErr ? '<div class="adm-err" role="alert">' + esc(S.adminBlogErr) + "</div>" : "");
-
-    var side =
-      '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Публикация</div>' +
-        '<div class="adm-hint">' + (d.status === "published"
-          ? "Опубликована. Изменения появятся в магазине сразу после сохранения."
-          : "Черновик. В магазине его пока не видно.") + "</div>" +
-        /* whether the screen is in step with the server — repainted by
-           blogPaintState() on every keystroke, so it never lags the text */
-        '<p class="adm-hint" data-blogpubstate style="margin:0">' + blogPubStateHTML(d, busy) + "</p>" +
-        (d.status === "published"
-          ? '<button class="adm-btn' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
-            '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
-          /* One language still empty: the same inline question «Удалить
-             статью» asks, in the same card, replacing the button that asked
-             it — the post is published by the next press, never blocked
-             (blogPublishWarnText()). «Сохранить черновик» stays where it
-             is: the other answer to «эстонского текста ещё нет» is to go on
-             writing it. */
-          : (S.adminBlogConfirmPublish
-            ? '<div class="adm-hint adm-hint--warn">' + S.adminBlogConfirmPublish + "</div>" +
-              '<button class="adm-btn" data-admblogpublishyes' + (busy ? " disabled" : "") + ">Опубликовать всё равно</button>" +
-              '<button class="adm-link adm-link--muted" data-admblogpublishno>Отмена</button>'
-            : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
-            '<button class="adm-btn adm-btn--ghost' + admDirtyCls(blogDirty()) + '" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
-        (d.id
-          ? (S.adminBlogConfirmDelete
-            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Она исчезнет из списка и из ' +
-              "магазина, вернуть её будет нельзя.</div>" +
-              '<button class="adm-btn adm-btn--warn" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button>" +
-              '<button class="adm-link adm-link--muted" data-admblogdelno>Отмена</button>'
-            : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
-          : "") +
-      "</div>" +
-      /* One primary action: the whole article, every field, all three
-         languages (admBlogWriteFull). The topic follows the title until the
-         owner types his own; the progress line says which language is being
-         written. The older helpers — a plan of headings, a translation of
-         what is already there — stay behind «Только часть». */
-      '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
-        admBlogTopicFieldHTML(d, genBusy) +
-        '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
-        '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
-        // the products the article came with — the toast's sentence, standing (admBlogWriteFull)
-        (placedLine ? '<div class="adm-hint" data-admblogplaced>' + esc(placedLine) + "</div>" : "") +
-        '<div class="adm-hint">Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.</div>' +
-        '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
-          '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
-          '<button class="adm-link" data-admblogoutline' + (genBusy ? " disabled" : "") + ">Только план по теме</button>" +
-          '<button class="adm-link" data-admblogtranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
-        "</div></details></div>";
-
-    return '<div class="adm-screen adm-screen--tight">' +
-      admBackHTML("data-admblogback", "Блог") +
-      /* Switching a language tab keeps every unsaved word — all three live in
-         one draft — but leaving the editor drops the lot, and it used to do
-         it silently. Same inline confirmation «Удалить статью» uses. */
-      (S.adminBlogConfirmBack
+    /* «Перевести с русского» under the Estonian and the English tab (the
+       design's place for it): the Russian article into THIS language. The
+       older «Перевести на ET и EN» — every other language at once — stays in
+       the assistant's fold. */
+    var tr = ru ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admblogtranslate="' + L + '"' +
+      (genBusy ? " disabled" : "") + ">Перевести с русского</button>";
+    return (S.adminBlogConfirmBack
         ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogbackyes>Выйти без сохранения</button>' +
           '<button class="adm-link adm-link--muted" data-admblogbackno>Остаться</button></div>'
         : "") +
-      admColsHTML(left, side) + "</div>";
+      // one column only: two panes have the list for a way back, a phone has its top bar
+      '<div class="adm-blog2__back">' + admBackHTML("data-admblogback", "Блог") + "</div>" +
+      /* The strip names itself, says what each of the three versions holds
+         and — under it — that these are three texts and not the panel's own
+         language (admLangBarHTML, docs/audit/2026-09-07-blog-language.md). */
+      admLangBarHTML("data-admbloglang", LANGS, L, "Язык статьи", function (code) {
+        return blogLangWords(d, code);
+      }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU, { translate: tr }) +
+      '<input class="adm-title-in" data-blogf="title" data-blogl="' + L + '" maxlength="200" placeholder="' +
+        (ru ? "Заголовок статьи" : "Пусто — покажем русский") + '" value="' + esc(d.title[L]) + '" aria-describedby="blogtitlehint">' +
+      // «Заполните заголовок хотя бы на русском.» while the article cannot be saved (the autosave's own line)
+      '<span id="blogtitlehint">' + admAutosaveHintHTML(as) + "</span>" +
+      '<div class="adm-blog2__top">' + admBlogCoverHTML(d) +
+        '<label class="adm-field adm-blog2__lead">Анонс — две строки в списке и в поиске' +
+          '<textarea class="adm-input" rows="4" maxlength="500" data-blogf="excerpt" data-blogl="' + L + '" placeholder="' +
+            (ru ? "Две строки — видно в списке статей и в поиске" : "Пусто — покажем русский") + '">' + esc(d.excerpt[L]) + "</textarea></label>" +
+      "</div>" +
+      admBlogCoverFoldHTML(d, L) +
+      '<div class="adm-bedit">' +
+        '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
+          return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
+        }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
+        '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
+        /* `placeholder` on a div is not a real one — the CSS prints it with
+           content: attr(placeholder), written so translateTree() rewrites it
+           like any other placeholder. `.adm-canvas`, not the shop's
+           `.acc__rich`: the article in the panel's own type. The box says
+           which of the three texts it holds (data-blogbody's value), so
+           blogSync() and blogReadForm() file what they read under the name
+           the markup carries, never under whatever S has moved on to. */
+        '<div class="adm-canvas" contenteditable="true" data-blogbody="' + L + '" role="textbox" aria-multiline="true" ' +
+          'aria-label="Текст статьи" placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
+          (d.body[L] || "") + "</div>" +
+      "</div>" +
+      admBlogProductsHTML(d, picked, matches) +
+      admBlogAiFoldHTML(d, gen, genBusy, placedLine) +
+      admBlogMoreFoldHTML(d, L) +
+      // a refusal the owner can act on — «Статья слишком длинная…», the sign-in — painted in place (blogPaintState)
+      '<div class="adm-err" role="alert" data-blogerr' + (S.adminBlogErr ? "" : " hidden") + ">" + esc(S.adminBlogErr || "") + "</div>" +
+      '<p class="adm-blog2__st" data-blogpubstate>' + blogPubStateHTML(d) + "</p>";
   }
   function admBlogPicksHTML(matches) {
     if (!matches.length) return "";
-    return '<div class="adm-list">' + matches.map(function (p) {
-      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "") + "</span>" +
+    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
     }).join("") + "</div>";
+  }
+  /** «Товары в статье» — the cards under the article: a row each with ×, and
+      «+ Товар» that opens the search. Twelve is what the server keeps
+      (src/lib/blog.ts), so the thirteenth is not offered rather than dropped
+      in silence. */
+  var BLOG_PRODUCTS_MAX = 12;
+  function admBlogProductsHTML(d, picked, matches) {
+    var full = d.products.length >= BLOG_PRODUCTS_MAX;
+    return '<div class="adm-bprods">' +
+      '<div class="adm-bprods__h">Товары в статье — покажем карточками внизу</div>' +
+      picked.map(function (p) {
+        return '<div class="adm-bprod"><span class="adm-bprod__n">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+          '<button class="adm-bprod__x" type="button" data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">×</button></div>';
+      }).join("") +
+      (full
+        ? '<p class="adm-hint">В статье уже 12 товаров — больше не поместится.</p>'
+        : S.adminBlogProdOpen || S.adminBlogQ
+          ? '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" aria-label="Найти товар по названию">' +
+            '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div>"
+          : '<div><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admblogprodadd>+ Товар</button></div>') +
+      "</div>";
+  }
+  /** «✨ Помощник напишет статью»: the topic and «Написать статью целиком» —
+      the whole article, every field, all three languages (admBlogWriteFull);
+      under them the two older helpers, a plan of headings and a translation
+      of what is already there. Open by itself while an article is being
+      written, so the progress line is in sight (admBlogWriteFull). */
+  function admBlogAiFoldHTML(d, gen, genBusy, placedLine) {
+    var body = admBlogTopicFieldHTML(d, genBusy) +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admblogfull' + (genBusy ? " disabled" : "") + ">" +
+        (genBusy ? "…" : "Написать статью целиком") + "</button></div>" +
+      '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" +
+        esc(blogGenText(d)) + "</div>" +
+      // the products the article came with — the toast's sentence, standing (admBlogWriteFull)
+      (placedLine ? '<div class="adm-hint" data-admblogplaced>' + esc(placedLine) + "</div>" : "") +
+      '<p class="adm-hint">Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.</p>' +
+      '<div class="adm-acts adm-acts--links">' +
+        '<button class="adm-link" type="button" data-admblogoutline' + (genBusy ? " disabled" : "") + ">Только план по теме</button>" +
+        '<button class="adm-link" type="button" data-admblogtranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
+      "</div>";
+    return admFoldHTML("blog-ai", "✨ Помощник напишет статью", "по-русски, потом на ET и EN", body);
+  }
+  /** «Адрес, автор, теги и Google». The address of a published article is
+      not saved while it is typed: leaving the box asks first (the link
+      changes — see the [data-blogslug] focusout). `data-blogmore` is the hook
+      the old <details> summary carried. */
+  function admBlogMoreFoldHTML(d, L) {
+    var body =
+      '<label class="adm-field">Адрес статьи' +
+        '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
+          esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '" autocapitalize="off" spellcheck="false"></label>' +
+      '<label class="adm-field">Теги — через запятую' +
+        '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
+      '<label class="adm-field">Автор' +
+        '<input class="adm-input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
+      /* The pair below is the language the tab is on — so are the two
+         buttons: «Заполнить автоматически» writes that language from the
+         article's own text, «все три языка» asks thrice (admBlogSeoFill). */
+      admSecHeadHTML("Для Google", "blog-google",
+        "Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.") +
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admblogseogen>Заполнить автоматически</button>' +
+        '<button class="adm-link adm-link--muted" type="button" data-admblogseoall>все три языка</button>' +
+      "</div>" +
+      '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
+        (d.seoTitle[L] || "").length + "/70</span>" +
+        '<input class="adm-input" data-blogf="seoTitle" data-blogl="' + L + '" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
+      '<label class="adm-field">Описание для Google · <span data-blogcount="seoDesc">' +
+        (d.seoDesc[L] || "").length + "/170</span>" +
+        '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc" data-blogl="' + L + '">' + esc(d.seoDesc[L]) + "</textarea></label>";
+    return admFoldHTML("blog-more", "Адрес, автор, теги и Google",
+      d.slug ? esc(d.slug) : "адрес, автор, теги, текст для Google", body)
+      .replace('data-admfold="', 'data-blogmore data-admfold="');
   }
   /**
    * «Вот так её увидят» — the cover in the two frames the shop really puts it
@@ -24214,45 +24656,50 @@
       translateTree(note);
     }
   }
-  /** The cover. With one: the two frames above — the picture as the list and
-      as the top of the article will show it — its caption under them when
-      there is one, and the two actions on the panel's paper below,
-      «Заменить обложку» and a quiet «Удалить», with no hint, because the
-      picture is the explanation. Without one: the dashed drop zone with
-      «+ Обложка» and the hint on what fits. It used to be one grey field for
-      all of it — a thumbnail, two buttons and the hint — and could not be
-      read once a cover was set (Dim, 10.09.2026). The same
+  /** The cover tile beside «Анонс» (screen 16): the picture with «Заменить
+      обложку» over it, or — without one — the dashed zone with «+ Обложка»
+      and the hint on what fits. The same
       [data-galdrop="blog"]/[data-galup="blog"]/[data-galfile="blog"] upload
-      stands behind both, so a photo dropped onto the picture replaces it. */
+      stands behind both, so a photo dropped onto the picture replaces it.
+      Everything else that can be done to a cover is in the fold under this
+      row (admBlogCoverFoldHTML). */
   function admBlogCoverHTML(d) {
     var off = MEDIA.on === false;
     var hint = off ? "Загрузка фото пока не настроена — нужно подключить хранилище." : "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.";
     var file = '<input class="adm-file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">';
     var err = UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "";
     if (d.coverUrl) {
-      var words = admBlogCoverWords(d);
-      var alt = words.alt;
-      return '<div class="adm-cover" data-galdrop="blog">' +
-        admBlogSeeHTML(d.coverUrl, words.say, d.coverFocus) +
-        (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
-        '<div class="adm-cover__acts">' +
-          /* «размер»: the two ways one photograph can stand in a frame. It
-             sits with «Заменить» and «Удалить» because it is the third thing
-             that can be done to the cover, and above the frames would put a
-             control between the owner and the picture it is about. */
-          admSegHTML("data-coverfit", BLOG_COVER_FITS,
-            (blogCoverFocus(d.coverFocus) || {}).fill ? "fill" : "fit", "Как стоит обложка") +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
-            (UP.busy ? upBusyText() : "Заменить обложку") + "</button>" + file +
-          '<button class="adm-link adm-link--warn" data-admblogcoverdel aria-label="Удалить обложку">Удалить</button>' +
-          (off ? '<span class="adm-hint adm-cover__note">' + hint + "</span>" : "") + err +
-        "</div></div>";
+      // the storage note and a refused upload stand under the picture, never over it
+      return '<div class="adm-bcoverw"><div class="adm-bcover" data-galdrop="blog">' +
+        '<span class="adm-bcover__img" role="img" aria-label="' + esc(admBlogCoverWords(d).say) + '" style="background-image:url(\'' +
+          esc(d.coverUrl) + "')\"></span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row adm-bcover__swap" type="button" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
+          (UP.busy ? upBusyText() : "Заменить обложку") + "</button>" + file +
+        "</div>" +
+        (off ? '<span class="adm-hint adm-bcover__note">' + hint + "</span>" : "") + err +
+        "</div>";
     }
-    return '<div class="adm-drop" data-galdrop="blog">' +
-      '<span><button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
+    return '<div class="adm-drop adm-bcover adm-bcover--none" data-galdrop="blog">' +
+      '<span><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
         (UP.busy ? upBusyText() : "+ Обложка") + "</button>" + file +
       '<span class="adm-hint" style="display:block;margin-top:6px">' + hint + "</span></span>" + err +
       "</div>";
+  }
+  /** Under the cover, folded (Dim, 18–23.09.2026 — kept, as the owner asked
+      for them): the three frames the shop really puts the picture in, each
+      moved and zoomed on its own (admBlogSeeHTML); «Вся фотография /
+      Заполнить рамку»; the caption; and «Удалить обложку». `.adm-cover` is
+      the box admBlogRepaintSee() finds the frames in. */
+  function admBlogCoverFoldHTML(d, L) {
+    if (!d.coverUrl) return "";
+    var words = admBlogCoverWords(d);
+    var fill = !!(blogCoverFocus(d.coverFocus) || {}).fill;
+    var body = '<div class="adm-cover">' + admBlogSeeHTML(d.coverUrl, words.say, d.coverFocus) + "</div>" +
+      '<div class="adm-cover__acts">' + admSegHTML("data-coverfit", BLOG_COVER_FITS, fill ? "fill" : "fit", "Как стоит обложка") + "</div>" +
+      '<label class="adm-field">Подпись к обложке' +
+        '<input class="adm-input" data-blogf="coverAlt" data-blogl="' + L + '" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
+      '<div class="adm-danger"><button class="adm-link adm-link--warn" type="button" data-admblogcoverdel>Удалить обложку</button></div>';
+    return admFoldHTML("blog-cover", "Как стоит обложка", fill ? "Заполнить рамку" : "Вся фотография", body);
   }
 
   /* ---------- Маркетинг → «Рассылка» ---------------------------------------
@@ -25967,14 +26414,22 @@
      — stay under them, because a redesign that quietly drops numbers is a
      redesign that loses the owner data. */
   var ADM_WEEKDAYS = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-  /** A KPI cell. `what` is the one plain sentence that says what the number
-      is — four words the owner never has to guess at, printed under the
-      figure instead of hidden in a tooltip (Dim, 07.09.2026). */
-  function admKpiHTML(label, value, deltaPct, what) {
+  /** A KPI cell (1a, screen 17): the name, the figure, the comparison in
+      plain words — «+12 % к прошлой неделе» — and the one sentence that says
+      what the number is, printed under the figure instead of hidden in a
+      tooltip (Dim, 07.09.2026). The change and its words are two text nodes,
+      so the words are one dictionary key whatever the number. */
+  var STATS_CMP = {
+    // «today» is compared with as many hours straight before it (rangeBounds, src/lib/analytics.ts) — not with the same hours yesterday
+    today: "к стольким же часам до полуночи",
+    "7d": "к прошлой неделе", "30d": "к прошлому месяцу", "90d": "к прошлым 90 дням"
+  };
+  function admKpiHTML(label, value, deltaPct, what, range) {
     var cls = deltaPct == null ? "" : deltaPct > 0 ? " adm-kpi__d--up" : deltaPct < 0 ? " adm-kpi__d--down" : "";
     var line = deltaPct == null
-      ? "нет данных за прошлый период"
-      : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
+      ? "<span>нет данных для сравнения</span>"
+      : "<span>" + (deltaPct > 0 ? "+" : deltaPct < 0 ? "−" : "") + num1(Math.abs(deltaPct)) + " %</span> " +
+        "<span>" + (STATS_CMP[range] || STATS_CMP["7d"]) + "</span>";
     return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + "</div>" +
       '<div class="adm-kpi__v">' + value + "</div>" +
       '<div class="adm-kpi__d' + cls + '">' + line + "</div>" +
@@ -26036,13 +26491,68 @@
         '<span class="adm-pair__s">' + r[2] + "</span></span>" + val + "</div>";
     }).join("") + "</div>";
   }
+  /** Name, figure, and a bar under them as long as the row's share of the
+      largest — «Что покупают» and the path to a purchase (screen 17). `rows`
+      are [name, figure text, number]; `green` — the funnel's own colour. */
+  function admShareRowsHTML(rows, empty, green) {
+    if (!rows.length) return '<div class="adm-empty">' + empty + "</div>";
+    var top = rows.reduce(function (m, r) { return Math.max(m, Number(r[2]) || 0); }, 0) || 1;
+    return '<div class="adm-shares' + (green ? " adm-shares--green" : "") + '">' + rows.map(function (r) {
+      // a nought has no bar at all; anything else at least a sliver, so it is seen
+      var n = Number(r[2]) || 0, w = n > 0 ? Math.max(2, Math.min(100, Math.round((n / top) * 100))) : 0;
+      return '<div class="adm-share"><div class="adm-share__r"><span class="adm-share__n">' + esc(String(r[0])) + "</span>" +
+        '<span class="adm-share__v">' + r[1] + "</span></div>" +
+        '<div class="adm-share__bar" aria-hidden="true"><i style="width:' + w + '%"></i></div></div>';
+    }).join("") + "</div>";
+  }
+  /** «Путь до покупки»: each step's count, the bar measured against the
+      first step, and — the design's addition — what share of the step before
+      went on to this one. A step can be skipped (a product put in the basket
+      straight from the catalogue), so a share over 100 % is left unsaid
+      rather than printed as a puzzle; the count beside it stays. */
+  function admFunnelRowsHTML(f) {
+    return admShareRowsHTML(FUNNEL_STAGES.map(function (s, i) {
+      var v = Number(f[s[0]]) || 0, prev = i ? Number(f[FUNNEL_STAGES[i - 1][0]]) || 0 : 0;
+      var pct = i && prev && v <= prev ? Math.round((v / prev) * 100) : null;
+      return [s[1], (pct !== null ? '<span class="adm-share__p">' + pct + " %</span> " : "") + numGrp(v), v];
+    }), "Пока нет данных", true);
+  }
+  /** A share of a whole, «82 %», for the device and country folds (the design shows shares). */
+  function admPct(n, all) { return all ? Math.round((n / all) * 100) + " %" : "0 %"; }
+  /** One «Ещё цифры» fold: its sentence first — what the numbers are is not
+      optional (Dim, 07.09.2026) — then the list. The summary is the list's
+      first row, the way the design shows it. */
+  function admStatsFoldHTML(key, title, lead, rows, empty, plain) {
+    // the name its own text node, so a word the dictionary knows («Телефоны», a country) is translated
+    var first = rows.length ? "<span>" + esc(String(rows[0][0])) + "</span> · " + esc(String(rows[0][1])) : "<span>" + empty + "</span>";
+    return admFoldHTML("stats-" + key, title, first,
+      '<p class="adm-hint">' + lead + "</p>" + admPairsHTML(rows, empty, plain));
+  }
+  /* ---------- Аналитика (1a) ------------------------------------------------
+     design_handoff_admin_ux README § 5, screen 17: the period, the four
+     numbers each with its comparison in plain words, «Выручка по дням», what
+     sells, and the path to a purchase — and everything else the screen has
+     had all along under «Ещё цифры», one fold each (Dim, Q16: nothing is
+     dropped; the Google block is a fold of its own). «Что покупают» keeps
+     its own title, «на какую сумму заказали», because those figures are not
+     money (Dim, 17.09.2026). Every figure is the server's (GET
+     /api/admin/analytics/) — the design's numbers were a mock-up's, and none
+     of them is here. */
   function admStatsScreen() {
     var range = statsRange();
-    var head = '<div class="adm-screen adm-screen--tight">' + admHead("", "Аналитика", "") +
-      '<div class="adm-chips" role="group" aria-label="Период">' + STATS_RANGES.map(function (r) {
-        return '<button class="adm-chip" data-statsrange="' + r[0] + '" aria-current="' + (r[0] === range) + '">' +
-          r[1] + "</button>";
-      }).join("") + "</div>";
+    var head = '<div class="adm-screen adm-screen--tight adm-stats">' + admHead("", "Аналитика", "") +
+      '<div class="adm-stats__per">' +
+        '<div class="adm-seg adm-seg--per" role="group" aria-label="Период">' + STATS_RANGES.map(function (r) {
+          return '<button type="button" data-statsrange="' + r[0] + '" aria-current="' + (r[0] === range) + '">' + r[1] + "</button>";
+        }).join("") + "</div>" +
+        admHelpBtnHTML("stats") +
+      "</div>" +
+      /* Two things about this screen are impossible to guess and both change
+         what every figure means: the money is paid orders only, and every
+         «+12 %» is against the same stretch of time just before this one.
+         One sentence, behind «?» (README rule 5). */
+      admHelpHTML("stats", "Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. " +
+        "А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.");
     if (SRV.admin !== true) {
       return head + '<div class="adm-empty">Аналитика считается на сервере из настоящих заходов и заказов — ' +
         "откроется, как только вы войдёте в панель</div></div>";
@@ -26061,115 +26571,116 @@
       return head + (statsErr || '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
     }
     head += statsErr;
-    var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; };
+    var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, esc(eur(p.revenue)), p.revenue]; };
     return head +
-      /* One sentence before the numbers, because two things about this screen
-         are impossible to guess and both change what every figure means: the
-         money is paid orders only, and every «+12%» is against the same
-         stretch of time just before this one. */
-      '<p class="adm-lead adm-lead--stats">Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. ' +
-        "А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.</p>" +
-      '<div class="adm-kpis">' +
+      '<div class="adm-kpis adm-kpis--4">' +
         admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct,
-          "Деньги по оплаченным заказам, вместе с доставкой.") +
+          "Деньги по оплаченным заказам, вместе с доставкой.", range) +
         admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct,
-          "Сколько заказов за это время оплатили.") +
+          "Сколько заказов за это время оплатили.", range) +
         admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct,
-          "Сколько денег в среднем в одном заказе.") +
-        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct,
-          "Сколько человек из каждых 100 зашедших в магазин что-то купили.") +
+          "Сколько денег в среднем в одном заказе.", range) +
+        // «Покупают», not «Из корзины в заказ»: it is visits → purchases (the design fixes the old name)
+        admKpiHTML("Покупают", num1(a.kpi.conversion.value * 100) + " %", a.kpi.conversion.deltaPct,
+          "Сколько человек из каждых 100 зашедших в магазин что-то купили.", range) +
       "</div>" +
-      admColsHTML(
-        '<div><div class="adm-sec__t">Выручка по дням</div>' +
-          '<p class="adm-hint adm-hint--lead">Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.</p>' +
-          (a.revenueByDay.length ? admBarsHTML(a.revenueByDay, range) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
-        /* Not money, and the title has to say so (Дим, 17.09.2026). Both this
-           block and «Бренды» below add up `item.sum` — цена × количество по
-           каждой строке заказа — and that is the price list, taken before the
-           order's discount, before the points the customer spent, before a
-           gift card settled part of the bill, and without the delivery. So a
-           товар that sold for 40 € after a 20 % code stands here at 50 €, and
-           the column has never been what landed in the bank.
-           Pro-rating the discount back onto the lines was considered and
-           refused: it would make every figure on this screen an estimate
-           nobody could check against a single order. The numbers stay exactly
-           as they were; the words above them stop calling them money, and
-           point at the one figure on this screen that IS money. */
-        '<div class="adm-sec__t">Топ товаров: на какую сумму заказали</div>' +
-        '<p class="adm-hint adm-hint--lead">Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».</p>' +
-        admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
-        '<div class="adm-sec__t adm-sec__t--sub">Искали, но не нашли</div>' +
-        '<p class="adm-hint adm-hint--lead">Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.</p>' +
-        admPairsHTML(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }),
-          "Таких запросов нет", true)) +
-      admStatsMoreHTML(a) + "</div>";
+      '<div class="adm-stats__cols">' +
+        '<div class="adm-stack">' +
+          '<div>' + admSecHeadHTML("Выручка по дням", "stats-bars",
+            "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.") +
+            (a.revenueByDay.length ? admBarsHTML(a.revenueByDay, range) : '<div class="adm-empty">Пока нет данных</div>') + "</div>" +
+          /* Not money, and the title has to say so (Дим, 17.09.2026). Both this
+             block and «Бренды» below add up `item.sum` — цена × количество по
+             каждой строке заказа — and that is the price list, taken before the
+             order's discount, before the points the customer spent, before a
+             gift card settled part of the bill, and without the delivery. So a
+             товар that sold for 40 € after a 20 % code stands here at 50 €, and
+             the column has never been what landed in the bank. The numbers stay
+             exactly as they were; the words above them stop calling them
+             money, and point at the one figure on this screen that IS money. */
+          '<div>' + admSecHeadHTML("Топ товаров: на какую сумму заказали", "stats-top",
+            "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».") +
+            admShareRowsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") + "</div>" +
+        "</div>" +
+        '<div class="adm-stack">' +
+          '<div>' + admSecHeadHTML("Путь до покупки", "stats-funnel",
+            "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.") +
+            admFunnelRowsHTML(a.funnel) + "</div>" +
+          '<div>' + admSecHeadHTML("Ещё цифры", "", "") + admStatsMoreHTML(a) + "</div>" +
+        "</div>" +
+      "</div>" +
+      /* The accountant's monthly file (XLSX, CSV) is where it has always been,
+         in «Настройки → О компании» (reportsCard) — a door to it from here. */
+      '<div class="adm-stats__foot"><button class="adm-link" type="button" data-admtab="setup" data-admsetpage="company">' +
+        "Отчёт для бухгалтера (XLSX, CSV) — в «Настройки → О компании»</button></div>" +
+      "</div>";
   }
-  /** The numbers that do not fit the four cells above but that the owner has
-      had all along: the funnel, brands, views, searches, promo codes, traffic
-      and Search Console. */
+  /** The numbers that do not fit the four cells and the two blocks above but
+      that the owner has had all along — one fold each, a sentence first. */
   function admStatsMoreHTML(a) {
-    /** A section: a title, the one sentence that says what its numbers are,
-        and the list itself. The sentence is not optional — it is the
-        difference between a table the owner reads and a table he scrolls
-        past (Dim, 07.09.2026). */
-    var sec = function (title, lead, body) {
-      return '<div><div class="adm-sec__t">' + title + "</div>" +
-        '<p class="adm-hint adm-hint--lead">' + lead + "</p>" + body + "</div>";
-    };
-    return '<div class="adm-stack adm-stack--tight">' +
-      sec("Путь до покупки",
-        "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.",
-        admPairsHTML(FUNNEL_STAGES.map(function (s) {
-          return [s[1], String(a.funnel[s[0]] || 0)];
-        }), "Пока нет данных", true)) +
+    var dev = a.traffic.device, devAll = (dev.mobile || 0) + (dev.desktop || 0);
+    var cAll = a.traffic.countries.reduce(function (s, c) { return s + (c.sessions || 0); }, 0);
+    return '<div class="adm-stats__more">' +
+      admStatsFoldHTML("zero", "Что искали и не нашли",
+        "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.",
+        a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }), "Таких запросов нет", true) +
       /* The same `item.sum` as «Топ товаров» above — the price list, not the
          takings — and with one more hole of its own: the query behind it
          (brandRevenue in src/lib/analytics.ts) reads `item->>'brand'`, and a
-         набор or a подарочная карта is built without that key at all
-         (src/lib/orders.ts, the bundle and gift-card lines), so neither is in
-         this table under any name. Saying it here is cheaper than the owner
-         finding it out by adding the rows up. */
-      sec("Бренды: на какую сумму заказали", "Цена товаров каждого бренда в заказах, а не полученные деньги. Наборы и подарочные карты сюда не попадают — бренд у них не указан.",
-        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж")) +
-      sec("Смотрят, но не покупают",
-        "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
-        admPairsHTML(a.viewedNotBought.map(function (p) {
-          return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)];
-        }), "Таких товаров нет", true)) +
-      sec("Что искали чаще всего", "Что люди печатали в поиске внутри магазина. Справа — сколько раз.",
-        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true)) +
-      sec("Промокоды", "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.",
-        admPairsHTML(a.promoUsage.map(function (r) { return [r.code, eur(r.amount)]; }),
-          "Промокоды пока не использовали")) +
-      /* One list of «Мобильные · EE · google.com» was three different questions
-         stacked in one column, and the country came as a two-letter code. Three
-         named lists now, and a real country name (countryName()). */
-      sec("С чего заходят", "С телефона или с компьютера. Справа — сколько человек.",
-        admPairsHTML([
-          ["Телефоны", String(a.traffic.device.mobile)],
-          ["Компьютеры", String(a.traffic.device.desktop)]
-        ], "Пока нет данных", true)) +
-      sec("Из каких стран", "Страна определяется по интернет-адресу гостя — это не адрес доставки.",
-        admPairsHTML(a.traffic.countries.map(function (c) { return [countryName(c.country), String(c.sessions)]; }),
-          "Пока нет данных", true)) +
-      sec("С каких сайтов приходят",
+         набор or a подарочная карта is built without that key at all, so
+         neither is in this table under any name. */
+      admStatsFoldHTML("brands", "Бренды: на какую сумму заказали",
+        "Цена товаров каждого бренда в заказах, а не полученные деньги. Наборы и подарочные карты сюда не попадают — бренд у них не указан.",
+        a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж") +
+      admStatsFoldHTML("promo", "Промокоды",
+        "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.",
+        a.promoUsage.map(function (r) { return [r.code, eur(r.amount)]; }), "Промокоды пока не использовали") +
+      /* shares, as the design shows them — the count stays beside each */
+      admStatsFoldHTML("device", "С чего заходят", "С телефона или с компьютера. Справа — доля и сколько человек.",
+        devAll ? [
+          ["Телефоны", admPct(dev.mobile || 0, devAll) + " · " + (dev.mobile || 0)],
+          ["Компьютеры", admPct(dev.desktop || 0, devAll) + " · " + (dev.desktop || 0)]
+        ] : [], "Пока нет данных", true) +
+      admStatsFoldHTML("countries", "Из каких стран", "Страна определяется по интернет-адресу гостя — это не адрес доставки.",
+        a.traffic.countries.map(function (c) { return [countryName(c.country), admPct(c.sessions || 0, cAll) + " · " + c.sessions]; }),
+        "Пока нет данных", true) +
+      admStatsFoldHTML("refs", "С каких сайтов приходят",
         "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.",
-        admPairsHTML(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }),
-          "Пока нет данных", true)) +
-      sec("Ещё цифры", "Четыре вещи, которые не поместились выше.",
+        a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }), "Пока нет данных", true) +
+      admStatsFoldHTML("viewed", "Смотрят, но не покупают",
+        "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
+        a.viewedNotBought.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Таких товаров нет", true) +
+      admStatsFoldHTML("searches", "Что искали чаще всего", "Что люди печатали в поиске внутри магазина. Справа — сколько раз.",
+        a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true) +
+      admFoldHTML("stats-carts", "Корзины, подарочные карты и чат",
+        "<span>Брошенные корзины</span> · " + (a.abandonedCarts || 0),
         admPairsHTML([
           ["Брошенные корзины", String(a.abandonedCarts),
             "Человек оставил почту и собрал корзину, но заказ так и не оформил."],
-          ["Открытий чата", String(a.chatOpens), "Сколько раз в магазине открыли окно чата."],
+          /* the design's line, counted on the server (Dim, q41): a basket
+             whose owner got the reminder and then ordered — carts.returned_at,
+             db/migrations/213_cart_returned_by_letter.sql */
+          // «—» while the server could not count them (null), never a made-up 0
+          ["Вернулись по письму", a.cartsReturned == null ? "—" : String(a.cartsReturned),
+            "Получили письмо о брошенной корзине и потом оформили заказ."],
           ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount),
             "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран."],
           ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount),
-            "Сколько карт использовали при оплате и на какую сумму."]
+            "Сколько карт использовали при оплате и на какую сумму."],
+          ["Открытий чата", String(a.chatOpens), "Сколько раз в магазине открыли окно чата."]
         ], "Пока нет данных", true)) +
-      sec("Магазин в поиске Google",
-        "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.",
+      admFoldHTML("stats-google", "Магазин в поиске Google", admGscSummaryHTML(),
+        '<p class="adm-hint">Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.</p>' +
         admGscHTML()) +
       "</div>";
+  }
+  /** The Google fold's one line: what the block would say first. */
+  function admGscSummaryHTML() {
+    if (!GSC) return "<span>Проверяем…</span>";
+    if (!GSC.ok) return GSC.error === "not_configured" ? "<span>Не подключено — подключает Дим</span>" : "<span>Нет ответа от Google</span>";
+    var imp = Number(GSC.impressions) || 0;
+    return imp ? "<span>Показы</span> · " + numGrp(imp) + " · <span>Переходы</span> · " + numGrp(Number(GSC.clicks) || 0)
+      : "<span>Показов пока нет</span>";
   }
   /* ---------- «Магазин в поиске Google» ------------------------------------
      This block used to be three rows of bare numbers — «Клики 47», «Показы
@@ -26299,11 +26810,15 @@
     loadGsc();
     if (!GSC) return '<div class="adm-skel"><i></i><i></i></div>';
     if (!GSC.ok) {
-      return '<div class="adm-empty">' + (GSC.error === "not_configured"
+      /* …and «см. «Подключения»» is a door now, not a direction (1a): the
+         one action is where the problem is explained */
+      var gscDoor = GSC.error === "not_configured" || GSC.error === "bad_key"
+        ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admtab="apps">Открыть «Подключения»</button>' : "";
+      return '<div class="adm-empty"><span>' + (GSC.error === "not_configured"
         ? "Google Search Console ещё не подключён — см. «Подключения»"
         : GSC.error === "bad_key"
           ? "Ключ Search Console не читается — см. «Подключения»"
-          : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
+          : "Google Search Console сейчас не отвечает — попробуйте позже") + "</span>" + gscDoor + "</div>";
     }
     var pos = Number(GSC.position) || 0;
     var imp = Number(GSC.impressions) || 0;
@@ -26371,11 +26886,13 @@
   var ADM_DEV_MAIL = "info@diipsolutions.eu";
   /** The action on a red row: a plain mailto, not a button that pretends the
       panel can fix a DNS record by itself. */
-  function admDevLink() {
+  function admDevHref() {
     // the page's address rides in the body, so «ссылка уже в письме» is true
-    var href = "mailto:" + ADM_DEV_MAIL + "?subject=" + encodeURIComponent("Rempire — вопрос из админки") +
+    return "mailto:" + ADM_DEV_MAIL + "?subject=" + encodeURIComponent("Rempire — вопрос из админки") +
       "&body=" + encodeURIComponent("Страница: " + location.href + "\n\n");
-    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Диму</a>';
+  }
+  function admDevLink() {
+    return '<a class="adm-btn adm-btn--row" href="' + esc(admDevHref()) + '">Написать Диму</a>';
   }
   /* «Подключения» asks Montonio for this store's own rates once per admin
      session (GET /api/admin/shipping/rates/?country=) and says so on the
@@ -26398,22 +26915,36 @@
       render();
     });
   }
+  /* How to switch on what only the owner can switch on — the «Как включить»
+     under three Montonio rows (Dim 25.09.2026, q19: one action per problem).
+     The row's own sentence, from the server, says what is off; this says
+     where to go. */
+  var APPS_HOWTO = {
+    bank_payments: "Войдите в Montonio Partner System и включите для магазина продукт «Bank payments». Как только Montonio его включит, эта строка станет зелёной — она проверяется каждый раз, когда вы открываете этот экран.",
+    refunds: "Войдите в Montonio Partner System и включите продукт «Refundable bank payments» — он включается только в боевом режиме. Строка станет зелёной после первой оплаты банковской ссылкой: у Montonio это видно только по оплаченному заказу.",
+    carriers: "Войдите в Montonio Partner System, раздел Shipping, и включите перевозчиков — договор Montonio или свой. Потом откройте этот экран ещё раз.",
+    camera: "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера"
+  };
   function admIntegrationRows() {
     var rows = [];
     var payOk = !!(PAYMETHODS.banks && PAYMETHODS.banks.length);
-    rows.push({ name: "Приём оплат · Montonio", ok: payOk,
+    /* «Проверить оплату» (the design's action): Montonio's bank list asked for
+       again, past every cache (appsCheckPay). While the first answer is still
+       on its way the row is «checking», not red. */
+    rows.push({ name: "Приём оплат · Montonio", ok: payOk, checking: !payOk && !PAYMETHODS.settled,
       sub: payOk
         ? "Карты, банковские ссылки, Apple/Google Pay. Работает."
         : "Список банков не пришёл — проверьте, открывается ли оплата у покупателя.",
-      act: payOk ? "" : admDevLink() });
+      act: payOk ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-appscheckpay' +
+        (S.appsPayBusy ? " disabled" : "") + ">" + (S.appsPayBusy ? "Проверяем…" : "Проверить оплату") + "</button>" });
 
     var rates = S.shipLiveRates;
     var rateN = rates ? Object.keys(rates).reduce(function (a, k) { return a + rates[k].length; }, 0) : 0;
-    rows.push({ name: "Доставка · Omniva, DPD, SmartPosti", ok: !rates || rateN > 0,
+    rows.push({ name: "Доставка · Omniva, DPD, SmartPosti", ok: !rates || rateN > 0, checking: !rates,
       sub: !rates ? "Проверяем тарифы…" : rateN
         ? "Наклейки печатаются из карточки заказа, тарифы перевозчиков подтягиваются сами."
         : "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.",
-      act: "" });
+      act: rates && !rateN ? admDevLink() : "" });
 
     /* Three states, not two. The panel has no way to ask whether Resend has a
        key — the only probe is a real test letter — so before one has been sent
@@ -26435,11 +26966,12 @@
        when there is none, because then an order whose push reached no phone
        is an order nobody hears about. Each sentence is its own node, so the
        translator finds it by key; the address and Resend's own words are not
-       Russian and pass through as they are. */
+       Russian and pass through as they are. Green, it keeps «Отправить
+       проверочное письмо» (q19). */
     var om = OWNER_MAIL, omTest = S.ownerMailTest;
     var omRefused = !!(omTest && omTest.error === "send_failed");
     var omOk = !om || !!om.unknown || (!!om.key && !!om.to && !omRefused);
-    rows.push({ name: "Письмо магазину о заказе", ok: omOk, quiet: !!(om && om.unknown),
+    rows.push({ name: "Письмо магазину о заказе", ok: omOk, quiet: !!(om && om.unknown), checking: !om,
       sub: !om ? "Проверяем…"
         : om.unknown ? "Не удалось узнать — обновите страницу."
         : !om.key ? "Письма не уходят совсем: на сервере нет ключа почты RESEND_API_KEY."
@@ -26456,11 +26988,11 @@
             "<span>— только когда оповещение на телефон не дошло ни до одного устройства.</span>",
       act: !om || om.unknown ? ""
         : !om.key || !om.to ? admDevLink()
-        : '<button class="adm-btn adm-btn--row" data-notifytest' + (S.ownerMailBusy ? " disabled" : "") + ">" +
+        : '<button class="adm-btn adm-btn--ghost adm-btn--row" data-notifytest' + (S.ownerMailBusy ? " disabled" : "") + ">" +
             (S.ownerMailBusy ? "Отправляем…" : "Отправить проверочное письмо") + "</button>" });
 
     var gscOk = !GSC || GSC.ok === true;
-    rows.push({ name: "Google Search Console", ok: gscOk,
+    rows.push({ name: "Google Search Console", ok: gscOk, checking: !GSC,
       sub: !GSC ? "Проверяем…" : GSC.ok
         ? "Google видит магазин, позиции — в разделе «Аналитика»."
         : GSC.error === "not_configured"
@@ -26471,16 +27003,22 @@
       act: gscOk ? "" : admDevLink() });
 
     var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;
-    rows.push({ name: "Аналитика посещений", ok: !ANALYTICS["7d"] || !!an,
-      sub: an ? "Откуда приходят и что ищут. Всё в разделе «Аналитика»." : "Считаем…", act: "" });
+    /* «Считаем…» while the first answer is on its way; an answer that did not
+       come is said as such — it used to stay «Считаем…» in red for good */
+    var anRec = ANALYTICS["7d"];
+    rows.push({ name: "Аналитика посещений", ok: !anRec || !!an, checking: !an && !(anRec && anRec.err),
+      sub: an ? "Откуда приходят и что ищут. Всё в разделе «Аналитика»."
+        : anRec && anRec.err ? "Аналитика сейчас не отвечает — попробуйте позже." : "Считаем…", act: "" });
 
     /* The square used to be green while the line under it said the model was
        not connected (audit 06.09.2026, question 7; Dim: make it tell the
        truth). Green only when a real model answers; grey — not red — while it
        runs on the built-in answers, because that is not a fault: the panel
-       still works, it simply cannot write anything new. `admAI` is null until
-       GET /api/assistant/ answers, so «Проверяем…» is the honest first state. */
-    rows.push({ name: "ИИ-помощник", ok: true, quiet: admAI === false,
+       still works, it simply cannot write anything new. So it stands under
+       «Работает», grey, with «Написать Диму» beside it — never counted as a
+       problem (q19; the design drew it as one). `admAI` is null until GET
+       /api/assistant/ answers, so «Проверяем…» is the honest first state. */
+    rows.push({ name: "ИИ-помощник", ok: true, quiet: admAI === false, checking: admAI === null,
       sub: admAI === null
         ? "Проверяем…"
         : admAI
@@ -26488,63 +27026,134 @@
           : "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.",
       act: admAI === false ? admDevLink() : "" });
 
-    /* The Montonio rows go under the payment and delivery ones, because they
-       answer a different question: not «работает ли» but «что вообще
-       включено». Their text is the server's, printed as it came — see
-       loadMontonio(). A row the server could not decide is grey («quiet»),
-       never green: «мы не смогли спросить» and «выключено» are different
-       facts and a square that merges them is the bug this screen is for. */
+    /* The Montonio readiness rows (src/lib/montonio-problems.ts), their text
+       the server's, printed as it came — see loadMontonio(). A row the server
+       could not decide is grey («quiet»), never green: «мы не смогли спросить»
+       and «выключено» are different facts. One action each (q19): what lives
+       in the server's environment is Dim's — no keys, the mode, the keys, the
+       parcel webhook (Montonio has no screen for it); what Renat switches on
+       in the Partner System gets «Как включить»; refunds stuck for ten days
+       open their orders. */
     var mont = (MONTONIO && MONTONIO.rows) || [];
+    var overdue = ((MONTONIO && MONTONIO.pending) || []).filter(function (p) { return p && p.overdue && p.id; });
     for (var mi = 0; mi < mont.length; mi++) {
-      var mr = mont[mi];
+      var mr = mont[mi], mk = String(mr.key || "");
+      var mact = "";
+      if (mr.ok === false) {
+        if (mk === "montonio" || mk === "env" || mk === "keys" || mk === "ship_webhook") mact = admDevLink();
+        else if (mk === "pending_refunds") {
+          mact = overdue.slice(0, 5).map(function (p) {
+            return '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admorder="' + esc(String(p.id)) + '">' +
+              '<span>Открыть заказ</span> <span class="adm-mono">' + esc(String(p.number || "")) + "</span></button>";
+          }).join("");
+        }
+      } else if (mk === "keys" && mr.quiet) mact = admDevLink();   // «refused»/«unreachable» are grey, and still Dim's
       rows.push({
+        key: mk,
         name: esc(String(mr.name[S.lang] || mr.name.RU || "Montonio")),
         ok: mr.ok !== false,
         quiet: mr.quiet === true,
         sub: esc(String(mr.sub[S.lang] || mr.sub.RU || "")),
-        /* Only the keys are Dim's: they live in the server's environment.
-           Bank links, refunds, carriers and the parcel webhook are all
-           switched on by Renat himself in the Partner System, and offering
-           «Написать Диму» there sends him to wait for someone who cannot
-           do it for him. */
-        act: mr.key === "keys" ? admDevLink() : ""
+        act: mact,
+        help: mr.ok === false && APPS_HOWTO[mk] ? APPS_HOWTO[mk] : "",
+        helpLabel: "Как включить"
       });
     }
 
     var cam = scanSupportInfo().camera;
-    rows.push({ name: "Сканер · камера телефона", ok: cam,
+    rows.push({ key: "camera", name: "Сканер · камера телефона", ok: cam,
       sub: cam
         ? "Камера доступна — сканер открывается из «Товары → Склад»."
         : "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.",
-      act: cam ? "" : '<button class="adm-btn adm-btn--row" data-admcamerahelp>Как разрешить</button>' });
+      act: "", help: cam ? "" : APPS_HOWTO.camera, helpLabel: "Как разрешить" });
     return rows;
   }
+  /** «Как включить» / «Как разрешить»: the same «?» panel as every help in
+      the panel (admHelpHTML), opened by a labelled button. The camera's keeps
+      the hook it always had (data-admcamerahelp — it used to be a toast). */
+  function admAppHelpHTML(r) {
+    if (!r.help) return { btn: "", panel: "" };
+    var key = "apps:" + r.key, open = !!ADM_HELP[key];
+    return {
+      btn: '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admhelp="' + esc(key) + '"' +
+        (r.key === "camera" ? " data-admcamerahelp" : "") + ' aria-expanded="' + open + '" aria-controls="' +
+        admDomId("admhelp-", key) + '">' + r.helpLabel + "</button>",
+      panel: admHelpHTML(key, r.help)
+    };
+  }
+  /* ---------- Подключения (1a) ----------------------------------------------
+     design_handoff_admin_ux README § 5, screen 18: what needs the owner comes
+     first — a card each, with its one action — and everything that works is
+     one folded line, «Работает · N». Rows still being asked about have a
+     line of their own, so the cards do not jump as the answers land. Every
+     colour is something a server reported (admIntegrationRows). The Montonio
+     rows, the owner's letter test and the camera's «Как разрешить» are all
+     here (q19), and «Проверить ещё раз» asks every probe again — Montonio's
+     keys line promises «проверяется каждый раз», and now it is. */
   function admAppsHTML() {
     if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadMontonio(); loadOwnerMail(); loadAnalytics("7d"); }
-    return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Подключения", "") +
-      /* `--lines`, like every other list in the panel (admin.css § «one shape
-         for every list»). It was a bare `.adm-row`, which on a phone puts the
-         name and «Написать Диму» in one wrapping line — and the name is what
-         gave way: «Приём оплат · Mont…», «Google Search Cons…», and by 33 px
-         in Estonian. Which service is broken is the one thing this screen
-         exists to say. As a `--lines` row the name owns the full width and
-         the button takes the row under it, exactly as an order's actions do. */
-      '<div class="adm-list">' + admIntegrationRows().map(function (r) {
-        return '<div class="adm-row adm-row--tall adm-row--lines">' +
-          // three states, not two: green = working, grey = known to be off but
-          // not broken (the assistant with no model), red = something is wrong
-          '<span class="adm-dot' + (r.ok ? (r.quiet ? " adm-dot--off" : "") : " adm-dot--warn") + '" aria-hidden="true"></span>' +
-          '<span class="adm-row__body"><span class="adm-row__nm">' + r.name + "</span>" +
-            '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
-          (r.act ? '<span class="adm-acts">' + r.act + "</span>" : "") + "</div>";
-      }).join("") + "</div>" +
-      '<p class="adm-hint">Если что-то красное и непонятно — напишите Диму. ' +
-        "Ссылка на эту страницу уже в письме.</p>" +
-      '<div class="adm-acts">' + admDevLink() + '<span class="adm-hint adm-mono">' + ADM_DEV_MAIL + "</span></div>" +
+    var all = admIntegrationRows();
+    var bad = [], good = [], wait = [];
+    all.forEach(function (r) {
+      if (r.checking) wait.push(r);
+      else if (r.ok) good.push(r);
+      else bad.push(r);
+    });
+    if (SRV.admin === true && !MONTONIO) wait.push({ name: "Montonio" });
+    var sum = bad.length
+      ? '<p class="adm-apps__sum adm-apps__sum--warn">' + bad.length + " " + pl(bad.length, "требует внимания", "требуют внимания", "требуют внимания") + "</p>"
+      : wait.length ? '<p class="adm-apps__sum">Проверяем…</p>' : '<p class="adm-apps__sum adm-apps__sum--ok">Всё работает ✓</p>';
+    var card = function (r) {
+      var h = admAppHelpHTML(r);
+      return '<div class="adm-appcard"><div class="adm-appcard__h"><span class="adm-dot adm-dot--warn" aria-hidden="true"></span>' +
+        '<span class="adm-appcard__n">' + r.name + "</span></div>" +
+        '<div class="adm-appcard__t">' + r.sub + "</div>" + h.panel +
+        (r.act || h.btn ? '<div class="adm-appcard__a">' + h.btn + r.act + "</div>" : "") + "</div>";
+    };
+    var line = function (r) {
+      var h = admAppHelpHTML(r);
+      return '<div class="adm-approw"><span class="adm-dot' + (r.quiet ? " adm-dot--off" : "") + '" aria-hidden="true"></span>' +
+        '<div class="adm-approw__b"><div class="adm-approw__n">' + r.name + "</div>" +
+        '<div class="adm-approw__t">' + r.sub + "</div>" + h.panel +
+        (r.act || h.btn ? '<div class="adm-approw__a">' + h.btn + r.act + "</div>" : "") + "</div></div>";
+    };
+    return '<div class="adm-screen adm-screen--tight adm-apps">' +
+      admHead("", "Подключения", '<button class="adm-link adm-link--muted" type="button" data-appsrecheck>Проверить ещё раз</button>') +
+      sum +
+      (bad.length ? '<div class="adm-appcards">' + bad.map(card).join("") + "</div>" : "") +
+      (wait.length
+        ? '<p class="adm-hint adm-apps__wait"><span>Ещё проверяем:</span> ' +
+            wait.map(function (r) { return "<span>" + r.name + "</span>"; }).join(", ") + "</p>"
+        : "") +
+      (good.length
+        ? admFoldHTML("apps-ok", "<span>Работает</span> · " + good.length,
+            good.map(function (r) { return "<span>" + r.name + "</span>"; }).join(", "),
+            '<div class="adm-approws">' + good.map(line).join("") + "</div>")
+        : "") +
+      '<p class="adm-apps__foot"><span>Что-то непонятно — напишите Диму:</span> ' +
+        '<a class="adm-link" href="' + esc(admDevHref()) + '">' + ADM_DEV_MAIL + "</a></p>" +
       "</div>";
   }
-
+  /** Every probe of this screen asked again — and Montonio's in particular,
+      whose keys line says it is checked each time the screen is opened
+      (admGoTab calls this on the way in; «Проверить ещё раз» by hand). */
+  function appsRecheck() {
+    if (SRV.admin !== true) return;
+    loadMontonio(true); loadGsc(true); loadOwnerMail(true); reloadPayMethods();
+  }
+  /** «Проверить оплату»: Montonio's bank list, asked for past every cache;
+      the row moves by itself when it lands, and a toast says what came back
+      once the wait the checkout itself allows is over. */
+  function appsCheckPay() {
+    if (S.appsPayBusy) return;
+    S.appsPayBusy = true; render();
+    reloadPayMethods();
+    setTimeout(function () {
+      S.appsPayBusy = false;
+      toast(PAYMETHODS.banks && PAYMETHODS.banks.length ? "Оплата работает — банки пришли ✓" : "Банки так и не пришли — напишите Диму");
+      render();
+    }, PAY_SETTLE_CAP_MS);
+  }
   /* ---------- Настройки: индекс и шесть страниц ---------------------------
      One long scroll of cards became six named places (README fix #6). The
      cards themselves are the ones that were already here — the banner editor,
@@ -32279,7 +32888,7 @@
       /* A new photograph, so the point that was dragged onto the old one
          goes with it: 62% across one picture is not 62% across another, and
          a crop nobody chose is worse than the frames' own centring. */
-      if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = r.url; S.adminBlogEdit.coverFocus = ""; }
+      if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = r.url; S.adminBlogEdit.coverFocus = ""; blogAutosave("change"); }
       render();
       toast("Картинка загружена ✓");
     }).catch(upFail);
@@ -39233,7 +39842,10 @@
       var post = r.body.post;
       var entry = demoApply({ type: "set_post_cover", slug: a.slug, url: att.url, prevUrl: post.coverUrl || "", title: post.title && (post.title.RU || post.title.ET || post.title.EN) });
       admAttFiled(a.key);
-      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) { S.adminBlogEdit.coverUrl = att.url; S.adminBlogEdit.coverFocus = ""; }
+      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) {
+        S.adminBlogEdit.coverUrl = att.url; S.adminBlogEdit.coverFocus = "";
+        blogAutosave("change");   // the open article saves as a whole — the cover with what was typed (1a)
+      }
       toast("Обложка поставлена ✓", entry);
       render();
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
@@ -39304,7 +39916,9 @@
       var next = blogBodies3WithFigure(d.body, url);
       LANGS.forEach(function (l) { d.body[l[0]] = next[l[0]]; });
       admAttFiled(a.key);
-      toast("Фото добавлено в конец статьи — сохраните");
+      // …and the article saves itself (1a), the picture with it
+      blogAutosave("change");
+      toast("Фото добавлено в конец статьи ✓");
       render();
       return;
     }
@@ -39349,9 +39963,10 @@
   function startArticleFromAssistant(a) {
     var topic = txt(a.topic).trim();
     if (!topic) return;
+    // an article open in the editor sends what it owes before the new one takes its place (1a)
+    if (S.adminBlogEdit && S.adminTab === "blog") { blogReadForm(); blogAutosave("change"); }
     S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
-    S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
-    S.adminBlogConfirmDelete = false; S.adminBlogErr = ""; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
+    blogStartNew();
     S.adminBlogTopic = topic;
     S.admMore = false;
     window.scrollTo({ top: 0 });
@@ -40397,7 +41012,12 @@
     if (tag === "IFRAME" || tag === "VIDEO" || tag === "CANVAS") return;
     // the blog's visual editor: its text is the article, not our markup
     if (from.isContentEditable) {
-      if (from.innerHTML !== to.innerHTML) from.innerHTML = to.innerHTML;
+      /* …and the picture bar laid over it (data-figui, the ring) is neither:
+         compared without them, so a background render — the media probe's
+         answer, a list landing — no longer wipes an open bar off a picture
+         whose article did not change (blogBoxHtml) */
+      var liveHtml = from.hasAttribute("data-blogbody") ? blogBoxHtml(from) : from.innerHTML;
+      if (liveHtml !== to.innerHTML) from.innerHTML = to.innerHTML;
       return;
     }
     admMorphChildren(from, to);
@@ -40675,7 +41295,8 @@
     // cold miss) — a fresh answer or one already in flight costs nothing
     if (S.screen === "blog") blogSyncList(S.lang);
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
-    if (S.screen === "admin" && S.adminTab === "blog" && !S.adminBlogEdit) loadAdminBlog(false);
+    // …with the editor open too: on a desktop the list stands beside it (1a, screen 16)
+    if (S.screen === "admin" && S.adminTab === "blog") loadAdminBlog(false);
     /* The parcel-point sheet lives in #pointslot, outside everything this
        render() just rewrote — it is mounted or unmounted here only when what
        should show changed (a navigation closed it, say), never rebuilt. So
@@ -41313,8 +41934,13 @@
        next Back — like the second press of «← Блог» — closes for real. */
     else if (top === "blog") {
       blogReadForm();
-      if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; return true; }
+      /* 1a: the article saves itself, so what it owes goes now and the card
+         closes; only an article that cannot be saved (no Russian title yet)
+         is asked about — once. */
+      if (blogDirty() && !blogSavesItself(S.adminBlogEdit) && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; return true; }
+      blogAutosave("change");
       S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
+      S.adminBlogMenu = false; S.adminBlogProdOpen = false;
       BLOGSEL = null; BLOGCARET = null;
     }
     else if (top === "edit") {
@@ -41369,7 +41995,9 @@
     } else if (S.adminBlogEdit && S.adminTab === "blog") {
       // the box repaints itself: read the screen before asking about it
       blogReadForm();
-      if (!blogDirty() || S.adminBlogConfirmBack) return false;
+      /* 1a: an article that can be saved saves — what it owes goes with the
+         section change (admGoTab flushes) — and is not asked about */
+      if (!blogDirty() || blogSavesItself(S.adminBlogEdit) || S.adminBlogConfirmBack) { blogAutosave("change"); return false; }
       S.adminBlogConfirmBack = go;
     } else if (S.mailOpen && S.adminTab === "mail") {
       // a letter's own words — the tab strip of «Маркетинг» stands above it (map #14)
@@ -41403,7 +42031,7 @@
     if (S.mailOpen && S.mailConfirmBack) mailRevertOne(mailTpl());
     S.goodsConfirmBack = false; S.adminBlogConfirmBack = false; S.mailConfirmBack = false;
     S.adminTab = tab; S.adminOrder = 0; S.adminEdit = "";
-    S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
+    S.adminBlogEdit = null; S.adminBlogMenu = false; S.adminBlogProdOpen = false;   // blog
     S.admMore = false;
     /* Every section opens at its own front door: «Настройки» on the index of
        six, «Письма» on the list of letters, «Клиенты» on the list rather than
@@ -41419,6 +42047,9 @@
     if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; }
     // …and a queue row may name the settings page it wants («Заполните IBAN»)
     if (go.setpage && tab === "setup") S.admSetPage = go.setpage;
+    /* «Подключения» asks its probes again every time it is opened — Montonio's
+       keys line says «проверяется каждый раз», and it was once per page load */
+    if (tab === "apps" && typeof appsRecheck === "function") appsRecheck();
     window.scrollTo({ top: 0 }); render();
   }
   /** As many parked entries as there are presses of Back due (admSteps), none
@@ -41634,6 +42265,8 @@
     var entry = S.toastUndo;
     S.toast = null; S.toastUndo = null; clearTimeout(toast._t); paintToast();
     if (!entry) return;
+    // a change still held back (1a, q8: a confirmed delete waits 5 s) has its own way back
+    if (typeof entry.undo === "function") { entry.undo(); return; }
     var i = DEMO.log.indexOf(entry);
     if (i < 0) return;
     var txt = entry.txt;
@@ -41851,7 +42484,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -43100,6 +43733,26 @@
         if (pa.type === "delete_bundle") { applyDeleteBundle(pa); return; }
         // a promo code nobody has used: the server keeps the rule, not this card
         if (pa.type === "delete_promo") { deletePromoByCode(pa.code); return; }
+        /* «Блог» (1a): the questions the article editor asks on this sheet —
+           publish with a language still empty, delete (then held, with
+           «Вернуть»), a published article's new address, and the assistant
+           about to write over a published text (it presses the very button
+           that asked, let through once — blogAiAsks). */
+        if (pa.type === "blog_publish") { publishBlogPost(true); return; }
+        if (pa.type === "blog_delete") { blogDeleteHold(pa.draft); return; }
+        if (pa.type === "blog_slug") {
+          if (pa.draft && pa.draft === S.adminBlogEdit) {
+            pa.draft.slug = pa.slug; pa.draft.slugAuto = false;
+            blogAutosave("change");
+          }
+          render(); return;
+        }
+        if (pa.type === "blog_ai") {
+          render();
+          var aiBtn = pa.sel ? document.querySelector(pa.sel) : null;
+          if (aiBtn) { BLOG_AI_SURE = true; aiBtn.click(); BLOG_AI_SURE = false; }
+          return;
+        }
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
@@ -43681,10 +44334,17 @@
       if (S.promoForm) { S.promoForm.scopeValue = ""; S.promoQ = ""; render(); refocus("[data-promoq]"); }
       return;
     }
+    /* «Как разрешить» on «Подключения»: since 1a a «?» panel under the row
+       (APPS_HOWTO.camera), not a 2.6-second toast. The button carries
+       data-admhelp too, so the shared branch above opens it; this answers a
+       bare data-admcamerahelp the same way. */
     if (d.admcamerahelp !== undefined) {
-      toast("iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера");
+      admHelpToggle("apps:camera"); render(); refocus("[data-admcamerahelp]");
       return;
     }
+    // «Подключения»: «Проверить ещё раз», «Проверить оплату»
+    if (d.appsrecheck !== undefined) { appsRecheck(); toast("Проверяем ещё раз…"); render(); return; }
+    if (d.appscheckpay !== undefined) { appsCheckPay(); return; }
 
     /* ---------- inventory: «Склад» — row edit form, filters, ledger, the PWA hint ---------- */
     if (d.stockedit !== undefined) {
@@ -44073,25 +44733,43 @@
     /* ---------- /features ------------------------------------------------ */
 
     /* ---------- blog: the admin editor ------------------------------------ */
-    if (d.admblognew !== undefined) {
-      S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
-      S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
-      S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
-      S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
-      window.scrollTo({ top: 0 }); render(); return;
+    /* «+ Статья» and a row of the list, with an article already open (on a
+       desktop both panes are up): what the open one owes is sent first —
+       and only an article that cannot be saved (no Russian title yet) is
+       asked about, the question remembering where the owner was going. */
+    if (d.admblognew !== undefined || d.admblogedit) {
+      var blogOpen = S.adminBlogEdit, blogNext = d.admblogedit ? { open: d.admblogedit } : { open: "new" };
+      if (blogOpen && d.admblogedit && blogOpen.id === d.admblogedit) return;   // that one is open already
+      if (blogOpen) {
+        blogReadForm();
+        if (blogDirty() && !blogSavesItself(blogOpen) && !S.adminBlogConfirmBack) {
+          S.adminBlogConfirmBack = blogNext; window.scrollTo({ top: 0 }); render(); return;
+        }
+        blogAutosave("change");
+        if (S.adminBlogConfirmBack) blogCloseEditor();   // asked, and pressed again: it goes
+      }
+      if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
+      blogStartNew(); window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
     if (d.admblogback !== undefined) {
-      // unsaved work dies with the draft — ask once (blogDirty), and about
-      // what is on screen rather than what the last `input` happened to catch
+      /* What is owed goes now and the editor closes; an article that cannot
+         be saved yet is asked about once — about what is on screen, not what
+         the last `input` happened to catch. */
       blogReadForm();
-      if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; render(); return; }
+      if (blogDirty() && !blogSavesItself(S.adminBlogEdit) && !S.adminBlogConfirmBack) {
+        S.adminBlogConfirmBack = true; render(); return;
+      }
+      blogAutosave("change");
       blogCloseEditor(); return;
     }
     if (d.admblogbackyes !== undefined) {
-      // a question the nav raised carries where it was going (admLeaveAsks)
+      // a question the nav raised carries where it was going (admLeaveAsks) — or «+ Статья» / a row of the list
       var blogTo = S.adminBlogConfirmBack;
-      blogCloseEditor(); admLeaveGo(blogTo); return;
+      blogCloseEditor();
+      if (blogTo && blogTo.open === "new") { blogStartNew(); window.scrollTo({ top: 0 }); render(); }
+      else if (blogTo && blogTo.open) openBlogEditor(blogTo.open);
+      else admLeaveGo(blogTo);
+      return;
     }
     if (d.admblogbackno !== undefined) { S.adminBlogConfirmBack = false; render(); return; }
     if (d.admbloglang) {
@@ -44100,10 +44778,20 @@
          texts sit in the same draft — and the tab you land on now says what
          it holds, which is the whole point of the strip.
          «Nothing is lost» is the promise, so the language being left is read
-         off the screen one last time before the screen stops being it. */
+         off the screen one last time before the screen stops being it — and
+         what it held is handed to the autosave. */
       blogReadForm();
+      blogAutosave("input");
       S.adminBlogLang = d.admbloglang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return;
     }
+    // «⋯» over the article: «Снять с публикации», «Удалить статью»
+    if (d.admblogmenu !== undefined) {
+      S.adminBlogMenu = !S.adminBlogMenu; render();
+      refocus(S.adminBlogMenu ? '.adm-bmenu__list [role="menuitem"]' : "[data-admblogmenu]");
+      return;
+    }
+    // «+ Товар»: the search for a product to put under the article
+    if (d.admblogprodadd !== undefined) { S.adminBlogProdOpen = true; render(); refocus("[data-admblogq]"); return; }
     /* ---- the visual editor's toolbar --------------------------------------
        None of these call render(): the box and its remembered selection have
        to survive, so the sheet under the toolbar is patched in place. */
@@ -44139,6 +44827,8 @@
     // the whole article, all three languages — see admBlogWriteFull()
     if (d.admblogfull !== undefined) {
       if (t.disabled || !S.adminBlogEdit) return;
+      // a published article's text is the shop's: asked first (blogAiAsks)
+      if (blogAiAsks("[data-admblogfull]")) return;
       var topicElF = document.querySelector("[data-admblogtopic]");
       var typedF = ((topicElF && topicElF.value) || "").trim();
       var topicF = (typedF || blogTopicValue(S.adminBlogEdit) || "").trim();
@@ -44156,6 +44846,7 @@
       var topicEl = document.querySelector("[data-admblogtopic]");
       var topic = ((topicEl && topicEl.value) || blogTopicValue(bdOut) || "").trim();
       if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
+      if (blogAiAsks("[data-admblogoutline]")) return;
       var obtn = t, olabel = t.textContent; t.disabled = true; t.textContent = "…";
       var bl = S.adminBlogLang || "RU";
       apiSend("/api/admin/ai/text/", "POST", { task: "blog_outline", lang: bl, input: { topic: topic } }).then(function (r) {
@@ -44173,21 +44864,32 @@
           if (tx.meta && txt(tx.meta.title)) bdOut.seoTitle[bl] = txt(tx.meta.title);
           if (tx.meta && txt(tx.meta.description)) bdOut.seoDesc[bl] = txt(tx.meta.description);
           if (bl === "RU" && bdOut.slugAuto && txt(tx.title)) bdOut.slug = blogSlugify(txt(tx.title));
-          toast("Черновик готов — проверьте и сохраните");
+          toast("Готово — проверьте текст.");
           render();
+          if (S.adminBlogEdit === bdOut) blogAutosave("change");   // it saves itself (1a)
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { obtn.disabled = false; obtn.textContent = olabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* Two buttons, one door. «Перевести с русского» under the Estonian or the
+       English tab carries that language (data-admblogtranslate="ET"): the
+       Russian article into it, nothing else touched. «Перевести на ET и EN»
+       in the assistant's fold carries none: from the first language that has
+       a title into the other two, as it always did. */
     if (d.admblogtranslate !== undefined) {
       if (t.disabled) return;
       var bdTr = S.adminBlogEdit;
       if (!bdTr) return;
-      var srcLang = bdTr.title.RU ? "RU" : bdTr.title.ET ? "ET" : bdTr.title.EN ? "EN" : "";
+      var trOne = d.admblogtranslate === "ET" || d.admblogtranslate === "EN" ? d.admblogtranslate : "";
+      var srcLang = trOne ? "RU" : bdTr.title.RU ? "RU" : bdTr.title.ET ? "ET" : bdTr.title.EN ? "EN" : "";
+      if (trOne && !(String(bdTr.title.RU || "").trim() || blogTextLen(bdTr.body.RU))) {
+        toast("Сначала напишите русский текст — переводим с него."); return;
+      }
       if (!srcLang) { toast("Сначала напишите статью хотя бы на одном языке"); return; }
-      var targets = ["RU", "ET", "EN"].filter(function (l) { return l !== srcLang; });
+      if (blogAiAsks(trOne ? '[data-admblogtranslate="' + trOne + '"]' : '[data-admblogtranslate=""]')) return;
+      var targets = trOne ? [trOne] : ["RU", "ET", "EN"].filter(function (l) { return l !== srcLang; });
       /* The body goes to the model as text, not as tags: a translation task
          handed HTML comes back with the markup rearranged, and the answer
          has to be parseable either way. blogHtmlToText() flattens it to
@@ -44237,10 +44939,11 @@
           if (got === targets.length) okN++;
         });
         if (authFail) { SRV.admin = false; }
-        else if (okN === jobs.length) toast("Черновик готов — проверьте и сохраните");
+        else if (okN === jobs.length) toast("Готово — проверьте текст.");
         else if (okN) toast("Перевелось не всё — проверьте и допишите");
         else toast(limited2 ? "Слишком много запросов — попробуйте позже" : "Не получилось — попробуйте ещё раз");
         render();
+        if (okN && S.adminBlogEdit === bdTr) blogAutosave("change");   // it saves itself (1a)
       }).catch(function () { tbtn.disabled = false; tbtn.textContent = tlabel; toast("Не получилось — попробуйте ещё раз"); render(); });
       return;
     }
@@ -44248,23 +44951,49 @@
        blog's own admSeoFill() — see admBlogSeoFill() next to the draft. */
     if (d.admblogseogen !== undefined || d.admblogseoall !== undefined) {
       if (S.adminBlogEdit) {
+        if (blogAiAsks(d.admblogseoall !== undefined ? "[data-admblogseoall]" : "[data-admblogseogen]")) return;
         admBlogSeoFill(S.adminBlogEdit, d.admblogseoall !== undefined ? ["RU", "ET", "EN"] : [S.adminBlogLang || "RU"], t);
       }
       return;
     }
+    /* The article's products — picks, so they save at once (1a); a product
+       taken off comes back with «Вернуть», in its place. */
     if (d.admblogproductadd) {
-      if (S.adminBlogEdit && S.adminBlogEdit.products.indexOf(d.admblogproductadd) < 0) {
-        S.adminBlogEdit.products.push(d.admblogproductadd);
+      var pad = S.adminBlogEdit;
+      if (pad && pad.products.indexOf(d.admblogproductadd) < 0 && pad.products.length < BLOG_PRODUCTS_MAX) {
+        pad.products.push(d.admblogproductadd);
+        blogAutosave("change");
       }
-      S.adminBlogQ = ""; render(); return;
+      S.adminBlogQ = ""; render(); refocus("[data-admblogq]"); return;
     }
     if (d.admblogproductdel) {
-      if (S.adminBlogEdit) {
-        S.adminBlogEdit.products = S.adminBlogEdit.products.filter(function (id) { return id !== d.admblogproductdel; });
+      var pdd = S.adminBlogEdit, gone = d.admblogproductdel;
+      var at = pdd ? pdd.products.indexOf(gone) : -1;
+      if (at >= 0) {
+        pdd.products.splice(at, 1);
+        blogAutosave("change");
+        toast("Товар убран из статьи", { prev: true, undo: function () {
+          if (S.adminBlogEdit !== pdd || pdd.products.indexOf(gone) >= 0) return;
+          pdd.products.splice(Math.min(at, pdd.products.length), 0, gone);
+          blogAutosave("change"); render();
+        } });
       }
       render(); return;
     }
-    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) { S.adminBlogEdit.coverUrl = ""; S.adminBlogEdit.coverFocus = ""; } render(); return; }
+    if (d.admblogcoverdel !== undefined) {
+      var cvd = S.adminBlogEdit;
+      if (cvd && cvd.coverUrl) {
+        var cvWas = { url: cvd.coverUrl, focus: cvd.coverFocus };
+        cvd.coverUrl = ""; cvd.coverFocus = "";
+        blogAutosave("change");
+        toast("Обложка убрана", { prev: true, undo: function () {
+          if (S.adminBlogEdit !== cvd || cvd.coverUrl) return;
+          cvd.coverUrl = cvWas.url; cvd.coverFocus = cvWas.focus;
+          blogAutosave("change"); render();
+        } });
+      }
+      render(); return;
+    }
     if (d.coverfit) {
       var ced = S.adminBlogEdit;
       if (ced) {
@@ -44273,6 +45002,7 @@
            own whichever way the picture stands on the page. */
         var cf = blogCoverFocus(ced.coverFocus);
         ced.coverFocus = blogCoverWrite(d.coverfit === "fill", cf);
+        blogAutosave("change");
       }
       render(); return;
     }
@@ -44287,14 +45017,29 @@
       blogPaintState();
       return;
     }
+    // «Сохранить» is gone (the editor saves itself); the hook means «send what is owed now»
     if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
     if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
-    if (d.admblogpublishyes !== undefined) { publishBlogPost(true); return; }
-    if (d.admblogpublishno !== undefined) { S.adminBlogConfirmPublish = ""; render(); return; }
+    /* The questions these four answered inline are the confirm sheet now
+       (data-admapply / data-admcancel); the hooks keep their meaning. */
+    if (d.admblogpublishyes !== undefined) { pendingAction = null; publishBlogPost(true); return; }
+    if (d.admblogpublishno !== undefined) { pendingAction = null; render(); return; }
     if (d.admblogunpublish !== undefined) { unpublishBlogPost(); return; }
-    if (d.admblogdel !== undefined) { S.adminBlogConfirmDelete = true; render(); return; }
-    if (d.admblogdelyes !== undefined) { deleteBlogPost(); return; }
-    if (d.admblogdelno !== undefined) { S.adminBlogConfirmDelete = false; render(); return; }
+    // «Удалить статью» (in «⋯»): the confirm sheet, then a delete held for as long as «Вернуть» is offered
+    if (d.admblogdel !== undefined) {
+      S.adminBlogMenu = false;
+      var delD = S.adminBlogEdit;
+      if (!delD || !delD.id) { render(); return; }
+      var delName = String(delD.title.RU || delD.title.ET || delD.title.EN || "").trim();
+      pendingAction = {
+        type: "blog_delete", overlay: true, danger: true, draft: delD, title: "Удалить статью?",
+        // the name its own line, the sentence its own — admDetailHTML makes each a text node
+        detail: (delName ? "«" + delName + "»\n" : "") + BLOG_DEL_WARN, ok: "Удалить"
+      };
+      render(); refocus("[data-admapply]"); return;
+    }
+    if (d.admblogdelyes !== undefined) { pendingAction = null; blogDeleteHold(S.adminBlogEdit); return; }
+    if (d.admblogdelno !== undefined) { pendingAction = null; render(); return; }
     /* ---------- /blog ------------------------------------------------------ */
 
     // «Маркетинг → Рассылка»: every data-news* button, in one place (newsClick)
@@ -44677,16 +45422,22 @@
     else if (t.matches("[data-blogslug]")) {
       if (S.adminBlogEdit) {
         var ns = t.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
-        S.adminBlogEdit.slug = ns;
-        S.adminBlogEdit.slugAuto = false;
         // …and show it. The box used to keep «Привет Мир!!» on screen while
         // the post was actually filed under «-----» — the owner could not
         // see the address he was publishing.
         if (t.value !== ns) t.value = ns;
+        /* An address is a code: it saves when the box is left (the
+           focusout below), not letter by letter. A published article's is
+           not even written into the draft until the question there has an
+           answer — its links are out in the world. */
+        if (S.adminBlogEdit.status !== "published") {
+          S.adminBlogEdit.slug = ns;
+          S.adminBlogEdit.slugAuto = false;
+        }
       }
     }
     else if (t.matches("[data-blogtags]")) {
-      if (S.adminBlogEdit) S.adminBlogEdit.tagsText = t.value;
+      if (S.adminBlogEdit) { S.adminBlogEdit.tagsText = t.value; blogAutosave("input"); }
     }
     else if (t.matches("[data-admblogq]")) {
       S.adminBlogQ = t.value;
@@ -44707,6 +45458,37 @@
         translateTree(plist);
       }
     }
+  });
+
+  /* blog (1a): the article's address, when its box is left. A draft's saves
+     then (a code saves on leaving, ADM_SAVE_POLICY.code). A published
+     article's address is out in the world — shared, indexed, in a letter —
+     and there is no redirect from the old one (upsertPost, src/lib/blog.ts),
+     so a new one is asked about first (Dim 25.09.2026, q5) and the box
+     shows the live address until the answer is «Поменять адрес». */
+  document.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !t.matches("[data-blogslug]") || S.screen !== "admin") return;
+    var d = S.adminBlogEdit;
+    if (!d) return;
+    if (d.status !== "published") { blogAutosave("change"); return; }
+    var ns = String(t.value || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+    t.value = d.slug;
+    if (!ns || ns === d.slug) return;
+    pendingAction = {
+      type: "blog_slug", overlay: true, draft: d, slug: ns, title: "Поменять адрес статьи?",
+      detail: "/blog/" + d.slug + "/ → /blog/" + ns + "/\n" + BLOG_SLUG_WARN, ok: "Поменять адрес"
+    };
+    render(); refocus("[data-admapply]");
+  });
+  /* …and «⋯» shuts on any tap outside it (its own items answer in the
+     delegate, which shuts it as it acts). */
+  document.addEventListener("click", function (e) {
+    if (!S.adminBlogMenu || S.screen !== "admin") return;
+    var t = e.target;
+    if (t && t.closest && t.closest(".adm-bmenu")) return;
+    S.adminBlogMenu = false;
+    render();
   });
 
   /* blog: keep the remembered selection current. Typing fires `input` and
@@ -45273,6 +46055,8 @@
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       // the admin confirm card: Escape is «Отмена» — nothing is applied
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
+      // the article's «⋯» (1a): shut, and the focus back on it
+      else if (S.adminBlogMenu && S.screen === "admin") { S.adminBlogMenu = false; render(); refocus("[data-admblogmenu]"); }
       // the phone's «Ещё» page: back to the screen it was opened over
       else if (S.admMore) { S.admMore = false; render(); }
       /* «Помощник»: the phone's sheet like any other sheet; the desktop's

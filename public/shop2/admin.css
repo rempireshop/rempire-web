@@ -1098,6 +1098,30 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-gate [data-admlogin] { width: 100%; height: 52px; font-weight: 600; }
 .adm-gate__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 10px; }
 .adm-gate__foot .adm-link { font-size: 13px; }
+/* The sign-in page (app.js admLoginScreen, screen 19): the card centred on
+   the paper, and on a desktop the dark half beside it with what the panel is
+   for. The 30-day line names the device the owner is holding — «телефон»
+   under 600 px, «устройство» anywhere wider. */
+.adm-login { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); }
+.adm-login__main { display: flex; align-items: center; justify-content: center; padding: 40px 24px; min-width: 0; }
+.adm-login .adm-gate { margin: 0; width: 100%; max-width: 380px; }
+.adm-login__brand { display: none; }
+.adm-gate__keep { margin: 0; font-size: 12px; line-height: 17px; color: var(--a-muted); }
+.adm-gate__keep--desk { display: none; }
+@media (min-width: 600px) {
+  .adm-gate__keep--phone { display: none; }
+  .adm-gate__keep--desk { display: inline; }
+}
+@media (min-width: 900px) {
+  .adm-login { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .adm-login__main { padding: 48px; }
+  .adm-login__brand {
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; padding: 48px;
+    background: var(--a-ink); color: var(--a-onink);
+  }
+  .adm-login__claim { font-family: Oswald, sans-serif; font-weight: 600; font-size: 34px; line-height: 40px; max-width: 380px; }
+  .adm-login__addr { font-size: 13px; color: var(--a-dim); }
+}
 
 /* ---------- phone --------------------------------------------------------- */
 
@@ -2207,6 +2231,120 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-card--soft { border-color: var(--a-rule); }
 .adm-card--soft .adm-btn { width: 100%; }
 
+/* ---- Блог, 1a (screen 16; app.js admBlogScreen) ----------------------------
+   The list and the open article side by side wherever the screen's own
+   column is wide enough for both — a container query, because what decides
+   it is the column, and the column narrows by 330 px whenever the assistant
+   is open — and one or the other where it is not: a phone, a small laptop
+   with the assistant up. The page column is wider than the panel's usual
+   1000 px here: two panes need it. */
+.adm-page:has(> .adm-blog2) { max-width: 1240px; }
+.adm-blog2 { container-type: inline-size; container-name: blog2; }
+.adm-blog2 .adm-head { align-items: center; }
+/* «не дописано · без товаров» under a 160-px tab: two lines, never cut */
+.adm-blog2 .adm-seg--lang .adm-seg__st { white-space: normal; }
+.adm-blog2__acts { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.adm-blog2__acts .adm-pin { margin-left: 0; }
+.adm-blog2__cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+.adm-blog2__ed { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.adm-blog2--ed .adm-blog2__list, .adm-blog2:not(.adm-blog2--ed) .adm-blog2__ed { display: none; }
+.adm-blog2__none { padding: 64px 16px; text-align: center; color: var(--a-muted); border: 1px dashed var(--a-edge); }
+@container blog2 (min-width: 960px) {
+  .adm-blog2__cols { grid-template-columns: 330px minmax(0, 1fr); gap: 32px; }
+  .adm-blog2--ed .adm-blog2__list { display: block; }
+  .adm-blog2:not(.adm-blog2--ed) .adm-blog2__ed { display: flex; }
+  .adm-blog2__back { display: none; }
+}
+/* the rows: a picture, the title, «date · RU · ET · EN» and the status tag */
+.adm-blist { border-top: 1px solid var(--a-ink); }
+.adm-brow {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; width: 100%; min-height: 76px;
+  padding: 12px 8px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-brow:hover { background: var(--a-panel); }
+.adm-brow.is-on { background: var(--a-panel); box-shadow: inset 3px 0 0 var(--a-ink); }
+.adm-brow__img { width: 72px; height: 54px; border: 1px solid var(--a-rule); background: var(--a-panel) center / cover no-repeat; }
+.adm-brow__body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.adm-brow__t { font-size: 14px; line-height: 19px; font-weight: 600; overflow-wrap: anywhere; }
+.adm-brow__m { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+/* the editor: «← Блог» only in one column on a desktop (a phone has it in the top bar) */
+@media (max-width: 899px) {
+  .adm-blog2__back { display: none; }
+  .adm-blog2--ed .adm-head .adm-h1, .adm-blog2__new { display: none; }
+  .adm-blog2--ed .adm-head { min-height: 0; }
+}
+/* an article that cannot be saved yet: the title's underline turns rust with its one line under it */
+.adm2 input.adm-title-in:has(+ #blogtitlehint > .adm-ashint:not([hidden])) { border-bottom-color: var(--a-rust); }
+#blogtitlehint .adm-ashint { margin-top: -10px; }
+/* the cover tile beside «Анонс»: the picture whole, «Заменить обложку» over its foot */
+.adm-blog2__top { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.adm-bcover {
+  position: relative; min-height: 140px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; padding: 10px;
+}
+.adm-bcover__img { position: absolute; inset: 0; background: var(--a-paper) center / contain no-repeat; }
+.adm-bcover__swap { position: relative; z-index: 1; background: rgba(253, 252, 249, .94); }
+.adm-bcoverw { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.adm-bcoverw > .adm-bcover { flex: 1; }
+.adm-bcover__note { margin: 0; }
+.adm-bcover.is-over { outline: 1px dashed var(--a-ink); outline-offset: -1px; background: var(--a-tint); }
+.adm-bcover--none { justify-content: center; height: auto; }
+.adm-blog2__lead { gap: 6px; }
+.adm-blog2__lead textarea.adm-input { flex: 1; min-height: 116px; }
+@container blog2 (max-width: 559px) {
+  .adm-blog2__top { grid-template-columns: minmax(0, 1fr); }
+  .adm-bcover { min-height: 180px; }
+}
+/* the text: the toolbar and the box are one bordered block. On a phone the
+   toolbar still WRAPS rather than scrolls: every button in sight at 375 px
+   (Renat writes on his phone — e2e/admin-blog.spec.ts holds it), 44 px each. */
+.adm-bedit { border: 1px solid var(--a-rule); background: var(--a-paper); }
+.adm-bedit .adm-tools { border: 0; border-bottom: 1px solid var(--a-rule); }
+.adm-bedit .adm-canvas { border: 0; }
+.adm-bedit .adm-tool:empty { display: none; }
+.adm-bedit .adm-tool { padding: 0 8px; }
+@media (max-width: 899px) {
+  .adm-bedit .adm-tools button { height: 44px; }
+}
+/* «Товары в статье — покажем карточками внизу» */
+.adm-bprods { display: flex; flex-direction: column; gap: 8px; }
+.adm-bprods__h { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-bprod {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px;
+  border-bottom: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-bprod__n { min-width: 0; overflow-wrap: anywhere; }
+.adm-bprod__x {
+  flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0;
+}
+.adm-bprod__x:hover { color: var(--a-ink); }
+.adm-acts--links { gap: 8px 20px; }
+/* the article's line at the foot: ● in the shop / ○ a draft */
+.adm-blog2__st { margin: 0; padding-top: 12px; border-top: 1px solid var(--a-rule); font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-blog2__on { color: var(--a-green); }
+/* «⋯» — its list under the button on a desktop, over it where the button is
+   pinned at the bottom (a phone). Square, a 1-px ink frame, like every menu here. */
+.adm-pin--blog { display: flex; align-items: center; gap: 8px; }
+.adm-bmenu { position: relative; flex: none; }
+.adm-bmenu__btn { width: 46px; height: 46px; padding: 0; font-size: 20px; line-height: 1; }
+.adm-bmenu__list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 48; min-width: 240px;
+  display: flex; flex-direction: column; background: var(--a-paper); border: 1px solid var(--a-ink);
+}
+.adm-bmenu__i {
+  min-height: 48px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); text-align: left; font: inherit; font-size: 14px; white-space: nowrap;
+}
+.adm-bmenu__i:last-child { border-bottom: 0; }
+.adm-bmenu__i:hover, .adm-bmenu__i:focus-visible { background: var(--a-panel); }
+.adm-bmenu__i--warn { color: var(--a-rust); }
+@media (max-width: 899px) {
+  .adm-pin--blog .adm-pin__btn { flex: 1; width: auto; }
+  .adm-bmenu__btn { width: 50px; height: 50px; }
+  .adm-bmenu__list { top: auto; bottom: calc(100% + 8px); left: 0; right: auto; }
+}
+
 /* ---------- Аналитика ----------------------------------------------------- */
 
 .adm-kpis {
@@ -2292,6 +2430,44 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    is what says it. */
 .adm-q__x { display: block; color: var(--a-warn); }
 
+/* ---- Аналитика, 1a (screen 17; app.js admStatsScreen) ----------------------
+   The period as a segmented control with the screen's one «?» beside it, the
+   four numbers in one row (two by two on a phone), then two columns — the
+   days and what sells; the path to a purchase and «Ещё цифры» — that stack
+   when the screen's own column is narrow. */
+.adm-stats { container-type: inline-size; container-name: stats; }
+.adm-stats__per { display: flex; align-items: center; gap: 8px; }
+/* the «?» beside the period, not pushed to the far end of the row */
+.adm-stats__per .adm-help { margin-left: 0; }
+.adm-stats + .adm-helpp, .adm-stats .adm-helpp { max-width: 640px; }
+.adm-kpis--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.adm-kpi__d span + span { color: var(--a-muted); }
+.adm-stats__cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+@container stats (max-width: 760px) {
+  .adm-stats__cols { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+}
+@media (max-width: 767px) {
+  .adm-kpis--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-stats__per .adm-seg { flex: 1 1 auto; }
+  .adm-stats__per .adm-seg button { flex: 1 1 0; padding: 0 8px; }
+}
+/* under a section's own ink rule the chart needs no second one */
+.adm-stats .adm-wbars { border-top: 0; margin-top: 4px; }
+/* a name, its figure, and a bar as long as its share — «Что покупают», the path to a purchase */
+.adm-shares { margin-top: 4px; }
+.adm-share { padding: 10px 0 12px; border-bottom: 1px solid var(--a-rule); }
+.adm-share__r { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; line-height: 19px; }
+.adm-share__n { min-width: 0; overflow-wrap: anywhere; }
+.adm-share__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 16px; white-space: nowrap; }
+.adm-share__p { font-family: "Golos Text", sans-serif; font-weight: 400; font-size: 12px; color: var(--a-muted); }
+.adm-share__bar { height: 6px; margin-top: 6px; background: var(--a-panel); }
+.adm-share__bar i { display: block; height: 100%; background: var(--a-ink); }
+.adm-shares--green .adm-share__bar i { background: var(--a-green); }
+.adm-stats__more .adm-foldrow__b > .adm-hint { margin: 0; max-width: 620px; }
+.adm-stats__more .adm-foldrow__b > .adm-list { margin-top: 0; }
+.adm-stats__foot { border-top: 1px solid var(--a-rule); padding-top: 12px; }
+.adm-stats__foot .adm-link { font-size: 13px; text-align: left; }
+
 /* ---------- «Цены и баллы»: one basket, both price lists ------------------
    The card's six numbers only mean something together, so the foot of the
    form works a real 40 € order through twice — once as an ordinary shopper,
@@ -2318,6 +2494,31 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-dot--warn { background: var(--a-warn); }
 /* known to be off, and not a fault — the assistant with no model behind it */
 .adm-dot--off { background: var(--a-canvas); }
+/* 1a (screen 18; app.js admAppsHTML): the count under the title, a card per
+   problem with its one action, the rows still being asked about on a line of
+   their own, and «Работает · N» folded. This screen has no dark button:
+   every action on it is outlined, «Написать Диму» included (README rule 2). */
+.adm-apps .adm-head { align-items: center; }
+.adm-apps__sum { margin: -12px 0 0; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--a-muted); }
+.adm-apps__sum--warn { color: var(--a-rust); }
+.adm-apps__sum--ok { color: var(--a-green); }
+.adm-appcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+.adm-appcard { border: 1px solid var(--a-edge); padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.adm-appcard__h { display: flex; align-items: flex-start; gap: 10px; }
+.adm-appcard__h .adm-dot { margin-top: 5px; }
+.adm-appcard__n { font-weight: 600; font-size: 15px; line-height: 20px; overflow-wrap: anywhere; }
+.adm-appcard__t, .adm-approw__t { font-size: 13px; line-height: 19px; color: var(--a-muted); overflow-wrap: anywhere; }
+.adm-appcard__a, .adm-approw__a { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.adm-apps .adm-btn { background: var(--a-paper); color: var(--a-ink); border-color: var(--a-ink); }
+.adm2 .adm-apps a.adm-btn { color: var(--a-ink); }
+.adm-apps .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); }
+.adm-apps__wait { margin: 0; }
+.adm-approw { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-approw:last-child { border-bottom: 0; }
+.adm-approw__b { min-width: 0; flex: 1; }
+.adm-approw__n { font-weight: 600; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.adm-apps__foot { margin: 0; font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-apps__foot .adm-link { font-size: 13px; overflow-wrap: anywhere; }
 
 /* ---------- Настройки ----------------------------------------------------- */
 
