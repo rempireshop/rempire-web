@@ -49,7 +49,7 @@ async function card(id: string) {
 
 interface CardBody {
   ok: boolean;
-  customer: { id: string; email: string; ordersCount: number; revenue: number };
+  customer: { id: string; email: string; ordersCount: number; revenue: number; birthday: string | null };
   orders: Array<{ id: string; number: string; createdAt: string; total: number; status: string; itemsCount: number; firstItem: string; channel: string; labeled: boolean; invoice: unknown }>;
   stats: { firstOrderAt: string | null; lastOrderAt: string | null; avgOrder: number; topBrands: Array<{ brand: string; spent: number }> };
   reviews: Array<{ id: string; productId: string; product: string; rating: number; text: string; status: string; createdAt: string; name: string }>;
@@ -249,6 +249,24 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     expect(body.orders).toEqual([]);
     expect(body.stats).toEqual({ firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] });
     expect(body.reviews).toEqual([]);
+  });
+
+  /* Dim, 25.09.2026 (q33): «show the birthday». The customer gives it in
+     their own account and the birthday letter reads it, but the admin query
+     never selected the column, so the owner could not see it anywhere. It is
+     a calendar date: formatted by Postgres, so no timezone can turn the 7th
+     into the 6th on its way to the card. */
+  it("carries the birthday the customer gave, as a plain date — and null when none was given", async () => {
+    const me = await recordLogin(EMAIL, "RU");
+    await updateCustomer(EMAIL, { birthday: "1990-03-07" });
+    const other = await recordLogin("no.birthday@example.com", "ET");
+
+    expect((await card(me.id)).body.customer).toMatchObject({ birthday: "1990-03-07" });
+    expect((await card(EMAIL)).body.customer).toMatchObject({ birthday: "1990-03-07" });
+    expect((await card(other.id)).body.customer).toMatchObject({ birthday: null });
+    // …and the list the card is opened from carries it too
+    const [row] = await listCustomersAdmin({ q: EMAIL });
+    expect(row.birthday).toBe("1990-03-07");
   });
 
   it("still refuses a caller with no admin cookie", async () => {
