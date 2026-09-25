@@ -97,6 +97,7 @@ function panel(opts: { orders: Order[]; found?: { q: string; rows: Order[] }; wa
     var location = { search: env.search };
     var pendingAction = null;
     var shipRollback = null, flowCountsAt = 0, reportSummaryAt = 0;
+    var ADM_SET_OF = {};   // srvPush hands settings keys to their own slot (1a) — none here
     ${ONE_DECL}
     ${SHIP_ERR}
     function apiJson(url) { return env.ask(url, "GET"); }

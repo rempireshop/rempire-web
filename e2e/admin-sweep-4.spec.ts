@@ -33,6 +33,13 @@ test.beforeEach(async ({}, testInfo) => {
     "admin sweep — desktop and mobile projects only");
 });
 
+/** A fold of a 1a screen, opened — never toggled shut (it remembers its state). */
+async function openFold(page: Page, key: string): Promise<void> {
+  const head = page.locator(`[data-admfold="${key}"]`).first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
+}
+
 /** «Настройки» → one of its six pages. */
 async function settings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
@@ -45,34 +52,47 @@ async function settings(page: Page, sub: string): Promise<void> {
 test.describe("admin — «Журнал изменений» shows the shop's own log", () => {
   test.use({ extraHTTPHeaders: ipHeaders(177) });
 
-  test("two lists: this browser with «Вернуть», the server read-only", async ({ page }) => {
+  /* 1a (25.09.2026, q7): ONE list — this browser's lines and the shop's —
+     and «Вернуть» from any device, because the server keeps what each change
+     replaced (db/migrations/207_audit_prev.sql). Sign-ins are folded away. */
+  test("one list: the shop's rows with who did it and a «Вернуть» of their own, sign-ins folded", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
 
-    // something that only the server records — a sign-in, which just happened
-    await settings(page, "journal");
+    /* A change this browser never saw — made straight through the route, and
+       a real one: a write of the same value has nothing to take back, and its
+       row rightly offers no «Вернуть». The suite's shop always has its pricing
+       stored (e2e bootstrap); it goes back as it was below. */
+    const pricing = (await (await page.request.get("/api/admin/settings/")).json()).settings.pricing;
+    expect(pricing, "the suite's shop has no stored pricing to change").toBeTruthy();
+    const moved = { ...pricing, proMinOrder: Number(pricing.proMinOrder || 0) + 1 };
+    expect((await page.request.put("/api/admin/settings/", { data: { pricing: moved } })).ok()).toBe(true);
+    try {
+      await settings(page, "journal");
+      await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" }),
+        "the second list is still there").toHaveCount(0);
 
-    // the two headings, and the sentence that explains the difference
-    await expect(page.locator(".adm-sec__t").filter({ hasText: "Ваши изменения в этом браузере" })).toBeVisible();
-    await expect(page.locator(".adm-sec__t").filter({ hasText: "Журнал магазина" })).toBeVisible();
-    await expect(page.locator(".adm-narrow"), "the journal does not say why «Вернуть» is local")
-      .toContainText("«Вернуть» работает только здесь");
-    await expect(page.locator(".adm-narrow"), "the server list is not labelled as shop-wide")
-      .toContainText("с любого устройства");
+      // the server's own rows really arrive, and carry who did it
+      const serverRows = page.locator(".adm-jrow__who");
+      await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
+      await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
+      const row = page.locator(".adm-jrow", { hasText: "Настройка изменена: Цены и баллы" }).first();
+      await expect(row, "the route's own change is not in the list").toBeVisible();
+      await expect(row.locator("[data-admundosrv]"), "a row the server can take back has no «Вернуть»").toBeVisible();
 
-    // the server's own rows really arrive, and carry who did it
-    const serverRows = page.locator(".adm-jrow__who");
-    await expect(serverRows.first(), "GET /api/admin/audit is still uncalled").toBeVisible({ timeout: 15_000 });
-    await expect(page.locator(".adm-narrow")).toContainText(/владелец|вход с адреса|магазин сам/);
+      // the sign-ins: one folded block with today's count, the rows inside it
+      const logins = page.locator('[data-admfold="set:logins"]');
+      await expect(logins).toHaveAttribute("aria-expanded", "false");
+      await expect(logins).toContainText("за сегодня");
+      await expect(page.locator(".adm-jrow--login").first()).toBeHidden();
+      await logins.click();
+      await expect(page.locator(".adm-jrow--login").first(), "the sign-in never reached the log").toBeVisible();
 
-    // the shop-wide rows are read-only — «Вернуть» belongs to the local list only
-    const undoCount = await page.locator("[data-admundo]").count();
-    const whoCount = await serverRows.count();
-    expect(whoCount, "no server rows at all").toBeGreaterThan(0);
-    expect(undoCount, "«Вернуть» leaked onto the server rows").toBeLessThan(whoCount + 1);
-
-    await assertClean(page, w, "journal with the server log");
+      await assertClean(page, w, "journal with the server log");
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { pricing } });
+    }
   });
 
   test("a change made here appears in both lists, and «Вернуть» is on the local one", async ({ page }) => {
@@ -413,6 +433,8 @@ test.describe("admin — «Доставлен» can close itself", () => {
     const w = watch(page);
     await openAdmin(page);
     await settings(page, "delivery");
+    // «Когда «Доставлен»» is a fold of the page since 1a
+    await openFold(page, "set:deliv");
 
     const days = page.locator("[data-delivdays]");
     await expect(days, "there is no «закрывать заказ через» setting").toBeVisible();
@@ -435,8 +457,11 @@ test.describe("admin — «Доставлен» can close itself", () => {
       expect(anyShipped >= 0).toBe(true);
     } finally {
       await settings(page, "delivery");
+      await openFold(page, "set:deliv");
       await page.locator("[data-delivdays]").selectOption("0");
       await clearToast(page);
+      await expect.poll(async () =>
+        ((await (await page.request.get("/api/admin/settings/")).json()).settings.delivery || {}).autoDays ?? 0).toBe(0);
     }
   });
 });
@@ -460,45 +485,47 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
     await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-checked", "true");
 
     // ---- off ---------------------------------------------------------------
-    await sw.click();
-    // the form under it stops asking about a programme that is off
-    await expect(page.locator('[data-pricingf="proDiscountPct"]'),
-      "the salon discount field is shown while the programme is off").toHaveCount(0);
-    await expect(page.locator(".adm-form")).toContainText("Сейчас выключено");
-    await page.locator("[data-admpricingsave]").click();
-    await page.locator("[data-admapply]").click();
-    await clearToast(page);
-
-    // ---- off: the five screens Dim named ----------------------------------
-    await adminSection(page, "people");
-    /* Off, the row keeps the two chips that are not about tiers at all — «Все»
-           and «Подписаны», who agreed to hear from the shop. The three tier chips
-           («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
-        await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
-        await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
-        await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
-    await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
-
-    await adminSection(page, "goods");
-    const first = page.locator("[data-admgoods]").first();
-    await first.click();
-    await page.locator('[data-edtab="sizes"]').click();
-    await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
-    await page.locator("[data-admclose]").first().click();
-
+    /* From here on the shop is changed: the `finally` below puts the programme
+       back on even when a step of the «off» half fails (a server that drops a
+       connection mid-run left it off for the retry, 25.09.2026). */
     const feed = async () => (await (await page.request.get("/api/overrides/")).json()).settings.pricing;
-    await expect.poll(async () => (await feed()).partnersOn,
-      { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
-    expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
-
     try {
+      await sw.click();
+      // the form under it stops asking about a programme that is off
+      await expect(page.locator('[data-pricingf="proDiscountPct"]'),
+        "the salon discount field is shown while the programme is off").toHaveCount(0);
+      await expect(page.locator(".adm-page")).toContainText("Сейчас выключено");
+      // the switch saves itself — no «Сохранить», no question (q40)
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
+      await clearToast(page);
+
+      // ---- off: the five screens Dim named ----------------------------------
+      await adminSection(page, "people");
+      /* Off, the row keeps the two chips that are not about tiers at all — «Все»
+             and «Подписаны», who agreed to hear from the shop. The three tier chips
+             («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
+          await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
+          await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
+          await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
+      await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
+
+      await adminSection(page, "goods");
+      const first = page.locator("[data-admgoods]").first();
+      await first.click();
+      await page.locator('[data-edtab="sizes"]').click();
+      await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
+      await page.locator("[data-admclose]").first().click();
+
+      await expect.poll(async () => (await feed()).partnersOn,
+        { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
+      expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
+
       // ---- on: everything comes back --------------------------------------
       await settings(page, "prices");
       await page.locator("[data-partnerson]").click();
       await expect(page.locator('[data-pricingf="proDiscountPct"]'),
         "switching it on did not open the settings under it").toBeVisible();
-      await page.locator("[data-admpricingsave]").click();
-      await page.locator("[data-admapply]").click();
       await clearToast(page);
       await expect.poll(async () => (await feed()).partnersOn,
         { timeout: 15_000, message: "the switch never reached the storefront" }).toBe(true);
@@ -519,8 +546,6 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       const back = page.locator("[data-partnerson]");
       if ((await back.getAttribute("aria-checked")) !== "true") {
         await back.click();
-        await page.locator("[data-admpricingsave]").click();
-        await page.locator("[data-admapply]").click();
         await clearToast(page);
       }
       await expect.poll(async () => (await feed()).partnersOn, { timeout: 15_000 }).toBe(true);

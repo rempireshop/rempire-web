@@ -1684,12 +1684,13 @@
       "title": "Включить «Партнёры и баллы»",
       "steps": [
         "«Ещё» → «Настройки» → «Цены и баллы».",
-        "Включить первый переключатель, «Партнёры и баллы».",
-        "Нажать «Сохранить» (на телефоне — вверху экрана) и подтвердить.",
+        "Включить верхний переключатель «Партнёры и баллы».",
+        "Посмотреть на пример внизу страницы: обычный покупатель и партнёр.",
         "Открыть в магазине кабинет покупателя."
       ],
       "expect": [
-        "Пока не сохранили, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — с названием карточки).",
+        "Переключатель сохраняется сразу, без вопроса: вверху «Сохранено ✓», внизу «Вернуть».",
+        "Пример показывает, сколько платит каждый и сколько вернётся баллами.",
         "В кабинете покупателя появились баллы.",
         "Там же появилась кнопка «Стать партнёром».",
         "На кассе появилось «Использовать баллы».",
@@ -1702,19 +1703,22 @@
         "title": "Switching on «Партнёры и баллы»",
         "steps": [
           "«Ещё» → «Настройки» → «Цены и баллы».",
-          "Switch on the first switch, «Партнёры и баллы» (partners and points).",
-          "Press «Сохранить» (on the phone — at the top of the screen) and confirm.",
+          "Switch on the top switch, «Партнёры и баллы» (partners and points).",
+          "Look at the example at the bottom of the page: an ordinary buyer and a partner.",
           "Open the customer account in the shop."
         ],
         "expect": [
-          "Until saved, «Не сохранено» stands next to «Сохранить» (on a computer with the card name).",
+          "The switch saves at once, with no question: «Сохранено ✓» at the top, «Вернуть» below.",
+          "The example shows what each one pays and what comes back as points.",
           "The customer account now shows points.",
           "A «Стать партнёром» button has appeared there.",
           "«Использовать баллы» has appeared at the checkout.",
           "The product card in the panel has a «Салон, €» column."
         ],
         "why": "With the switch off, half this plan has nothing to look at."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-promo-create",
@@ -1866,9 +1870,9 @@
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
         "Проверить шесть строк: Эстония, Латвия, Литва, Финляндия, «Другие страны Европы», «Остальные страны».",
-        "Раскрыть «Цены по странам Европы» и найти Польшу, Венгрию и Грецию.",
-        "Вписать 4 в поле DPD у Польши и раскрыть «Что увидит покупатель».",
-        "Нажать «вернуть» под этим полем, ничего не сохранять."
+        "Раскрыть «Страны Европы» и найти Польшу, Венгрию и Грецию.",
+        "Вписать 4 в поле DPD у Польши и выйти из поля.",
+        "Нажать «вернуть» под этим полем."
       ],
       "expect": [
         "Под полями Эстонии: Omniva 3,19, SmartPosti 2,59, DPD 2,59, Unisend 2,49 €.",
@@ -1876,7 +1880,7 @@
         "«Бесплатно от»: 59 € у четырёх домашних стран, 200 € в остальной Европе.",
         "Польша: пакомат Nova Post 5,49 €, DPD 7,49 €, курьер 15,99 €.",
         "Венгрия: пакомат только Nova Post 7,09 €; Греция: пакомата нет, курьер 28,89 €.",
-        "DPD Польши 4: «Ниже Montonio: 7,49 € · вернуть», в предпросмотре Европа «от 4 €»."
+        "DPD Польши 4: рыжее «Ниже тарифа Montonio: 7,49 €» и «Оставить так»; после «вернуть» — пусто."
       ],
       "why": "Курьер в Грецию стоит 43 €; проданный за 9,90 € вы доплатите сами.",
       "risk": "high",
@@ -1886,9 +1890,9 @@
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
           "Check six rows: Estonia, Latvia, Lithuania, Finland, «Другие страны Европы», «Остальные страны».",
-          "Expand «Цены по странам Европы» and find Poland, Hungary and Greece.",
-          "Type 4 into Poland's DPD box and open «Что увидит покупатель».",
-          "Press «вернуть» under that box; save nothing."
+          "Expand «Страны Европы» and find Poland, Hungary and Greece.",
+          "Type 4 into Poland's DPD box and leave the box.",
+          "Press «вернуть» under that box."
         ],
         "expect": [
           "Under Estonia's boxes: Omniva 3.19, SmartPosti 2.59, DPD 2.59, Unisend 2.49 €.",
@@ -1896,12 +1900,12 @@
           "«Бесплатно от»: €59 in the four home countries, €200 in the rest of Europe.",
           "Poland: locker Nova Post €5.49, DPD €7.49, courier €15.99.",
           "Hungary: locker Nova Post only, €7.09; Greece: no locker, courier €28.89.",
-          "Poland's DPD at 4: «Ниже Montonio: 7,49 € · вернуть», preview Europe «от 4 €»."
+          "Poland's DPD at 4: rust «Ниже тарифа Montonio: 7,49 €» and «Оставить так»; empty after «вернуть»."
         ],
         "why": "A courier to Greece costs 43 €; at 9.90 € you pay the rest."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T15:03:40.794Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-delivery-below",
@@ -1912,17 +1916,16 @@
       "title": "Цена доставки ниже Montonio",
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
-        "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии.",
-        "Нажать «Сохранить» и прочитать карточку до конца.",
-        "Нажать «Сохранить всё равно».",
+        "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии, выйти из поля.",
+        "Прочитать рыжие строки под полями и вверху, потом нажать «Оставить так» под обоими.",
         "Сразу в кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva.",
         "Свернуть браузер и вернуться, потом обновить страницу и открыть панель.",
-        "Очистить оба поля, нажать «Сохранить» и подтвердить."
+        "Очистить оба поля и выйти из поля."
       ],
       "expect": [
-        "Карточка «Цена ниже тарифа Montonio» называет обе строки, ничего не обрезано.",
-        "Пока не подтвердили, рядом с «Сохранить» написано «Не сохранено».",
-        "После подтверждения: «Тарифы доставки сохранены» и «Сохранено ✓».",
+        "Под полем Эстонии: «Ниже тарифа Montonio: 3,19 €» и кнопка «Оставить так».",
+        "Вверху страницы: «Не сохранено: цена ниже тарифа Montonio» — вопросов в окошке нет.",
+        "После «Оставить так» у обоих — «Сохранено ✓».",
         "В кассе у Omniva 1 € — и после возврата в браузер, и после обновления.",
         "В панели после обновления в полях по-прежнему 1 и 2.",
         "После очистки под полями снова цены Montonio: 3,19 € и 4,99 €."
@@ -1934,17 +1937,16 @@
         "title": "A delivery price below Montonio's",
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
-          "Type 1 into Estonia's Omniva box and 2 into Latvia's.",
-          "Press «Сохранить» (save) and read the card to the end.",
-          "Press «Сохранить всё равно» (save anyway).",
+          "Type 1 into Estonia's Omniva box and 2 into Latvia's, and leave the box.",
+          "Read the rust lines under the boxes and at the top, then press «Оставить так» under both.",
           "Straight away, at the checkout with a cart under 59 €, pick Estonia, «Пакомат» and Omniva.",
           "Put the browser in the background and come back, then reload and open the panel.",
-          "Clear both boxes, press «Сохранить» and confirm."
+          "Clear both boxes and leave the box."
         ],
         "expect": [
-          "The «Цена ниже тарифа Montonio» card names both rows, nothing cut off.",
-          "Until you confirm, «Не сохранено» stands next to «Сохранить».",
-          "After confirming: «Тарифы доставки сохранены» and «Сохранено ✓».",
+          "Under Estonia's box: «Ниже тарифа Montonio: 3,19 €» and an «Оставить так» button.",
+          "At the top of the page: «Не сохранено: цена ниже тарифа Montonio» — no pop-up question.",
+          "After «Оставить так» on both — «Сохранено ✓».",
           "At the checkout Omniva is 1 € — after coming back and after the reload.",
           "Back in the panel after the reload the boxes still hold 1 and 2.",
           "After clearing, Montonio's prices are under the boxes again: 3,19 € and 4,99 €."
@@ -1952,7 +1954,7 @@
         "why": "A price below the rate is your call, but never by accident: the card asks once."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T15:09:21.235Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-carton",
@@ -1962,7 +1964,7 @@
       "lang": "RU",
       "title": "Коробка магазина: 25 × 18 × 8",
       "steps": [
-        "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
+        "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка».",
         "Проверить три размера, строку с весом и размер ячейки.",
         "Поставить высоту 10 и выйти из поля.",
         "Вернуть высоту 8 и выйти из поля."
@@ -1970,7 +1972,7 @@
       "expect": [
         "Размеры 25, 18 и 8 см; строка: «На этикетке вес 0,9 кг».",
         "С высотой 10 вес на этикетке остался 0,9 кг.",
-        "Размер ячейки по умолчанию — S.",
+        "Размер ячейки по умолчанию — S, в ряду кнопок XS–XL.",
         "С высотой 10 появилось предупреждение про пакоматы DPD за границей.",
         "С высотой 8 предупреждение исчезло.",
         "Каждое изменение подтверждено «Сохранено ✓»."
@@ -1981,7 +1983,7 @@
       "en": {
         "title": "The shop's box: 25 × 18 × 8",
         "steps": [
-          "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка магазина».",
+          "«Ещё» → «Настройки» → «Доставка и оплата» → «Коробка».",
           "Check the three sides, the weight line and the locker size.",
           "Set the height to 10 and leave the field.",
           "Set it back to 8 and leave the field."
@@ -1989,7 +1991,7 @@
         "expect": [
           "Sides 25, 18 and 8 cm; the line says «На этикетке вес 0,9 кг».",
           "With a height of 10 the label weight stays 0.9 kg.",
-          "The default locker size is S.",
+          "The default locker size is S, in a row of XS–XL buttons.",
           "With a height of 10 a warning about DPD lockers abroad appears.",
           "With a height of 8 the warning is gone.",
           "Each change is confirmed with «Сохранено ✓»."
@@ -1997,7 +1999,7 @@
         "why": "A box bigger than the one prices are worked out for loses money on every DPD locker abroad."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T16:37:14.361Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-delivery-folds",
@@ -2008,32 +2010,34 @@
       "title": "Складные блоки в «Доставке и оплате»",
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
-        "Раскрыть «Цены по странам Европы», потом нажать на заголовок ещё раз.",
+        "Раскрыть «Страны Европы», потом нажать на заголовок ещё раз.",
         "То же самое с «Что увидит покупатель».",
-        "Снова раскрыть список стран и переключить «Доставляем сюда» у любой страны."
+        "Снова раскрыть «Страны Европы» и выключить любую страну её переключателем."
       ],
       "expect": [
         "Первое нажатие раскрывает блок, второе закрывает его.",
         "Так ведут себя оба блока, а не один.",
-        "Переключение страны список под руками не захлопывает."
+        "Переключение страны список под руками не захлопывает.",
+        "Под названием закрытого блока — одна строка о том, что внутри."
       ],
       "why": "Список из двадцати одной страны, который нельзя закрыть, прячет под собой всю остальную страницу — включая «Сохранить».",
       "risk": "low",
       "writes": false,
-      "mark": "new",
-      "markedAt": "2026-09-18T12:20:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z",
       "en": {
         "title": "The folding blocks in «Доставка и оплата»",
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
-          "Open «Цены по странам Европы», then press its heading again.",
+          "Open «Страны Европы», then press its heading again.",
           "Do the same with «Что увидит покупатель».",
-          "Open the country list again and flip «Доставляем сюда» on any country."
+          "Open «Страны Европы» again and switch any country off with its switch."
         ],
         "expect": [
           "The first press opens the block, the second closes it.",
           "Both blocks behave that way, not just one.",
-          "Flipping a country does not snap the list shut under your hand."
+          "Flipping a country does not snap the list shut under your hand.",
+          "Under a closed block's name — one line saying what is inside."
         ],
         "why": "A twenty-one-country list that will not close hides the rest of the page under it — «Сохранить» included."
       }
@@ -2049,38 +2053,38 @@
         "На той же странице выписать текущие цены Эстонии.",
         "Нажать «Везде взять цены Montonio».",
         "Посмотреть, что стало с полями и с подписями под ними.",
-        "Нажать «Отменить правки», ничего не сохраняя.",
-        "Вписать своё число в одно поле и нажать на серую цену под ним."
+        "Сразу нажать «Вернуть» в подсказке внизу экрана.",
+        "Вписать своё число в одно поле, выйти из поля и нажать «вернуть» под ним."
       ],
       "expect": [
-        "Кнопка очищает все поля цен — остаются цены Montonio под полями.",
+        "Кнопка очищает все поля цен — остаются серые цены Montonio.",
         "«Бесплатно от» кнопка не трогает.",
-        "Вверху страницы написано, что пустое поле — это цена Montonio.",
-        "Рядом с «Сохранить» появилось «Не сохранено».",
-        "«Отменить правки» возвращает ваши цены, ничего не сохранив.",
-        "Нажатие на серую цену под полем очищает это одно поле."
+        "Вопроса нет: сразу «Сохранено ✓» и подсказка «В таблице цены Montonio».",
+        "«Вернуть» в подсказке возвращает ваши прежние цены.",
+        "Вверху страницы написано: серые числа — цены Montonio, жирные — ваши.",
+        "«вернуть» под полем очищает это одно поле."
       ],
       "why": "Одно нажатие стирает все ваши цены сразу, и покупатель увидит их только после «Сохранить» — значит смотреть надо до него.",
       "risk": "high",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-18T12:20:00.000Z",
+      "markedAt": "2026-09-25T10:51:07.148Z",
       "en": {
         "title": "The «Везде взять цены Montonio» button",
         "steps": [
           "On the same page write down Estonia's current prices.",
           "Press «Везде взять цены Montonio» (use Montonio prices everywhere).",
           "Look at what happened to the boxes and to the lines under them.",
-          "Press «Отменить правки» (discard changes) without saving anything.",
-          "Type your own number into one box and press the grey price under it."
+          "Straight away, press «Вернуть» in the notice at the bottom of the screen.",
+          "Type your own number into one box, leave it, and press «вернуть» under it."
         ],
         "expect": [
-          "The button empties every price box — Montonio's prices stay underneath.",
+          "The button empties every price box — Montonio's grey prices stay.",
           "It does not touch «Бесплатно от».",
-          "The top of the page says an empty box means Montonio's price.",
-          "Next to «Сохранить» the words «Не сохранено» appear.",
-          "«Отменить правки» brings your prices back, saving nothing.",
-          "Pressing the grey price under a box empties that one box."
+          "No question: «Сохранено ✓» at once and the notice «В таблице цены Montonio».",
+          "«Вернуть» in the notice brings your earlier prices back.",
+          "The top of the page says: grey numbers are Montonio's, bold ones are yours.",
+          "«вернуть» under a box empties that one box."
         ],
         "why": "One press wipes every price you set, and a shopper only sees the result after «Сохранить» — so the looking has to happen before it."
       }
@@ -2093,7 +2097,7 @@
       "lang": "RU",
       "title": "Какие банки показывать",
       "steps": [
-        "«Ещё» → «Настройки» → «Доставка и оплата» → блок про банки.",
+        "«Ещё» → «Настройки» → «Доставка и оплата» → «Банки в кассе».",
         "Оставить в Эстонии включёнными только Swedbank и SEB.",
         "Попробовать выключить и эти два — до последнего.",
         "Открыть кассу с доставкой в Эстонию и посмотреть список банков.",
@@ -2101,6 +2105,7 @@
       ],
       "expect": [
         "Банки в панели разбиты по странам.",
+        "Каждый переключатель сохраняется сразу — вверху «Сохранено ✓».",
         "На кассе с доставкой в Эстонию остались только Swedbank и SEB.",
         "Других эстонских банков в списке нет.",
         "Последний включённый банк страны выключить нельзя — панель говорит почему.",
@@ -2112,7 +2117,7 @@
       "en": {
         "title": "Which banks to show",
         "steps": [
-          "«Ещё» → «Настройки» → «Доставка и оплата» → the banks block.",
+          "«Ещё» → «Настройки» → «Доставка и оплата» → «Банки в кассе».",
           "Under Estonia leave only Swedbank and SEB switched on.",
           "Try switching those two off as well, down to the last one.",
           "Open the checkout with delivery to Estonia and look at the bank list.",
@@ -2120,6 +2125,7 @@
         ],
         "expect": [
           "The banks in the panel are grouped by country.",
+          "Each switch saves at once — «Сохранено ✓» at the top.",
           "At the checkout only Swedbank and SEB are left for Estonia.",
           "No other Estonian bank is in the list.",
           "The last bank of a country will not switch off; the panel says why.",
@@ -2128,7 +2134,7 @@
         "why": "An empty bank list stops the payment, and extra logos slow it down."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-company-iban",
@@ -2142,15 +2148,14 @@
         "Посмотреть на строку «Реквизиты», пока IBAN пуст.",
         "Открыть блок и вписать в IBAN что-нибудь не похожее на счёт.",
         "Проверить название, регистрационный номер, номер KMKR, адрес, почту и телефон.",
-        "Вписать настоящий IBAN и банк, нажать «Сохранить» (на телефоне — вверху) и подтвердить."
+        "Вписать настоящий IBAN и банк и выйти из поля."
       ],
       "expect": [
         "Название, адрес и номера заполнены.",
         "Пока IBAN пуст, на строке «Реквизиты» стоит метка «нет IBAN».",
         "Под ней строка о том, что счета компаниям не уходят.",
-        "Если вписать не IBAN, подсказка у поля говорит об этом.",
-        "После сохранения IBAN и название банка на месте, метки нет.",
-        "Рядом с «Сохранить» было «Не сохранено», после сохранения — «Сохранено ✓»."
+        "Не IBAN: поле рыжее, подсказка говорит почему, и оно не сохраняется.",
+        "Настоящий IBAN сохраняется сам: вверху «Сохранено ✓», метки больше нет."
       ],
       "why": "Счёт без номера счёта не оплатят, а с чужими реквизитами деньги уйдут мимо.",
       "risk": "high",
@@ -2162,18 +2167,19 @@
           "Look at the «Реквизиты» row while the IBAN is empty.",
           "Open the block and type something that is not an account number into IBAN.",
           "Check the name, the registration number, the KMKR (VAT) number, the address, the e-mail and the phone.",
-          "Type the real IBAN and bank, press «Сохранить» (on the phone — at the top) and confirm."
+          "Type the real IBAN and bank, and leave the field."
         ],
         "expect": [
           "The name, address and numbers are filled in.",
           "While the IBAN is empty the «Реквизиты» row carries a «нет IBAN» badge.",
           "Under it a line says no invoice goes out to companies.",
-          "Type something that is not an IBAN and the field's own hint says so.",
-          "After saving the IBAN and bank name are there and the badge is gone.",
-          "Next to «Сохранить» it said «Не сохранено», and «Сохранено ✓» after saving."
+          "Not an IBAN: the field turns rust, the hint says why, and it is not saved.",
+          "A real IBAN saves itself: «Сохранено ✓» at the top, and the badge is gone."
         ],
         "why": "An invoice with no account number goes unpaid; wrong details send the money elsewhere."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-invoice-settings",
@@ -2183,7 +2189,7 @@
       "lang": "RU",
       "title": "Настройки счетов для компаний",
       "steps": [
-        "На той же странице найти блок «Счета для компаний».",
+        "На той же странице раскрыть «Счета для компаний».",
         "Проверить приставку номера, срок оплаты и два поля с днями.",
         "Поменять срок оплаты и нажать Enter в поле."
       ],
@@ -2192,8 +2198,8 @@
         "«Напомнить за, дней до срока» — 2.",
         "«Отменить через, дней после срока» — 7.",
         "Ноль в этих полях значит «не делать этого».",
-        "Enter в поле сохраняет: рядом с «Сохранить» появляется «Сохранено ✓».",
-        "«Сохранено ✓» держится, пока вы не начнёте печатать снова."
+        "Enter в поле сохраняет: вверху «Сохранено ✓», кнопки «Сохранить» нет.",
+        "Внизу подсказка «Счета для компаний: сохранено ✓» с «Вернуть»."
       ],
       "why": "Слишком короткий срок отменит заказ фирмы, которая платит раз в неделю.",
       "risk": "med",
@@ -2201,7 +2207,7 @@
       "en": {
         "title": "Invoice settings for companies",
         "steps": [
-          "On the same page find the «Счета для компаний» (invoices for companies) block.",
+          "On the same page open the «Счета для компаний» (invoices for companies) block.",
           "Check the number prefix, the payment term and the two fields counted in days.",
           "Change the payment term and press Enter in the box."
         ],
@@ -2210,11 +2216,13 @@
           "«Напомнить за, дней до срока» is 2.",
           "«Отменить через, дней после срока» is 7.",
           "A zero in either field means «do not do this».",
-          "Enter in the box saves: «Сохранено ✓» appears next to «Сохранить».",
-          "«Сохранено ✓» stays until you type again."
+          "Enter in the box saves: «Сохранено ✓» at the top, no «Сохранить» button.",
+          "At the bottom, the notice «Счета для компаний: сохранено ✓» with «Вернуть»."
         ],
         "why": "Too short a term cancels the order of a company that pays weekly."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "panel-push",
@@ -2236,14 +2244,14 @@
         "Проверочное приходит, даже когда панель свёрнута.",
         "Нажатие на оповещение открывает карточку того самого заказа.",
         "В списке оба устройства; у того, с которого смотрите, стоит «этот».",
-        "«Убрать» снимает устройство из списка, и оповещения на него больше не идут.",
+        "«Убрать» снимает устройство; 5 секунд его можно «Вернуть», потом оповещения не идут.",
         "В Safari не с домашнего экрана кнопки нет — написано, как добавить иконку."
       ],
       "why": "Оповещение — это единственный способ узнать о заказе, не открывая панель. iPhone отдаёт их только приложению с домашнего экрана, поэтому проверять надо именно оттуда.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-21T06:53:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z",
       "en": {
         "title": "Order notifications on your phone",
         "steps": [
@@ -2259,7 +2267,7 @@
           "The test arrives even with the panel in the background.",
           "Tapping the notification opens that exact order's card.",
           "Both devices are listed; the one you are on is marked «этот».",
-          "«Убрать» takes a device off the list and notifications stop going to it.",
+          "«Убрать» removes a device; «Вернуть» works for 5 seconds, then notifications stop.",
           "Outside the Home Screen there is no button, but instructions for adding the icon."
         ],
         "why": "A notification is the only way to hear about an order without opening the panel. iOS delivers them only to a Home Screen app, so that is where this must be tested."
@@ -7169,7 +7177,7 @@
         "Выключить переключатель у одного набора и открыть магазин.",
         "Нажать «Вернуть» в сообщении внизу.",
         "Открыть набор, нажать «Удалить набор» → «Удалить» и сразу «Вернуть».",
-        "Выключить «Показывать наборы» в «Ещё» → «Настройки» → «Главная страница».",
+        "Выключить «Наборы» в «Ещё» → «Настройки» → «Главная страница».",
         "Открыть магазин и посмотреть меню и главную.",
         "Вернуть всё обратно."
       ],
@@ -7188,7 +7196,7 @@
           "Switch one set off with its switch and open the shop.",
           "Press «Вернуть» (undo) in the message at the bottom.",
           "Open a set, press «Удалить набор» → «Удалить» (delete) and «Вернуть» at once.",
-          "Switch «Показывать наборы» (show sets) off in «Ещё» → «Настройки» → «Главная страница».",
+          "Switch «Наборы» off in «Ещё» → «Настройки» → «Главная страница».",
           "Open the shop and look at the menu and the home page.",
           "Put everything back."
         ],
@@ -7201,7 +7209,7 @@
         "why": "A withdrawn set still on sale brings an order you cannot fill."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:17.769Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "blog-new-post",
@@ -8618,7 +8626,7 @@
       "title": "Отчёт для бухгалтера",
       "steps": [
         "«Ещё» → «Настройки» → «О компании», найти «Отчёт для бухгалтера».",
-        "Выбрать месяц и нажать «Скачать CSV», потом «Скачать XLSX».",
+        "Выбрать месяц в списке и нажать «Скачать CSV», потом «Скачать XLSX».",
         "Открыть файл, сложить столбец Total и вычесть из него столбец Refunded.",
         "Сверить это с плитками наверху и найти колонки «VAT %» и про счёт компании."
       ],
@@ -8638,7 +8646,7 @@
         "title": "The report for the accountant",
         "steps": [
           "«Ещё» → «Настройки» → «О компании», find «Отчёт для бухгалтера».",
-          "Choose a month, press «Скачать CSV», then «Скачать XLSX».",
+          "Choose a month in the list, press «Скачать CSV», then «Скачать XLSX».",
           "Open the file, add up the Total column and take the Refunded column off it.",
           "Check that against the tiles above, and find the «VAT %» and company columns."
         ],
@@ -8651,7 +8659,8 @@
           "If the month had a refund, a «Возвращено» tile is on the card."
         ],
         "why": "A wrong VAT figure in this file means a fine. The rate comes from the order itself, so a month already filed exports identically the second time."
-      }
+      },
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "journal-undo",
@@ -8659,40 +8668,46 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Журнал изменений и «Вернуть»",
+      "title": "Журнал изменений и «Вернуть» с любого устройства",
       "steps": [
         "Поменять цену любого товара.",
-        "«Ещё» → «Настройки» → «Журнал изменений».",
+        "«Ещё» → «Настройки» → «Журнал».",
         "Найти своё изменение и нажать «Вернуть».",
-        "Пролистать ниже до «Журнал магазина»."
+        "С другого устройства поменять текст полоски на «Главной странице».",
+        "На телефоне обновить «Журнал» и нажать «Вернуть» у этой полоски.",
+        "Раскрыть «Входы в админку» внизу."
       ],
       "expect": [
-        "Цена вернулась к прежней.",
-        "В верхнем списке — то, что вы меняли с этого телефона.",
-        "В нижнем — история со всех устройств.",
-        "Нижний список только читается, менять в нём нечего."
+        "Цена вернулась к прежней, а строка ушла из списка.",
+        "Один список: ваши строки помечены «вы · здесь».",
+        "У изменения с другого устройства тоже есть «Вернуть» — и оно срабатывает.",
+        "После этого «вернули» у той строки видно и на другом устройстве.",
+        "Входы в админку свёрнуты в один блок с числом за сегодня."
       ],
       "why": "Ошибочную цену надо возвращать одним нажатием, а не звонком Диму.",
       "risk": "med",
       "writes": true,
       "en": {
-        "title": "The change log and «Вернуть»",
+        "title": "The change log and «Вернуть» from any device",
         "steps": [
           "Change the price of any product.",
-          "«Ещё» → «Настройки» → «Журнал изменений».",
-          "Find your change and press «Вернуть» — undo.",
-          "Scroll further down to «Журнал магазина»."
+          "«Ещё» → «Настройки» → «Журнал».",
+          "Find your change and tap «Вернуть».",
+          "From another device, change the strip text on «Главная страница».",
+          "On the phone, reload «Журнал» and tap «Вернуть» on that strip change.",
+          "Open «Входы в админку» at the bottom."
         ],
         "expect": [
-          "The price is back to what it was.",
-          "The upper list holds what you changed on this phone.",
-          "The lower one holds the history from every device.",
-          "The lower list is read-only; nothing there can be changed."
+          "The price is back to the old one, and the line has left the list.",
+          "One list: your own lines are marked «вы · здесь».",
+          "The change from the other device has «Вернуть» too — and it works.",
+          "After that, the other device also shows «вернули» on that line.",
+          "Admin logins are folded into one block with today's count."
         ],
         "why": "A wrong price must come back in one press, not a phone call."
       },
       "mark": "redo",
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-25T12:47:20.824Z"
     },
     {
       "id": "settings-hero",
@@ -8702,16 +8717,17 @@
       "lang": "RU",
       "title": "Большая картинка на главной",
       "steps": [
-        "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-        "Поправить текст первого слайда кнопкой ✨ и выбрать другую картинку из плиток.",
-        "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
-        "Нажать «Сохранить» (на телефоне — вверху экрана), подтвердить и открыть главную магазина."
+        "«Ещё» → «Настройки» → «Главная страница», блок «Баннер».",
+        "Открыть первый слайд, поправить текст кнопкой ✨ и выбрать другую картинку из плиток.",
+        "Добавить слайд про подарочную карту; добавлять слайды, пока «+ Слайд» не погаснет.",
+        "Открыть лишний слайд, нажать «Удалить слайд», подтвердить и сразу нажать «Вернуть».",
+        "Удалить его ещё раз, подождать 5 секунд и открыть главную магазина."
       ],
       "expect": [
         "При выборе картинки страница остаётся на месте.",
-        "Рядом с «Сохранить» — «Не сохранено» (на компьютере — «…: Главный баннер»).",
-        "При пяти слайдах «Добавить слайд» серая, рядом причина про максимум.",
-        "После сохранения на кнопке «Сохранено ✓».",
+        "Кнопки «Сохранить» нет: каждое изменение сохраняется само, вверху «Сохранено ✓».",
+        "При пяти слайдах «+ Слайд» серая, рядом причина про максимум.",
+        "Удаление сначала спрашивает; «Вернуть» в первые 5 секунд ставит слайд на место.",
         "На главной картинки сменяются сами; текст и картинки те, что вы выбрали.",
         "На слайде про карту стоит картинка карты, а не шампунь."
       ],
@@ -8721,23 +8737,24 @@
       "en": {
         "title": "The big picture at the top",
         "steps": [
-          "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-          "Rewrite the first slide's text with ✨ and pick another picture from the tiles.",
-          "Add a gift-card slide; keep adding slides until the button goes grey.",
-          "Press «Сохранить» (on the phone — at the top), confirm and open the shop's home page."
+          "«Ещё» → «Настройки» → «Главная страница», the «Баннер» block.",
+          "Open the first slide, touch up its text with ✨ and pick another picture from the tiles.",
+          "Add a gift-card slide; keep adding slides until «+ Слайд» greys out.",
+          "Open a spare slide, tap «Удалить слайд», confirm, and straight away tap «Вернуть».",
+          "Delete it again, wait 5 seconds and open the shop's home page."
         ],
         "expect": [
           "Picking a picture leaves the page where it was.",
-          "Next to «Сохранить» — «Не сохранено» (on a computer «…: Главный баннер»).",
-          "At five slides «Добавить слайд» is grey, with the reason beside it.",
-          "After saving the button reads «Сохранено ✓».",
-          "On the home page the pictures change by themselves; text and pictures are yours.",
-          "The gift-card slide shows the card, not a shampoo bottle."
+          "No «Сохранить» button: every change saves itself, «Сохранено ✓» at the top.",
+          "With five slides «+ Слайд» is grey, with the reason about the maximum beside it.",
+          "Deleting asks first; «Вернуть» within 5 seconds puts the slide back.",
+          "On the home page the pictures change by themselves; the texts and pictures are yours.",
+          "The gift-card slide shows the card's picture, not a shampoo."
         ],
         "why": "A button leading to the wrong place wastes the shop's best screen."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:48:59.431Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "settings-content",
@@ -8747,19 +8764,19 @@
       "lang": "RU",
       "title": "Часы работы, контакты и верхняя полоска",
       "steps": [
-        "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
-        "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин.",
-        "На «О компании» поменять телефон, не сохраняя; на «Главной странице» сохранить полоску.",
-        "На «Главной странице» нажать «Сбросить к стандартному» у полоски."
+        "«Настройки» → «О компании» → «Часы работы»: у понедельника вписать 1000 и 19.",
+        "Нажать «на все рабочие дни», потом вписать соцсети.",
+        "«Настройки» → «Главная страница»: вписать текст верхней полоски и открыть магазин.",
+        "На «О компании» поменять телефон; потом в «Журнале» нажать «Вернуть» у полоски.",
+        "На «Главной странице» в «⋯» у полоски нажать «Вернуть стандартный текст полоски»."
       ],
       "expect": [
-        "Пока вы печатаете, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — название карточки).",
+        "Часы сами становятся «10:00» и «19:00», строка над ними — сводка недели.",
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
-        "Узкая полоска с вашим текстом стоит над магазином.",
-        "Она есть и на эстонском, и на английском.",
-        "Сохранение полоски не сохраняет телефон; он так и ждёт своего «Сохранить».",
-        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются."
+        "Полоска с вашим текстом стоит над магазином — и на эстонском, и на английском.",
+        "«Вернуть» у полоски не трогает новый телефон.",
+        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются.",
+        "Кнопок «Сохранить» нет: всё сохраняется само, вверху «Сохранено ✓»."
       ],
       "why": "Без часов работы вам будут звонить и спрашивать, открыты ли вы.",
       "risk": "low",
@@ -8767,24 +8784,24 @@
       "en": {
         "title": "Opening hours, contacts and the top strip",
         "steps": [
-          "«Настройки» → «О компании»: fill in the opening hours and social links.",
-          "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop.",
-          "On «О компании» change the phone without saving; on «Главная страница» save the strip.",
-          "On «Главная страница» press «Сбросить к стандартному» under the strip."
+          "«Настройки» → «О компании» → «Часы работы»: type 1000 and 19 for Monday.",
+          "Tap «на все рабочие дни», then type in the social links.",
+          "«Настройки» → «Главная страница»: type the top strip's text and open the shop.",
+          "On «О компании» change the phone; then in «Журнал» tap «Вернуть» on the strip.",
+          "On «Главная страница», in the strip's «⋯», tap «Вернуть стандартный текст полоски»."
         ],
         "expect": [
-          "While you type, «Не сохранено» stands next to «Сохранить» (on a computer the card name).",
+          "The hours turn into «10:00» and «19:00» by themselves; the line above sums up the week.",
           "The opening hours show on «Контакты» and at the foot of every page.",
-          "The thin strip with your text sits above the shop.",
-          "It is there in Estonian and in English too.",
-          "Saving the strip does not save the phone; it still waits for its own «Сохранить».",
-          "Resetting the strip changes the strip only; details and IBAN, hours and socials stay."
+          "The strip with your text sits above the shop — in Estonian and English too.",
+          "«Вернуть» on the strip leaves the new phone alone.",
+          "Resetting the strip changes only the strip; details and IBAN, hours and socials stay.",
+          "No «Сохранить» buttons: everything saves itself, «Сохранено ✓» at the top."
         ],
         "why": "With no opening hours, people phone you to ask if you're open."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T17:37:33.147Z"
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "settings-delivered-auto",
@@ -8794,14 +8811,14 @@
       "lang": "RU",
       "title": "Когда заказ считается доставленным",
       "steps": [
-        "«Настройки» → «Доставка и оплата», найти блок про доставленные заказы.",
-        "Посмотреть «Спрашивать перевозчика» и «Закрывать заказ через».",
-        "Поменять число дней и сохранить."
+        "«Настройки» → «Доставка и оплата», раскрыть «Когда «Доставлен»».",
+        "Посмотреть «Спрашивать перевозчика» и «Если перевозчик молчит — закрыть заказ».",
+        "Выбрать другое число дней и обновить страницу."
       ],
       "expect": [
-        "Новое число дней сохранилось и осталось после перезагрузки.",
+        "Новое число дней сохранилось сразу и осталось после перезагрузки.",
         "Кнопка «Доставлен» в заказе никуда не делась.",
-        "У списка «Закрывать заказ через» одна стрелка, а не две."
+        "У списка дней одна стрелка, а не две."
       ],
       "why": "Заказ, закрывшийся сам слишком рано, спрячет посылку, которая ещё едет.",
       "risk": "low",
@@ -8809,17 +8826,19 @@
       "en": {
         "title": "When an order counts as delivered",
         "steps": [
-          "«Настройки» → «Доставка и оплата», find the delivered-orders block.",
-          "Look at «Спрашивать перевозчика» and «Закрывать заказ через».",
-          "Change the number of days and save."
+          "«Настройки» → «Доставка и оплата», open «Когда «Доставлен»».",
+          "Look at «Спрашивать перевозчика» and «Если перевозчик молчит — закрыть заказ».",
+          "Pick another number of days and reload the page."
         ],
         "expect": [
-          "The new number of days saved and stayed after a reload.",
+          "The new number of days saved at once and is still there after the reload.",
           "The «Доставлен» button in the order is still there.",
-          "The «Закрывать заказ через» list has one arrow, not two."
+          "The list of days has one arrow, not two."
         ],
         "why": "An order closing itself too early hides a parcel still travelling."
-      }
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
       "id": "settings-integrations",

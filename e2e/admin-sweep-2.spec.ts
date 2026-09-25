@@ -154,7 +154,10 @@ test.describe("admin sweep 2 — the orders list", () => {
 test.describe("admin sweep 2 — delivery tariffs", () => {
   test.use({ extraHTTPHeaders: ipHeaders(192) });
 
-  test("«Везде взять цены Montonio» only clears the boxes, and the reset asks first", async ({ page }, testInfo) => {
+  /* 1a (25.09.2026, q37): every price saves when its box is left, and both
+     whole-table buttons act at once — no confirm card, «Вернуть» on the toast
+     and in the journal is the way back. */
+  test("«Везде взять цены Montonio» empties the boxes at once, and «Вернуть» takes it back", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one write per action is enough");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
@@ -166,75 +169,54 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await expect(lv).toBeVisible();
 
       /* A price of the owner's own, so there is something to clear. 6,49 € is
-         well above Montonio's own price for a Latvian DPD locker, so the save
-         guard has no reason to refuse it. */
+         well above Montonio's own price for a Latvian DPD locker, so nothing
+         holds it back: it saves the moment the box is left. */
       await lv.fill("6,49");
-      await page.locator("[data-admshipsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
-      await page.locator("[data-admapply]").click();
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await lv.press("Tab");
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await page.locator("[data-closetoast]").click();
       await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
-      const before = JSON.stringify(await rules());
 
       /* The line under the box is the way back: it names the price the box
-         would charge if it were empty, and one tap empties it. */
+         would charge if it were empty, and one tap empties it — saved. */
       await expect(page.locator('[data-shipclear="c:dpd:LV"]'))
         .toContainText(LV_DPD.toFixed(2).replace(".", ","));
       await page.locator('[data-shipclear="c:dpd:LV"]').click();
       await expect(lv).toHaveValue("");
-      expect(JSON.stringify(await rules()), "clearing one cell changed the shop before «Сохранить»").toBe(before);
+      await expect.poll(async () => (await rules())?.carriers?.dpd?.LV,
+        { timeout: 20_000, message: "«вернуть» under the box did not reach the shop" }).toBeUndefined();
+      await page.locator("[data-closetoast]").click();
 
-      /* …and «Везде взять цены Montonio» does the same for the whole table.
-         The sentence under it promises «проверьте цифры и сохраните», so the
-         shop must not move until the confirm card is answered. */
+      // …and «Везде взять цены Montonio» does the same for the whole table, at once
       await lv.fill("6,49");
+      await lv.press("Tab");
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
+      await page.locator("[data-closetoast]").click();
       await page.locator("[data-admshipmontonio]").click();
-      await expect(page.getByRole("status")).toContainText("цены Montonio");
-      await page.locator("[data-closetoast]").click();
+      await expect(page.getByRole("status")).toContainText("В таблице цены Montonio", { timeout: 15_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await expect(lv).toHaveValue("");
-      expect(JSON.stringify(await rules()), "the clear changed the shop before «Сохранить»").toBe(before);
-
-      // «Сохранить» → the card → now the shop follows, and the cell is gone
-      await page.locator("[data-admshipsave]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить тарифы доставки?");
-      await page.locator("[data-admapply]").click();
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
-      await page.locator("[data-closetoast]").click();
       /* Nothing, not Montonio's number written down. Since r22 (17.09.2026,
          cleanShippingRules() in src/lib/shipping.ts) the row stores the
          owner's own cells and nothing beside them, so a cleared cell is ABSENT
          from it — which is what makes «пустое поле — цена Montonio» survive a
-         save. The money is unchanged: quoteFromRules() reads Montonio's own
-         table for a cell the row does not mention, which is the number the
-         line under the box promised. */
+         save. */
       await expect.poll(async () => (await rules())?.carriers?.dpd?.LV).toBeUndefined();
 
-      // …and the reset below needs a price to put back, so out of step again
-      await lv.fill("6,49");
-      await page.locator("[data-admshipsave]").click();
-      await page.locator("[data-admapply]").click();
-      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
-      await page.locator("[data-closetoast]").click();
-      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
+      // «Вернуть» on that toast: his own price is back, in the box and in the shop
+      await page.locator(".adm-toast__undo").click();
+      await expect.poll(async () => Number((await rules())?.carriers?.dpd?.LV),
+        { timeout: 20_000, message: "«Вернуть» did not put the owner's price back" }).toBe(6.49);
+      await expect(lv).toHaveValue("6,49");
 
-      /* «Вернуть значения по умолчанию» — a delivery price too, so it asks;
-         «Отмена» changes nothing. It sits in the row of actions under the
-         table now, beside «Везде взять цены Montonio», rather than inside the
-         fold that held the markup boxes. */
+      /* «Вернуть значения по умолчанию» — delivery prices only (q37), at once,
+         with «Вернуть». Back to the shipped default, which since r22 means
+         «никаких своих цен» rather than today's price list. */
       await page.locator("[data-admshipreset]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть тарифы по умолчанию?");
-      await page.locator("[data-admcancel]").click();
+      await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные", { timeout: 15_000 });
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      expect(Number((await rules())?.carriers?.dpd?.LV)).toBe(6.49);
-      await page.locator("[data-admshipreset]").click();
-      await page.locator("[data-admapply]").click();
-      await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
-      /* Back to the shipped default, which since r22 means «никаких своих
-         цен» rather than today's price list: SHIP_STORED_DEFAULT carries the
-         two decisions that are the owner's — how much delivery to give away
-         and where the shop delivers — and not one price. */
       await expect.poll(async () => (await rules())?.carriers?.dpd?.LV).toBeUndefined();
     } finally {
       await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
@@ -245,29 +227,37 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
 test.describe("admin sweep 2 — settings", () => {
   test.use({ extraHTTPHeaders: ipHeaders(193) });
 
-  test("an untouched banner says «Изменений нет», and a refused write says so instead of «Сохранено ✓»", async ({ page }, testInfo) => {
+  test("«Главная страница» has nothing to save by hand, and a refused write says so instead of «Сохранено ✓»", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one write per action is enough");
     await loginAsAdmin(page);
     await openSettings(page, "home");
-    /* Since r12 the page's save bar answers before a click: with nothing
-       typed the bar says «Изменений нет» and its «Сохранить» is disabled, so
-       an untouched banner cannot even reach the confirm card. */
-    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
-    await expect(page.locator("[data-herosave]")).toBeDisabled();
+    /* 1a: no save bar and no «Сохранить» — the page saves itself (README § 2) */
+    await expect(page.locator("[data-setbar]")).toHaveCount(0);
+    await expect(page.locator("[data-herosave]")).toHaveCount(0);
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
 
-    /* The chatbot switch writes settings in the background. With the server
-       refusing, the owner used to see «Чат выключен ✓» and nothing else —
-       and find the chat still on from another phone. */
+    /* The chatbot switch writes settings at once. With the server refusing,
+       the owner used to see «Чат выключен ✓» and nothing else — and find the
+       chat still on from another phone. Since 1a the toast waits for the 2xx
+       and the header says «Не сохранилось» instead. */
     const chatBefore = (await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot;
-    await page.route("**/api/admin/settings/", (route) => {
-      if (route.request().method() !== "PUT") return route.continue();
-      return route.fulfill({ status: 500, contentType: "application/json", body: '{"ok":false,"error":"server_error"}' });
-    });
-    await page.locator("[data-admchatbot]").click();
-    await expect(page.getByRole("status")).toContainText("Не удалось сохранить на сервере");
-    await page.unroute("**/api/admin/settings/");
-    expect((await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot).toBe(chatBefore);
+    try {
+      await page.route("**/api/admin/settings/", (route) => {
+        if (route.request().method() !== "PUT") return route.continue();
+        return route.fulfill({ status: 500, contentType: "application/json", body: '{"ok":false,"error":"server_error"}' });
+      });
+      await page.locator("[data-admchatbot]").click();
+      // the header's own line — the page's on a desktop, the top bar's on a phone
+      await expect(page.locator('[role="alert"]:visible', { hasText: "Не сохранилось" }).first()).toBeVisible();
+      await expect(page.getByRole("status").filter({ hasText: /Чат (включён|выключен) ✓/ }),
+        "«✓» before the server said yes").toHaveCount(0);
+      await page.unroute("**/api/admin/settings/");
+      expect((await (await page.request.get("/api/admin/settings/")).json()).settings.chatbot).toBe(chatBefore);
+    } finally {
+      await page.unroute("**/api/admin/settings/").catch(() => undefined);
+      // a shop that never stored the switch has nothing to put back
+      if (chatBefore !== undefined) await page.request.put("/api/admin/settings/", { data: { chatbot: chatBefore } });
+    }
   });
 });
 

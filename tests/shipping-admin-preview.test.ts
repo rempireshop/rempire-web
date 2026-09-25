@@ -184,11 +184,14 @@ describe("the preview is the customer's own table, not a second one", () => {
     expect(adminCss).toMatch(/\.adm-preview \.dlv__table \{[^}]*min-width: 0;/);
   });
 
-  /* The fold's state lives in S and is redrawn from it, so the <summary>'s own
-     activation behaviour must not flip `open` a second time behind the
-     render. Source-level, because it is one line and there is no DOM here. */
-  it("keeps the fold's open state in S rather than in the browser", () => {
-    expect(src).toMatch(/d\.shippreview !== undefined\) \{[\s\S]{0,120}e\.preventDefault\(\);/);
+  /* The fold's state lives in the panel and is redrawn from it. Since 1a the
+     preview is one of the page's folds (admFoldHTML, «Что увидит
+     покупатель»): a <button aria-expanded>, not a <details> whose own
+     activation could flip `open` a second time behind the render, and its
+     state is the panel's per-key fold memory. Source-level: no DOM here. */
+  it("keeps the fold's open state in the panel rather than in the browser", () => {
+    expect(src).toContain('admFoldHTML("set:preview", "Что увидит покупатель"');
+    expect(src).not.toMatch(/<details[^>]*data-shippreview/);
   });
 
   it("shows all six rows of the panel's grid, «Остальные страны» included", () => {
@@ -247,8 +250,11 @@ describe("one rule, said once, and true of every box", () => {
      delivery is a bit over engineered.» One sentence replaces the three,
      because there is now one rule and every box on the screen obeys it. */
   it("says what an empty box means, at the top, once", () => {
-    expect(src).toContain("Пустое поле — цена Montonio, она написана под полем. ");
-    expect(src).toMatch(/adm-notice">Пустое поле — цена Montonio/);
+    /* 1a (25.09.2026): the rule moved into the page's «?», and one line of
+       legend over the table says it in five words — the Montonio price now
+       stands grey IN the empty box, so there is nothing under it to point at. */
+    expect(src).toContain("<span>Пустое поле — цена Montonio, она серым в поле. ");
+    expect(src).toMatch(/adm-rt__legend">Серые числа — цены Montonio\. Жирные — ваши\./);
   });
 
   it("has dropped the three paragraphs that explained the three tables", () => {

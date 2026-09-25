@@ -162,45 +162,77 @@ describe("an emptied «Бесплатно от» stops the shop promising free d
 
 /* ---------- a refused delivery-price save ----------------------------------- */
 
+/* 1a (25.09.2026): the table saves itself through its settings slot —
+   shipPut() is the slot's `send`. A price the server refuses (below_cost —
+   one this panel's own mirror did not catch) is held at its box, the table
+   the shop runs on goes back to the server's, and the rest of the change is
+   sent again; any other failure is the slot's to show («Не сохранилось —
+   Повторить») with the change still owed, nothing rolled back. */
+function shipRig(answers: Array<{ status: number; body: unknown }>) {
+  const puts: any[] = [];
+  const body = `
+    var S = { shipDraft: null, shipLow: null, shipErr: "" };
+    var SHIP_STORED_DEFAULT = { freeFrom: 59, methods: { parcel: {}, courier: {}, pickup: {} }, carriers: {} };
+    var SHIP_STORED = { freeFrom: 59, methods: { parcel: {}, courier: {}, pickup: {} }, carriers: { dpd: { LV: 6.49 }, omniva: { EE: 1 } } };
+    var shipServerRow = { freeFrom: 59, methods: { parcel: {}, courier: {}, pickup: {} }, carriers: {} };
+    var SHIP_ACCEPT = {};
+    var toasts = [];
+    function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
+    function setShipRules(r) { SHIP_STORED = cloneRules(r); }
+    function shipLowCells() { return []; }   // this panel's mirror: nothing under the tariff
+    function shipFreshNote() {}
+    function render() {}
+    function toast(t) { toasts.push(t); }
+    function apiSend(url, m, b) { PUTS.push(JSON.parse(JSON.stringify(b))); return Promise.resolve(ANSWERS.shift()); }
+    ${["admAutosaveOk", "jsonCanon", "shipSig", "shipCellKey", "shipRowCell", "shipRowSet", "shipAccepted",
+      "shipLowAll", "shipHeldCells", "shipGate", "shipPut"].map(slice).join("\n")}
+    return {
+      put: shipPut,
+      stored: function () { return SHIP_STORED; },
+      server: function () { return shipServerRow; },
+      S: S, toasts: toasts
+    };`;
+  const rig = new Function("PUTS", "ANSWERS", body)(puts, answers.slice()) as {
+    put: (note: unknown) => Promise<unknown>; stored: () => any; server: () => any; S: any; toasts: string[];
+  };
+  return { ...rig, puts };
+}
+
 describe("a delivery-price save the server refuses", () => {
-  it("puts the live table back, the owner's numbers back in the boxes and «Сохранено ✓» out", () => {
-    const rules: Record<string, unknown> = { freeFrom: 0.5 };   // the refused table, already live in the panel
-    const was = { freeFrom: 59 };
-    const tried = { freeFrom: 0.5 };
-    const entry = { txt: "Тарифы доставки" };
-    const S: Record<string, unknown> = { shipDraft: null, admSetSaved: "delivery" };
-    const DEMO: Record<string, unknown> = { log: [entry, { txt: "что-то раньше" }] };
-    let rendered = 0;
-    let setTo: unknown = null;
-
-    const fn = build<(b: unknown) => void>(["shipRulesRefused"], {
-      setShipRules: (r: unknown) => { setTo = r; },
-      cloneRules: (r: unknown) => JSON.parse(JSON.stringify(r)),
-      S, DEMO, demoSave: () => {}, render: () => { rendered++; },
-    });
-    fn({ was, tried, entry });
-
-    expect(setTo).toEqual(was);                       // the table the shop is really running on
-    expect(S.shipDraft).toEqual(tried);               // his numbers still in the boxes, dirty bar lit
-    expect(S.admSetSaved).toBe("");                   // nothing was saved, so nothing says «Сохранено ✓»
-    expect(DEMO.log).toEqual([{ txt: "что-то раньше" }]);   // and the journal does not claim it either
-    expect(rendered).toBe(1);
-    expect(rules).toBeTruthy();
+  it("holds the refused price at its box and saves the rest of the change", async () => {
+    const cell = { carrier: "omniva", country: "EE", method: "parcel", charged: 1, cost: 3.19 };
+    const rig = shipRig([
+      { status: 400, body: { ok: false, error: "below_cost", cells: [cell] } },
+      { status: 200, body: { ok: true } },
+    ]);
+    const answer = await rig.put({ toast: "Тарифы доставки сохранены" });
+    expect(rig.puts).toHaveLength(2);
+    expect(rig.puts[0].settings.shipping_rules.carriers).toEqual({ dpd: { LV: 6.49 }, omniva: { EE: 1 } });
+    // the second write: the refused price out, the owner's other price in
+    expect(rig.puts[1].settings.shipping_rules.carriers).toEqual({ dpd: { LV: 6.49 } });
+    expect(answer).toEqual({ status: 200, body: { ok: true } });
+    // the till runs on what the server holds; the box still shows his number, rust
+    expect(rig.stored().carriers).toEqual({ dpd: { LV: 6.49 } });
+    expect(rig.S.shipDraft.carriers.omniva).toEqual({ EE: 1 });
+    expect(rig.S.shipLow).toEqual([cell]);
+    expect(rig.server().carriers).toEqual({ dpd: { LV: 6.49 } });
   });
 
-  it("is wired to every answer that is not a 200/ok, not just to below_cost", () => {
-    /* The panel applies the new table BEFORE the PUT answers (demoApply), so
-       the rollback has to hang off the PUT itself. */
+  it("any other failure is the slot's: the answer goes back, nothing is rolled back", async () => {
+    const rig = shipRig([{ status: 503, body: { ok: false, error: "db_unavailable" } }]);
+    const answer = await rig.put({ toast: "Тарифы доставки сохранены" });
+    expect(answer).toEqual({ status: 503, body: { ok: false, error: "db_unavailable" } });
+    expect(rig.toasts).toEqual([]);                    // never «сохранены» without a 2xx
+    expect(rig.stored().carriers.omniva).toEqual({ EE: 1 });   // still owed — «Повторить» sends it
+    expect(rig.server().carriers).toEqual({});
+  });
+
+  it("srvPush hands the table to its slot, whoever applied it", () => {
     const push = slice("srvPush");
-    const at = push.indexOf('a.type === "set_shipping_rules"');
-    expect(at, "srvPush() no longer has a set_shipping_rules branch").toBeGreaterThan(0);
-    // 900, not 600: since 23.09.2026 the branch also carries the «Сохраняем…»
-    // flag and the «Сохранить всё равно» card (tests/shipping-below-cost.test.ts)
-    const branch = push.slice(at, at + 900);
-    expect(branch).toContain("shipRulesRefused(shipBack)");
-    expect(branch).toMatch(/status === 200 && r\.body && r\.body\.ok/);
-    // and demoApply has to record what to put back
-    expect(slice("demoApply")).toContain("shipRollback = {");
+    expect(push).toContain("if (a && ADM_SET_OF[a.type])");
+    expect(push).toContain("admSetPut(ADM_SET_OF[a.type])");
+    expect(src).toContain('set_shipping_rules: "shipping_rules"');
+    expect(slice("admSetSend")).toContain('if (key === "shipping_rules") return shipPut(note);');
   });
 });
 
@@ -247,11 +279,44 @@ describe("nothing is saved over the shop's own settings before they have been re
   });
 
   it("every write on that screen is gated on a real read having landed", () => {
-    expect(slice("savePricing")).toContain("adminSettingsReady()");
-    // «Спрашивать перевозчика», «Закрывать заказ через» and the bank switches
-    // all PUT a whole object assembled from the same failed read
-    const gate = /if \(!adminSettingsReady\(\)\)/g;
-    expect(src.match(gate)?.length ?? 0).toBeGreaterThanOrEqual(4);
+    expect(slice("admPricingSave")).toContain("adminSettingsReady()");
+    /* «Спрашивать перевозчика», «Закрывать заказ через» and the bank switches
+       all PUT a whole object assembled from the same read. Since 1a
+       (25.09.2026) a change made before it lands is not refused — the owner's
+       tap waits for the read and goes the moment it lands (admSetWhenReady),
+       computed over the shop's real values; never before. */
+    expect(slice("admSetWhenReady")).toContain("if (adminSettingsReady()) { fn(); return null; }");
+    expect(slice("loadAdminPricing")).toContain("admSetWaitFlush();");
+    const waits = src.match(/admSetWhenReady\(function \(\) \{/g)?.length ?? 0;
+    expect(waits, "the switches, the pick and the boxes all wait for the read").toBeGreaterThanOrEqual(8);
+    expect(src).not.toContain('if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают');
+  });
+
+  it("a change made before the read waits for it and then goes, over the shop's values", () => {
+    const S: Record<string, unknown> = { pricingLoaded: null, pricingLoadErr: false };
+    const loads: boolean[] = [];
+    const fns = new Function("S", "LOADS", `
+      function loadAdminPricing(force) { LOADS.push(!!force); }
+      ${slice("adminSettingsReady")}
+      var ADM_SET_WAIT = [];
+      ${slice("admSetWhenReady")}
+      ${slice("admSetWaitFlush")}
+      return { when: admSetWhenReady, flush: admSetWaitFlush };`)(S, loads) as {
+      when: (fn: () => void) => Promise<unknown> | null; flush: () => void;
+    };
+    const ran: string[] = [];
+    const w = fns.when(() => ran.push("days 7 over " + JSON.stringify(S.pricingLoaded)));
+    expect(w, "a change before the read did not wait").toBeInstanceOf(Promise);
+    expect(ran).toEqual([]);
+    expect(loads, "nobody asked for the read").toEqual([false]);
+    fns.flush();                        // the read has not landed: still waiting
+    expect(ran).toEqual([]);
+    S.pricingLoaded = { partnersOn: true };
+    fns.flush();                        // …and now it has
+    expect(ran).toEqual(['days 7 over {"partnersOn":true}']);
+    // after the read, a change goes at once
+    expect(fns.when(() => ran.push("now"))).toBeNull();
+    expect(ran).toHaveLength(2);
   });
 
   it("«О компании» refuses to save until the document has really been read", () => {
@@ -263,13 +328,11 @@ describe("nothing is saved over the shop's own settings before they have been re
     const array = build<() => boolean>(["contentLoaded"], { DEMO: { content: [] } });
     expect(array()).toBe(false);
 
-    /* The gate itself: both «Сохранить» and «Вернуть стандартные» send
-       { content: DEMO.content } in full (srvPush), so both have to hold. */
-    const saveAt = src.indexOf("if (d.contentsave !== undefined) {");
+    /* The gate itself: every field's own save and «Вернуть стандартные» send
+       { content: DEMO.content } in full (admSetSend), so both have to hold. */
+    expect(slice("admContentCommit")).toContain("if (!contentLoaded())");
     const resetAt = src.indexOf("if (d.contentreset !== undefined) {");
-    expect(saveAt).toBeGreaterThan(0);
     expect(resetAt).toBeGreaterThan(0);
-    expect(src.slice(saveAt, saveAt + 320)).toContain("if (!contentLoaded())");
     expect(src.slice(resetAt, resetAt + 380)).toContain("if (!contentLoaded())");
   });
 });

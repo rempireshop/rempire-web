@@ -37,14 +37,6 @@ async function placeOrder(page: Page, email: string): Promise<string> {
   return payOrder(page, email, "paid");
 }
 
-/** «Применить» writes through to PUT /api/admin/settings only after the
- *  optimistic toast — the storefront visit below must not race that write. */
-async function applyAndWaitForSettingsWrite(page: Page): Promise<void> {
-  const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
-  await page.locator("[data-admapply]").click();
-  expect((await put).ok()).toBe(true);
-}
-
 /** A switch in Настройки applies locally and PUTs in the background. A test
  *  that only waits for the toast then opens the storefront can read
  *  `/api/overrides/` *before* that write lands and see the old value — and a
@@ -72,6 +64,14 @@ async function openSettings(page: Page, sub: "home" | "company" = "home"): Promi
   if (await back.count()) await back.first().click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
   await expect(page.locator("[data-admsetback]")).toBeVisible();
+}
+
+/** «О компании» → «Реквизиты», opened (a 1a fold remembers its state, so a
+ *  second click would shut it). */
+async function openCompanyFold(page: Page): Promise<void> {
+  const head = page.locator('[data-admfold="content:company"]').first();
+  if ((await head.getAttribute("aria-expanded")) !== "true") await head.click();
+  await expect(head).toHaveAttribute("aria-expanded", "true");
 }
 
 /** A switch is a <button role="switch" aria-checked>, not a link whose label
@@ -281,14 +281,12 @@ test.describe("admin", () => {
 
       try {
         await page.locator('[data-heroedit="0"]').click();
+        /* 1a (25.09.2026): the title saves itself a second after the last
+           keystroke — no «Сохранить», no card; «Вернуть» on the toast */
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await page.locator('[data-herof="title"]').fill("E2E hero title");
-        // the banner is shop-wide, so «Сохранить» asks first — the overlay
-        // card, same as a tariff (README § State)
-        await page.locator("[data-herosave]").click();
-        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await applyAndWaitForSettingsWrite(page);
-        await expect(page.getByRole("status")).toBeVisible();
+        expect((await put).ok()).toBe(true);
+        await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));
@@ -296,10 +294,13 @@ test.describe("admin", () => {
         await expect(home.page.getByText("E2E hero title")).toBeVisible();
         await home.close();
       } finally {
+        // «Вернуть стандартный баннер» is under the banner's «⋯», and acts at once
         await openSettings(page);
+        const more = page.locator('[data-setmore="banner"]');
+        if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
         await page.locator("[data-heroreset]").click();
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        await put;
       }
     });
   });
@@ -315,15 +316,15 @@ test.describe("admin", () => {
         // separate "open" step, just expand its "Реквизиты" sub-block (see
         // fixtures/docs/testing.md on why nothing here waits on a "Контент"
         // heading click).
-        await page.locator('[data-contentblock="company"]').click();
-        await page.locator('[data-contentf="company.phone"]').fill("+372 5000000");
-        // the details reach every page of the shop, so the save asks first
-        await page.locator("[data-contentsave]").click();
-        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить данные магазина?");
-        await expect(page.locator(".adm-confirm__d")).toContainText("+372 5000000");
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await applyAndWaitForSettingsWrite(page);
-        await expect(page.getByRole("status")).toBeVisible();
+        // «Реквизиты» is a fold since 1a — opened, never toggled shut
+        await openCompanyFold(page);
+        const phone = page.locator('[data-contentf="company.phone"]');
+        await phone.fill("+372 5000000");
+        // a number-like field saves when it is left (1a), no card
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await phone.press("Tab");
+        expect((await put).ok()).toBe(true);
+        await expect(page.getByRole("status")).toContainText("Данные магазина сохранены", { timeout: 15_000 });
 
         const home = await freshStorefrontPage(browser);
         await home.page.goto(shopUrl("", "/"));
@@ -332,11 +333,13 @@ test.describe("admin", () => {
         await expect(home.page.getByText("+372 5000000")).toBeVisible();
         await home.close();
       } finally {
+        // «Вернуть стандартные данные» is under the page's «⋯», and acts at once
         await openSettings(page, "company");
-        await page.locator('[data-contentblock="company"]').click();
-        await page.locator("[data-contentreset]").click();
-        await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        const more = page.locator('[data-setmore="company"]');
+        if ((await more.getAttribute("aria-expanded")) !== "true") await more.click();
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await page.locator('[data-contentreset="company"]').click();
+        await put;
       }
     });
   });

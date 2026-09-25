@@ -3949,3 +3949,208 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm-setitem .adm-step-qty button { width: 44px; height: 44px; }
   .adm-setitem__x { width: 44px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Настройки», direction 1a — README § 5, Admin 1a Screens 4.dc.html,
+   screens 09-settings-*. The index is the whole screen on a phone and a
+   permanent column on a desktop, with the page beside it; every page saves
+   itself (no save bar), optional parts fold with a summary under the title.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* the two panes need more than the 1000 px the other sections live in */
+.adm-page:has(> .adm-set) { max-width: 1240px; }
+.adm-set { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0 40px; align-items: start; }
+.adm-set__col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 24px; }
+.adm-set__main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (max-width: 899px) {
+  .adm-set { display: flex; flex-direction: column; gap: 16px; }
+  .adm-set__col { position: static; }
+  /* a page open over the index: the page, and «← Настройки» in the top bar */
+  .adm-set--open .adm-set__col { display: none; }
+}
+
+/* the index: a row per page, its line under it; on a desktop the page shown is lit */
+.adm-setidx { display: flex; flex-direction: column; border-top: 1px solid var(--a-ink); }
+.adm-setidx__r {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto 14px; gap: 10px; align-items: center;
+  min-height: 60px; padding: 12px 0; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: none; color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-setidx__r:hover { background: var(--a-panel); }
+.adm-setidx__t { display: flex; flex-direction: column; min-width: 0; }
+.adm-setidx__nm { font-size: 15.5px; line-height: 21px; }
+.adm-setidx__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-setidx__chev { font-size: 18px; line-height: 1; color: var(--a-muted); }
+.adm-setidx__info { display: flex; flex-direction: column; padding: 14px 0; border-bottom: 1px solid var(--a-rule); }
+@media (min-width: 900px) {
+  .adm-setidx__r { padding: 10px 10px; margin: 0 -10px; width: calc(100% + 20px); grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-setidx__chev { display: none; }
+  .adm-setidx__r[aria-current="page"] { background: var(--a-panel); }
+  .adm-setidx__r[aria-current="page"] .adm-setidx__nm { font-weight: 600; }
+  .adm-setidx__info { border-bottom: 0; margin-top: 8px; border-top: 1px solid var(--a-rule); }
+  .adm-setidx__info .adm-setidx__nm { font-size: 14px; }
+}
+
+/* a page's title and its «?» */
+.adm-set__h { display: flex; align-items: center; gap: 12px; }
+.adm-set__h .adm-help { margin-left: 0; }
+.adm-set__main > .adm-link { align-self: flex-start; }
+.adm-set__main > .adm-narrow { display: flex; flex-direction: column; gap: 16px; }
+.adm-set__block { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.adm-set__sw { border-top: 1px solid var(--a-ink); }
+.adm-set__acts { margin-top: 8px; align-items: center; }
+.adm-set__grp {
+  font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--a-muted); padding: 14px 0 4px;
+}
+.adm-swrow > span { display: flex; flex-direction: column; min-width: 0; }
+.adm-swrow--main { border-bottom: 1px solid var(--a-ink); font-weight: 600; }
+.adm-swrow--main .adm-row__sub { font-weight: 400; }
+.adm-sech__x { margin-left: auto; font-size: 13px; color: var(--a-muted); }
+
+/* the folds on these pages: the summary UNDER the title (design), not beside it */
+.adm-set__folds { border-top: 1px solid var(--a-ink); margin-top: 8px; }
+.adm-set__folds > .adm-foldrow:first-child { border-top: 0; }
+.adm-set .adm-foldrow__h { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; }
+.adm-set .adm-foldrow__t { grid-column: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.adm-set .adm-foldrow__s { grid-column: 1; grid-row: 2; text-align: left; white-space: normal; font-size: 12.5px; line-height: 17px; }
+.adm-set .adm-foldrow__chev { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+.adm-foldrow__warn { color: var(--a-rust); font-weight: 500; }
+
+/* «⋯» — the rare actions of a block */
+.adm-setmore { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.adm-setmore__btn {
+  min-width: 44px; height: 36px; padding: 0 12px; border: 1px solid var(--a-edge); background: var(--a-paper);
+  color: var(--a-ink); font-size: 18px; line-height: 1; letter-spacing: .08em;
+}
+.adm-setmore.is-open .adm-setmore__btn { border-color: var(--a-ink); background: var(--a-panel); }
+.adm-setmore__b { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 12px; background: var(--a-panel); }
+@media (max-width: 899px) { .adm-setmore__btn { height: 44px; } }
+
+/* ---------- Доставка и оплата: the country × carrier table ---------------- */
+
+.adm-rt { border-top: 1px solid var(--a-ink); }
+.adm-rt__head { display: none; }
+.adm-rt__row { border-bottom: 1px solid var(--a-rule); }
+.adm-rt__nm { display: none; }
+.adm-rt__h {
+  width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 12px 0;
+  border: 0; background: none; color: var(--a-ink); text-align: left; font: inherit;
+}
+.adm-rt__ht { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.adm-rt__hn { font-size: 15.5px; font-weight: 600; line-height: 21px; }
+.adm-rt__hs { font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-rt__chev { flex: none; transition: transform .2s; }
+.adm-rt__row.is-open .adm-rt__chev { transform: rotate(180deg); }
+.adm-rt__row:not(.is-open) .adm-rt__b { display: none; }
+.adm-rt__b { display: flex; flex-direction: column; padding: 0 0 12px; }
+/* a cell: its name, the box, what the box means beside it */
+.adm-rt .adm-rates__c {
+  display: grid; grid-template-columns: 100px 92px minmax(0, 1fr); gap: 4px 10px; align-items: center; padding: 6px 0;
+}
+.adm-rt .adm-tariffs__l { display: block; margin: 0; font-size: 14px; color: var(--a-ink); }
+.adm-rt .adm-rates__c .adm-input { height: 44px; padding: 0 10px; }
+.adm-rt .adm-rt__f { min-width: 0; }
+.adm-rt .adm-ashint { grid-column: 2 / -1; }
+.adm-rt .adm-rates__c--none .adm-rates__dash { display: none; }
+.adm-rt .adm-rates__c--none .adm-hint--cell { grid-column: 2 / -1; }
+.adm-rt .adm-rates__c:last-child { border-top: 1px solid var(--a-rule); margin-top: 4px; padding-top: 10px; }
+.adm-rt .adm-rates__c:last-child .adm-tariffs__l { font-weight: 600; }
+@media (min-width: 900px) {
+  .adm-rt__head, .adm-rt__row {
+    display: grid; grid-template-columns: minmax(120px, 1.3fr) repeat(6, minmax(0, 1fr)); gap: 8px 8px;
+  }
+  .adm-rt__head {
+    font-size: 12px; color: var(--a-muted); padding: 8px 0 6px; border-bottom: 1px solid var(--a-ink); align-items: end;
+  }
+  .adm-rt { border-top: 0; }
+  .adm-rt__row { padding: 10px 0; align-items: start; }
+  .adm-rt__h { display: none; }
+  .adm-rt__nm { display: block; font-weight: 600; line-height: 20px; padding-top: 12px; }
+  .adm-rt__b, .adm-rt__row:not(.is-open) .adm-rt__b { display: contents; }
+  .adm-rt .adm-rates__c { display: block; padding: 0; }
+  .adm-rt .adm-rates__c:last-child { border-top: 0; margin: 0; padding: 0; }
+  .adm-rt .adm-tariffs__l { display: none; }
+  .adm-rt .adm-rates__c--none .adm-rates__dash { display: block; }
+  .adm-rt .adm-rates__c--none .adm-hint--cell { display: none; }
+  /* an empty box's own line hides — the grey price is IN the box — until the
+     box is being typed in, when the placeholder has gone */
+  .adm-rt .adm-rates__c:not(.is-own):not(:focus-within) .adm-rt__f > .adm-hint--cell:not(.adm-hint--loss) { visibility: hidden; }
+  .adm-rt__unit { display: none; }
+}
+/* Montonio's price, grey IN an empty box; an own price bold */
+.adm-rates__c .adm-input::placeholder { color: var(--a-muted); opacity: .8; }
+.adm-rates__c.is-own .adm-input { font-weight: 600; border-color: var(--a-ink); }
+.adm-rates__c .adm-input[aria-invalid="true"] { border-color: var(--a-rust); }
+.adm-rt__legend { margin: 8px 0 0; }
+/* a price under the tariff, waiting for «Оставить так» */
+.adm-rt__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; }
+.adm-rt__keep {
+  min-height: 32px; padding: 0 10px; border: 1px solid var(--a-rust); background: var(--a-paper);
+  color: var(--a-rust); font-size: 12.5px; font-weight: 600;
+}
+.adm-rt__acts .adm-rates__undo { width: auto; margin: 0; padding: 4px 0; }
+@media (max-width: 899px) { .adm-rt__keep { min-height: 44px; } .adm-rt__acts .adm-rates__undo { min-width: 44px; } }
+.adm-rates__c:has(.adm-rt__keep) .adm-input { border-color: var(--a-rust); color: var(--a-rust); }
+/* a held box's own «why not sent» line says what the rust line with «Оставить так» already says */
+.adm-rates__c:has(.adm-rt__keep) .adm-ashint { display: none; }
+
+/* ---------- Главная страница: the banner's slides ------------------------- */
+
+.adm-slides { border-top: 1px solid var(--a-rule); }
+.adm-slide { border-bottom: 1px solid var(--a-rule); }
+.adm-slide__row { display: flex; align-items: center; gap: 10px; padding: 10px 0; min-height: 64px; }
+.adm-slide__t {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start;
+  border: 0; background: none; padding: 4px 0; color: var(--a-ink); text-align: left; font: inherit; min-height: 44px;
+}
+.adm-slide__t .adm-row__nm { max-width: 100%; }
+.adm-slide__t .adm-row__sub { display: flex; align-items: center; gap: 6px; }
+.adm-slide.is-off .adm-thumb, .adm-slide.is-off .adm-slide__t .adm-row__nm { opacity: .55; }
+.adm-slide.is-open { background: var(--a-panel); box-shadow: -12px 0 0 var(--a-panel), 12px 0 0 var(--a-panel); }
+.adm-slide.is-open .adm-slide__row { border-bottom: 1px solid var(--a-ink); }
+.adm-slide__ed { padding: 14px 0 18px; }
+.adm-slide__ed:focus { outline: none; }
+.adm-slide__acts { justify-content: space-between; }
+.adm-slides__add { width: 100%; }
+.adm-set__tick { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.adm-set__tick span:first-child { flex: 1; }
+.adm-set__tick .adm-input { width: 72px; text-align: center; height: 44px; padding: 0 8px; }
+@media (max-width: 899px) {
+  .adm-slide__row .adm-ops { gap: 2px; flex-wrap: nowrap; }
+  .adm-slide__row .adm-thumb { width: 44px; height: 44px; }
+}
+
+/* ---------- О компании: the hours ----------------------------------------- */
+
+.adm-hours__row {
+  grid-template-columns: 110px minmax(0, 1fr) auto; padding: 6px 0; border-bottom: 1px solid var(--a-rule);
+}
+.adm-hours__t { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.adm-hours__in { width: 84px; text-align: center; height: 44px; padding: 0 8px; font-variant-numeric: tabular-nums; }
+.adm-hours__off { font-size: 14px; color: var(--a-muted); }
+.adm-hours__d { font-size: 14px; color: var(--a-ink); }
+.adm-hours__hint { grid-column: 1 / -1; }
+@media (max-width: 899px) {
+  .adm-hours__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-hours__d { grid-column: 1 / -1; }
+  .adm-hours__in { width: 76px; }
+}
+
+/* ---------- Журнал --------------------------------------------------------- */
+
+.adm-jlist { border-top: 1px solid var(--a-ink); margin-top: 8px; }
+.adm-jlist .adm-jrow { align-items: flex-start; flex-wrap: nowrap; }
+.adm-jrow__m { display: block; font-size: 12px; color: var(--a-muted); margin-top: 2px; }
+.adm-jrow__m .adm-jrow__t { font-size: 12px; }
+.adm-jrow__me { font-size: 12px; color: var(--a-muted); }
+.adm-jrow__done { flex: none; font-size: 12px; color: var(--a-muted); padding-top: 3px; }
+.adm-jrow.is-undone .adm-jrow__l, .adm-jrow.is-undone .adm-jrow__x > span:not(.adm-jrow__m) { text-decoration: line-through; color: var(--a-muted); }
+.adm-jrow .adm-btn--row { flex: none; }
+.adm-jrow--login { min-height: 44px; }
+
+/* ---------- Оповещения на телефон ----------------------------------------- */
+
+.adm-push__state { display: flex; align-items: center; gap: 10px; }
+.adm-push__dot { width: 10px; height: 10px; flex: none; background: var(--a-canvas); border: 1px solid var(--a-edge); }
+.adm-push__dot.is-on { background: var(--a-green); border-color: var(--a-green); }

@@ -821,7 +821,25 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
 
 /* ---------- audit -------------------------------------------------------- */
 
-export async function writeAudit(actor: string, action: string, payload?: unknown): Promise<void> {
+/**
+ * What a change replaced — the `prev` column (db/migrations/207_audit_prev.sql).
+ * A wrapper rather than the bare value, so «the key did not exist before»
+ * (`{ before: null }`, stored as a jsonb null) is a different call from «no old
+ * value recorded» (no argument, stored as SQL NULL — «Вернуть» is then not
+ * offered for the row).
+ */
+export type AuditPrev = { before: unknown };
+
+export async function writeAudit(actor: string, action: string, payload?: unknown, prev?: AuditPrev): Promise<void> {
+  if (prev) {
+    await query("insert into admin_audit (actor, action, payload, prev) values ($1, $2, $3::jsonb, $4::jsonb)", [
+      actor,
+      action,
+      jsonbParam(payload),
+      jsonbParam(prev.before),
+    ]);
+    return;
+  }
   await query("insert into admin_audit (actor, action, payload) values ($1, $2, $3::jsonb)", [
     actor,
     action,
@@ -830,28 +848,55 @@ export async function writeAudit(actor: string, action: string, payload?: unknow
 }
 
 /** Same, for places where a missing database must not break the request. */
-export async function writeAuditSafe(actor: string, action: string, payload?: unknown): Promise<void> {
+export async function writeAuditSafe(actor: string, action: string, payload?: unknown, prev?: AuditPrev): Promise<void> {
   try {
-    await writeAudit(actor, action, payload);
+    await writeAudit(actor, action, payload, prev);
   } catch (err) {
     console.error(`[orders] audit "${action}" not written:`, err);
   }
 }
 
-export type AuditRow = { id: number; at: string; actor: string | null; action: string; payload: unknown };
+/** `prev` is present only on a row that recorded one — see AuditPrev. */
+export type AuditRow = { id: number; at: string; actor: string | null; action: string; payload: unknown; prev?: unknown };
 
 export async function listAudit(limit = 100): Promise<AuditRow[]> {
-  const rows = await query<{ id: string | number; at: string | Date; actor: string | null; action: string; payload: unknown }>(
-    "select id, at, actor, action, payload from admin_audit order by at desc, id desc limit $1",
+  const rows = await query<{
+    id: string | number; at: string | Date; actor: string | null; action: string; payload: unknown;
+    prev: unknown; has_prev: boolean;
+  }>(
+    "select id, at, actor, action, payload, prev, (prev is not null) as has_prev from admin_audit order by at desc, id desc limit $1",
     [Math.min(Math.max(Number(limit) || 100, 1), 500)],
   );
-  return rows.map((r) => ({
-    id: Number(r.id),
-    at: new Date(r.at as string).toISOString(),
-    actor: r.actor,
-    action: r.action,
-    payload: r.payload,
-  }));
+  return rows.map((r) => {
+    const row: AuditRow = {
+      id: Number(r.id),
+      at: new Date(r.at as string).toISOString(),
+      actor: r.actor,
+      action: r.action,
+      payload: r.payload,
+    };
+    if (r.has_prev) row.prev = r.prev ?? null;
+    return row;
+  });
+}
+
+/**
+ * One settings row as it is stored, for the audit's `prev` — or `found:false`
+ * when the key has never been written. Read just before the write replaces it.
+ */
+export async function getSettingRaw(key: string): Promise<{ found: boolean; value: unknown }> {
+  const rows = await query<{ value: unknown }>("select value from settings where key = $1", [key]);
+  return rows.length ? { found: true, value: rows[0].value } : { found: false, value: null };
+}
+
+/**
+ * One product's own override row, exactly as stored — no inventory-derived
+ * stock word (getOverrides adds that), because what «Вернуть» must put back is
+ * what the owner had set. null when the product has no row.
+ */
+export async function getOverrideRow(productId: string): Promise<Override | null> {
+  const rows = await query<OverrideRow>("select * from product_overrides where product_id = $1", [productId]);
+  return rows.length ? mapOverride(rows[0]) : null;
 }
 
 /* ---------- pricing ------------------------------------------------------ */

@@ -1197,6 +1197,105 @@
         "Kasutuskordade arv peab olema täisarv ja suurem kui null.",
       "Сохранить тарифы": "Salvesta tariifid",
       "Вернуть значения по умолчанию": "Taasta vaikeväärtused",
+      /* «Настройки», direction 1a (25.09.2026) — the index, the pages that
+         save themselves, the journal from any device */
+      "цены по странам, способы оплаты": "hinnad riikide kaupa, makseviisid",
+      "баннер, полоска сверху, наборы": "bänner, riba üleval, komplektid",
+      "реквизиты, часы, соцсети, отчёт": "rekvisiidid, lahtiolekuajad, sotsiaalmeedia, aruanne",
+      "скидка салонам, баллы за покупки": "salongide allahindlus, ostupunktid",
+      "Журнал": "Logi",
+      "что менялось — с «Вернуть»": "mis muutus — koos nupuga «Taasta»",
+      "RU основной · ET · EN — переводятся сами": "RU põhikeel · ET · EN — tõlgitakse ise",
+      "Пустое поле — цена Montonio, она серым в поле. Впишите своё число — покупатель заплатит его. Новые цены покупатели видят сразу.": "Tühi väli on Montonio hind, see on väljas hallilt. Kirjutage oma number — ostja maksab selle. Uusi hindu näevad ostjad kohe.",
+      "Серые числа — цены Montonio. Жирные — ваши. «—» — перевозчик туда не возит.": "Hallid numbrid on Montonio hinnad, paksud on teie omad. «—» — vedaja sinna ei vii.",
+      "Страны Европы": "Euroopa riigid",
+      "Где показывать пакоматы": "Kus pakiautomaate pakkuda",
+      "Способы оплаты": "Makseviisid",
+      "включает Montonio": "lülitab sisse Montonio",
+      "Банки в кассе": "Pangad kassas",
+      "Когда «Доставлен»": "Millal «Kohale toimetatud»",
+      "как на странице «Доставка и оплата»": "nagu lehel «Tarne ja maksmine»",
+      "бесплатной доставки нет": "tasuta tarnet pole",
+      "доставка бесплатна всегда": "tarne on alati tasuta",
+      "€ в корзине": "€ ostukorvis",
+      "Нажмите «Оставить так» под ценой — или поправьте её.": "Vajutage hinna all «Jäta nii» — või parandage hind.",
+      "Оставить так": "Jäta nii",
+      "вернуть": "taasta",
+      "пять банков по умолчанию": "viis panka vaikimisi",
+      "включены все": "kõik on sees",
+      "Коробка сохранена": "Karp salvestatud",
+      "Если перевозчик молчит — закрыть заказ": "Kui vedaja vaikib — sulge tellimus",
+      "«от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.": "«alates …» — riigis on mitu eri hinnaga vedajat; «—» — seda viisi riigis ei pakuta.",
+      "Сумма от 0 до 10 000 €, пусто или «нет».": "Summa 0 kuni 10 000 €, tühi või «no».",
+      "Цена — число от 0 до 99 €.": "Hind on number 0 kuni 99 €.",
+      "Цена ниже тарифа Montonio сохранена — разницу доплатит магазин": "Montonio tariifist madalam hind salvestatud — vahe maksab pood",
+      "Ниже тарифа Montonio — «Оставить так» или другая цена": "Montonio tariifist madalam — «Jäta nii» või muu hind",
+      "В таблице цены Montonio": "Tabelis on Montonio hinnad",
+      "В таблице уже цены Montonio": "Tabelis on juba Montonio hinnad",
+      "Когда «Доставлен»: сохранено": "Millal «Kohale toimetatud»: salvestatud",
+      "Банки в кассе: сохранено": "Pangad kassas: salvestatud",
+      "Баннер — большая картинка наверху главной. Слайды идут по кругу; один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.": "Bänner on suur pilt avalehe ülaosas. Slaidid vahelduvad ringiratast; üks slaid on lihtsalt pilt ilma noolteta. Tühja eesti- või ingliskeelse teksti asemel näitame venekeelset.",
+      "Полоска сверху": "Riba üleval",
+      "Чат-помощник": "Vestlusabi",
+      "Вернуть стандартный текст полоски": "Taasta riba vaiketekst",
+      "Ссылка на картинку — или выберите фото товара выше": "Pildi link — või valige toote foto ülalt",
+      "Удалить слайд": "Kustuta slaid",
+      "Слайдов нет — баннер на главной не показывается. Нажмите «+ Слайд».": "Slaide pole — avalehel bännerit ei näidata. Vajutage «+ Slaid».",
+      "+ Слайд": "+ Slaid",
+      "Слайд меняется каждые": "Slaid vahetub iga",
+      "сек": "s",
+      "Вернуть стандартный баннер": "Taasta vaikebänner",
+      "От 2 до 30 секунд.": "2 kuni 30 sekundit.",
+      "Слайд на месте": "Slaid on tagasi",
+      "Слайд удалён": "Slaid kustutatud",
+      "Сначала напишите русский текст": "Kirjutage esmalt venekeelne tekst",
+      "Переведено — проверьте тексты": "Tõlgitud — kontrollige tekste",
+      "Слайд добавлен скрытым — заполните и включите": "Slaid lisatud peidetuna — täitke see ja lülitage sisse",
+      "Удалить слайд?": "Kustutada slaid?",
+      "Слайд исчезнет с главной страницы. Картинка останется в товарах.": "Slaid kaob avalehelt. Pilt jääb toodete juurde.",
+      "Слайд показан ✓": "Slaid on nähtav ✓",
+      "Слайд скрыт ✓": "Slaid peidetud ✓",
+      "Полоска включена ✓": "Riba sisse lülitatud ✓",
+      "Полоска выключена ✓": "Riba välja lülitatud ✓",
+      "Стандартные данные вернули ✓": "Vaikeandmed taastatud ✓",
+      "Баннер": "Bänner",
+      "Меняется здесь — меняется везде: в подвале, на «Контактах», в правовых текстах, в письмах и счетах.": "Muudate siin — muutub kõikjal: jaluses, lehel «Kontakt», õigustekstides, kirjades ja arvetel.",
+      "Вступительный абзац": "Sissejuhatav lõik",
+      "Вернуть стандартные данные": "Taasta vaikeandmed",
+      "Время с": "Aeg alates",
+      "Время до": "Aeg kuni",
+      "Время понедельника — на все рабочие дни": "Esmaspäeva aeg — kõigile tööpäevadele",
+      "Время — например 10:00 или 1000.": "Aeg — näiteks 10:00 või 1000.",
+      "Впишите время «с» и «до».": "Kirjutage aeg «alates» ja «kuni».",
+      "Часы работы сохранены": "Lahtiolekuajad salvestatud",
+      "Сначала впишите время понедельника": "Kirjutage esmalt esmaspäeva aeg",
+      "Пн": "E", "Вт": "T", "Ср": "K", "Чт": "N", "Пт": "R", "Сб": "L", "Вс": "P",
+      "KMKR — две буквы страны и 2–14 цифр или букв, например EE102723858.": "KMKR — kaks riigi tähte ja 2–14 numbrit või tähte, näiteks EE102723858.",
+      "Это не похоже на адрес почты — например info@rempireshop.com.": "See ei näe e-posti aadressi moodi — näiteks info@rempireshop.com.",
+      "Телефон — цифры, пробелы и скобки, не меньше пяти знаков.": "Telefon — numbrid, tühikud ja sulud, vähemalt viis märki.",
+      "IBAN — две буквы страны и 10–40 цифр и букв, например EE38 2200 2210 2014 5685.": "IBAN — kaks riigi tähte ja 10–40 numbrit ja tähte, näiteks EE38 2200 2210 2014 5685.",
+      "Рег. номер — это 4–20 цифр, например 12216136.": "Registrikood on 4–20 numbrit, näiteks 12216136.",
+      "счета не уходят — нет IBAN": "arveid ei saadeta — IBAN puudub",
+      "без напоминания": "meeldetuletuseta",
+      "Только латинские буквы, цифры и дефис — до 8 знаков.": "Ainult ladina tähed, numbrid ja sidekriips — kuni 8 märki.",
+      "Отчёт не загрузился.": "Aruanne ei laadinud.",
+      "Тексты писем": "Kirjade tekstid",
+      "Номиналы подарочной карты": "Kinkekaardi nimiväärtused",
+      "Лимит писем": "Kirjade limiit",
+      "Один балл — одно евро.": "Üks punkt on üks euro.",
+      "Здесь всё, что меняли вы и магазин — с любого устройства. «Вернуть» отменяет изменение, даже если вы делали его на другом телефоне.": "Siin on kõik, mida teie ja pood muutsid — igast seadmest. «Taasta» võtab muudatuse tagasi ka siis, kui tegite selle teises telefonis.",
+      "вы · здесь": "teie · siin",
+      "вернули": "taastatud",
+      "Изменений пока нет. Всё, что вы поменяете, появится здесь — с кнопкой «Вернуть».": "Muudatusi veel pole. Kõik, mida muudate, ilmub siia — koos nupuga «Taasta».",
+      "Входы в админку": "Sisselogimised",
+      "Входов пока нет.": "Sisselogimisi veel pole.",
+      "Вернули ✓": "Taastatud ✓",
+      "Это изменение отсюда не вернуть": "Seda muudatust ei saa siit tagasi võtta",
+      "Если телефон не получил": "Kui telefon teadet ei saanud",
+      "Если оповещение не дошло ни до одного телефона, магазин отправляет письмо на свою почту. Telegram, если его подключал Дим, приходит всегда.": "Kui teade ei jõudnud ühegi telefonini, saadab pood kirja oma e-postile. Telegram, kui Dim selle ühendas, tuleb alati.",
+      "Проверить письмо в «Подключения»": "Kontrolli kirja jaotises «Liidestused»",
+      "Устройство уже убрано — включите оповещения на нём снова": "Seade on juba eemaldatud — lülitage teavitused selles uuesti sisse",
+      "Устройство убрано": "Seade eemaldatud",
       "Тарифы доставки сохранены ✓": "Tarnetariifid salvestatud ✓",
       "Вернули значения по умолчанию ✓": "Vaikeväärtused taastatud ✓",
       "Бесплатно от": "Tasuta alates", "Пакомат": "Pakiautomaat", "Курьер": "Kuller",
@@ -4465,6 +4564,105 @@
         "The number of uses must be a whole number above zero.",
       "Сохранить тарифы": "Save the tariffs",
       "Вернуть значения по умолчанию": "Restore the defaults",
+      /* «Настройки», direction 1a (25.09.2026) — the index, the pages that
+         save themselves, the journal from any device */
+      "цены по странам, способы оплаты": "prices by country, payment methods",
+      "баннер, полоска сверху, наборы": "banner, top strip, sets",
+      "реквизиты, часы, соцсети, отчёт": "company details, hours, social media, report",
+      "скидка салонам, баллы за покупки": "salon discount, points for purchases",
+      "Журнал": "Journal",
+      "что менялось — с «Вернуть»": "what changed — with «Restore»",
+      "RU основной · ET · EN — переводятся сами": "RU main · ET · EN — translated automatically",
+      "Пустое поле — цена Montonio, она серым в поле. Впишите своё число — покупатель заплатит его. Новые цены покупатели видят сразу.": "An empty box is Montonio's price — shown in grey inside it. Type your own number and the shopper pays that. Shoppers see new prices at once.",
+      "Серые числа — цены Montonio. Жирные — ваши. «—» — перевозчик туда не возит.": "Grey numbers are Montonio's prices, bold ones are yours. «—» — the carrier does not deliver there.",
+      "Страны Европы": "European countries",
+      "Где показывать пакоматы": "Where to offer pickup points",
+      "Способы оплаты": "Payment methods",
+      "включает Montonio": "switched on by Montonio",
+      "Банки в кассе": "Banks at checkout",
+      "Когда «Доставлен»": "When «Delivered»",
+      "как на странице «Доставка и оплата»": "as on the «Delivery & payment» page",
+      "бесплатной доставки нет": "no free delivery",
+      "доставка бесплатна всегда": "delivery always free",
+      "€ в корзине": "€ in the basket",
+      "Нажмите «Оставить так» под ценой — или поправьте её.": "Press «Keep it» under the price — or correct it.",
+      "Оставить так": "Keep it",
+      "вернуть": "undo",
+      "пять банков по умолчанию": "five banks by default",
+      "включены все": "all on",
+      "Коробка сохранена": "Box saved",
+      "Если перевозчик молчит — закрыть заказ": "If the carrier stays silent — close the order",
+      "«от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.": "«from …» — the country has several carriers at different prices; «—» — this method is not offered there.",
+      "Сумма от 0 до 10 000 €, пусто или «нет».": "An amount from 0 to 10 000 €, empty or «no».",
+      "Цена — число от 0 до 99 €.": "The price is a number from 0 to 99 €.",
+      "Цена ниже тарифа Montonio сохранена — разницу доплатит магазин": "Price below Montonio's tariff saved — the shop pays the difference",
+      "Ниже тарифа Montonio — «Оставить так» или другая цена": "Below Montonio's tariff — «Keep it» or another price",
+      "В таблице цены Montonio": "The table now has Montonio's prices",
+      "В таблице уже цены Montonio": "The table already has Montonio's prices",
+      "Когда «Доставлен»: сохранено": "When «Delivered»: saved",
+      "Банки в кассе: сохранено": "Banks at checkout: saved",
+      "Баннер — большая картинка наверху главной. Слайды идут по кругу; один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.": "The banner is the big picture at the top of the home page. Slides rotate; a single slide is just a picture without arrows. An empty Estonian or English text is replaced by the Russian one.",
+      "Полоска сверху": "Top strip",
+      "Чат-помощник": "Chat assistant",
+      "Вернуть стандартный текст полоски": "Restore the strip's standard text",
+      "Ссылка на картинку — или выберите фото товара выше": "Picture link — or pick a product photo above",
+      "Удалить слайд": "Delete slide",
+      "Слайдов нет — баннер на главной не показывается. Нажмите «+ Слайд».": "No slides — the banner is not shown on the home page. Press «+ Slide».",
+      "+ Слайд": "+ Slide",
+      "Слайд меняется каждые": "The slide changes every",
+      "сек": "sec",
+      "Вернуть стандартный баннер": "Restore the standard banner",
+      "От 2 до 30 секунд.": "From 2 to 30 seconds.",
+      "Слайд на месте": "The slide is back",
+      "Слайд удалён": "Slide deleted",
+      "Сначала напишите русский текст": "Write the Russian text first",
+      "Переведено — проверьте тексты": "Translated — check the texts",
+      "Слайд добавлен скрытым — заполните и включите": "Slide added hidden — fill it in and switch it on",
+      "Удалить слайд?": "Delete the slide?",
+      "Слайд исчезнет с главной страницы. Картинка останется в товарах.": "The slide disappears from the home page. The picture stays with the products.",
+      "Слайд показан ✓": "Slide shown ✓",
+      "Слайд скрыт ✓": "Slide hidden ✓",
+      "Полоска включена ✓": "Strip on ✓",
+      "Полоска выключена ✓": "Strip off ✓",
+      "Стандартные данные вернули ✓": "Standard details restored ✓",
+      "Баннер": "Banner",
+      "Меняется здесь — меняется везде: в подвале, на «Контактах», в правовых текстах, в письмах и счетах.": "Change it here and it changes everywhere: the footer, «Contact», the legal texts, the letters and the invoices.",
+      "Вступительный абзац": "Opening paragraph",
+      "Вернуть стандартные данные": "Restore the standard details",
+      "Время с": "From",
+      "Время до": "Until",
+      "Время понедельника — на все рабочие дни": "Monday's hours — for every working day",
+      "Время — например 10:00 или 1000.": "A time — for example 10:00 or 1000.",
+      "Впишите время «с» и «до».": "Type both the «from» and the «until» time.",
+      "Часы работы сохранены": "Opening hours saved",
+      "Сначала впишите время понедельника": "Type Monday's hours first",
+      "Пн": "Mon", "Вт": "Tue", "Ср": "Wed", "Чт": "Thu", "Пт": "Fri", "Сб": "Sat", "Вс": "Sun",
+      "KMKR — две буквы страны и 2–14 цифр или букв, например EE102723858.": "KMKR — two country letters and 2–14 digits or letters, for example EE102723858.",
+      "Это не похоже на адрес почты — например info@rempireshop.com.": "That does not look like an e-mail address — for example info@rempireshop.com.",
+      "Телефон — цифры, пробелы и скобки, не меньше пяти знаков.": "A phone number — digits, spaces and brackets, at least five characters.",
+      "IBAN — две буквы страны и 10–40 цифр и букв, например EE38 2200 2210 2014 5685.": "IBAN — two country letters and 10–40 digits and letters, for example EE38 2200 2210 2014 5685.",
+      "Рег. номер — это 4–20 цифр, например 12216136.": "The registry code is 4–20 digits, for example 12216136.",
+      "счета не уходят — нет IBAN": "invoices are not sent — no IBAN",
+      "без напоминания": "no reminder",
+      "Только латинские буквы, цифры и дефис — до 8 знаков.": "Latin letters, digits and a hyphen only — up to 8 characters.",
+      "Отчёт не загрузился.": "The report did not load.",
+      "Тексты писем": "Letter texts",
+      "Номиналы подарочной карты": "Gift card amounts",
+      "Лимит писем": "Letter limit",
+      "Один балл — одно евро.": "One point is one euro.",
+      "Здесь всё, что меняли вы и магазин — с любого устройства. «Вернуть» отменяет изменение, даже если вы делали его на другом телефоне.": "Everything you and the shop changed — from any device. «Restore» takes a change back even if you made it on another phone.",
+      "вы · здесь": "you · here",
+      "вернули": "restored",
+      "Изменений пока нет. Всё, что вы поменяете, появится здесь — с кнопкой «Вернуть».": "No changes yet. Everything you change will appear here — with a «Restore» button.",
+      "Входы в админку": "Sign-ins to the panel",
+      "Входов пока нет.": "No sign-ins yet.",
+      "Вернули ✓": "Restored ✓",
+      "Это изменение отсюда не вернуть": "This change cannot be taken back from here",
+      "Если телефон не получил": "If no phone got it",
+      "Если оповещение не дошло ни до одного телефона, магазин отправляет письмо на свою почту. Telegram, если его подключал Дим, приходит всегда.": "If the notification reached no phone, the shop sends a letter to its own address. Telegram, if Dim connected it, always arrives.",
+      "Проверить письмо в «Подключения»": "Check the letter in «Integrations»",
+      "Устройство уже убрано — включите оповещения на нём снова": "The device is already removed — switch notifications on there again",
+      "Устройство убрано": "Device removed",
       "Тарифы доставки сохранены ✓": "Delivery tariffs saved ✓",
       "Вернули значения по умолчанию ✓": "Defaults restored ✓",
       "Бесплатно от": "Free from", "Пакомат": "Parcel locker", "Курьер": "Courier",
@@ -6629,6 +6827,25 @@
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* «Настройки», direction 1a (25.09.2026): the lines the pages compose —
+       the index's device count, the folds' summaries, the rate cells, the
+       hours, the journal's sign-ins, the report's months. */
+    [/^подключено устройств: (\d+)$/, { ET: "ühendatud seadmeid: $1", EN: "devices connected: $1" }],
+    [/^доставляем в (\d+) из (\d+)$/, { ET: "tarnime $1 riiki $2-st", EN: "delivering to $1 of $2" }],
+    [/^пакомат в (\d+) из (\d+) стран$/, { ET: "pakiautomaat $1 riigis $2-st", EN: "pickup points in $1 of $2 countries" }],
+    [/^включено (\d+) из (\d+)$/, { ET: "sees $1 / $2", EN: "$1 of $2 on" }],
+    [/^работают все (\d+)$/, { ET: "kõik $1 töötavad", EN: "all $1 working" }],
+    [/^(\S+) × (\S+) × (\S+) см$/, { ET: "$1 × $2 × $3 cm", EN: "$1 × $2 × $3 cm" }],
+    [/^ячейка (\S+)$/, { ET: "kapp $1", EN: "locker $1" }],
+    [/^номер (\S+-0001)$/, { ET: "number $1", EN: "number $1" }],
+    [/^оплата (\d+) дн\.$/, { ET: "maksetähtaeg $1 p", EN: "payment in $1 days" }],
+    [/^напомнить за (\d+) дн\.$/, { ET: "meeldetuletus $1 p enne", EN: "reminder $1 days before" }],
+    [/^Ниже тарифа Montonio: (.+) · вернуть$/, { ET: "Alla Montonio tariifi: $1 · taasta", EN: "Below Montonio's tariff: $1 · undo" }],
+    [/^Ниже тарифа Montonio: (.+)$/, { ET: "Alla Montonio tariifi: $1", EN: "Below Montonio's tariff: $1" }],
+    [/^(\d+) за сегодня$/, { ET: "$1 täna", EN: "$1 today" }],
+    [/^(Пн|Вт|Ср|Чт|Пт|Сб|Вс)–(Пн|Вт|Ср|Чт|Пт|Сб|Вс) (.+)$/, { ET: "$1–$2 $3", EN: "$1–$2 $3" }],
+    [/^(Пн|Вт|Ср|Чт|Пт|Сб|Вс) (.+)$/, { ET: "$1 $2", EN: "$1 $2" }],
+    [/^(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) (\d{4})$/, { ET: "$1 $2", EN: "$1 $2" }],
     /* 1a, the phone's «Ещё» (admMoreLine): what is waiting under «Клиенты»,
        and the week's takings under «Аналитика». Russian takes three forms
        and gets one string each from pl(); Estonian and English take two, and
@@ -27993,9 +28210,11 @@
       PUSH.publicKey = (r.body && r.body.publicKey) || "";
       PUSH.devices = (r.body && r.body.devices) || [];
       PUSH.err = r.status === 503 ? "db" : "";
+      // answered: until now «не подключены» would have been a guess (1a — the loading state)
+      PUSH.answered = true;
       render();
       pushSyncHere();
-    }).catch(function () { PUSH.err = "net"; render(); });
+    }).catch(function () { PUSH.err = "net"; PUSH.answered = true; render(); });
   }
   /** Какой из подключённых — этот самый телефон. */
   function pushSyncHere() {
@@ -28202,6 +28421,8 @@
       return '<div class="adm-empty"><p>Этот браузер не умеет оповещения.</p>' +
         '<p class="adm-hint">Откройте «Админку» на телефоне — там они работают.</p></div>';
     }
+    // the list not here yet: «ещё не подключены» before the answer would be a guess
+    if (!PUSH.answered && SRV.admin === true) return '<div class="adm-skel"><i></i><i></i></div>';
     if (!PUSH.configured) {
       return '<p class="adm-err adm-err--block">Оповещения ещё не подключены к магазину. ' +
         'Это делает Дим — один раз, ключами на сервере.</p>';
@@ -28216,25 +28437,28 @@
         'откройте «Админку» с иконки и вернитесь сюда.</p>';
     }
     var on = !!PUSH.here;
+    /* This phone first — a dot and one sentence, and ONE button that flips it:
+       the page's one dark button while it is off (design), outlined once on. */
     out += '<div class="adm-push__here">' +
-      '<p class="adm-push__state">' + (on ? "Этот телефон подключён ✓" : "Этот телефон не подключён") + "</p>" +
+      '<p class="adm-push__state"><span class="adm-push__dot' + (on ? " is-on" : "") + '" aria-hidden="true"></span>' +
+        "<span>" + (on ? "Этот телефон подключён ✓" : "Этот телефон не подключён") + "</span></p>" +
       (on
         ? '<button class="adm-btn adm-btn--ghost" type="button" data-pushoff' + (PUSH.busy ? " disabled" : "") +
             ">Выключить на этом телефоне</button>"
         : '<button class="adm-btn" type="button" data-pushon' + (PUSH.busy ? " disabled" : "") +
             ">Включить на этом телефоне</button>") +
-      "</div>" +
-      '<p class="adm-hint">Приходит, когда заказ оплачен: номер, сумма и покупатель. ' +
-      "Нажатие открывает этот заказ.</p>";
+      "</div>";
     if (PUSH.err) out += '<p class="adm-err adm-err--block">' + esc(PUSH_ERR[PUSH.err] || PUSH_ERR.on) + "</p>";
     if (PUSH.sent) out += '<p class="adm-note">Проверочное ушло на устройств: ' + esc(PUSH.sent) + "</p>";
 
-    var others = PUSH.devices.filter(function (d) { return d.endpoint !== PUSH.here; });
-    out += '<h3 class="adm-sec__t" style="margin-top:18px">Подключённые устройства</h3>';
-    if (!PUSH.devices.length) {
+    // a device taken off the list waits five seconds for «Вернуть» (pushDropHeld)
+    var shown = PUSH.devices.filter(function (d) { return !PUSH_HELD[d.endpoint]; });
+    var others = shown.filter(function (d) { return d.endpoint !== PUSH.here; });
+    out += admSecHeadHTML("Подключённые устройства", "", "");
+    if (!shown.length) {
       out += '<p class="adm-hint">Пока ни одного. Включите на телефоне, который всегда с вами.</p>';
     } else {
-      out += '<div class="adm-push__list">' + PUSH.devices.map(function (d) {
+      out += '<div class="adm-push__list">' + shown.map(function (d) {
         var here = d.endpoint === PUSH.here;
         return '<div class="adm-push__row">' +
           '<span class="adm-push__nm">' + esc(d.label || "Устройство") +
@@ -28253,69 +28477,249 @@
     }
     return out;
   }
+  /* «Оповещения на телефон» as a settings page (design): this phone, the
+     devices, the test; then where an order's news goes when no phone takes
+     it; then the scanner as an app of its own — the install hint and the
+     «Сканер отдельным приложением ↗» door moved here from «Склад» (1a, q17).
+     The block is the stock screen's own admScanAppHTML() (branch ux1a-stock)
+     once that is merged; until then the same two pieces are drawn here. */
+  function admSetPushPageHTML() {
+    return admSetHeadHTML("push", "Приходит, когда заказ оплачен: номер, сумма и покупатель. Нажатие открывает этот заказ.") +
+      '<div class="adm-narrow--form adm-form">' + admSetPushHTML() +
+        admSecHeadHTML("Если телефон не получил", "", "") +
+        '<p class="adm-hint" style="margin:0">Если оповещение не дошло ни до одного телефона, магазин отправляет письмо на свою почту. ' +
+          "Telegram, если его подключал Дим, приходит всегда.</p>" +
+        '<div class="adm-acts"><button class="adm-link" type="button" data-admtab="apps">Проверить письмо в «Подключения»</button></div>' +
+        (typeof admScanAppHTML === "function" ? admScanAppHTML()
+          : admSecHeadHTML("Сканер", "", "") + pwaHintHTML() +
+            '<div class="adm-acts"><button class="adm-link" type="button" data-scanapp>Сканер отдельным приложением ↗</button></div>') +
+      "</div>";
+  }
+  /* «Убрать» with «Вернуть» (design): the device leaves the list at once and
+     the unsubscribe waits five seconds — a device that is not this one cannot
+     be subscribed again from here, so the way back has to be before the
+     server hears of it (q8's hold). */
+  var PUSH_HELD = {};
+  function pushDropHeld(endpoint) {
+    if (PUSH.busy || PUSH_HELD[endpoint]) return;
+    PUSH_HELD[endpoint] = 1;
+    render();
+    admHold(ADM_HOLD_MS, function () {
+      delete PUSH_HELD[endpoint];
+      pushDrop(endpoint);
+    }, function (late) {
+      delete PUSH_HELD[endpoint];
+      // once the server has let it go, only the device itself can come back
+      if (late) toast("Устройство уже убрано — включите оповещения на нём снова");
+      render();
+    }, "Устройство убрано");
+  }
 
+  /* ======================================================================
+     «Настройки», direction 1a — design_handoff_admin_ux README § 5,
+     prototypes/Admin 1a Screens 4.dc.html, screens 09-settings-*, and Dim's
+     answers of 25.09.2026 (ux1a decisions q4, q7, q8, q37–q40).
+
+     Every page saves itself. A number, a code or a name saves when the owner
+     leaves the box or presses Enter, a long text a second after the last
+     keystroke, a switch or a pick at once (ADM_SAVE_POLICY, q1). The save bar
+     that used to end each page — «Сохранить», «Отменить правки», «Изменения
+     не сохранены: …» — is gone, and so are its confirm cards («Изменить
+     тарифы доставки?», «Изменить баннер на главной?», «Изменить данные
+     магазина?», «Изменить цены и баллы?»): what «Отменить правки» did is a
+     «Вернуть» now, on the toast after each change and on its line in
+     «Журнал». What still asks first is what README rule 4 names — deleting
+     a slide — and a delivery price under Montonio's, which waits for its own
+     «Оставить так» (q4).
+     ====================================================================== */
   var ADM_SET_PAGES = [
-    ["delivery", "Доставка и оплата", "тарифы по странам · Montonio · способы оплаты"],
-    ["home", "Главная страница", "баннер, полоска вверху, наборы и чат"],
-    ["company", "О компании", "реквизиты, часы, контакты, соцсети, отчёты"],
-    ["prices", "Цены и баллы", "скидка салона, баллы лояльности, Pro-цены"],
-    ["langs", "Языки", "RU основной · ET · EN"],
+    ["delivery", "Доставка и оплата", "цены по странам, способы оплаты"],
+    ["home", "Главная страница", "баннер, полоска сверху, наборы"],
+    ["company", "О компании", "реквизиты, часы, соцсети, отчёт"],
+    ["prices", "Цены и баллы", "скидка салонам, баллы за покупки"],
     ["push", "Оповещения на телефон", "звонок, когда заказ оплачен"],
-    /* «в этом браузере», because that is where it lives: DEMO.log is a
-       localStorage list (ADM_LS), not the server's admin_audit. What was
-       changed from the phone is not in the laptop's journal — the row used to
-       say «всё, что применялось» and read like a shop-wide history. */
-    ["journal", "Журнал изменений", "ваши изменения с «Вернуть» и журнал сервера"]
+    /* «с любого устройства» since 25.09.2026 (q7): the server keeps what
+       each change replaced, so «Вернуть» is no longer this browser's alone */
+    ["journal", "Журнал", "что менялось — с «Вернуть»"]
   ];
   function admSetTitle(key) {
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
-    return "Настройки";
+    return "";
   }
-  /* ---------- the settings pages' one save bar ------------------------------
-     Dim, 10.09.2026: «all saving flows … least clicks, comfortable on the
-     phone and on the desktop». A settings page used to end each card with
-     its own bare «Сохранить»: on a phone the banner's stood two screens
-     below the slide being edited, and nothing anywhere said whether what
-     was on screen had been saved. Now each page with a draft — Главная
-     страница, О компании, Доставка и оплата, Цены и баллы — ends in the
-     product editor's sticky bar (admin.css .adm-savebar: above the nav on a
-     phone, the toast climbs over it), and the bar is the ONLY «Сохранить»
-     on the page:
+  /** The line under an index row: what is live when the panel knows it. */
+  function admSetSub(p) {
+    // «подключено устройств: 1» once the push list has been read (design)
+    if (p[0] === "push" && PUSH.loaded && pushCan() && PUSH.configured) return "подключено устройств: " + PUSH.devices.length;
+    return p[2];
+  }
 
-       · quiet while nothing differs — a ghost, disabled button and
-         «Изменений нет»;
-       · the moment a draft differs, a line that names the card —
-         «Изменения не сохранены: Главный баннер» — the ink button and
-         «Отменить правки»;
-       · «Сохранено ✓» on the button once the change went through, until
-         the next keystroke (S.admSetSaved, cleared on any edit).
+  /* ---- one settings key, one write at a time ------------------------------
+     PUT /api/admin/settings stores every top-level key WHOLE — a merge cannot
+     say «this cell is gone» — so each write sends the whole value of its key,
+     as the panel holds it when the write leaves (admSetValue). One key is one
+     slot of the 1a autosave (admAutosave, «set:<key>»): at most one write in
+     flight and one waiting behind it, so ten quick changes are at most two
+     PUTs and the second carries all ten; apiSend() already puts every PUT to
+     this route in one queue. The header's «Сохраняем… / Сохранено ✓ / Не
+     сохранилось — Повторить» is that slot's, and «Повторить» sends the key
+     again as it is then.
 
-     The button carries the ATTRIBUTE of the first dirty card («data-
-     herosave», «data-contentsave» …), so the existing handlers, the confirm
-     cards and the e2e suite reach it exactly as before; two dirty cards are
-     saved one after the other, each through its own question. Painted in
-     place by paintSetBar() from every input handler of these forms — a
-     render() would take the caret out of the field being typed in. */
-  var ADM_SET_CARDS = {
-    home: [["hero", "Главный баннер"], ["content", "Верхняя полоска"]],
-    company: [["content", "Данные магазина"], ["invoice", "Счета для компаний"]],
-    delivery: [["ship", "Тарифы доставки"]],
-    prices: [["pricing", "Цены и баллы"]]
+     Every change still goes through demoApply() first — its journal line and
+     «Вернуть», the local state the shop reads — and srvPush() hands each
+     settings key here instead of firing a PUT of its own. So the owner's
+     edits, the assistant's applied proposals and every «Вернуть» all save one
+     way. The toast that names a change («Тарифы доставки сохранены» +
+     «Вернуть») waits for the server's 2xx — never «сохранено» before it. */
+  var ADM_SET_OF = {
+    set_hero: "hero", set_content: "content", set_pricing: "pricing", set_delivery: "delivery",
+    set_parcel: "shipping_parcel", set_banks: "payment_banks", toggle_chatbot: "chatbot",
+    toggle_bundles: "bundles", set_invoice: "invoice", set_shipping_rules: "shipping_rules"
   };
-  var ADM_SET_SAVE_ATTR = {
-    hero: "data-herosave", content: "data-contentsave", invoice: "data-adminvsave",
-    ship: "data-admshipsave", pricing: "data-admpricingsave"
-  };
-  function admSetCardDirty(kind, page) {
-    if (kind === "hero") return heroDirty();
-    if (kind === "content") return contentDirtyFor(page);
-    if (kind === "invoice") return invoiceDirty();
-    if (kind === "ship") return shipDirty();
-    if (kind === "pricing") return pricingDirty();
+  /** key → { toast, entry, ref, undoOf } for the next write of that key. */
+  var ADM_SET_NOTE = {};
+  /** key → when the panel last changed it (Date.now()) — a read asked before that is older than the panel. */
+  var ADM_SET_AT = {};
+  var admSetSeq = 0;
+  /** The whole value a key is saved as — what the panel holds right now. */
+  function admSetValue(key) {
+    if (key === "hero") return DEMO.hero && Array.isArray(DEMO.hero.slides) ? DEMO.hero : null;
+    if (key === "content") return DEMO.content;
+    if (key === "pricing") return S.pricingLoaded;
+    if (key === "delivery") return normaliseDelivery(S.deliveryLoaded);
+    if (key === "shipping_parcel") return normaliseParcel(S.parcelLoaded);
+    if (key === "payment_banks") return bankFilter();
+    if (key === "chatbot") return !!DEMO.chatbot;
+    if (key === "bundles") return DEMO.bundles !== false;
+    if (key === "invoice") return invoiceConf();
+    return undefined;
+  }
+  /** The journal's own name for a change — sent as `ref`, so this browser can
+      tell its row in the server's journal from another device's. */
+  function admSetRef() { return "j" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  /** Queue the write of one key. `note` rides on the next write of it. */
+  function admSetPut(key, note) {
+    if (note) {
+      var n = ADM_SET_NOTE[key] || (ADM_SET_NOTE[key] = {});
+      for (var k in note) if (Object.prototype.hasOwnProperty.call(note, k)) n[k] = note[k];
+    }
+    admSetSeq += 1;
+    ADM_SET_AT[key] = Date.now();
+    return admAutosave("set:" + key, admSetSeq, "change", {
+      kind: "pick",
+      send: function () { return admSetSend(key); }
+    });
+  }
+  function admSetSend(key, asked) {
+    /* The session not known yet — the page has just loaded and
+       /api/admin/me has not answered (SRV.admin null). Ask first: a save is
+       never «done» on the say-so of a panel that has not heard from the
+       server. Found by e2e: a phone typed right after a reload toasted
+       «сохранены» down the demo's path and never left the browser. */
+    if (SRV.admin === null && !asked) return checkAdmin().then(function () { return admSetSend(key, true); });
+    var note = ADM_SET_NOTE[key] || {};
+    delete ADM_SET_NOTE[key];
+    // the demo, with no server behind it: the apply was the whole save
+    if (!SRV.admin) { if (note.toast) toast(note.toast, note.entry); return true; }
+    if (key === "shipping_rules") return shipPut(note);
+    var body = { settings: {} };
+    body.settings[key] = admSetValue(key);
+    if (note.undoOf) body.undoOf = note.undoOf;
+    if (note.ref) body.ref = note.ref;
+    return apiSend("/api/admin/settings/", "PUT", body).then(function (r) {
+      if (admAutosaveOk(r)) {
+        /* the checkout draws PAYMETHODS.banks, fetched once per page load, and
+           the panel and the checkout are the same page — asked again once the
+           PUT has landed, never before (the route reads the setting) */
+        if (key === "payment_banks") reloadPayMethods();
+        if (note.toast) toast(note.toast, note.entry);
+      }
+      return r;
+    });
+  }
+  /**
+   * An owner's change on a settings page: the journal line, the local state,
+   * the write — and the toast with «Вернуть» once the server has it.
+   * The note goes in BEFORE demoApply(): srvPush() inside it may send at once,
+   * and the note's `ref` has to be on that write. The entry is filled in
+   * after — the toast needs it only when the answer lands.
+   */
+  function admSetApply(a, toastText) {
+    var key = ADM_SET_OF[a.type];
+    var note = { toast: toastText || "", ref: admSetRef() };
+    if (key) ADM_SET_NOTE[key] = note;
+    var entry = demoApply(a);
+    if (!entry) { if (key && ADM_SET_NOTE[key] === note) delete ADM_SET_NOTE[key]; return null; }
+    note.entry = entry;
+    entry.ref = note.ref;
+    demoSave();
+    return entry;
+  }
+  /** Is a write of this key still owed or on its way? A read that lands then must not overwrite it. */
+  function admSetBusy(key) {
+    var f = ADM_AS["set:" + key];
+    return !!f && (f.busy || f.dirty || f.failed);
+  }
+  /** May a read asked at `askedAt` replace what the panel holds for `key`?
+      Not while a write of it is owed, and not if the panel changed it since
+      the read left — then the answer is the older of the two. */
+  function admSetFresh(key, askedAt) {
+    return !admSetBusy(key) && !((ADM_SET_AT[key] || 0) >= askedAt);
+  }
+  /* A box's autosave record remembers the value it last sent, and skips a
+     value equal to it. Values on these pages also change by other doors — a
+     «вернуть», «Вернуть» on a toast, a fresh read from another device — so a
+     record left over from before would skip the owner typing the old value
+     back. Each render of a settings page forgets the records with nothing
+     owed; a box that is refused, being typed in or on its way keeps its. */
+  var ADM_SET_FIELD = /^(ship|content|hero|parcel|inv|price|hours):/;
+  function admSetForget() {
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k) || !ADM_SET_FIELD.test(k)) continue;
+      var f = ADM_AS[k];
+      if (!f.dirty && !f.busy && !f.failed && !f.timer) delete ADM_AS[k];
+    }
+  }
+  /** Is any box of this settings page still holding typing that has not gone? */
+  function admSetTyping(prefix) {
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k) || k.indexOf(prefix) !== 0) continue;
+      if (ADM_AS[k].dirty || ADM_AS[k].busy) return true;
+    }
     return false;
   }
-  function admSetDirtyCards(page) {
-    return (ADM_SET_CARDS[page] || []).filter(function (c) { return admSetCardDirty(c[0], page); });
+  /* The same GET /api/admin/settings the pages already read (loadAdminPricing)
+     is asked again each time a settings page opens — never cached, so a
+     change made on the phone is on the laptop's page before the laptop's next
+     whole-key PUT could send the old document back over it (gap analysis § 0,
+     «cross-device clobber»). The keys the public feed also carries are taken
+     from it here, unless a write of the key is still owed from this page. */
+  function admSetAdopt(st, askedAt) {
+    if (!st || typeof st !== "object") return;
+    if (Object.prototype.hasOwnProperty.call(st, "hero") && admSetFresh("hero", askedAt) && !admSetTyping("hero:")) {
+      DEMO.hero = st.hero && typeof st.hero === "object" && Array.isArray(st.hero.slides) ? st.hero : null;
+      if (S.heroEdit < 0) S.heroDraft = null;
+    }
+    if (st.content && typeof st.content === "object" && !Array.isArray(st.content) &&
+        admSetFresh("content", askedAt) && !admSetTyping("content:")) {
+      DEMO.content = st.content;
+      S.contentDraft = null;
+    }
+    if (typeof st.chatbot === "boolean" && admSetFresh("chatbot", askedAt)) DEMO.chatbot = st.chatbot;
+    if (typeof st.bundles === "boolean" && admSetFresh("bundles", askedAt)) DEMO.bundles = st.bundles;
+    if (st.invoice && typeof st.invoice === "object" && admSetFresh("invoice", askedAt) && !admSetTyping("inv:")) {
+      DEMO.invoice = {
+        dueDays: Number(st.invoice.dueDays) || 7,
+        prefix: String(st.invoice.prefix == null ? "A-" : st.invoice.prefix),
+        remindBeforeDays: invoiceDayNum(st.invoice.remindBeforeDays, 2, 30),
+        cancelAfterDays: invoiceDayNum(st.invoice.cancelAfterDays, 7, 90)
+      };
+    }
+  }
+  /** A settings page opened — from the index, a deep link, the assistant. What
+      the page left owes goes first; admSetRead() reads its settings again. */
+  function admSetOpen(page) {
+    admAutosaveFlush();
+    S.admSetPage = page; S.shipErr = "";
   }
   /* ---- the save bar on a phone: the header's status word ------------------
      Since 11.09.2026 the bar is the phone's top header (admin.css ≤ 767):
@@ -28442,52 +28846,6 @@
        the observer would sleep through the very growth it is here for */
     try { admBarRO.observe(bar, { box: "border-box" }); } catch (e) { admBarRO.observe(bar); }
   }
-  function admSetBarHTML(page) {
-    if (!ADM_SET_CARDS[page]) return "";
-    return '<div class="adm-savebar adm-savebar--set' + admDirtyCls(admSetDirtyCards(page).length > 0) + '" data-setbar>' +
-      admSetBarInnerHTML(page) + "</div>";
-  }
-  function admSetBarInnerHTML(page) {
-    var cards = ADM_SET_CARDS[page] || [];
-    if (!cards.length) return "";
-    /* The delivery prices are applied to the screen before the server has
-       answered, so between the tap and the answer there is no draft and
-       nothing is saved yet either: neither «Изменений нет» nor «Сохранено ✓»
-       is true. The answer decides which word comes next (srvPush). */
-    if (page === "delivery" && S.shipSaving) {
-      return '<span class="adm-savebar__note" data-setnote>Сохраняем…</span>' +
-        '<button class="adm-btn adm-savebar__main adm-btn--ghost" data-admshipsave disabled>Сохранить</button>';
-    }
-    var dirty = admSetDirtyCards(page);
-    var saved = !dirty.length && S.admSetSaved === page;
-    var attr = ADM_SET_SAVE_ATTR[(dirty.length ? dirty[0] : cards[0])[0]];
-    /* each name its own node, the colon outside them: the dictionary
-       translates «Изменения не сохранены» and «Главный баннер» as the
-       whole keys they already are */
-    // once saved the button itself says so, and the line goes quiet — the
-    // same two words twice in one bar would be noise
-    // …and, beside the desktop's sentence, the one word the phone header has
-    // room for: the sentence is hidden there and the word here (admin.css
-    // .adm-savebar__note--long / --short)
-    var note = dirty.length
-      ? '<span class="adm-savebar__note adm-savebar__note--warn" data-setnote>' +
-          '<span class="adm-savebar__note--long"><span>Изменения не сохранены</span>: ' +
-          dirty.map(function (c) { return "<span>" + c[1] + "</span>"; }).join(", ") + "</span>" +
-          '<span class="adm-savebar__note--short">Не сохранено</span></span>'
-      : saved ? ""
-      : '<span class="adm-savebar__note" data-setnote>Изменений нет</span>';
-    return note +
-      '<button class="adm-btn adm-savebar__main' + (dirty.length ? "" : " adm-btn--ghost") + '" ' + attr + (dirty.length ? "" : " disabled") + ">" +
-        (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      (dirty.length ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-setrevert>' + SAVEBAR_CANCEL + '</button>' : "");
-  }
-  function paintSetBar() {
-    var bar = document.querySelector("[data-setbar]");
-    if (!bar) return;
-    bar.innerHTML = admSetBarInnerHTML(S.admSetPage || "");
-    translateTree(bar);
-    admDirtyMark(bar, admSetDirtyCards(S.admSetPage || "").length > 0);
-  }
   /* «Письма» in the settings index — a door, not a page (23.09.2026). The mail
      settings live in «Маркетинг → Письма», beside the letters they time, but
      «Настройки» is where the owner looked for the daily limit («There is no
@@ -28495,123 +28853,258 @@
      there: data-admtab="mail" is the same door the assistant's «Открыть»
      buttons use. */
   function admSetMailLinkHTML() {
-    return '<button data-admtab="mail"><span><span class="adm-row__nm">Письма</span>' +
-      '<span class="adm-row__sub">сколько писем в сутки, брошенная корзина, тексты — в «Маркетинг → Письма»</span></span>' +
-      '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+    return '<button class="adm-setidx__r" type="button" data-admtab="mail"><span class="adm-setidx__t">' +
+      '<span class="adm-setidx__nm">Письма</span>' +
+      '<span class="adm-setidx__s">сколько писем в сутки, брошенная корзина, тексты — в «Маркетинг → Письма»</span></span>' +
+      '<span class="adm-setidx__chev" aria-hidden="true">›</span></button>';
+  }
+  /** The index of the pages: the whole screen on a phone, the permanent left
+      column on a desktop (the page it opened beside it, marked). */
+  function admSetIndexHTML(cur) {
+    var noIban = !ibanOk(contentConf().company.iban);
+    return '<nav class="adm-setidx" aria-label="Настройки">' +
+      ADM_SET_PAGES.map(function (p) {
+        return '<button class="adm-setidx__r" type="button" data-admsetpage="' + p[0] + '"' +
+            (cur === p[0] ? ' aria-current="page"' : "") + ">" +
+          '<span class="adm-setidx__t"><span class="adm-setidx__nm">' + p[1] + "</span>" +
+            '<span class="adm-setidx__s">' + admSetSub(p) + "</span></span>" +
+          // the one thing on the index that needs him: invoices do not go out without it
+          (p[0] === "company" && noIban ? admTagHTML("alert", "нет IBAN") : "") +
+          '<span class="adm-setidx__chev" aria-hidden="true">›</span></button>' +
+          (p[0] === "push" ? admSetMailLinkHTML() : "");
+      }).join("") +
+      /* «Языки» (q39): one line, nothing to tap — all three languages are
+         always on and the visitor picks his own; the page it used to open
+         had no setting on it. */
+      '<div class="adm-setidx__info"><span class="adm-setidx__nm">Языки магазина</span>' +
+        '<span class="adm-setidx__s">RU основной · ET · EN — переводятся сами</span></div>' +
+      "</nav>";
+  }
+  /* The same GET /api/admin/settings the pages already read (loadAdminPricing)
+     is asked again when a settings page comes on screen — it is never cached,
+     so a change made on the phone is on the laptop's page before the laptop's
+     next whole-key PUT could send the old document back over it (gap analysis
+     § 0, «cross-device clobber»). Once per page opened, and again after 20 s
+     on the same page; loadAdminPricing() leaves alone every key the panel is
+     still writing or changed after the read left (admSetFresh). */
+  var admSetReadKey = "", admSetReadAt = 0;
+  function admSetRead(page) {
+    var key = page + "|" + (S.admSetPage || ""), now = Date.now();
+    if (key === admSetReadKey && now - admSetReadAt < 20000) return;
+    admSetReadKey = key; admSetReadAt = now;
+    if (SRV.admin !== true) return;
+    if (S.pricingLoaded || S.pricingLoadErr) { S.pricingLoadErr = false; loadAdminPricing(true); }
+    if (page === "journal") { AUDIT.asked = false; loadAudit(true); }
+    if (page === "push") pushLoad(true);
   }
   function admSetupHTML() {
-    var page = S.admSetPage || "";
-    if (!page) {
-      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Настройки", "") +
-        '<div class="adm-idx">' + ADM_SET_PAGES.map(function (p) {
-          return '<button data-admsetpage="' + p[0] + '"><span><span class="adm-row__nm">' + p[1] + "</span>" +
-            '<span class="adm-row__sub">' + p[2] + "</span></span>" +
-            '<span class="adm-row__chev" aria-hidden="true">›</span></button>' +
-            (p[0] === "push" ? admSetMailLinkHTML() : "");
-        }).join("") + "</div></div>";
-    }
-    return '<div class="adm-screen adm-screen--tight">' +
-      admBackHTML('data-admsetback', "Настройки") +
-      admHead("", admSetTitle(page), "") +
-      (page === "delivery" ? admSetDeliveryHTML()
-        : page === "home" ? admSetHomeHTML()
-        : page === "company" ? admSetCompanyHTML()
-        : page === "prices" ? admSetPricesHTML()
-        : page === "langs" ? admSetLangsHTML()
-        : page === "push" ? admSetPushHTML()
-        : admSetJournalHTML()) +
-      // the page's one «Сохранить», sticky at the bottom (ADM_SET_CARDS above)
-      admSetBarHTML(page) +
+    var page = admSetTitle(S.admSetPage || "") ? S.admSetPage : "";
+    // a desktop has room for the page beside the index (design 09-settings-delivery-desktop)
+    var desk = !!(ADM_PHONE_MQ && !ADM_PHONE_MQ.matches);
+    var shown = page || (desk ? "delivery" : "");
+    admSetForget();
+    pushLoad(false);   // «подключено устройств: N» on the index
+    if (shown) admSetRead(shown);
+    return '<div class="adm-screen adm-screen--tight adm-set' + (page ? " adm-set--open" : "") + '">' +
+      '<div class="adm-set__col">' + admHead("", "Настройки", "") + admSetIndexHTML(shown) + "</div>" +
+      (shown ? '<div class="adm-set__main" data-setpage="' + shown + '">' + admSetPageHTML(shown) + "</div>" : "") +
       "</div>";
   }
+  function admSetPageHTML(page) {
+    if (page === "delivery") return admSetDeliveryHTML();
+    if (page === "home") return admSetHomeHTML();
+    if (page === "company") return admSetCompanyHTML();
+    if (page === "prices") return admSetPricesHTML();
+    if (page === "push") return admSetPushPageHTML();
+    return admSetJournalHTML();
+  }
+  /** A page's head: the way back (while a page is open over the index), the
+      title, and its «?» with the one paragraph that used to sit on the page. */
+  function admSetHeadHTML(page, help) {
+    return (S.admSetPage ? admBackHTML("data-admsetback", "Настройки") : "") +
+      '<div class="adm-set__h"><h2 class="adm-h1 adm-h1--flat">' + admSetTitle(page) + "</h2>" +
+        (help ? admHelpBtnHTML("set:" + page) : "") + "</div>" +
+      (help ? admHelpHTML("set:" + page, help) : "");
+  }
+  /** GET /api/admin/settings not answered yet, or failed: nothing is drawn
+      that could be saved over the shop's real settings (adminSettingsReady). */
+  function admSetLoadingHTML() {
+    if (S.pricingLoadErr) {
+      return '<div class="adm-error"><span>Настройки магазина сейчас не отвечают — попробуйте ещё раз.</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="pricing">Повторить</button></div>';
+    }
+    return '<div class="adm-skel"><i></i><i></i><i></i></div>';
+  }
+  /** «3,19» — a price in a box's grey placeholder: the digits, no «€». */
+  function admMoney2(n) { return (Math.round(Number(n) * 100) / 100).toFixed(2).replace(/\./, ","); }
+  /** A line of facts joined by « · », each its own node (admPiecesHTML). */
+  function admSumHTML(bits) { return admPiecesHTML(bits.filter(function (b) { return !!b; }).join(" · ")); }
 
-  /* ---------- Доставка и оплата: ONE rate table ----------------------------
+  /* ---------- Доставка и оплата --------------------------------------------
      Ренат, 14.09.2026: «I just need to control the shipping price for the
      client in the checkout according to Montonio price. If I do not like the
-     Montonio price, I will just override it… it seems to me that this delivery
-     is a bit over engineered.»
+     Montonio price, I will just override it.» One table — a row per country,
+     a column per carrier Montonio prices there, the courier and «Бесплатно
+     от» — and one rule for every box in it: empty is Montonio's price (grey,
+     in the box), a number is yours (bold). On a phone each country folds,
+     Estonia open, with its cheapest price and its free-from in the fold's
+     line (design 09-settings-phone-delivery). Everything else on the page
+     is a fold with a one-line summary.
 
-     It was three tables for two decisions. The grid's «Пакомат» column almost
-     never billed anybody — in EE, LV, LT and FI the shopper picks a carrier
-     chip and quoteFromRules() reads that carrier's own cell long before the
-     column, and no other country offers a locker at all. The «Наценка» boxes
-     changed no bill in any country. And «Заполнить по тарифам Montonio» wrote
-     numbers that have been the default since 13.09.2026.
-
-     So: one table. A row per country, a column per carrier Montonio prices
-     there, plus the courier and the free-from threshold. One rule for every
-     box in it — empty means Montonio's price, a number means yours — and that
-     price written under the box, so what he is overriding and what he would
-     go back to are the same visible number. */
+     Each box saves when it is left (q1). A price under Montonio's is not
+     refused and not asked about in a sheet (q4): its box turns rust with
+     «Ниже тарифа Montonio» and «Оставить так», and it is not saved until
+     that tap — the rest of the table saves around it (shipGate). */
+  var DELIV_HELP =
+    "<span>Пустое поле — цена Montonio, она серым в поле. Впишите своё число — покупатель заплатит его. Новые цены покупатели видят сразу.</span> " +
+    "<span>«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.</span> " +
+    "<span>Самовывоза в таблице нет — он всегда бесплатный. «—» — этот перевозчик в эту страну не возит.</span> " +
+    "<span>Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. При оформлении у каждой точки написано, какая она; цена одна и та же.</span>";
+  /** Which countries' folds are open on a phone — Estonia to begin with. */
+  var ADM_RT_OPEN = { EE: 1 };
   function admSetDeliveryHTML() {
-    // no inline confirm card here: a tariff save sets `overlay: true`, and
-    // screenAdmin() lifts that same card onto a scrim over the page
-    return '<div class="adm-narrow">' +
-      /* The rule, once, at the top, because everything below is an instance of
-         it. The old screen needed three paragraphs to explain which of its
-         three tables actually billed; this one needs a sentence. */
-      '<p class="adm-notice">Пустое поле — цена Montonio, она написана под полем. ' +
-        "Впишете своё число — покупатель заплатит его.</p>" +
-      /* A refused save, above the table rather than under the preview at the
-         bottom: on a phone that was a screen and a half of scrolling away
-         from the save button, and nobody found it (23.09.2026). */
-      admShipErrHTML() +
-      '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--head"><span>Страна</span>' +
-        SHIP_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
-        "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
-      SHIP_ROWS.map(function (r) {
-        return admShipRowHTML(r[0], r[1], "") +
-          // the twenty-one countries behind «Другие страны Европы» fold out
-          // right under it, so the zone price and the country prices read as
-          // one table and not as two screens
-          (r[0] === "EU" ? admShipEuropeHTML() : "");
-      }).join("") +
-      /* The one thing the column could not say for itself: an empty box here
-         is an answer, not a blank. Renat cleared it and the shop went on
-         giving delivery away from 59 € — shipFreeCell() draws the real
-         threshold now, and this sentence says what happens if he empties it. */
-      '<p class="adm-hint" style="margin-top:10px">«Бесплатно от»: 0 — доставка бесплатна всегда, ' +
-        "пусто — бесплатной доставки в эту страну нет.</p>" +
-      /* The third delivery method has no row in the grid and no price box
-         anywhere — because it has no price. Worth one line so the table does
-         not read as «самовывоза тут нет». */
-      '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный. ' +
-        "«—» — этот перевозчик в эту страну не возит.</p>" +
-      /* One cell prices Montonio's `pickupPoint`, and that method is not
-         machines only: Nova Post keeps 129 manned counters in Latvia and 110
-         in Lithuania, Finnish DPD 1053 of them. The shopper sees which is
-         which at each point in the picker; the owner should know the column
-         he is pricing covers both. */
-      '<p class="adm-hint" style="margin-top:4px">Под «Пакоматом» бывают и пункты выдачи — там посылку отдаёт продавец. ' +
-        "При оформлении у каждой точки написано, какая она; цена одна и та же.</p>" +
-      admShipPreviewHTML() +
-      // «Сохранить» is the page's bar (admSetBarHTML); these two are the ways
-      // back — one to Montonio's prices, one to the numbers the shop shipped with
-      '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn adm-btn--ghost" data-admshipmontonio>Везде взять цены Montonio</button>' +
-        '<button class="adm-link adm-link--muted" data-admshipreset>Вернуть значения по умолчанию</button>' +
+    loadAdminPricing(false);
+    var head = admSetHeadHTML("delivery", DELIV_HELP);
+    // the table is only drawn from the shop's own row — the default table is not his
+    if (SRV.admin === true && !S.pricingLoaded) return head + admSetLoadingHTML();
+    return head +
+      admShipHeldHTML() +
+      '<div class="adm-rt">' +
+        '<div class="adm-rt__head"><span>Страна</span>' +
+          SHIP_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
+          "<span>Курьер</span><span>Бесплатно от</span></div>" +
+        SHIP_ROWS.map(function (r) { return admRtRowHTML(r[0], r[1]); }).join("") +
       "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">«Везде взять цены Montonio» очистит все ваши цены — ' +
-        "в таблице останутся цены Montonio. Проверьте цифры и сохраните.</p>" +
-      '<div class="adm-sec__t" style="margin-top:24px">Оплата</div>' +
-      '<div class="adm-list">' + PAYS.map(function (p) {
-        return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + p.l + "</span>" +
-          /* The same resolution the checkout makes at :16625. `p.h` is the
-             default seven days; the real term is settings.invoice.dueDays, and
-             a screen headed «Так увидит клиент» that prints a different number
-             from the one the client sees is worse than no screen. */
-          '<span class="adm-row__sub">' + (p.k === "invoice" ? invoiceHint() : p.h) + "</span></span>" +
-          '<span class="adm-badge adm-badge--ok">включено</span></div>';
-      }).join("") + "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
-        "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
-      admBanksHTML() +
-      admParcelBoxHTML() +
-      admDeliveryCloseHTML() +
+      '<p class="adm-hint adm-rt__legend">Серые числа — цены Montonio. Жирные — ваши. «—» — перевозчик туда не возит.</p>' +
+      '<div class="adm-set__folds">' +
+        admFoldHTML("set:eu", "Страны Европы", admSetEuSum(), admShipEuropeHTML()) +
+        admFoldHTML("set:pickup", "Где показывать пакоматы", admSetPickupSum(), admShipPickupHTML()) +
+        admFoldHTML("set:unserved", "Куда Montonio не возит", admSetUnservedSum(), admShipUnservedHTML()) +
+        admFoldHTML("set:pay", "Способы оплаты", admSetPaySum(), admPaysHTML()) +
+        admFoldHTML("set:banks", "Банки в кассе", admSetBanksSum(), admBanksHTML()) +
+        admFoldHTML("set:box", "Коробка", admSetBoxSum(), admParcelBoxHTML()) +
+        admFoldHTML("set:deliv", "Когда «Доставлен»", admSetDelivSum(), admDeliveryCloseHTML()) +
+        admFoldHTML("set:preview", "Что увидит покупатель", "как на странице «Доставка и оплата»", admShipPreviewHTML()) +
+      "</div>" +
+      '<div class="adm-acts adm-set__acts">' +
+        '<button class="adm-btn adm-btn--ghost" data-admshipmontonio>Везде взять цены Montonio</button>' +
+        '<button class="adm-link" data-admshipreset>Вернуть значения по умолчанию</button>' +
       "</div>";
   }
+  /* One row of the table. The same markup is a row of the desktop grid and,
+     on a phone, a fold: the name twice — a plain cell for the grid, a button
+     with the summary for the phone, admin.css shows one — and ONE set of
+     boxes either way, so every `data-shiprule` exists exactly once. */
+  function admRtRowHTML(key, name) {
+    var open = !!ADM_RT_OPEN[key];
+    var cells = SHIP_CARRIER_COLS.map(function (c) {
+      var price = shipLockerMontonio(c[0], key);
+      if (typeof price !== "number") return admRateNoneHTML(c[1]);
+      var cell = shipCarrierCell(c[0], key), rule = "c:" + c[0] + ":" + key;
+      return admRateCellHTML(rule, cell, c[1] + " — " + name, c[1], admRateFootHTML(rule, cell, price, ""), price);
+    }).join("");
+    var courier = shipCell("courier", key), cm = MONTONIO_PRICE.courier[key];
+    cells += admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name, "Курьер",
+      admShipCourierFoot(key, courier), cm ? cm[0] : undefined);
+    cells += admRateCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от",
+      admShipFreeFoot(shipFreeCell(key)), undefined);
+    return '<div class="adm-rt__row' + (open ? " is-open" : "") + '" data-rtrow="' + key + '">' +
+      '<button class="adm-rt__h" type="button" data-shiprow="' + key + '" aria-expanded="' + open + '">' +
+        '<span class="adm-rt__ht"><span class="adm-rt__hn">' + name + "</span>" +
+        '<span class="adm-rt__hs" data-rtsum="' + key + '">' + admRtSumHTML(key) + "</span></span>" +
+        '<svg class="adm-rt__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+      "</button>" +
+      '<span class="adm-rt__nm">' + name + "</span>" +
+      '<div class="adm-rt__b">' + cells + "</div></div>";
+  }
+  /** «от 2,49 € · бесплатно от 59 €» — what the fold of one country says shut. */
+  function admRtSumHTML(key) {
+    var live = shipRulesFrom(shipDraft()), best = null;
+    SHIP_CARRIER_COLS.forEach(function (c) {
+      if (typeof shipLockerMontonio(c[0], key) !== "number") return;
+      var v = live.carriers && live.carriers[c[0]] && live.carriers[c[0]][key];
+      if (typeof v !== "number") v = shipLockerMontonio(c[0], key);
+      if (best === null || v < best) best = v;
+    });
+    var cour = live.methods && live.methods.courier ? live.methods.courier : {};
+    var cv = typeof cour[key] === "number" ? cour[key] : (typeof cour["default"] === "number" ? cour["default"] : null);
+    if (typeof cv === "number" && (best === null || cv < best)) best = cv;
+    var free = shipFreeCell(key);
+    return admSumHTML([
+      best === null ? "" : "от " + eur(best),
+      free === "нет" ? "бесплатной доставки нет" : free === "0" ? "доставка бесплатна всегда" : "бесплатно от " + eur(Number(free))
+    ]);
+  }
+  /** What «Бесплатно от» says beside its box: the unit, or what empty and 0 mean. */
+  function admShipFreeFoot(v) {
+    if (v === "нет") return '<span class="adm-hint adm-hint--cell adm-hint--loss">бесплатной доставки нет</span>';
+    if (v === "0") return '<span class="adm-hint adm-hint--cell">доставка бесплатна всегда</span>';
+    return '<span class="adm-hint adm-hint--cell adm-rt__unit">€ в корзине</span>';
+  }
+  /** The prices waiting for «Оставить так» — said once above the table as well
+      as at each box, so a rust box three screens down is not missed. */
+  function admShipHeldHTML() {
+    if (!shipHeldCells(shipDraft()).length) return "";
+    return '<div class="adm-err adm-err--block" role="alert" data-shipheld>' +
+      "<div>Не сохранено: цена ниже тарифа Montonio</div>" +
+      "<div>Нажмите «Оставить так» под ценой — или поправьте её.</div></div>";
+  }
+  /** «Страны Европы · доставляем в 21 из 21» */
+  function admSetEuSum() {
+    var on = SHIP_EU_COUNTRIES.filter(function (c) { return !shipCountryOff(c); }).length;
+    return admSumHTML(["доставляем в " + on + " из " + SHIP_EU_COUNTRIES.length]);
+  }
+  function admSetPickupSum() {
+    var open = SHIP_PICKUP_COUNTRIES, on = open.filter(function (c) { return !shipPickupOff(c); }).length;
+    return admSumHTML(["пакомат в " + on + " из " + open.length + " стран"]);
+  }
+  function admSetUnservedSum() {
+    var on = SHIP_UNSERVED.filter(function (c) { return !shipCountryOff(c); }).length;
+    return admSumHTML([on ? "доставляем в " + on + " из " + SHIP_UNSERVED.length : "не доставляем"]);
+  }
+  /** «работают все 4 · включает Montonio» — the payment methods are the provider's to switch. */
+  function admSetPaySum() {
+    var line = "работают все " + PAYS.length;
+    return admSumHTML([line, "включает Montonio"]);
+  }
+  function admSetBanksSum() {
+    var list = admBankList();
+    if (!list.length) return admSumHTML(["пять банков по умолчанию"]);
+    var f = bankFilter();
+    if (!f.length) return admSumHTML(["включены все"]);
+    var on = list.filter(function (b) { return admBankOn(b.code); }).length;
+    var line = "включено " + on + " из " + list.length;
+    return admSumHTML([line]);
+  }
+  function admSetBoxSum() {
+    var p = parcelConf();
+    var size = "" + p.length + " × " + p.width + " × " + p.height + " см";
+    var door = "ячейка " + p.lockerSize;
+    return admSumHTML([size, door]);
+  }
+  function admSetDelivSum() {
+    var d = deliveryConf();
+    return admSumHTML([
+      d.useCarrier ? "спрашивать перевозчика" : "не спрашивать перевозчика",
+      d.autoDays ? "через " + d.autoDays + " " + pl(d.autoDays, "день", "дня", "дней") : "по времени не закрывать"
+    ]);
+  }
+  /** «Способы оплаты» — read-only: the payment provider switches them. */
+  function admPaysHTML() {
+    return '<div class="adm-list adm-list--flat">' + PAYS.map(function (p) {
+      return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + p.l + "</span>" +
+        /* The same resolution the checkout makes. `p.h` is the default seven
+           days; the real term is settings.invoice.dueDays, and a screen that
+           prints a different number from the one the client sees is worse
+           than no screen. */
+        '<span class="adm-row__sub">' + (p.k === "invoice" ? invoiceHint() : p.h) + "</span></span>" +
+        admTagHTML("ok", "включено") + "</div>";
+    }).join("") + "</div>" +
+      '<p class="adm-hint" style="margin:0">Способы оплаты включает платёжный провайдер. ' +
+        "Чтобы что-то убрать или добавить, напишите Диму.</p>";
+  }
   /**
-   * «Коробка магазина» — settings.shipping_parcel.
+   * «Коробка» — settings.shipping_parcel.
    *
    * Montonio asks some carriers for the parcel's measurements and refuses the
    * booking without them (`constraints.parcelDimensionsRequired`); the shop
@@ -28625,52 +29118,48 @@
    * `max(actualWeight, volumetricWeight)`. Montonio, 24.09.2026: the price
    * takes the REAL weight; the box decides only DPD's size category abroad
    * (XS/S/M/L — this carton is XS) and the locker door. So the line under the
-   * boxes now prints the weight a label declares (parcelDeclaredKg), and the
-   * warning below it names the DPD lockers abroad as what a bigger box costs.
+   * boxes prints the weight a label declares (parcelDeclaredKg), and the
+   * warning below it names the DPD lockers abroad as what a bigger box costs
+   * — today's wording, not the design's «Montonio считает цену по этой
+   * коробке», which stopped being true that day (q7 of the gap analysis).
    * Centimetres, because that is what a tape measure says; the metres
    * Montonio wants are converted once, on the server.
    *
-   * The locker door beside it is only the seed. What is actually pre-selected
-   * on an order card is what he has been shipping — see admShipPrepHTML().
+   * The locker door beside it is only the seed — all five of Montonio's sizes
+   * (XS–XL: the carton is DPD's XS), as a segmented control. What is actually
+   * pre-selected on an order card is what he has been shipping — see
+   * admShipPrepHTML() and the «Чаще всего вы отправляете …» line.
    *
-   * Saved on the spot with an undo, like «Доставлен сам» below it, and not
-   * through the tariff table's «Сохранить»: it is a different settings row and
-   * it moves no price.
+   * Each box saves when it is left, the door when it is tapped, with «Вернуть»
+   * — a different settings row from the tariffs, and it moves no price.
    */
   function admParcelBoxHTML() {
     loadAdminPricing(false);
     var p = parcelConf();
     var used = p.recent.length;
-    return '<div class="adm-sec__t" style="margin-top:24px">Коробка магазина</div>' +
-      '<p class="adm-hint" style="margin:0 0 10px">Некоторые перевозчики не примут посылку без размеров. ' +
+    var box = function (f, label) {
+      var as = admParcelAs(f);
+      return '<label class="adm-field"><span>' + label + "</span>" +
+        '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
+          'data-parcelbox="' + f + '" data-autosave="' + as + '" value="' + esc(String(p[f])) + '"' + admAutosaveInvalidAttr(as) + ">" +
+        admAutosaveHintHTML(as) + "</label>";
+    };
+    return '<div class="adm-helpp">Некоторые перевозчики не примут посылку без размеров. ' +
         "Размеров у товаров нет, поэтому магазин объявляет одну коробку — эту. " +
         "За границу пакомат DPD считается по размеру коробки, поэтому коробка поменьше — " +
         "прямая экономия на такой посылке. Курьер и Nova Post считаются по весу. " +
-        "По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.</p>" +
-      '<div class="adm-parcel">' +
-        '<label class="adm-field"><span>Длина, см</span>' +
-          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
-            'data-parcelbox="length" value="' + esc(String(p.length)) + '"></label>' +
-        '<label class="adm-field"><span>Ширина, см</span>' +
-          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
-            'data-parcelbox="width" value="' + esc(String(p.width)) + '"></label>' +
-        '<label class="adm-field"><span>Высота, см</span>' +
-          '<input class="adm-input" type="number" inputmode="decimal" min="1" max="200" step="0.5" ' +
-            'data-parcelbox="height" value="' + esc(String(p.height)) + '"></label>' +
-      "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">' +
+        "По Эстонии, Латвии, Литве, Финляндии и Швеции цена от размера не зависит.</div>" +
+      '<div class="adm-parcel">' + box("length", "Длина, см") + box("width", "Ширина, см") + box("height", "Высота, см") + "</div>" +
+      '<p class="adm-hint" style="margin:0">' +
         (PARCEL_PRICES_VOLUMETRIC ? admParcelVolLine(parcelVolKg(p)) : admParcelKgLine(parcelDeclaredKg(p))) + "</p>" +
       (parcelBeyondPriced(p)
-        ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Цены пакоматов DPD за границей посчитаны для коробки 25 × 18 × 8 см. ' +
+        ? '<p class="adm-hint adm-hint--warn" style="margin:0">Цены пакоматов DPD за границей посчитаны для коробки 25 × 18 × 8 см. ' +
           "С коробкой больше Montonio возьмёт за такую посылку больше, чем заплатит покупатель — " +
           "для редкой большой посылки поменяйте размер прямо в заказе.</p>"
         : "") +
-      '<label class="adm-field" style="margin-top:12px"><span>Размер ячейки по умолчанию</span>' +
-        '<select class="adm-input" data-parcelsize>' +
-        LOCKER_SIZES.map(function (k) {
-          return '<option value="' + k + '"' + (k === p.lockerSize ? " selected" : "") + ">" + k + "</option>";
-        }).join("") + "</select></label>" +
-      '<p class="adm-hint" style="margin-top:8px">' +
+      '<div class="adm-field"><span>Размер ячейки по умолчанию</span>' +
+        admSegHTML("data-parcelsize", LOCKER_SIZES.map(function (k) { return [k, k]; }), p.lockerSize, "Размер ячейки по умолчанию") + "</div>" +
+      '<p class="adm-hint" style="margin:0">' +
         (used
           ? admParcelLearnedLine(suggestLocker(p))
           : "Пока этикеток не было — при первой будет предложен этот размер.") +
@@ -28683,10 +29172,39 @@
          and the panel says so rather than sending him looking for a setting
          that is not his to find. The code is still printed when one does
          arrive — admShipmentHTML() draws it only `if (mont.dropOffPin)`. */
-      '<p class="adm-hint" style="margin-top:8px">Кода сдачи у посылки обычно не будет: ' +
+      '<p class="adm-hint" style="margin:0">Кода сдачи у посылки обычно не будет: ' +
         "его выдают только по прямому договору с перевозчиком, а Omniva не выдаёт вовсе. " +
         "Это нормально — посылку сдают по наклейке, отсканировав её в пакомате. " +
         "Пустая строка на листе A4 не ошибка.</p>";
+  }
+  /** One side of the carton as a box that saves itself (1–200 cm, q1: on leave). */
+  function admParcelAs(f) {
+    var as = "parcel:" + f;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: "count",
+        validate: function (v) {
+          var n = Number(String(v).replace(",", "."));
+          return String(v).trim() !== "" && isFinite(n) && n > 0 && n <= 200 ? "" : "Сторона коробки — от 1 до 200 см.";
+        },
+        send: function (v) {
+          var n = Math.round(Number(String(v).replace(",", ".")) * 10) / 10;
+          return admSetWhenReady(function () { admParcelSave(f, n); }) || true;
+        }
+      });
+    }
+    return as;
+  }
+  /** One field of settings.shipping_parcel, saved whole — `recent` included,
+      so the size history the suggestion learns from survives a save. */
+  function admParcelSave(field, value) {
+    if (!adminSettingsReady()) { admSetWhenReady(function () { admParcelSave(field, value); }); return; }
+    var cur = parcelConf();
+    if (cur[field] === value) return;
+    var next = { length: cur.length, width: cur.width, height: cur.height, lockerSize: cur.lockerSize, recent: cur.recent.slice() };
+    next[field] = value;
+    admSetApply({ type: "set_parcel", value: next }, "Коробка сохранена");
+    render();
   }
   /** «Чаще всего вы отправляете L — этот размер и будет предложен.»
       One text node, and no declining noun in it: translateTree() rewrites a
@@ -28793,35 +29311,35 @@
     else next = all.filter(function (x) { return f.indexOf(x) >= 0 || x === c; });
     return next.length === all.length ? [] : next;
   }
+  /* «Банки в кассе» — the fold's body. Each switch saves at once with
+     «Вернуть»; the last bank of a country cannot be switched off (the
+     server would hand the country's whole list back — admBankLastOn). */
   function admBanksHTML() {
     loadPayMethods();        // Montonio's list — the switches
     loadAdminPricing(false); // the same GET /api/admin/settings — which of them are on
     var list = admBankList();
     if (!list.length) {
-      return '<div class="adm-sec__t" style="margin-top:24px">Какие банки показывать</div>' +
-        '<p class="adm-hint" style="margin:0">Список придёт от Montonio, когда магазин к нему подключён. ' +
+      return '<p class="adm-hint" style="margin:0">Список придёт от Montonio, когда магазин к нему подключён. ' +
         "Пока в кассе пять банков по умолчанию: Swedbank, SEB, LHV, Luminor, Coop.</p>";
     }
     var f = bankFilter();
-    return '<div class="adm-sec__t" style="margin-top:24px">Какие банки показывать</div>' +
-      '<p class="adm-hint" style="margin:0 0 4px">' +
+    return '<div class="adm-helpp"><span>' +
         (f.length ? "Показываются только включённые." : "Включены все — покупатель видит весь список Montonio.") +
-      "</p>" +
-      '<p class="adm-hint" style="margin:0 0 10px">Выключенный банк пропадает из фишек в кассе; ' +
-        "на странице Montonio он всё равно остаётся. В каждой стране хотя бы один банк должен остаться включённым.</p>" +
+      "</span> <span>Выключенный банк пропадает из фишек в кассе; " +
+        "на странице Montonio он всё равно остаётся. В каждой стране хотя бы один банк должен остаться включённым.</span></div>" +
       /* Grouped by country, because the rule is per country: the flat list
          made «выключить все эстонские» look like an ordinary five taps, and
          the checkout then showed all five back (filterBanks на сервере).
          Montonio's own array already comes country by country
          (mapBanks() walks `paymentInitiation.setup`), so this only puts a
          heading where the country changes. */
-      '<div class="adm-list">' + list.map(function (b, i) {
+      '<div class="adm-list adm-list--flat">' + list.map(function (b, i) {
         var on = admBankOn(b.code);
         var country = String(b.country || "").toUpperCase();
         var same = i && country === String(list[i - 1].country || "").toUpperCase();
         var head = !country || same
           ? ""
-          : '<div class="adm-row__sub" style="margin:10px 0 2px">' + esc(countryName(country)) + "</div>";
+          : '<div class="adm-set__grp">' + esc(countryName(country)) + "</div>";
         return head + '<div class="adm-swrow"><span>' + esc(String(b.name || b.code)) +
           '<span class="adm-row__sub">' + esc(String(b.code)) + "</span></span>" +
           admSwitch('data-admbank="' + esc(String(b.code)) + '"', on,
@@ -28839,7 +29357,8 @@
          with no Montonio record at all and for a status the shop cannot read.
 
      Off by default (0 days): a shop that has not decided must not be closing
-     orders on its own. The manual button stays exactly where it was. */
+     orders on its own. The manual button stays exactly where it was. All six
+     choices stay — 3, 5, 7, 10 and 14 days (gap analysis Q6 = A). */
   var DELIVERY_DAY_CHOICES = [
     [0, "никогда — только вручную"], [3, "через 3 дня после отправки"], [5, "через 5 дней после отправки"],
     [7, "через 7 дней после отправки"], [10, "через 10 дней после отправки"], [14, "через 14 дней после отправки"]
@@ -28850,32 +29369,29 @@
   function admDeliveryCloseHTML() {
     loadAdminPricing(false);   // the same GET /api/admin/settings the prices card makes
     var d = deliveryConf();
-    return '<div class="adm-sec__t" style="margin-top:24px">Когда заказ считается доставленным</div>' +
-      '<p class="adm-hint" style="margin:0 0 10px">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</p>' +
+    return '<div class="adm-helpp">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</div>' +
       '<div class="adm-swrow"><span>Спрашивать перевозчика' +
         '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
         admSwitch("data-delivcarrier", d.useCarrier, "Спрашивать перевозчика") + "</div>" +
-      '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
+      '<label class="adm-field"><span>Если перевозчик молчит — закрыть заказ</span>' +
         '<select class="adm-input" data-delivdays>' +
         DELIVERY_DAY_CHOICES.map(function (n) {
           return '<option value="' + n[0] + '"' + (n[0] === d.autoDays ? " selected" : "") + ">" + n[1] + "</option>";
         }).join("") + "</select></label>" +
-      '<p class="adm-hint" style="margin-top:8px">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
+      '<p class="adm-hint" style="margin:0">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
   }
   /**
    * «Что увидит покупатель» — the six rows of the table above, drawn by the
-   * **customer page's own renderer** (deliveryPageHTML with `tableOnly`), over
-   * the draft rather than over the saved rules.
+   * **customer page's own renderer** (deliveryPageHTML with `tableOnly`).
    *
    * Two rules it exists to keep, and both are the reason it is not a second
    * table of its own:
    *   · it cannot drift from /info/shipping/, because it *is* /info/shipping/
    *     — one function, one set of tables (SHIP_RULES' shape, CARRIER_NAMES,
    *     CARRIERS_BY_COUNTRY);
-   *   · it answers for what the owner is typing *now*. A preview of the saved
-   *     settings would confirm numbers he has already changed, which is worse
-   *     than no preview — so it reads shipDraft() and paintShipPreview()
-   *     repaints it on every keystroke.
+   *   · it answers for what the boxes hold *now* — a price being typed moves
+   *     it on the keystroke (paintShipPreview), before the box is left and
+   *     saved.
    *
    * Six rows, not the page's five: «Остальные страны» has no row on the
    * customer page (nothing is sold to a country that falls through to it
@@ -28898,15 +29414,8 @@
     });
   }
   function admShipPreviewHTML() {
-    /* data-fold: this fold's open state is S.shipPreviewOpen, so the markup
-       below states it both ways and admMorphAttrs() must obey both. */
-    return '<details class="adm-fold adm-preview" data-fold style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
-      '<summary data-shippreview><span class="adm-link">Что увидит покупатель</span>' +
-        '<span class="adm-row__sub">та же таблица, что на странице «Доставка и оплата»</span></summary>' +
-      '<div style="padding-top:12px" data-shippreviewbody>' + admShipPreviewTableHTML() + "</div>" +
-      '<p class="adm-hint" style="margin-top:8px">Показаны несохранённые правки. «от …» — у страны ' +
-        "несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.</p>" +
-      "</details>";
+    return '<div class="adm-preview" data-shippreviewbody>' + admShipPreviewTableHTML() + "</div>" +
+      '<p class="adm-hint" style="margin:0">«от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.</p>';
   }
   /**
    * Redraw the line under ONE box, without a render.
@@ -28917,25 +29426,31 @@
    * box he is typing in (the same reason paintShipPreview() exists), and a
    * line that lags one keystroke behind says «вернуть» under a number he has
    * just cleared. Only the sibling of the input is touched; the input itself,
-   * and therefore the caret, is left alone.
+   * and therefore the caret, is left alone. The cell is marked «own» (bold)
+   * the moment it holds a number.
    */
   function paintShipFoot(input) {
     var key = input.dataset.shiprule || "", parts = key.split(":");
     var cell = input.parentNode, html = "";
     if (!cell || !cell.className || cell.className.indexOf("adm-rates__c") < 0) return;
+    var val = String(input.value).trim();
     if (parts[0] === "c") {
       // Montonio's price for this card — abroad as well as at home (24.09.2026)
       var price = shipLockerMontonio(parts[1], parts[2]);
       if (typeof price !== "number") return;
-      html = admRateFootHTML(key, String(input.value).trim(), price, "");
+      html = admRateFootHTML(key, val, price, "");
     } else if (parts[0] === "m" && parts[1] === "courier") {
-      html = admShipCourierFoot(parts[2], String(input.value).trim());
+      html = admShipCourierFoot(parts[2], val);
+    } else if (parts[0] === "free") {
+      var f = shipNum(val, 10000);
+      html = admShipFreeFoot(f === undefined || f === null ? "нет" : f !== f ? "" : String(f));
     } else {
-      return;                    // «Бесплатно от» has no Montonio price and no line
+      return;
     }
+    if (cell.classList) cell.classList.toggle("is-own", val !== "");
     var old = input.nextElementSibling;
-    if (old) old.outerHTML = html;
-    else if (html) input.insertAdjacentHTML("afterend", html);
+    if (old) old.outerHTML = '<span class="adm-rt__f">' + html + "</span>";
+    else input.insertAdjacentHTML("afterend", '<span class="adm-rt__f">' + html + "</span>");
     translateTree(cell);
   }
   /**
@@ -28948,7 +29463,7 @@
    * whole job is to empty the boxes: type 6,49 into a box whose last painted
    * markup said `value=""`, press «Везде взять цены Montonio», and the draft
    * is empty while the box still reads 6,49 — a screen lying about what it
-   * will save. So the button says, in so many words, what the boxes now hold.
+   * saved. So the button says, in so many words, what the boxes now hold.
    */
   function syncShipInputs() {
     var boxes = document.querySelectorAll("[data-shiprule]");
@@ -28959,6 +29474,7 @@
         : parts[0] === "free" ? shipFreeCell(parts[1])
         : null;
       if (v === null) continue;
+      v = shipBoxShow(boxes[i].dataset.shiprule, v);
       if (boxes[i].value !== v) boxes[i].value = v;
       paintShipFoot(boxes[i]);
     }
@@ -28974,22 +29490,72 @@
   /* ---------- one cell of the rate table ------------------------------------
      `col` is the column's own name. It is drawn into every cell and hidden by
      CSS where the header row is visible (admin.css .adm-tariffs__l): on a
-     375 px phone seven columns cannot be a table at all, so the row becomes a
-     card and the columns become labelled fields two to a line. No horizontal
-     scroll — the panel's fade-at-the-edge trick still hides something, and a
-     price the owner cannot see is the one thing this screen exists to stop.
+     375 px phone the columns become labelled rows. No horizontal scroll —
+     the panel's fade-at-the-edge trick still hides something, and a price the
+     owner cannot see is the one thing this screen exists to stop.
 
-     Under the box goes ONE number: what the shop charges if the box is empty.
-     While the box is empty that number is simply printed — it is the price in
-     force. The moment he types his own, the same line becomes a button that
-     puts Montonio's back, so «вернуть» is one tap and never a guess at what
-     the old number was. */
-  function admRateCellHTML(key, value, label, col, foot) {
-    return '<span class="adm-rates__c">' +
+     An empty box shows Montonio's price in grey inside it (the placeholder,
+     1a) and, under it, the same number spelled out — kept, because the
+     placeholder goes the moment a digit is typed and the owner should still
+     see what he is overriding. The moment he types his own, the line becomes
+     the button that puts Montonio's back, so «вернуть» is one tap and never a
+     guess at what the old number was. `price` is Montonio's for the grey
+     placeholder, undefined where there is none (a zone's courier, «Бесплатно
+     от»). Each box saves itself when it is left (admShipAs). */
+  function admRateCellHTML(key, value, label, col, foot, price) {
+    var as = admShipAs(key);
+    return '<span class="adm-rates__c' + (String(value) !== "" ? " is-own" : "") + '">' +
       '<span class="adm-tariffs__l">' + col + "</span>" +
-      '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
-        '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">' +
-      (foot || "") + "</span>";
+      '<input class="adm-input" data-shiprule="' + key + '" data-autosave="' + as + '" value="' + esc(shipBoxShow(key, value)) +
+        '" placeholder="' + (typeof price === "number" ? admMoney2(price) : "") +
+        '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '"' + admAutosaveInvalidAttr(as) + ">" +
+      '<span class="adm-rt__f">' + (foot || "") + "</span>" +
+      admAutosaveHintHTML(as) + "</span>";
+  }
+  /** What a box shows for a stored number: «10,84», «9,90» — a decimal comma
+      (design), two places for a price; a threshold as it is («59», «59,5»).
+      shipNum() reads either separator back. */
+  function shipBoxShow(key, value) {
+    var s = String(value == null ? "" : value);
+    if (!/^\d+(\.\d+)?$/.test(s)) return s;
+    var n = Number(s);
+    if (String(key).indexOf("free:") === 0) return s.replace(/\./, ",");
+    return (Math.round(n * 100) / 100).toFixed(2).replace(/\./, ",");
+  }
+  /** One box of the table as a field that saves itself (q1: money on leave). */
+  function admShipAs(rule) {
+    var as = "ship:" + rule;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: "money",
+        validate: function (v) {
+          var bad = shipCellHint(rule, v);
+          if (bad) return bad;
+          /* A price under Montonio's tariff the owner has not said «Оставить
+             так» to (q4) is held in its box: never sent — so the header does
+             not say «Сохранено ✓» over it, and the journal writes no line —
+             the box rust, «Оставить так» under it, the line at the top. */
+          setShipDraftField(rule, v);
+          if (shipHeldKey(rule)) { render(); return "Ниже тарифа Montonio — «Оставить так» или другая цена"; }
+          return "";
+        },
+        send: function (v) {
+          setShipDraftField(rule, v);
+          var w = admShipCommit();
+          render();
+          // still waiting for the shop's settings to be read: «Сохраняем…» until it goes
+          return w && typeof w.then === "function" ? w : true;
+        }
+      });
+    }
+    return as;
+  }
+  /** What a box refuses — never sent, the box rust and this one line under it. */
+  function shipCellHint(rule, v) {
+    var free = String(rule).indexOf("free:") === 0;
+    var n = shipNum(v, free ? 10000 : 99);
+    if (n !== n) return free ? "Сумма от 0 до 10 000 €, пусто или «нет»." : "Цена — число от 0 до 99 €.";
+    return "";
   }
   /** «· SmartPosti» — which carrier the courier price belongs to, so
       «22,29 €» is not a number out of nowhere. Never translated: proper nouns.
@@ -29006,13 +29572,17 @@
    * While the box is empty that is the price in force, so the line just says
    * it. The moment he types his own, the same line becomes a button that puts
    * Montonio's back — «вернуть» is a tap, never a guess at what the number
-   * used to be. Below Montonio's price the line says so in words as well as in
-   * red: the save will refuse it (belowCostCells on the server), and the
-   * refusal is nicer to read before the save than after it.
+   * used to be.
    *
-   * Each of the three readings is one whole sentence with the money as its
-   * only hole, so the dictionary can carry it as a UI_RX rule instead of
-   * three loose fragments — same reasoning as montonioSourceLabel() had.
+   * Under Montonio's price (q4, Dim 25.09.2026): no sheet, no refusal. The
+   * line turns rust — «Ниже тарифа Montonio: 6,89 €» — and, until the owner
+   * says so, carries «Оставить так» beside «вернуть»: the price is not saved
+   * before that tap (shipGate), which sends the server's own accept flag. A
+   * price he has accepted, or one the shop already charges, keeps the rust
+   * line with «вернуть» only.
+   *
+   * Each reading is one whole sentence with the money as its only hole, so
+   * the dictionary can carry it as a UI_RX rule instead of loose fragments.
    */
   function admRateFootHTML(key, value, price, carrier) {
     var money = eur(price) + (carrier ? montonioCarrierTag(carrier) : "");
@@ -29029,11 +29599,16 @@
     /* two whole sentences, each with the price as its only hole: the i18n
        checker reads the source, and a label spliced in through a ternary or a
        variable reads to it as loose fragments rather than one line */
-    if (isFinite(n) && n > 0 && n < price) {
-      return '<button class="adm-hint adm-hint--cell adm-rates__undo adm-hint--loss" data-shipclear="' +
-        esc(key) + '">Ниже Montonio: ' + money + " · вернуть</button>";
+    if (isFinite(n) && n >= 0 && n < price) {
+      if (!shipAccepted(key, n)) {
+        return '<span class="adm-hint adm-hint--cell adm-hint--loss">Ниже тарифа Montonio: ' + money + "</span>" +
+          '<span class="adm-rt__acts"><button class="adm-rt__keep" type="button" data-shipaccept="' + esc(key) + '">Оставить так</button>' +
+          '<button class="adm-rates__undo" type="button" data-shipclear="' + esc(key) + '">вернуть</button></span>';
+      }
+      return '<button class="adm-hint adm-hint--cell adm-rates__undo adm-hint--loss" type="button" data-shipclear="' +
+        esc(key) + '">Ниже тарифа Montonio: ' + money + " · вернуть</button>";
     }
-    return '<button class="adm-hint adm-hint--cell adm-rates__undo" data-shipclear="' +
+    return '<button class="adm-hint adm-hint--cell adm-rates__undo" type="button" data-shipclear="' +
       esc(key) + '">Montonio: ' + money + " · вернуть</button>";
   }
   /** A cell for a carrier that does not serve this country: a dash, not a box.
@@ -29046,18 +29621,14 @@
       '<span class="adm-hint adm-hint--cell">не возит</span></span>';
   }
   /**
-   * One line of the rate table: the country, one box per carrier Montonio
-   * prices there, the courier, the free-from threshold. The same columns for a
-   * zone («Другие страны Европы») and for a single country (Германия) — the
-   * countries are the same table, one fold deeper, so nothing new has to be
-   * learnt to read them.
-   * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
-   * real country can be switched off, not a zone.
+   * One line of the European countries' table: the country with its
+   * «доставляем сюда» switch, a locker box for each carrier with lockers there
+   * (SHIP_EU_CARRIER_COLS — Nova Post and DPD; Dim, /test 24.09.2026, kept by
+   * the gap analysis Q3), the courier, the free-from threshold. The same
+   * boxes as the main table, one fold deeper.
+   * `iso` non-empty adds the switch beside the name: only a real country can
+   * be switched off, not a zone.
    * `cols` is the carrier columns to draw — SHIP_CARRIER_COLS when left out.
-   * The European fold passes SHIP_EU_CARRIER_COLS: its countries have lockers
-   * at Nova Post and DPD only, and until 24.09.2026 it drew no locker box at
-   * all — the checkout sold those lockers at Montonio's price and the owner
-   * had nothing to type over it (Дим, /test, 24.09.2026).
    */
   function admShipRowHTML(key, name, iso, cols) {
     var eu = cols === SHIP_EU_CARRIER_COLS;
@@ -29073,14 +29644,15 @@
       if (typeof price !== "number") return admRateNoneHTML(c[1]);
       var cell = shipCarrierCell(c[0], key);
       return admRateCellHTML("c:" + c[0] + ":" + key, cell, label, c[1],
-        admRateFootHTML("c:" + c[0] + ":" + key, cell, price, ""));
+        admRateFootHTML("c:" + c[0] + ":" + key, cell, price, ""), price);
     }).join("");
-    var courier = shipCell("courier", key);
+    var courier = shipCell("courier", key), cm = MONTONIO_PRICE.courier[key];
     return '<div class="adm-tariffs adm-tariffs--rates' + (eu ? " adm-tariffs--eu" : "") +
-      (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head + carriers +
+      (off ? " adm-tariffs--off" : "") + '">' + head + carriers +
       admRateCellHTML("m:courier:" + key, courier, "Курьер — " + name, "Курьер, €",
-        admShipCourierFoot(key, courier)) +
-      admRateCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от, €", "") +
+        admShipCourierFoot(key, courier), cm ? cm[0] : undefined) +
+      admRateCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от, €",
+        admShipFreeFoot(shipFreeCell(key)), undefined) +
       "</div>";
   }
   /** What an empty «Курьер» box does on this row — and it is not the same
@@ -29107,70 +29679,41 @@
     return '<span class="adm-hint adm-hint--cell">пусто — берётся «Остальные страны»</span>';
   }
   /**
-   * «Цены по странам Европы» — the twenty-one countries behind the zone row,
-   * plus the seven Montonio cannot reach at all.
+   * «Страны Европы» — the twenty-one countries behind the zone row, as a fold
+   * of its own under the table (design) with a summary line.
    *
-   * Folded rather than laid out flat, and folded *under* the zone row rather
-   * than on a page of its own: the six-line table is what Renat reads at a
-   * glance and twenty-seven lines is not, but the country he needs is one tap
-   * from the zone whose price it overrides. Country names come from the
-   * browser, so all three languages get them free.
+   * Their price row is the table's, one fold deeper: a locker box for each of
+   * the two carriers that have lockers in these countries (SHIP_EU_CARRIER_COLS
+   * — Nova Post and DPD, kept on Dim's word of 24.09.2026 although the design
+   * draws only the courier), then the courier and «Бесплатно от». Omniva,
+   * SmartPosti and Unisend would be sixty-three dashes, so they stay out.
+   * Country names come from the browser, so all three languages get them free.
    *
-   * Five columns inside, not eight: a locker box for each of the two carriers
-   * that have lockers in these countries (SHIP_EU_CARRIER_COLS — Nova Post
-   * and DPD), then the courier and «Бесплатно от». Until 24.09.2026 there
-   * were three, and the line above the list said there was no per-carrier
-   * price here — while the checkout sold each of those lockers at its own
-   * Montonio price. Omniva, SmartPosti and Unisend would be sixty-three
-   * dashes, so they stay out.
-   *
-   * 18.09.2026 — the fold no longer says «только курьер». Ренат opened every
-   * country DPD serves, so eighteen of these twenty-one now offer a pickup
-   * point too, and «Где предлагать пакомат» below is the list he narrows it
-   * with. The three that do not are Hungary, Romania and Greece: the first two
-   * have a locker at Nova Post only, which is Montonio International Shipping
-   * and has no returns at all, and Greece has none anywhere. Whether to add
-   * Nova Post's is still a decision of its own and nobody has taken it.
+   * 18.09.2026 — Ренат opened every country DPD serves, so eighteen of these
+   * twenty-one now offer a pickup point too, and «Где показывать пакоматы» is
+   * the list he narrows it with. The three that do not are Hungary, Romania
+   * and Greece: the first two have a locker at Nova Post only, which is
+   * Montonio International Shipping and has no returns at all, and Greece has
+   * none anywhere.
    */
   function admShipEuropeHTML() {
-    /* data-fold: the open state is S.shipEuOpen, not the browser's own — so
-       the markup states it both ways and admMorphAttrs() obeys both. The same
-       <summary> opens and closes it; the `›` beside the title turns to point
-       down while it is open (.adm-fold[open] > summary::before). */
-    return '<details class="adm-fold adm-fold--sub" data-fold' + (S.shipEuOpen ? " open" : "") + '>' +
-      /* the title is the link, the caption beside it is not: `text-decoration`
-         propagates into every in-flow descendant, so an underline on the
-         <summary> itself would underline the caption too */
-      '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
-        '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
-      '<div style="padding-top:8px">' +
-        /* One sentence per column kind, each a whole dictionary key. The
-           courier half is not the locker half: an empty courier box lets
-           every carrier charge its own Montonio price, a typed one is one
-           price for all of them (shipRulePrice, quoteFromRules). */
-        '<p class="adm-hint" style="margin:0 0 4px">Пакомат — своя цена у каждого перевозчика, как у Эстонии.</p>' +
-        '<p class="adm-hint" style="margin:0 0 4px">Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.</p>' +
-        '<p class="adm-hint" style="margin:0 0 10px">Под полем — сколько магазин возьмёт, если поле очистить.</p>' +
-        '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
-          SHIP_EU_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
-          "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
-        SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
-          .sort(function (a, b) { return a[1].localeCompare(b[1]); })
-          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], SHIP_EU_CARRIER_COLS); }).join("") +
-        admShipPickupHTML() +
-        admShipUnservedHTML() +
-      "</div></details>";
+    /* One sentence per column kind, each a whole dictionary key. The courier
+       half is not the locker half: an empty courier box lets every carrier
+       charge its own Montonio price, a typed one is one price for all of
+       them (shipRulePrice, quoteFromRules). */
+    return '<div class="adm-helpp">' +
+        "<span>Пакомат — своя цена у каждого перевозчика, как у Эстонии.</span> " +
+        "<span>Курьер: пустое поле — у каждого перевозчика своя цена Montonio, ваше число — одна цена для всех.</span> " +
+        "<span>Под полем — сколько магазин возьмёт, если поле очистить.</span></div>" +
+      '<div class="adm-tariffs adm-tariffs--rates adm-tariffs--eu adm-tariffs--head"><span>Страна</span>' +
+        SHIP_EU_CARRIER_COLS.map(function (c) { return "<span>" + c[1] + "</span>"; }).join("") +
+        "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
+      SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
+        .sort(function (a, b) { return a[1].localeCompare(b[1]); })
+        .map(function (r) { return admShipRowHTML(r[0], r[1], r[0], SHIP_EU_CARRIER_COLS); }).join("");
   }
   /**
-   * The seven countries the checkout used to offer and Montonio cannot post
-   * to: Cyprus, Malta, Iceland, Liechtenstein, Norway, Switzerland, the UK.
-   * Off by default since 07.09.2026 — an order to any of them could be placed
-   * and paid for and then not sent — and no price boxes at all, because there
-   * is no tariff to put in them. Renat can switch one back on; what he does
-   * then is his own arrangement with the customer.
-   */
-  /**
-   * «Где предлагать пакомат» — one list, and the one the owner narrows.
+   * «Где показывать пакоматы» — one list, and the one the owner narrows.
    *
    * Ренат, 18.09.2026: «open every country DPD serves». That is the default
    * and it is derived rather than typed — every country the tariff mirror
@@ -29182,7 +29725,7 @@
    *
    * A switch that is ON is the ordinary state and says so; a switch that is
    * OFF says what the customer will see instead, which is the courier line
-   * the country had before.
+   * the country had before. Each saves at once, with «Вернуть».
    *
    * Nothing here moves a price. The «Пакомат» cell of every one of these
    * countries has existed since 07.09.2026 — `costBasis()` prices a locker
@@ -29193,10 +29736,9 @@
     var open = SHIP_PICKUP_COUNTRIES.slice();
     if (!open.length) return "";
     var on = open.filter(function (c) { return !shipPickupOff(c); }).length;
-    return '<div class="adm-sec__t" style="margin-top:20px">Где предлагать пакомат</div>' +
-      '<p class="adm-hint" style="margin:4px 0 4px">Montonio возит в пакоматы и пункты выдачи во всех этих странах. ' +
-        "Выключите страну — и в кассе для неё останется только курьер.</p>" +
-      '<p class="adm-hint" style="margin:0 0 10px">' + admShipPickupCountLine(on, open.length) + "</p>" +
+    return '<div class="adm-helpp"><span>Montonio возит в пакоматы и пункты выдачи во всех этих странах. ' +
+        "Выключите страну — и в кассе для неё останется только курьер.</span> " +
+        "<span>" + admShipPickupCountLine(on, open.length) + "</span></div>" +
       '<div class="adm-list adm-list--flat">' +
         open.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
@@ -29211,11 +29753,20 @@
   }
   /** «Пакомат включён: 22 из 22.» — one text node, and no declining noun. */
   function admShipPickupCountLine(on, all) { return "Пакомат включён: " + on + " из " + all + "."; }
+  /**
+   * «Куда Montonio не возит» — the seven countries the checkout used to offer
+   * and Montonio cannot post to: Cyprus, Malta, Iceland, Liechtenstein,
+   * Norway, Switzerland, the UK. Off by default since 07.09.2026 — an order to
+   * any of them could be placed and paid for and then not sent — and no price
+   * boxes at all, because there is no tariff to put in them. Renat can switch
+   * one back on; what he does then is his own arrangement with the customer.
+   * Today's words, not the design's «отправим курьером» (gap analysis Q7 = A):
+   * Montonio cannot ship there at all.
+   */
   function admShipUnservedHTML() {
-    return '<div class="adm-sec__t" style="margin-top:20px">Куда Montonio не возит</div>' +
-      '<p class="adm-hint" style="margin:4px 0 10px">Montonio не берёт посылки в эти страны ни одним перевозчиком. ' +
+    return '<div class="adm-helpp">Montonio не берёт посылки в эти страны ни одним перевозчиком. ' +
         "Пока страна выключена, покупатель не увидит её в списке при оформлении. " +
-        "Включите её, только если готовы договариваться о доставке письмом.</p>" +
+        "Включите её, только если готовы договариваться о доставке письмом.</div>" +
       '<div class="adm-list adm-list--flat">' +
         SHIP_UNSERVED.map(function (c) { return [c, countryName(c)]; })
           .sort(function (a, b) { return a[1].localeCompare(b[1]); })
@@ -29229,46 +29780,81 @@
       "</div>";
   }
 
-  /* Главная страница: the two switches that decide what the shop shows at all,
-     then the banner editor and the announcement bar — the two things the owner
-     changes when he wants the front page to say something else. Since phase 4
-     both cards are the panel's own `adm-` markup: no storefront classes, no
-     `.adm-embed` wrapper to re-seat them. */
+  /* ---------- Главная страница -----------------------------------------------
+     Three switches on top — the strip, the sets, the shopper's chat — each at
+     once with «Вернуть»; the strip's texts in three languages under them
+     while it is on; then the banner: slides with ↑ ↓ and a switch, the one
+     being edited opened right under its own row (Renat, 13.09.2026: «opens
+     somewhere below»), and the interval. What the owner rarely needs — the
+     strip's link, a slide's picture address and ✨, both resets — is behind
+     «⋯» (gap analysis Q10 = A: all kept). */
+  var HOME_HELP = "Баннер — большая картинка наверху главной. Слайды идут по кругу; один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.";
   function admSetHomeHTML() {
-    var sets = DEMO.bundles !== false;
-    var chat = !!DEMO.chatbot;
-    return '<div class="adm-narrow">' +
-      '<div class="adm-list adm-list--flat">' +
-        '<div class="adm-swrow"><span>Показывать наборы' +
+    var sets = DEMO.bundles !== false, chat = !!DEMO.chatbot;
+    var annOn = contentDraft().announcement.on !== false;
+    return admSetHeadHTML("home", HOME_HELP) +
+      '<div class="adm-list adm-list--flat adm-set__sw">' +
+        '<div class="adm-swrow"><span>Полоска сверху' +
+          '<span class="adm-row__sub">чёрная строка над шапкой магазина</span></span>' +
+          admSwitch("data-contentannon", annOn, "Полоска сверху") + "</div>" +
+        '<div class="adm-swrow"><span>Наборы' +
           '<span class="adm-row__sub">если выключено — их не видно нигде в магазине</span></span>' +
-          admSwitch("data-admbundles", sets, "Показывать наборы") + "</div>" +
-        '<div class="adm-swrow"><span>ИИ-чат для покупателей' +
+          admSwitch("data-admbundles", sets, "Наборы") + "</div>" +
+        '<div class="adm-swrow"><span>Чат-помощник' +
           '<span class="adm-row__sub">кружок-консультант в углу магазина</span></span>' +
-          admSwitch("data-admchatbot", chat, "ИИ-чат для покупателей") + "</div>" +
+          admSwitch("data-admchatbot", chat, "Чат-помощник") + "</div>" +
       "</div>" +
-      '<p class="adm-hint" style="margin-top:10px">Подарочная карта продаётся отдельным пунктом в меню — ' +
-        "номиналы включаются в «Маркетинг → Подарочные карты».</p>" +
-      admHeroCard() +
-      admContentCard(["announcement"], "Верхняя полоска") +
+      (annOn ? admSetStripHTML() : "") +
+      admHeroCard();
+  }
+  /** The strip's texts — in the page, not in a fold: it is on every page of the shop. */
+  function admSetStripHTML() {
+    return '<div class="adm-set__block">' +
+      cLangBar(["announcement.text", "announcement.short"]) +
+      cTri("announcement.text", "Текст полоски", "input", 300,
+        "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
+      cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
+      admSetMoreHTML("strip",
+        /* No «✨» here (Dim, 07.09.2026: «fewer sparkle buttons»). The two
+           that stayed are the two the owner cannot easily write himself — a
+           banner slide and a product name. */
+        cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300, "", "url") +
+        '<button class="adm-link" type="button" data-contentreset="home">Вернуть стандартный текст полоски</button>') +
       "</div>";
   }
-  function admSetCompanyHTML() {
-    return '<div class="adm-narrow">' +
-      admContentCard(["company", "hours", "social", "contact", "emailfooter"], "") +
-      invoiceSettingsCard() +
-      reportsCard() + "</div>";
+  /** «⋯» — the rare actions of a block, folded under one small button. */
+  var ADM_SET_MORE = {};
+  function admSetMoreHTML(key, body) {
+    var open = !!ADM_SET_MORE[key];
+    return '<div class="adm-setmore' + (open ? " is-open" : "") + '">' +
+      '<button class="adm-setmore__btn" type="button" data-setmore="' + esc(key) + '" aria-expanded="' + open + '" aria-label="Ещё" title="Ещё">⋯</button>' +
+      (open ? '<div class="adm-setmore__b">' + body + "</div>" : "") + "</div>";
   }
 
+  /* ---------- О компании ----------------------------------------------------
+     Everything the shop says about itself, changed here once and everywhere:
+     the footer, «Контакты», the legal texts, the letters, the invoices. Each
+     block a fold with a one-line summary (design); the company's details keep
+     all eight fields — KMKR, e-mail and phone feed the footer, «Контакты»,
+     the legal texts and the invoices (gap analysis Q11 = A). Then the
+     accountant's report. */
+  function admSetCompanyHTML() {
+    return admSetHeadHTML("company", "") +
+      '<p class="adm-lead" style="margin:0">Меняется здесь — меняется везде: в подвале, на «Контактах», в правовых текстах, в письмах и счетах.</p>' +
+      admContentCard(["company", "hours", "contact", "social", "invoice", "emailfooter"]) +
+      reportsCard();
+  }
   /* ---------- «Счета для компаний» ------------------------------------------
      settings.invoice: the number prefix («A-» → A-2026-0001), the payment
      term, and the two intervals the daily job works on — when to remind and
-     when to cancel by itself (src/lib/invoice-dunning.ts). Four fields and a
-     save — not money, so no confirm card, but a journal line like every other
-     setting. The card also says plainly when the bank details the invoice
-     prints are still blank in «Реквизиты» above: since 07.09.2026 a missing
-     IBAN does not merely look bad on the PDF, it **stops the letter** — an
-     invoice nobody can pay is worse than no invoice — and nobody but the
-     owner can fill that field in. */
+     when to cancel by itself (src/lib/invoice-dunning.ts). A fold of «О
+     компании» since 1a: four boxes that save when they are left, each with
+     «Вернуть» (a set_invoice journal line — until 25.09.2026 this card's
+     save was the one settings write with no way back). The fold also says
+     plainly when the bank details the invoice prints are still blank in
+     «Реквизиты» above: since 07.09.2026 a missing IBAN does not merely look
+     bad on the PDF, it **stops the letter** — an invoice nobody can pay is
+     worse than no invoice — and nobody but the owner can fill that field in. */
   function invoiceConf() {
     var s = DEMO.invoice && typeof DEMO.invoice === "object" ? DEMO.invoice : {};
     return {
@@ -29282,13 +29868,6 @@
   function invoiceDayNum(v, fallback, max) {
     var n = Math.round(Number(v));
     return isFinite(n) && n >= 0 && n <= max ? n : fallback;
-  }
-  function invoiceDraft() {
-    if (!S.invDraft) {
-      var c = invoiceConf();
-      S.invDraft = { prefix: c.prefix, dueDays: String(c.dueDays), remindBeforeDays: String(c.remindBeforeDays), cancelAfterDays: String(c.cancelAfterDays) };
-    }
-    return S.invDraft;
   }
   /* ---- the IBAN, judged the way the server judges it ----------------------
      `iban()` in src/lib/content.ts keeps a value only when it matches this
@@ -29305,17 +29884,11 @@
      number, the KMKR number, the e-mail, the phone and every link go through
      a regex of their own on the way in (REG_RE, VAT_RE, EMAIL_RE, PHONE_RE,
      URL_RE in src/lib/content.ts) and are stored as "" when they do not
-     match — the same silent blanking, with nothing anywhere saying so. A
-     phone typed with a letter in it left the panel showing what was typed and
-     «Сохранено ✓» under it, while the footer of every page, the «Контакты»
-     page and the letters lost the number altogether; the panel does not
-     re-read after boot (refreshFeeds leaves the admin alone), so the owner
-     found out on another device, or not at all.
-
-     A warning, not a refusal: an empty field is a legitimate answer, the
-     value is his, and blocking a save would be a new way to lose an
-     afternoon's typing. One sentence per kind, under the field it is about,
-     exactly as the IBAN's — tests/settings-audit-r21.test.ts runs these five
+     match — the same silent blanking. So the panel asks the same question
+     before it sends: a value the server would blank is not sent at all (1a,
+     README § 2 — «don't autosave invalid values»), the box turns rust with
+     one line under it, and it saves the moment it is right. An empty field is
+     an answer and always goes. tests/settings-audit-r21.test.ts runs these
      and src/lib/content.ts over the same values and fails on the first cell
      where they disagree. */
   var C_FIELD_RE = {
@@ -29339,18 +29912,21 @@
     var s = cFieldNorm(kind, v);
     return !s || C_FIELD_RE[kind].test(s);
   }
-  var C_FIELD_WARN = {
-    regCode: "Регистрационный номер — это 4–20 цифр, например 12216136. Магазин сохранит поле пустым.",
-    vatNumber: "Номер KMKR — две буквы страны и дальше 2–14 цифр или букв, например EE102723858. Магазин сохранит поле пустым.",
-    email: "Это не похоже на адрес почты — например info@rempireshop.com. Магазин сохранит поле пустым.",
-    phone: "Телефон — цифры, пробелы и скобки, не меньше пяти знаков, например +372 5623 7237. Магазин сохранит поле пустым.",
-    url: "Ссылка должна начинаться с https:// — например https://instagram.com/rempire. Магазин сохранит поле пустым."
+  /** The one line under a box whose value is not sent. */
+  var C_FIELD_GATE = {
+    regCode: "Рег. номер — это 4–20 цифр, например 12216136.",
+    vatNumber: "KMKR — две буквы страны и 2–14 цифр или букв, например EE102723858.",
+    email: "Это не похоже на адрес почты — например info@rempireshop.com.",
+    phone: "Телефон — цифры, пробелы и скобки, не меньше пяти знаков.",
+    url: "Ссылка должна начинаться с https://",
+    iban: "IBAN — две буквы страны и 10–40 цифр и букв, например EE38 2200 2210 2014 5685."
   };
-  /** The hint `cInput()` takes: the warning when the server would blank this
-      value, and whatever the field says for itself otherwise. */
-  function cFieldHint(kind, path, plain) {
-    if (cFieldOk(kind, cDraftGet(path))) return plain || "";
-    return '<span class="adm-hint--warn">' + C_FIELD_WARN[kind] + "</span>";
+  /** "" when the value may go, else the line to show — for a content box of kind `gate`. */
+  function cGateHint(gate, v) {
+    if (!gate || !String(v == null ? "" : v).trim()) return "";
+    if (gate === "iban") return ibanOk(v) ? "" : C_FIELD_GATE.iban;
+    if (C_FIELD_RE[gate] && !cFieldOk(gate, v)) return C_FIELD_GATE[gate];
+    return "";
   }
   /** The IBAN the shop can actually print on an invoice — "" when there is
       none, and "" when what is typed is not an IBAN the server will keep. */
@@ -29358,8 +29934,20 @@
     var v = String(contentConf().company.iban || "");
     return ibanOk(v) ? v : "";
   }
-  function invoiceSettingsCard() {
-    var d = invoiceDraft();
+  /** «номер A-2026-0001 · оплата 7 дн. · напомнить за 2» — the fold's line. */
+  function invoiceSumHTML() {
+    var c = invoiceConf();
+    if (!ibanOk(contentConf().company.iban)) {
+      return '<span class="adm-foldrow__warn">счета не уходят — нет IBAN</span>';
+    }
+    return admSumHTML([
+      "номер " + c.prefix + new Date().getFullYear() + "-0001",
+      "оплата " + c.dueDays + " дн.",
+      c.remindBeforeDays ? "напомнить за " + c.remindBeforeDays + " дн." : "без напоминания"
+    ]);
+  }
+  function invoiceBodyHTML() {
+    var d = invoiceConf();
     var co = contentConf().company;
     var year = new Date().getFullYear();
     /* IBAN is not on this list: it has its own paragraph right above, and the
@@ -29368,13 +29956,19 @@
     if (!co.bankName) gaps.push("банк");
     if (!co.regCode) gaps.push("рег. номер");
     if (!co.vatNumber) gaps.push("номер KMKR");
-    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Счета для компаний</div></div>' +
-      '<div class="adm-form" style="margin-top:8px" data-adminvsettings>' +
-        '<p class="adm-hint" style="margin:0">Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. ' +
-          "Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».</p>" +
+    var field = function (f, label, attrs, hint) {
+      var as = invoiceAs(f);
+      return '<label class="adm-field">' + label +
+        '<input class="adm-input" ' + attrs + ' data-invsetf="' + f + '" data-autosave="' + as + '" value="' + esc(String(d[f])) + '"' + admAutosaveInvalidAttr(as) + ">" +
+        admAutosaveHintHTML(as) +
+        (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
+    };
+    return '<div class="adm-form" data-adminvsettings>' +
+        '<div class="adm-helpp">Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. ' +
+          "Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».</div>" +
         (ibanOk(co.iban)
           ? ""
-          : '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0"><span>Без IBAN счёт не уходит вообще.</span> ' +
+          : '<p class="adm-hint adm-hint--warn" style="margin:0"><span>Без IBAN счёт не уходит вообще.</span> ' +
               (co.iban
                 ? "<span>В блоке «Реквизиты» выше вместо IBAN что-то другое — магазин сохранит поле пустым " +
                   "и письмо со счётом не отправит.</span> "
@@ -29382,106 +29976,117 @@
                   "поэтому магазин не отправляет такое письмо.</span> ") +
               "<span>Заполните и нажмите в заказе «Отправить счёт ещё раз».</span></p>") +
         (gaps.length
-          ? '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0">' +
+          ? '<p class="adm-hint adm-hint--warn" style="margin:0">' +
               "<span>В блоке «Реквизиты» выше не заполнено:</span> " + gaps.map(function (g) { return "<span>" + esc(g) + "</span>"; }).join(", ") + ". " +
               "<span>Без IBAN и банка в счёте не будет реквизитов для оплаты.</span></p>"
           : "") +
-        '<div class="adm-edpair" style="margin-top:12px">' +
-          '<label class="adm-field">Префикс номера' +
-            '<input class="adm-input" maxlength="8" data-invsetf="prefix" value="' + esc(d.prefix) + '" placeholder="A-">' +
-            '<span class="adm-hint">Например: ' + esc(d.prefix) + year + "-0001</span></label>" +
-          '<label class="adm-field">Срок оплаты, дней' +
-            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-invsetf="dueDays" value="' + esc(d.dueDays) + '">' +
-            '<span class="adm-hint">От 1 до 60. Столько дней касса обещает компании на перевод.</span></label>' +
-          '<label class="adm-field">Напомнить за, дней до срока' +
-            '<input class="adm-input" type="number" min="0" max="30" inputmode="numeric" data-invsetf="remindBeforeDays" value="' + esc(d.remindBeforeDays) + '">' +
-            '<span class="adm-hint">Письмо с тем же счётом уйдёт ещё раз. 0 — не напоминать.</span></label>' +
-          '<label class="adm-field">Отменить через, дней после срока' +
-            '<input class="adm-input" type="number" min="0" max="90" inputmode="numeric" data-invsetf="cancelAfterDays" value="' + esc(d.cancelAfterDays) + '">' +
-            '<span class="adm-hint">Заказ закроется сам, товар вернётся в продажу, компании уйдёт письмо. 0 — не отменять.</span></label>' +
+        '<div class="adm-edpair">' +
+          field("prefix", "Префикс номера", 'maxlength="8" placeholder="A-" autocomplete="off"',
+            "Например: " + esc(d.prefix) + year + "-0001") +
+          field("dueDays", "Срок оплаты, дней", 'type="number" min="1" max="60" inputmode="numeric"',
+            "От 1 до 60. Столько дней касса обещает компании на перевод.") +
+          field("remindBeforeDays", "Напомнить за, дней до срока", 'type="number" min="0" max="30" inputmode="numeric"',
+            "Письмо с тем же счётом уйдёт ещё раз. 0 — не напоминать.") +
+          field("cancelAfterDays", "Отменить через, дней после срока", 'type="number" min="0" max="90" inputmode="numeric"',
+            "Заказ закроется сам, товар вернётся в продажу, компании уйдёт письмо. 0 — не отменять.") +
         "</div>" +
-        '<p class="adm-hint" style="margin-top:10px">Считает раз в сутки. Оплаченный счёт не трогает никогда — ' +
+        '<p class="adm-hint" style="margin:0">Считает раз в сутки. Оплаченный счёт не трогает никогда — ' +
           "даже если вы отметили оплату уже после срока.</p>" +
-        // «Сохранить» is the page's bar (admSetBarHTML), which names this card while it differs
       "</div>";
   }
-  /** Does the card show something other than settings.invoice? */
-  function invoiceDirty() {
-    if (!S.invDraft) return false;
-    var d = S.invDraft, c = invoiceConf();
-    return String(d.prefix) !== c.prefix || String(d.dueDays) !== String(c.dueDays) ||
-      String(d.remindBeforeDays) !== String(c.remindBeforeDays) || String(d.cancelAfterDays) !== String(c.cancelAfterDays);
+  /* The four boxes and what each refuses — the same bounds cleanInvoiceSettings()
+     keeps on the server (src/lib/invoices.ts). A half-typed «1» of «14» days
+     would be promised on the next invoice letter, so these save on leave (q1). */
+  var INVOICE_BOUNDS = {
+    dueDays: [1, 60, "Срок оплаты — от 1 до 60 дней"],
+    remindBeforeDays: [0, 30, "Напоминание — от 0 до 30 дней"],
+    cancelAfterDays: [0, 90, "Отмена — от 0 до 90 дней"]
+  };
+  function invoiceAs(f) {
+    var as = "inv:" + f;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: f === "prefix" ? "code" : "count",
+        validate: function (v) {
+          var s = String(v == null ? "" : v).trim();
+          if (f === "prefix") return /^[A-Za-z0-9-]{0,8}$/.test(s) ? "" : "Только латинские буквы, цифры и дефис — до 8 знаков.";
+          var b = INVOICE_BOUNDS[f], n = Number(s);
+          return s !== "" && isFinite(n) && Math.round(n) === n && n >= b[0] && n <= b[1] ? "" : b[2];
+        },
+        send: function (v) {
+          var s = String(v == null ? "" : v).trim();
+          admInvoiceSave(f, f === "prefix" ? s.toUpperCase() : Math.round(Number(s)));
+          return true;
+        }
+      });
+    }
+    return as;
   }
-  function srvInvoiceSettingsSave() {
-    var d = invoiceDraft();
-    var was = invoiceConf();
-    var days = Math.round(Number(d.dueDays));
-    if (!isFinite(days) || days < 1 || days > 60) { toast("Срок оплаты — от 1 до 60 дней"); return; }
-    var remind = Math.round(Number(d.remindBeforeDays));
-    if (!isFinite(remind) || remind < 0 || remind > 30) { toast("Напоминание — от 0 до 30 дней"); return; }
-    var cancel = Math.round(Number(d.cancelAfterDays));
-    if (!isFinite(cancel) || cancel < 0 || cancel > 90) { toast("Отмена — от 0 до 90 дней"); return; }
-    var prefix = String(d.prefix || "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8);
-    var value = { prefix: prefix, dueDays: days, remindBeforeDays: remind, cancelAfterDays: cancel };
-    apiSend("/api/admin/settings/", "PUT", { invoice: value }).then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) {
-        DEMO.invoice = value; S.invDraft = null;
-        if (S.admSetPage === "company") S.admSetSaved = "company";   // the bar's «Сохранено ✓»
-        var setLine = pl(days,
-          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " день",
-          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дня",
-          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дней");
-        journalNote(setLine);
-        /* The two intervals get their own lines, and only when they moved:
-           the journal is a record of changes, not a form dump. */
-        if (remind !== was.remindBeforeDays) {
-          journalNote(remind ? "Счета для компаний: напоминание за " + remind + " дн. до срока" : "Счета для компаний: напоминание выключено");
-        }
-        if (cancel !== was.cancelAfterDays) {
-          journalNote(cancel ? "Счета для компаний: автоотмена через " + cancel + " дн. после срока" : "Счета для компаний: автоотмена выключена");
-        }
-        toast("Счета для компаний: сохранено ✓"); render();
-        return;
-      }
-      toast("Не удалось сохранить");
-    }).catch(function () { toast("Сервер не отвечает"); });
+  function admInvoiceSave(field, value) {
+    var cur = invoiceConf();
+    if (cur[field] === value) return;
+    var next = { prefix: cur.prefix, dueDays: cur.dueDays, remindBeforeDays: cur.remindBeforeDays, cancelAfterDays: cur.cancelAfterDays };
+    next[field] = value;
+    admSetApply({ type: "set_invoice", value: next }, "Счета для компаний: сохранено ✓");
+    render();
+  }
+  /** The journal's line for settings.invoice — the term always, the two
+      intervals only when they moved: the journal is a record of changes, not a
+      form dump. One line per fact, so each reaches the dictionary whole. */
+  function invoiceActionText(v, was) {
+    var days = Number(v.dueDays) || 7, prefix = String(v.prefix == null ? "A-" : v.prefix);
+    var lines = [pl(days,
+      "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " день",
+      "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дня",
+      "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дней")];
+    var remind = Number(v.remindBeforeDays), cancel = Number(v.cancelAfterDays);
+    if (!was || remind !== was.remindBeforeDays) {
+      lines.push(remind ? "Счета для компаний: напоминание за " + remind + " дн. до срока" : "Счета для компаний: напоминание выключено");
+    }
+    if (!was || cancel !== was.cancelAfterDays) {
+      lines.push(cancel ? "Счета для компаний: автоотмена через " + cancel + " дн. после срока" : "Счета для компаний: автоотмена выключена");
+    }
+    return lines.join("\n");
   }
   function admSetPricesHTML() {
-    return '<div class="adm-narrow--form">' + admPricingCard() + "</div>";
+    return admSetHeadHTML("prices",
+      "<span>Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.</span> " +
+      "<span>Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».</span> " +
+      "<span>После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».</span> " +
+      "<span>Один балл — одно евро.</span>") +
+      '<div class="adm-narrow--form">' + admPricingCard() + "</div>";
   }
-  /* Языки: no switches. All three languages are live and the visitor picks his
-     own; a switch that turned one off would have to hide a third of the shop's
-     own URLs, which is a deploy, not a setting. So the page says, in two plain
-     sentences, what is translated by itself and where to write when a wording
-     is off. It used to list the three storefront addresses under that; Dim
-     took them out on 12.09.2026 — they overflowed a phone, and «Открыть
-     магазин ↗» in the menu's foot is the address anyone needs. */
-  function admSetLangsHTML() {
-    return '<div class="adm-narrow--form adm-form">' +
-      '<p class="adm-lead" style="margin:0">Магазин работает сразу на трёх языках — русском, эстонском и английском. ' +
-        "Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.</p>" +
-      '<p class="adm-lead" style="margin:0">Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, ' +
-        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.</p>" +
-      '<p class="adm-hint" style="margin:0">Язык самой админки переключается внизу меню — на магазин это не влияет.</p>' +
-      '<div class="adm-acts">' + admDevLink() + "</div>" +
-      "</div>";
-  }
-  /* ---------- Журнал изменений --------------------------------------------
-     Two lists, because there really are two (audit 06.09.2026, question 5;
-     Dim's answer: «show the server log»).
+  /* «Языки» has no page since 25.09.2026 (q39): one line on the index says
+     what the page did — all three languages are live and translate
+     themselves; there was nothing on it to set. */
 
-     · «Ваши изменения в этом браузере» — DEMO.log, the same list the undo
-       toast writes into, and the only one «Вернуть» can act on: putting a
-       change back means knowing what it was before, and only the browser that
-       made it holds that. Said in one plain sentence instead of hiding the
-       button, which is what was asked for.
-     · «Журнал магазина» — admin_audit, written by the server from ~25 places
-       (GET /api/admin/audit), every device and every session. Read-only, and
-       labelled as such: this is the history of the shop, not of this laptop.
+  /* ---------- Журнал ----------------------------------------------------------
+     One list, newest first: every change the owner made — on this device or
+     any other — and what the shop did by itself, each with who and when
+     (design, «всё, что меняли вы — с любого устройства»).
 
-     An entry with nothing to put back (an undo's own «Отмена: …» line) gets no
-     button — a «Вернуть» that does nothing is worse than none at all. */
+     Two sources behind it, merged by time:
+       · DEMO.log — this browser's own lines (localStorage, 40), written the
+         moment a change is applied, with the richest text («цена: 14,90 € →
+         9,90 €») and a `prev` for «Вернуть»;
+       · admin_audit — the server's journal (GET /api/admin/audit, 100 rows),
+         every device and every session. Since 25.09.2026 (q7, migration 207)
+         a row keeps what its change replaced, and the listing hands back the
+         fields to put back (`undo`), so «Вернуть» works from any device,
+         through the route that made the change.
+     A server row this browser also has a line for — the same settings write
+     (`ref`), or the same product or order within two minutes — is shown
+     once, as this browser's line.
+
+     «Вернуть» on a line of a key saved whole (the banner, the tariffs, the
+     prices, the box…) takes back only the newest line of that key from here;
+     an older one goes back through the server row, which knows the fields it
+     changed and leaves later edits of other fields alone. A line taken back
+     stays, struck through, «вернули» — on every device, since the undo's
+     own PUT names the row it took back (`undoOf`).
+
+     Sign-ins are folded under «Входы в админку»: they are the rate-limit's
+     counter and the owner's own safety check, not changes. */
   var AUDIT = { rows: null, err: "", asked: false };
   function loadAudit(force) {
     if (SRV.admin !== true) return;
@@ -29490,10 +30095,11 @@
     apiJson("/api/admin/audit/?limit=100").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       var ok = r.status === 200 && r.body.ok && Array.isArray(r.body.audit);
-      AUDIT.rows = ok ? r.body.audit : [];
-      AUDIT.err = ok ? "" : "Журнал магазина не загрузился.";
+      if (ok) { AUDIT.rows = r.body.audit; AUDIT.err = ""; }
+      // a refresh that failed keeps the rows on screen (loadOverview's rule)
+      else { if (!AUDIT.rows) AUDIT.rows = []; AUDIT.err = "Журнал магазина не загрузился."; }
       render();
-    }).catch(function () { AUDIT.rows = []; AUDIT.err = "Сервер не отвечает."; render(); });
+    }).catch(function () { if (!AUDIT.rows) AUDIT.rows = []; AUDIT.err = "Сервер не отвечает."; render(); });
   }
   /** «13.09, 14:05» out of the ISO stamp the route answers with. */
   function auditWhen(at) {
@@ -29576,6 +30182,14 @@
     "admin.login": "Вход в админку", "admin.login.failed": "Неудачный вход",
     "admin.logout": "Выход из админки", "db.migrate": "Обновление базы"
   };
+  /* What a settings row is about, in the words of the pages that write it —
+     a key is a name for the code, not for the owner. Each a dictionary key. */
+  var AUDIT_SETTING_WORDS = {
+    hero: "Баннер", content: "Данные магазина", shipping_rules: "Тарифы доставки", pricing: "Цены и баллы",
+    chatbot: "Чат-помощник", bundles: "Наборы", delivery: "Когда «Доставлен»", shipping_parcel: "Коробка",
+    payment_banks: "Банки в кассе", invoice: "Счета для компаний", mail_texts: "Тексты писем",
+    flows: "Письма", gift_amounts: "Номиналы подарочной карты", mail_budget: "Лимит писем"
+  };
   /** One row of the shop's own log, as HTML.
 
       Every word in the table above IS a dictionary key — and until r16 this
@@ -29591,6 +30205,10 @@
     // goes through the same door — admPiecesHTML(), see the rule above
     if (typeof p.line === "string" && p.line) return admPiecesHTML(p.line);
     var word = AUDIT_WORDS[row.action] || row.action;
+    // a settings row names the page's own word for its key, as a node of its own
+    if (row.action === "setting.set" && typeof p.key === "string" && AUDIT_SETTING_WORDS[p.key]) {
+      return "<span>" + esc(word) + "</span>: <span>" + esc(AUDIT_SETTING_WORDS[p.key]) + "</span>";
+    }
     var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
     /* And WHY, when the row carries it. Every trilingual explanation this
        shop composes — Montonio refusing a refund, a carrier refusing a
@@ -29629,38 +30247,241 @@
       return '<span class="adm-jrow__l">' + admPiecesHTML(line) + "</span>";
     }).join("");
   }
+  var AUDIT_LOGIN = { "admin.login": 1, "admin.login.failed": 1, "admin.logout": 1 };
+  /** When a line of this browser's own list was written. `at` since 1a; an
+      older line has only its «13.09, 14:05», read as this year. */
+  function jentryAt(e) {
+    if (e && typeof e.at === "number") return e.at;
+    var m = /^(\d\d)\.(\d\d), (\d\d):(\d\d)$/.exec(String(e && e.t || ""));
+    if (!m) return 0;
+    return new Date(new Date().getFullYear(), Number(m[2]) - 1, Number(m[1]), Number(m[3]), Number(m[4])).getTime();
+  }
+  /** Is this server row the same change as one of this browser's lines? */
+  var AUDIT_TWIN_MS = 120000;
+  function auditTwin(row, e) {
+    var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
+    var a = e && e.a;
+    if (!a) return false;
+    if (row.action === "setting.set") return !!e.ref && p.ref === e.ref;
+    var near = Math.abs(Date.parse(row.at) - jentryAt(e)) <= AUDIT_TWIN_MS;
+    if (!near) return false;
+    var pid = a.id || a.product_id;
+    if (/^(override|product)\./.test(row.action)) return !!pid && p.id === pid;
+    if (/^(order|shipment)\./.test(row.action)) {
+      return (!!a.number && (p.number === a.number)) || (!!a.id && (p.orderId === a.id || p.id === a.id));
+    }
+    return false;
+  }
+  /* The settings actions whose `prev` is the whole value of their key: taken
+     back from here only while they are the newest line of that key — an
+     older one would put back every later edit of the key with it. */
+  var JOURNAL_WHOLE = {
+    set_hero: 1, set_shipping_rules: 1, set_pricing: 1, set_delivery: 1, set_parcel: 1,
+    set_banks: 1, set_invoice: 1, set_mail_texts: 1, set_gift_amounts: 1
+  };
+  function jentryNewestOfKind(i) {
+    var e = DEMO.log[i], type = e && e.a && e.a.type;
+    for (var j = 0; j < i; j++) {
+      var o = DEMO.log[j];
+      if (o && o.a && o.a.type === type && o.prev && !o.undone) return false;
+    }
+    return true;
+  }
+  /* A line taken back here leaves the list, as it always has — an «Отмена:
+     …» line takes its place. Its server row stays in the shop's log, and the
+     one list (1a) would show it again the moment the line that hid it was
+     gone. So what the line was is kept, small: enough for auditTwin() to
+     know that row, and the journal hides it with the line. */
+  function jentryGone(e) {
+    if (!e || !e.a) return;
+    var g = { at: jentryAt(e), ref: e.ref || "",
+      a: { type: e.a.type, id: e.a.id, product_id: e.a.product_id, number: e.a.number } };
+    DEMO.jgone = [g].concat(DEMO.jgone || []).slice(0, 40);
+  }
+  /** Is this server row one of this browser's own — shown, or taken back? */
+  function auditMine(r) {
+    var k;
+    for (k = 0; k < DEMO.log.length; k++) if (auditTwin(r, DEMO.log[k])) return true;
+    var gone = DEMO.jgone || [];
+    for (k = 0; k < gone.length; k++) if (auditTwin(r, gone[k])) return true;
+    return false;
+  }
+  /** The server's twin of a line of this browser, once the server list is here. */
+  function jentryTwin(e) {
+    var rows = AUDIT.rows || [];
+    for (var k = 0; k < rows.length; k++) if (auditTwin(rows[k], e)) return rows[k];
+    return null;
+  }
+  /** Can «Вернуть» on this line work — and which way does it go? */
+  function jentryUndo(i) {
+    var e = DEMO.log[i];
+    if (!e || !e.prev || e.undone) return "";
+    if (!(e.a && JOURNAL_WHOLE[e.a.type]) || jentryNewestOfKind(i)) return "local";
+    var twin = jentryTwin(e);
+    return twin && twin.undo && !twin.undone ? "server" : "";
+  }
+  /** A server row the owner can take back from here. */
+  function auditCanUndo(row) {
+    if (!row || !row.undo || row.undone) return false;
+    if (row.undo.kind === "override") return true;
+    return !!admSetActionFor(row.undo.key, null, true);
+  }
   function admSetJournalHTML() {
     loadAudit(false);
-    var mine = DEMO.log.length
-      ? DEMO.log.map(function (e, i) {
-          return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
-            '<span class="adm-jrow__x">' + jrowTextHTML(e.txt) + "</span>" +
-            (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
-            "</div>";
-        }).join("")
-      : '<div class="adm-empty">Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div>';
-    var srv;
+    var head = admSetHeadHTML("journal",
+      "Здесь всё, что меняли вы и магазин — с любого устройства. «Вернуть» отменяет изменение, даже если вы делали его на другом телефоне.");
+    /* A line written without `at` (the goods editor's, the stock's) knows only
+       its minute: it sorts at the minute's end, above the shop's rows of that
+       minute — e2e, 25.09.2026: a price changed after a settings write stood
+       below it. */
+    var items = DEMO.log.map(function (e, i) {
+      return { at: jentryAt(e) + (e && typeof e.at === "number" ? 0 : 59999), i: i, e: e };
+    });
+    var logins = [];
+    if (AUDIT.rows) {
+      AUDIT.rows.forEach(function (r) {
+        if (AUDIT_LOGIN[r.action]) { logins.push(r); return; }
+        if (auditMine(r)) return;
+        items.push({ at: Date.parse(r.at) || 0, r: r });
+      });
+    }
+    // newest first; this browser's line before a server row of the same moment
+    items.sort(function (a, b) { return (b.at - a.at) || ((a.r ? 1 : 0) - (b.r ? 1 : 0)); });
+    var list = items.length ? items.map(function (it) {
+      if (it.r) {
+        var r = it.r;
+        return '<div class="adm-jrow' + (r.undone ? " is-undone" : "") + '">' +
+          '<span class="adm-jrow__x">' + auditTextHTML(r) +
+            '<span class="adm-jrow__m"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span> · " +
+            '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></span></span>" +
+          (r.undone ? '<span class="adm-jrow__done">вернули</span>'
+            : auditCanUndo(r) ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admundosrv="' + r.id + '">Вернуть</button>' : "") +
+          "</div>";
+      }
+      var e = it.e, way = jentryUndo(it.i);
+      return '<div class="adm-jrow' + (e.undone ? " is-undone" : "") + '">' +
+        '<span class="adm-jrow__x">' + jrowTextHTML(e.txt) +
+          '<span class="adm-jrow__m"><span class="adm-jrow__t">' + esc(e.t) + "</span> · " +
+          '<span class="adm-jrow__me">вы · здесь</span></span></span>' +
+        (e.undone ? '<span class="adm-jrow__done">вернули</span>'
+          : way ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admundo="' + it.i + '">Вернуть</button>' : "") +
+        "</div>";
+    }).join("") : '<div class="adm-empty">Изменений пока нет. Всё, что вы поменяете, появится здесь — с кнопкой «Вернуть».</div>';
+    var srv = "";
     if (SRV.admin !== true) srv = '<div class="adm-note">Войдите как владелец, чтобы увидеть журнал магазина.</div>';
     else if (AUDIT.err) {
       srv = '<div class="adm-error"><span>' + esc(AUDIT.err) + "</span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="audit">Повторить</button></div>';
     } else if (!AUDIT.rows) srv = '<div class="adm-skel"><i></i><i></i><i></i></div>';
-    else if (!AUDIT.rows.length) srv = '<div class="adm-empty">Сервер пока ничего не записал.</div>';
-    else {
-      srv = AUDIT.rows.map(function (r) {
-        return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span>" +
-          '<span class="adm-jrow__x">' + auditTextHTML(r) + "</span>" +
-          '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></div>";
-      }).join("");
-    }
-    return '<div class="adm-narrow">' +
-      '<div class="adm-sec"><span class="adm-sec__t">Ваши изменения в этом браузере</span></div>' +
-      '<p class="adm-hint">«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.</p>' +
-      mine +
-      '<div class="adm-sec" style="margin-top:24px"><span class="adm-sec__t">Журнал магазина</span></div>' +
-      '<p class="adm-hint">Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.</p>' +
-      srv +
+    return '<div class="adm-narrow">' + head + srv +
+      '<div class="adm-jlist">' + list + "</div>" +
+      (AUDIT.rows ? admFoldHTML("set:logins", "Входы в админку", admJournalLoginSum(logins),
+        logins.length ? logins.map(function (r) {
+          return '<div class="adm-jrow adm-jrow--login"><span class="adm-jrow__x">' + auditTextHTML(r) +
+            '<span class="adm-jrow__m"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span> · " +
+            '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></span></span></div>";
+        }).join("") : '<p class="adm-hint" style="margin:0">Входов пока нет.</p>') : "") +
       "</div>";
+  }
+  /** «2 за сегодня» — sign-ins since midnight, by the browser's clock. */
+  function admJournalLoginSum(rows) {
+    var d = new Date(), from = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var n = rows.filter(function (r) { return r.action === "admin.login" && (Date.parse(r.at) || 0) >= from; }).length;
+    return admSumHTML([n + " за сегодня"]);
+  }
+  /** The demoApply() action that puts settings key `key` to `value` — the
+      same action the page that owns the key applies, so a «Вернуть» from the
+      journal goes through the same door. `probe`: only asks whether there is one. */
+  function admSetActionFor(key, value, probe) {
+    var T = {
+      hero: "set_hero", content: "set_content", pricing: "set_pricing", delivery: "set_delivery",
+      shipping_parcel: "set_parcel", payment_banks: "set_banks", chatbot: "toggle_chatbot",
+      bundles: "toggle_bundles", invoice: "set_invoice", shipping_rules: "set_shipping_rules",
+      gift_amounts: "set_gift_amounts", mail_texts: "set_mail_texts"
+    }[key];
+    if (!T || probe) return T || null;
+    if (T === "set_shipping_rules") return { type: T, rules: value && typeof value === "object" ? value : cloneRules(SHIP_STORED_DEFAULT), full: true, belowCost: true };
+    if (T === "set_content") return value && typeof value === "object" ? { type: T, value: value } : null;
+    if (T === "set_pricing" || T === "set_delivery" || T === "set_parcel" || T === "set_invoice") {
+      return value && typeof value === "object" ? { type: T, value: value } : null;
+    }
+    if (T === "set_banks" || T === "set_gift_amounts") return Array.isArray(value) ? { type: T, value: value } : null;
+    if (T === "toggle_chatbot" || T === "toggle_bundles") return typeof value === "boolean" ? { type: T, value: value } : null;
+    if (T === "set_mail_texts") return { type: T, value: value && typeof value === "object" ? value : {} };
+    return { type: T, value: value };   // the banner: null is the standard one
+  }
+  /** `value` with the row's changes put back: each path to what it held, a
+      path that did not exist deleted. */
+  function admUndoPaths(value, changes) {
+    var out;
+    try { out = JSON.parse(JSON.stringify(value === undefined ? null : value)); } catch (e) { out = null; }
+    for (var i = 0; i < changes.length; i++) {
+      var c = changes[i], p = c.path || [];
+      if (!p.length) { out = c.gone ? null : c.before; continue; }
+      if (!out || typeof out !== "object" || Array.isArray(out)) out = {};
+      var o = out;
+      for (var k = 0; k < p.length - 1; k++) {
+        if (!o[p[k]] || typeof o[p[k]] !== "object" || Array.isArray(o[p[k]])) o[p[k]] = {};
+        o = o[p[k]];
+      }
+      if (c.gone) delete o[p[p.length - 1]];
+      else o[p[p.length - 1]] = c.before;
+    }
+    return out;
+  }
+  /** A row's changes to the shop's details as a set_content patch: each path
+      to what it held; a field that was not there back to empty (a switch to
+      on); a document that did not exist back to the standard one. */
+  function admContentUndoPatch(changes) {
+    var patch = {};
+    for (var i = 0; i < changes.length; i++) {
+      var c = changes[i], p = c.path || [];
+      if (!p.length) return contentDiff(contentConf(), c.before && typeof c.before === "object" ? contentApply(CONTENT_DEFAULT, c.before) : CONTENT_DEFAULT);
+      var v = c.gone ? (p[p.length - 1] === "on" ? true : "") : c.before;
+      cPathSet(patch, p.join("."), v);
+    }
+    return patch;
+  }
+  /* «Вернуть» on a server row — or on this browser's line that can only go
+     back that way. The setting is read as it is NOW (never cached), the
+     row's fields are put back over it, and the result goes through the page's
+     own action: its journal line, the local state, the PUT with `undoOf`. */
+  function admJournalUndoServer(row, local) {
+    var u = row && row.undo;
+    if (!u) return;
+    if (u.kind === "override") {
+      var body = { id: u.id, undoOf: row.id };
+      for (var k in u.patch) if (Object.prototype.hasOwnProperty.call(u.patch, k)) body[k] = u.patch[k];
+      apiSend("/api/admin/overrides/", "PUT", body).then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); return; }
+        if (local) { local.undone = true; demoSave(); }
+        toast("Вернули ✓");
+        loadServerOverrides(); loadAudit(true);
+      }).catch(function () { toast("Сервер не отвечает — изменение не сохранилось"); });
+      return;
+    }
+    var asked = Date.now();
+    apiJson("/api/admin/settings/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); return; }
+      var st = r.body.settings || {};
+      admSetTake(st, asked);
+      var cur = Object.prototype.hasOwnProperty.call(st, u.key) ? st[u.key] : null;
+      /* the shop's details go back as a patch of the fields the row changed —
+         so this line's own «Вернуть» later is scoped the same way */
+      var a = u.key === "content"
+        ? admSetActionFor(u.key, admContentUndoPatch(u.changes))
+        : admSetActionFor(u.key, admUndoPaths(cur, u.changes));
+      if (!a) { toast("Это изменение отсюда не вернуть"); return; }
+      ADM_SET_NOTE[u.key] = { undoOf: row.id, toast: "Вернули ✓" };
+      if (a.type === "set_pricing" && !S.pricingLoaded) S.pricingLoaded = normalisePricing(st.pricing);
+      var entry = demoApply(a);
+      if (ADM_SET_NOTE[u.key]) ADM_SET_NOTE[u.key].entry = entry;
+      if (local) { local.undone = true; demoSave(); }
+      AUDIT.asked = false;
+      render();
+    }).catch(function () { toast("Сервер не отвечает — изменение не сохранилось"); });
   }
 
   /* ---------- «Письма»: preview + test send -----------------------------
@@ -29912,10 +30733,13 @@
   }
 
   /* ---------- «Главный баннер»: the owner's own banner editor --------------
-     Everything is edited on a copy (S.heroDraft) and nothing reaches the shop
-     until «Сохранить» — which goes through the same confirm card and the same
-     undoable log as every other change, as one set_hero action carrying the
-     whole banner. */
+     Edited on a copy (S.heroDraft) — the slide being typed in — and saved by
+     itself (1a): a switch, an arrow, a picture, a link target at once; a text
+     a second after the last keystroke; the interval when its box is left.
+     Each save is one set_hero action carrying the whole banner, through the
+     same journal as every other change, with «Вернуть» on its toast. A new
+     slide starts hidden, so nothing half-written reaches the home page;
+     deleting one asks first and is held for five seconds (q8). */
   var HERO_PAGES = [
     ["shipping", "Доставка и оплата"], ["returns", "Возврат товара"],
     ["terms", "Условия продажи"], ["contact", "Контакты"], ["privacy", "Конфиденциальность"]
@@ -29927,8 +30751,8 @@
     }
     return S.heroDraft;
   }
-  /* The draft outlives a trip to another tab, so the card has to say when what
-     it shows is not yet what the shop shows. */
+  /* Does the copy show something the shop does not? Between a keystroke and
+     its save, and while a delete is held. */
   function heroDirty() {
     if (!S.heroDraft) return false;
     try { return JSON.stringify(heroClean(S.heroDraft)) !== JSON.stringify(heroClean(heroConf())); }
@@ -29957,6 +30781,13 @@
       out.slides.push(o);
     });
     return out;
+  }
+  /** Save the copy as the banner — nothing when it already is. `toastText`
+      "" saves without a toast (a held delete's own toast is already up). */
+  function admHeroCommit(toastText) {
+    var next = heroClean(heroDraft());
+    if (JSON.stringify(next) === JSON.stringify(heroClean(heroConf()))) return null;
+    return admSetApply({ type: "set_hero", value: next, keep: true }, toastText === undefined ? "Баннер сохранён" : toastText);
   }
   function heroGoLabel(go) {
     var g = String(go || "");
@@ -30030,54 +30861,71 @@
     return list.map(function (p) { return admPickTile("data-herogopick", p.id, p, cur.go === "product:" + p.id); }).join("");
   }
   /* One slide as a row: the picture, the title, where the button goes, then
-     the controls — order, the on/off switch, «Изменить», «Удалить». Every one
-     of them edits the draft; nothing reaches the shop before «Сохранить». */
+     ↑ ↓ and the switch (design). The title is the button that opens the
+     slide's editor right under the row — Renat, 13.09.2026: «Clicking on
+     edit, opens the edit pane somewhere below, so on mobile you might not
+     even notice or understand if the pane is open or not». A hidden slide is
+     faded and says «скрыт» in words. */
   function heroRowHTML(s, i, n) {
-    var on = s.on !== false;
-    /* Renat, 13.09.2026: «Clicking on edit, opens the edit pane somewhere
-       below, so on mobile you might not even notice or understand if the pane
-       is open or not». The form is drawn under the whole list, which on a
-       375-px screen is off the bottom of the phone — so the row itself has to
-       say that it is the one being edited, and its button has to be the way
-       back out. `open` marks the row, aria-expanded says the same thing to a
-       screen reader, and the button reads «Свернуть» while the form is down. */
-    var open = S.heroEdit === i;
-    // data-herorow: paintHeroPick() repaints this one row when its picture changes
-    return '<div class="adm-row adm-row--tall' + (open ? " adm-row--open" : "") + '" data-herorow="' + i + '">' +
-      '<span class="adm-thumb">' + heroArt(s.image, "ph") + "</span>" +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
-        (on ? "" : ' <span class="adm-badge adm-badge--sm adm-badge--quiet">скрыт</span>') +
-        (open ? ' <span class="adm-badge adm-badge--sm">открыт</span>' : "") + "</span>" +
-        '<span class="adm-row__sub">' + esc(heroGoLabel(s.go)) + "</span></span>" +
-      '<span class="adm-ops">' +
-        '<button class="adm-iconbtn" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") +
-          ' aria-label="Выше" title="Выше">↑</button>' +
-        '<button class="adm-iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
-          ' aria-label="Ниже" title="Ниже">↓</button>' +
-        admSwitch('data-heroon="' + i + '"', on, esc(heroT(s.title)) || "Без заголовка") +
+    var on = s.on !== false, open = S.heroEdit === i;
+    var name = esc(heroT(s.title)) || "Без заголовка";
+    // data-herorow: paintHeroPick() repaints this row's picture in place
+    return '<div class="adm-slide' + (open ? " is-open" : "") + (on ? "" : " is-off") + '" data-herorow="' + i + '">' +
+      '<div class="adm-slide__row">' +
+        '<span class="adm-thumb">' + heroArt(s.image, "ph") + "</span>" +
         /* One button, not two: data-heroedit is the address of a slide's form
            all over this suite, and it toggles — a second tap folds the pane
-           away again, which is what «Свернуть» means. */
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i +
-          '" aria-expanded="' + open + '" aria-controls="heroform">' + (open ? "Свернуть" : "Изменить") + "</button>" +
-        '<button class="adm-link adm-link--warn" data-herodel="' + i + '">Удалить</button>' +
-      "</span></div>";
+           away again. */
+        '<button class="adm-slide__t" type="button" data-heroedit="' + i + '" aria-expanded="' + open + '" aria-controls="heroform">' +
+          '<span class="adm-row__nm" data-herorowt>' + name + "</span>" +
+          '<span class="adm-row__sub">' + (on ? "" : admTagHTML("quiet", "скрыт") + " ") + "<span>" + esc(heroGoLabel(s.go)) + "</span></span></button>" +
+        '<span class="adm-ops">' +
+          '<button class="adm-iconbtn" type="button" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") +
+            ' aria-label="Выше" title="Выше">↑</button>' +
+          '<button class="adm-iconbtn" type="button" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
+            ' aria-label="Ниже" title="Ниже">↓</button>' +
+          admSwitch('data-heroon="' + i + '"', on, name) +
+        "</span></div>" +
+      (open ? heroFormHTML(i) : "") + "</div>";
   }
+  /** One text of the open slide, in the language on screen, saving itself a
+      second after the last keystroke (q1: long texts). An empty Estonian or
+      English text says out loud that the Russian is shown instead. */
   function heroFieldHTML(s, key, label, tag, max) {
     var L = S.heroLang || "RU";
     var val = (s[key] && s[key][L]) || "";
     var ru = (s[key] && s[key].RU) || "";
+    var as = heroAs(key);
     var hint = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
     return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '">' + esc(val) + "</textarea>"
-        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '" value="' + esc(val) + '">') +
+        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '" data-autosave="' + as + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" data-herol="' + L + '" data-autosave="' + as + '" value="' + esc(val) + '">') +
       hint + "</label>";
   }
-  /* The slide's own form, opened under the list by «Изменить»: the texts in
-     the language of the segmented control, the link, the picture, and the
-     storefront's own hero as a live preview. «Готово» only folds it away —
-     the draft keeps everything typed until «Сохранить». */
+  /* The draft follows every keystroke already (the input listener writes it
+     and repaints the preview); the autosave only says when the banner is
+     saved. No render(): the owner is typing in this very box. */
+  function heroAs(key) {
+    // one record per slide, text and language: a record's «already saved»
+    // must never be another slide's
+    var as = "hero:" + S.heroEdit + ":" + key + ":" + (S.heroLang || "RU");
+    if (!ADM_AS_SPEC[as]) admAutosaveSpec(as, { kind: "text", send: function () { admHeroCommit(); paintHeroRowText(); return true; } });
+    return as;
+  }
+  /** The open slide's title in its row, as it is typed — without a render. */
+  function paintHeroRowText() {
+    var s = heroDraft().slides[S.heroEdit];
+    var el = document.querySelector('[data-herorow="' + S.heroEdit + '"] [data-herorowt]');
+    if (!s || !el) return;
+    el.textContent = heroT(s.title) || "Без заголовка";
+    translateTree(el);
+  }
+  /* The slide's own editor, right under its row: the texts in the language
+     of the strip over them (with «Перевести с русского» on ET and EN), where
+     the button goes, the picture, and the storefront's own hero as a live
+     preview. The picture's address and ✨ are behind «⋯»; «Свернуть» folds
+     it away and «Удалить слайд» asks first. */
   function heroFormHTML(i) {
     var s = heroDraft().slides[i];
     if (!s) return "";
@@ -30088,26 +30936,16 @@
     var opt = function (v, label) {
       return '<option value="' + esc(v) + '"' + (sel === v ? " selected" : "") + ">" + esc(label) + "</option>";
     };
-    /* `id` and `tabindex` so the render that opens it can bring it into view
-       and put the cursor in it (heroOpenEdit); the ✕ is the way out from the
-       TOP of the pane — «Готово» is at its bottom, which on a phone is another
-       screenful away, and a pane you cannot see the end of is a pane you
-       cannot tell is open (Renat, 13.09.2026). */
-    return '<div class="adm-card adm-card--pad adm-form adm-form--inline" id="heroform" tabindex="-1">' +
-      '<div class="adm-edbar"><span class="adm-sec__t">' + "Баннер " + (i + 1) + "</span>" +
-        '<button class="adm-iconbtn adm-iconbtn--x" data-heroclose aria-label="Закрыть слайд" title="Закрыть слайд">✕</button>' +
-        admLangBarHTML("data-herolang", LANGS, L, "Язык баннера", function (code) {
-          return admLangHas(["eyebrow", "title", "sub", "cta"].map(function (f) {
-            return (s[f] && s[f][code]) || "";
-          }).join(""));
-        }, LANG_BAR_NOTE) + "</div>" +
+    // `id` and `tabindex` so the render that opens it can bring it into view (heroOpenEdit)
+    return '<div class="adm-slide__ed adm-form" id="heroform" tabindex="-1">' +
+      admLangBarHTML("data-herolang", LANGS, L, "Язык баннера", function (code) {
+        return admLangFallback(code, ["eyebrow", "title", "sub", "cta"].map(function (f) { return (s[f] && s[f][code]) || ""; }).join(""),
+          ["eyebrow", "title", "sub", "cta"].map(function (f) { return (s[f] && s[f].RU) || ""; }).join(""));
+      }, LANG_BAR_NOTE, L !== "RU" ? { translate: '<button class="adm-link" type="button" data-herotr>Перевести с русского</button>' } : null) +
       heroFieldHTML(s, "eyebrow", "Строка сверху", "input", 40) +
       heroFieldHTML(s, "title", "Заголовок", "input", 40) +
       heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
       heroFieldHTML(s, "cta", "Надпись на кнопке", "input", 24) +
-      // the four texts written by the assistant — from the title (or the
-      // link) as a hint, for the language on the pill or all three
-      admSparkHTML('data-herospark="one"', "✨ Написать тексты слайда", 'data-herospark="all"') +
       '<label class="adm-field">Куда ведёт кнопка' +
         '<select class="adm-input" data-herogo>' +
           '<optgroup label="Разделы">' + opt("cat:all", "Все товары") +
@@ -30128,51 +30966,116 @@
           '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
         '<div class="adm-picks" id="herogolist">' + heroGoRows() + "</div>" +
       "</div>" +
-      '<div class="adm-sec__t">Картинка</div>' +
-      '<label class="adm-field">Ссылка на картинку — или выберите фото товара ниже' +
-        '<input class="adm-input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
-        '" placeholder="https://… или /shop/img/…"></label>' +
-      /* media: a picture of the owner's own, straight into the field above */
-      galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
-      '<input class="adm-input" data-heroimgq value="' + esc(S.heroImgQ || "") +
-        '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
-      '<div class="adm-picks" id="heroimglist">' + heroImgRows() + "</div>" +
-      '<div class="adm-sec__t">Предпросмотр</div>' +
-      '<div class="adm-heroprev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div>" +
-      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-heroclose>Готово</button></div>' +
+      '<div class="adm-field"><span>Картинка</span>' +
+        '<input class="adm-input" data-heroimgq value="' + esc(S.heroImgQ || "") +
+          '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
+        '<div class="adm-picks" id="heroimglist">' + heroImgRows() + "</div>" +
+        /* media: a picture of the owner's own — «+ своя» */
+        galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
+      "</div>" +
+      '<div class="adm-field"><span>Предпросмотр</span>' +
+        '<div class="adm-heroprev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div></div>" +
+      admSetMoreHTML("slide",
+        // the four texts written by the assistant — one of the two ✨ Dim kept (07.09.2026)
+        admSparkHTML('data-herospark="one"', "✨ Написать тексты слайда", 'data-herospark="all"') +
+        '<label class="adm-field">Ссылка на картинку — или выберите фото товара выше' +
+          '<input class="adm-input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
+          '" placeholder="https://… или /shop/img/…"></label>') +
+      '<div class="adm-acts adm-slide__acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-heroclose>Свернуть</button>' +
+        '<button class="adm-link adm-link--warn" type="button" data-herodel="' + i + '">Удалить слайд</button></div>' +
     "</div>";
   }
-  function heroCountLabel(n) { return n + " " + pl(n, "слайд", "слайда", "слайдов"); }
+  function heroCountLabel(n) { return n + " из 5"; }
   function admHeroCard() {
     var d = heroDraft(), n = d.slides.length;
-    // the draft's own timing, not the saved one — a number typed a moment ago
-    // must survive the render that opening a slide causes
     var tick = Number(d.interval);
     tick = tick >= 2000 && tick <= 30000 ? tick : HERO_TICK;
-    return '<div class="adm-sec" style="margin-top:28px"><div class="adm-sec__t">Главный баннер</div>' +
-        '<div class="adm-sec__x">' + heroCountLabel(n) + "</div></div>" +
-      '<p class="adm-hint" style="margin-top:6px">Большая картинка на главной. Слайды показываются по кругу; ' +
-        "один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.</p>" +
-      /* No «есть несохранённые изменения» line here any more: the page's
-         save bar says it (admSetBarHTML). The paragraph used to come and go
-         between the hint and the list — and under the index-based morph
-         every sibling after it was rebuilt each time the draft crossed the
-         line between «same as saved» and «different», the picture picker
-         with them; that was the jump Dim saw (paintHeroPick). */
-      (n ? '<div class="adm-list">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
-         : '<div class="adm-empty">Слайдов нет — баннер на главной не показывается. Нажмите «Добавить слайд».</div>') +
-      (S.heroEdit >= 0 && S.heroEdit < n ? heroFormHTML(S.heroEdit) : "") +
-      '<label class="adm-field" style="max-width:220px;margin-top:16px">Смена слайдов, секунд' +
-        '<input class="adm-input" type="number" min="2" max="30" step="1" data-herotick value="' +
-        Math.round(tick / 1000) + '"></label>' +
-      /* «Сохранить» is the page's bar. At the ceiling the add button is
-         disabled AND says why beside it — a grey button on its own read as
-         «nothing happens» (Dim, 10.09.2026). The sentence is always in the
-         tree, hidden below five, for the same index-stability reason. */
-      '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn adm-btn--ghost" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
-        '<span class="adm-hint" data-heromax' + (n >= 5 ? "" : " hidden") + ">Максимум 5 слайдов — удалите один, чтобы добавить новый</span>" +
-        '<button class="adm-link adm-link--muted" data-heroreset>Сбросить к стандартному</button></div>';
+    var as = admHeroTickAs();
+    return '<div class="adm-set__block">' +
+      admSecHeadHTML("Баннер", "", "", '<span class="adm-sech__x">' + heroCountLabel(n) + "</span>") +
+      (n ? '<div class="adm-slides">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
+         : '<div class="adm-empty">Слайдов нет — баннер на главной не показывается. Нажмите «+ Слайд».</div>') +
+      /* At the ceiling the add button is disabled AND says why beside it — a
+         grey button on its own read as «nothing happens» (Dim, 10.09.2026).
+         The sentence is always in the tree, hidden below five, for the same
+         index-stability reason as the product panel above. */
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-slides__add" type="button" data-heroadd' + (n >= 5 ? " disabled" : "") + ">+ Слайд</button>" +
+        '<span class="adm-hint" data-heromax' + (n >= 5 ? "" : " hidden") + ">Максимум 5 слайдов — удалите один, чтобы добавить новый</span></div>" +
+      '<label class="adm-set__tick"><span>Слайд меняется каждые</span>' +
+        '<input class="adm-input" type="number" min="2" max="30" step="1" inputmode="numeric" data-herotick data-autosave="' + as + '" value="' +
+          Math.round(tick / 1000) + '"' + admAutosaveInvalidAttr(as) + "><span>сек</span></label>" +
+      admAutosaveHintHTML(as) +
+      admSetMoreHTML("banner", '<button class="adm-link" type="button" data-heroreset>Вернуть стандартный баннер</button>') +
+      "</div>";
+  }
+  /** «каждые [6] сек» — 2 to 30, saved when the box is left. */
+  function admHeroTickAs() {
+    var as = "hero:tick";
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: "count",
+        validate: function (v) {
+          var n = Number(v);
+          return String(v).trim() !== "" && isFinite(n) && n >= 2 && n <= 30 ? "" : "От 2 до 30 секунд.";
+        },
+        send: function (v) { heroDraft().interval = Math.round(Number(v)) * 1000; admHeroCommit(); return true; }
+      });
+    }
+    return as;
+  }
+  /* «Удалить слайд» — asked first (README rule 4), then held for five
+     seconds (q8): the slide leaves the list at once, the toast carries
+     «Вернуть», and only when the five seconds are up does the banner without
+     it go to the shop. «Вернуть» after that is the journal's own undo. */
+  var ADM_HOLD_MS = 5000;
+  var ADM_HOLDS = [];
+  /** Hold a change for `ms`: `fire` makes it, `undo(late)` takes it back —
+      before it was made (late = false) or after (true). The toast is
+      `text` with «Вернуть». */
+  function admHold(ms, fire, undo, text) {
+    var h = { done: false, timer: 0, entry: null };
+    var drop = function () { ADM_HOLDS = ADM_HOLDS.filter(function (x) { return x !== h; }); };
+    h.fire = function () {
+      if (h.done) return;
+      h.done = true; clearTimeout(h.timer); drop();
+      fire(h);
+    };
+    h.timer = setTimeout(h.fire, ms);
+    ADM_HOLDS.push(h);
+    toast(text, {
+      prev: true,
+      undo: function () {
+        if (!h.done) { h.done = true; clearTimeout(h.timer); drop(); undo(false, h); }
+        else undo(true, h);
+      }
+    });
+    return h;
+  }
+  // a page closing with a change held: the change was confirmed — it goes now
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("pagehide", function () { ADM_HOLDS.slice().forEach(function (h) { h.fire(); }); });
+  }
+  function admHeroDelete(i) {
+    var d = heroDraft(), s = d.slides[i];
+    if (!s) { render(); return; }
+    d.slides.splice(i, 1);
+    S.heroEdit = -1;
+    render();
+    admHold(ADM_HOLD_MS, function (h) { h.entry = admHeroCommit(""); }, function (late, h) {
+      if (late) {
+        var j = h.entry ? DEMO.log.indexOf(h.entry) : -1;
+        if (j >= 0) { var tx = h.entry.txt; demoUndo(j); journalNote(admCancelLine(tx)); toast("Отменено"); }
+        render();
+        return;
+      }
+      var dd = heroDraft();
+      dd.slides.splice(Math.min(i, dd.slides.length), 0, s);
+      admHeroCommit("");
+      render();
+      toast("Слайд на месте");
+    }, "Слайд удалён");
   }
   /** Bring an element up to just under the panel's sticky top bar — on a
       phone `.adm-top` is `position: sticky` at the top, so a plain
@@ -30194,51 +31097,33 @@
     if (onlyIfHidden && r.top >= hdr && r.bottom <= (window.innerHeight || 0)) return;
     window.scrollTo({ top: Math.max(0, r.top + window.scrollY - hdr - 12) });
   }
-  /* A slide's form has just been opened by «Изменить» or «Добавить слайд».
-
-     Renat, 13.09.2026: «Clicking on edit, opens the edit pane somewhere below,
-     so on mobile you might not even notice or understand if the pane is open
-     or not to modify». The pane is drawn under the whole list of slides, which
-     on a 375-px phone is below the fold — the tap looked like it did nothing.
-
-     So the pane comes to the owner when it OPENS, and only then: a previous
-     round deliberately stopped the page moving when a picture is picked
+  /* A slide's editor has just been opened by its row or by «+ Слайд». The
+     pane comes to the owner when it OPENS, and only then: a previous round
+     deliberately stopped the page moving when a picture is picked
      (paintHeroPick — defect 10, 10.09.2026), because jumping on every tap
      inside the pane was itself the complaint. One scroll, on the one render
-     that puts the form on screen; everything that happens inside it after
-     that still leaves the page exactly where the finger left it. */
+     that puts the form on screen, and only if it is not already in sight. */
   function heroOpenEdit() {
     requestAnimationFrame(function () {
       var form = document.getElementById("heroform");
       if (!form) return;
-      admScrollUnderHeader(form);
+      admScrollUnderHeader(form, true);
       // the pane, not a field: focusing an input raises the phone's keyboard
       // over the very thing the owner was told to look at (scanToEditor)
       if (form.focus) form.focus({ preventScroll: true });
     });
   }
-  /** …and folding it away again, from the ✕ at its top, from «Готово» at its
-      bottom, or from a second tap on the row's own button. The finger goes
-      back to the row it came from — a phone that had scrolled down to the pane
-      would otherwise be left looking at «Смена слайдов» with no idea which
-      slide it had just been editing. */
+  /** …and folding it away again, from «Свернуть» or from a second tap on the
+      row. The finger goes back to the row it came from. */
   function heroCloseEdit() {
     var was = S.heroEdit;
+    admAutosaveFlush();   // a text still owed goes before its box does
     S.heroEdit = -1;
     render();
     var row = document.querySelector('[data-heroedit="' + was + '"]');
     if (!row) return;
     admScrollUnderHeader(row, true);
     if (row.focus) row.focus({ preventScroll: true });
-  }
-  /** The confirm card's detail line for a banner save — the shop-wide thing
-      the owner is about to do, in one sentence he can read in his language. */
-  function heroConfirmDetail(value) {
-    var on = value && value.slides ? value.slides.filter(function (s) { return s.on !== false; }).length : 0;
-    // two whole sentences rather than one with a fork in it: each is one text
-    // node on the card, and the dictionary pass needs to see each whole
-    if (on) return "Слайдов на сайте: " + on + ".\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.";
-    return "Все слайды скрыты — баннер на главной не показывается.\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.";
   }
   /* Typing must not cost the caret, so the two moving parts of the form are
      repainted on their own instead of through render(). */
@@ -30259,19 +31144,13 @@
      box or an upload. Patched in place, never through render().
 
      Dim, 10.09.2026 (defect 10): «picking a new image for an existing slide
-     makes the page jump to the top». Measured before the fix: the first
-     pick stayed put, the pick that made the draft equal the saved banner
-     again threw the page 869 px on a desktop and 1433 px on a phone. The
-     culprit was the «есть несохранённые изменения» paragraph the card drew
-     between the hint and the list only while the draft differed: a node
-     that appears or disappears mid-column shifts every sibling after it,
-     and the index-based morph (admMorphChildren) then replaces the slide
-     list, the open form and the picker the owner had just tapped — the
-     browser loses its scroll anchor with them. That paragraph is gone (the
-     bar says it), the link picker is a permanent hidden node, and a pick
-     touches only what it changes: the tiles' aria-current, the URL box, the
-     row's thumbnail, the preview and the bar. The tapped tile keeps its
-     node and its focus. */
+     makes the page jump to the top». A node that appears or disappears
+     mid-column shifts every sibling after it, and the index-based morph
+     (admMorphChildren) then replaces the slide list, the open form and the
+     picker the owner had just tapped — the browser loses its scroll anchor
+     with them. So a pick touches only what it changes: the tiles'
+     aria-current, the URL box, the row's thumbnail and the preview. The
+     tapped tile keeps its node and its focus. */
   function paintHeroPick() {
     var d = heroDraft(), i = S.heroEdit, s = d.slides[i];
     if (!s) return;
@@ -30284,15 +31163,40 @@
     if (url && url.value !== heroUrl(s.image)) url.value = heroUrl(s.image);
     var goHint = document.querySelector("[data-herogohint]");
     if (goHint) { goHint.textContent = "Кнопка ведёт на: " + heroGoLabel(go); translateTree(goHint); }
-    var row = document.querySelector('[data-herorow="' + i + '"]');
-    if (row && row.parentNode) {
-      var tmp = document.createElement("div");
-      tmp.innerHTML = heroRowHTML(s, i, d.slides.length);
-      translateTree(tmp);
-      row.parentNode.replaceChild(tmp.firstChild, row);
-    }
+    var thumb = document.querySelector('[data-herorow="' + i + '"] .adm-thumb');
+    if (thumb) { thumb.innerHTML = heroArt(s.image, "ph"); translateTree(thumb); }
     paintHeroPreview();
-    paintSetBar();
+  }
+  /* «Перевести с русского» on the slide's ET or EN strip: the four Russian
+     texts through the same translate task the product editor uses
+     (POST /api/admin/ai/text, task "translate"), written into the other two
+     languages and saved. */
+  function heroTranslate(btn) {
+    var s = heroDraft().slides[S.heroEdit];
+    if (!s || !btn || btn.disabled) return;
+    var fields = ["eyebrow", "title", "sub", "cta"].filter(function (f) { return s[f] && String(s[f].RU || "").trim(); });
+    if (!fields.length) { toast("Сначала напишите русский текст"); return; }
+    var label = btn.textContent, left = fields.length, fail = "";
+    btn.disabled = true; btn.textContent = "…";
+    fields.forEach(function (f) {
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: String(s[f].RU), sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: ["Rempire"] }
+      }).then(function (r) {
+        if (r.status === 200 && r.body && r.body.ok && r.body.texts) {
+          if (r.body.texts.ET) s[f].ET = String(r.body.texts.ET);
+          if (r.body.texts.EN) s[f].EN = String(r.body.texts.EN);
+        } else fail = (r.body && r.body.error) || "x";
+      }).catch(function () { fail = "x"; }).then(function () {
+        if (--left) return;
+        btn.disabled = false; btn.textContent = label;
+        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+        else if (fail) toast("Не получилось — попробуйте ещё раз");
+        admHeroCommit("Переведено — проверьте тексты");
+        render();
+      });
+    });
   }
 
   /* ---------- admin: «Контент» — the shop's own details --------------------
@@ -30300,11 +31204,16 @@
      opening hours, the social links, the black strip above the header, the
      «Контакты» page and the extra line at the bottom of every letter.
 
-     Edited on a copy (S.contentDraft) exactly like the banner; nothing reaches
-     the shop until «Сохранить», which goes through the same confirm card and
-     the same undoable journal as every other change — as ONE set_content
-     action carrying only the fields that actually differ, so the confirm card
-     can say «телефон → +372 …» instead of dumping the whole document. */
+     Edited on a copy (S.contentDraft) — what is typed and not yet saved —
+     and saved field by field (1a): a box when it is left, a long text a
+     second after the last keystroke, a switch at once. Each save is ONE
+     set_content action carrying only the fields it changed, and its journal
+     line keeps only what those fields held before — so «Вернуть» on the
+     strip's text puts back the strip's text and leaves the phone number typed
+     after it alone (the bug the whole-document `prev` had: undoing a
+     «Главная» change reverted every later «О компании» edit). The PUT still
+     carries the whole document (the route stores each key whole), built from
+     what the panel holds when it leaves. */
   function contentDraft() {
     if (!S.contentDraft || typeof S.contentDraft !== "object") {
       try { S.contentDraft = JSON.parse(JSON.stringify(contentConf())); }
@@ -30312,22 +31221,26 @@
     }
     return S.contentDraft;
   }
-  function cDraftGet(path) {
-    var parts = String(path).split("."), o = contentDraft();
+  /** A path («company.phone», «announcement.text.ET») read out of any document. */
+  function cPathGet(doc, path) {
+    var parts = String(path).split("."), o = doc;
     for (var i = 0; i < parts.length; i++) {
       if (o == null || typeof o !== "object") return "";
       o = o[parts[i]];
     }
     return o == null ? "" : o;
   }
-  function cDraftSet(path, value) {
-    var parts = String(path).split("."), o = contentDraft();
+  /** …and written into one, the objects on the way made as needed. */
+  function cPathSet(doc, path, value) {
+    var parts = String(path).split("."), o = doc;
     for (var i = 0; i < parts.length - 1; i++) {
       if (!o[parts[i]] || typeof o[parts[i]] !== "object") o[parts[i]] = {};
       o = o[parts[i]];
     }
     o[parts[parts.length - 1]] = value;
   }
+  function cDraftGet(path) { return cPathGet(contentDraft(), path); }
+  function cDraftSet(path, value) { cPathSet(contentDraft(), path, value); }
   /** Same rule as the server: "" · "closed" · "HH:MM–HH:MM". */
   function cHoursNorm(v) {
     var s = String(v || "").trim().toLowerCase();
@@ -30337,6 +31250,24 @@
     if (m.length !== 2) return "";
     var ok = /^([01]\d|2[0-3]):[0-5]\d$/;
     return ok.test(m[0]) && ok.test(m[1]) ? m[0] + "–" + m[1] : "";
+  }
+  /* «1000» → «10:00», «9» → «09:00», «930» → «09:30», «10.30» → «10:30»:
+     the 24-hour boxes format themselves when they are left (design; the
+     owner's picker cut «10:00 A» on a phone). null when it is not a time. */
+  function cTimeFmt(raw) {
+    var s = String(raw == null ? "" : raw).trim();
+    if (!s) return "";
+    var h, m, d = /^\d{1,4}$/.test(s) ? s : "";
+    if (d) {
+      if (d.length <= 2) { h = Number(d); m = 0; }
+      else { h = Number(d.slice(0, d.length - 2)); m = Number(d.slice(-2)); }
+    } else {
+      var x = /^(\d{1,2})\s*[:.,hH]\s*(\d{2})$/.exec(s);
+      if (!x) return null;
+      h = Number(x[1]); m = Number(x[2]);
+    }
+    if (!(h >= 0 && h <= 23 && m >= 0 && m <= 59)) return null;
+    return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
   }
   function cTriDiff(base, draft) {
     var out = {}, b = base || {}, d = draft || {};
@@ -30385,32 +31316,11 @@
     try { return Object.keys(contentDiff(contentConf(), contentDraft())).length > 0; }
     catch (e) { return false; }
   }
-  /** The same diff, split the way the settings pages show the document: the
-      announcement bar is on «Главная страница», everything else on «О
-      компании» — so each page's save bar names only the card that is on it. */
-  function contentDirtyFor(page) {
-    var diff;
-    try { diff = contentDiff(contentConf(), contentDraft()); } catch (e) { return false; }
-    var keys = Object.keys(diff);
-    if (page === "home") return keys.indexOf("announcement") >= 0;
-    return keys.some(function (k) { return k !== "announcement"; });
-  }
-  /** «Отменить правки» for one page: that page's part of the draft goes back
-      to what the shop shows; typing made on the other page is left alone. */
-  function contentRevert(page) {
-    var conf;
-    try { conf = JSON.parse(JSON.stringify(contentConf())); } catch (e) { S.contentDraft = null; return; }
-    var d = contentDraft();
-    if (page === "home") { d.announcement = conf.announcement; return; }
-    Object.keys(conf).forEach(function (k) { if (k !== "announcement") d[k] = conf[k]; });
-  }
-  /* …and the two buttons that WRITE keep to the same split. «Сбросить к
-     стандартному» under «Верхняя полоска» used to diff the whole document
-     against the defaults — resetting the strip put back the default company
-     name, an empty IBAN, the default phone and socials, and wiped the letter
-     footer — and one «Сохранить» on either page saved what the other page's
-     form held too (map of the panel, 23.09.2026, #15). Off these two pages
-     (nothing draws the card there) the whole document counts, as before. */
+  /* «Вернуть стандартные …» keeps to its page: the strip's reset on
+     «Главная страница» puts back the strip and nothing else; «О компании»'s
+     puts back that page's details and leaves the strip alone (map of the
+     panel, 23.09.2026, #15). Off these two pages (the assistant) the whole
+     document counts, as before. */
   function contentOnPage(key, page) {
     if (page !== "home" && page !== "company") return true;
     return page === "home" ? key === "announcement" : key !== "announcement";
@@ -30421,173 +31331,297 @@
     Object.keys(patch || {}).forEach(function (k) { if (contentOnPage(k, page)) out[k] = patch[k]; });
     return out;
   }
-  /** After one page's save or reset: what is still typed on the other page
-      is carried into the fresh draft instead of going with the old one. */
+  /** After one page's reset: what is still typed on the other page is carried
+      into the fresh draft instead of going with the old one. */
   function contentKeepOther(page, old) {
     if (!old || typeof old !== "object") return;
     var d = contentDraft();
     Object.keys(old).forEach(function (k) { if (!contentOnPage(k, page)) d[k] = old[k]; });
   }
-  function cInput(path, label, ph, max, hint) {
+  /** What the fields a patch names held in `base` — the patch that puts them
+      back. A field that is not there reads as empty (a boolean as «on»). */
+  function contentPrevPatch(base, patch) {
+    var out = {};
+    Object.keys(patch || {}).forEach(function (k) {
+      var v = patch[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        out[k] = contentPrevPatch(base && typeof base[k] === "object" ? base[k] : {}, v);
+      } else {
+        var was = base ? base[k] : undefined;
+        out[k] = was === undefined || was === null ? (typeof v === "boolean" ? true : "") : was;
+      }
+    });
+    return out;
+  }
+  /* Save the fields at `paths` from the draft — only those, and only if they
+     differ from what the shop shows. Never over a document this browser has
+     never read (contentLoaded): the PUT carries the whole of it. */
+  function admContentCommit(paths, toastText) {
+    if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return null; }
+    var conf = contentConf(), patch = {}, n = 0;
+    paths.forEach(function (p) {
+      var v = cDraftGet(p), was = cPathGet(conf, p);
+      if (typeof was === "boolean" || typeof v === "boolean") { if (v === was) return; }
+      else if (String(v) === String(was)) return;
+      cPathSet(patch, p, typeof v === "boolean" ? v : String(v));
+      n++;
+    });
+    if (!n) return null;
+    return admSetApply({ type: "set_content", value: patch, keep: true }, toastText || "Данные магазина сохранены");
+  }
+  /** One text box of the document as a field that saves itself. `gate` is
+      the kind of identifier it must be (cGateHint) — a value the server would
+      blank is not sent. */
+  function cAs(path, kind, gate) {
+    var as = "content:" + path;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: kind,
+        validate: function (v) { return cGateHint(gate, v); },
+        send: function (v) { cDraftSet(path, v); admContentCommit([path]); paintContentState(); return true; }
+      });
+    }
+    return as;
+  }
+  /* A one-line box. `gate` — the identifier it must be (regCode, vatNumber,
+     email, phone, url, iban) or nothing; a name or an address is saved when
+     the box is left (q1), an identifier too. */
+  function cInput(path, label, ph, max, hint, gate) {
+    var as = cAs(path, gate ? "code" : "name", gate);
     return '<label class="adm-field">' + label +
-      '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
-      esc(cDraftGet(path)) + '" placeholder="' + esc(ph || "") + '">' +
+      '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" data-autosave="' + as + '" value="' +
+      esc(cDraftGet(path)) + '" placeholder="' + esc(ph || "") + '"' + admAutosaveInvalidAttr(as) + ">" +
+      admAutosaveHintHTML(as) +
       (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
   }
-  /* A trilingual field follows the language control at the top of the card;
-     an empty ET/EN says out loud that the Russian will be shown instead. */
-  function cTri(base, label, tag, max, hint) {
+  /* A trilingual field follows the language strip above it; an empty ET/EN
+     says out loud that the Russian will be shown instead. A long text saves a
+     second after the last keystroke (q1), and the strip's state words follow
+     it (paintContentState). */
+  function cTri(base, label, tag, max, hint, gate) {
     var L = S.contentLang || "RU";
     var path = base + "." + L;
     var val = String(cDraftGet(path) || "");
     var ru = String(cDraftGet(base + ".RU") || "");
+    var as = cAs(path, "text", gate);
     var fell = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
     return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="adm-input" rows="4" maxlength="' + max + '" data-contentf="' + path + '">' + esc(val) + "</textarea>"
-        : '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' + esc(val) + '">') +
+        ? '<textarea class="adm-input" rows="4" maxlength="' + max + '" data-contentf="' + path + '" data-autosave="' + as + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" data-autosave="' + as + '" value="' + esc(val) + '">') +
+      admAutosaveHintHTML(as) +
       (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + fell + "</label>";
   }
-  /** The five texts on this card that exist per language — cTri() above. */
-  var CONTENT_TRI = ["hours.note", "announcement.text", "announcement.short", "contactPage", "emailFooter"];
-  function cLangPills() {
-    return admLangBarHTML("data-contentlang", LANGS, S.contentLang || "RU", "Язык текстов", function (code) {
-      return admLangHas(CONTENT_TRI.map(function (p) { return cDraftGet(p + "." + code); }).join(""));
-    }, LANG_BAR_NOTE);
+  /** RU / ET / EN over the texts of one block, each language's state under
+      it, and «Перевести с русского» on ET and EN (README § 1). */
+  function cLangBar(bases) {
+    var L = S.contentLang || "RU";
+    return '<div data-contentbar="' + bases.join(",") + '">' + admLangBarHTML("data-contentlang", LANGS, L, "Язык текстов", function (code) {
+      return admLangFallback(code, bases.map(function (b) { return cDraftGet(b + "." + code); }).join(""),
+        bases.map(function (b) { return cDraftGet(b + ".RU"); }).join(""));
+    }, LANG_BAR_NOTE, L !== "RU"
+      ? { translate: '<button class="adm-link" type="button" data-contenttr="' + bases.join(",") + '">Перевести с русского</button>' }
+      : null) + "</div>";
   }
-  /** One block of the document as a row; «Изменить» opens its fields right
-      under the row — the document is long, a phone screen is not. */
-  function cBlock(id, title, sub, body) {
-    var open = S.contentOpen === id;
-    return '<div class="adm-row adm-row--tall">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + title + "</span>" +
-        '<span class="adm-row__sub">' + sub + "</span></span>" +
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-contentblock="' + id + '" aria-expanded="' + open + '">' +
-        (open ? "Свернуть" : "Изменить") + "</button></div>" +
-      (open ? '<div class="adm-card adm-card--pad adm-form adm-form--inline">' + body + "</div>" : "");
+  /** The language strips' state words, after a text saved — in place, the caret stays. */
+  function paintContentState() {
+    var bars = document.querySelectorAll("[data-contentbar]");
+    for (var i = 0; i < bars.length; i++) {
+      var bases = String(bars[i].getAttribute("data-contentbar")).split(",");
+      var slots = bars[i].querySelectorAll("[data-langst]");
+      for (var k = 0; k < slots.length; k++) {
+        var code = slots[k].getAttribute("data-langst");
+        slots[k].innerHTML = admLangStateHTML(admLangFallback(code,
+          bases.map(function (b) { return cDraftGet(b + "." + code); }).join(""),
+          bases.map(function (b) { return cDraftGet(b + ".RU"); }).join("")));
+        translateTree(slots[k]);
+      }
+    }
   }
-  /* A closed day keeps its box, read-only and saying «выходной» in its
-     placeholder — the word is a dictionary key, so the Estonian panel reads
-     «suletud» where a value attribute would have stayed Russian. */
+  /* «Перевести с русского» for the texts of one block — the product editor's
+     translate task, into ET and EN, then saved like anything typed. */
+  function contentTranslate(btn, bases) {
+    if (!btn || btn.disabled) return;
+    var todo = bases.filter(function (b) { return String(cDraftGet(b + ".RU") || "").trim(); });
+    if (!todo.length) { toast("Сначала напишите русский текст"); return; }
+    var label = btn.textContent, left = todo.length, fail = "";
+    btn.disabled = true; btn.textContent = "…";
+    todo.forEach(function (b) {
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: String(cDraftGet(b + ".RU")), sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: ["Rempire"] }
+      }).then(function (r) {
+        if (r.status === 200 && r.body && r.body.ok && r.body.texts) {
+          if (r.body.texts.ET) cDraftSet(b + ".ET", String(r.body.texts.ET));
+          if (r.body.texts.EN) cDraftSet(b + ".EN", String(r.body.texts.EN));
+        } else fail = (r.body && r.body.error) || "x";
+      }).catch(function () { fail = "x"; }).then(function () {
+        if (--left) return;
+        btn.disabled = false; btn.textContent = label;
+        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+        else if (fail) toast("Не получилось — попробуйте ещё раз");
+        var paths = [];
+        todo.forEach(function (b) { paths.push(b + ".ET", b + ".EN"); });
+        admContentCommit(paths, "Переведено — проверьте тексты");
+        render();
+      });
+    });
+  }
+  /** «Пн–Пт 10:00–19:00 · Сб 10:00–16:00 · Вс выходной» — the hours in one
+      line, equal neighbours joined; a day with nothing set is left out. */
+  var CONTENT_DAY_SHORT = { mon: "Пн", tue: "Вт", wed: "Ср", thu: "Чт", fri: "Пт", sat: "Сб", sun: "Вс" };
+  function cHoursSum(hours) {
+    var bits = [], run = null;
+    var shut = function () {
+      if (!run) return;
+      var span = CONTENT_DAY_SHORT[run.from] + (run.to !== run.from ? "–" + CONTENT_DAY_SHORT[run.to] : "");
+      bits.push(span + " " + (run.v === "closed" ? "выходной" : run.v));
+      run = null;
+    };
+    CONTENT_DAYS.forEach(function (d) {
+      var v = cHoursNorm(hours[d[0]]);
+      if (!v) { shut(); return; }
+      if (run && run.v === v) { run.to = d[0]; return; }
+      shut();
+      run = { from: d[0], to: d[0], v: v };
+    });
+    shut();
+    return bits.length ? admSumHTML(bits) : "не указаны — раздел не показывается";
+  }
+  /* One row per day: the day, «с» and «до» as 24-hour boxes that format
+     themselves, and the working-day switch (design; q38 — open/closed per day
+     with from–to). A closed day says «выходной» where its boxes were. The
+     stored value is still the one the server has always read: "HH:MM–HH:MM",
+     "closed", or "" for a day not shown. */
   function cHoursBody() {
     var d = contentDraft();
     return '<div class="adm-hours">' + CONTENT_DAYS.map(function (row) {
       var v = String(d.hours[row[0]] || ""), closed = v === "closed";
-      return '<div class="adm-hours__row">' +
-        '<label class="adm-hours__d" for="ch-' + row[0] + '">' + row[1] + "</label>" +
-        '<input class="adm-input" id="ch-' + row[0] + '" maxlength="20" data-contenthours="' + row[0] +
-          '" value="' + (closed ? "" : esc(v)) + '" placeholder="' + (closed ? "выходной" : "10:00–19:00") + '"' +
-          (closed ? " readonly" : "") + ">" +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-contentclosed="' + row[0] + '">' +
-          (closed ? "Рабочий день" : "Выходной") + "</button></div>";
+      var norm = cHoursNorm(v), pair = norm && norm !== "closed" ? norm.split("–") : ["", ""];
+      var box = function (side, val, ph, name) {
+        var as = hoursAs(row[0], side);
+        return '<input class="adm-input adm-hours__in" inputmode="numeric" maxlength="5" autocomplete="off" data-hoursf="' + row[0] + ":" + side +
+          '" data-autosave="' + as + '" value="' + esc(val) + '" placeholder="' + ph + '" aria-label="' + esc(name) + '"' + admAutosaveInvalidAttr(as) + ">";
+      };
+      return '<div class="adm-hours__row' + (closed ? " is-closed" : "") + '" data-contenthours="' + row[0] + '">' +
+        '<span class="adm-hours__d">' + row[1] + "</span>" +
+        (closed
+          ? '<span class="adm-hours__off">выходной</span>'
+          : '<span class="adm-hours__t">' + box("from", pair[0], "10:00", "Время с") + '<span aria-hidden="true">–</span>' +
+            box("to", pair[1], "19:00", "Время до") + "</span>") +
+        admSwitch('data-contentclosed="' + row[0] + '"', !closed, row[1]) +
+        '<span class="adm-ashint adm-hours__hint" data-hourshint="' + row[0] + '" hidden></span>' +
+        "</div>";
     }).join("") + "</div>" +
-      '<p class="adm-hint" style="margin:0">Время в виде 10:00–19:00. Пустая строка — день не показываем; выходной отмечается кнопкой.</p>' +
+      '<button class="adm-link" type="button" data-hoursall>Время понедельника — на все рабочие дни</button>' +
+      cLangBar(["hours.note"]) +
       cTri("hours.note", "Примечание под часами", "input", 300, "Например: в праздники — по записи.");
   }
-  /* `only` — which of the six blocks this page wants; `title` — a section
-     heading when the card sits under other things (the home page), none when
-     the page title already says it (О компании). The settings redesign split
-     the card in two: the announcement bar belongs on «Главная страница» and
-     everything else on «О компании». The DRAFT is shared either way, so a
-     «Сохранить» from either page saves whatever the owner changed. */
-  function admContentCard(only, title) {
-    var d = contentDraft();
-    var annOn = d.announcement.on !== false;
-    var show = function (id) { return !only || only.indexOf(id) >= 0; };
-    var co = d.company;
-    return (title ? '<div class="adm-sec" style="margin-top:28px"><div class="adm-sec__t">' + title + "</div></div>" : "") +
-      (show("company")
-        ? '<p class="adm-lead" style="margin:0">Всё, что магазин говорит о себе. Меняется здесь один раз — и меняется везде: ' +
-          "в подвале, на «Контактах», в правовых текстах и в письмах.</p>"
-        : "") +
-      // no dirty line here: the page's save bar names this card while it differs (admSetBarHTML)
-      '<div style="margin-top:12px">' + cLangPills() + "</div>" +
-      '<div class="adm-list">' +
-        /* «hard to spot» (Renat, 13.09.2026): the red paragraph about a missing
-           IBAN was printed under the «Счета для компаний» card, pointing at a
-           field inside a block that is CLOSED until «Изменить» is pressed — so
-           the screen said «fill it in» over a row that showed no such field.
-           The row itself now carries it: one filled badge on the block's name
-           and one sentence where its address line goes. That is the whole of
-           the red on this page — the field's own hint appears only once the
-           block is open, and only when what is typed is not an IBAN. */
-        (!show("company") ? "" : cBlock("company",
-          ibanOk(co.iban)
-            ? "Реквизиты"
-            : 'Реквизиты <span class="adm-badge adm-badge--warnfill adm-badge--sm">нет IBAN</span>',
-          (ibanOk(co.iban)
-            ? ""
-            : '<span class="adm-row__sub--warn">Счета компаниям не уходят, пока здесь нет IBAN.</span><br>') +
-          esc(co.legalName) + (co.regCode ? " · <span>рег. " + esc(co.regCode) + "</span>" : "") + (co.address ? " · " + esc(co.address) : ""),
-          cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
-          '<div class="adm-edpair">' +
-            cInput("company.regCode", "Регистрационный номер", "12216136", 24,
-              cFieldHint("regCode", "company.regCode", "Только цифры.")) +
-            cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24,
-              cFieldHint("vatNumber", "company.vatNumber")) + "</div>" +
-          cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200) +
-          '<div class="adm-edpair">' +
-            cInput("company.email", "Электронная почта", "info@rempireshop.com", 190,
-              cFieldHint("email", "company.email")) +
-            cInput("company.phone", "Телефон", "+372 5623 7237", 30,
-              cFieldHint("phone", "company.phone")) + "</div>" +
-          '<div class="adm-edpair">' +
-            /* The field says what the server will do with what is typed —
-               a value that is not an IBAN is stored as an empty one, and
-               the owner deserves to hear that here rather than from a
-               warning that comes back after the next reload. */
-            cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42,
-              co.iban && !ibanOk(co.iban)
-                ? '<span class="adm-hint--warn">Это не похоже на IBAN: две буквы страны и дальше 10–40 цифр и букв, например EE38 2200 2210 2014 5685. Магазин сохранит поле пустым.</span>'
-                : "") +
-            cInput("company.bankName", "Банк", "Swedbank", 60, "Печатается в счёте рядом с IBAN.") + "</div>" +
-          '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — ' +
-            "условия продажи, возврат, конфиденциальность — и в счета для компаний.</p>")) +
-        (!show("hours") ? "" : cBlock("hours", "Часы работы",
-          (CONTENT_DAYS.filter(function (r) { return d.hours[r[0]]; }).length
-            ? "показываем в подвале и на «Контактах»"
-            : "не указаны — раздел не показывается"),
-          cHoursBody())) +
-        (!show("social") ? "" : cBlock("social", "Соцсети",
-          esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ")) || "нет ссылок",
-          '<div class="adm-edpair">' + CONTENT_SOCIALS.map(function (r) {
-            return cInput("social." + r[0], r[1], "https://…", 300,
-              cFieldHint("url", "social." + r[0]));
-          }).join("") + "</div>" +
-          '<p class="adm-hint" style="margin:0">Пустая строка убирает значок из подвала.</p>')) +
-        (!show("announcement") ? "" : cBlock("announcement", title ? "Текст и ссылка" : "Верхняя полоска",
-          (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
-          '<div class="adm-swrow"><span>Показывать полоску' +
-            '<span class="adm-row__sub">чёрная строка над шапкой магазина</span></span>' +
-            admSwitch("data-contentannon", annOn, "Показывать полоску") + "</div>" +
-          cTri("announcement.text", "Текст полоски", "input", 300,
-            "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
-          cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
-          /* No «✨» here any more (Dim, 07.09.2026: «fewer sparkle buttons»).
-             Six one-off writers were six different ways to ask the same
-             assistant for a sentence; the two that stayed are the two the
-             owner cannot easily write himself — a banner slide and a product
-             name. Everything else he asks the assistant for in its own words,
-             where it can also show him what it is about to change. */
-          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300,
-            cFieldHint("url", "announcement.link")))) +
-        (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
-          "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
-        (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
-          esc(cText(d.emailFooter)) || "нет",
-          cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
-      "</div>" +
-      // «Сохранить» is the page's bar (admSetBarHTML); only the reset stays with the card
-      '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-link adm-link--muted" data-contentreset>Сбросить к стандартному</button></div>';
+  /** One «с» or «до» box: formats itself when left, and the day saves once
+      both are there (or both are empty — the day is then not shown). */
+  function hoursAs(day, side) {
+    var as = "hours:" + day + ":" + side;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: "code",
+        validate: function (v) { return cTimeFmt(v) === null ? "Время — например 10:00 или 1000." : ""; },
+        send: function (v) {
+          var el = document.querySelector('[data-hoursf="' + day + ":" + side + '"]');
+          var t = cTimeFmt(v);
+          if (el && t !== null && el.value !== t) el.value = t;
+          admHoursSave(day);
+          return true;
+        }
+      });
+    }
+    return as;
   }
-  /** The confirm card's detail for a content save: what changes, then where
-      it shows up — the owner is about to edit every page of the shop at once. */
-  function contentConfirmDetail(patch) {
-    return contentActionText(patch) +
-      "\nИзменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах.";
+  /** Both boxes of one day, read off the screen, into the document. */
+  function admHoursSave(day) {
+    var from = document.querySelector('[data-hoursf="' + day + ':from"]');
+    var to = document.querySelector('[data-hoursf="' + day + ':to"]');
+    var a = cTimeFmt(from ? from.value : ""), b = cTimeFmt(to ? to.value : "");
+    var hint = document.querySelector('[data-hourshint="' + day + '"]');
+    var half = a === null || b === null || (!!a !== !!b);
+    if (hint) { hint.textContent = half ? trText("Впишите время «с» и «до».", S.lang) : ""; hint.hidden = !half; }
+    if (half) return;
+    cDraftSet("hours." + day, a ? a + "–" + b : "");
+    admContentCommit(["hours." + day], "Часы работы сохранены");
+    var sum = document.querySelector('[data-admfold="content:hours"] .adm-foldrow__s');
+    if (sum) { sum.innerHTML = cHoursSum(contentConf().hours); translateTree(sum); }
+  }
+  /** «Время понедельника — на все рабочие дни»: Monday's hours to every other
+      working day — a closed day stays closed. One save, one «Вернуть». */
+  function admHoursAll() {
+    var mon = cHoursNorm(cDraftGet("hours.mon"));
+    if (!mon || mon === "closed") { toast("Сначала впишите время понедельника"); return; }
+    var paths = [];
+    CONTENT_DAYS.forEach(function (d) {
+      if (d[0] === "mon" || cDraftGet("hours." + d[0]) === "closed") return;
+      cDraftSet("hours." + d[0], mon);
+      paths.push("hours." + d[0]);
+    });
+    admContentCommit(paths, "Часы работы сохранены");
+    render();
+  }
+  /* The blocks as folds with a one-line summary (design). The fold's opener
+     also answers to its old address `data-contentblock` — the blocks were
+     «Изменить» rows until 1a, and the e2e suite and the assistant reach them
+     by it. */
+  function cFold(id, title, sum, body) {
+    return admFoldHTML("content:" + id, title, sum, body)
+      .replace("data-admfold=", 'data-contentblock="' + id + '" data-admfold=');
+  }
+  /* `only` — which blocks this page wants: «О компании» draws them all but
+     the strip, which is on «Главная страница». */
+  function admContentCard(only) {
+    var d = contentDraft(), conf = contentConf();
+    var show = function (id) { return !only || only.indexOf(id) >= 0; };
+    var co = conf.company;
+    var ibanMissing = !ibanOk(co.iban);
+    return '<div class="adm-set__folds">' +
+      /* «hard to spot» (Renat, 13.09.2026): the red paragraph about a missing
+         IBAN was printed under the «Счета для компаний» card, pointing at a
+         field inside a block that was closed. The fold itself carries it now:
+         a filled tag on its title and one sentence where its summary goes —
+         and the same tag on the index row of «О компании». */
+      (!show("company") ? "" : cFold("company",
+        ibanMissing ? "<span>Реквизиты</span> " + admTagHTML("alert", "нет IBAN") : "Реквизиты",
+        ibanMissing
+          ? '<span class="adm-foldrow__warn">Счета компаниям не уходят, пока здесь нет IBAN.</span>'
+          : admSumHTML([co.legalName, co.regCode ? "рег. " + co.regCode : "", co.address]),
+        cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120, "") +
+        '<div class="adm-edpair">' +
+          cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.", "regCode") +
+          cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24, "", "vatNumber") + "</div>" +
+        cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200, "") +
+        '<div class="adm-edpair">' +
+          cInput("company.email", "Электронная почта", "info@rempireshop.com", 190, "", "email") +
+          cInput("company.phone", "Телефон", "+372 5623 7237", 30, "", "phone") + "</div>" +
+        '<div class="adm-edpair">' +
+          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42, "", "iban") +
+          cInput("company.bankName", "Банк", "Swedbank", 60, "Печатается в счёте рядом с IBAN.") + "</div>" +
+        '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — ' +
+          "условия продажи, возврат, конфиденциальность — и в счета для компаний.</p>")) +
+      (!show("hours") ? "" : cFold("hours", "Часы работы", cHoursSum(conf.hours), cHoursBody())) +
+      (!show("contact") ? "" : cFold("contact", "Страница «Контакты»",
+        "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
+        cLangBar(["contactPage"]) + cTri("contactPage", "Вступительный абзац", "textarea", 1200))) +
+      (!show("social") ? "" : cFold("social", "Соцсети",
+        esc(CONTENT_SOCIALS.filter(function (r) { return conf.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ")) || "нет ссылок",
+        '<div class="adm-edpair">' + CONTENT_SOCIALS.map(function (r) {
+          return cInput("social." + r[0], r[1], "https://…", 300, "", "url");
+        }).join("") + "</div>" +
+        '<p class="adm-hint" style="margin:0">Пустая строка убирает значок из подвала.</p>')) +
+      (!show("invoice") ? "" : admFoldHTML("content:invoice", "Счета для компаний", invoiceSumHTML(), invoiceBodyHTML())) +
+      (!show("emailfooter") ? "" : cFold("emailfooter", "Подпись в письмах",
+        esc(cText(d.emailFooter)) || "нет",
+        cLangBar(["emailFooter"]) +
+        cTri("emailFooter", "Строка внизу письма", "input", 300,
+          "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
+      "</div>" +
+      admSetMoreHTML("company", '<button class="adm-link" type="button" data-contentreset="company">Вернуть стандартные данные</button>');
   }
 
   /* ---------- wholesale/loyalty: «Цены и лояльность» ------------------------
@@ -30746,44 +31780,9 @@
       loadAdminPricing._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        var st0 = r.body.settings || {};
-        /* The tariff row, from the one read of it no edge can have kept
-           (no-store). The panel used to show whatever /api/overrides/ last
-           said — up to two and a half minutes behind a save — so a reload
-           right after «Сохранить» showed the old boxes, and the next save
-           sent the old row back (Дим, /test 24.09.2026; shipFreshRow). Not
-           while a save is on its way, and not if one landed after this read
-           was asked for: then this answer is the older of the two. Prices
-           typed and not saved stay in their boxes, as in adoptServer(). */
-        var ownShip = feedShipRules(st0);
-        if (ownShip && !S.shipSaving && !(shipFresh && shipFresh.at >= askedAt)) {
-          var keepShipDraft = shipDirty();
-          setShipRules(ownShip);
-          if (!keepShipDraft) S.shipDraft = null;
-          shipFreshNote(ownShip, false);
-        }
-        /* The form's own draft is seeded from S.pricingLoaded, and the first
-           paint happens before this answer lands — so a draft made from the
-           empty defaults has to go, or the card would keep drawing «Партнёры
-           и баллы» off after the server said otherwise. Only ever on the very
-           first load: after that the draft is what the owner has typed. */
-        var firstLoad = !S.pricingLoaded;
-        S.pricingLoaded = normalisePricing(st0.pricing);
-        if (firstLoad) S.pricingDraft = null;
-        // the admin's own copy is the authoritative one for the panel: the
-        // public feed it would otherwise wait for is edge-cached for 30 s
-        adoptPricingLocally();
-        // «Доставлен» без кнопки: the same admin-only settings map, read once
-        S.deliveryLoaded = normaliseDelivery(st0.delivery);
-        // «Какие банки показывать» — settings.payment_banks, from the same map
-        S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
-        /* «Коробка магазина» — settings.shipping_parcel, same map, same read.
-           The order card needs it to pre-select the locker door, so it is read
-           here rather than on the settings screen: the owner opens «Заказы»
-           far more often than «Настройки», and a card that asked would be a
-           question where there should be a confirmation. */
-        S.parcelLoaded = normaliseParcel(st0.shipping_parcel);
+        admSetTake(r.body.settings || {}, askedAt);
         S.pricingLoadErr = false;
+        admSetWaitFlush();   // what the owner did while the read was out goes now
         render();
       }
       else if (!S.pricingLoaded) { S.pricingLoadErr = true; render(); }
@@ -30791,6 +31790,54 @@
       loadAdminPricing._busy = false;
       if (!S.pricingLoaded) { S.pricingLoadErr = true; render(); }
     });
+  }
+  /* One answer of GET /api/admin/settings, taken in. Every key the panel is
+     still writing, or changed after the read was asked for (`askedAt`), is
+     left as the panel has it — then the answer is the older of the two
+     (admSetFresh, 1a: a change saves itself, and a read landing a moment
+     after it must not put the old value back). */
+  function admSetTake(st0, askedAt) {
+    /* The tariff row, from the one read of it no edge can have kept
+       (no-store). The panel used to show whatever /api/overrides/ last
+       said — up to two and a half minutes behind a save — so a reload
+       right after a save showed the old boxes, and the next save sent the
+       old row back (Дим, /test 24.09.2026; shipFreshRow). Prices typed and
+       not yet saved stay in their boxes, as in adoptServer(). */
+    var ownShip = feedShipRules(st0);
+    if (ownShip && admSetFresh("shipping_rules", askedAt) && !(shipFresh && shipFresh.at >= askedAt)) {
+      var keepShipDraft = shipDirty();
+      setShipRules(ownShip);
+      shipServerRow = cloneRules(SHIP_STORED);
+      if (!keepShipDraft) S.shipDraft = null;
+      shipFreshNote(ownShip, false);
+    }
+    /* The form's own draft is seeded from S.pricingLoaded, and the first
+       paint happens before this answer lands — so a draft made from the
+       empty defaults has to go, or the card would keep drawing «Партнёры
+       и баллы» off after the server said otherwise. After that the draft
+       is what the owner has typed — kept while a box is still owed. */
+    var firstLoad = !S.pricingLoaded;
+    if (firstLoad || admSetFresh("pricing", askedAt)) {
+      S.pricingLoaded = normalisePricing(st0.pricing);
+      if (firstLoad || !admSetTyping("price:")) S.pricingDraft = null;
+      // the admin's own copy is the authoritative one for the panel: the
+      // public feed it would otherwise wait for is edge-cached for 30 s
+      adoptPricingLocally();
+    }
+    // «Доставлен» без кнопки: the same admin-only settings map
+    if (!S.deliveryLoaded || admSetFresh("delivery", askedAt)) S.deliveryLoaded = normaliseDelivery(st0.delivery);
+    // «Какие банки показывать» — settings.payment_banks, from the same map
+    if (!S.banksLoaded || admSetFresh("payment_banks", askedAt)) {
+      S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
+    }
+    /* «Коробка магазина» — settings.shipping_parcel, same map, same read.
+       The order card needs it to pre-select the locker door, so it is read
+       here rather than on the settings screen: the owner opens «Заказы»
+       far more often than «Настройки», and a card that asked would be a
+       question where there should be a confirmation. */
+    if (!S.parcelLoaded || admSetFresh("shipping_parcel", askedAt)) S.parcelLoaded = normaliseParcel(st0.shipping_parcel);
+    // …and the keys the public feed carries too, read here fresher than it (1a)
+    admSetAdopt(st0, askedAt);
   }
   /* «Применить» on a set_pricing — the form's own «Сохранить» and, far more
      dangerously, the assistant's «подними скидку для салонов до 25 %».
@@ -30806,8 +31853,7 @@
      and nothing is applied until they are here. */
   function applySetPricing(pa) {
     if (S.pricingLoaded) {
-      toast("Цены и баллы сохранены", demoApply(pa));
-      S.admSetSaved = S.admSetPage || "";
+      admSetApply(pa, "Цены и баллы сохранены");
       render(); return;
     }
     apiJson("/api/admin/settings/").then(function (r) {
@@ -30816,8 +31862,7 @@
       S.pricingLoaded = normalisePricing((r.body.settings || {}).pricing);
       S.pricingDraft = null;
       adoptPricingLocally();
-      toast("Цены и баллы сохранены", demoApply(pa));
-      S.admSetSaved = S.admSetPage || "";
+      admSetApply(pa, "Цены и баллы сохранены");
       render();
     }).catch(function () { toast("Не получилось — попробуйте ещё раз"); render(); });
   }
@@ -30825,6 +31870,27 @@
       every write this screen makes (prices and points, «Доставлен» без кнопки,
       the bank list). Writing before it has landed writes the defaults. */
   function adminSettingsReady() { return !!S.pricingLoaded; }
+  /* A change made before that read has answered — a pick the moment the page
+     opened — is not refused any more: the owner's tap wins. It waits for the
+     read and goes the moment it lands (loadAdminPricing → admSetWaitFlush),
+     computed then, over the shop's real values. Returns null when it ran at
+     once; while it waits, a promise that settles when it has run — a box's
+     autosave returns it, so the header says «Сохраняем…» until then rather
+     than «Сохранено ✓». (Found by two agents' e2e and by hand, 25.09.2026:
+     «Доставлен» days picked at once were refused, after 3 s saved.) */
+  var ADM_SET_WAIT = [];
+  function admSetWhenReady(fn) {
+    if (adminSettingsReady()) { fn(); return null; }
+    var p = new Promise(function (resolve) { ADM_SET_WAIT.push(function () { fn(); resolve(true); }); });
+    loadAdminPricing(!!S.pricingLoadErr);
+    return p;
+  }
+  function admSetWaitFlush() {
+    if (!adminSettingsReady() || !ADM_SET_WAIT.length) return;
+    var q = ADM_SET_WAIT;
+    ADM_SET_WAIT = [];
+    q.forEach(function (f) { try { f(); } catch (e) { /* one change's fault is not the next one's */ } });
+  }
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
     return S.pricingDraft;
@@ -30865,12 +31931,8 @@
      paintHeroPreview(). The refused field is marked as well as the sentence
      under the fields: the message says what is wrong, the border says where. */
   function paintPricingState() {
-    var err = document.querySelector("[data-pricingerr]");
-    if (err) { err.textContent = S.pricingErr || ""; err.hidden = !S.pricingErr; translateTree(err); }
-    var fields = document.querySelectorAll("[data-pricingf]");
-    for (var i = 0; i < fields.length; i++) {
-      fields[i].setAttribute("aria-invalid", String(!!S.pricingErr && fields[i].getAttribute("data-pricingf") === S.pricingErrField));
-    }
+    /* A refused number is the autosave's to mark — rust and one line under
+       its box (pricingAs), never sent. */
     /* The worked example under each field, and the basket at the foot of the
        card, are the point of this screen (Dim, 07.09.2026): they have to move
        with the digit the owner is typing, or he is reading last minute's
@@ -30884,24 +31946,40 @@
     }
     var calc = document.getElementById("pricingcalc");
     if (calc) { calc.innerHTML = admPricingCalcHTML(); translateTree(calc); }
-    // «Сохранить» / «Отменить правки» are the page's bar — lit the same way
-    paintSetBar();
   }
-  /* «Сохранить» proposes and the confirm card applies: a discount is money,
-     and it lands on every partner's next basket the moment it is saved. */
-  function savePricing() {
-    // never over the defaults: the PUT sends the whole `pricing` document
-    if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-    if (!pricingDirty()) { toast("Изменений нет"); return; }
-    S.pricingErr = ""; S.pricingErrField = "";
-    var value = cloneRules(pricingDraft());
-    pendingAction = {
-      type: "set_pricing", value: value, overlay: true,
-      title: "Изменить цены и баллы?",
-      detail: actionText({ type: "set_pricing", value: value }) +
-        "\nНовые условия начнут действовать сразу — для всех покупателей и партнёров."
-    };
-    render(); refocus("[data-admapply]");
+  /* «Цены и баллы» saves itself (q40, Dim 25.09.2026): a switch at once, a
+     number when its box is left — never a half-typed one (q1). It used to go
+     through «Изменить цены и баллы?» because «a discount is money»; the
+     bounded ranges keep a slip small, «Вернуть» is on the toast and in the
+     journal, and the one master switch still decides everything (kept —
+     Dim, 07.09.2026). `patch` is set_pricing's own partial shape. */
+  function admPricingSave(patch) {
+    // never over the defaults: the PUT sends the whole `pricing` document — it waits for the read
+    if (!adminSettingsReady()) { admSetWhenReady(function () { admPricingSave(patch); }); return null; }
+    var next = mergePricing(S.pricingLoaded, patch);
+    if (JSON.stringify(next) === JSON.stringify(normalisePricing(S.pricingLoaded))) return null;
+    return admSetApply({ type: "set_pricing", value: patch }, "Цены и баллы сохранены");
+  }
+  /** One number of the form as a box that saves itself — its bounds are the
+      gate (PRICING_FIELDS), and a refused value is not sent. */
+  function pricingAs(key) {
+    var as = "price:" + key;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: "money",
+        validate: function (v) {
+          var lim = PRICING_FIELDS[key], s = String(v == null ? "" : v).trim().replace(",", "."), n = Number(s);
+          return !s || !isFinite(n) || n < lim[0] || n > lim[1] ? lim[2] : "";
+        },
+        send: function (v) {
+          var n = Math.round(Number(String(v).trim().replace(",", ".")) * 100) / 100, p = {};
+          if (key === "proDiscountPct" || key === "proMinOrder") p[key] = n;
+          else { p.loyalty = {}; p.loyalty[key] = n; }
+          return admSetWhenReady(function () { admPricingSave(p); }) || true;
+        }
+      });
+    }
+    return as;
   }
   /* ---------- what each of these six numbers actually does -----------------
      Renat has never run a loyalty scheme, and «Списать не больше, % от
@@ -31006,11 +32084,19 @@
       "</p>";
   }
   function admPricingField(key, label, val) {
+    var as = pricingAs(key);
     return '<label class="adm-field">' + label +
-      '<input class="adm-input" data-pricingf="' + key + '" inputmode="decimal" value="' + esc(String(val)) +
-        '" aria-invalid="' + (!!S.pricingErr && S.pricingErrField === key) + '">' +
+      '<input class="adm-input" data-pricingf="' + key + '" data-autosave="' + as + '" inputmode="decimal" value="' + esc(String(val)) + '"' +
+        admAutosaveInvalidAttr(as) + ">" +
+      // data-pricingerr: the refusal's own line, as before 1a — now one per box
+      admAutosaveHintHTML(as).replace("<span ", '<span data-pricingerr="' + key + '" ') +
       '<span class="adm-hint" data-pricingex="' + key + '">' + pricingHintHTML(key) + "</span></label>";
   }
+  /* «Цены и баллы» (q40): the one master switch «Партнёры и баллы» (Dim,
+     07.09.2026 — gap analysis Q8 = A, not the design's two), the salon
+     discount and the points under it, and the 40 € order worked through with
+     the numbers in the boxes. Everything saves itself with «Вернуть»; what a
+     партнёр is went into the page's «?». */
   function admPricingCard() {
     loadAdminPricing(false);
     /* Nothing honest to draw until the shop's own numbers are here: the
@@ -31020,7 +32106,6 @@
        back by itself and the owner was left wondering what he had done. */
     if (SRV.admin === true && !S.pricingLoaded) {
       return '<div class="adm-form">' +
-        '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
         (S.pricingLoadErr
           ? '<div class="adm-error"><span>Настройки магазина сейчас не отвечают — попробуйте ещё раз.</span>' +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="pricing">Повторить</button></div>'
@@ -31028,33 +32113,25 @@
     }
     var d = pricingDraft(), lo = d.loyalty.enabled, on = d.partnersOn === true;
     return '<div class="adm-form">' +
-      '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять цены и баллы.</div>') +
-      // no dirty line here: the page's save bar says it (admSetBarHTML, painted by paintPricingState)
       /* «Партнёры и баллы» — the one switch Dim asked for (07.09.2026), off by
          default because Renat said «later». Off, the shop has no wholesale
          tier and no points: nothing is shown about either, on any screen, and
          nothing is earned, spent or discounted. The numbers below keep their
          values, so switching it on puts everything back as it was. */
-      '<div class="adm-swrow"><span>Партнёры и баллы' +
+      '<div class="adm-swrow adm-swrow--main"><span>Партнёры и баллы' +
         '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
         admSwitch("data-partnerson", on, "Партнёры и баллы") + "</div>" +
       (!on
         ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>'
         : "") +
       (!on ? "" :
-      '<div class="adm-sec__t">Салоны и мастера</div>' +
-      /* Who a «партнёр» even is: the word runs through five screens of this
-         panel and nothing anywhere said it out loud (Dim, 07.09.2026). */
-      '<div class="adm-note"><span>Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.</span> ' +
-        "<span>Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».</span> " +
-        "<span>После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».</span> " +
-        "<span>Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.</span></div>" +
+      admSecHeadHTML("Салоны и мастера", "", "") +
       '<div class="adm-edpair">' +
         admPricingField("proDiscountPct", "Скидка для салонов, %", d.proDiscountPct) +
         admPricingField("proMinOrder", "Действует от суммы корзины, €", d.proMinOrder) +
       "</div>" +
-      '<div class="adm-sec__t">Баллы за покупки</div>' +
+      admSecHeadHTML("Баллы за покупки", "", "") +
       '<div class="adm-swrow"><span>Начислять баллы' +
         '<span class="adm-row__sub">часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро</span></span>' +
         admSwitch("data-pricingtoggle", lo, "Начислять баллы") + "</div>" +
@@ -31066,10 +32143,8 @@
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
       /* The whole thing on one basket, both price lists side by side — and it
          answers while he types, before anything is saved. */
-      '<div class="adm-sec__t">Как это посчитается на заказе в ' + eur(PRICING_EX_BASKET) + "</div>" +
-      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>" +
-      // filled in place by paintPricingState() as the owner types
-      '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>") +
+      admSecHeadHTML("Как это посчитается на заказе в " + eur(PRICING_EX_BASKET), "", "") +
+      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>") +
       "</div>";
   }
 
@@ -31225,20 +32300,22 @@
     if (!S.shipDraft) return false;
     try { return shipSig(S.shipDraft) !== shipSig(SHIP_STORED); } catch (e) { return true; }
   }
-  /* ---- a price under Montonio's: asked about, not refused (23.09.2026) ----
+  /* ---- a price under Montonio's: held at its box, not asked in a sheet ----
      Ренат, 23.09.2026: «I did this change, but the text in the message cannot
      be seen to the end», and one check later: «Now when I go back, the prices
-     are not there anymore.» His save never happened. The server refused it
-     (below_cost), the panel had already said «Тарифы доставки сохранены», and
-     the refusal came as a three-line toast cut after six cells and «и ещё 12».
+     are not there anymore.» His save never happened: the server refused it
+     (below_cost) and the refusal came as a toast cut after six cells.
 
      A delivery cheaper than Montonio's price is a decision the owner may make
      on purpose — a promotion, a round number — the way «Бесплатно от» always
-     was. So «Сохранить» asks instead of failing: every such cell, in full, on
-     the confirm card, and «Сохранить всё равно» sends the table with
-     acceptBelowCost. A save that did not ask (an undo, the assistant's card)
-     is still refused by the server, and that refusal opens this same card
-     (shipLowAsk) rather than a toast.
+     was; what the server's refusal is for is that nobody makes it by accident
+     (src/app/api/admin/settings/route.ts, acceptBelowCost). Since the table
+     saves itself (1a) there is no «Сохранить» to ask on, and no sheet (Dim,
+     25.09.2026, q4): a price under the tariff turns its box rust with «Ниже
+     тарифа Montonio» and «Оставить так», and it is NOT sent until that tap —
+     the rest of the table saves around it (shipGate). «Оставить так» sends the
+     server's own accept flag. A cell the server already holds, or one an undo
+     puts back, was accepted when it was stored and goes through as it is.
 
      Mirrors belowCostCells() in src/lib/shipping.ts over the stored row:
      every carrier cell against that carrier's own price, the courier against
@@ -31271,56 +32348,136 @@
     for (var i = 0; i < SHIP_ROWS.length; i++) if (SHIP_ROWS[i][0] === iso) return SHIP_ROWS[i][1];
     return countryName(iso);
   }
-  /** One cell, the way the card and the page list it: the column, the row, his
-      price and Montonio's. Pieces joined by « · », each translated on its own
-      (admPiecesHTML), so no sentence has to be glued around a country name. */
+  /** One cell, the way a list names it: the column, the row, his price and
+      Montonio's. Pieces joined by « · », each translated on its own. */
   function shipLowLine(c) {
     return (c.method === "courier" ? "Курьер" : (CARRIER_NAMES[c.carrier] || c.carrier)) + " · " +
       shipPlaceName(c.country) + " · " + eur(c.charged) + " (Montonio " + eur(c.cost) + ")";
   }
-  /** The confirm card for a table with cells under Montonio's price. */
-  function shipLowAction(rules, low) {
-    return {
-      type: "set_shipping_rules", rules: rules, full: true, overlay: true, belowCost: true,
-      title: "Цена ниже тарифа Montonio",
-      detail: "Ваша цена, в скобках — цена Montonio:\n" + low.map(shipLowLine).join("\n") +
-        "\nРазницу до тарифа магазин доплатит сам.",
-      ok: "Сохранить всё равно"
-    };
+  /** The box a below-cost cell belongs to — its `data-shiprule`. */
+  function shipCellKey(c) { return c.method === "courier" ? "m:courier:" + c.country : "c:" + c.carrier + ":" + c.country; }
+  /** One cell of a stored row by its box key, undefined when absent. */
+  function shipRowCell(row, key) {
+    var p = String(key).split(":"), t;
+    if (!row) return undefined;
+    if (p[0] === "c") t = row.carriers && row.carriers[p[1]];
+    else if (p[0] === "m") t = row.methods && row.methods[p[1]];
+    return t && Object.prototype.hasOwnProperty.call(t, p[2]) ? t[p[2]] : undefined;
   }
-  /** «Сохранить» on «Доставка и оплата»: the ordinary card, or the one above. */
-  function shipSaveAction(rules) {
-    var low = shipLowCells(rules);
-    if (low.length) return shipLowAction(rules, low);
-    return {
-      type: "set_shipping_rules", rules: rules, full: true, overlay: true,
-      title: "Изменить тарифы доставки?",
-      detail: "Новые цены покупатели увидят сразу при оформлении."
-    };
+  function shipRowSet(row, key, v) {
+    var p = String(key).split(":"), home = p[0] === "c" ? "carriers" : "methods";
+    if (!row[home]) row[home] = {};
+    if (!row[home][p[1]]) row[home][p[1]] = {};
+    if (v === undefined) delete row[home][p[1]][p[2]];
+    else row[home][p[1]][p[2]] = v;
+    if (home === "carriers" && !Object.keys(row.carriers[p[1]]).length) delete row.carriers[p[1]];
   }
-  /** The server refused a table that did not ask (below_cost): the same card,
-      with the server's own list of cells, so the way through is one tap and
-      not a hunt for which box it meant. Never over a card already open. */
-  function shipLowAsk(r, sent) {
-    if (!r || !r.body || r.body.error !== "below_cost" || pendingAction) return;
-    var low = Array.isArray(r.body.cells) && r.body.cells.length ? r.body.cells : shipLowCells(sent);
-    if (!low.length) return;
-    pendingAction = shipLowAction(sent, low);
-    render(); refocus("[data-admapply]");
+  /* The row the server is known to hold — what a held cell goes back to in
+     the PUT, and what counts as «already accepted». Set by every read of the
+     row and every save of it that landed. */
+  var shipServerRow = null;
+  /** key → the price the owner said «Оставить так» to, this session. */
+  var SHIP_ACCEPT = {};
+  function shipAccepted(key, charged) {
+    if (SHIP_ACCEPT[key] === charged) return true;
+    return shipRowCell(shipServerRow || SHIP_STORED, key) === charged;
   }
-  /** The page's own copy of a refusal, beside the table: every cell, never cut. */
-  function admShipErrHTML() {
-    if (!S.shipErr) return "";
-    if (!S.shipLow || !S.shipLow.length) {
-      return '<div class="adm-err adm-err--block" role="alert">' + esc(S.shipErr) + "</div>";
+  /** Every cell of `row` under the tariff — by this panel's own mirror, and
+      any the server itself named in a refusal (S.shipLow) while the box still
+      holds that price. */
+  function shipLowAll(row) {
+    var low = shipLowCells(row), seen = {};
+    low.forEach(function (c) { seen[shipCellKey(c)] = 1; });
+    (S.shipLow || []).forEach(function (c) {
+      var key = shipCellKey(c);
+      if (!seen[key] && shipRowCell(row, key) === c.charged) { low.push(c); seen[key] = 1; }
+    });
+    return low;
+  }
+  /** Is the box `key` of the panel's table waiting for «Оставить так»? */
+  function shipHeldKey(key) {
+    return shipHeldCells(shipDraft()).some(function (c) { return shipCellKey(c) === key; });
+  }
+  /** The cells of `row` waiting for «Оставить так». */
+  function shipHeldCells(row) {
+    return shipLowAll(row).filter(function (c) { return !shipAccepted(shipCellKey(c), c.charged); });
+  }
+  /** The row as it may be sent: each held cell back to what the server holds. */
+  function shipGate(row) {
+    var send = cloneRules(row), held = shipHeldCells(row), base = shipServerRow || SHIP_STORED_DEFAULT;
+    held.forEach(function (c) { shipRowSet(send, shipCellKey(c), shipRowCell(base, shipCellKey(c))); });
+    return { send: send, held: held };
+  }
+  /** Every below-cost cell of a row counts as accepted — the row an undo
+      puts back was stored, so it was accepted when it was. */
+  function shipAcceptRow(row) {
+    shipLowCells(row || {}).forEach(function (c) { SHIP_ACCEPT[shipCellKey(c)] = c.charged; });
+  }
+  /**
+   * The table's write — the settings slot's `send` for shipping_rules
+   * (admSetSend). The row the panel holds, gated: a held cell stays in its
+   * box (S.shipDraft) and out of the PUT; everything else goes, with the
+   * accept flag when an accepted cell under the tariff is in it.
+   *
+   * The server may still refuse (a cell its mirror prices higher than this
+   * one does): the cells it names are held too, the table goes back to what
+   * the server holds, and the rest is sent once more — the owner sees the
+   * rust boxes, never a lost table (Ренат, 23.09.2026).
+   */
+  function shipPut(note) {
+    var boxes = cloneRules(SHIP_STORED);
+    var gate = shipGate(boxes);
+    if (gate.held.length) {
+      setShipRules(gate.send);
+      if (!S.shipDraft || shipSig(S.shipDraft) === shipSig(gate.send)) S.shipDraft = boxes;
+      // only a held price moved: there is nothing the server does not already have
+      if (shipServerRow && shipSig(gate.send) === shipSig(shipServerRow)) return true;
     }
-    return '<div class="adm-err adm-err--block" role="alert">' +
-      "<div>Не сохранено: цена ниже тарифа Montonio</div>" +
-      '<ul class="adm-err__list">' + S.shipLow.map(function (c) {
-        return "<li>" + admPiecesHTML(shipLowLine(c)) + "</li>";
-      }).join("") + "</ul>" +
-      "<div>Поднимите цену, очистите поле или нажмите «Сохранить» и подтвердите «Сохранить всё равно».</div>" +
-      "</div>";
+    var send = function (row) {
+      var body = { settings: { shipping_rules: row } };
+      if (shipLowCells(row).length) body.acceptBelowCost = true;
+      if (note.undoOf) body.undoOf = note.undoOf;
+      if (note.ref) body.ref = note.ref;
+      return apiSend("/api/admin/settings/", "PUT", body);
+    };
+    return send(gate.send).then(function (r) {
+      if (admAutosaveOk(r)) {
+        shipServerRow = cloneRules(gate.send);
+        // a feed the edge still holds from before this must not bring the old table back (shipFreshRow)
+        shipFreshNote(gate.send, true);
+        S.shipErr = ""; S.shipLow = null;
+        if (note.toast && !gate.held.length) toast(note.toast, note.entry);
+        return r;
+      }
+      if (!(r && r.body && r.body.error === "below_cost")) return r;
+      S.shipLow = Array.isArray(r.body.cells) ? r.body.cells : [];
+      var tried = cloneRules(SHIP_STORED), again = shipGate(tried);
+      setShipRules(again.send);
+      S.shipDraft = tried;
+      render();
+      if (shipSig(again.send) === shipSig(shipServerRow || SHIP_STORED_DEFAULT)) return true;
+      return send(again.send).then(function (r2) {
+        if (admAutosaveOk(r2)) { shipServerRow = cloneRules(again.send); shipFreshNote(again.send, true); }
+        return r2;
+      });
+    });
+  }
+  /**
+   * An edit of the table — a box left, a switch, «вернуть», «Везде взять
+   * цены Montonio», «Значения по умолчанию»: the boxes (S.shipDraft) go to
+   * the shop as one set_shipping_rules with «Вернуть» on its toast. The boxes
+   * keep what they show: a price held for «Оставить так» stays in its box.
+   */
+  function admShipCommit(toastText, opts) {
+    if (SRV.admin === true && !adminSettingsReady()) return admSetWhenReady(function () { admShipCommit(toastText, opts); render(); });
+    var draft = cloneRules(shipDraft());
+    if (shipSig(draft) === shipSig(SHIP_STORED)) return null;
+    // only a price held for «Оставить так» moved: nothing to send, no journal line
+    if (shipSig(shipGate(draft).send) === shipSig(shipServerRow || SHIP_STORED)) { S.shipDraft = draft; return null; }
+    var entry = admSetApply({ type: "set_shipping_rules", rules: draft, full: true, reset: !!(opts && opts.reset) },
+      toastText || "Тарифы доставки сохранены");
+    S.shipDraft = draft;
+    return entry;
   }
   function shipNum(raw, max) {
     var s = String(raw == null ? "" : raw).trim().replace(",", ".");
@@ -34314,7 +35471,7 @@
     uploadPhoto(files[0], "hero").then(function (r) {
       UP.busy = 0; UP.total = 0;
       var s = heroDraft().slides[S.heroEdit];
-      if (s) s.image = r.url;
+      if (s) { s.image = r.url; admHeroCommit(""); }
       render();
       toast("Картинка загружена ✓");
     }).catch(upFail);
@@ -38751,6 +39908,8 @@
       if (Array.isArray(_dj.giftAmounts)) DEMO.giftAmounts = _dj.giftAmounts;
       if (Array.isArray(_dj.custom)) DEMO.custom = _dj.custom;   // product creation
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
+      // the lines taken back here, whose server rows the journal hides (1a)
+      DEMO.jgone = Array.isArray(_dj.jgone) ? _dj.jgone.slice(0, 40) : [];
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
@@ -39241,11 +40400,20 @@
       return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
     var s = j.settings || {};
-    if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
-    if (typeof s.bundles === "boolean") DEMO.bundles = s.bundles;
+    /* A key this page has written since it loaded is the owner's, not the
+       feed's: /api/overrides/ is edge-cached for up to 30 s, and since 1a a
+       setting is applied here and sent at once — a feed landing in between
+       put the old document back, and the next whole-key PUT sent it to the
+       server (found by e2e, 25.09.2026: a phone saved as the old one). The
+       admin's own no-store read (admSetTake → admSetAdopt) keeps those keys
+       in step instead. (`typeof`: harnesses that run this on its own.) */
+    var fed = function (key) { return typeof ADM_SET_AT === "undefined" || !ADM_SET_AT[key]; };
+    if (typeof s.chatbot === "boolean" && fed("chatbot")) DEMO.chatbot = s.chatbot;
+    if (typeof s.bundles === "boolean" && fed("bundles")) DEMO.bundles = s.bundles;
     // the banner: null on the server means «стандартный», and it wins over the
     // local copy exactly like every other setting
-    if (s.hero === null) DEMO.hero = null;
+    if (!fed("hero")) { /* this page's own banner stands */ }
+    else if (s.hero === null) DEMO.hero = null;
     else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
@@ -39258,7 +40426,7 @@
        dunning intervals, so the settings card opens on what is really saved
        rather than on the defaults (settings.invoice, «Настройки → О компании
        → Счета для компаний»). */
-    if (s.invoice && typeof s.invoice === "object") {
+    if (s.invoice && typeof s.invoice === "object" && fed("invoice")) {
       DEMO.invoice = {
         dueDays: Number(s.invoice.dueDays) || 7,
         prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix),
@@ -39281,7 +40449,7 @@
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
        the panel's draft is dropped — the same rule as the banner. */
-    if (s.content && typeof s.content === "object" && !Array.isArray(s.content)) {
+    if (s.content && typeof s.content === "object" && !Array.isArray(s.content) && fed("content")) {
       DEMO.content = s.content;
       S.contentDraft = null;
     }
@@ -39409,9 +40577,8 @@
            it was only ever cleared, so the box could never appear.
            …and the toast is no longer the sentence itself (23.09.2026): three
            lines of a toast cut it after the sixth cell, in Russian whatever
-           the panel's language. The box lists every cell from `cells`, and
-           shipLowAsk() puts the same list on a card with «Сохранить всё
-           равно»; the toast only says what happened. */
+           the panel's language. The page holds every cell it names at its
+           own box (shipLowAll, 1a); the toast only says what happened. */
         S.shipErr = String(r.body.detail);
         S.shipLow = Array.isArray(r.body.cells) ? r.body.cells : null;
         toast("Не сохранено: цена ниже тарифа Montonio"); render(); return r;
@@ -39439,48 +40606,17 @@
     return { id: a.id, sizes: lad.length ? lad : null,
       price: lad.length ? lad[0].price : (a.price != null ? a.price : null) };
   }
-  /* What the last optimistic tariff save has to put back if the server says
-     no — set by demoApply(), consumed once by srvPush() below. */
-  var shipRollback = null;
-  /** The save was refused (below_cost) or never landed: the live table goes
-      back to what the shop is really charging, the owner's own numbers go
-      back into the boxes with the dirty bar lit, «Сохранено ✓» goes out, and
-      the journal line that claimed the save is dropped. The toast is already
-      the server's own sentence — it names the carrier, the country and both
-      numbers, and now it names a box that is still on screen. */
-  /** The PUT body. «Сохранить всё равно» — the owner saw every cell under
-      Montonio's price and confirmed — rides beside the settings, never inside
-      them: the route takes `acceptBelowCost` off before it reads the rest. */
-  function shipBody(rules, belowCost) {
-    return belowCost ? { settings: { shipping_rules: rules }, acceptBelowCost: true } : { shipping_rules: rules };
-  }
+  /* A tariff save — «Сохранить» until 1a, the table's own autosave since —
+     goes through the settings slot now (admSetPut → shipPut): the rollback
+     that stood here (shipRollback, shipRulesRefused) put the old table back
+     and dropped the journal line on any refusal; a refused cell is held at
+     its box instead (shipGate), and a save that did not land is owed and
+     retried from the header's «Повторить», its line kept. */
   function shipSavedText(a) { return a && a.reset ? "Тарифы снова стандартные" : "Тарифы доставки сохранены"; }
-  /** The server took the table: now, and not before, the toast and «Сохранено ✓».
-      An undo (no journal entry) has its own «Отменено» toast already. */
-  function shipSavedOk(a, entry) {
-    S.shipErr = ""; S.shipLow = null;
-    if (entry) {
-      toast(shipSavedText(a), entry);
-      if (S.admSetPage === "delivery") S.admSetSaved = "delivery";
-    }
-    render();
-  }
-  function shipRulesRefused(back) {
-    if (!back) return;
-    setShipRules(back.was);
-    S.shipDraft = back.tried;
-    S.admSetSaved = "";
-    if (back.entry) {
-      DEMO.log = DEMO.log.filter(function (e) { return e !== back.entry; });
-      demoSave();
-    }
-    render();
-  }
   /* A journal line the server refused. demoApply() writes the line and saves
      it BEFORE the call leaves, so the panel stays quick — which means a
      refusal has to take it back out, or the journal claims a step nobody
-     took and offers «Вернуть» for it. Same shape as shipRulesRefused()
-     above, which does this for the delivery prices. */
+     took and offers «Вернуть» for it. */
   function journalDrop(entry) {
     if (!entry) return;
     DEMO.log = DEMO.log.filter(function (e) { return e !== entry; });
@@ -39527,9 +40663,15 @@
     }
   }
   function srvPush(a, entry) {
-    // consumed here whatever the action was, so a stale one can never be
-    // applied to some later save (the panel signed out, an undo, …)
-    var shipBack = shipRollback; shipRollback = null;
+    /* 1a: a settings key is written by its slot (admSetPut) — one write in
+       flight per key, the header's status and «Повторить» — whoever applied
+       it: the page itself, the assistant, «Вернуть». Before the SRV.admin
+       gate on purpose: without a server the slot says so itself (admSetSend). */
+    if (a && ADM_SET_OF[a.type]) {
+      if (a.type === "set_shipping_rules" && a.belowCost) shipAcceptRow(a.full ? a.rules : SHIP_STORED);
+      admSetPut(ADM_SET_OF[a.type]);
+      return;
+    }
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
     if (a.type === "set_price") srvSaved(apiSend(ov, "PUT", { id: a.id, price: a.value }));
@@ -39658,57 +40800,19 @@
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
     else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
-    // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
-    else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
-    /* «Коробка магазина»: the whole object travels, `recent` included, so the
-       size history the suggestion learns from survives a save of the boxes.
-       The server holds the same line for a request that omits it
-       (mergeParcel), but the panel has the row in hand and sends it. */
-    else if (a.type === "set_parcel") srvSaved(apiSend(st, "PUT", { shipping_parcel: normaliseParcel(S.parcelLoaded) }));
-    /* «Какие банки показывать» — the whole array of codes, so undo re-sends it.
-       …and the checkout is then asked for the list again: it draws
-       PAYMETHODS.banks, which is fetched once per page load, and the panel and
-       the checkout are the same page. Without this the owner flipped a switch,
-       walked to the checkout and saw the list from before he touched it —
-       «I can switch off … but they are still displayed in checkout» (Ренат,
-       13.09.2026). After the PUT, never before it: the route reads the setting
-       to build its answer. The undo path comes through here too. */
-    else if (a.type === "set_banks") srvSaved(apiSend(st, "PUT", { payment_banks: bankFilter() })).then(function (r) {
-      if (r && r.status === 200 && r.body && r.body.ok) reloadPayMethods();
-    });
-    else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
-    else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
-    else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
+    /* «Доставлен» без кнопки, «Коробка магазина», «Какие банки показывать»,
+       the two switches, the banner: settings keys, written by their slot
+       above (admSetPut / admSetSend — the banks' checkout list is asked for
+       again there, once the PUT has landed). */
     // «Письма»: the whole map travels, so undo re-sends the previous one —
     // same reasoning as the banner and the content document
     else if (a.type === "set_mail_texts") srvSaved(apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} })).then(function (r) {
       if (r && r.status === 200 && r.body && r.body.ok) mailPreviewRefresh();
     });
-    // content: the whole document travels, so undo re-sends the previous one
-    else if (a.type === "set_content") srvSaved(apiSend(st, "PUT", { content: DEMO.content }));
-    /* checkout-gaps: the whole delivery table travels, because a merge cannot
-       express a price the owner deleted. Promo codes have their own routes —
+    /* content and the delivery table are settings keys too (above): the
+       whole document / the whole STORED row travels, because a merge cannot
+       express a field the owner emptied. Promo codes have their own routes —
        they are rows in promo_codes, not a settings blob. */
-    else if (a.type === "set_shipping_rules") {
-      // the STORED row, not the merged table: a cell the owner left empty is
-      // absent from it and goes on following Montonio's tariff (r22)
-      var shipSent = cloneRules(SHIP_STORED);
-      S.shipSaving = true;
-      srvSaved(apiSend(st, "PUT", shipBody(shipSent, a.belowCost))).then(function (r) {
-        S.shipSaving = false;
-        // anything but a 200/ok — the below_cost refusal, a 503, no answer at
-        // all: the panel must not go on showing a table the shop is not running
-        if (r && r.status === 200 && r.body && r.body.ok) {
-          // …and a feed the edge still holds from before this must not bring
-          // the old table back over it (shipFreshRow)
-          shipFreshNote(shipSent, true);
-          shipSavedOk(a, entry); return;
-        }
-        shipRulesRefused(shipBack);
-        if (!shipBack) render();   // an undo has nothing to roll back, but the bar still says «Сохраняем…»
-        shipLowAsk(r, shipSent);
-      });
-    }
     else if (a.type === "create_promo") {
       apiSend("/api/admin/promos/", "POST", a.promo).then(function (r) {
         if (!(r.status === 200 && r.body.ok)) toast("Промокод не сохранился — проверьте условия");
@@ -39758,10 +40862,9 @@
       });
     }
     // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
-    // proMinOrder) only ever travels through this admin-only route — never
-    // the public /api/overrides one. adjust_points is a manual credit on one
-    // customer's card, not a settings write.
-    else if (a.type === "set_pricing") srvSaved(apiSend(st, "PUT", { pricing: S.pricingLoaded }));
+    // proMinOrder) only ever travels through the admin-only settings route
+    // (a settings key — admSetPut above) — never the public /api/overrides
+    // one. adjust_points is a manual credit on one customer's card.
     /* product creation: off the shelf is DELETE (the row stays, active=false),
        back on is PUT {active:true} — the undo of the one is the other */
     else if (a.type === "set_product_active") {
@@ -40702,13 +41805,17 @@
     if (!SRV.admin) return;
     // stamped before the call, so the render() below cannot ask again
     reportSummaryAt = Date.now();
+    S.reportErr = "";
     apiJson("/api/admin/reports/orders/?month=" + encodeURIComponent(reportMonthOr(month)) + "&format=json").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.reportSummary = r.body.summary; S.reportSummaryFor = reportMonthOr(month);
         render();
+        return;
       }
-    }).catch(noop);
+      // the skeleton used to stay for ever on a failed read (1a: an error and «Повторить»)
+      S.reportErr = "Отчёт не загрузился."; render();
+    }).catch(function () { S.reportErr = "Сервер не отвечает."; render(); });
   }
 
   /* Only the overrides are read for everybody — they change what the shop
@@ -40856,15 +41963,30 @@
     if (reportSummaryAt && now - reportSummaryAt < FLOW_COUNTS_TTL) return;
     srvLoadReportSummary(S.reportMonth);
   }
+  /** The last twelve months, newest first — the report's month picker (design: a select). */
+  function reportMonths() {
+    var d = new Date(), out = [];
+    for (var i = 0; i < 12; i++) {
+      var y = d.getFullYear(), m = d.getMonth() - i;
+      while (m < 0) { m += 12; y -= 1; }
+      out.push(y + "-" + (m < 9 ? "0" : "") + (m + 1));
+    }
+    return out;
+  }
   function reportsCard() {
     loadReportSummaryOnce();
     var month = S.reportMonth || reportMonthOr();
     var sum = S.reportSummary && S.reportSummaryFor === month ? S.reportSummary : null;
-    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Отчёт для бухгалтера</div></div>' +
-      '<div class="adm-form" style="margin-top:8px">' +
-        '<p class="adm-hint" style="margin:0">Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.</p>' +
-        '<label class="adm-field" style="max-width:240px">Месяц' +
-          '<input class="adm-input" type="month" data-admreportsmonth value="' + esc(month) + '"></label>' +
+    var months = reportMonths();
+    if (months.indexOf(month) < 0) months.push(month);
+    return '<div class="adm-set__block">' +
+      admSecHeadHTML("Отчёт для бухгалтера", "set:report",
+        "Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.") +
+      '<div class="adm-form">' +
+        '<label class="adm-field" style="max-width:320px">Месяц' +
+          '<select class="adm-input" data-admreportsmonth>' + months.map(function (m) {
+            return '<option value="' + m + '"' + (m === month ? " selected" : "") + ">" + monthLabelRu(m) + "</option>";
+          }).join("") + "</select></label>" +
         (sum
           ? (sum.orders
               /* «Выручка» and «НДС» are net of refunds (summarize() in
@@ -40876,6 +41998,9 @@
                 admPlainKpi("Выручка", eur(sum.revenue)) + admPlainKpi("НДС", eur(sum.vat)) +
                 (sum.refunded > 0 ? admPlainKpi("Возвращено", "−" + eur(sum.refunded)) : "") + "</div>"
               : '<div class="adm-empty" style="margin:0">За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.</div>')
+          : S.reportErr
+            ? '<div class="adm-error"><span>' + esc(S.reportErr) + "</span>" +
+              '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="report">Повторить</button></div>'
           : SRV.admin === true ? '<div class="adm-skel" style="margin:0"><i></i><i></i></div>' : "") +
         /* The same pair as «Клиенты», drawn the same way and in the same
            order: XLSX filled and first because it is the one that just opens
@@ -40884,7 +42009,7 @@
         '<div class="adm-acts">' +
           '<button class="adm-btn adm-btn--row" data-admreportdl="xlsx">Скачать XLSX</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreportdl="csv">Скачать CSV</button></div>' +
-      "</div>";
+      "</div></div>";
   }
   /* «Клиенты → Отзывы»: what the journal line calls each of the three states.
      Its own table so the i18n check sees whole words, not fragments spliced
@@ -41071,6 +42196,7 @@
     if (a.type === "set_gift_amounts") return "Номиналы подарочной карты: " + (a.value || []).join(" · ") + " €";
     if (a.type === "set_shipping_rules") return shipActionText(a);
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
+    if (a.type === "set_invoice") return invoiceActionText(a.value || {}, null);
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
     // the short form — the model named a topic, the panel writes the article
@@ -41295,7 +42421,8 @@
     return head + (parts.length <= 4 ? parts.join(" · ") : parts.slice(0, 4).join(" · ") + " и ещё " + (parts.length - 4));
   }
   function demoApply(a) {
-    var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: actionText(a), a: a, prev: null };
+    // `at`: the journal merges this browser's lines with the server's by time (1a)
+    var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), at: Date.now(), txt: actionText(a), a: a, prev: null };
     var p = a.id && byId(a.id);
     if (a.type === "set_price") { entry.prev = { type: "set_price", id: a.id, value: DEMO.price[a.id] != null ? DEMO.price[a.id] : p.price }; DEMO.price[a.id] = a.value; }
     // wholesale/loyalty: a.value null clears the override back to "computed
@@ -41399,7 +42526,9 @@
     else if (a.type === "set_hero") {
       entry.prev = { type: "set_hero", value: DEMO.hero };
       DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
-      S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
+      // `keep`: the banner page saving itself — the slide being edited stays open (1a)
+      if (!a.keep) { S.heroDraft = null; S.heroEdit = -1; }
+      S.slide = 0; restartHero();
     }
     /* «Письма»: settings.mail_texts has no demo layer — MAIL_TEXTS.texts IS
        the last known server value, and the whole map travels every time, so
@@ -41449,23 +42578,12 @@
          and a merged table put back as a row would fill every hole in it. */
       entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_STORED), full: true };
       /* The row being replaced is one the server took. If it sits under
-         Montonio's price, that was confirmed («Сохранить всё равно») when it
-         was saved, so «Отменить» putting it back does not ask a second time. */
+         Montonio's price, that was accepted when it was saved, so «Вернуть»
+         putting it back does not hold it a second time (shipAcceptRow). */
       if (shipLowCells(SHIP_STORED).length) entry.prev.belowCost = true;
-      var shipWas = cloneRules(SHIP_STORED);
       // a partial patch (the assistant's) is merged INTO the stored row, so
       // that one is a row too and never a merged table wearing a row's name
       setShipRules(a.full ? a.rules : shipStoredMerge(SHIP_STORED, a.rules));
-      /* …and what to put back if the server refuses the save (a price under
-         what Montonio charges — belowCostMessage in src/lib/shipping.ts) or
-         if it never lands. The table is replaced, the draft emptied and
-         «Сохранено ✓» lit here, before the PUT has answered; without this the
-         panel went on showing prices the shop is not charging, with the
-         owner's own numbers gone from the boxes the server's sentence was
-         talking about. srvPush() below is where it is used. */
-      // both halves are stored ROWS: `was` goes back through setShipRules()
-      // and `tried` goes straight into S.shipDraft, which is a row (r22)
-      shipRollback = { was: shipWas, tried: cloneRules(SHIP_STORED), entry: entry };
       S.shipDraft = null; S.shipErr = "";
     }
     // undoing a code the assistant just made switches it off again
@@ -41502,12 +42620,33 @@
        field), but undo has to restore the whole document — the patch alone
        cannot say what a field looked like before it existed. */
     else if (a.type === "set_content") {
-      entry.prev = { type: "set_content", whole: DEMO.content };
+      /* …but only what the patch touched is put back (1a): «Вернуть» on the
+         strip's text restores the strip's text, and the phone number typed
+         on «О компании» after it stays. Until 25.09.2026 this kept the whole
+         document, and undoing one «Главная» change reverted every later «О
+         компании» edit with it. */
+      var cBase = contentConf();
+      entry.prev = { type: "set_content", value: contentPrevPatch(cBase, a.value) };
       var cWas = S.contentDraft;
-      DEMO.content = contentApply(contentConf(), a.value);
-      S.contentDraft = null;
-      // one settings page's save or reset: the other page's typing stays typed
-      if (a.page) contentKeepOther(a.page, cWas);
+      DEMO.content = contentApply(cBase, a.value);
+      // `keep`: one field saving itself — what is typed in the others stays in the draft
+      if (!a.keep) {
+        S.contentDraft = null;
+        // one settings page's reset: the other page's typing stays typed
+        if (a.page) contentKeepOther(a.page, cWas);
+      }
+    }
+    /* «Счета для компаний» (1a): settings.invoice as a journal line with a way
+       back — until 25.09.2026 its save wrote notes and no «Вернуть». */
+    else if (a.type === "set_invoice") {
+      entry.prev = { type: "set_invoice", value: invoiceConf() };
+      entry.txt = invoiceActionText(a.value || {}, invoiceConf());
+      DEMO.invoice = {
+        prefix: String(a.value && a.value.prefix != null ? a.value.prefix : "A-"),
+        dueDays: Number(a.value && a.value.dueDays) || 7,
+        remindBeforeDays: invoiceDayNum(a.value && a.value.remindBeforeDays, 2, 30),
+        cancelAfterDays: invoiceDayNum(a.value && a.value.cancelAfterDays, 7, 90)
+      };
     }
     /* wholesale/loyalty: settings.pricing has no demo layer either (same
        reasoning as delivery prices above) — S.pricingLoaded IS the last
@@ -41592,6 +42731,11 @@
       DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
       S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
     }
+    else if (a.type === "set_invoice") {
+      var iv = a.value || {};
+      DEMO.invoice = { prefix: String(iv.prefix == null ? "A-" : iv.prefix), dueDays: Number(iv.dueDays) || 7,
+        remindBeforeDays: invoiceDayNum(iv.remindBeforeDays, 2, 30), cancelAfterDays: invoiceDayNum(iv.cancelAfterDays, 7, 90) };
+    }
     else if (a.type === "set_mail_texts") {
       if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
       S.mailDraft = null;
@@ -41618,8 +42762,14 @@
     // `a` is entry.prev here, so a.value is the status being restored.
     else if (a.type === "moderate_review") { if (!admReviewApplyLocal(a.id, a.value)) S.admReviews = null; }
     else if (a.type === "set_gift_amounts") { DEMO.giftAmounts = a.value.slice(); }
-    // content: `whole` is the document as it was, null meaning «стандартный»
-    else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
+    /* content: `value` puts back the fields the change touched and nothing
+       else (1a); a line written before 25.09.2026 carries the whole document
+       as it was in `whole`, null meaning «стандартный» */
+    else if (a.type === "set_content") {
+      if (a.value && typeof a.value === "object") DEMO.content = contentApply(contentConf(), a.value);
+      else DEMO.content = a.whole || null;
+      S.contentDraft = null;
+    }
     // wholesale/loyalty
     else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; adoptPricingLocally(); }
     else if (a.type === "adjust_points") {
@@ -41631,6 +42781,11 @@
     else if (a.type === "set_tier") { admTierLocal(a.id, a.email, a.value); }
     // product creation: the row comes back on (or goes off) the shelf
     else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
+    /* The line leaves the list; its server row must not come back in its
+       place (jentryGone). The undo's own write stays a row of the shop's log
+       — the record that it was taken back. (`typeof`: the test harnesses that
+       run demoUndo on its own have no journal to keep.) */
+    if (typeof jentryGone === "function") jentryGone(entry);
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -44632,7 +45787,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-hoursall],[data-admundosrv],[data-parcelsize]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -44949,6 +46104,8 @@
       else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       // the one GET behind «Цены и баллы», «Доставлен» без кнопки and the banks
       else if (d.admreload === "pricing") { S.pricingLoadErr = false; loadAdminPricing(true); }
+      // «О компании» → «Отчёт для бухгалтера»: the month's summary asked again
+      else if (d.admreload === "report") { S.reportErr = ""; srvLoadReportSummary(S.reportMonth); }
       /* «Клиенты»: the list (grey bars while it is asked again — the failed
          read left an empty list, which would read as «nobody») and one
          customer's card, forced past the error it remembers (map defect 7) */
@@ -45099,7 +46256,6 @@
       render(); refocus("[data-admrefundamt]"); return;
     }
     if (d.adminvresend) { srvInvoiceResend(d.adminvresend); return; }
-    if (d.adminvsave !== undefined) { srvInvoiceSettingsSave(); return; }
     if (d.admunpaidsave !== undefined) { srvUnpaidSettingsSave(); return; }
     if (d.admordercancel) {
       var canRow = admOrderById(d.admordercancel);
@@ -45585,8 +46741,8 @@
           if (L === (S.heroLang || "RU")) { var hEl = document.querySelector('[data-herof="' + f + '"]'); if (hEl) hEl.value = tx[f]; }
         });
         paintHeroPreview();
-        // the draft moved without a keystroke: the page's bar says so now, not at the next render
-        paintSetBar();
+        // the draft moved without a keystroke: the banner saves it (1a)
+        admHeroCommit();
       });
       return;
     }
@@ -45852,6 +47008,8 @@
            «снять с продажи» on the owner's own product is the row's active
            flag — journalled and undoable through demoApply() like a stock change */
         if (pa.type === "create_product") { applyCreateProduct(pa); return; }
+        // «Удалить слайд» confirmed: gone from the list, held five seconds (q8)
+        if (pa.type === "hero_delete") { admHeroDelete(pa.index); return; }
         // …and a change to one of those rows: a PUT, journalled with the row as it was
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
         // «Рассылка»: the send is a loop of POSTs with its own progress card — nothing to undo
@@ -45959,18 +47117,15 @@
            about prices the shop never took. srvPush() says it on a 200, and
            the bar reads «Сохраняем…» until then. Without a server (the
            demo) the apply is the whole save, so it is said now. */
-        else if (pa.type === "set_shipping_rules") {
-          var shEntry = demoApply(pa);
-          if (!SRV.admin) toast(shipSavedText(pa), shEntry);
-        }
+        else if (pa.type === "set_shipping_rules") { admSetApply(pa, shipSavedText(pa)); }
         // «Изменить статус вручную»: confirmed — one PATCH, no journal line
         else if (pa.type === "order_manual") { srvOrderPatch(pa.id, { status: pa.value }); }
         /* «Настройки»: the three cards rebuilt in phase 4 name themselves the
            same way, and the toast's «Отменить» takes back the line they wrote. */
-        else if (pa.type === "set_hero") {
-          toast(pa.value ? "Баннер сохранён" : "Баннер снова стандартный", demoApply(pa));
-        }
-        else if (pa.type === "set_content") { toast("Данные магазина сохранены", demoApply(pa)); }
+        /* the assistant's banner and shop details: the toast waits for the
+           server, like every settings save (admSetApply) */
+        else if (pa.type === "set_hero") { admSetApply(pa, pa.value ? "Баннер сохранён" : "Баннер снова стандартный"); }
+        else if (pa.type === "set_content") { admSetApply(pa, "Данные магазина сохранены"); }
         /* …and «Цены и баллы» reads the shop's own figures first when this
            screen has never loaded them — see applySetPricing(). It writes the
            toast and the «Сохранено ✓» itself, so it returns. */
@@ -45979,11 +47134,6 @@
            the tier switch and «+ Партнёр» are held with «Вернуть» instead —
            custDecide(), custSetTier(), custAddPartner(). */
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
-        // the settings bar says «Сохранено ✓» for the page whose card just went through
-        if (pa.type === "set_hero" || pa.type === "set_content" || pa.type === "set_pricing" ||
-            (pa.type === "set_shipping_rules" && !SRV.admin)) {
-          S.admSetSaved = S.admSetPage || "";
-        }
         render();
       }
       return;
@@ -46004,27 +47154,32 @@
     if (d.delivcarrier !== undefined) {
       // the PUT carries the whole settings.delivery object, so never before
       // the read that says what is in it has landed (loadAdminPricing)
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var dc = deliveryConf();
-      var dcEntry = demoApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } });
-      render(); toast("Сохранено ✓", dcEntry); return;
+      admSetWhenReady(function () {
+        var dc = deliveryConf();
+        admSetApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } }, "Когда «Доставлен»: сохранено");
+        render();
+      });
+      return;
     }
     // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks
     if (d.admbank !== undefined) {
-      // same gate as the delivery switch above: the whole array travels
-      if (!adminSettingsReady()) { toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      /* The last bank of a country stays on — the server would hand that
-         country's whole list back anyway (filterBanks), and a switch that
-         says «off» while the checkout shows the bank is worse than a switch
-         that refuses. render() puts the checkbox back where it was. */
-      if (admBankLastOn(d.admbank)) {
+      // same wait as the delivery switch above: the whole array travels
+      var bank = d.admbank;
+      admSetWhenReady(function () {
+        /* The last bank of a country stays on — the server would hand that
+           country's whole list back anyway (filterBanks), and a switch that
+           says «off» while the checkout shows the bank is worse than a switch
+           that refuses. render() puts the checkbox back where it was. */
+        if (admBankLastOn(bank)) {
+          render();
+          toast("Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все");
+          return;
+        }
+        // the checkout is asked for the fresh list once the PUT lands (admSetSend)
+        admSetApply({ type: "set_banks", value: admBankToggle(bank) }, "Банки в кассе: сохранено");
         render();
-        toast("Хотя бы один банк на страну должен остаться — иначе в кассе снова показываются все");
-        return;
-      }
-      // the checkout is asked for the fresh list once the PUT lands (demoApply)
-      var bkEntry = demoApply({ type: "set_banks", value: admBankToggle(d.admbank) });
-      render(); toast("Сохранено ✓", bkEntry); return;
+      });
+      return;
     }
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.
@@ -46124,58 +47279,56 @@
       render(); toast("Текст письма сохранён ✓", mailEntry); return;
     }
     if (d.admchatbot !== undefined) {
-      demoApply({ type: "toggle_chatbot", value: !DEMO.chatbot });
-      toast(DEMO.chatbot ? "Чат включён ✓" : "Чат выключен ✓"); render(); return;
-    }
-    if (d.admbundles !== undefined) {
-      demoApply({ type: "toggle_bundles", value: DEMO.bundles === false });
-      if (DEMO.bundles === false && (S.screen === "bundles" || S.screen === "bundle")) S.screen = "home";
-      toast(DEMO.bundles !== false ? "Наборы показаны ✓" : "Наборы скрыты ✓"); render(); return;
-    }
-    /* ---- «Отменить правки» on a settings page's save bar (admSetBarHTML):
-       the drafts of the cards the bar lists go back to what the shop shows —
-       only those, and only this page's part of a shared draft. ----------- */
-    if (d.setrevert !== undefined) {
-      var rvPage = S.admSetPage || "";
-      if (rvPage === "home" && heroDirty()) {
-        S.heroDraft = null;
-        if (S.heroEdit >= heroConf().slides.length) S.heroEdit = -1;
-      }
-      // the shared content draft is only on these two pages' bars — «Отменить
-      // правки» elsewhere must leave what was typed on «О компании» alone
-      if ((rvPage === "home" || rvPage === "company") && contentDirtyFor(rvPage)) contentRevert(rvPage);
-      if (rvPage === "company") S.invDraft = null;
-      if (rvPage === "delivery") { S.shipDraft = null; S.shipErr = ""; }
-      if (rvPage === "prices") { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; }
-      S.admSetSaved = "";
+      var chatOn = !DEMO.chatbot;
+      admSetApply({ type: "toggle_chatbot", value: chatOn }, chatOn ? "Чат включён ✓" : "Чат выключен ✓");
       render(); return;
     }
-    /* ---- «Главный баннер». Every button here edits the draft only; the shop
-       changes on «Сохранить», through the confirm card. ------------------- */
+    if (d.admbundles !== undefined) {
+      var setsOn = DEMO.bundles === false;
+      admSetApply({ type: "toggle_bundles", value: setsOn }, setsOn ? "Наборы показаны ✓" : "Наборы скрыты ✓");
+      if (DEMO.bundles === false && (S.screen === "bundles" || S.screen === "bundle")) S.screen = "home";
+      render(); return;
+    }
+    /* ---- «Главный баннер» (1a): every button here saves at once, with
+       «Вернуть» on its toast — the slide's texts save themselves as they are
+       typed (heroAs). The editor opens under its own row. ------------------ */
     if (d.heroedit !== undefined) {
       // the row's own button toggles: a second tap is «Свернуть» (heroRowHTML)
       if (S.heroEdit === Number(d.heroedit)) { heroCloseEdit(); return; }
+      admAutosaveFlush();   // the slide left owes its last words first
       S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
       UP.err = ""; ensureMedia();   // media: the «Загрузить» button under the picture
       render(); heroOpenEdit(); return;
     }
     if (d.heroclose !== undefined) { heroCloseEdit(); return; }
-    if (d.herolang) { S.heroLang = d.herolang; render(); return; }
+    if (d.herolang) { admAutosaveFlush(); S.heroLang = d.herolang; render(); return; }
+    // «Перевести с русского» on the slide's ET / EN strip
+    if (d.herotr !== undefined) { heroTranslate(t); return; }
     if (d.heroadd !== undefined) {
       var hAdd = heroDraft();
       // the button is disabled at the ceiling and says why beside itself (admHeroCard); this is the belt
       if (hAdd.slides.length >= 5) { toast("Максимум 5 слайдов — удалите один, чтобы добавить новый"); return; }
+      /* Added HIDDEN (design): the banner saves itself now, and a new slide
+         switched on at once would put «Новый баннер» on the home page before
+         a word of it was written. */
       hAdd.slides.push({
         id: "s" + Date.now().toString(36),
         eyebrow: { RU: "" }, title: { RU: "Новый баннер" }, sub: { RU: "" }, cta: { RU: "Смотреть" },
-        go: "cat:all", image: (CATALOGUE[0] || {}).id || "", on: true
+        go: "cat:all", image: (CATALOGUE[0] || {}).id || "", on: false
       });
       S.heroEdit = hAdd.slides.length - 1; S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
+      admHeroCommit("Слайд добавлен скрытым — заполните и включите");
       render(); heroOpenEdit(); return;
     }
+    // «Удалить слайд» asks first (README rule 4), then is held for five seconds (q8)
     if (d.herodel !== undefined) {
-      heroDraft().slides.splice(Number(d.herodel), 1);
-      S.heroEdit = -1; render(); return;
+      var hDel = heroDraft().slides[Number(d.herodel)];
+      if (!hDel) return;
+      pendingAction = {
+        type: "hero_delete", index: Number(d.herodel), overlay: true, danger: true,
+        title: "Удалить слайд?", detail: "Слайд исчезнет с главной страницы. Картинка останется в товарах.", ok: "Удалить"
+      };
+      render(); refocus("[data-admapply]"); return;
     }
     if (d.heromove) {
       var mv = d.heromove.split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
@@ -46184,183 +47337,159 @@
         var tmp = hMove[mi]; hMove[mi] = hMove[mj]; hMove[mj] = tmp;
         if (S.heroEdit === mi) S.heroEdit = mj;
         else if (S.heroEdit === mj) S.heroEdit = mi;
+        admHeroCommit();
       }
       render(); return;
     }
     if (d.heroon !== undefined) {
       var hOn = heroDraft().slides[Number(d.heroon)];
-      if (hOn) hOn.on = hOn.on === false;
+      if (hOn) { hOn.on = hOn.on === false; admHeroCommit(hOn.on ? "Слайд показан ✓" : "Слайд скрыт ✓"); }
       render(); return;
     }
     // a picture or a link target picked from a tile: patched in place, so the
     // page stays where the finger is (paintHeroPick — defect 10, 10.09.2026)
     if (d.heroimg) {
       var hImg = heroDraft().slides[S.heroEdit];
-      if (hImg) hImg.image = d.heroimg;
+      if (hImg) { hImg.image = d.heroimg; admHeroCommit(); }
       paintHeroPick(); return;
     }
     if (d.herogopick) {
       var hGo = heroDraft().slides[S.heroEdit];
-      if (hGo) hGo.go = "product:" + d.herogopick;
+      if (hGo) { hGo.go = "product:" + d.herogopick; admHeroCommit(); }
       paintHeroPick(); return;
     }
-    /* The banner is the first thing every visitor sees, so a save asks first
-       — the same overlay card as a tariff or a shipped order (README § State). */
-    if (d.herosave !== undefined) {
-      // nothing typed since the last save — no card, no journal line
-      if (!heroDirty()) { toast("Изменений нет"); return; }
-      var hSave = heroClean(heroDraft());
-      pendingAction = {
-        type: "set_hero", value: hSave, overlay: true,
-        title: "Изменить баннер на главной?", detail: heroConfirmDetail(hSave)
-      };
-      render(); refocus("[data-admapply]"); return;
-    }
+    // «Вернуть стандартный баннер» (under «⋯»): at once, with «Вернуть» on its toast
     if (d.heroreset !== undefined) {
-      pendingAction = {
-        type: "set_hero", value: null, overlay: true,
-        title: "Вернуть стандартный баннер?",
-        detail: "Ваши слайды заменятся пятью стандартными. Это можно отменить из журнала изменений."
-      };
-      render(); refocus("[data-admapply]"); return;
-    }
-    /* ---- content: «Контент». Every button edits the draft; the shop changes
-       on «Сохранить», through the same confirm card as everything else. ---- */
-    if (d.contentlang) { S.contentLang = d.contentlang; render(); return; }
-    if (d.contentblock !== undefined) {
-      S.contentOpen = S.contentOpen === d.contentblock ? "" : d.contentblock;
+      if (!DEMO.hero) { toast("Уже стандартные значения"); return; }
+      admSetApply({ type: "set_hero", value: null }, "Баннер снова стандартный");
       render(); return;
     }
+    /* ---- content: «Контент» (1a) — a switch at once, a box when it is left
+       (cAs), each save the fields it changed and a «Вернуть». -------------- */
+    if (d.contentlang) { admAutosaveFlush(); S.contentLang = d.contentlang; render(); return; }
+    if (d.contenttr) { contentTranslate(t, String(d.contenttr).split(",")); return; }
     if (d.contentannon !== undefined) {
       var cAnn = contentDraft().announcement;
       cAnn.on = cAnn.on === false;
+      admContentCommit(["announcement.on"], cAnn.on ? "Полоска включена ✓" : "Полоска выключена ✓");
       render(); return;
     }
+    // a day's working-day switch: closed ↔ open (open with its boxes empty until they are typed)
     if (d.contentclosed) {
       var cH = contentDraft().hours;
       cH[d.contentclosed] = cH[d.contentclosed] === "closed" ? "" : "closed";
+      admContentCommit(["hours." + d.contentclosed], "Часы работы сохранены");
       render(); return;
     }
-    if (d.contentsave !== undefined) {
-      // never the defaults over the real document — see contentLoaded()
-      if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      // this page's part only — the other page's typing waits for its own bar (contentPart)
-      var cPatch = contentPart(contentDiff(contentConf(), contentDraft()), S.admSetPage || "");
-      if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
-      pendingAction = {
-        type: "set_content", value: cPatch, page: S.admSetPage || "", overlay: true,
-        title: "Изменить данные магазина?", detail: contentConfirmDetail(cPatch)
-      };
-      render(); refocus("[data-admapply]"); return;
-    }
+    if (d.hoursall !== undefined) { admHoursAll(); return; }
+    /* «Вернуть стандартный текст полоски» / «Вернуть стандартные данные»
+       (under «⋯»): at once, with «Вернуть» — and only what is on its page:
+       the strip's reset is not the company's (contentPart). */
     if (d.contentreset !== undefined) {
-      // same gate: «вернуть стандартные» must mean «back to the defaults from
-      // what is really stored», not «write the defaults over the unknown»
+      // «вернуть стандартные» must mean «back to the defaults from what is
+      // really stored», not «write the defaults over the unknown»
       if (!contentLoaded()) { toast("Данные магазина ещё не загрузились — обновите страницу."); return; }
-      // …and only what is on this page: the strip's reset is not the company's
-      var cBack = contentPart(contentDiff(contentConf(), CONTENT_DEFAULT), S.admSetPage || "");
+      var cPage = d.contentreset || S.admSetPage || "";
+      var cBack = contentPart(contentDiff(contentConf(), CONTENT_DEFAULT), cPage);
       if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
-      pendingAction = {
-        type: "set_content", value: cBack, page: S.admSetPage || "", overlay: true,
-        title: "Вернуть стандартные данные?", detail: contentConfirmDetail(cBack)
-      };
-      render(); refocus("[data-admapply]"); return;
+      admSetApply({ type: "set_content", value: cBack, page: cPage }, "Стандартные данные вернули ✓");
+      render(); return;
     }
-    if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
+    // «⋯» of a block: its rare actions shown or folded
+    if (d.setmore) { ADM_SET_MORE[d.setmore] = !ADM_SET_MORE[d.setmore]; render(); refocus('[data-setmore="' + d.setmore + '"]'); return; }
+    /* «Вернуть» on a line of this browser's own journal: the change goes back
+       and the line leaves the list, as it always has (the server's row of the
+       undo is the record). A line of a key saved whole that is not its newest goes back through
+       its server row instead, which puts back only what that line changed
+       (jentryUndo). The server row it had reads «вернули» too (undoOf). */
+    if (d.admundo !== undefined) {
+      var ui = Number(d.admundo), ue = DEMO.log[ui], way = jentryUndo(ui);
+      if (!ue || !way) return;
+      var twin = jentryTwin(ue);
+      if (way === "server") { admJournalUndoServer(twin, ue); return; }
+      var ukey = ue.a && ADM_SET_OF[ue.a.type];
+      if (ukey && twin) ADM_SET_NOTE[ukey] = { undoOf: twin.id };
+      demoUndo(ui); toast("Отменено ✓");
+      AUDIT.asked = false;
+      render(); return;
+    }
+    // «Вернуть» on a server row — a change made on another device (q7)
+    if (d.admundosrv) {
+      var srow = null;
+      (AUDIT.rows || []).forEach(function (r) { if (String(r.id) === String(d.admundosrv)) srow = r; });
+      if (srow) admJournalUndoServer(srow, null);
+      return;
+    }
 
     /* ---------- checkout-gaps: delivery prices and promo codes ------------ */
-    /* A delivery price is money the shopper is charged, so since phase 3 it
-       goes through the confirm card like shipping an order or cancelling one
-       — README § State, «any change that affects the shop or money». */
-    /* …and a price under Montonio's is listed on that card, every cell of it,
-       with «Сохранить всё равно» — see shipLowCells(). */
-    if (d.admshipsave !== undefined) {
-      pendingAction = shipSaveAction(cloneRules(shipDraft()));
-      render(); refocus("[data-admapply]"); return;
-    }
-    /* «Доставляем сюда» — a draft change like every price box beside it, so
-       «Сохранить» is the one thing that changes what a stranger sees. The fold
-       is remembered so the panel does not close under the finger that tapped. */
+    /* «Доставляем сюда» and «Где показывать пакоматы» save at once, with
+       «Вернуть» — they change what a stranger sees, and the toast can take
+       it back. The fold stays open under the finger (ADM_FOLD). */
     if (d.shipcountry) {
       toggleShipCountry(d.shipcountry);
-      S.shipEuOpen = true;
+      admShipCommit();
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
     }
-    /* «Где предлагать пакомат» — a draft change like every other cell on this
-       screen, so it lights the same «Сохранить» and travels in the same PUT.
-       Nothing is offered or withdrawn until he presses it. */
     if (d.shippickup) {
       toggleShipPickup(d.shippickup);
-      S.shipEuOpen = true;
+      admShipCommit();
       render(); refocus('[data-shippickup="' + d.shippickup + '"]'); return;
     }
-    /* Same as «Что увидит покупатель» below, and for the same reason: a
-       <summary> carries an activation behaviour of its own, and the browser
-       flips `open` after this listener returns. S is what the next render
-       draws from, so the two must not both toggle — one tap, one flip, and S
-       makes it. Without this the fold took two taps to open (the render drew
-       it open, the browser's own toggle closed it again). */
-    if (d.shipeu !== undefined) {
-      e.preventDefault();
-      S.shipEuOpen = !S.shipEuOpen; render(); return;
+    // a country's fold on a phone: shut or open (Estonia starts open)
+    if (d.shiprow) {
+      if (ADM_RT_OPEN[d.shiprow]) delete ADM_RT_OPEN[d.shiprow]; else ADM_RT_OPEN[d.shiprow] = 1;
+      render(); refocus('[data-shiprow="' + d.shiprow + '"]'); return;
     }
-    /* «Что увидит покупатель» — remembered like the Europe fold, so the panel
-       does not close under the finger that opened it.
-       preventDefault() because <summary> carries an activation behaviour of
-       its own: the browser flips `open` after this listener returns, on the
-       node that was clicked. S is what the next render draws from, so the two
-       must not both toggle — one tap, one flip, and S makes it. */
-    if (d.shippreview !== undefined) {
-      e.preventDefault();
-      S.shipPreviewOpen = !S.shipPreviewOpen; render(); return;
-    }
-    // the defaults are prices too — the same card as «Сохранить»
+    /* «Вернуть значения по умолчанию» — delivery prices only (q37): the EMPTY
+       row (r22), every cell back to following Montonio's tariff, «Бесплатно
+       от», the countries and the pickup list back to the shop's defaults. At
+       once, with «Вернуть» on the toast and in the journal — no sheet. */
     if (d.admshipreset !== undefined) {
-      pendingAction = {
-        /* «по умолчанию» is the EMPTY row (r22): no prices of the shop's own,
-           so every cell goes back to following Montonio's tariff. Sending the
-           default table instead would write today's tariff in as the owner's
-           own numbers — which is «стандартные цены на сегодня», not
-           «стандартные настройки». */
-        type: "set_shipping_rules", rules: cloneRules(SHIP_STORED_DEFAULT), full: true, reset: true, overlay: true,
-        title: "Вернуть тарифы по умолчанию?",
-        detail: "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений."
-      };
-      render(); refocus("[data-admapply]"); return;
+      S.shipDraft = cloneRules(SHIP_STORED_DEFAULT);
+      if (!admShipCommit("Тарифы снова стандартные", { reset: true })) toast("Уже стандартные значения");
+      render(); syncShipInputs(); paintShipPreview(); return;
     }
-    /* Into the draft, not the shop — the sentence under the button promises
-       «проверьте цифры и сохраните», so only «Сохранить» → the confirm card
-       changes what a stranger is charged.
-
-       «Везде взять цены Montonio» is the whole-table half of the rule every
+    /* «Везде взять цены Montonio» is the whole-table half of the rule every
        box on the screen follows: it EMPTIES every overridable cell rather
        than writing numbers into them, because an empty cell already means
-       Montonio's price. That is the difference from the «Заполнить по тарифам
-       Montonio» button it replaces — that one wrote the same numbers in by
-       hand and then they stopped following the price list. «Бесплатно от» is
-       not touched: how much delivery to give away is his decision, not
-       Montonio's, and an empty threshold means something else entirely. */
+       Montonio's price. «Бесплатно от» is not touched: how much delivery to
+       give away is his decision, not Montonio's. Never below cost, so it is
+       applied at once, with «Вернуть». */
     if (d.admshipmontonio !== undefined) {
       var mDraft = shipDraft();
       mDraft.carriers = {};
-      /* Every price cell, not only the ones with a box. Until r22 the draft
-         was the merged table, so «очистит все ваши цены» could only mean «put
-         Montonio's numbers back in», and the row the shop kept went on
-         carrying the twenty-two «Пакомат» cells no box on this screen has ever
-         been able to edit — cells that then had to be argued with by the save
-         guard. Emptied, they fall back to the same numbers
-         (DEFAULT_SHIPPING_RULES.methods.parcel on the server), so no price
-         moves; they simply stop being the owner's. */
+      /* Every price cell, not only the ones with a box: emptied, they fall
+         back to the same numbers (DEFAULT_SHIPPING_RULES.methods.parcel on
+         the server), so no price moves; they simply stop being the owner's. */
       mDraft.methods = { parcel: {}, courier: {}, pickup: {} };
-      toast("В таблице цены Montonio — проверьте и нажмите «Сохранить»");
+      if (!admShipCommit("В таблице цены Montonio")) toast("В таблице уже цены Montonio");
       render(); syncShipInputs(); paintShipPreview(); return;
     }
     /* One cell back to Montonio: the grey line under a box he has typed into
        is a button, so «вернуть» never means guessing what the old number was.
-       The caret goes back to the box it belongs to. */
+       Saved at once; the caret goes back to the box it belongs to. */
     if (d.shipclear) {
+      delete ADM_AS["ship:" + d.shipclear];    // a held box's rust and line go with its number
       setShipDraftField(d.shipclear, "");
-      render(); refocus('[data-shiprule="' + d.shipclear + '"]'); return;
+      admShipCommit();
+      render(); syncShipInputs(); refocus('[data-shiprule="' + d.shipclear + '"]'); return;
+    }
+    /* «Оставить так» under a price below Montonio's tariff (q4): the owner
+       says it on purpose — the price goes with the accept flag. */
+    if (d.shipaccept) {
+      var accBox = document.querySelector('[data-shiprule="' + d.shipaccept + '"]');
+      if (accBox) setShipDraftField(d.shipaccept, accBox.value);
+      var accV = shipRowCell(shipDraft(), d.shipaccept);
+      if (typeof accV === "number") SHIP_ACCEPT[d.shipaccept] = accV;
+      S.shipLow = null;
+      delete ADM_AS["ship:" + d.shipaccept];   // the box's «held» line and rust go with the answer
+      admShipCommit("Цена ниже тарифа Montonio сохранена — разницу доплатит магазин");
+      render(); refocus('[data-shiprule="' + d.shipaccept + '"]'); return;
+    }
+    // «Коробка» → «Размер ячейки по умолчанию», XS–XL (gap analysis Q5 = A)
+    if (d.parcelsize) {
+      if (LOCKER_SIZES.indexOf(d.parcelsize) >= 0) admParcelSave("lockerSize", d.parcelsize);
+      refocus('[data-parcelsize="' + d.parcelsize + '"]'); return;
     }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     if (d.acctprosend !== undefined) { acctProSubmit(); return; }
@@ -46403,20 +47532,30 @@
     if (d.admpartnersave !== undefined) { custAddPartner(); return; }
     if (d.admcusttierset !== undefined) { custSetTier(d.admcusttierset); return; }
     if (d.admgoset !== undefined) {
-      S.adminTab = "setup"; S.admSetPage = d.admgoset; S.admCustOpen = ""; S.admMore = false;
+      S.adminTab = "setup"; admSetOpen(d.admgoset); S.admCustOpen = ""; S.admMore = false;
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     // «Опубликовать» / «Скрыть» on the customer card's own review rows
     if (d.admcustrev) { var custRev = d.admcustrev.split(":"); moderateCustReview(custRev[0], custRev[1]); return; }
-    if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
-    // «Отменить правки» for this card is the bar's own data-setrevert above
-    // the loyalty switch: a <button aria-pressed> like every other switch in the panel
-    if (d.pricingtoggle !== undefined) { var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled; render(); return; }
-    /* «Партнёры и баллы»: the outer switch. A draft change like every other
-       field on this form — «Сохранить» is what puts it through the confirm
-       card and into the journal, so one mis-tap costs nothing. */
-    if (d.partnerson !== undefined) { var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn; render(); return; }
+    /* «Начислять баллы» and «Партнёры и баллы»: switches, so saved at once
+       (q40) — «Вернуть» on the toast takes a mis-tap back. */
+    if (d.pricingtoggle !== undefined) {
+      admSetWhenReady(function () {
+        var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled;
+        admPricingSave({ loyalty: { enabled: lty.enabled } });
+        render();
+      });
+      return;
+    }
+    if (d.partnerson !== undefined) {
+      admSetWhenReady(function () {
+        var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn;
+        admPricingSave({ partnersOn: pd.partnersOn });
+        render();
+      });
+      return;
+    }
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page
@@ -46427,9 +47566,9 @@
     if (d.pushon !== undefined) { pushOn(); return; }
     if (d.pushoff !== undefined) { pushOff(); return; }
     if (d.pushtest !== undefined) { pushTest(); return; }
-    if (d.pushdrop) { pushDrop(d.pushdrop); return; }
-    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admsetback !== undefined) { S.admSetPage = ""; S.admSetSaved = ""; S.shipErr = ""; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.pushdrop) { pushDropHeld(d.pushdrop); return; }
+    if (d.admsetpage !== undefined) { admSetOpen(d.admsetpage); window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admsetback !== undefined) { admSetOpen(""); window.scrollTo({ top: 0 }); render(); return; }
     /* A denomination is a quick, reversible edit: it applies at once and the
        toast offers to take it back (README § State). The last one on cannot be
        switched off — a gift page with no amounts on it is a broken page. */
@@ -47434,15 +48573,9 @@
         var hF = t.dataset.herof;
         if (!hSl[hF] || typeof hSl[hF] !== "object") hSl[hF] = {};
         hSl[hF][S.heroLang || "RU"] = t.value;
+        // the banner itself is saved by the box's autosave (heroAs), a second after the last key
         paintHeroPreview();
-        paintSetBar();   // the page's bar lights up with the first keystroke
       }
-    }
-    // the timing on input as well as on change: Enter here is «Сохранить»
-    // (ADM_ENTER_FORMS), and the draft has to hold the number before the click
-    else if (t.matches("[data-herotick]")) {
-      heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
-      paintSetBar();
     }
     /* checkout-gaps: the delivery table and the promo form both keep the caret
        — a full render on every keystroke would take it out of the field. The
@@ -47455,8 +48588,9 @@
       var shipBad = shipRaw !== "" && !/^(нет|no|-|—)$/i.test(shipRaw) && !(isFinite(Number(shipRaw)) && Number(shipRaw) >= 0 && Number(shipRaw) <= shipMax);
       if (shipBad) t.setAttribute("aria-invalid", "true"); else t.removeAttribute("aria-invalid");
       // …and «Что увидит покупатель» follows the draft, not the saved rules:
-      // a preview one keystroke behind confirms a number he has just changed
-      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); paintShipFoot(t); paintShipPreview();
+      // a preview one keystroke behind confirms a number he has just changed.
+      // The box saves when it is left (admShipAs).
+      setShipDraftField(t.dataset.shiprule, t.value); paintShipFoot(t); paintShipPreview();
     }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
@@ -47509,15 +48643,14 @@
        button is pressed, and «Сохранить» reads the draft, not the DOM. */
     // …and each lights its own save control in place: the page's bar for the
     // settings cards, the card's own button for «Неоплаченные заказы»
-    else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); paintSetBar(); }
-    else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; paintSetBar(); }
+    // saved by the box's own autosave (cAs) — the draft follows the keystroke
+    else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
     else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
     else if (t.matches("[data-cartf]")) { cartFlowDraft()[t.dataset.cartf] = t.value; S.cartFlowSaved = false; paintCartFlowState(); }
     else if (t.matches("[data-mbf]")) { mailBudgetDraft()[t.dataset.mbf] = t.value; S.mailBudgetSaved = false; paintMailBudgetState(); }
     /* «Куда присылать примеры писем» / «Адрес для теста»: kept as it is typed,
        so a switch flipped on the same page (a render) does not take it away */
     else if (t.matches("[data-mailto]")) { S.mailTo = t.value; }
-    else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; paintSetBar(); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
@@ -47834,38 +48967,17 @@
       S.boxOverride[sbSide] = Math.round(sbNum * 10) / 10;
       render(); return;
     }
-    /* «Коробка магазина» — settings.shipping_parcel, saved on `change` (the
-       field is left, not on every keystroke) with the same undo as the two
-       settings below it. The whole object travels, `recent` included, so the
-       size history is never the casualty of a typed dimension. */
-    else if (t.matches("[data-parcelbox]") || t.matches("[data-parcelsize]")) {
-      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var pcCur = parcelConf();
-      var pcNext = {
-        length: pcCur.length, width: pcCur.width, height: pcCur.height,
-        lockerSize: pcCur.lockerSize, recent: pcCur.recent.slice()
-      };
-      if (t.matches("[data-parcelsize]")) pcNext.lockerSize = t.value;
-      else {
-        var pcField = t.getAttribute("data-parcelbox");
-        var pcNum = Number(String(t.value).replace(",", "."));
-        /* Out of the box's range is ignored and the field put back, the same
-           way a rate cell is: a 0 here would be a parcel Montonio refuses. */
-        if (!isFinite(pcNum) || pcNum <= 0 || pcNum > 200) {
-          render(); toast("Сторона коробки — от 1 до 200 см."); return;
-        }
-        pcNext[pcField] = Math.round(pcNum * 10) / 10;
-      }
-      var pcEntry = demoApply({ type: "set_parcel", value: pcNext });
-      render(); toast("Сохранено ✓", pcEntry); return;
-    }
-    /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
+    /* «Коробка» saves each side when it is left (admParcelAs) and the door
+       when it is tapped (data-parcelsize, the click listener). */
+    /* «Доставлен» без кнопки — «закрывать заказ через N дней»: a pick, saved at once */
     else if (t.matches("[data-delivdays]")) {
-      // same gate as the switch beside it — the whole object travels
-      if (!adminSettingsReady()) { render(); toast("Настройки магазина сейчас не отвечают — попробуйте ещё раз."); return; }
-      var dvc = deliveryConf();
-      var dvEntry = demoApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } });
-      render(); toast("Сохранено ✓", dvEntry);
+      // same wait as the switch beside it — the whole object travels; the pick is the one made now
+      var dDays = Number(t.value) || 0;
+      admSetWhenReady(function () {
+        var dvc = deliveryConf();
+        admSetApply({ type: "set_delivery", value: { autoDays: dDays, useCarrier: dvc.useCarrier } }, "Когда «Доставлен»: сохранено");
+        render();
+      });
     }
     // «Вернуть деньги»: the split under the amount follows what is typed
     else if (t.matches("[data-admrefundamt]")) admRefundRepaint(t.value);
@@ -47917,16 +49029,14 @@
         gSl.go = t.value === "product"
           ? (String(gSl.go || "").indexOf("product:") === 0 ? gSl.go : "product:")
           : t.value;
+        // «Один товар» with no product picked yet is not a link — saved when a tile is tapped
+        if (gSl.go !== "product:") admHeroCommit();
       }
       render();
     }
     else if (t.matches("[data-heroimgurl]")) {
       var uSl = heroDraft().slides[S.heroEdit], uV = t.value.trim();
-      if (uSl && uV) { uSl.image = uV; paintHeroPick(); }   // in place — see paintHeroPick
-    }
-    else if (t.matches("[data-herotick]")) {
-      heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
-      paintSetBar();
+      if (uSl && uV) { uSl.image = uV; admHeroCommit(); paintHeroPick(); }   // in place — see paintHeroPick
     }
     /* media: the file picker — «Загрузить фото» in the goods editor and the
        banner's own button both land here. On a phone the same input offers the
@@ -48794,19 +49904,13 @@
     // «Склад» and the set editor save themselves (1a) — Enter is their «leave» (admTypedEvent, bundleAsEvent)
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
     ["[data-mailto]", "[data-mailtest]"],
-    /* r12: the settings cards and the two small cards. Their «Сохранить» is
-       the page's bar (admSetBarHTML) — outside the card the box is in, so
-       admEnterTarget() looks up to the page when the card has no button of
-       its own. Not the banner's search boxes ([data-heroq], [data-heroimgq])
-       and not its URL box: Enter there must never mean «save the banner». */
+    /* r12: the two small cards. admEnterTarget() looks up to the page when
+       the card has no button of its own. */
     ["[data-unpaidf]", "[data-admunpaidsave]"],
     ["[data-cartf]", "[data-admcartsave]"],
     ["[data-mbf]", "[data-admmbsave]"],
-    ["[data-invsetf]", "[data-adminvsave]"],
-    ["[data-shiprule]", "[data-admshipsave]"],
-    ["[data-pricingf]", "[data-admpricingsave]"],
-    ["[data-contentf],[data-contenthours]", "[data-contentsave]"],
-    ["[data-herof],[data-herotick]", "[data-herosave]"],
+    /* the settings pages are not here since 1a: their boxes save themselves,
+       and Enter in one is «save this box now» (the autosave's own keydown) */
     // «Рассылка»: Enter in the test-address box sends the test, in the brief asks the assistant
     ["[data-newsto]", "[data-newstest]"],
     ["[data-newsbrief]", "[data-newswrite]"],

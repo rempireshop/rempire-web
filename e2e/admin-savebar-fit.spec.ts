@@ -2,40 +2,37 @@ import { expect, type Page, test } from "@playwright/test";
 import { adminLang, adminSection, loginAsAdmin } from "./fixtures";
 
 /**
- * **Does every word fit in the phone's save bar, in all three languages?**
+ * **Does every word fit on the phone's delivery page, in all three languages?**
  *
  * Ренат, 14.09.2026: «Have you tested it in each language and all letters fit
  * everywhere on mobile as well? I'm not sure about on mobile if everything
  * fits in the upper save bar in each language, are you sure? Check the sizes
  * of the letters.»
  *
- * It did not fit, and nobody could have seen it by looking: the bar's status
- * word is `text-overflow: ellipsis`, so a word too wide for its box is not a
- * broken layout, it is a slightly shorter word. At 360 px the Russian «Не
- * сохранено» had 75 px for 89 and the Estonian «Salvestamata» 70 for 86 —
- * both cut mid-word — and at 375 px Russian cleared by 0,7 px and Estonian by
- * nothing at all. So this test measures rather than looks, and it measures the
- * one thing a screenshot cannot show: the NATURAL width of the visible word
- * (a Range over its text) against the box it has to sit in.
+ * It did not fit then, and nobody could have seen it by looking: a status word
+ * is `text-overflow: ellipsis`, so a word too wide for its box is not a broken
+ * layout, it is a slightly shorter word. So this test measures rather than
+ * looks: the NATURAL width of each visible word (a Range over its text)
+ * against the box it has to sit in.
  *
- * The subject is «Настройки → Доставка и оплата», which is the widest thing
- * the panel asks a phone to hold — one row per country, a column per carrier
- * (five from 14.09.2026, four since Nova Post left the home columns on
- * 22.09.2026), plus the courier and the
- * free-from threshold. The BAR, though, is every admin screen's: .adm-savebar
- * in admin.css is the phone's top header on the product editor, the mail
- * texts, a newsletter and all four settings pages. A fix for one is a fix for
- * all, and so is a regression.
+ * 1a (25.09.2026) took the save bar off «Настройки» — every box saves itself,
+ * and the phone's top bar says «Сохраняем… / Сохранено ✓ / Не сохранилось»
+ * (.adm-savest--top). What the owner has to read on this page now is that
+ * status, and the two new words under a price below Montonio's tariff: the
+ * rust «Ниже тарифа Montonio: …» and «Оставить так» (q4). All of it measured
+ * here, with the rest of the old contract: nothing sideways, nothing sticking
+ * out, no control under 44 × 44.
  *
- * 360 px as well as 375: the smallest phone the shop sees (Galaxy A-series,
- * iPhone SE in landscape-safe mode) and the iPhone the owner actually holds.
+ * The subject is «Настройки → Доставка и оплата», still the widest thing the
+ * panel asks a phone to hold. 360 px as well as 375: the smallest phone the
+ * shop sees and the iPhone the owner actually holds.
  */
 
 const WIDTHS = [375, 360];
 const LANGS = ["RU", "ET", "EN"] as const;
 
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile", "the phone's save bar — mobile project only");
+  test.skip(testInfo.project.name !== "mobile", "the phone's delivery page — mobile project only");
 });
 
 async function openDelivery(page: Page): Promise<void> {
@@ -43,15 +40,15 @@ async function openDelivery(page: Page): Promise<void> {
   const back = page.locator("[data-admsetback]");
   if (await back.count()) await back.first().click();
   await page.locator('[data-admsetpage="delivery"]').first().click();
-  await expect(page.locator("[data-setbar]")).toBeVisible();
+  await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toBeVisible();
 }
 
 interface Fit {
-  /** The bar's own height. One row is 53 px: 4 + 44 + 4 + a 1-px rule. */
-  barHeight: number;
+  /** The phone's top bar — one row: it must not grow a second line. */
+  topHeight: number;
   /** The page, sideways. A rate screen that scrolls sideways hides a price. */
   sideways: boolean;
-  /** Every word in the bar, with the room it has and the room it needs. */
+  /** Every word under test, with the room it has and the room it needs. */
   words: Array<{ what: string; box: number; needs: number }>;
   /** Anything inside the viewport that sticks out of it. */
   overflowing: string[];
@@ -60,32 +57,30 @@ interface Fit {
 }
 
 /** One reading of the whole screen, taken in the browser in one go. */
-async function fit(page: Page): Promise<Fit> {
-  return await page.evaluate(() => {
+async function fit(page: Page, selectors: string[]): Promise<Fit> {
+  return await page.evaluate((sels) => {
     /** The natural width of an element's own text, box be damned. */
     const textWidth = (el: Element): number => {
       const r = document.createRange();
       r.selectNodeContents(el);
       return +r.getBoundingClientRect().width.toFixed(1);
     };
-    /** The one child of `el` this viewport actually draws (the --long/--short pair). */
-    const shown = (el: Element): Element =>
-      Array.from(el.querySelectorAll<HTMLElement>("span")).find(
-        (s) => s.offsetParent !== null && s.getBoundingClientRect().width > 0,
-      ) ?? el;
-
-    const bar = document.querySelector<HTMLElement>("[data-setbar]");
     const words: Fit["words"] = [];
-    if (bar) {
-      for (const child of Array.from(bar.children)) {
-        const el = child as HTMLElement;
-        const target = shown(el);
+    for (const sel of sels) {
+      document.querySelectorAll<HTMLElement>(sel).forEach((el) => {
+        if (el.offsetParent === null) return;
+        /* A word that is allowed to wrap onto two lines is not cut: the box
+           it must fit is its own width on one line only when it does not
+           wrap — so measure a single-line word against its box, and a
+           wrapped one against the page. */
+        const cs = getComputedStyle(el);
+        const oneLine = cs.whiteSpace === "nowrap" || cs.textOverflow === "ellipsis";
         words.push({
-          what: (target.textContent || "").trim(),
-          box: el.clientWidth,
-          needs: Math.ceil(textWidth(target)),
+          what: (el.textContent || "").trim(),
+          box: oneLine ? el.clientWidth : document.documentElement.clientWidth,
+          needs: Math.ceil(oneLine ? textWidth(el) : Math.min(textWidth(el), el.scrollWidth)),
         });
-      }
+      });
     }
 
     const vw = document.documentElement.clientWidth;
@@ -98,34 +93,29 @@ async function fit(page: Page): Promise<Fit> {
         overflowing.push(`${el.tagName}.${el.className} right=${r.right.toFixed(1)} > ${vw}`);
       }
     });
-    document.querySelectorAll<HTMLElement>("button, input, summary, a[href]").forEach((el) => {
+    document.querySelectorAll<HTMLElement>(".adm-page button, .adm-page input, .adm-page select, .adm-top button").forEach((el) => {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return;
       if (getComputedStyle(el).visibility === "hidden") return;
       if (r.width < 43.5 || r.height < 43.5) {
-        small.push(`${r.width.toFixed(0)}×${r.height.toFixed(0)} «${(el.textContent || "").trim().slice(0, 30)}»`);
+        small.push(`${r.width.toFixed(0)}×${r.height.toFixed(0)} «${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)}»`);
       }
     });
-
+    const top = document.querySelector<HTMLElement>(".adm-top");
     return {
-      barHeight: bar ? bar.offsetHeight : 0,
+      topHeight: top ? top.offsetHeight : 0,
       sideways: document.documentElement.scrollWidth > document.documentElement.clientWidth + 0.5,
       words,
       overflowing,
       small,
     };
-  });
+  }, selectors);
 }
 
-/** Asserts one reading, naming the state so a failure says which of the four. */
+/** Asserts one reading, naming the state so a failure says which one. */
 function assertFits(f: Fit, state: string): void {
   expect(f.sideways, `${state}: the page scrolls sideways`).toBe(false);
-  /* One row. The bar is `flex-wrap: wrap`, so a word that will not fit does
-     not overflow — it takes a second row and pushes the form down under a
-     header that is suddenly twice as tall. Height is what catches that; the
-     word widths below catch the other failure, the silent ellipsis. */
-  expect(f.barHeight, `${state}: the save bar wrapped to a second row`).toBeLessThanOrEqual(56);
-  expect(f.barHeight, `${state}: the save bar has no row at all`).toBeGreaterThanOrEqual(48);
+  expect(f.topHeight, `${state}: the top bar wrapped to a second row`).toBeLessThanOrEqual(64);
   for (const w of f.words) {
     expect(w.needs, `${state}: «${w.what}» needs ${w.needs} px and has ${w.box}`).toBeLessThanOrEqual(w.box);
   }
@@ -133,67 +123,50 @@ function assertFits(f: Fit, state: string): void {
   expect(f.small, `${state}: a control smaller than 44 × 44`).toEqual([]);
 }
 
+const STATUS = ".adm-savest--top .adm-savest__t";
+const HELD = ['[data-rtrow="EE"] .adm-hint--loss', '[data-rtrow="EE"] .adm-rt__keep', "[data-shipheld] div"];
+
 for (const width of WIDTHS) {
   for (const lang of LANGS) {
-    test(`the save bar holds every word at ${width} px in ${lang}`, async ({ page }) => {
-      test.setTimeout(60_000);
+    test(`the delivery page holds every word at ${width} px in ${lang}`, async ({ page }) => {
+      test.setTimeout(90_000);
       await page.setViewportSize({ width, height: 812 });
       await loginAsAdmin(page);
-      await adminLang(page, lang);
-      await openDelivery(page);
+      const stored = async () => (await (await page.request.get("/api/admin/settings/")).json()).settings.shipping_rules ?? null;
+      const original = await stored();
+      try {
+        await adminLang(page, lang);
+        await openDelivery(page);
 
-      // «Изменений нет» — the quiet bar, one word and a disabled button
-      assertFits(await fit(page), `${width}/${lang}/clean`);
+        // untouched: nothing held, nothing to say
+        assertFits(await fit(page, [STATUS]), `${width}/${lang}/clean`);
 
-      // «Не сохранено» — the widest state: cancel + word + button, all three
-      const cell = page.locator('[data-shiprule="c:omniva:EE"]');
-      await cell.fill("3.49");
-      await cell.blur();
-      await expect(page.locator("[data-setnote]")).toBeVisible();
-      assertFits(await fit(page), `${width}/${lang}/unsaved`);
+        /* A price under Montonio's tariff: the box turns rust, «Ниже тарифа
+           Montonio: 3,19 €» and «Оставить так» under it, a line at the top of
+           the page — the widest state this page has. Nothing is sent yet. */
+        const cell = page.locator('[data-shiprule="c:omniva:EE"]');
+        await cell.fill("1");
+        await cell.press("Tab");
+        await expect(page.locator('[data-shipaccept="c:omniva:EE"]')).toBeVisible();
+        assertFits(await fit(page, [STATUS, ...HELD]), `${width}/${lang}/held`);
 
-      // …while it saves: the confirm card stands over the page and the bar stays
-      await page.locator("[data-admshipsave]").first().click();
-      await expect(page.locator("[data-admapply]")).toBeVisible();
-      assertFits(await fit(page), `${width}/${lang}/saving`);
+        // «Оставить так»: saved with the accept flag, «Сохранено ✓» on top
+        const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+        await page.locator('[data-shipaccept="c:omniva:EE"]').click();
+        expect((await put).ok()).toBe(true);
+        await expect(page.locator(".adm-savest--top .adm-savest__t--ok")).toBeAttached();
+        assertFits(await fit(page, [STATUS, '[data-rtrow="EE"] .adm-hint--loss']), `${width}/${lang}/saved`);
 
-      // «Сохранено ✓» on the button, the word and the cancel both gone
-      await page.locator("[data-admapply]").first().click();
-      await expect(page.locator("[data-admapply]")).toHaveCount(0);
-      await expect(page.locator("[data-admshipsave]")).toBeVisible();
-      assertFits(await fit(page), `${width}/${lang}/saved`);
-
-      /* Take Estonia's Omniva override back out. Every spec in this run shares
-         one in-memory database (playwright.config.ts, workers: 1), so a 3,49 €
-         left behind here is a 3,49 € the checkout specs would price against.
-         «вернуть» clears the cell and the second save writes the table without
-         it — after which the box is EMPTY, not 3,19. That is the r22 contract
-         (17.09.2026, «пустая клетка в тарифах остаётся пустой»,
-         cleanShippingRules() in src/lib/shipping.ts): the screen shows and
-         saves the owner's OWN row, and a cell he never filled in is absent
-         from it rather than written down at whatever Montonio charged that
-         day. Before that the save seeded every missing cell from the defaults
-         and the box came back materialised at 3,19.
-
-         Both halves are asserted, because an empty box is also what a save
-         that quietly dropped the whole row would look like: the stored row
-         must no longer carry this cell at all, and the money is unchanged —
-         quoteFromRules() reads Montonio's own 3,19 € when the row says
-         nothing about the cell. */
-      await page.locator('[data-shipclear="c:omniva:EE"]').first().click();
-      await page.locator("[data-admshipsave]").first().click();
-      await page.locator("[data-admapply]").first().click();
-      await expect(page.locator("[data-admapply]")).toHaveCount(0);
-      await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toHaveValue("");
-      await expect
-        .poll(async () => {
-          const feed = await page.request.get(`/api/overrides/?t=${Date.now()}`);
-          const stored = (await feed.json()) as {
-            settings?: { shipping_rules?: { carriers?: Record<string, Record<string, number>> } };
-          };
-          return stored.settings?.shipping_rules?.carriers?.omniva?.EE;
-        }, { message: "the 3,49 € override outlived the test" })
-        .toBeUndefined();
+        /* Take Estonia's Omniva override back out: «вернуть» under the box
+           empties it and saves — after which the stored row no longer carries
+           the cell at all (cleanShippingRules(), r22), and the box is EMPTY. */
+        await page.locator('[data-shipclear="c:omniva:EE"]').first().click();
+        await expect(page.locator('[data-shiprule="c:omniva:EE"]')).toHaveValue("");
+        await expect.poll(async () => (await stored())?.carriers?.omniva?.EE,
+          { timeout: 20_000, message: "the 1 € override outlived the test" }).toBeUndefined();
+      } finally {
+        await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
+      }
     });
   }
 }

@@ -288,19 +288,15 @@ test.describe("sweep — goods editor", () => {
 });
 
 /**
- * «Сохранить» on the tariff grid. A delivery price is money a stranger is
- * charged, so since the phase-3 redesign it goes through the confirm card like
- * shipping an order does (README § State) — two clicks, not one.
+ * Leaving the box IS the save since 1a (25.09.2026, README § 2): a price goes
+ * to the shop when the box it was typed in is left, with «Вернуть» on the
+ * toast. Garbage is not sent at all — the box turns rust with one line under
+ * it, and that IS the refusal. A price under Montonio's tariff would wait for
+ * «Оставить так» (q4); nothing here types one.
  */
 async function saveTariffs(page: Page): Promise<void> {
-  /* r12: the page's save bar is quiet while the table equals what the shop
-     charges — garbage never enters the draft, so there is nothing to save
-     and the button is off; that IS the refusal (the cell goes red). */
-  const save = page.locator("[data-admshipsave]");
-  if (await save.isDisabled()) return;
-  await save.click();
-  await expect(page.locator("[data-admapply]")).toBeVisible();
-  await page.locator("[data-admapply]").click();
+  await page.keyboard.press("Tab");
+  await page.waitForTimeout(300);
 }
 
 test.describe("sweep — delivery prices", () => {

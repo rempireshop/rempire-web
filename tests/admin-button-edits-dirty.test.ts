@@ -111,7 +111,7 @@ function editor(): Env {
   };
 
   const f = new Function(
-    "S", "GAL", "VID", "DEMO", "document", "apiSend", "admSpark", "heroDraft", "paintSetBar", "product",
+    "S", "GAL", "VID", "DEMO", "document", "apiSend", "admSpark", "heroDraft", "admHeroCommit", "product",
     `var UP = { busy: 0, total: 0, err: "" }, MEDIA = { on: true }, SRV = { admin: true };
      var AI_UNDO = { descRU: "", descET: "", descEN: "", seoT: "", seoD: "", seoTet: "", seoDet: "", seoTen: "", seoDen: "" };
      var BUNDLE_AI_UNDO = { desc: { RU: "", ET: "", EN: "" } };
@@ -306,11 +306,13 @@ describe("the promo form: the chips are edits", () => {
   });
 });
 
-describe("«Главная страница»: the banner's ✨ says «not saved» at once", () => {
-  it("repaints the page's bar in place", () => {
+/* 1a (25.09.2026): the banner saves itself — the ✨ fill is saved the moment
+   it lands (admHeroCommit), where it used to light the page's save bar. */
+describe("«Главная страница»: the banner's ✨ is saved at once", () => {
+  it("saves the banner as soon as the texts land", () => {
     const e = editor();
     e.S.adminEdit = "";
     e.click({ herospark: "RU" });
-    expect(e.paintsSetBar(), "the bar waited for the next render").toBeGreaterThan(0);
+    expect(e.paintsSetBar(), "the fill waited for the next render to be saved").toBeGreaterThan(0);
   });
 });

@@ -369,10 +369,16 @@ describe("«Подключения»: the shop's own order letter", () => {
 
 describe("«Настройки» has a door to «Письма»", () => {
   it("between «Оповещения на телефон» and the journal, opening Маркетинг → Письма", () => {
+    // the phone's index (1a): the whole screen is the list of pages
     const html = build<() => string>(
       ["ADM_SET_PAGES"],
-      ["admSetupHTML", "admSetMailLinkHTML"],
-      { S: { admSetPage: "" }, admHead: () => "" },
+      ["admSetupHTML", "admSetMailLinkHTML", "?admSetIndexHTML", "?admSetSub", "?admSetTitle"],
+      {
+        S: { admSetPage: "" }, admHead: () => "", ADM_PHONE_MQ: { matches: true },
+        PUSH: { loaded: false, devices: [] }, pushCan: () => false, pushLoad: () => {},
+        admSetForget: () => {}, admSetRead: () => {}, admTagHTML: (_k: string, t: string) => t,
+        ibanOk: () => true, contentConf: () => ({ company: { iban: "EE1" } }),
+      },
       "admSetupHTML",
     )();
     const door = html.indexOf('data-admtab="mail"');
