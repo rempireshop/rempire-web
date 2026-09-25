@@ -4559,7 +4559,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-rt .adm-rates__c--none .adm-hint--cell { grid-column: 2 / -1; }
 .adm-rt .adm-rates__c:last-child { border-top: 1px solid var(--a-rule); margin-top: 4px; padding-top: 10px; }
 .adm-rt .adm-rates__c:last-child .adm-tariffs__l { font-weight: 600; }
-@media (min-width: 900px) {
+/* the table from 1000 px: under it (a narrow desktop, where «Настройки» shows
+   one pane at a time — below) the page is 520–620 px and seven columns drew
+   price boxes that showed one digit; the country rows fold as on a phone */
+@media (min-width: 1000px) {
   .adm-rt__head, .adm-rt__row {
     display: grid; grid-template-columns: minmax(120px, 1.3fr) repeat(6, minmax(0, 1fr)); gap: 8px 8px;
   }
@@ -4663,3 +4666,58 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-push__state { display: flex; align-items: center; gap: 10px; }
 .adm-push__dot { width: 10px; height: 10px; flex: none; background: var(--a-canvas); border: 1px solid var(--a-edge); }
 .adm-push__dot.is-on { background: var(--a-green); border-color: var(--a-green); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A narrow desktop — 900 to 1209/1239 px: a 1024 laptop, an iPad on its side.
+   The sidebar (232), the assistant's strip (52) and the page's margins (96)
+   leave 520–830 px of page, and three screens were drawn for more (the
+   polish pass's overflow sweep, 25.09.2026, at 1024 × 800):
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (min-width: 900px) and (max-width: 1239px) {
+  /* «Настройки»: the index beside a page left the page 354 px. One pane at a
+     time, as on a phone — the index, or the page with its «← Настройки». */
+  .adm-set { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+  .adm-set__col { position: static; }
+  .adm-set--open .adm-set__col { display: none; }
+  .adm-set:not(.adm-set--open) .adm-set__main { display: none; }
+}
+@media (min-width: 900px) and (max-width: 1209px) {
+  /* «Каталог»: five fixed columns took 614 px and gave the name 15 — one word
+     a line, under the sizes. The sizes go under the name instead, as the
+     phone has them, and «Объёмы» leaves the header. */
+  .adm-grow {
+    grid-template-columns: 52px minmax(0, 1fr) 96px 110px 92px;
+    grid-template-areas: "img open st pr vis" "img sz st pr vis"; row-gap: 2px;
+  }
+  .adm-grow--head > span:nth-child(2) { display: none; }
+  .adm-grow__sz { align-self: start; }
+  /* «Склад»: the name over its sizes (as on a phone) and the sizes' columns
+     the whole width — beside the name they ran 50 px past the page and the
+     barcode and its scan button were cut off */
+  .adm-stkhead, .adm-stk { grid-template-columns: minmax(0, 1fr); }
+  .adm-stkhead > span:first-child { display: none; }
+  .adm-stk { padding: 12px 0 4px; }
+  .adm-stk__h { padding: 0; margin-bottom: 2px; }
+  .adm-stkhead__r, .adm-row.adm-stk__r { grid-template-columns: 80px 104px 140px 90px minmax(0, 1fr); }
+  .adm-stk__sz { grid-template-columns: 80px 104px; }
+  /* «Наборы»: a 440-px editor beside the list left the list 168 px and its
+     switches drawn over the editor. The list, or the open set (its ✕ is the
+     way back), as on a phone. */
+  .adm-sets { grid-template-columns: minmax(0, 1fr); }
+  .adm-sets--ed .adm-sets__list, .adm-sets__pick { display: none; }
+  /* the product card's «В магазине»: three columns drew the switch over
+     «В наличии»; the switch takes a line, «Наличие» and «Подраздел» share one */
+  .adm-edshop { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .adm-edshop > :first-child { grid-column: 1 / -1; }
+}
+
+/* An iPhone on its side: the notch and the rounded corners are left and right
+   now, and viewport-fit=cover lets the page run under them. The page, the top
+   bar, the pinned button and the tab bar keep their content clear of them —
+   upright the insets are 0 and every value below is the one it always was. */
+@media (max-width: 899px) {
+  .adm-page { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .adm-top { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+  .adm-pin { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .adm-bar { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+}
