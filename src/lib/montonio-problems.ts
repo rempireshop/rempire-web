@@ -109,21 +109,32 @@ export type RefundRefusal =
   | "exceeds_refundable"
   | "below_minimum"
   | "not_refundable_now"
+  | "refunds_disabled"
   | "bad_access_key"
   | "bad_secret_key"
   | "unknown";
 
 export interface RefundRefusalReading {
   reason: RefundRefusal;
-  /** Montonio's own line, unchanged. Shown as-is for `unknown`. */
+  /** Montonio's own line, unchanged — for the journal row and the log. Shown (ids taken out) for `unknown`. */
   montonio: string;
   status: number;
   /** The amount asked for, when Montonio printed it. */
   asked?: number;
   /** What Montonio says may still go back right now, when it printed it. */
   refundable?: number;
+  /** `refunds_disabled`: the payment method Montonio named — `paymentInitiation`, `cardPayments`, … */
+  method?: string;
   messages: Trilingual;
 }
+
+/** How the refused payment was made, in words — `refunds_disabled` names it. */
+const REFUND_METHOD_WORDS: Record<string, Trilingual> = {
+  paymentInitiation: { RU: "банковской ссылкой", ET: "pangalingiga", EN: "by bank link" },
+  cardPayments: { RU: "картой", ET: "kaardiga", EN: "by card" },
+  blik: { RU: "через BLIK", ET: "BLIKiga", EN: "with BLIK" },
+  mobilePay: { RU: "через MobilePay", ET: "MobilePayga", EN: "with MobilePay" },
+};
 
 const REFUND_TEXT: Record<Exclude<RefundRefusal, "unknown">, (v: RefundRefusalReading) => Trilingual> = {
   /* 400 — Order uuid [...] already has a refund with same idempotency key.
@@ -229,6 +240,47 @@ const REFUND_TEXT: Record<Exclude<RefundRefusal, "unknown">, (v: RefundRefusalRe
       "Two — refunds are not switched on for this payment method. Wait a day and try again. Nothing has been taken.",
   }),
 
+  /* 400 — Refunds are not enabled for store [<store uuid>] and payment method
+     [montonio] > [paymentInitiation]. Not in the refunds guide's list either;
+     met on the sandbox on 25.09.2026 (every bank-link refund), where the panel
+     quoted it whole — English, with the store's id — and told the owner to
+     show it to Dim. It is a switch on Montonio's side with a name the
+     integration page already uses: for a bank link it is the «Refundable bank
+     payments» product (src/app/api/admin/montonio/route.ts). For any other
+     method there is no product to name, so the sentence says only what is
+     known: Montonio has refunds off for it. The raw line stays in the
+     journal row's `detail`. */
+  refunds_disabled: (v) => {
+    const how = v.method ? REFUND_METHOD_WORDS[v.method] : undefined;
+    if (v.method === "paymentInitiation") {
+      return {
+        RU:
+          "Montonio не делает возвраты по оплате банковской ссылкой: в настройках магазина в Montonio они выключены. " +
+          "Включите продукт «Refundable bank payments» в Montonio Partner System и повторите — или верните деньги покупателю переводом из банка. " +
+          "Ничего не списано.",
+        ET:
+          "Montonio ei tee pangalingiga makstud tellimustele tagasimakseid: poe seadetes Montonios on need välja lülitatud. " +
+          "Lülitage Montonio Partner Systemis sisse toode «Refundable bank payments» ja proovige uuesti — või kandke raha kliendile pangast tagasi. " +
+          "Midagi ei ole maha kantud.",
+        EN:
+          "Montonio does not refund payments made by bank link: refunds are switched off in the shop's Montonio settings. " +
+          "Switch on the «Refundable bank payments» product in the Montonio Partner System and try again — or send the money back by bank transfer. " +
+          "Nothing has been taken.",
+      };
+    }
+    return {
+      RU:
+        "Montonio не делает возвраты по оплате " + (how ? how.RU : "этим способом") + ": в настройках магазина в Montonio они выключены. " +
+        "Спросите Montonio, как их включить, — или верните деньги покупателю переводом из банка. Ничего не списано.",
+      ET:
+        "Montonio ei tee " + (how ? how.ET : "selle makseviisiga") + " makstud tellimustele tagasimakseid: poe seadetes Montonios on need välja lülitatud. " +
+        "Küsige Montoniolt, kuidas need sisse lülitada — või kandke raha kliendile pangast tagasi. Midagi ei ole maha kantud.",
+      EN:
+        "Montonio does not refund payments made " + (how ? how.EN : "this way") + ": refunds are switched off in the shop's Montonio settings. " +
+        "Ask Montonio how to switch them on — or send the money back by bank transfer. Nothing has been taken.",
+    };
+  },
+
   /* 401 — STORE_NOT_FOUND - double check your access key */
   bad_access_key: () => ({
     RU:
@@ -262,9 +314,19 @@ const REFUND_TEXT: Record<Exclude<RefundRefusal, "unknown">, (v: RefundRefusalRe
   }),
 };
 
+/**
+ * A Montonio line as the owner may read it: every uuid in it — the store's,
+ * an order's, a payment's — becomes «…». They mean nothing on his screen and
+ * the store's is not his to hand round; the whole line stays in the journal
+ * row's `detail` and in the log (src/app/api/admin/orders/[id]/refund).
+ */
+function withoutIds(line: string): string {
+  return line.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "…");
+}
+
 /** The refusal in Montonio's own words — what an unrecognised one says. */
 function refundUnknownText(montonio: string): Trilingual {
-  const said = montonio || "—";
+  const said = withoutIds(montonio) || "—";
   return {
     RU: "Montonio не принял возврат и назвал причину сам: «" + said + "». Ничего не списано. Покажите эту строку Диму.",
     ET: "Montonio ei võtnud tagasimakset vastu ja nimetas põhjuse ise: „" + said + "\". Midagi ei ole maha kantud. Näidake see rida Dimile.",
@@ -344,6 +406,13 @@ export function readRefundRefusal(
     base.reason = "below_minimum";
   } else if (/cannot be refunded at this time/i.test(message)) {
     base.reason = "not_refundable_now";
+  } else if (/refunds are not enabled/i.test(message)) {
+    /* «… and payment method [montonio] > [paymentInitiation]» — the last
+       bracket is the method; the store's id in the first one is not read. */
+    base.reason = "refunds_disabled";
+    const tail = message.slice(message.search(/payment method/i) >= 0 ? message.search(/payment method/i) : 0);
+    const words = [...tail.matchAll(/\[\s*([A-Za-z]+)\s*\]/g)].map((m) => m[1]);
+    if (words.length) base.method = words[words.length - 1];
   } else if (/STORE_NOT_FOUND/i.test(message) || status === 401) {
     base.reason = "bad_access_key";
   } else if (/INVALID_TOKEN/i.test(message) || status === 403) {

@@ -4540,13 +4540,13 @@
         "Строка возврата одна, «Возвращено X из Y» не изменилось.",
         "Баланс подарочной карты вырос один раз.",
         "Новое окошко пишет «По заказу уже возвращено …» — ещё один возврат можно только оттуда.",
-        "Если Montonio отказал — обе фразы одинаковые, строк нет ни одной."
+        "Если Montonio отказал — обе фразы одинаковые, по-русски, без номера магазина; строк нет."
       ],
       "why": "Окошко, открытое до первого возврата, — это второй возврат одним нажатием.",
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T22:32:02.633Z",
+      "markedAt": "2026-09-25T22:53:28.519Z",
       "en": {
         "title": "Press «Вернуть деньги» a second time",
         "steps": [
@@ -4562,7 +4562,7 @@
           "One refund row, and «Возвращено X из Y» did not change.",
           "The card's balance grew only once.",
           "The new box says «По заказу уже возвращено …»; a further refund starts only there.",
-          "If Montonio refused, both answers read alike and no row appears."
+          "If Montonio refused, both answers read alike, in plain words with no store id; no row."
         ],
         "why": "A box opened before the first refund is a second refund one tap away."
       }
