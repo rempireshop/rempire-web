@@ -131,8 +131,8 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
     ["orders", "orders", "Заказы"],
     ["goods", "goods", "Товары"],
     ["stock", "goods", "Товары"],
-    // the nav item is «Салон»; the screen it opens is titled «Продажа в салоне»
-    ["pos", "pos", "Продажа в салоне"],
+    // the nav item is «Салон», and since 1a so is the screen's own title
+    ["pos", "pos", "Салон"],
     ["people", "people", "Клиенты"],
     ["reviews", "people", "Клиенты"],
     ["promos", "promos", "Маркетинг"],
