@@ -98,6 +98,8 @@ async function loseTheRecord(orderId: string): Promise<void> {
     "update orders set status = 'paid', payment = payment - 'refunds' - 'refundedTotal' where id = $1",
     [orderId],
   );
+  // an attempt that died on the way back left no answer to replay (src/lib/idempotency.ts)
+  await query("delete from idempotency_keys where key like $1", [`refund:${orderId}:%`]);
 }
 
 async function patchCustomer(id: string, body: Record<string, unknown>) {

@@ -255,13 +255,25 @@ async function paidOrder(ref = "mock_ref_1"): Promise<Order> {
   return (await getOrder(order.id))!;
 }
 
+/** «Вернуть деньги» from a card opened NOW: the panel posts the number of
+    refund lines the card shows (`refundsSeen`, refund route header), so a
+    test that names none is the owner opening a fresh card each time. A repeat
+    from the SAME card is tests/refund-once-per-look.test.ts. */
 async function refund(id: string, body: Record<string, unknown> = {}) {
   const { POST } = await import("@/app/api/admin/orders/[id]/refund/route");
+  const seen = "refundsSeen" in body ? {} : { refundsSeen: refundsOf((await getOrder(id))?.payment).length };
   const res = await POST(
-    makeRequest(`/api/admin/orders/${id}/refund/`, { method: "POST", body, cookie: adminCookieHeader() }),
+    makeRequest(`/api/admin/orders/${id}/refund/`, { method: "POST", body: { ...seen, ...body }, cookie: adminCookieHeader() }),
     { params: Promise.resolve({ id }) },
   );
   return { status: res.status, body: (await res.json()) as Record<string, unknown> };
+}
+
+/** The attempt that died without an answer left none to replay: the lease
+    runOnce() held for it is gone (src/lib/idempotency.ts). A test that fakes
+    a lost answer by rolling the ledger back rolls this back with it. */
+async function forgetRefundAttempts(orderId: string): Promise<void> {
+  await query("delete from idempotency_keys where key like $1", [`refund:${orderId}:%`]);
 }
 
 async function refundWebhook(
@@ -446,6 +458,7 @@ describe("«Вернуть деньги» — the admin route", () => {
 
     // the answer never reached the panel: nothing was recorded
     await setOrderPayment(order.id, { refunds: [], refundedTotal: 0 });
+    await forgetRefundAttempts(order.id);
     const again = await refund(order.id, { amount: 5 });
     expect(again.status, JSON.stringify(again.body)).toBe(200);
 

@@ -2390,6 +2390,11 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Kontrollige summat — tagastada saab kuni jäägi ulatuses.",
       "Заказ закрыт — возврат не оформить.": "Tellimus on suletud — tagasimakset ei saa vormistada.",
+      // 26.09.2026: the same card pressed again after the refund went through (R-100086)
+      "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.":
+        "Selle tellimuse eest on juba tagastatud — seda tagastust ei saadetud, raha teist korda ei läinud. Avage «Tagasta raha» uuesti: aken näitab, kui palju on jäänud.",
+      "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново.":
+        "Selle tellimuse tagastust juba vormistatakse — raha teist korda ei lähe. Oodake minut ja avage tellimus uuesti.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Tühistatud",
       // 23.09.2026: the order's refund is pending, the card is refused until it settles
@@ -5880,6 +5885,11 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Check the amount — you can refund at most what is left.",
       "Заказ закрыт — возврат не оформить.": "The order is closed — no refund can be made.",
+      // 26.09.2026: the same card pressed again after the refund went through (R-100086)
+      "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.":
+        "This order has had a refund already — this one was not sent, the money did not go out twice. Open «Refund» again: the box will show what is left.",
+      "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново.":
+        "A refund on this order is already being made — the money will not go out twice. Wait a minute and open the order again.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Cancelled",
       // 23.09.2026: the order's refund is pending, the card is refused until it settles
@@ -43511,8 +43521,27 @@
        its amount, see srvOrderRefund); a card that would not take its money
        back is the owner's to look at */
     gift_whole: "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.",
-    gift_credit_failed: "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах»."
+    gift_credit_failed: "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».",
+    /* 26.09.2026 (staging, R-100086): the card this refund was confirmed on
+       was opened before the last refund — a second press, a second device,
+       a screen that never heard the answer. The server refuses it before a
+       cent moves and says what is already back (`messages`, printed first);
+       these two are the fallback for an answer that carried none. */
+    refund_stale: "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.",
+    in_progress: "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново."
   };
+  /** How many refund lines the order card holds — what «Вернуть деньги»
+      posts as `refundsSeen`. The server takes a refund only from a card whose
+      count is the ledger's own (POST /api/admin/orders/<id>/refund/,
+      `refund_stale`), so the same card pressed twice, or open on two devices,
+      is one refund; a card opened after the first carries the new count and
+      says «По заказу уже возвращено …». Counted the way the server counts:
+      an entry without a reference is not a refund. */
+  function admRefundSeen(row) {
+    var n = 0;
+    admRefunds(row && row.srv && row.srv.payment).forEach(function (r) { if (r && r.ref) n++; });
+    return n;
+  }
   /** The cards this order sold, as a sentence for the confirm card (its own
       block under the text): which will be cancelled with the refund, or the
       one somebody has spent from — the reason the server will refuse a full
@@ -43615,14 +43644,19 @@
       refocus("[data-admrefundamt]");
       return;
     }
-    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount));
+    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount), pa.seen);
   }
-  function srvOrderRefund(id, number, typed, max) {
+  /** `seen` — the count of refund lines the card was opened on
+      (admRefundSeen). Absent, the server reads it as 0: only the first
+      refund of an order can be made without it. */
+  function srvOrderRefund(id, number, typed, max, seen) {
     if (SRV.refundBusy) return;
     var amount = admRefundAmount(typed, max);
     if (isNaN(amount)) { toast(REFUND_ERR.bad_amount); return; }
     SRV.refundBusy = true; render();
-    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", { amount: amount }).then(function (r) {
+    var body = { amount: amount };
+    if (typeof seen === "number" && isFinite(seen)) body.refundsSeen = seen;
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", body).then(function (r) {
       SRV.refundBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -43661,7 +43695,11 @@
       for (var fi = 0; fi < found.length; fi++) {
         journalNote("Заказ " + number + ": Montonio уже сделал возврат " + eur(Number(found[fi].amount) || 0) + " — записали в заказ");
       }
-      if (found.length) admOrdersChanged();
+      /* …and a refusal because the card was older than the ledger (or its
+         twin is running right now) means the list behind this card is stale:
+         read it again, so the next «Вернуть деньги» opens on the new count and
+         says what is already back. */
+      if (found.length || err === "refund_stale" || err === "in_progress") admOrdersChanged();
       if (err === "gift_used") {
         var usedCode = admRefundCode(r.body);
         toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
@@ -43679,7 +43717,13 @@
         toast((srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат") + fwait);
       }
       render();
-    }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
+    }).catch(function () {
+      SRV.refundBusy = false; toast("Сервер не отвечает");
+      /* The answer is lost, not necessarily the refund: read the order again
+         so the next card counts what really happened. */
+      admOrdersChanged();
+      render();
+    });
   }
   function srvInvoiceResend(id) {
     if (SRV.invoiceBusy) return;
@@ -48296,6 +48340,8 @@
       pendingAction = {
         type: "order_refund", overlay: true, danger: true, id: refRow.id, number: refRow.number,
         amount: refRow.refundable.toFixed(2),
+        // the ledger this card was opened on — one refund per look (srvOrderRefund)
+        seen: admRefundSeen(refRow),
         title: "Вернуть деньги?",
         detail: admRefundConfirmText(refRow),
         preview: soldNote || undefined,

@@ -92,9 +92,33 @@
  * amount in a list that was empty because of the very failure he was retrying
  * — where a DIFFERENT amount was a second real refund. The 502 body carries
  * `recorded: [{ ref, amount, status }]` for what was written.
+ *
+ * AND PRESSING IT AGAIN AFTER IT WORKED (staging, 25.09.2026, R-100086).
+ *
+ * Everything above makes a retry of ONE refund land on the same references.
+ * None of it could tell a retry from a second refund once the first was
+ * written down: the sequence had moved, so the second press derived fresh
+ * references — the design's own word for a deliberate partial refund — and a
+ * 9 € gift-card order was given 4 € back twice. The Montonio half behaved the
+ * same way; the sandbox only looked safe because Montonio refused every
+ * bank-link refund there.
+ *
+ * So the body says which ledger the request was made from: `refundsSeen`, the
+ * number of refund lines the order card showed when «Вернуть деньги» was
+ * opened (absent = 0 — a caller that says nothing can only make the first).
+ * A count that is not the ledger's own is `refund_stale` (409, with
+ * `messages` RU/ET/EN and `refundedTotal`): nothing is asked of Montonio or
+ * the card. And one request per count runs at a time — runOnce() under a key
+ * made here from the order and the count (src/lib/idempotency.ts); a twin
+ * that arrives while it runs is `in_progress`. Two devices holding the same
+ * card used to be able to send two different sums at once, and the ledger's
+ * read-modify-write then kept one line of the two while the card had been
+ * credited both. A second partial refund is a card opened after the first,
+ * which prints «По заказу уже возвращено …» and carries the new count.
  */
 import { requireAdmin } from "@/lib/auth";
 import { creditGiftCard, getGiftCard, soldCardsUsage, type SoldCardUsage } from "@/lib/giftcards";
+import { fingerprintOf, runOnce, type IdempotentAnswer } from "@/lib/idempotency";
 import { readRefundRefusal, refundPendingText } from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, PAID_ORDER_STATUSES, writeAuditSafe, type Order } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
@@ -105,9 +129,13 @@ import {
   giftOwedByCard,
   giftRefundRef,
   refundableAmount,
+  refundBusyText,
   refundedTotal,
   refundIdempotencyKey,
+  refundIntentKey,
+  refundSeenOf,
   refundsOf,
+  refundStaleText,
   splitRefund,
   type RefundEntry,
 } from "@/lib/payments/refund";
@@ -121,6 +149,34 @@ type Ctx = { params: Promise<{ id: string }> };
 
 function bad(error: string, status = 400, extra: Record<string, unknown> = {}) {
   return Response.json({ ok: false, error, ...extra }, { status });
+}
+
+type Answer = IdempotentAnswer<Record<string, unknown>>;
+
+/** The same refusal as bad(), as an answer runOnce() hands back rather than a Response. */
+function no(error: string, status = 400, extra: Record<string, unknown> = {}): Answer {
+  return { status, body: { ok: false, error, ...extra } };
+}
+
+/** Stored beside the intent key; never looked up by. */
+const ROUTE = "POST /api/admin/orders/:id/refund";
+
+/**
+ * The ledger has moved since the card this request was made from: nothing
+ * goes out, and the owner is told what is already back and how to make a
+ * second refund if that is what he meant.
+ */
+function stale(order: Order): Answer {
+  const back = refundedTotal(order.payment);
+  console.warn(
+    `[api/admin/orders/:id/refund] ${order.number}: a refund made from an older card was refused ` +
+      `(${refundsOf(order.payment).length} lines, ${back} € back)`,
+  );
+  return no("refund_stale", 409, {
+    refundedTotal: back,
+    refunds: refundsOf(order.payment).length,
+    messages: refundStaleText(back),
+  });
 }
 
 function money(n: number): number {
@@ -250,7 +306,7 @@ export async function POST(req: Request, ctx: Ctx) {
   if (denied) return denied;
   const { id } = await ctx.params;
 
-  let body: { amount?: unknown };
+  let body: { amount?: unknown; refundsSeen?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -278,6 +334,62 @@ export async function POST(req: Request, ctx: Ctx) {
     return bad("already_refunded", 409, { refundedTotal: refundedTotal(order.payment) });
   }
 
+  /* The card this request was made from must be the ledger as it stands —
+     see the header, «AND PRESSING IT AGAIN AFTER IT WORKED». */
+  const seen = refundSeenOf(body.refundsSeen);
+  if (seen !== refundsOf(order.payment).length) {
+    const refused = stale(order);
+    return Response.json(refused.body, { status: refused.status });
+  }
+
+  const found: Order = order;
+  let run;
+  try {
+    run = await runOnce(
+      {
+        key: refundIntentKey(found.id, seen),
+        route: ROUTE,
+        // the sum is the intention: the same key with another sum is another device, refused below
+        fingerprint: fingerprintOf({ amount: body.amount ?? null }),
+      },
+      () => refundOnce(found, body),
+    );
+  } catch (err) {
+    console.error("[api/admin/orders/:id/refund] refund failed:", err);
+    return bad("db_unavailable", 503);
+  }
+  /* The same look at the ledger is being refunded right now — a double tap, or
+     the same card open on a second device with a different sum. Nothing was
+     run for this request. */
+  if (run.outcome === "in_flight" || run.outcome === "mismatch") {
+    return bad("in_progress", 409, { messages: refundBusyText() });
+  }
+  return Response.json(run.body, { status: run.status, headers: { "cache-control": "no-store" } });
+}
+
+/**
+ * One refund, run at most once per look at the ledger (see POST above). Every
+ * refusal is an answer, not a Response: runOnce() remembers a success and
+ * releases the key on anything else, so a refused attempt can be made again
+ * from the same card.
+ */
+async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise<Answer> {
+  /* Read again now that this request holds the key: a refund webhook (a
+     refund Renat made in Montonio's portal) may have landed between the check
+     in POST and the claim, and the references below are counted off this
+     ledger. */
+  let order: Order;
+  try {
+    order = (await getOrder(seenOrder.id)) ?? seenOrder;
+  } catch (err) {
+    console.error("[api/admin/orders/:id/refund] read failed:", err);
+    return no("db_unavailable", 503);
+  }
+  if (refundsOf(order.payment).length !== refundsOf(seenOrder.payment).length) return stale(order);
+  if (order.status === "refunded") {
+    return no("already_refunded", 409, { refundedTotal: refundedTotal(order.payment) });
+  }
+
   /* What the order was worth to the customer — the money plus what a gift
      card paid — and what of it has already gone back, to either place. */
   let value: number;
@@ -287,16 +399,16 @@ export async function POST(req: Request, ctx: Ctx) {
     [value, giftPaid, sold] = await Promise.all([refundValue(order), giftPaidOf(order), soldCardsUsage(order.id)]);
   } catch (err) {
     console.error("[api/admin/orders/:id/refund] ledger read failed:", err);
-    return bad("db_unavailable", 503);
+    return no("db_unavailable", 503);
   }
   const back = refundedTotal(order.payment);
   const left = refundableAmount(value, order.payment);
-  if (!(left > 0)) return bad("already_refunded", 409, { refundedTotal: back });
+  if (!(left > 0)) return no("already_refunded", 409, { refundedTotal: back });
 
   const asked = body.amount === undefined || body.amount === null || body.amount === "" ? left : Number(body.amount);
-  if (!Number.isFinite(asked)) return bad("bad_amount");
+  if (!Number.isFinite(asked)) return no("bad_amount");
   const amount = money(asked);
-  if (!(amount >= 0.01) || amount > left + 0.005) return bad("bad_amount", 400, { left });
+  if (!(amount >= 0.01) || amount > left + 0.005) return no("bad_amount", 400, { left });
   const full = amount >= left - 0.005;
 
   /* The cards this order sold. Voided by settleRefund() once the order is
@@ -305,10 +417,10 @@ export async function POST(req: Request, ctx: Ctx) {
   const live = sold.filter((c) => !c.voidedAt);
   if (live.length) {
     const used = live.find((c) => c.used > 0.004);
-    if (full && used) return bad("gift_used", 409, { code: used.code, used: used.used, amount: used.amount });
+    if (full && used) return no("gift_used", 409, { code: used.code, used: used.used, amount: used.amount });
     const goodsPart = money(Math.max(0, value - giftSoldValue(order)));
     if (!full && back + amount > goodsPart + 0.005) {
-      return bad("gift_whole", 409, { goodsLeft: money(Math.max(0, goodsPart - back)), left });
+      return no("gift_whole", 409, { goodsLeft: money(Math.max(0, goodsPart - back)), left });
     }
   }
 
@@ -340,7 +452,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const giftLeftTotal = money(giftOwed.reduce((sum, g) => sum + g.owed, 0));
   const split = splitRefund(amount, Math.max(0, giftLeftTotal));
   const giftCard = split.gift > 0 ? giftOwed.find((g) => g.owed > 0.004) : undefined;
-  if (split.gift > 0 && !giftCard) return bad("bad_amount", 400, { left });
+  if (split.gift > 0 && !giftCard) return no("bad_amount", 400, { left });
 
   /* Ask the card whether it can take its share BEFORE a cent leaves the bank.
      creditGiftCard() refuses a voided card, and a card is voided the moment
@@ -361,7 +473,7 @@ export async function POST(req: Request, ctx: Ctx) {
           ? "over_face_value"
           : null;
     if (why) {
-      return bad("gift_credit_failed", 409, { code: giftCard.code, detail: why, moneyRefunded: 0 });
+      return no("gift_credit_failed", 409, { code: giftCard.code, detail: why, moneyRefunded: 0 });
     }
   }
 
@@ -371,19 +483,19 @@ export async function POST(req: Request, ctx: Ctx) {
   let provider;
   let moneyResult: { ref: string; amount: number; status: RefundEntry["status"]; detail?: string } | null = null;
   if (split.money > 0) {
-    if (!providerRef) return bad("no_provider_ref", 409, { gift: split.gift, money: split.money });
+    if (!providerRef) return no("no_provider_ref", 409, { gift: split.gift, money: split.money });
     try {
       provider = getProvider();
     } catch (err) {
       console.error("[api/admin/orders/:id/refund] no provider:", err);
-      return bad("not_configured", 503);
+      return no("not_configured", 503);
     }
-    if (!canRefund(provider)) return bad("not_configured", 503);
+    if (!canRefund(provider)) return no("not_configured", 503);
     /* The order was taken by a different provider from the one configured now
        (a shop that switched, or an order settled by hand). Sending a refund
        through the wrong gateway would be a request about somebody else's id. */
     const took = typeof payment.provider === "string" ? payment.provider : "";
-    if (took && took !== provider.name) return bad("not_configured", 503, { detail: took });
+    if (took && took !== provider.name) return no("not_configured", 503, { detail: took });
 
     try {
       moneyResult = await provider.refundPayment({
@@ -447,7 +559,7 @@ export async function POST(req: Request, ctx: Ctx) {
         ...montonio,
         ...(adopted.length ? { recorded: adopted } : {}),
       });
-      return bad(code, 502, {
+      return no(code, 502, {
         detail,
         ...(refusal ? { reason: refusal.reason, messages: refusal.messages } : {}),
         ...montonio,
@@ -529,7 +641,7 @@ export async function POST(req: Request, ctx: Ctx) {
       const credited = await creditGiftCard(giftCard.code, split.gift, order.id, { ref: giftRef });
       if (!credited.ok) {
         console.error("[api/admin/orders/:id/refund] card credit refused:", credited.error, giftCard.code);
-        return bad("gift_credit_failed", 409, {
+        return no("gift_credit_failed", 409, {
           code: giftCard.code,
           detail: credited.error,
           moneyRefunded: split.money,
@@ -588,8 +700,9 @@ export async function POST(req: Request, ctx: Ctx) {
     }
 
     const fresh = (await getOrder(order.id)) ?? current;
-    return Response.json(
-      {
+    return {
+      status: 200,
+      body: {
         ok: true,
         amount: refundedNow,
         ...(moneyResult && moneyResult.status === "pending"
@@ -606,14 +719,13 @@ export async function POST(req: Request, ctx: Ctx) {
         status: out.status,
         order: fresh,
       },
-      { headers: { "cache-control": "no-store" } },
-    );
+    };
   } catch (err) {
     /* The money HAS left Montonio by now — this is the record of it that
        failed. Loud in the log and honest to the panel: the owner must look at
        Montonio rather than press the button again. */
     console.error("[api/admin/orders/:id/refund] recording the refund failed:", err);
-    return bad("recorded_failed", 503, {
+    return no("recorded_failed", 503, {
       ref: moneyResult?.ref,
       amount: moneyResult ? money(moneyResult.amount || split.money) : split.gift,
     });

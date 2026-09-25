@@ -4477,45 +4477,47 @@
       "id": "order-refund-retry",
       "area": "orders",
       "who": "dim",
-      "device": "phone",
+      "device": "any",
       "lang": "RU",
       "title": "Нажать «Вернуть деньги» второй раз",
       "steps": [
-        "Открыть оплаченный заказ и нажать «⋯» → «Вернуть деньги» на часть суммы.",
-        "Прочитать ответ: он должен быть по-русски и сказать, списано что-нибудь или нет.",
-        "Нажать «⋯» → «Вернуть деньги» ещё раз на ту же сумму.",
-        "Открыть «Доставка и оплата» и посчитать строки в списке возвратов.",
-        "Если заказ был оплачен подарочной картой — открыть эту карту."
+        "Открыть один оплаченный заказ в двух вкладках — или на телефоне и на компьютере.",
+        "В обеих нажать «⋯» → «Вернуть деньги» на одну и ту же часть суммы и оставить окошки открытыми.",
+        "Подтвердить в первой вкладке и прочитать ответ.",
+        "Подтвердить во второй.",
+        "Открыть «Доставка и оплата» и посчитать строки возвратов. Если платили подарочной картой — открыть эту карту.",
+        "Нажать «⋯» → «Вернуть деньги» ещё раз и прочитать окошко."
       ],
       "expect": [
-        "Второе нажатие не создало второй возврат — строка одна.",
-        "На счёт покупателя не ушло ни цента: всё вернулось на карту.",
-        "Баланс карты не вырос второй раз.",
-        "Сумма «Возвращено X из Y» после второго нажатия не изменилась.",
-        "Если Montonio отказал оба раза — обе фразы одинаковые, строк нет ни одной."
+        "Вторая вкладка отказала: «По этому заказу уже вернули …» — второй раз деньги не ушли.",
+        "Строка возврата одна, «Возвращено X из Y» не изменилось.",
+        "Баланс подарочной карты вырос один раз.",
+        "Новое окошко пишет «По заказу уже возвращено …» — ещё один возврат можно только оттуда.",
+        "Если Montonio отказал — обе фразы одинаковые, строк нет ни одной."
       ],
-      "why": "Кнопка, которая сказала «не удалось», — это кнопка, на которую нажмут ещё раз.",
+      "why": "Окошко, открытое до первого возврата, — это второй возврат одним нажатием.",
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z",
+      "markedAt": "2026-09-25T22:32:02.633Z",
       "en": {
         "title": "Press «Вернуть деньги» a second time",
         "steps": [
-          "Open a paid order and press «⋯» → «Вернуть деньги» for part of the amount.",
-          "Read the answer: it must be in plain words and say whether anything was taken.",
-          "Press «⋯» → «Вернуть деньги» again for the same amount.",
-          "Open «Доставка и оплата» and count the rows in the refund list.",
-          "If the order was paid with a gift card, open that card."
+          "Open one paid order in two tabs — or on the phone and on the computer.",
+          "In both press «⋯» → «Вернуть деньги» for the same part of the amount and leave both boxes open.",
+          "Confirm in the first tab and read the answer.",
+          "Confirm in the second.",
+          "Open «Доставка и оплата» and count the refund rows. If a gift card paid, open that card.",
+          "Press «⋯» → «Вернуть деньги» once more and read the box."
         ],
         "expect": [
-          "The second press made no second refund — there is one line.",
-          "Not a cent went to the customer's account: it all went back on the card.",
-          "The card's balance did not grow a second time.",
-          "«Возвращено X из Y» did not change after the second press.",
-          "If Montonio refused both times, both answers read alike and no row appears."
+          "The second tab refused: «По этому заказу уже вернули …» — no money went out twice.",
+          "One refund row, and «Возвращено X из Y» did not change.",
+          "The card's balance grew only once.",
+          "The new box says «По заказу уже возвращено …»; a further refund starts only there.",
+          "If Montonio refused, both answers read alike and no row appears."
         ],
-        "why": "A button that said «it did not work» is a button somebody presses again."
+        "why": "A box opened before the first refund is a second refund one tap away."
       }
     },
     {

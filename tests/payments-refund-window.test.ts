@@ -124,12 +124,19 @@ async function loseTheGiftLine(orderId: string): Promise<void> {
   const kept = refundsOf(order.payment).filter((r) => r.to !== "giftcard");
   await setOrderPayment(orderId, { refunds: kept, refundedTotal: refundedTotal({ refunds: kept }) });
   await query("update orders set status = 'paid' where id = $1", [orderId]);
+  /* …and neither of those two endings left an answer to replay: a 503 releases
+     the key runOnce() held for the attempt, and a killed function's lease runs
+     out (src/lib/idempotency.ts). */
+  await query("delete from idempotency_keys where key like $1", [`refund:${orderId}:%`]);
 }
 
+/** «Вернуть деньги» from a card opened NOW — the panel posts the number of
+    refund lines its card shows (`refundsSeen`); see tests/refund-once-per-look.test.ts. */
 async function refund(id: string, body: Record<string, unknown> = {}) {
   const { POST } = await import("@/app/api/admin/orders/[id]/refund/route");
+  const seen = "refundsSeen" in body ? {} : { refundsSeen: refundsOf((await getOrder(id))?.payment).length };
   const res = await POST(
-    makeRequest(`/api/admin/orders/${id}/refund/`, { method: "POST", body, cookie: adminCookieHeader() }),
+    makeRequest(`/api/admin/orders/${id}/refund/`, { method: "POST", body: { ...seen, ...body }, cookie: adminCookieHeader() }),
     { params: Promise.resolve({ id }) },
   );
   return { status: res.status, body: (await res.json()) as Record<string, unknown> };
