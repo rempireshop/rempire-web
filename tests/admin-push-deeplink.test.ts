@@ -71,6 +71,7 @@ function panel(opts: { search: string; admin?: boolean | null; orders?: Order[] 
     var FOUND = { q: null, want: "", rows: null, err: false, busy: false, seq: 0 };
     ${ONE_DECL}
     var PUSH = { want: null };
+    var ADM_OV = { at: 0 };   // admLogin asks for the panel's own product read again (loadAdminOverrides)
     var location = { search: env.search, pathname: "/shop2/admin/", hash: "" };
     var history = { state: { y: 0 }, replaceState: function (s, t, url) { env.replaced.push(url); location.search = url.indexOf("?") >= 0 ? url.slice(url.indexOf("?")) : ""; } };
     function apiJson(url) { return env.ask(url, "GET"); }
