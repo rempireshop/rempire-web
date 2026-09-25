@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 test.beforeEach(async ({}, testInfo) => {
   // phone + desktop are the two designed layouts (docs/design/admin-handoff-README.md);
@@ -714,5 +714,48 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
     await page.locator(`[data-stockqtyinput="${key}"]`).fill("500");
     await page.locator(`[data-stockqtyinput="${key}"]`).press("Enter");
     await expect(page.getByRole("status")).toContainText("→ 500");
+  });
+});
+
+/**
+ * The ONE dark button a phone pins above the tab bar (.adm-pin, fixed) must
+ * not ride in with the screen. A transform makes its box the containing block
+ * of anything `fixed` inside it, so the entrance slide (adm-up) stood the
+ * button mid-page for a quarter of a second («Салон», 25.09.2026). The screen
+ * of every section that pins one fades in without moving — keyed on
+ * body.adm-pinned as well as on :has(), so a phone browser without :has()
+ * gets it too (1a integration, 25.09.2026).
+ */
+test.describe("admin shell — the pinned button does not ride in with the screen", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(141) });
+
+  test("phone: Салон, Склад and Блог fade in without a slide while a button is pinned", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the button is pinned above the bar on a phone only");
+    await loginAsAdmin(page);
+    const places: Array<[string, string | undefined, string]> = [
+      ["pos", undefined, "Салон"],
+      ["goods", "stock", "Склад"],
+      ["blog", undefined, "Блог"],
+    ];
+    for (const [key, sub, label] of places) {
+      await adminSection(page, key);
+      if (sub) await page.locator(`.adm-tab[data-admtab="${sub}"]`).click();
+      await expect(page.locator(".adm-pin").first(), `${label}: no pinned button`).toBeVisible();
+      // the entrance class is up only for the render that changed the screen: put it back to read the cascade
+      const seen = await page.evaluate(() => {
+        const col = document.querySelector(".adm-page")!;
+        const had = col.classList.contains("adm-page--enter");
+        col.classList.add("adm-page--enter");
+        const screen = col.querySelector(":scope > .adm-screen")!;
+        const name = getComputedStyle(screen).animationName;
+        if (!had) col.classList.remove("adm-page--enter");
+        const pin = document.querySelector(".adm-pin")!.getBoundingClientRect();
+        const bar = document.querySelector(".adm-bar")!.getBoundingClientRect();
+        return { name, pinned: document.body.classList.contains("adm-pinned"), gap: Math.abs(pin.bottom - bar.top) };
+      });
+      expect(seen.pinned, `${label}: body.adm-pinned is not set`).toBe(true);
+      expect(seen.name, `${label}: the screen slides in and carries its pinned button`).toBe("adm-fadein");
+      expect(seen.gap, `${label}: the pinned button does not stand on the tab bar`).toBeLessThan(2);
+    }
   });
 });

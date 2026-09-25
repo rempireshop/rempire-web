@@ -1299,6 +1299,13 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
      then dropped to the bar («Салон», 25.09.2026). A screen that pins one
      fades without moving. */
   .adm-page--enter > .adm-screen:has(.adm-pin) { animation-name: adm-fadein; }
+  /* …and the same without :has(), which a phone browser before it (Safari
+     15.3, Firefox 120) drops whole: renderImpl marks the body whenever a pin
+     is on the page, whichever screen drew it — the order card's step, «+
+     Партнёр», «Сканировать», «+ Набор», the blog's «Опубликовать» (1a
+     integration, 25.09.2026). A separate rule, so neither can take the
+     other down with it. */
+  body.adm-pinned .adm-page--enter > .adm-screen { animation-name: adm-fadein; }
   body.adm-typing .adm-pin { display: none; }
   body.adm-pinned .adm-page { padding-bottom: calc(var(--a-barh) + var(--a-pinh) + 32px); }
   body.adm-pinned .adm-toast { bottom: calc(var(--a-barh) + var(--a-pinh) + 12px); }

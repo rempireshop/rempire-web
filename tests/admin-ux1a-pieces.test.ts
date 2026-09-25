@@ -156,6 +156,23 @@ describe("admPinnedHTML — the ONE dark button (README rule 2)", () => {
   it("renderImpl tells the CSS a pin is on screen (body.adm-pinned)", () => {
     expect(fn("renderImpl")).toContain('document.body.classList.toggle("adm-pinned", S.screen === "admin" && !!bodySlot.querySelector(".adm-pin"));');
   });
+  /* A transform makes its box the containing block of anything `fixed` in
+     it: the entrance slide (adm-up) carried the pinned button mid-page for a
+     quarter of a second («Салон», 25.09.2026). Salon's fix keyed it on
+     `:has(.adm-pin)`, which a browser without :has() drops whole; the body
+     class covers every screen that pins one, on every phone browser. */
+  it("the entrance fade never carries the pinned button — on any screen, with or without :has()", () => {
+    const css = readFileSync(fileURLToPath(new URL("../public/shop2/admin.css", import.meta.url)), "utf8")
+      .replace(/\r\n?/g, "\n").replace(/\/\*[\s\S]*?\*\//g, "");
+    const fade = /@keyframes adm-fadein \{([^}]*\}[^}]*)\}/.exec(css);
+    expect(fade, "@keyframes adm-fadein is gone").not.toBeNull();
+    expect(fade![1], "the pinned screen's fade moves the screen").not.toContain("transform");
+    // the phone block that makes .adm-pin fixed
+    const blocks = css.split(/(?=@media )/).filter((b) => /\.adm-pin \{[^}]*position: fixed/.test(b));
+    expect(blocks, "no phone rule pins .adm-pin").toHaveLength(1);
+    expect(blocks[0]).toContain("body.adm-pinned .adm-page--enter > .adm-screen { animation-name: adm-fadein; }");
+    expect(blocks[0], "salon's own rule went").toContain(".adm-page--enter > .adm-screen:has(.adm-pin) { animation-name: adm-fadein; }");
+  });
 });
 
 describe("admTagHTML — a status tag (README § 3)", () => {
