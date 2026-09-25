@@ -53,7 +53,7 @@ function names(pay: Pay, codes: string[]): string[] {
 }
 
 /** The «Оплата» block's text for a bank-link order paid through `code`. */
-function paymentBlock(pay: Pay, code: string): string {
+function paymentBlock(pay: Pay, code: string, detail?: string): string {
   return runInNewContext(`
     var PAYMETHODS = ${JSON.stringify(pay)};
     var BANK_CODES = ${sliceLiteral("var BANK_CODES = ", "};")};
@@ -68,7 +68,7 @@ function paymentBlock(pay: Pay, code: string): string {
     ${slice("payPiecesHTML")}
     ${slice("bankNameOf")}
     ${slice("admPaymentHTML")}
-    admPaymentHTML({ total: 30, payment: { method: "bank", bank: ${JSON.stringify(code)}, provider: "montonio", status: "paid" } });
+    admPaymentHTML({ total: 30, payment: { method: "bank", bank: ${JSON.stringify(code)}, provider: "montonio", status: "paid", detail: ${JSON.stringify(detail ?? null)} } });
   `, {}) as string;
 }
 
@@ -97,6 +97,49 @@ describe("the order card names the bank a shopper paid through", () => {
     const html = paymentBlock(NONE, "RVUALT2V");
     expect(html).toContain("<span>Revolut</span>");
     expect(html).not.toContain("RVUALT2V");
+  });
+
+  /* Staging, 25.09.2026 (order-card-payment, R-100061): paid through «Revolut
+     Poland» — Montonio's own words in payment.detail — and the card said
+     «Банковская ссылка · Revolut Estonia». Montonio lists one bank per
+     country, and Revolut, N26 and Wise sit in several countries under ONE BIC,
+     so the first entry of the list was simply the Estonian one. */
+  const MULTI: Pay = {
+    banks: null,
+    all: [
+      { code: "HABAEE2X", name: "Swedbank Estonia" },
+      { code: "RVUALT2V", name: "Revolut Estonia" },
+      { code: "NTSBDEB1", name: "N26 Estonia" },
+      { code: "HABALV22", name: "Swedbank Latvia" },
+      { code: "RVUALT2V", name: "Revolut Latvia" },
+      { code: "NTSBDEB1", name: "N26 Latvia" },
+      { code: "RVUALT2V", name: "Revolut Poland" },
+      { code: "CTDLBANK", name: "Citadele Latvia" },
+      { code: "CTDLBANK", name: "Citadele Lithuania" },
+    ],
+  };
+
+  it("a BIC shared by several countries is named without a country", () => {
+    expect(names(MULTI, ["RVUALT2V", "NTSBDEB1", "CTDLBANK"])).toEqual(["Revolut", "N26", "Citadele"]);
+    const html = paymentBlock(MULTI, "RVUALT2V");
+    expect(html).toContain("<span>Revolut</span>");
+    expect(html).not.toContain("Estonia");
+  });
+
+  it("…unless the payment itself says which: Montonio's own name for the bank it went through", () => {
+    const html = paymentBlock(MULTI, "RVUALT2V", "paymentInitiation · Revolut Poland");
+    expect(html).toContain("<span>Revolut Poland</span>");
+    expect(html).not.toContain("Revolut Estonia");
+    // …and only a name that belongs to THIS bank: anything else is not believed
+    expect(paymentBlock(MULTI, "RVUALT2V", "paymentInitiation · Swedbank Estonia")).toContain("<span>Revolut</span>");
+    expect(paymentBlock(MULTI, "RVUALT2V", "отмечено оплаченным в админке")).toContain("<span>Revolut</span>");
+    // the list not in yet: the payment's own name still wins over the bare brand
+    expect(paymentBlock(NONE, "RVUALT2V", "paymentInitiation · Revolut Poland")).toContain("<span>Revolut Poland</span>");
+  });
+
+  it("a bank that is in one country keeps its full name", () => {
+    expect(names(MULTI, ["HABAEE2X", "HABALV22"])).toEqual(["Swedbank Estonia", "Swedbank Latvia"]);
+    expect(paymentBlock(MULTI, "HABAEE2X", "paymentInitiation · Swedbank Estonia")).toContain("<span>Swedbank Estonia</span>");
   });
 
   it("the card asks for Montonio's list when the order was paid by bank link", () => {

@@ -174,6 +174,21 @@ describe("onOrderPaid", () => {
     }
   });
 
+  /* Staging, 25.09.2026 (R-100078, R-100087): a PAID order cancelled from the
+     card told the customer «Деньги за него не списаны — платить ничего не
+     нужно». The cancel route now hands the letter what the order was worth,
+     and the letter says the money comes back (src/emails/order-cancelled.ts). */
+  it("«Заказ отменён» for a paid order says the money comes back, not that none was taken", async () => {
+    const { fn, calls } = makeFetch();
+    vi.stubGlobal("fetch", fn);
+    await onOrderClosed({ ...ORDER, lang: "RU", status: "cancelled" }, { kind: "cancelled", value: 57.5 });
+    const text = String(payloadOf(calls.resend[0]).text ?? "");
+    expect(text).toContain("Деньги за него мы вернём");
+    expect(text).not.toContain("не списаны");
+    expect(text).not.toContain("платить ничего не нужно");
+    vi.unstubAllGlobals();
+  });
+
   /* Montonio answers 200 PENDING for a refund it has merely ACCEPTED: it can
      still fail for want of balance, and it cancels itself after ten days. Until
      19.09.2026 that state sent «Деньги возвращены», so a customer could have it

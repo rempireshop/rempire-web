@@ -31,7 +31,7 @@ import {
   textBody,
   textFooter,
 } from "./layout";
-import { mailText, mailTextHtml, type MailTextValues } from "./texts";
+import { fillPlaceholders, hasMailText, mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, OrderLike, RenderedEmail } from "./types";
 
 /**
@@ -59,7 +59,98 @@ export interface ClosedOptions {
    */
   giftAmount?: number;
   giftCode?: string;
+  /**
+   * `cancelled` only: what the order was worth to the customer — the money
+   * plus what a gift card paid (src/lib/payments/settle.ts refundValue()). The
+   * route that cancels knows it; without it the letter reads the payment
+   * alone (cancelMoneyOf below).
+   */
+  value?: number;
 }
+
+/**
+ * Where the money of a cancelled order stands — the one fact the letter must
+ * not get wrong. «Отменить заказ» moves no money: the refund is the card's own
+ * «Вернуть деньги» (the panel's confirm says so, admCancelConfirmText in
+ * public/shop2/app.js). Staging, 25.09.2026, R-100078 and R-100087: two PAID
+ * orders were cancelled and both customers read «Деньги за него не списаны —
+ * платить ничего не нужно».
+ *
+ *   none  nothing came in: not paid, or a promo / points covered the order;
+ *   owed  money came in — paid, or held as too little — and not all of it has
+ *         gone back yet («мы вернём»);
+ *   back  what came in has gone back already.
+ */
+export type CancelMoney = "none" | "owed" | "back";
+
+export function cancelMoneyOf(order: OrderLike, value?: number): CancelMoney {
+  const p = (order.payment && typeof order.payment === "object" ? order.payment : {}) as Record<string, unknown>;
+  /* A caller that hands over a value is saying the money came in — the
+     cancel route only does for an order that was paid when it was cancelled. */
+  const came = p.status === "paid" || !!p.held || (typeof value === "number" && value > 0.004);
+  if (!came) return "none";
+  const total = num(order.total, 0);
+  /* What came in: the caller's figure (money + gift card), else the money
+     itself — and an order a gift card covered entirely has a total of 0 and
+     is still owed the card's part back, whatever it was. */
+  const worth =
+    typeof value === "number" && Number.isFinite(value)
+      ? value
+      : total > 0
+        ? total
+        : p.method === "giftcard"
+          ? Number.POSITIVE_INFINITY
+          : 0;
+  if (!(worth > 0.004)) return "none";
+  const refunds = Array.isArray(p.refunds) ? (p.refunds as Array<Record<string, unknown>>) : [];
+  const back = refunds
+    .filter((r) => r && typeof r === "object" && r.status !== "failed")
+    .reduce((sum, r) => sum + num(r.amount, 0), 0);
+  return back >= worth - 0.005 ? "back" : "owed";
+}
+
+/**
+ * The paid versions of «Заказ отменён». The opening sentence is the owner's
+ * once he has written one («Письма», ./texts.ts); until then it follows the
+ * money the way gift-card.ts's opening follows the giver. The unpaid opening
+ * is the template's own default and reads exactly as it always did.
+ */
+const CANCEL_PAID: Record<Exclude<CancelMoney, "none">, Record<Lang, { preheader: string; intro: string; detail: string }>> = {
+  owed: {
+    ru: {
+      preheader: "Заказ отменён. Деньги за него мы вернём.",
+      intro: "Заказ № {order} отменён. Деньги за него мы вернём — об этом придёт отдельное письмо.",
+      detail: "Деньги за этот заказ мы вернём тем же путём, каким они пришли.",
+    },
+    et: {
+      preheader: "Tellimus on tühistatud. Raha selle eest tagastame.",
+      intro: "Tellimus nr {order} on tühistatud. Raha selle eest tagastame — sellest tuleb eraldi kiri.",
+      detail: "Selle tellimuse raha tagastame sama teed, kust see tuli.",
+    },
+    en: {
+      preheader: "The order has been cancelled. We will refund what you paid.",
+      intro: "Order no. {order} has been cancelled. We will refund what you paid — a separate e-mail will follow.",
+      detail: "The money for this order goes back the way it came.",
+    },
+  },
+  back: {
+    ru: {
+      preheader: "Заказ отменён. Деньги за него уже возвращены.",
+      intro: "Заказ № {order} отменён. Деньги за него уже возвращены.",
+      detail: "Деньги за этот заказ уже возвращены.",
+    },
+    et: {
+      preheader: "Tellimus on tühistatud. Raha selle eest on juba tagastatud.",
+      intro: "Tellimus nr {order} on tühistatud. Raha selle eest on juba tagastatud.",
+      detail: "Selle tellimuse raha on juba tagastatud.",
+    },
+    en: {
+      preheader: "The order has been cancelled. The money has already been refunded.",
+      intro: "Order no. {order} has been cancelled. The money for it has already been refunded.",
+      detail: "The money for this order has already been refunded.",
+    },
+  },
+};
 
 /**
  * The money line and the «what next» line when a gift card is involved. Two
@@ -201,28 +292,35 @@ export function renderOrderCancelled(
   const sum = money(amount);
 
   const values: MailTextValues = { name, order: number, total: sum, shop: BRAND.name };
-  const intro = mailText(template, L, "intro", values);
+  /* A cancelled order the customer PAID for: the money line, the preheader
+     and — while the owner has written no opening of his own — the opening say
+     where the money is, never «не списаны» (cancelMoneyOf above). */
+  const moneyState: CancelMoney = kind === "cancelled" ? cancelMoneyOf(order, options.value) : "none";
+  const paid = moneyState === "none" ? null : CANCEL_PAID[moneyState][L];
+  const paidIntro = paid && !hasMailText(template, L, "intro") ? fillPlaceholders(paid.intro, values).trim() : "";
+  const intro = paidIntro || mailText(template, L, "intro", values);
+  const introHtml = paidIntro ? esc(paidIntro) : mailTextHtml(template, L, "intro", values);
   const signature = mailText(template, L, "signature", values);
   const withSum = kind !== "cancelled";
   const gift = withSum ? giftLines(L, amount, options) : null;
-  const detail = gift ? gift.detail : withSum ? t.detail[0] + sum + t.detail[1] : t.detail[0];
+  const detail = gift ? gift.detail : withSum ? t.detail[0] + sum + t.detail[1] : paid ? paid.detail : t.detail[0];
   const detailHtml = gift
     ? gift.detailHtml
     : withSum
       ? esc(t.detail[0]) + money(amount, true) + esc(t.detail[1])
-      : esc(t.detail[0]);
+      : esc(paid ? paid.detail : t.detail[0]);
   const wait = gift ? gift.wait : t.wait;
 
   const body =
     rowTitle(t.title) +
-    rowLead(`${esc(hello)} ${mailTextHtml(template, L, "intro", values)}`) +
+    rowLead(`${esc(hello)} ${introHtml}`) +
     rowPanel(t.label, detailHtml, esc(wait)) +
     rowNote([mailTextHtml(template, L, "signature", values)]);
 
   const html = shell({
     lang: L,
     title: `${t.title} — Rempire`,
-    preheader: t.preheader,
+    preheader: paid ? paid.preheader : t.preheader,
     body,
     footerNote: esc(c.serviceNote),
   });

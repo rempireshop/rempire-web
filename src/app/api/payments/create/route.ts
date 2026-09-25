@@ -3,7 +3,7 @@ import { getOrder, setOrderPayment } from "@/lib/orders";
 import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { toPaymentOrder, orderLang } from "@/lib/payments/order";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { giftLinks, receiptUrl } from "@/lib/payments/receipt";
+import { giftLinks, isPickupOrder, receiptUrl } from "@/lib/payments/receipt";
 import { coveredBy, settleWithoutPayment } from "@/lib/payments/settle";
 import {
   PaymentError,
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
       paid: true,
       provider: "none",
       ref: "",
-      redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift }),
+      redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift, pickup: isPickupOrder(row) }),
     });
   }
 

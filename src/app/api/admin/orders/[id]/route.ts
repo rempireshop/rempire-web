@@ -56,6 +56,7 @@ import { cancelLetter, dropStatusLetters, holdAndSend, type LetterHeld } from "@
 import { applyPaymentResult } from "@/lib/payments/apply";
 import { notifyOrderClosed, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { refundedTotal } from "@/lib/payments/refund";
+import { refundValue } from "@/lib/payments/settle";
 import { setReturnHandled } from "@/lib/returns";
 import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
 
@@ -95,6 +96,17 @@ function settled(order: Order): boolean {
   if ((["paid", "shipped", "delivered"] as string[]).includes(order.status)) return true;
   const p = order.payment as { status?: unknown } | null | undefined;
   return !!p && typeof p === "object" && p.status === "paid";
+}
+
+/** What an order was worth to the customer — the money plus what a gift card
+    paid — for «Заказ отменён»; the total alone if the card ledger is down. */
+async function worthOf(order: Order): Promise<number> {
+  try {
+    return await refundValue(order);
+  } catch (err) {
+    console.error("[api/admin/orders/:id] order value unreadable for the cancel letter:", err);
+    return Number(order.total) || 0;
+  }
 }
 
 /**
@@ -277,7 +289,16 @@ export async function PATCH(req: Request, ctx: Ctx) {
          later, so the toast's «Вернуть» can still stop it. Never fatal: a
          status that already moved must not fail because Resend had a bad day. */
       if (status === "cancelled") {
-        letter = await holdAndSend(found.id, "cancelled", (now) => notifyOrderClosed(now, { kind: "cancelled" }));
+        /* …and it says where the money is. The cancel moves none of it — the
+           refund is «Вернуть деньги» — so a PAID order's letter must say the
+           money comes back, not «не списаны — платить ничего не нужно» (two
+           paid orders on staging, 25.09.2026, R-100078 and R-100087). What
+           came in is read when the letter leaves, refunds made in the ten
+           seconds included. */
+        const tookMoney = settled(found) || !!(found.payment as { held?: unknown } | null)?.held;
+        letter = await holdAndSend(found.id, "cancelled", async (now) =>
+          notifyOrderClosed(now, { kind: "cancelled", ...(tookMoney ? { value: await worthOf(now) } : {}) }),
+        );
       }
       /* «Изменить статус вручную → возврат» is money: it went through its own
          confirm and has no «Вернуть», so its letter goes now. It names what has

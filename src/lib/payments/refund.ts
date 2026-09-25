@@ -386,6 +386,98 @@ export function giftRefundRef(orderId: string, seq: number, amount: number): str
   return `gc:${h.slice(0, 32)}`;
 }
 
+/* ---------- one refund per look at the order ------------------------------
+ *
+ * The two keys above make a retry of ONE refund safe — the retry derives the
+ * same key and the same card ref, so Montonio and the card ledger refuse the
+ * copy. What they cannot do is tell a retry from a second refund once the
+ * first has been written down: the sequence has moved, the next key is a new
+ * key, and a new key is a new refund. That is correct for a partial refund the
+ * owner really means, and it is exactly how a gift-card order paid 9 € was
+ * given 8 € back from two presses of «Вернуть деньги» for 4 € (staging,
+ * R-100086, 25.09.2026): the second press was answered as a second, deliberate
+ * refund. The Montonio half is no different — on the sandbox it only looked
+ * safe because Montonio refused every bank-link refund there.
+ *
+ * So the request now says which ledger it was made from: `refundsSeen`, the
+ * number of refund lines the order card showed when «Вернуть деньги» was
+ * opened. The route refuses a request whose count is not the ledger's own
+ * (refundSeenOf, `refund_stale`) and runs at most one refund per count at a
+ * time (refundIntentKey, src/lib/idempotency.ts). A double tap, a second
+ * device holding the same card, a retry from a screen that never heard the
+ * answer — all of them were made from the ledger BEFORE the first refund, and
+ * none of them can be a second refund. A second partial refund is still one
+ * tap away, from a card opened after the first: that card prints «По заказу
+ * уже возвращено …» and carries the new count.
+ */
+
+/**
+ * The count a request says it was made from.
+ *
+ * Absent is 0, not «no check»: a caller that says nothing about the ledger
+ * can only make the FIRST refund of an order. Anything that is not a whole
+ * number ≥ 0 is -1, which no ledger ever has — a count nobody could have seen
+ * must not match by accident and let a stale card through.
+ */
+export function refundSeenOf(v: unknown): number {
+  if (v === undefined || v === null || v === "") return 0;
+  const n = typeof v === "string" ? Number(v.trim()) : typeof v === "number" ? v : NaN;
+  return Number.isInteger(n) && n >= 0 ? n : -1;
+}
+
+/**
+ * The inbound idempotency key for one refund intention: this order, as it
+ * stood at `seen` refund lines. Server-made from the order, never from a
+ * header the client could forget to send — src/lib/idempotency.ts runOnce()
+ * then lets exactly one request per look at the ledger run, and answers a
+ * twin that arrives while it runs with `in_progress`.
+ */
+export function refundIntentKey(orderId: string, seen: number): string {
+  return `refund:${orderId}:${Math.max(0, Math.trunc(seen))}`;
+}
+
+/** «12,90 €» — the panel's own spelling, in all three languages. */
+function eurText(n: number): string {
+  const v = money(n);
+  return (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", ",")) + " €";
+}
+
+/**
+ * What the owner reads when the refund he confirmed was made from an order
+ * card that no longer matches the ledger — `refund_stale`. It has to say two
+ * things plainly: nothing went out this time, and how to make a second refund
+ * if that is what he meant. The button's name is the one his panel shows in
+ * that language («Tagasta raha», «Refund» — the UI dictionaries in
+ * public/shop2/app.js).
+ */
+export function refundStaleText(refunded: number): { RU: string; ET: string; EN: string } {
+  const back = money(refunded) > 0;
+  const sum = eurText(refunded);
+  return {
+    RU:
+      (back ? "По этому заказу уже вернули " + sum + "." : "Возвраты по этому заказу изменились.") +
+      " Этот возврат не отправлен — второй раз деньги не ушли." +
+      " Если нужен ещё один возврат, откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.",
+    ET:
+      (back ? "Selle tellimuse eest on juba tagastatud " + sum + "." : "Selle tellimuse tagastused on muutunud.") +
+      " Seda tagastust ei saadetud — raha teist korda ei läinud." +
+      " Kui on vaja veel üht tagastust, avage «Tagasta raha» uuesti: aken näitab, kui palju on jäänud.",
+    EN:
+      (back ? sum + " has already been refunded on this order." : "The refunds on this order have changed.") +
+      " This refund was not sent — the money did not go out twice." +
+      " If you need another refund, open «Refund» again: the box will show what is left.",
+  };
+}
+
+/** `in_progress` — the same refund is being made right now, from another tap or another device. */
+export function refundBusyText(): { RU: string; ET: string; EN: string } {
+  return {
+    RU: "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново.",
+    ET: "Selle tellimuse tagastust juba vormistatakse — raha teist korda ei lähe. Oodake minut ja avage tellimus uuesti.",
+    EN: "A refund on this order is already being made — the money will not go out twice. Wait a minute and open the order again.",
+  };
+}
+
 /** True once the refunds cover the order — the moment it becomes «возврат». */
 export function fullyRefunded(total: number, refunded: number): boolean {
   return num(total) > 0 ? refunded >= num(total) - 0.005 : refunded > 0;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrderByNumber } from "@/lib/orders";
 import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { giftLinks, receiptUrl, type ReceiptState } from "@/lib/payments/receipt";
+import { giftLinks, isPickupOrder, receiptUrl, type ReceiptState } from "@/lib/payments/receipt";
 import { settlePayment } from "@/lib/payments/settle";
 import { guardTokenChecks } from "@/lib/payments/token-guard";
 
@@ -33,6 +33,7 @@ function done(
     method?: string;
     bank?: string;
     country?: string;
+    pickup?: boolean;
   } = {},
 ) {
   return NextResponse.redirect(receiptUrl(base, { number, state, ...extra }), 303);
@@ -178,6 +179,8 @@ async function handle(req: Request, params: URLSearchParams) {
        The screen cannot work this out for itself: it is a cold page load
        after the redirect, and its own checkout state has reset to Estonia. */
     country: countryOf(order),
+    // a paid self-pickup is promised a letter, not a tracking number (receiptUrl drops it unless paid)
+    pickup: isPickupOrder(order),
   });
 }
 

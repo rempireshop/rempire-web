@@ -187,6 +187,54 @@ describe("readRefundRefusal — each documented refusal gets its own words", () 
     expect(read.messages.ET).toMatch(/ühe tööpäeva/);
   });
 
+  /* Staging, 25.09.2026 (order-refund-retry, R-100083): the sandbox answered
+     «Refunds are not enabled for store [<uuid>] and payment method [montonio]
+     > [paymentInitiation]» and the owner was shown that line — English, and
+     the store's id with it. It is a setting on Montonio's side, it has one
+     fix, and the raw line belongs in the journal's detail, not on his screen. */
+  it("reads «Refunds are not enabled for store …» as a Montonio setting, without the store id", () => {
+    const STORE = "0c6d4d4e-2a53-4f37-9d58-3a1b2c4d5e6f";
+    const detail = montonioErrorText(
+      400,
+      JSON.stringify({ message: `Refunds are not enabled for store [${STORE}] and payment method [montonio] > [paymentInitiation]` }),
+    );
+    const read = readRefundRefusal(detail);
+    expect(read.reason).toBe("refunds_disabled");
+    // the raw line is still there for the journal row — just not on the screen
+    expect(read.montonio).toContain(STORE);
+    for (const lang of MONTONIO_LANGS) {
+      expect(read.messages[lang]).not.toContain(STORE);
+      expect(read.messages[lang]).not.toContain("Refunds are not enabled");
+      expect(read.messages[lang]).not.toContain("paymentInitiation");
+      expect(read.messages[lang]).toContain("Refundable bank payments");
+    }
+    expect(read.messages.RU).toContain("банковской ссылкой");
+    expect(read.messages.RU).toContain("Ничего не списано.");
+    expect(read.messages.ET).toContain("pangalingiga");
+    expect(read.messages.EN).toContain("by bank link");
+
+    // another payment method: no bank-link product to name, the same plain gist
+    const card = readRefundRefusal(
+      montonioErrorText(400, JSON.stringify({ message: `Refunds are not enabled for store [${STORE}] and payment method [montonio] > [cardPayments]` })),
+    );
+    expect(card.reason).toBe("refunds_disabled");
+    expect(card.messages.RU).toContain("картой");
+    expect(card.messages.RU).not.toContain("Refundable bank payments");
+    for (const lang of MONTONIO_LANGS) expect(card.messages[lang]).not.toContain(STORE);
+  });
+
+  it("a refusal nobody has taught it is quoted — but a store or order id in it is not", () => {
+    const read = readRefundRefusal(
+      montonioErrorText(400, JSON.stringify({ message: `Something new about order [${ORDER_UUID}]` })),
+    );
+    expect(read.reason).toBe("unknown");
+    expect(read.montonio).toContain(ORDER_UUID);
+    for (const lang of MONTONIO_LANGS) {
+      expect(read.messages[lang]).toContain("Something new about order […]");
+      expect(read.messages[lang]).not.toContain(ORDER_UUID);
+    }
+  });
+
   it("classifies 401 and 403 even when the body says nothing at all", () => {
     expect(readRefundRefusal("HTTP 401").reason).toBe("bad_access_key");
     expect(readRefundRefusal("HTTP 403").reason).toBe("bad_secret_key");

@@ -703,6 +703,7 @@
       "Оформляем заказ…": "Vormistame tellimust…",
       "Заказ оплачен": "Tellimus makstud",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui pakk läheb vedajale, saadame jälgimisnumbri.",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui tellimusele saab järele tulla, anname teada.",
       "Оплата не прошла": "Makse ebaõnnestus",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "Raha ei võetud. Tellimus on alles — proovi uuesti maksta või vali teine makseviis.",
       "Заказ не оплачен": "Tellimus on maksmata",
@@ -1119,6 +1120,8 @@
 
       // i18n pass 2: checkout field errors — the shopper meets these mid-address
       "Впишите имя и фамилию — их напечатают на посылке.": "Kirjuta ees- ja perekonnanimi — need trükitakse pakile.",
+      "Впишите имя и фамилию — ими подпишем подарочную карту.": "Kirjuta ees- ja perekonnanimi — nendega allkirjastame kinkekaardi.",
+      "Впишите имя и фамилию — по ним выдадим заказ.": "Kirjuta ees- ja perekonnanimi — nende järgi anname tellimuse üle.",
       "Впишите улицу и дом.": "Kirjuta tänav ja maja number.",
       "Впишите индекс.": "Kirjuta postiindeks.",
       "Впишите город.": "Kirjuta linn.",
@@ -2390,6 +2393,11 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Kontrollige summat — tagastada saab kuni jäägi ulatuses.",
       "Заказ закрыт — возврат не оформить.": "Tellimus on suletud — tagasimakset ei saa vormistada.",
+      // 26.09.2026: the same card pressed again after the refund went through (R-100086)
+      "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.":
+        "Selle tellimuse eest on juba tagastatud — seda tagastust ei saadetud, raha teist korda ei läinud. Avage «Tagasta raha» uuesti: aken näitab, kui palju on jäänud.",
+      "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново.":
+        "Selle tellimuse tagastust juba vormistatakse — raha teist korda ei lähe. Oodake minut ja avage tellimus uuesti.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Tühistatud",
       // 23.09.2026: the order's refund is pending, the card is refused until it settles
@@ -4222,6 +4230,7 @@
       "Оформляем заказ…": "Placing your order…",
       "Заказ оплачен": "Order paid",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Thank you. The confirmation and receipt are on their way to your inbox; you will get a tracking number when the parcel is handed to the carrier.",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.": "Thank you. The confirmation and receipt are on their way to your inbox; we will write when the order is ready to collect.",
       "Оплата не прошла": "Payment did not go through",
       "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "No money was taken. The order is saved — try paying again or choose another method.",
       "Заказ не оплачен": "The order is not paid",
@@ -4635,6 +4644,8 @@
 
       // i18n pass 2: checkout field errors — the shopper meets these mid-address
       "Впишите имя и фамилию — их напечатают на посылке.": "Enter your first and last name — they are printed on the parcel.",
+      "Впишите имя и фамилию — ими подпишем подарочную карту.": "Enter your first and last name — we sign the gift card with them.",
+      "Впишите имя и фамилию — по ним выдадим заказ.": "Enter your first and last name — the order is handed over under that name.",
       "Впишите улицу и дом.": "Enter your street and house number.",
       "Впишите индекс.": "Enter your postcode.",
       "Впишите город.": "Enter your town or city.",
@@ -5880,6 +5891,11 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Check the amount — you can refund at most what is left.",
       "Заказ закрыт — возврат не оформить.": "The order is closed — no refund can be made.",
+      // 26.09.2026: the same card pressed again after the refund went through (R-100086)
+      "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.":
+        "This order has had a refund already — this one was not sent, the money did not go out twice. Open «Refund» again: the box will show what is left.",
+      "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново.":
+        "A refund on this order is already being made — the money will not go out twice. Wait a minute and open the order again.",
       /* gift cards and refunds (10.09.2026): the order card and the two refusals */
       "Аннулирована": "Cancelled",
       // 23.09.2026: the order's refund is pending, the card is refused until it settles
@@ -7365,6 +7381,12 @@
     // …and the journal line it leaves behind
     [/^Письмо клиенту · заказ (.+)$/,
       { ET: "Kiri kliendile · tellimus $1", EN: "Letter to the customer · order $1" }],
+    /* One order is «1 order», «1 tellimus» — the general rules below said
+       «1 orders» on «Обзор» (staging, 25.09.2026). The same shape as «(1) шт»:
+       the singular first, anchored, so «21 заказ» still reads «21 orders». */
+    [/^(1) заказ · (\d+) в салоне$/, { ET: "$1 tellimus · $2 salongis", EN: "$1 order · $2 in the salon" }],
+    [/^(1) заказ · (.+) в день$/, { ET: "$1 tellimus · $2 päevas", EN: "$1 order · $2 per day" }],
+    [/^(1) заказ$/, { ET: "$1 tellimus", EN: "$1 order" }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -18658,6 +18680,15 @@
   function shipBad(key) { return S.shipTouched && shipRequired(key) && shipEmpty(key); }
   function shipMsg(key) {
     if (key === "phone" && S.ship.phone.trim()) return "Проверьте номер — похоже, в нём не хватает цифр.";
+    /* The name is printed on a parcel only when there is one. A gift-card
+       order has none — the name signs the card («От: …», src/lib/giftcard-
+       pdf.ts) — and a self-pickup is handed over at the counter by it
+       (staging, 25.09.2026: the gift checkout said «напечатают на посылке»). */
+    if (key === "name") {
+      var m = shipMethod();
+      if (m === "digital") return "Впишите имя и фамилию — ими подпишем подарочную карту.";
+      if (m === "pickup") return "Впишите имя и фамилию — по ним выдадим заказ.";
+    }
     return SHIP_MSG[key];
   }
 
@@ -22471,21 +22502,54 @@
       so a bank the owner has since switched off in «Доставка и оплата» keeps
       its name on the orders it already paid — then the checkout's list, the
       built-in five, the three international ones, and the code only when
-      nothing is known. */
-  function bankNameOf(code) {
+      nothing is known.
+
+      `detail` — the payment's own `payment.detail`. For a bank link Montonio
+      puts its name for the bank THIS payment went through in it: the order
+      token's `paymentProviderName`, «paymentInitiation · Revolut Poland»
+      (src/lib/payments/montonio.ts verifyToken). It matters for the banks
+      that sit in several countries under one BIC: Montonio lists one entry
+      per country («Revolut Estonia», «Revolut Poland», … all RVUALT2V), and
+      the first of them named a Polish payment «Revolut Estonia» (staging,
+      25.09.2026, R-100061). So: the payment's own name when it is one of this
+      BIC's names; else, for a BIC with several names, the bank without the
+      country («Revolut», or the words every name starts with); else the one
+      name. Anything else in `detail` («отмечено оплаченным в админке») is
+      not a bank and is not read. */
+  function bankNameOf(code, detail) {
+    var parts = typeof detail === "string" ? detail.split(" · ") : [];
+    var own = parts.length === 2 && parts[0] === "paymentInitiation" ? parts[1].trim() : "";
+    var brand = Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : "";
+    var names = [];
     var lists = [PAYMETHODS.all || [], PAYMETHODS.banks || []];
     for (var l = 0; l < lists.length; l++) {
-      for (var i = 0; i < lists[l].length; i++) if (lists[l][i].code === code) return lists[l][i].name || code;
+      for (var i = 0; i < lists[l].length; i++) {
+        var n = lists[l][i].code === code ? (lists[l][i].name || code) : "";
+        if (n && names.indexOf(n) < 0) names.push(n);
+      }
+    }
+    if (own && (names.indexOf(own) >= 0 || (brand && own.indexOf(brand) === 0))) return own;
+    if (names.length === 1) return names[0];
+    if (names.length > 1) {
+      if (brand) return brand;
+      // the words at the front every name shares: «Citadele» of «Citadele Latvia» and «Citadele Lithuania»
+      var head = String(names[0]).split(" ");
+      for (var m = 1; m < names.length; m++) {
+        var w = String(names[m]).split(" "), j = 0;
+        while (j < head.length && j < w.length && head[j] === w[j]) j++;
+        head = head.slice(0, j);
+      }
+      return head.join(" ") || names[0];
     }
     for (var k in BANK_CODES) if (BANK_CODES[k] === code) return k;
-    return Object.prototype.hasOwnProperty.call(BANK_NAMES_ABROAD, code) ? BANK_NAMES_ABROAD[code] : code;
+    return brand || code;
   }
   function admPaymentHTML(o) {
     var p = o && o.payment;
     if (!p || typeof p !== "object") return "";
     var method = PAY_METHOD_NAMES[p.method] || (p.method ? String(p.method) : "");
     // the bank's own name is a proper noun and travels beside the method, never inside it
-    var bank = p.method === "bank" && p.bank ? bankNameOf(String(p.bank)) : "";
+    var bank = p.method === "bank" && p.bank ? bankNameOf(String(p.bank), p.detail) : "";
     var state = p.status === "paid" ? "оплачен" : p.status === "failed" ? "не оплачен" : p.status === "pending" ? "ждёт оплаты" : "";
     var provider = PAY_PROVIDER_NAMES[p.provider] || (p.provider ? String(p.provider) : "");
     var head = payPiecesHTML([method || "—", bank]);
@@ -43511,8 +43575,27 @@
        its amount, see srvOrderRefund); a card that would not take its money
        back is the owner's to look at */
     gift_whole: "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.",
-    gift_credit_failed: "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах»."
+    gift_credit_failed: "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».",
+    /* 26.09.2026 (staging, R-100086): the card this refund was confirmed on
+       was opened before the last refund — a second press, a second device,
+       a screen that never heard the answer. The server refuses it before a
+       cent moves and says what is already back (`messages`, printed first);
+       these two are the fallback for an answer that carried none. */
+    refund_stale: "По этому заказу уже был возврат — этот не отправлен, второй раз деньги не ушли. Откройте «Вернуть деньги» заново: окошко покажет, сколько осталось.",
+    in_progress: "Возврат по этому заказу уже оформляется — второй раз деньги не уйдут. Подождите минуту и откройте заказ заново."
   };
+  /** How many refund lines the order card holds — what «Вернуть деньги»
+      posts as `refundsSeen`. The server takes a refund only from a card whose
+      count is the ledger's own (POST /api/admin/orders/<id>/refund/,
+      `refund_stale`), so the same card pressed twice, or open on two devices,
+      is one refund; a card opened after the first carries the new count and
+      says «По заказу уже возвращено …». Counted the way the server counts:
+      an entry without a reference is not a refund. */
+  function admRefundSeen(row) {
+    var n = 0;
+    admRefunds(row && row.srv && row.srv.payment).forEach(function (r) { if (r && r.ref) n++; });
+    return n;
+  }
   /** The cards this order sold, as a sentence for the confirm card (its own
       block under the text): which will be cancelled with the refund, or the
       one somebody has spent from — the reason the server will refuse a full
@@ -43615,14 +43698,19 @@
       refocus("[data-admrefundamt]");
       return;
     }
-    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount));
+    srvOrderRefund(pa.id, pa.number, typed, Number(pa.amount), pa.seen);
   }
-  function srvOrderRefund(id, number, typed, max) {
+  /** `seen` — the count of refund lines the card was opened on
+      (admRefundSeen). Absent, the server reads it as 0: only the first
+      refund of an order can be made without it. */
+  function srvOrderRefund(id, number, typed, max, seen) {
     if (SRV.refundBusy) return;
     var amount = admRefundAmount(typed, max);
     if (isNaN(amount)) { toast(REFUND_ERR.bad_amount); return; }
     SRV.refundBusy = true; render();
-    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", { amount: amount }).then(function (r) {
+    var body = { amount: amount };
+    if (typeof seen === "number" && isFinite(seen)) body.refundsSeen = seen;
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", body).then(function (r) {
       SRV.refundBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -43661,7 +43749,11 @@
       for (var fi = 0; fi < found.length; fi++) {
         journalNote("Заказ " + number + ": Montonio уже сделал возврат " + eur(Number(found[fi].amount) || 0) + " — записали в заказ");
       }
-      if (found.length) admOrdersChanged();
+      /* …and a refusal because the card was older than the ledger (or its
+         twin is running right now) means the list behind this card is stale:
+         read it again, so the next «Вернуть деньги» opens on the new count and
+         says what is already back. */
+      if (found.length || err === "refund_stale" || err === "in_progress") admOrdersChanged();
       if (err === "gift_used") {
         var usedCode = admRefundCode(r.body);
         toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
@@ -43679,7 +43771,13 @@
         toast((srvMsg(r.body) || REFUND_ERR[err] || "Не удалось оформить возврат") + fwait);
       }
       render();
-    }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
+    }).catch(function () {
+      SRV.refundBusy = false; toast("Сервер не отвечает");
+      /* The answer is lost, not necessarily the refund: read the order again
+         so the next card counts what really happened. */
+      admOrdersChanged();
+      render();
+    });
   }
   function srvInvoiceResend(id) {
     if (SRV.invoiceBusy) return;
@@ -45430,6 +45528,9 @@
     var owing = s === "failed" || s === "pending";
     S.done = {
       status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g),
+      /* `d=pickup` — a paid self-pickup order: no parcel, so no tracking
+         number to promise (donePaidNote). */
+      pickup: s === "paid" && q.d === "pickup",
       /* `o` — the order's id: what «Оплатить ещё раз» sends back to re-create
          the payment for the same order. */
       order: owing && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
@@ -45795,15 +45896,25 @@
       '<h1 class="display h1">' + (d.status === "paid" ? "Заказ оплачен" : "Заказ оформлен") + "</h1>" + num +
       '<p class="muted" style="margin-bottom:22px">' +
         (d.status === "paid"
-          ? (d.gift && d.gift.length
-            /* features: nothing is being posted, so the parcel sentence would
-               be a promise the shop is not making. */
-            ? "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда."
-            : "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.")
+          ? donePaidNote(d)
           : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
       "</p>" +
       doneGiftHTML(d.gift) +
       '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+  }
+
+  /** The paid receipt's one sentence — what happens next, and only what the
+      shop will really do. A gift card is mailed, a parcel gets a tracking
+      number, and a self-pickup gets neither: the shop writes when it can be
+      collected (the same promise «Доставка и оплата» makes). Staging,
+      25.09.2026: a self-pickup order (R-100083) was promised a tracking
+      number. `d.pickup` rides on the receipt URL (src/lib/payments/receipt.ts). */
+  function donePaidNote(d) {
+    /* features: nothing is being posted, so the parcel sentence would
+       be a promise the shop is not making. */
+    if (d.gift && d.gift.length) return "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда.";
+    if (d.pickup) return "Спасибо! Подтверждение и чек уже летят на почту. Когда заказ можно будет забрать, мы напишем.";
+    return "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.";
   }
 
   // ---------- overlays ----------
@@ -48296,6 +48407,8 @@
       pendingAction = {
         type: "order_refund", overlay: true, danger: true, id: refRow.id, number: refRow.number,
         amount: refRow.refundable.toFixed(2),
+        // the ledger this card was opened on — one refund per look (srvOrderRefund)
+        seen: admRefundSeen(refRow),
         title: "Вернуть деньги?",
         detail: admRefundConfirmText(refRow),
         preview: soldNote || undefined,

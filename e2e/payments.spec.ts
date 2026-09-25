@@ -371,6 +371,11 @@ test.describe("payments — the money goes back", () => {
     await page.getByRole("link", { name: "Оплатить" }).click();
     await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
     await waitForScreen(page, "done");
+    /* A self-pickup is promised a letter when it can be collected — there is
+       no parcel and no tracking number (staging, 25.09.2026, R-100083). */
+    expect(page.url()).toMatch(/[?&]d=pickup(&|$)/);
+    await expect(page.getByText("Когда заказ можно будет забрать, мы напишем.")).toBeVisible();
+    await expect(page.getByText("пришлём трек-номер")).toHaveCount(0);
     const number = receiptNumber(page);
     const paid = await adminOrder(browser, number);
     expect(paid.status).toBe("paid");

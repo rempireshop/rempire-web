@@ -34,8 +34,15 @@ import {
   textBody,
   textFooter,
 } from "./layout";
-import { mailText, mailTextHtml, type MailTextValues } from "./texts";
+import { fillPlaceholders, hasMailText, mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, OrderLike, RenderedEmail } from "./types";
+
+/** An order of gift cards only: `digital` delivery, or every line a card. */
+export function isDigitalOrder(order: OrderLike): boolean {
+  if (String(order.shipping?.method ?? "").toLowerCase() === "digital") return true;
+  const lines = Array.isArray(order.items) ? order.items : [];
+  return lines.length > 0 && lines.every((l) => l?.kind === "gift" || String(l?.id ?? "").startsWith("gift:"));
+}
 
 interface Strings {
   preheader: string;
@@ -47,6 +54,16 @@ interface Strings {
   textIntro: string;
   /** wholesale/loyalty (100_tiers_loyalty) — one line, only when order.loyaltyEarned > 0. */
   points: (n: number) => string;
+  /**
+   * An order of gift cards only: nothing is packed and nothing is posted.
+   * Staging, 25.09.2026 (R-100084): its letter said «мы его получили и уже
+   * собираем», «Способ получения: digital» and «Мы напишем, когда передадим
+   * посылку в доставку». The card itself goes out in its own letter
+   * (src/lib/mail-hooks.ts, issueOrderGiftCards) — to the recipient's address
+   * when one was typed, else the buyer's — so this says «уходит … на почту,
+   * указанную для неё», never «придёт вам».
+   */
+  digital: { preheader: string; intro: string; method: string; wait: string };
 }
 
 /** 1 балл, 2–4 балла, 5(-20) баллов — standard Russian numeral agreement. */
@@ -71,6 +88,12 @@ const T: Record<Lang, Strings> = {
       "Мы напишем, когда передадим посылку в доставку — обычно в течение 1–2 рабочих дней.",
     textIntro: "Состав заказа:",
     points: (n) => `Вам начислено ${n} ${ruPluralPoints(n)} лояльности за этот заказ — уже доступны в личном кабинете.`,
+    digital: {
+      preheader: "Спасибо за заказ! Подарочная карта уходит отдельным письмом.",
+      intro: "Спасибо за заказ № {order} — мы его получили.",
+      method: "Электронная доставка",
+      wait: "Подарочная карта уходит отдельным письмом — на почту, указанную для неё при оформлении.",
+    },
   },
   et: {
     preheader:
@@ -84,6 +107,12 @@ const T: Record<Lang, Strings> = {
       "Anname teada, kui paki kullerile üle anname — tavaliselt 1–2 tööpäeva jooksul.",
     textIntro: "Tellimuse sisu:",
     points: (n) => `Selle ostuga kogusite ${n} boonuspunkti — need juba ootavad teie kontol.`,
+    digital: {
+      preheader: "Aitäh tellimuse eest! Kinkekaart läheb eraldi kirjaga.",
+      intro: "Aitäh tellimuse nr {order} eest — see on meieni jõudnud.",
+      method: "Elektrooniline tarne",
+      wait: "Kinkekaart läheb eraldi kirjaga — tellimisel selle jaoks antud e-postile.",
+    },
   },
   en: {
     preheader:
@@ -97,6 +126,12 @@ const T: Record<Lang, Strings> = {
       "We will write as soon as the parcel is handed to the carrier — usually within 1–2 business days.",
     textIntro: "Order summary:",
     points: (n) => `You earned ${n} loyalty ${n === 1 ? "point" : "points"} on this order — already in your account.`,
+    digital: {
+      preheader: "Thanks for your order! The gift card goes out in a separate e-mail.",
+      intro: "Thank you for order no. {order} — we have it.",
+      method: "Electronic delivery",
+      wait: "The gift card goes out in a separate e-mail — to the address given for it at checkout.",
+    },
   },
 };
 
@@ -113,9 +148,13 @@ export function renderOrderConfirmed(
   const hello = greeting(L, name);
   const items = itemsBlock(order.items, L);
   const totals = totalsOf(order, items.sum);
-  const delivery = deliveryLine(order.shipping, L);
+  /* Gift cards only — createOrder() stores those as `digital` (src/lib/
+     orders.ts); an order whose every line is a card is the same thing
+     whatever the browser sent. */
+  const digital = isDigitalOrder(order);
+  const delivery = digital ? t.digital.method : deliveryLine(order.shipping, L);
   const pickup = shipKind(order.shipping) === "pickup";
-  const wait = pickup ? t.waitPickup : t.waitShip;
+  const wait = digital ? t.digital.wait : pickup ? t.waitPickup : t.waitShip;
 
   const values: MailTextValues = {
     name,
@@ -123,7 +162,14 @@ export function renderOrderConfirmed(
     total: money(totals.total),
     shop: BRAND.name,
   };
-  const intro = mailText("order-confirmed", L, "intro", values);
+  /* «…и уже собираем» is the default opening, and a gift card is not packed:
+     while the owner has written no opening of his own, a digital order gets
+     one that promises nothing about a parcel (the gift-card letter's rule,
+     ./gift-card.ts). His own text still wins. */
+  const digitalIntro =
+    digital && !hasMailText("order-confirmed", L, "intro") ? fillPlaceholders(t.digital.intro, values).trim() : "";
+  const intro = digitalIntro || mailText("order-confirmed", L, "intro", values);
+  const introHtml = digitalIntro ? esc(digitalIntro) : mailTextHtml("order-confirmed", L, "intro", values);
   const signature = mailText("order-confirmed", L, "signature", values);
 
   // The totals row wants the method only ("Пакомат Omniva"); the address
@@ -138,7 +184,7 @@ export function renderOrderConfirmed(
   const signatureHtml = mailTextHtml("order-confirmed", L, "signature", values);
   const body =
     rowTitle(t.title) +
-    rowLead(`${esc(hello)} ${mailTextHtml("order-confirmed", L, "intro", values)}`) +
+    rowLead(`${esc(hello)} ${introHtml}`) +
     rowLabel(t.items) +
     rowLines([...items.lines, ...rows.lines]) +
     rowPanel(t.method, esc(delivery), esc(wait)) +
@@ -147,7 +193,7 @@ export function renderOrderConfirmed(
   const html = shell({
     lang: L,
     title: `${t.title} — Rempire`,
-    preheader: t.preheader,
+    preheader: digital ? t.digital.preheader : t.preheader,
     body,
     footerNote: esc(c.serviceNote),
   });

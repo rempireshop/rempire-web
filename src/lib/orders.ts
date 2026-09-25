@@ -41,6 +41,7 @@ import {
 // through the optional-neighbour door a few lines down.
 import { DEFAULT_SHIPPING_RULES, shippingZone } from "@/lib/shipping";
 import { NO_NOVAPOST_COUNTRIES } from "@/lib/shipping/country-prices";
+import { POS_NO_NAME } from "@/lib/pos-name";
 // media: what product_overrides.video_url is allowed to hold — a pure module
 // of this build, no side effects, see src/lib/video.ts.
 import { cleanVideoUrl } from "@/lib/video";
@@ -1639,7 +1640,8 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   // web checkout where both identify the shopper for the receipt and account.
   const channel: "web" | "pos" = input.channel === "pos" ? "pos" : "web";
   const customer = input?.customer ?? {};
-  const name = String(customer.name ?? "").trim().slice(0, 120) || (channel === "pos" ? "Продажа в салоне" : "");
+  // the till's stand-in is not a person: letters greet it as nobody (src/lib/pos-name.ts)
+  const name = String(customer.name ?? "").trim().slice(0, 120) || (channel === "pos" ? POS_NO_NAME : "");
   const email = String(customer.email ?? "").trim().toLowerCase().slice(0, 160);
   const phone = String(customer.phone ?? "").trim().slice(0, 40);
   if (!name) throw new OrderError("bad_name");

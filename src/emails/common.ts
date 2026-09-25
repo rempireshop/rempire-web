@@ -18,18 +18,28 @@ import {
   type LineRow,
 } from "./layout";
 import type { Lang, OrderItem, OrderLike, OrderShipping } from "./types";
+import { isPosNoName } from "../lib/pos-name";
 import { translateProductName, translateVariant } from "../lib/product-name";
 
 /* ---------- customer --------------------------------------------------- */
 
-/** Name for the greeting, or "" when we only know an e-mail address. */
+/** A name that is a real one: not the till's «Продажа в салоне» stand-in. */
+function personal(v: string | null | undefined): string | null | undefined {
+  return isPosNoName(v) ? null : v;
+}
+
+/**
+ * Name for the greeting, or "" when we only know an e-mail address — or only
+ * the till's stand-in for a sale nobody gave a name for, which greeted a
+ * customer «Здравствуйте, Продажа в!» (staging, 25.09.2026, src/lib/pos-name.ts).
+ */
 export function customerName(
   src:
     | { customer_name?: string | null; name?: string | null; shipping?: OrderShipping | null }
     | null
     | undefined,
 ): string {
-  const direct = pick(src?.customer_name, src?.name, src?.shipping?.name);
+  const direct = pick(personal(src?.customer_name), personal(src?.name), personal(src?.shipping?.name));
   // "ivan@mail.ee" as a name reads worse than no name at all.
   if (!direct || direct.includes("@")) return "";
   return direct.split(/\s+/).slice(0, 2).join(" ");

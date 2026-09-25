@@ -100,6 +100,8 @@ export async function notifyOrderClosed(
     /** The part of `amount` that went back onto a gift card, and which card — the letter names it. */
     giftAmount?: number;
     giftCode?: string;
+    /** On a cancel of a paid order: what it was worth (money + gift card) — the letter says the money comes back. */
+    value?: number;
   },
 ): Promise<boolean> {
   return (await call("onOrderClosed", order, opts)).ran;
