@@ -34,7 +34,7 @@ const IMAGE_URL = "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp";
    dark button and asks about an empty ET/EN on the confirm sheet; «Снять с
    публикации» is in «⋯»; the address, tags and Google lines, the assistant
    and the cover's frames are folds. */
-type Post = { id: string; slug: string; status: string; author: string; title: Record<string, string>; body: Record<string, string>; coverUrl: string | null };
+type Post = { id: string; slug: string; status: string; author: string; title: Record<string, string>; body: Record<string, string>; coverUrl: string | null; products: string[] };
 async function serverPost(page: Page, id: string): Promise<Post> {
   const r = await page.request.get(`/api/admin/blog/?id=${id}`);
   return (await r.json()).post as Post;
@@ -861,6 +861,23 @@ test.describe("blog — the whole article", () => {
       await savedAs(page, postId, (p) => !p.body.RU.includes(`data-product="${PRODUCT.id}"`) && p.body.RU.includes(`data-product="${PRODUCT_2.id}"`),
         "deleting the card did not save itself");
       await assertClean(page, w, "a placed card taken out by hand");
+
+      /* ---- × in «Товары в статье» takes the product's cards out too ------
+         (staging, 25.09.2026: it took the product off the list and left its
+         card in the text) — in every language, saved, and «Вернуть» puts
+         them back */
+      await page.locator(`[data-admblogproductdel="${PRODUCT_2.id}"]`).click();
+      await expect(page.getByRole("status").first()).toContainText("Товар и его карточки убраны из статьи");
+      await expect(cards, "the product's card stayed in the text after its ×").toHaveCount(0);
+      await savedAs(page, postId, (p) => !p.products.includes(PRODUCT_2.id)
+        && !p.body.RU.includes(`data-product="${PRODUCT_2.id}"`) && !p.body.ET.includes(`data-product="${PRODUCT_2.id}"`)
+        && !p.body.EN.includes(`data-product="${PRODUCT_2.id}"`), "the × did not save the text without the product's cards");
+      await page.getByRole("status").locator("[data-admtoastundo]").click();
+      await expect(cards, "«Вернуть» did not bring the card back").toHaveCount(1);
+      await expect(cards.first()).toHaveAttribute("data-product", PRODUCT_2.id);
+      await savedAs(page, postId, (p) => p.products.includes(PRODUCT_2.id) && p.body.ET.includes(`data-product="${PRODUCT_2.id}"`),
+        "«Вернуть» did not save the cards back");
+      await assertClean(page, w, "a product and its cards taken out with ×, and put back");
     } finally {
       // this suite leaves the blog as it found it
       if (postId) await page.request.delete(`/api/admin/blog/?id=${postId}`);

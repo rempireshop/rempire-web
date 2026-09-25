@@ -7517,6 +7517,47 @@
       "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
+      "id": "blog-product-remove",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "× у товара в статье убирает и его карточку",
+      "steps": [
+        "«Ещё» → «Блог», открыть статью с карточкой товара в тексте на всех трёх языках.",
+        "В «Товары в статье» нажать × у этого товара.",
+        "Посмотреть текст на RU, ET и EN.",
+        "Нажать «Вернуть» на плашке."
+      ],
+      "expect": [
+        "Плашка «Товар и его карточки убраны из статьи».",
+        "Карточки этого товара нет ни в одном языке, пустой строки на её месте тоже.",
+        "Через секунду вверху «Сохранено ✓».",
+        "«Вернуть» ставит товар в список и карточки на прежние места."
+      ],
+      "why": "Товар, убранный из статьи, не должен продаваться в её тексте.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "× on an article's product takes its card out too",
+        "steps": [
+          "«Ещё» → «Блог», open an article with a product card in the text in all three languages.",
+          "In «Товары в статье» press × on that product.",
+          "Look at the text in RU, ET and EN.",
+          "Press «Вернуть» on the toast."
+        ],
+        "expect": [
+          "The toast «Товар и его карточки убраны из статьи».",
+          "No card of that product in any language, and no empty line where it stood.",
+          "A second later «Сохранено ✓» at the top.",
+          "«Вернуть» puts the product back on the list and the cards back in place."
+        ],
+        "why": "A product taken off an article must not go on selling in its text."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-25T23:13:20.113Z"
+    },
+    {
       "id": "people-list",
       "area": "people",
       "who": "renat",

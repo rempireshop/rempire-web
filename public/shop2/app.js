@@ -1822,6 +1822,7 @@
       "адрес, автор, теги, текст для Google": "aadress, autor, sildid, tekst Google'i jaoks",
       "Сначала напишите русский текст — переводим с него.": "Kirjutage esmalt venekeelne tekst — tõlgime sellest.",
       "Товар убран из статьи": "Toode eemaldati artiklist",
+      "Товар и его карточки убраны из статьи": "Toode ja selle kaardid eemaldati artiklist",
       "Обложка убрана": "Kaanepilt eemaldati",
       "Удалить статью?": "Kustutada artikkel?",
       "Статья исчезнет из блога на всех трёх языках.": "Artikkel kaob blogist kõigis kolmes keeles.",
@@ -5318,6 +5319,7 @@
       "адрес, автор, теги, текст для Google": "address, author, tags, text for Google",
       "Сначала напишите русский текст — переводим с него.": "Write the Russian text first — we translate from it.",
       "Товар убран из статьи": "Product removed from the article",
+      "Товар и его карточки убраны из статьи": "Product and its cards removed from the article",
       "Обложка убрана": "Cover removed",
       "Удалить статью?": "Delete the article?",
       "Статья исчезнет из блога на всех трёх языках.": "The article disappears from the blog in all three languages.",
@@ -16338,6 +16340,21 @@
      vanishing. In its own place when the model behaved, in the article
      either way: the answer was «carry them across every time» (Dim,
      08.09.2026), not «when the model cooperates». */
+  /** Every card of product `id` out of one text: the marker, with the line it
+      stood on when that line held nothing else, and the space the «Товар»
+      button put after it. A card in the middle of a sentence leaves the
+      sentence where it was. Written for the shapes this editor writes
+      (blogProductLinkHTML, blogCleanHtml) — attributes in any order. */
+  function blogDropCard(html, id) {
+    var s = String(html || "");
+    if (!id || s.indexOf("data-product") < 0) return s;
+    var q = String(id).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // up to ITS </a> and no further: a lazy [\s\S]*? would reach past it to a later link's
+    var a = '<a\\b[^>]*\\bdata-product="' + q + '"[^>]*>(?:(?!<\\/a>)[\\s\\S])*<\\/a>';
+    var pad = "(?:\\s|&nbsp;| |<br\\s*\\/?>)*";
+    return s.replace(new RegExp("<p>" + pad + a + pad + "<\\/p>", "g"), "")
+      .replace(new RegExp(a + "(?:&nbsp;| )?", "g"), "");
+  }
   function blogCardMark(n) { return "[[" + n + "]]"; }
   var BLOG_CARD_MARK_RX = /\[\[\d+\]\]/g;
   function blogCardsOut(html) {
@@ -50235,15 +50252,27 @@
       }
       S.adminBlogQ = ""; render(); refocus("[data-admblogq]"); return;
     }
+    /* …and its cards leave the text with it, in all three languages (staging,
+       25.09.2026: the × took the product off the list and left its card in
+       the article, still selling it). «Вернуть» brings the cards back into
+       every text nobody has touched since — never over words written after. */
     if (d.admblogproductdel) {
       var pdd = S.adminBlogEdit, gone = d.admblogproductdel;
       var at = pdd ? pdd.products.indexOf(gone) : -1;
       if (at >= 0) {
+        blogReadForm();   // the box's latest words first — they are what the cards come out of
+        var bodyWas = { RU: pdd.body.RU, ET: pdd.body.ET, EN: pdd.body.EN }, cardsGone = 0;
+        ["RU", "ET", "EN"].forEach(function (L) {
+          var next = blogDropCard(pdd.body[L], gone);
+          if (next !== pdd.body[L]) { pdd.body[L] = next; cardsGone++; }
+        });
+        var bodyNow = { RU: pdd.body.RU, ET: pdd.body.ET, EN: pdd.body.EN };
         pdd.products.splice(at, 1);
         blogAutosave("change");
-        toast("Товар убран из статьи", { prev: true, undo: function () {
+        toast(cardsGone ? "Товар и его карточки убраны из статьи" : "Товар убран из статьи", { prev: true, undo: function () {
           if (S.adminBlogEdit !== pdd || pdd.products.indexOf(gone) >= 0) return;
           pdd.products.splice(Math.min(at, pdd.products.length), 0, gone);
+          ["RU", "ET", "EN"].forEach(function (L) { if (pdd.body[L] === bodyNow[L]) pdd.body[L] = bodyWas[L]; });
           blogAutosave("change"); render();
         } });
       }
