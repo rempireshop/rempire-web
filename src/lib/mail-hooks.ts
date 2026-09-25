@@ -493,7 +493,9 @@ async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
  */
 export async function onOrderClosed(
   order: OrderLike,
-  options: { kind: ClosedKind; amount?: number; giftAmount?: number; giftCode?: string } = { kind: "cancelled" },
+  options: { kind: ClosedKind; amount?: number; giftAmount?: number; giftCode?: string; value?: number } = {
+    kind: "cancelled",
+  },
 ): Promise<MailHookResult> {
   try {
     const to = customerEmail(order);
@@ -509,7 +511,11 @@ export async function onOrderClosed(
        the customer to look at a bank statement for money that is on a card. */
     const giftAmount = kind === "cancelled" ? 0 : Math.min(amount, Math.max(0, num(options.giftAmount, 0)));
     const giftCode = giftAmount > 0 && typeof options.giftCode === "string" ? options.giftCode.trim() : "";
-    const mail = renderOrderCancelled(order, lang, { kind, amount, giftAmount, giftCode });
+    /* `value` — on a cancel, what the order was worth when the money came in;
+       the letter says «мы вернём» rather than «не списаны» for a paid order
+       (src/emails/order-cancelled.ts cancelMoneyOf). */
+    const value = kind === "cancelled" && typeof options.value === "number" ? options.value : undefined;
+    const mail = renderOrderCancelled(order, lang, { kind, amount, giftAmount, giftCode, value });
     const res = await sendRendered(to, mail, {
       tags: { template: kind === "cancelled" ? "order-cancelled" : kind === "refund_sent" ? "order-refund-sent" : "order-refunded" },
       idempotencyKey: `${kind}:${orderNumber(order)}:${amount.toFixed(2)}${giftAmount > 0 ? `:gc${giftAmount.toFixed(2)}` : ""}`,

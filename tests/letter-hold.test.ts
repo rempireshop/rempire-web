@@ -17,6 +17,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
    the module stays real — the invoice route and the paid-by-hand path use it. */
 const sentShipped: string[] = [];
 const sentClosed: Array<{ number: string; kind: string }> = [];
+/** …and everything «Заказ отменён» was handed, for the money line. */
+const closedOpts: Array<Record<string, unknown>> = [];
 vi.mock("@/lib/mail-hooks", async (orig) => {
   const real = (await orig()) as Record<string, unknown>;
   return {
@@ -27,6 +29,7 @@ vi.mock("@/lib/mail-hooks", async (orig) => {
     }),
     onOrderClosed: vi.fn(async (o: { number: string }, opts: { kind: string }) => {
       sentClosed.push({ number: o.number, kind: opts.kind });
+      closedOpts.push(opts);
       return { ok: true, sent: true };
     }),
   };
@@ -100,6 +103,7 @@ describe("customer letters held ten seconds", () => {
     await truncateAll();
     sentShipped.length = 0;
     sentClosed.length = 0;
+    closedOpts.length = 0;
     clockNow = 0;
     sleepers = [];
     letterClock.sleep = (ms: number) => new Promise<void>((wake) => sleepers.push({ at: clockNow + ms, wake }));
@@ -175,6 +179,32 @@ describe("customer letters held ten seconds", () => {
     await patch(undone.id, { status: "paid" });
     await tick(LETTER_HOLD_MS);
     expect(sentClosed.map((s) => s.number)).toEqual([kept.number]);
+  });
+
+  /* Staging, 25.09.2026 (R-100078, R-100087): the letter for a PAID order
+     said «Деньги за него не списаны». The route now tells it what came in —
+     and tells an unpaid order's letter nothing, so that one reads as before. */
+  it("«Заказ отменён» is handed what a paid order was worth, and nothing for an unpaid one", async () => {
+    const { renderOrderCancelled } = await import("@/emails/order-cancelled");
+    const paid = await paidParcel();
+    await patch(paid.id, { status: "cancelled" });
+    await tick(LETTER_HOLD_MS);
+    expect(closedOpts[0]).toMatchObject({ kind: "cancelled", value: Number(paid.total) });
+    const letter = renderOrderCancelled({ ...(await getOrder(paid.id))! }, "ru", closedOpts[0] as never);
+    expect(letter.text).toContain("Деньги за этот заказ мы вернём");
+    expect(letter.text).not.toContain("не списаны");
+
+    const unpaid = await createOrder({
+      lang: "ru",
+      items: [{ id: PRODUCT, qty: 1 }],
+      customer: { name: "Мария Тамм", email: "maria@example.com", phone: "+372 5555 5555" },
+      shipping: { method: "parcel", country: "EE", pointId: "1", pointName: "Kristiine" },
+    });
+    await patch(unpaid.id, { status: "cancelled" });
+    await tick(LETTER_HOLD_MS);
+    expect(closedOpts[1]).toEqual({ kind: "cancelled" });
+    const plain = renderOrderCancelled({ ...(await getOrder(unpaid.id))! }, "ru", closedOpts[1] as never);
+    expect(plain.text).toContain("Деньги за этот заказ не списаны.");
   });
 
   it("a hand-set «возврат» is money: its letter goes at once, not held", async () => {

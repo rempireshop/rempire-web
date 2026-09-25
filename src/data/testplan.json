@@ -4531,13 +4531,15 @@
         "Открыть неоплаченный или ошибочный заказ.",
         "Нажать «⋯» → «Отменить заказ» и прочитать окошко.",
         "Подтвердить.",
-        "Посмотреть остатки товаров из этого заказа."
+        "Посмотреть остатки товаров из этого заказа.",
+        "Повторить с оплаченным заказом и прочитать письмо «Заказ отменён» у клиента."
       ],
       "expect": [
         "В окошке написано, что отмена деньги не возвращает.",
         "Там же сказано, что для возврата есть отдельная кнопка.",
         "После отмены товары вернулись на склад.",
-        "Письмо «Заказ отменён» уходит через десять секунд; «Вернуть» на полоске его останавливает."
+        "Письмо «Заказ отменён» уходит через десять секунд; «Вернуть» на полоске его останавливает.",
+        "У оплаченного заказа письмо обещает вернуть деньги, а не «не списаны»."
       ],
       "why": "Если бы окошко обещало возврат, покупатель остался бы без денег и без товара.",
       "risk": "high",
@@ -4548,18 +4550,20 @@
           "Open an unpaid or mistaken order.",
           "Press «⋯» → «Отменить заказ» (cancel order) and read the box.",
           "Confirm.",
-          "Look at the stock of the products from that order."
+          "Look at the stock of the products from that order.",
+          "Repeat with a paid order and read the customer's «Заказ отменён» letter."
         ],
         "expect": [
           "The box says outright that cancelling returns no money.",
           "It says a separate button does the refund.",
           "After cancelling, the goods are back in stock.",
-          "The «Заказ отменён» letter leaves ten seconds later; «Вернуть» on the bar stops it."
+          "The «Заказ отменён» letter leaves ten seconds later; «Вернуть» on the bar stops it.",
+          "For a paid order the letter says the money comes back — never «not charged»."
         ],
         "why": "If the box promised a refund, the buyer would lose both money and goods."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T22:41:11.172Z"
     },
     {
       "id": "order-giftcard-pdf",
