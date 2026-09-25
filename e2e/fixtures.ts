@@ -203,7 +203,7 @@ export async function adminSection(page: Page, key: string, sub?: string): Promi
     await direct.first().click();
   } else {
     await more.first().click();
-    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
+    await page.locator(`.adm-more [data-admtab="${key}"]`).first().click();
   }
   if (sub) await page.locator(`[data-admtab="${sub}"][aria-current]:visible`).first().click();
 }
@@ -212,21 +212,18 @@ export async function adminSection(page: Page, key: string, sub?: string): Promi
  * Switches the panel's own language (RU · ET · EN).
  *
  * The strip is drawn twice, like the navigation: once in the desktop sidebar
- * and once in the phone's «Ещё» sheet, which is not in the document at all
- * until the sheet is open. So a phone has to open the sheet, pick, and close
- * it again — the caller is looking at the screen underneath.
+ * and once on the phone's «Ещё» page, which is not in the document at all
+ * until the page is open. So a phone has to open the page, pick, and go Back
+ * again — the caller is looking at the screen underneath. Back is the page's
+ * only way out that goes nowhere else (1a, screen 14: no scrim, no ✕).
  */
 export async function adminLang(page: Page, code: "RU" | "ET" | "EN"): Promise<void> {
   const button = page.locator(`.adm-langs button[data-lang="${code}"]:visible`);
   if (await button.count()) { await button.first().click(); return; }
   await page.locator("[data-admmore]:visible").first().click();
-  await page.locator(`.adm-sheet .adm-langs button[data-lang="${code}"]`).first().click();
-  /* Near the top-left corner, not the middle: the scrim is the whole screen
-     and the sheet is stacked on top of its lower half, so a click aimed at
-     the scrim's centre lands on the sheet. The dark strip above the sheet is
-     where a thumb taps, and it is the only part of the scrim that is clear. */
-  await page.locator("[data-admmoreclose]").first().click({ position: { x: 8, y: 8 } });
-  await expect(page.locator(".adm-sheet")).toHaveCount(0);
+  await page.locator(`.adm-more .adm-langs button[data-lang="${code}"]`).first().click();
+  await page.goBack();
+  await expect(page.locator(".adm-more")).toHaveCount(0);
 }
 
 /**
