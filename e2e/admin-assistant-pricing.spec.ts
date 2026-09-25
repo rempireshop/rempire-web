@@ -76,7 +76,10 @@ test.describe("the assistant's «скидка для салонов», asked fro
          PUT left 20 ms after the default 10 s. Room for that, not a retry. */
       const put = page.waitForRequest((r) => r.url().includes("/api/admin/settings/") && r.method() === "PUT", { timeout: 30_000 });
       await answer.locator(".adm-propose [data-admapply]").click();
-      const sent = JSON.parse((await put).postData() || "{}") as { pricing?: typeof SAVED };
+      /* «Настройки» 1a writes a key through its own slot (admSetSend): the
+         body is { settings: { pricing }, ref } — the route takes both shapes */
+      const body = JSON.parse((await put).postData() || "{}") as { pricing?: typeof SAVED; settings?: { pricing?: typeof SAVED } };
+      const sent = { pricing: body.settings?.pricing ?? body.pricing };
 
       expect(sent.pricing, "the panel PUT something that was not the pricing settings").toBeTruthy();
       expect(sent.pricing!.proDiscountPct, "the one number the owner asked about").toBe(25);

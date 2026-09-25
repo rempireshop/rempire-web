@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, ipHeaders } from "./fixtures";
+import { adminLang, adminSection, cardBack, ipHeaders } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 import { openCard, settled, typeAndLeave } from "./goods-helpers";
 
@@ -28,10 +28,11 @@ import { openCard, settled, typeAndLeave } from "./goods-helpers";
 /** «Настройки» → one of its pages. */
 async function settings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  // (on a phone the way back is the top bar's «← Настройки» — fixtures.cardBack)
+  const back = cardBack(page, "[data-admsetback]", "Настройки");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]", "Настройки")).toBeVisible();
 }
 
 /** The row of this browser's own list, by its position. */

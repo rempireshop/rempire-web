@@ -255,6 +255,36 @@ async function oneShape(page: Page, sel: string, label: string): Promise<void> {
 }
 
 /**
+ * «Блог» since 1a (screen 16): a card row — the cover, then the title over its
+ * date · languages and the status tag, all from one x. The same promise as
+ * the other lists, measured on that shape: the words start at one x on every
+ * row, a long title wraps instead of being cut sideways, nothing runs past
+ * the screen, and the row is a thumb's size.
+ */
+async function blogShape(page: Page): Promise<void> {
+  const vw = page.viewportSize()!.width;
+  const rows = await page.evaluate(() => Array.from(document.querySelectorAll("[data-bloglist] .adm-brow")).map((row) => {
+    const b = (el: Element | null) => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height };
+    };
+    const t = row.querySelector(".adm-brow__t") as HTMLElement | null;
+    return { text: (t?.textContent || "").trim(), row: b(row)!, body: b(row.querySelector(".adm-brow__body")), cut: !!t && t.scrollWidth > t.clientWidth + 1 };
+  }));
+  expect(rows.length, `Блог @${vw}: fewer than two rows to compare`).toBeGreaterThan(1);
+  const x = rows[0].body ? rows[0].body.left : NaN;
+  for (const r of rows) {
+    const who = `Блог @${vw} · «${r.text.slice(0, 32)}»`;
+    expect(r.body, `${who}: the row has no text body`).not.toBeNull();
+    expect(Math.round(r.body!.left - x), `${who}: the words start at another x than the first row's`).toBe(0);
+    expect(r.cut, `${who}: the title is cut off sideways`).toBe(false);
+    expect(r.row.right, `${who}: the row runs past the screen`).toBeLessThanOrEqual(vw + 0.5);
+    expect(r.row.height, `${who}: the row is under 44 px`).toBeGreaterThanOrEqual(43.5);
+  }
+}
+
+/**
  * «Заказы» has the 1a shape (design_handoff_admin_ux, screen 04), still one
  * shape on every row: the customer and the sum on the first line; the
  * number · day · what · where and the status tag on the second, the tag at
@@ -407,7 +437,8 @@ test.describe("admin — one shape per list on the phone", () => {
 
         await adminSection(page, "blog");
         await expect(page.locator(`[data-admblogedit="${postId}"]`)).toBeVisible();
-        await oneShape(page, "[data-admblogedit].adm-row--lines", "Блог");
+        // 1a: an article is a card row of its own shape (screen 16)
+        await blogShape(page);
 
         await adminSection(page, "promos", "mail");
         await expect(page.locator("[data-mailtpl]").first()).toBeVisible();

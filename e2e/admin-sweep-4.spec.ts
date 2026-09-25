@@ -805,7 +805,10 @@ test.describe("admin — a warehouse row saves itself, and the blog card says wh
     await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации");
     await expect(page.locator("[data-admsavest]:visible").first(), "the header never said it saved").toContainText("Сохранено ✓", { timeout: 15_000 });
     await expect(state, "a saved draft is still called new").toHaveText("○ Черновик — в магазине не видно");
-    // tidy up: «⋯» → «Удалить статью» → the sheet → held, with «Вернуть»
+    /* tidy up: «⋯» → «Удалить статью» → the sheet → held, with «Вернуть».
+       The title box is let go first — on a phone «⋯» stands with the pinned
+       button, which steps aside while the keyboard is up (body.adm-typing) */
+    await page.locator('[data-blogf="title"]').blur();
     await page.locator("[data-admblogmenu]").click();
     await page.locator("[data-admblogdel]").click();
     await page.locator(".adm-confirm [data-admapply]").click();

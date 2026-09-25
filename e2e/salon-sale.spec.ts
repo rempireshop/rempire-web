@@ -40,7 +40,12 @@ test.describe("the salon till", () => {
        placeholder; the sentence itself is behind «?»): type an address and
        the letter with the receipt goes to it. */
     await expect(page.locator("[data-posemail]")).toHaveAttribute("placeholder", "придёт чек и баллы");
+    // on a phone «Клиент» is a fold (optional, README § 1) — opened first; a desktop shows it open
+    const buyer = page.locator('[data-admfold="pos:buyer"]');
+    if (await buyer.isVisible() && (await buyer.getAttribute("aria-expanded")) !== "true") await buyer.click();
     await page.locator("[data-posemail]").fill(email);
+    // …and let go of the box: on a phone the pinned button steps aside while the keyboard is up (body.adm-typing)
+    await page.locator("[data-posemail]").blur();
 
     /* money goes through the confirm sheet, here as everywhere in the panel —
        «К оплате» is the one dark button and carries the method picked above

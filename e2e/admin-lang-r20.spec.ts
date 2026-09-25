@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { adminLang, adminSection, ipHeaders, LANGS, shopUrl, waitForScreen } from "./fixtures";
+import { adminLang, adminSection, cardBack, ipHeaders, LANGS, shopUrl, waitForScreen } from "./fixtures";
 import { openAdmin } from "./sweep-helpers";
 
 /**
@@ -24,10 +24,12 @@ import { openAdmin } from "./sweep-helpers";
 /** «Настройки» → one of its pages (same helper as admin-journal-r16). */
 async function settings(page: Page, sub: string): Promise<void> {
   await adminSection(page, "setup");
-  const back = page.locator("[data-admsetback]");
-  if (await back.count()) await back.first().click();
+  /* (on a phone the way back is the top bar's «← Настройки» — fixtures.cardBack;
+     no words to match: this file switches the panel to ET and EN) */
+  const back = cardBack(page, "[data-admsetback]");
+  if (await back.count()) await back.click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
-  await expect(page.locator("[data-admsetback]")).toBeVisible();
+  await expect(cardBack(page, "[data-admsetback]")).toBeVisible();
 }
 
 const CYRILLIC = /[А-Яа-яЁё]/;

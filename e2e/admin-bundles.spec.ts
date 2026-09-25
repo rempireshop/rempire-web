@@ -179,8 +179,12 @@ test.describe("admin — наборы", () => {
       /* 1a (q27): no «Сохранить». The price leaves the box on Enter, and with
          a name, two products and a price below the parts the draft is a real
          set now — hidden, on the address its name gave it — and the price is
-         what is stored (q28). */
-      const created = bundlePost(page);
+         what is stored (q28). The per-cent box was LEFT for the euro one a
+         moment ago, and money saves on leave (q1): that already made the set,
+         at 13,60 €, and its answer can land after this line — so the POST
+         that counts is the one carrying the price typed last. */
+      const created = page.waitForResponse((r) => r.url().includes("/api/admin/bundles/") && r.request().method() === "POST" &&
+        (r.request().postDataJSON() as { price?: number } | null)?.price === SET_PRICE);
       await page.locator('[data-bundlef="price"]').press("Enter");
       const res = await created;
       expect(res.ok()).toBe(true);
