@@ -1647,7 +1647,7 @@
         "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
         "Числа совпадают с тем, что есть на самом деле.",
         "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить».",
-        "Скрытый товар считается отдельной строкой, и она открывает «Каталог → Скрытые»."
+        "Скрытый товар — свой или из каталога — отдельной строкой; она открывает «Каталог → Скрытые»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
       "risk": "med",
@@ -1668,12 +1668,12 @@
           "Under reviews, who wrote and the stars; under a request, the salon's name.",
           "The numbers match what is really there.",
           "Each line opens its own section; the dark button opens «Заказы» on «Отправить».",
-          "A hidden product gets a line of its own, and it opens «Каталог → Скрытые»."
+          "A hidden product, own or catalogue, has its own line opening «Каталог → Скрытые»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-25T22:41:16.705Z"
     },
     {
       "id": "panel-partners-switch",

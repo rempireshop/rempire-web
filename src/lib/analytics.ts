@@ -46,13 +46,15 @@ function productInfo(id: string): { id: string; name: string; brand: string } {
    at call time the way src/lib/orders.ts does it, once per summary, for the
    handful of ids the lists actually name — never for a catalogue id. */
 type Named = { id: string; name: string; brand: string };
-async function customNames(ids: string[]): Promise<Map<string, { name: string; brand: string }>> {
+/* …with the row's «Показывать в магазине» (`active`) beside the name: the
+   owner's own product is switched off THERE, not on an override row. */
+async function customNames(ids: string[]): Promise<Map<string, { name: string; brand: string; active: boolean }>> {
   const want = [...new Set(ids.filter((id) => id.startsWith("c-") && !BY_ID.has(id)))];
-  const out = new Map<string, { name: string; brand: string }>();
+  const out = new Map<string, { name: string; brand: string; active: boolean }>();
   if (!want.length) return out;
   try {
-    const { customMinByIds } = await import("@/lib/custom-products");
-    for (const [id, own] of await customMinByIds(want)) out.set(id, { name: own.min.n, brand: own.min.b });
+    const { customLabelsByIds } = await import("@/lib/custom-products");
+    for (const [id, own] of await customLabelsByIds(want)) out.set(id, own);
   } catch (err) {
     console.error("[analytics] custom products not loaded:", err);
   }
@@ -722,17 +724,26 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
      list that would have reminded him to order it, and stay hidden for ever.
      So the main figure is clean and one line says how many are waiting
      behind the switch. */
-  const short: Array<[string, "low" | "out"]> = [];
-  const hidden: Array<[string, "low" | "out"]> = [];
+  const running: Array<[string, "low" | "out", boolean]> = [];
   for (const [id, o] of Object.entries(overrides)) {
     const stock = counted[id] ?? o.stock;
     if (stock !== "low" && stock !== "out") continue;
-    (o.hidden ? hidden : short).push([id, stock]);
+    running.push([id, stock, !!o.hidden]);
   }
   /* One round trip for both lists: the hidden ones are named too, because a
      row that says «2 скрытых товара заканчиваются» and nothing else can only
      be answered by reading every hidden product in the shop. */
-  const names = await customNames([...short, ...hidden].map(([id]) => id));
+  const names = await customNames(running.map(([id]) => id));
+  /* «Показывать в магазине» off is one switch in the panel and two places on
+     the server: `hidden` on the override row for a catalogue product, `active`
+     on the owner's own row (custom_products) — which this card never read,
+     so his own product switched off stayed in the number he acts on and out
+     of the hidden line (verification pass 25.09.2026, panel-overview). */
+  const short: Array<[string, "low" | "out"]> = [];
+  const hidden: Array<[string, "low" | "out"]> = [];
+  for (const [id, stock, off] of running) {
+    (off || names.get(id)?.active === false ? hidden : short).push([id, stock]);
+  }
   const resolve = (rows: Array<[string, "low" | "out"]>): OverviewLowStockItem[] => {
     const out: OverviewLowStockItem[] = [];
     for (const [id, stock] of rows) {
