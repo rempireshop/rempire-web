@@ -880,11 +880,20 @@ describe("the slider, «Сбросить» and «Вся фотография» /
     expect(d.coverFocus).toBe("fill 50 50");
   });
 
+  // 1a: the switch is a pick, so it saves at once (blogAutosave("change")) — counted here
+  let saves: string[] = [];
   const press = (word: string, from: string) => {
     const ed = { coverFocus: from };
-    branch("if (d.coverfit) {", ["d", "S", "render"], { coverfit: word }, { adminBlogEdit: ed }, () => {});
+    branch("if (d.coverfit) {", ["d", "S", "render", "blogAutosave"], { coverfit: word }, { adminBlogEdit: ed }, () => {},
+      (ev: string) => { saves.push(ev); });
     return ed.coverFocus;
   };
+
+  it("saves at once — a pick, not a word being typed", () => {
+    saves = [];
+    press("fill", "fit 62 28");
+    expect(saves).toEqual(["change"]);
+  });
 
   it("keeps every frame's point and zoom across the switch — same photograph, same framing", () => {
     expect(press("fill", "fit 62 28")).toBe("fill 62 28");
