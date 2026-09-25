@@ -2274,6 +2274,55 @@
       }
     },
     {
+      "id": "panel-phone-fit",
+      "area": "panel",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Панель на телефоне: всё в ширину экрана",
+      "steps": [
+        "На телефоне открыть «Заказы», «Товары» → «Склад», «Салон» и «Клиенты».",
+        "Посмотреть на поле поиска, нажать в него и начать печатать.",
+        "«Ещё» → «Настройки» → «Главная страница», пролистать до самого низа.",
+        "«Ещё» → «Аналитика»: посмотреть на свёрнутые строки внизу страницы.",
+        "Открыть заказ, где товаров больше одного, и набор в «Товары» → «Наборы».",
+        "Повернуть телефон боком и открыть «Заказы»."
+      ],
+      "expect": [
+        "Лупа в каждом поле поиска стоит по середине высоты, слева от слов.",
+        "Подсказка в поле видна целиком, а страница не увеличивается от нажатия.",
+        "«Главная страница» в ширину экрана: «Вкл», вкладки ET и EN видны целиком.",
+        "В «Аналитике» пояснение стоит под названием строки и не обрезано.",
+        "Названия товаров в заказе и в наборе видны полностью, не «Proraso — Bear…».",
+        "Боком ничего не прячется под вырезом экрана."
+      ],
+      "why": "Обрезанный край экрана прячет переключатель, который вы не увидите и не нажмёте.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-25T18:35:33.655Z",
+      "en": {
+        "title": "The panel on a phone: everything fits the screen",
+        "steps": [
+          "On a phone open «Заказы», «Товары» → «Склад», «Салон» and «Клиенты».",
+          "Look at the search box, tap into it and start typing.",
+          "«Ещё» → «Настройки» → «Главная страница», scroll to the very bottom.",
+          "«Ещё» → «Аналитика»: look at the folded rows at the foot of the page.",
+          "Open an order with more than one product, and a set under «Товары» → «Наборы».",
+          "Turn the phone on its side and open «Заказы»."
+        ],
+        "expect": [
+          "The magnifier in every search box sits halfway up it, left of the words.",
+          "The hint in the box shows in full, and tapping it does not zoom the page.",
+          "«Главная страница» fits the screen: «Вкл» and the ET and EN tabs show whole.",
+          "In «Аналитика» the note sits under the row's name and is not cut short.",
+          "Product names in the order and in the set show in full, not «Proraso — Bear…».",
+          "Sideways, nothing hides under the notch."
+        ],
+        "why": "A cut-off screen edge hides a switch you will neither see nor press."
+      }
+    },
+    {
       "id": "cart-basics",
       "area": "checkout",
       "who": "renat",
