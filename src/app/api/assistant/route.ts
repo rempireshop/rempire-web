@@ -176,14 +176,36 @@ async function blogLinesForPrompt(): Promise<string> {
    client round trip would. Dynamically imported and best-effort, same
    posture as every other optional neighbour in this codebase: a stock
    hiccup must never be the reason the assistant stops answering. */
+/* The list the model is shown is capped, and so is its answer — but the cap
+   is ours, so the count past it is ours to say. It used to stop at twelve
+   lines with no word that there were more: «Bio Botanical Serum 150/500 мл»
+   were simply missing from «что заканчивается» (verification pass
+   25.09.2026, ai-assistant-ask). Now the block says how many in all, and the
+   model is told to end its list with «…и ещё N» and the way to «Склад». */
+const STOCK_ROWS_MAX = 12;
+/** «товар / товара / товаров» for n — the Russian words the model is handed to end its list with. */
+function ruGoods(n: number): string {
+  const d = n % 10, h = n % 100;
+  if (d === 1 && h !== 11) return "товар";
+  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return "товара";
+  return "товаров";
+}
 async function stockSummaryForPrompt(): Promise<string> {
   try {
     const { lowStockSummary } = await import("@/lib/inventory");
-    const rows = await lowStockSummary(12);
-    if (!rows.length) return "(nothing tracked is low or out right now)";
-    return rows
-      .map((r) => `${r.brand} ${r.name}${r.variant ? " " + r.variant : ""} — ${r.state === "out" ? "нет" : "мало"} (${r.qty} шт)`)
-      .join("\n");
+    const all = await lowStockSummary(1000);
+    if (!all.length) return "(nothing tracked is low or out right now)";
+    const rows = all.slice(0, STOCK_ROWS_MAX);
+    const lines = rows.map((r) => `${r.brand} ${r.name}${r.variant ? " " + r.variant : ""} — ${r.state === "out" ? "нет" : "мало"} (${r.qty} шт)`);
+    const more = all.length - rows.length;
+    if (more > 0) {
+      lines.unshift(`${all.length} in all; the first ${rows.length} (нет first) are listed:`);
+      lines.push(
+        `…and ${more} more not listed here. Whenever you list these, never present the ${rows.length} above as the whole list: ` +
+        `end it with a line of its own, «…и ещё ${more} ${ruGoods(more)}» in the owner's language, and point to «Склад» with "tab":"stock", where all ${all.length} are.`,
+      );
+    }
+    return lines.join("\n");
   } catch {
     return "(not available right now — say so rather than guessing)";
   }

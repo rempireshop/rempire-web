@@ -8258,9 +8258,9 @@
       "expect": [
         "Ответ пришёл на языке вопроса: на русский — по-русски, на английский — по-английски.",
         "Язык панели при этом не менялся.",
-        "В ответе настоящие номера заказов и названия товаров.",
+        "В ответе настоящие номера заказов и названия товаров, без общих отговорок.",
         "На «Что заканчивается…» — список: по товару на строке, справа выделенное «нет» или «мало».",
-        "Общих отговорок вместо конкретики нет.",
+        "Товаров больше, чем в списке: в конце «…и ещё N» и путь в «Склад».",
         "Кнопки под ответом открывают нужный раздел."
       ],
       "why": "Помощник — самый быстрый способ узнать, что делать, не листая пять экранов.",
@@ -8277,15 +8277,15 @@
         "expect": [
           "The answer comes in the language of the question: Russian for Russian, English for English.",
           "The panel's own language did not change.",
-          "It holds real order numbers and real product names.",
+          "It holds real order numbers and real product names, no vague answers.",
           "«Что заканчивается…» comes back as a list: a product a line, «нет»/«мало» at the right.",
-          "No vague answers instead of specifics.",
+          "More products than listed: the list ends «…и ещё N» and points to «Склад».",
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      "markedAt": "2026-09-25T22:46:11.323Z"
     },
     {
       "id": "ai-assistant-voice",

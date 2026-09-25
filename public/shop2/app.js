@@ -7653,6 +7653,9 @@
        the names below it are nodes of their own, one a line */
     [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно:$/,
       { ET: "Lõppemas on $1 toodet. Kiireloomulised:", EN: "$1 products are running low. Urgent:" }],
+    // …and the line under that list when it shows only the first three
+    [/^…и ещё 1 товар$/, { ET: "…ja veel 1 toode", EN: "…and 1 more product" }],
+    [/^…и ещё (\d+) товар(?:|а|ов)$/, { ET: "…ja veel $1 toodet", EN: "…and $1 more products" }],
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
     [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
     // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
@@ -45541,7 +45544,13 @@
           return '<li class="adm-msg__li"><span class="adm-msg__nm">' + esc(admProdName(p.brand + " " + p.name)) + "</span>" +
             '<span class="adm-msg__st' + (out ? " adm-msg__st--out" : "") + '">' + (out ? "нет" : "мало") + "</span></li>";
         }).join("") + "</ul>" +
-        '<p class="adm-msg__p">Могу собрать заказ поставщику и отправить его вам на подпись.</p></div>';
+        /* …and the rest by number, with the way to all of them: the list
+           stopped at three with no word that there were more (verification
+           pass 25.09.2026, ai-assistant-ask) — the AI answer is told the
+           same (stockSummaryForPrompt, src/app/api/assistant/route.ts) */
+        (low.length > 3 ? '<p class="adm-msg__p">…и ещё ' + (low.length - 3) + " " + plural(low.length - 3) + "</p>" : "") +
+        '<p class="adm-msg__p">Могу собрать заказ поставщику и отправить его вам на подпись.</p>' +
+        (low.length > 3 ? aiGo("stock", "Открыть склад") : "") + "</div>";
     }
     /* The week's takings, when the assistant itself is off (no key on the
        server — probeAdmAI). The chip «Сколько продали за неделю?» lands here

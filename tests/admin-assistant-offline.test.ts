@@ -143,6 +143,39 @@ describe("the offline answer to «Что заканчивается…» is a li
   });
 });
 
+/* Verification pass on staging, 25.09.2026 (ai-assistant-ask): the list
+   stopped with no word that there were more. The lead sentence counts them
+   all; the list shows three; the rest is said by number, with the way to
+   «Склад». */
+describe("the offline list says how many it did not show", () => {
+  const many = (n: number): Product[] =>
+    Array.from({ length: n }, (_, i) => ({ id: `p${i}`, brand: "Proraso", name: `Wax ${i}`, stock: i % 2 ? "low" : "out" }));
+
+  it("«…и ещё N» in Russian plural, and a button to «Склад»", () => {
+    expect(answer("RU", Q, many(4))).toContain('<p class="adm-msg__p">…и ещё 1 товар</p>');
+    expect(answer("RU", Q, many(5))).toContain('<p class="adm-msg__p">…и ещё 2 товара</p>');
+    const html = answer("RU", Q, many(8));
+    expect(html).toContain('<p class="adm-msg__p">…и ещё 5 товаров</p>');
+    expect(html).toContain('data-admtab="stock"');
+  });
+
+  it("three or fewer: nothing more to say, no extra button", () => {
+    const html = answer("RU", Q, many(3));
+    expect(html).not.toContain("и ещё");
+    expect(html).not.toContain('data-admtab="stock"');
+  });
+
+  it("in Estonian and English too", () => {
+    expect(onScreen(answer("ET", Q, many(4)), "ET")).toContain("…ja veel 1 toode");
+    expect(onScreen(answer("EN", Q, many(4)), "EN")).toContain("…and 1 more product");
+    expect(onScreen(answer("ET", Q, many(8)), "ET")).toContain("…ja veel 5 toodet");
+    expect(onScreen(answer("EN", Q, many(8)), "EN")).toContain("…and 5 more products");
+    for (const lang of ["ET", "EN"] as const) {
+      expect(onScreen(answer(lang, Q, many(8)), lang).filter((t) => CYR.test(t))).toEqual([]);
+    }
+  });
+});
+
 describe("the other offline answers name no products", () => {
   /* The same glue can only happen where a list of names is joined into one
      node. Every other branch of adminAnswer() is a fixed sentence and a
