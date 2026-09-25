@@ -329,12 +329,17 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 
 /* ---------- chips and tabs ------------------------------------------------ */
 
-.adm-chips { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+/* 8 px between chips, like every other gap on the 4/8 scale; a chip is its
+   word and — where it counts something — the number beside it in bold
+   (`.adm-chip__n`), on every screen alike (1a screens 04, 07, 11: «Все 8») */
+.adm-chips { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
 .adm-chips::-webkit-scrollbar { display: none; }
 .adm-chip {
   height: 40px; padding: 0 14px; font-size: 14px; font-weight: 500; white-space: nowrap;
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
 }
+.adm-chip__n { font-weight: 700; font-variant-numeric: tabular-nums; }
 .adm-chip[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); border-color: var(--a-ink); }
 /* The placeholder chips under a letter's field: seven of them, three times
    over, so they get the narrower padding and the mono of the token they
@@ -791,8 +796,6 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
    count bold beside its word; «?» after them on «Возвраты» */
 .adm-ochips__row { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .adm-ochips { flex: 0 1 auto; min-width: 0; }
-.adm-ochips .adm-chip { display: inline-flex; align-items: center; gap: 6px; flex: none; }
-.adm-chip__n { font-weight: 600; }
 .adm-ochips__row .adm-help { margin: 0; }
 .adm-olist__note { margin: 8px 0; }
 .adm-olist__more { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 12px; }
@@ -947,7 +950,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-prog__rule { position: absolute; z-index: 0; top: 5px; left: 12.5%; right: 12.5%; height: 2px; background: var(--a-rule); list-style: none; }
 .adm-prog--2 .adm-prog__rule { left: 25%; right: 25%; }
 .adm-prog__rule i { display: block; height: 100%; background: var(--a-ink); }
-@media (max-width: 899px) { .adm-prog__l { font-size: 12px; } }
+@media (max-width: 899px) { .adm-prog__l { font-size: 12px; white-space: normal; overflow-wrap: anywhere; } }
 
 /* «Следующий шаг»: one bordered card — what to do, one line, «?»; the box
    and the locker door of this parcel; «Отправлен без этикетки» */
@@ -1012,6 +1015,9 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-ship__where { padding-top: 10px; font-size: 14px; line-height: 20px; }
 /* «Состав»: the lines, the delivery, the discount and points, «Итого» */
 .adm2 .adm-oline { padding: 10px 0; min-height: 0; flex-wrap: nowrap; }
+/* the whole name of what is in the parcel, on two lines if it needs them —
+   «Kevin.Murphy — Un.Tangled Spray — спрей для…» is what gets packed wrong */
+.adm2 .adm-oline .adm-row__nm { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
 .adm2 .adm-ominor { padding: 10px 0; min-height: 0; }
 .adm-ominor .adm-row__sub { margin: 0; }
 .adm-ocard .adm-total { align-items: baseline; padding: 12px 0 0; }
@@ -1329,7 +1335,13 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
    bar, full width; renderImpl sets body.adm-pinned so the page's end and the
    toast clear it, and it steps aside while the keyboard is up. */
 .adm-pin { margin-left: auto; flex: none; }
-.adm-pin__btn { height: 46px; padding: 0 24px; font-weight: 600; }
+.adm-pin__btn { height: 46px; padding: 0 24px; font-weight: 600; max-width: 100%; min-width: 0; }
+/* A label in pieces — «Открыть первый:» and a customer's name — keeps its
+   first piece whole and ends the name with «…» when it does not fit. A
+   long name used to run past BOTH edges of the button, centred, so the
+   phone read «вый: Александра-Кристина Константинопольская» (1a polish). */
+.adm-pin__btn > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-pin__btn > span:first-child:not(:last-child) { flex: none; }
 @media (max-width: 899px) {
   .adm-pin {
     position: fixed; left: 0; right: 0; bottom: var(--a-barh); z-index: 49; margin: 0;
@@ -1950,6 +1962,7 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* the name, its hint and «✨» on one line where they fit */
 .adm-edname { display: flex; align-items: baseline; justify-content: space-between; gap: 4px 16px; flex-wrap: wrap; }
 .adm-edname__spark { flex: none; font-size: 13px; min-height: 32px; }
+@media (max-width: 899px) { .adm-edname__spark { min-height: 44px; } }   /* a thumb on «Новый товар» */
 /* «Фото по объёмам» and «Видео» share a row where there is room (screen 02) */
 .adm-edpair2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 32px; align-items: start; }
 .adm-edpair2 > :only-child { grid-column: 1 / -1; }
@@ -2022,6 +2035,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* Описание and Google: the language segmented control, and the pair of
    fields one language shows on the Google tab */
 .adm-edbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* «✨ Заполнить автоматически · все три языка» is wider than a 360-px phone:
+   it takes a second line inside its frame instead of running off the edge */
+@media (max-width: 899px) {
+  .adm-edbar .adm-acts .adm-btn { max-width: 100%; height: auto; min-height: 44px; padding: 8px 14px; line-height: 18px; white-space: normal; }
+}
 .adm-edlang { display: flex; flex-direction: column; gap: 16px; }
 .adm-seg { display: flex; border: 1px solid var(--a-ink); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
@@ -2441,6 +2459,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scanoverlay button { font-family: inherit; cursor: pointer; }
 .scanoverlay input { font-family: inherit; font-size: 15px; }
+/* 16 px on a phone for the same reason as the panel's fields (inputs, above) */
+@media (max-width: 899px) { .scanoverlay input { font-size: 16px; } }
 /* same reason as `.adm2 [hidden]` above — the torch button is a flex box that
    is only there when the camera has a torch to switch */
 .scanoverlay [hidden] { display: none !important; }
@@ -2576,7 +2596,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
 /* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
-@media (max-width: 899px) { .adm-seg button { height: 44px; } }
+/* …and 44 wide too: «S · M · L» (Настройки → Доставка, the parcel size) drew
+   three one-letter segments 40 px wide */
+@media (max-width: 899px) { .adm-seg button { height: 44px; min-width: 44px; } }
 
 /* ---------- language of the *text*, not of the panel ----------------------
    The strip that says which of three language versions is on screen. It has
@@ -3019,6 +3041,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-pfield__l { font-size: 12px; line-height: 16px; color: var(--a-muted); }
 .adm-ppanel .adm-seg { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .adm-ppanel .adm-seg button { height: 44px; padding: 0 6px; }
+/* «Whole order» (EN) is wider than a third of a 375-px phone at 14 px */
+@media (max-width: 389px) { .adm-ppanel .adm-seg button { padding: 0 4px; font-size: 13px; } }
 .adm-ppanel .adm-foldrow__b { gap: 14px; }
 .adm-ppanel__foot { margin: 0; }
 .adm-ppanel .adm-err[hidden] { display: none; }
@@ -3487,7 +3511,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-kpi { padding: 16px; border-right: 1px solid var(--a-rule); border-bottom: 1px solid var(--a-rule); }
 .adm-kpi__l { font-size: 13px; color: var(--a-muted); }
 .adm-kpi__v { font-family: Oswald, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; margin-top: 4px; }
-.adm-kpi__d { font-size: 13px; margin-top: 4px; color: var(--a-muted); }
+.adm-kpi__d { font-size: 13px; line-height: 18px; margin-top: 4px; color: var(--a-muted); }
 .adm-kpi__d--up { color: var(--a-ok); }
 .adm-kpi__d--down { color: var(--a-warn); }
 
@@ -4125,6 +4149,20 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-foldrow.is-open .adm-foldrow__chev { transform: rotate(180deg); }
 .adm-foldrow__b { display: flex; flex-direction: column; gap: 12px; padding: 12px 0 16px; border-bottom: 1px solid var(--a-rule); }
 @media (prefers-reduced-motion: reduce) { .adm-foldrow__chev { transition: none; } }
+/* A phone puts the summary UNDER the title, left, and lets it take a second
+   line. Beside the title it had only what the title left over — 33 px on
+   «Аналитика → Бренды», so it read «S…», and an Estonian title could push
+   the chevron off the row — and nothing on a phone is cut short (README § 1).
+   The layout the «Настройки» pages already use (`.adm-set .adm-foldrow__h`). */
+@media (max-width: 899px) {
+  .adm-foldrow__h { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 2px; }
+  .adm-foldrow__t { grid-column: 1; min-width: 0; }
+  .adm-foldrow__s {
+    grid-column: 1; grid-row: 2; text-align: left; white-space: normal; overflow: visible;
+    font-size: 12.5px; line-height: 17px;
+  }
+  .adm-foldrow__chev { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+}
 
 /* a status tag: the badge's colours, drawn small and firm (11 px, 600) */
 .adm-tag { height: 20px; padding: 0 6px; font-size: 11px; font-weight: 600; }
@@ -4220,6 +4258,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   border: 1px solid var(--a-ink); background: transparent; color: var(--a-ink); padding: 0;
 }
 .adm-stk__scan:hover { background: var(--a-tint); }
+@media (max-width: 899px) { .adm-stk__scan { width: 44px; height: 44px; } }
 @media (min-width: 900px) {
   /* the same five columns as the head (.adm-stkhead__r) — after the phone rule, which it overrides */
   .adm-row.adm-stk__r { grid-template-columns: 90px 110px 140px 100px minmax(0, 1fr); column-gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--a-rule); }
@@ -4333,6 +4372,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   border: 0; background: none; padding: 0; text-align: left; color: inherit; font: inherit;
 }
 .adm-setrow__open .adm-row__sub { margin-top: 1px; font-size: 12px; }
+@media (max-width: 899px) { .adm-setrow__open { min-height: 44px; } }
 .adm-setrow__pr { grid-area: pr; text-align: left; font-size: 16px; }
 .adm-setrow__acts { grid-area: acts; display: flex; align-items: center; gap: 2px; }
 @media (min-width: 900px) {
@@ -4385,6 +4425,14 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-setitem .adm-step-qty__v { min-width: 30px; font-size: 16px; }
 .adm-setitem__x { width: 40px; height: 44px; flex: none; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0; }
 .adm-setitem__x:hover { color: var(--a-ink); }
+/* the name wraps — «Proraso — Bear…» at 90 px could be any of three oils —
+   and on a phone it has the row: − 1 + and × go to the line under it */
+.adm-setitem .adm-row__nm { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+@media (max-width: 899px) {
+  .adm-row.adm-setitem { flex-wrap: wrap; row-gap: 4px; }
+  .adm-setitem .adm-row__body { flex: 1 1 calc(100% - 60px); }
+  .adm-setitem .adm-step-qty { margin-left: auto; }
+}
 .adm-setpicks { display: flex; flex-direction: column; }
 .adm-setpicks:empty { display: none; }
 .adm-setpick { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
@@ -4410,7 +4458,15 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-set__col { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 24px; }
 .adm-set__main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 @media (max-width: 899px) {
-  .adm-set { display: flex; flex-direction: column; gap: 16px; }
+  /* `stretch`, not the grid's `start`: a column of flex items at `start` is
+     each as wide as its own content wants, and «Главная страница» — the RU ·
+     ET · EN tabs, the long strip text in its box, the slide rows — wanted
+     427 px on a 390-px phone. The page ran off the right edge and .adm2's
+     clip cut it there: the switches' «Вкл», the ET/EN tabs and the ends of
+     the boxes were simply not on screen (Dim, 25.09.2026: «seems to be too
+     wide»). Stretched, the page is the phone's width and everything in it
+     wraps or shrinks as it does on every other page. */
+  .adm-set { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
   .adm-set__col { position: static; }
   /* a page open over the index: the page, and «← Настройки» in the top bar */
   .adm-set--open .adm-set__col { display: none; }
@@ -4566,6 +4622,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 @media (max-width: 899px) {
   .adm-slide__row .adm-ops { gap: 2px; flex-wrap: nowrap; }
   .adm-slide__row .adm-thumb { width: 44px; height: 44px; }
+  /* the slide's title gets the row — «Профессио…» beside ↑ ↓ and the switch
+     told nothing — and ↑ ↓ · Вкл stand on the line under it, at the right */
+  .adm-slide__row { flex-wrap: wrap; row-gap: 2px; }
+  .adm-slide__t { flex: 1 1 calc(100% - 54px); }
+  .adm-slide__t .adm-row__nm { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+  .adm-slide__row .adm-ops { margin-left: auto; }
 }
 
 /* ---------- О компании: the hours ----------------------------------------- */

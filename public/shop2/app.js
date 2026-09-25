@@ -8031,6 +8031,11 @@
     [/^цена: (.+)$/, { ET: "hind: $1", EN: "price: $1" }],
     [/^фото: (.+)$/, { ET: "fotod: $1", EN: "photos: $1" }],
     [/^верхняя полоска: (.+)$/, { ET: "ülemine riba: $1", EN: "the top strip: $1" }],
+    /* «Доставка и оплата»: each price box is named for a reader by its column
+       and its country (admRateCellHTML) — «DPD — Эстония», «Курьер — Латвия»,
+       «Бесплатно от — Литва»; both halves are dictionary words (polish pass,
+       25.09.2026: an ET/EN panel read them out in Russian) */
+    [/^(Omniva|SmartPosti|DPD|Unisend|Nova Post|Курьер|Бесплатно от) — (.+)$/, { ET: "$1 — $2", EN: "$1 — $2" }],
     /* …and the confirm card's own copy of a product save, which is ONE text
        node with its lines still in it (the journal splits them, the card does
        not — .adm-propose__d is `white-space: pre-line`). */
@@ -8143,7 +8148,12 @@
   var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.cosum__scope,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
     ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r,.toast," +
     // «Рассылка»: a product named in a block — its card, its link, its row in the picker
-    ".adm-nb__nm";
+    ".adm-nb__nm," +
+    /* 1a: «Каталог»'s row draws the name in .adm-grow__t, «Наборы»' picker in
+       .adm-setpick__nm and «Аналитика»'s «Что покупают» in .adm-share__n — an
+       ET/EN panel read «Bio Botanical Shampoo — шампунь» in all three (polish
+       pass, 25.09.2026) */
+    ".adm-grow__t,.adm-setpick__nm,.adm-share__n";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -23012,8 +23022,9 @@
              count comes from goodsMatchesFilter(), the very predicate the
              list filters by, so the number and the list cannot disagree. */
           var n = all.filter(function (q) { return goodsMatchesFilter(q, x[0]); }).length;
+          // the word and its number as two nodes, the number bold — as on «Заказы»
           return '<button class="adm-chip" data-goodsfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-            x[1] + " " + n + "</button>";
+            "<span>" + x[1] + '</span> <b class="adm-chip__n">' + n + "</b></button>";
         }).join("") + "</div>" +
       '<div class="adm-glist" id="goodslist">' + admCatalogRows() + "</div>";
   }
@@ -39552,7 +39563,7 @@
              «Нет 0» is the answer to the question (Dim, 19.09.2026). */
           STOCK_FILTERS.map(function (x) {
             return '<button class="adm-chip" data-stockfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-              x[1] + (S.stockLevels ? " " + stockFilterCount(x[0]) : "") + "</button>";
+              "<span>" + x[1] + "</span>" + (S.stockLevels ? ' <b class="adm-chip__n">' + stockFilterCount(x[0]) + "</b>" : "") + "</button>";
           }).join("") + "</div>" +
       "</div>" +
       '<div class="adm-stkmeta">' +
@@ -39611,7 +39622,7 @@
         chips.map(function (c) {
           var n = all.filter(function (m) { return stockHistMatch(m, c[0]); }).length;
           return '<button class="adm-chip" data-stockmovesreason="' + c[0] + '" aria-current="' + (k === c[0]) + '">' +
-            c[1] + (S.stockMoves ? " " + n : "") + "</button>";
+            "<span>" + c[1] + "</span>" + (S.stockMoves ? ' <b class="adm-chip__n">' + n + "</b>" : "") + "</button>";
         }).join("") +
       "</div>" +
       (S.stockMovesErr ? '<div class="adm-error"><span>' + esc(S.stockMovesErr) + "</span>" +

@@ -361,7 +361,10 @@ describe("«История склада»: six chips, and «Списание» o
 
   it("counts every chip over the lines on screen — «Продажи» is the web and the salon together", () => {
     const html = hist(ledger);
-    const chips = (html.match(/data-stockmovesreason="[^"]*"[^>]*>[^<]*</g) || []).map((c) => c.replace(/^.*>/, "").replace(/<$/, ""));
+    // a chip is its word and its number, two nodes since the polish pass of
+    // 25.09.2026 (`<span>Все</span> <b class="adm-chip__n">6</b>`); the text is the same
+    const chips = (html.match(/<button class="adm-chip" data-stockmovesreason="[^"]*"[^>]*>.*?<\/button>/g) || [])
+      .map((c) => c.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim());
     expect(chips).toEqual(["Все 6", "Приход 1", "Продажи 2", "Вручную 1", "Возврат 1", "Правка карточки 1"]);
   });
 
