@@ -84,7 +84,7 @@ const CATALOGUE = [
   { id: "balm", brand: "Proraso", name: "Balm", price: 8, sizes: [], prices: [8] },
 ];
 
-function sets(list: Array<Record<string, unknown>> | null = []) {
+function sets(list: Array<Record<string, unknown>> | null = [], realList = false) {
   const calls: Call[] = [];
   const toasts: Array<{ msg: string; undo: unknown }> = [];
   const store: Record<string, string> = {};
@@ -119,7 +119,7 @@ function sets(list: Array<Record<string, unknown>> | null = []) {
     function journalNote() {}
     function toast(m, u) { TOASTS.push({ msg: m, undo: u }); }
     function render() {}
-    function loadAdminBundles() {}
+    ${realList ? fn("loadAdminBundles") + "\n" + fn("loadAdminBundlesThen") : "function loadAdminBundles() {}"}
     function loadBundles() {}
     function call(url, method, b) { var c = { url: url, method: method, body: b || null }; CALLS.push(c); return Promise.resolve(ANSWER(c)); }
     function apiSend(url, method, b) { return call(url, method, b); }
@@ -189,6 +189,24 @@ describe("«+ Набор» is a local draft until it is valid (q27)", () => {
     expect(s.calls[0].body).toMatchObject({ id: "beard-set", active: false, price: 12.9, title: { RU: "Набор для бороды" } });
     expect(f.editing, "the draft did not become a set").toBe(true);
     expect(s.store["rmp-bundle-draft"], "the draft outlived the set it became").toBeUndefined();
+    expect(s.SAVE.state).toBe("saved");
+  });
+
+  /* e2e, 25.09.2026: the price box was left within a second of opening
+     «Наборы», before GET /api/admin/bundles/ had answered — the address could
+     not be checked, the save was refused, and nothing tried again once the
+     list arrived. The first save now waits for the list and then goes. */
+  it("a set left before the list has arrived waits for it, then saves itself", async () => {
+    const s = sets(null, true);
+    s.answer((c) => (c.method === "GET" ? { status: 200, body: { ok: true, bundles: [saved] } } : { status: 200, body: { ok: true } }));
+    const f = s.blank(); s.S.bundleForm = f;
+    f.title.RU = "Набор для бороды";
+    f.items.push({ productId: "shampoo", variant: 0, qty: 1 }, { productId: "balm", variant: 0, qty: 1 });
+    f.price = "12,90"; s.touched("money"); s.leave("blur");
+    await flush(); await flush();
+    expect(s.calls.map((c) => c.method)).toEqual(["GET", "POST", "GET"]);
+    expect(s.calls[1].body).toMatchObject({ id: "beard-set", active: false, price: 12.9 });
+    expect(f.editing).toBe(true);
     expect(s.SAVE.state).toBe("saved");
   });
 

@@ -3220,7 +3220,7 @@
       "Нажмите на набор слева, чтобы изменить": "Muutmiseks vajutage vasakul komplektile",
       "Набор открыт — впишите цену, и он сохранится сам, скрытым": "Komplekt on avatud — sisestage hind ja see salvestub ise, peidetuna",
       "Впишите цену набора или скидку — тогда набор сохранится.": "Sisestage komplekti hind või allahindlus — siis komplekt salvestub.",
-      "Список наборов ещё не загрузился — подождите секунду.": "Komplektide nimekiri pole veel laadinud — oodake hetk.",
+      "Список наборов не загрузился — нажмите «Повторить» над ним.": "Komplektide nimekiri ei laadinud — vajutage selle kohal «Proovi uuesti».",
       "Набор сохранён — пока скрыт. Включите «Показывать в магазине», когда он готов.": "Komplekt on salvestatud — praegu peidetud. Lülitage «Näidata poes» sisse, kui see on valmis.",
       "Не получилось вернуть набор.": "Komplekti ei õnnestunud taastada.",
       "Черновик готов — проверьте текст": "Mustand on valmis — kontrollige teksti",
@@ -6311,7 +6311,7 @@
       "Нажмите на набор слева, чтобы изменить": "Tap a set on the left to edit it",
       "Набор открыт — впишите цену, и он сохранится сам, скрытым": "The set is open — enter a price and it saves itself, hidden",
       "Впишите цену набора или скидку — тогда набор сохранится.": "Enter the set's price or a discount — then the set is saved.",
-      "Список наборов ещё не загрузился — подождите секунду.": "The list of sets hasn't loaded yet — wait a second.",
+      "Список наборов не загрузился — нажмите «Повторить» над ним.": "The list of sets did not load — press «Try again» above it.",
       "Набор сохранён — пока скрыт. Включите «Показывать в магазине», когда он готов.": "The set is saved — hidden for now. Turn on «Show in the shop» when it is ready.",
       "Не получилось вернуть набор.": "Couldn't bring the set back.",
       "Черновик готов — проверьте текст": "The draft is ready — check the text",
@@ -30647,14 +30647,22 @@
     loadAdminBundles._busy = true;
     apiJson("/api/admin/bundles/").then(function (r) {
       loadAdminBundles._busy = false;
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 401) { SRV.admin = false; render(); loadAdminBundlesThen(); return; }
       S.admBundles = r.status === 200 && r.body.ok ? hydrateBundles(r.body.bundles || []) : [];
       S.admBundleErr = r.status === 200 && r.body.ok ? "" : "Список наборов не загрузился.";
       render();
+      loadAdminBundlesThen();
     }).catch(function () {
       loadAdminBundles._busy = false;
       S.admBundles = []; S.admBundleErr = "Сервер не отвечает."; render();
+      loadAdminBundlesThen();
     });
+  }
+  /** 1a: a new set's first save waits for the list (bundleAsSend) — it goes on here. */
+  function loadAdminBundlesThen() {
+    var q = loadAdminBundles._then || [];
+    loadAdminBundles._then = [];
+    q.forEach(function (fn) { fn(); });
   }
 
   /* ---------- the address of a new set ------------------------------------
@@ -31153,9 +31161,18 @@
     if (f.deleted) return Promise.resolve(true);   // deleted while a save was owed: nothing to bring back
     var creating = !f.editing;
     if (creating && !S.admBundles) {
-      // an upsert on an address nobody checked could replace a set that exists
-      loadAdminBundles(false);
-      return Promise.resolve({ refused: "Список наборов ещё не загрузился — подождите секунду." });
+      /* An upsert on an address nobody checked could replace a set that
+         exists — so a new set waits for the list, then goes. A refusal here
+         would be owed nothing: the box has already been left, and a set typed
+         in the first second after opening «Наборы» would never save itself. */
+      if (SRV.admin !== true) return Promise.resolve({ refused: "Нужен вход в админку — изменение не сохранилось" });
+      return new Promise(function (resolve) {
+        (loadAdminBundles._then = loadAdminBundles._then || []).push(function () {
+          resolve(S.admBundles && !S.admBundleErr ? bundleAsSend(f)
+            : { refused: "Список наборов не загрузился — нажмите «Повторить» над ним." });
+        });
+        loadAdminBundles(false);
+      });
     }
     if (creating && !f.id) f.id = bundleSuggestId(f.title);
     var body = bundleFormPayload(f);
