@@ -22,7 +22,7 @@ test.beforeEach(async ({}, testInfo) => {
  * Both projects on purpose — unlike every other admin spec (docs/testing.md
  * "Why most specs run on desktop only"). The whole point of the redesign is
  * that Renat works from an iPhone, so the phone half is the half that matters:
- * the sticky bottom bar, the «Ещё» sheet, the assistant as a sheet.
+ * the sticky bottom bar, the «Ещё» page, the assistant as a sheet.
  *
  * Every test has its own fake IP: admin login is rate-limited 5/min.
  */
@@ -51,10 +51,19 @@ test.describe("admin shell — the five places", () => {
     expect(box, "the bottom bar has no box at all").not.toBeNull();
     expect(Math.abs((box!.y + box!.height) - vh), "the bottom bar is not at the bottom").toBeLessThan(2);
 
-    // «Ещё» → the sheet with the six sections that are not on the bar
+    /* «Ещё» → a PAGE with the six sections that are not on the bar (1a,
+       screen 14): the bar stays under it with «Ещё» alone lit, the top bar
+       shows the wordmark, and the screen it was opened over is hidden. */
     await page.locator("[data-admmore]").click();
-    const sheet = page.locator(".adm-sheet");
+    const sheet = page.locator(".adm-more");
     await expect(sheet).toBeVisible();
+    await expect(sheet.locator("h1.adm-more__t")).toHaveText("Ещё");
+    await expect(bar).toBeVisible();
+    await expect(bar.locator('[aria-current="true"]')).toHaveCount(1);
+    await expect(bar.locator('[data-admmore][aria-current="true"]')).toBeVisible();
+    await expect(page.locator(".adm-top__mark")).toHaveText("REMPIRE");
+    await expect(page.locator(".adm-page"), "the screen under «Ещё» still shows").toBeHidden();
+    await expect(page.locator(".adm-scrim--more, .adm-sheet"), "«Ещё» is a sheet again").toHaveCount(0);
     for (const label of ["Клиенты", "Маркетинг", "Блог", "Аналитика", "Подключения", "Настройки"]) {
       await expect(sheet.getByText(label, { exact: true })).toBeVisible();
     }
@@ -72,16 +81,16 @@ test.describe("admin shell — the five places", () => {
     await expect(out, "«Выйти» went back to being a text link").toHaveClass(/adm-btn/);
     expect((await out.boundingBox())!.height, "«Выйти» is under a thumb's size").toBeGreaterThanOrEqual(44);
 
-    // a row opens its section and closes the sheet behind it
-    await page.locator('.adm-sheet [data-admtab="blog"]').click();
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    // a row opens its section and closes the page behind it
+    await page.locator('.adm-more [data-admtab="blog"]').click();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
     await expect(page.locator("h1.adm-h1")).toHaveText("Блог");
 
-    // the scrim closes it without going anywhere
+    // Back closes it without going anywhere: the section it was opened from
     await page.locator("[data-admmore]").click();
-    await expect(page.locator(".adm-sheet")).toBeVisible();
-    await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    await expect(page.locator(".adm-more")).toBeVisible();
+    await page.goBack();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
     await expect(page.locator("h1.adm-h1")).toHaveText("Блог");
   });
 
@@ -623,13 +632,17 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await expect(page.locator("[data-posq]")).toBeVisible();
     await fitsThePhone(page, "Салон");
 
-    // the «Ещё» sheet, and the same footer inside it
+    // the «Ещё» page, and the same footer on it
     await page.locator("[data-admmore]").click();
-    await expect(page.locator(".adm-sheet")).toBeVisible();
+    await expect(page.locator(".adm-more")).toBeVisible();
     await fitsThePhone(page, "Ещё");
-    await centred(page, ".adm-sheet__foot", "sheet foot", false);
-    await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    await centred(page, ".adm-more__foot", "«Ещё» foot", false);
+    // no status line is cut: each one is as wide as its text needs, or wraps
+    const cut = await page.locator(".adm-more .adm-row__sub").evaluateAll((els) =>
+      els.filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.textContent));
+    expect(cut, "a line under a «Ещё» row is cut").toEqual([]);
+    await page.goBack();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
   });
 });
 

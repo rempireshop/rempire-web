@@ -309,11 +309,12 @@ test.describe("a11y admin", () => {
     await audit.check(page, "admin Салон");
 
     if (mobile) {
+      // «Ещё» is a page (1a, screen 14): Back puts it away, as it closes any page
       await page.locator("[data-admmore]").click();
-      await expect(page.locator(".adm-sheet")).toBeVisible();
-      await audit.check(page, "admin «Ещё» sheet");
-      await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
-      await expect(page.locator(".adm-sheet")).toHaveCount(0);
+      await expect(page.locator(".adm-more")).toBeVisible();
+      await audit.check(page, "admin «Ещё» page");
+      await page.goBack();
+      await expect(page.locator(".adm-more")).toHaveCount(0);
     }
 
     await section("people", /Клиенты/);

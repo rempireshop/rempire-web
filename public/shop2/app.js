@@ -2084,7 +2084,7 @@
       "Маркетинг": "Turundus",
       "и отзывы": "ja arvustused",
       "промокоды · письма": "sooduskoodid · kirjad",
-      "доставка · главная · компания · цены · языки · журнал": "tarne · avaleht · ettevõte · hinnad · keeled · logi",
+      "доставка, главная, компания": "tarne, avaleht, ettevõte",
       "Ещё": "Veel",
       "Открыть магазин ↗": "Ava pood ↗",
       "Магазин ↗": "Pood ↗",
@@ -2497,7 +2497,7 @@
       "Отказать": "Keeldu", "Отказать в заявке?": "Kas keelduda taotlusest?",
       "Какие клиенты": "Millised kliendid",
       "Имя, почта, телефон, компания": "Nimi, e-post, telefon, ettevõte",
-      "промокоды · подарочные карты · письма": "sooduskoodid · kinkekaardid · kirjad",
+      "промокоды, карты, письма": "sooduskoodid, kaardid, kirjad",
       "+ Промокод": "+ Sooduskood",
       "Подарочные карты": "Kinkekaardid",
       "Номиналы карты": "Kaardi nimiväärtused",
@@ -3279,7 +3279,7 @@
       "как в прошлый раз": "nagu eelmisel korral",
       "чаще всего": "kõige sagedamini",
       /* direction 1a — the frame and the shared pieces (admTopHTML,
-         admMoreSheetHTML, admConfirmHTML, admSaveStatusHTML, admHelpBtnHTML,
+         admMorePageHTML, admConfirmHTML, admSaveStatusHTML, admHelpBtnHTML,
          admLangFallback) */
       "Не надо": "Loobu",
       "Не сохранилось — проверьте интернет": "Ei salvestunud — kontrolli internetiühendust",
@@ -5229,7 +5229,7 @@
       "Маркетинг": "Marketing",
       "и отзывы": "and reviews",
       "промокоды · письма": "promo codes · emails",
-      "доставка · главная · компания · цены · языки · журнал": "delivery · home page · company · prices · languages · log",
+      "доставка, главная, компания": "delivery, home page, company",
       "Ещё": "More",
       "Открыть магазин ↗": "Open the shop ↗",
       "Магазин ↗": "Shop ↗",
@@ -5640,7 +5640,7 @@
       "Отказать": "Decline", "Отказать в заявке?": "Decline the request?",
       "Какие клиенты": "Which customers",
       "Имя, почта, телефон, компания": "Name, e-mail, phone, company",
-      "промокоды · подарочные карты · письма": "promo codes · gift cards · letters",
+      "промокоды, карты, письма": "promo codes, cards, e-mails",
       "+ Промокод": "+ Promo code",
       "Подарочные карты": "Gift cards",
       "Номиналы карты": "Card amounts",
@@ -6416,8 +6416,9 @@
       "по умолчанию": "by default",
       "как в прошлый раз": "as last time",
       "чаще всего": "most often",
-      /* direction 1a — the frame and the shared pieces */
-      "Не надо": "Don't",
+      /* direction 1a — the frame and the shared pieces. «Не надо» is the
+         confirm's way out, and the English one says it the English way. */
+      "Не надо": "Cancel",
       "Не сохранилось — проверьте интернет": "Not saved — check the internet connection",
       "Подсказка": "Hint",
       "Язык панели": "Panel language",
@@ -9530,7 +9531,8 @@
     adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
     adminOrder: 0,   // opened order id (0 = list)
     // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
-    admMore: false,        // the phone «Ещё» sheet
+    admMore: false,        // the phone «Ещё» page
+    admMoreY: 0,           // …and how far down the screen under it was scrolled (admMoreScroll)
     // «Заказы» chips: all (where the screen opens, r16) | new | shipped | invoice | returns.
     // label / delivered / salon are older keys the overview and the suite still press.
     admOrderFilter: "all",
@@ -19190,17 +19192,18 @@
     ["goods", "Товары", "products"],
     ["pos", "Салон", "salon"]
   ];
-  /* «Ещё»: a bottom sheet on a phone, an inline group under a rule in the
-     desktop sidebar. The fourth column is the one-line description the sheet
+  /* «Ещё»: a page of its own on a phone, an inline group under a rule in the
+     desktop sidebar. The fourth column is the one-line description the page
      shows under the name — the fixed line; admMoreLine() puts a live one in
-     its place where the panel already holds the numbers (1a, screen 14). */
+     its place where the panel already holds the numbers (1a, screen 14).
+     Short enough for one line at 390 px, and never cut if it is not. */
   var ADM_MORE = [
     ["people", "Клиенты", "customers", "и отзывы"],
-    ["promos", "Маркетинг", "marketing", "промокоды · подарочные карты · письма"],
+    ["promos", "Маркетинг", "marketing", "промокоды, карты, письма"],
     ["blog", "Блог", "blog", "статьи для покупателей"],
     ["stats", "Аналитика", "analytics", "продажи и посетители"],
     ["apps", "Подключения", "integrations", "оплата, доставка, почта, Google"],
-    ["setup", "Настройки", "settings", "доставка · главная · компания · цены · языки · журнал"]
+    ["setup", "Настройки", "settings", "доставка, главная, компания"]
   ];
   var ADM_SECTION_OF = {
     over: "over", orders: "orders",
@@ -21828,12 +21831,14 @@
         admLogoutHTML() +
       "</div></aside>";
   }
+  /* While the «Ещё» page is open it is the page on screen, so «Ещё» alone is
+     lit — not also the section it was opened over (screen 14). */
   function admBarHTML(waiting) {
     var moreOn = !!S.admMore;
     for (var i = 0; i < ADM_MORE.length; i++) if (ADM_MORE[i][0] === admSection()) moreOn = true;
     return '<nav class="adm-bar" aria-label="Разделы админки">' +
       ADM_SECTIONS.map(function (t) {
-        var on = admSection() === t[0];
+        var on = !S.admMore && admSection() === t[0];
         return '<button class="adm-bar__i" data-admtab="' + t[0] + '" aria-current="' + on + '" title="' + t[1] + '">' +
           admIcon(t[2], on, 22) + '<span>' + t[1] + "</span>" +
           (t[0] === "orders" && waiting ? '<span class="adm-bar__b">' + waiting + "</span>" : "") + "</button>";
@@ -21841,43 +21846,65 @@
       '<button class="adm-bar__i" data-admmore aria-current="' + moreOn + '" title="Ещё">' +
         admIcon("more", moreOn, 22) + "<span>Ещё</span></button></nav>";
   }
-  /* «Ещё» on a phone (1a, screen 14): the six sections that are not on the
-     bar, each with ONE line of what is waiting there, then the panel's
-     language and the two ways out. Still a sheet — its scrim, Back, Escape
-     and the Back layer «more» are what they were — but it stands ON the
-     tab bar rather than over it, so «Ещё» stays lit under it and the other
-     four places are one tap away, as on the design's page. */
-  function admMoreSheetHTML() {
-    return '<button class="adm-scrim adm-scrim--phone adm-scrim--more" data-admmoreclose aria-label="Закрыть"></button>' +
-      '<div class="adm-sheet adm-sheet--phone adm-more" role="dialog" aria-modal="true" aria-label="Ещё">' +
-        '<div class="adm-sheet__grab"><i></i></div>' +
-        '<div class="adm-sheet__body">' +
-          '<h2 class="adm-more__t">Ещё</h2>' +
+  /* «Ещё» on a phone (1a, screen 14) is a PAGE, not a sheet (Dim: follow the
+     new UX): the title with its 1-px rule, the six sections that are not on
+     the bar — each with its icon, ONE line of what is waiting there and a
+     chevron — then the panel's language and the two ways out. The tab bar
+     stays under it with «Ещё» lit, and the top bar shows the wordmark.
+
+     It is still the Back layer «more» (admLayers), so nothing about the
+     history changed: the tap on «Ещё» parks its entry, Back spends it and
+     hands back the screen it was opened over — card and all — and a row
+     is admGoTab(), which closes the page on its way into the section. The
+     screen underneath is not thrown away while the page is up: it stays in
+     the document, hidden (admin.css .adm2--more), so a form half typed
+     under «Ещё» is still half typed when Back brings it back. */
+  function admMorePageHTML() {
+    return '<section class="adm-more" aria-labelledby="adm-more-t">' +
+        '<h1 class="adm-more__t" id="adm-more-t" tabindex="-1">Ещё</h1>' +
+        '<div class="adm-more__list">' +
           ADM_MORE.map(function (t) {
             var line = admMoreLine(t[0]);
-            // aria-current, like every other nav item: the sheet has to say
-            // which section you are already in, and it is what the suite reads
-            return '<button class="adm-sheet__row" data-admtab="' + t[0] + '" aria-current="' +
+            // aria-current, like every other nav item: the page says which
+            // section it was opened over, and it is what the suite reads
+            return '<button class="adm-more__row" type="button" data-admtab="' + t[0] + '" aria-current="' +
               (admSection() === t[0]) + '" title="' + t[1] + '">' +
               admIcon(t[2], false, 22) +
               '<span class="adm-more__txt"><span class="adm-row__nm">' + t[1] + "</span>" +
               (line[0] ? '<span class="adm-row__sub' + (line[1] ? " adm-row__sub--warn" : "") + '">' +
                 (line[2] ? admPiecesHTML(line[0]) : line[0]) + "</span>" : "") + "</span>" +
-              '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+              '<svg class="adm-more__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                'stroke-width="1.8" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>';
           }).join("") +
           /* No «Помощник» row (Dim, 25.09.2026, q12): the assistant's icon is
-             in the phone's top bar. While a save bar is the phone's header
-             (≤ 767, a screen not yet on autosave) that bar is not drawn, and
-             the assistant waits until the form is closed — the save bars go
-             as their screens move to autosave. */
+             in the phone's top bar, and this page always has that bar — even
+             opened over a form whose save bar is the phone's header (≤ 767),
+             because the save bar belongs to the screen hidden under it. */
         "</div>" +
-        '<div class="adm-sheet__foot">' +
+        '<div class="adm-more__foot">' +
           '<div class="adm-more__lang"><span>Язык панели</span>' + admLangsHTML() + "</div>" +
           '<div class="adm-more__acts">' +
             '<button class="adm-btn adm-btn--ghost" type="button" data-go="home">Открыть магазин ↗</button>' +
             admLogoutHTML() +
           "</div>" +
-        "</div></div>";
+        "</div></section>";
+  }
+  /** After every render of the panel (renderImpl): a page opens at its top,
+      and Back hands the screen under «Ещё» back where it was left. While the
+      page was up that screen was hidden and the browser clamped the scroll to
+      the page's own height, so without this Back lands at the top of a long
+      list. Only onto the SAME screen — a row that went somewhere else starts
+      at the top of it (admGoTab). */
+  var admMoreOver = "";   // the screen «Ещё» stands over, while it is open
+  function admMoreScroll() {
+    var under = admViewKey() + "|" + admLayers().filter(function (l) { return l !== "more"; }).join(",");
+    if (S.admMore) {
+      if (!admMoreOver) { admMoreOver = under; window.scrollTo(0, 0); }
+      return;
+    }
+    if (!admMoreOver) return;
+    if (admMoreOver === under) window.scrollTo(0, S.admMoreY || 0);
+    admMoreOver = "";
   }
 
   /* The assistant: one FAB, then a 380-px pane on a desktop and a 75 %-tall
@@ -22472,8 +22499,13 @@
      [data-admsavest] slot — the phone's top bar and the desktop's page header
      both have one — so a write landing never re-renders the form under the
      caret. «Сохранено ✓» fades after ADM_SAVE_SHOWN_MS; an error stays until
-     «Повторить» (or a later write of the same field) lands. No live region:
-     the toast is the one thing in the panel that announces itself. */
+     «Повторить» (or a later write of the same field) lands. «Сохраняем…» and
+     «Сохранено ✓» say nothing out loud — they come and go with every keystroke
+     and would talk over the field being typed in. The error is the one state
+     that must be heard: a change that did not reach the shop, read off a
+     status the owner is not looking at. So only that line is role="alert",
+     and it is announced when it is written into the slot (admSavePaint); the
+     slot the viewport hides (display: none) is not read at all. */
   function admSaveBegin() { ADM_SAVE.busy++; clearTimeout(ADM_SAVE.fade); admSaveSet("saving"); }
   function admSaveEnd() {
     ADM_SAVE.busy = Math.max(0, ADM_SAVE.busy - 1);
@@ -22493,7 +22525,7 @@
     if (s === "saving") return '<span class="adm-savest__t">Сохраняем…</span>';
     if (s === "saved") return '<span class="adm-savest__t adm-savest__t--ok">Сохранено ✓</span>';
     if (s === "error") {
-      return '<span class="adm-savest__t adm-savest__t--err">Не сохранилось — проверьте интернет</span>' +
+      return '<span class="adm-savest__t adm-savest__t--err" role="alert">Не сохранилось — проверьте интернет</span>' +
         '<button class="adm-savest__retry" type="button" data-admsaveretry>Повторить</button>';
     }
     return "";
@@ -22659,7 +22691,9 @@
   function admTopBackLabel() {
     var l = admLayers();
     for (var i = l.length - 1; i >= 0; i--) {
-      if (l[i] === "section") return "";
+      /* the «Ещё» page is a front door of its own: the wordmark, whatever
+         card it was opened over (screen 14) */
+      if (l[i] === "section" || l[i] === "more") return "";
       if (l[i] === "order") return S.admCustOpen ? "К клиенту" : "Заказы";
       if (ADM_TOP_BACK[l[i]]) return ADM_TOP_BACK[l[i]];
     }
@@ -22730,7 +22764,7 @@
   }
 
   /* The panel, in one shell: sections down the left (a 232-px sidebar that
-     folds to icons on a desktop, a 64-px bottom bar plus an «Ещё» sheet on a
+     folds to icons on a desktop, a 64-px bottom bar plus an «Ещё» page on a
      phone), the work in the middle, and the assistant behind a floating
      button instead of a permanent third column.
 
@@ -22792,16 +22826,20 @@
        sidebar carries the logo, the language and the ways out); the page
        column carries the save status at its top right on a desktop
        (.adm-pagest); the assistant is its pane or, folded, its strip. */
-    return '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") + '">' +
+    /* The phone's «Ещё» page (admMorePageHTML) is drawn beside the screen, not
+       instead of it: .adm2--more hides the screen while the page is up, so
+       what was typed there is still there when Back brings it back. */
+    return '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") +
+        (S.admMore ? " adm2--more" : "") + '">' +
         admTopHTML() +
         '<div class="adm2__frame">' +
           admSideHTML(waiting) +
           '<div class="adm-main"><div class="adm-page' + (admEnterClass() ? " adm-page--enter" : "") + '">' +
             '<div class="adm-pagest">' + admSaveSlotHTML("adm-savest--page") + "</div>" +
-            body + "</div></div>" +
+            body + "</div>" +
+            (S.admMore ? admMorePageHTML() : "") + "</div>" +
         "</div>" +
         admBarHTML(waiting) +
-        (S.admMore ? admMoreSheetHTML() : "") +
         (S.admAi ? admAsstHTML() : admStripHTML()) +
         (pendingAction && pendingAction.overlay ? admConfirmHTML(pendingAction) : "") +
       "</div>";
@@ -33821,7 +33859,7 @@
       if (EDB.ix >= 0 && EDB.rows[EDB.ix]) edBrandPick(EDB.rows[EDB.ix].name); else edBrandClose();
     } else if (e.key === "Escape") {
       if (!open) return;
-      e.preventDefault(); e.stopPropagation();   // the panel's own Escape (the «Ещё» sheet, the card) stays out of it
+      e.preventDefault(); e.stopPropagation();   // the panel's own Escape (the «Ещё» page, the card) stays out of it
       edBrandClose();
     } else if (e.key === "Tab") { edBrandClose(); }
   }, true);
@@ -41687,7 +41725,7 @@
        to has to clear the PANEL's header and the PANEL's bar, not the shop's
        (admin.css § «what the browser scrolls a focused field to»). */
     document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
-    if (S.screen === "admin") admScrollers();   // which way each strip scrolls
+    if (S.screen === "admin") { admScrollers(); admMoreScroll(); }   // which way each strip scrolls; «Ещё»
     else document.body.classList.remove("adm-typing");
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
     // …and, if this is the first screen that wants the assistant at all, the
@@ -42247,7 +42285,7 @@
   /** What is open over the panel right now, bottom layer first.
 
       The order is what the eye sees stacked, because Back closes the top one:
-      a card first, then the phone's «Ещё» sheet, then a confirm card — and the
+      a card first, then the phone's «Ещё» page, then a confirm card — and the
       scanner last of all, since its viewfinder is mounted outside the panel
       (scanMount) and covers every one of them. */
   /** Is «Помощник» a sheet over the panel right now (a phone, ≤ 899 px) rather
@@ -42383,7 +42421,7 @@
   /* ---------- …and out through the nav ------------------------------------
      «←» and the phone's Back ask before an unsaved product or article is
      thrown away. Every `data-admtab` did not — the phone's bottom bar, the
-     desktop sidebar, the tab strips, the «Ещё» sheet, the assistant's
+     desktop sidebar, the tab strips, the «Ещё» page, the assistant's
      «Открыть …»: one tap on «Заказы» dropped a typed price or a whole article
      in silence (map of the panel, 23.09.2026, #2). They ask the same
      question now, at the top of the editor, and the question remembers where
@@ -42406,7 +42444,7 @@
       S.mailConfirmBack = go;
     } else return false;
     /* The question stands above the editor, so it has to be in sight: the
-       «Ещё» sheet a row was tapped in, and the phone's assistant sheet an
+       «Ещё» page a row was tapped in, and the phone's assistant sheet an
        «Открыть …» was tapped in, would both cover it. */
     S.admMore = false;
     if (S.admAi && admAsstSheet()) S.admAi = false;
@@ -43145,7 +43183,7 @@
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) {
       S.admAi = !S.admAi;
-      if (t.closest(".adm-sheet--phone")) S.admMore = false;   // opened from «Ещё»: the sheet gives way
+      if (t.closest(".adm-more")) S.admMore = false;   // opened from «Ещё»: the page gives way
       admPanesSave(); render(); admAiRefocus(); return;
     }
     /* 1a: the phone top bar's «← …» — the very step the phone's own Back
@@ -43156,8 +43194,15 @@
     // «?» beside a section title, and a fold row: open or shut, remembered for the session
     if (d.admhelp !== undefined) { admHelpToggle(d.admhelp); render(); refocus(admAsSel("data-admhelp", d.admhelp)); return; }
     if (d.admfold !== undefined) { admFoldToggle(d.admfold); render(); refocus(admAsSel("data-admfold", d.admfold)); return; }
-    // the phone «Ещё» sheet
-    if (d.admmore !== undefined) { S.admMore = true; render(); return; }
+    /* the phone «Ещё» page: opened from the tab bar, closed by Back or by a
+       row (admGoTab). `data-admmoreclose` puts it away without going
+       anywhere, as Back does — nothing on the page draws it now, the hook
+       stays for whatever still asks for it. */
+    if (d.admmore !== undefined) {
+      if (!S.admMore) S.admMoreY = window.scrollY || 0;
+      // a new page: a screen reader starts reading at its title
+      S.admMore = true; render(); refocus("#adm-more-t"); return;
+    }
     if (d.admmoreclose !== undefined) { S.admMore = false; render(); return; }
     /* One door into every section, still addressed by the key it has always
        had: `data-admtab="stock"` opens Товары on its «Склад» tab, `"mail"`
@@ -46241,7 +46286,7 @@
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       // the admin confirm card: Escape is «Отмена» — nothing is applied
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
-      // the phone's «Ещё» sheet
+      // the phone's «Ещё» page: back to the screen it was opened over
       else if (S.admMore) { S.admMore = false; render(); }
       /* «Помощник»: the phone's sheet like any other sheet; the desktop's
          docked column only from inside it — Escape pressed over a form must
@@ -46254,7 +46299,7 @@
       return;
     }
     // every open modal dialog — the drawers, the parcel-machine sheet, the
-    // admin confirm card, the phone's «Ещё» sheet — keeps Tab inside itself
+    // admin confirm card — keeps Tab inside itself («Ещё» is a page, not one)
     if (e.key === "Tab") {
       var modal = topModal();
       if (!modal) return;
@@ -46271,7 +46316,7 @@
   /* ---------- modal dialogs: focus in, focus back, Tab stays inside ----------
      Anything rendered with role="dialog" aria-modal="true" is modal for real:
      the drawers (their own slot), the parcel-machine sheet and the admin
-     confirm card (in the body), the phone's «Ещё» sheet. The topmost is the
+     confirm card (in the body). The topmost is the
      last one in document order — the overlay slot comes after the body. */
   function topModal() {
     var all = document.querySelectorAll('[role="dialog"][aria-modal="true"]');

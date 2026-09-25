@@ -139,19 +139,24 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator(".scanoverlay"), "Escape did not close the scanner").toHaveCount(0);
   });
 
-  test("phone: the «Ещё» sheet, and a card opened from it", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "mobile", "«Ещё» is the phone's own sheet");
+  test("phone: the «Ещё» page, and a card opened from it", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "«Ещё» is the phone's own page");
     await loginAsAdmin(page);
 
+    // a page opened over «Заказы» (1a, screen 14) — Back hands «Заказы» back
+    await adminSection(page, "orders");
+    await expect(page.locator("[data-admorderq]")).toBeVisible();
     await page.locator("[data-admmore]").click();
-    await expect(page.locator(".adm-sheet")).toBeVisible();
+    await expect(page.locator(".adm-more")).toBeVisible();
+    await expect(page.locator("[data-admorderq]"), "«Заказы» still shows under the «Ещё» page").toBeHidden();
     await back(page);
-    await expect(page.locator(".adm-sheet"), "Back did not close the «Ещё» sheet").toHaveCount(0);
+    await expect(page.locator(".adm-more"), "Back did not close the «Ещё» page").toHaveCount(0);
+    await expect(page.locator("[data-admorderq]"), "Back did not return to the section «Ещё» was opened from").toBeVisible();
 
     // …and a card reached through it closes the same way
     await page.locator("[data-admmore]").click();
-    await page.locator('.adm-sheet [data-admtab="setup"]').click();
-    await expect(page.locator(".adm-sheet")).toHaveCount(0);
+    await page.locator('.adm-more [data-admtab="setup"]').click();
+    await expect(page.locator(".adm-more")).toHaveCount(0);
     await page.locator('[data-admsetpage="company"]').click();
     await expect(page.locator("[data-admsetback]")).toBeVisible();
     await back(page);
@@ -202,7 +207,7 @@ test.describe("admin — «Назад» closes what is open", () => {
   });
 
   test("phone: a card inside a section closes first, the section only after it", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "mobile", "«Ещё» is the phone's own sheet");
+    test.skip(testInfo.project.name !== "mobile", "«Ещё» is the phone's own page");
     test.setTimeout(120_000);
     await loginAsAdmin(page);
 
