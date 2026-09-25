@@ -2462,7 +2462,7 @@
       "+ Товар": "+ Toode",
       "Приёмка": "Vastuvõtt",
       "скоро": "varsti",
-      "Название, бренд, штрихкод": "Nimi, bränd, triipkood",
+      "Товар или штрихкод": "Toode või triipkood",
       "Таких товаров нет": "Selliseid tooteid pole",
       "Наборы выключены — в магазине их не видно нигде.": "Komplektid on välja lülitatud — poes neid kusagil ei näe.",
       "Показан": "Näidatakse",
@@ -5959,7 +5959,7 @@
       "+ Товар": "+ Product",
       "Приёмка": "Goods in",
       "скоро": "soon",
-      "Название, бренд, штрихкод": "Name, brand, barcode",
+      "Товар или штрихкод": "Product or barcode",
       "Таких товаров нет": "No products like that",
       "Наборы выключены — в магазине их не видно нигде.": "Sets are switched off — they are nowhere in the shop.",
       "Показан": "Shown",
@@ -7570,6 +7570,8 @@
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
     [/^Подарочная карта ([A-Z0-9-]+)$/, { ET: "Kinkekaart $1", EN: "Gift card $1" }],
+    // «Аналитика → Топ товаров»: a gift card sold, by its amount (src/lib/analytics.ts nameSetsAndCards)
+    [/^Подарочная карта (\d+(?:,\d+)?) €$/, { ET: "Kinkekaart $1 €", EN: "Gift card $1 €" }],
     [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }],
     // главный баннер
     [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
@@ -7675,6 +7677,9 @@
        the names below it are nodes of their own, one a line */
     [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно:$/,
       { ET: "Lõppemas on $1 toodet. Kiireloomulised:", EN: "$1 products are running low. Urgent:" }],
+    // …and the line under that list when it shows only the first three
+    [/^…и ещё 1 товар$/, { ET: "…ja veel 1 toode", EN: "…and 1 more product" }],
+    [/^…и ещё (\d+) товар(?:|а|ов)$/, { ET: "…ja veel $1 toodet", EN: "…and $1 more products" }],
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
     [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
     // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
@@ -23727,6 +23732,7 @@
     if (!q) { admVoiceStop(); return; }   // the pane was folded away mid-sentence
     var text = (admVoiceBase ? admVoiceBase + " " : "") + String(heard || "").replace(/^\s+/, "");
     q.value = text; S.adminQ = text;
+    admHeld(q);   // the model holds the heard words, as it holds typed ones
   }
   /* Chrome: is the microphone barred by the page's own Permissions-Policy —
      the one refusal no browser setting of the owner's can lift? Until
@@ -24082,6 +24088,24 @@
     }
     if (f.again) { f.again = false; if (f.dirty || f.value !== v) { f.dirty = true; admAutosaveSend(f, null); } }
     admSaveEnd();
+  }
+  /** «Вернуть» put back what a field's last write had replaced: the server
+      no longer holds the value this record says it saved. So the next change
+      is a real write even when it is that same value again — the video's «×»
+      pressed a second time after «Вернуть» used to send nothing (the record
+      still said "" was saved), and the link came back on the next reload
+      (verification pass 25.09.2026, goods-video). `prefix`: every field
+      whose key starts so — an undo from another device's journal row knows
+      the product, not the field. */
+  function admAutosaveReopen(key, prefix) {
+    for (var k in ADM_AS) {
+      if (!Object.prototype.hasOwnProperty.call(ADM_AS, k)) continue;
+      if (prefix ? k.indexOf(key) !== 0 : k !== key) continue;
+      var f = ADM_AS[k];
+      f.saved = undefined;
+      // nothing owed: whatever comes next is a change; something owed still goes as it is
+      if (!f.dirty) f.value = undefined;
+    }
   }
   function admSaveFailedN() {
     var n = 0;
@@ -24480,6 +24504,8 @@
     var gate = admGateView();
     if (gate === "wait") return admWaitScreen();
     if (gate === "login") return admLoginScreen();
+    // the products this panel edits: its own no-store read, not the edge copy
+    loadAdminOverrides(false);
     var tab = S.adminTab;
     // account-flows: the queue sizes under the three switches, once
     if (tab === "mail" && SRV.admin === true) loadFlowCounts();
@@ -28337,7 +28363,13 @@
       return head + (statsErr || '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
     }
     head += statsErr;
-    var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, esc(eur(p.revenue)), p.revenue]; };
+    /* a set is its own name in the panel's language, a gift card «Подарочная
+       карта 50 €» (the dictionary's rule) — not «bundle:beard», «gift:50»
+       (src/lib/analytics.ts nameSetsAndCards; verification pass 25.09.2026) */
+    var prod = function (p) {
+      var nm = (p.names && p.names[S.lang]) || p.name;
+      return [(p.brand ? p.brand + " — " : "") + nm, esc(eur(p.revenue)), p.revenue];
+    };
     return head +
       '<div class="adm-kpis adm-kpis--4">' +
         admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct,
@@ -31229,6 +31261,7 @@
         if (r.status === 401) { SRV.admin = false; render(); return; }
         if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); return; }
         if (local) { local.undone = true; demoSave(); }
+        admAutosaveReopen("ed:" + u.id + ":", true);   // the card's fields: what they saved is not on the server now
         toast("Вернули ✓");
         loadServerOverrides(); loadAudit(true);
       }).catch(function () { toast("Сервер не отвечает — изменение не сохранилось"); });
@@ -37366,6 +37399,7 @@
       demoSave();
     }
     ED.j[key] = fresh ? null : entry;
+    entry.asKey = key;   // its «Вернуть» reopens this field's record (admAutosaveReopen)
     return entry;
   }
   /** A typed field has landed: the shop's copy and the journal follow, and a
@@ -38327,6 +38361,8 @@
   /** The answer's product becomes the shop's copy — the feed's list, the
       panel's full list, CATALOGUE — with the overrides re-applied on top. */
   function customAdopt(product) {
+    // the server's answer to this page's own write: newer than any read in the air (OV_LOCAL)
+    ovWrote(product.id);
     var replaced = false;
     for (var i = 0; i < DEMO.custom.length; i++) if (DEMO.custom[i].id === product.id) { DEMO.custom[i] = product; replaced = true; }
     if (!replaced) DEMO.custom.unshift(product);
@@ -41656,12 +41692,17 @@
     return '<div class="adm-screen adm-screen--tight adm-salon">' +
       admHead("", "Салон", admHelpBtnHTML("salon")) + admHelpHTML("salon", POS_HELP) +
       '<div class="adm-salon__grid">' +
-        /* the glass like every other search box (1a, screen 05); the three
-           things it finds by, listed like «Клиенты»' «Имя, почта, телефон,
-           компания», so the whole line still fits beside «Сканировать» */
+        /* the glass like every other search box (1a, screen 05), and the
+           words it must never lose: a barcode works here too. «Название,
+           бренд, штрихкод» (219 px in 16-px Golos) was cut at 390 px and
+           only fitted under 390 with the glass taken away (verification
+           pass 25.09.2026, panel-phone-fit); «Товар или штрихкод» is 160 px,
+           «Toode või triipkood» 146, «Product or barcode» 147 — whole beside
+           «Сканировать», glass and all, from 360 px up. A brand still finds
+           (posSearchResultsHTML), as on «Склад». */
         '<div class="adm-salon__find">' +
           admSearchHTML('<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
-            '" placeholder="Название, бренд, штрихкод" aria-label="Поиск товара" autocomplete="off">', "adm-salon__q") + scan +
+            '" placeholder="Товар или штрихкод" aria-label="Поиск товара" autocomplete="off">', "adm-salon__q") + scan +
         "</div>" +
         '<div class="adm-salon__list" id="poslist"' + (searching ? "" : " hidden") + ">" + posSearchResultsHTML() + "</div>" +
         '<div class="adm-salon__cart">' + (S.posDone ? admPosReceiptHTML() : posCartHTML()) + "</div>" +
@@ -42361,6 +42402,8 @@
      own stale copy is taken out of the path. */
   var FEED_FETCH = { cache: "no-store" };
   function apiJson(url, opts) {
+    // a product write, whichever door it leaves by — see OV_LOCAL
+    if (opts && opts.method && opts.method !== "GET") ovWroteReq(url, opts.body);
     return fetch(url, opts || {}).then(function (res) {
       var ct = res.headers.get("content-type") || "";
       if (ct.indexOf("json") < 0) throw new Error("no-api");
@@ -42430,13 +42473,137 @@
     return queued;
   }
 
-  function adoptServer(j) {
+  /* ---- the products the panel edits: read past the edge -----------------
+     /api/overrides/ is the SHOP's feed: public and cached at the edge
+     (s-maxage 30, stale-while-revalidate 120 — an answer up to ~150 s old).
+     The panel read it too, at boot, and edited what it said. Verification
+     pass on staging, 25.09.2026: the Google texts saved in all three
+     languages, the panel reloaded a minute later, and the fold said «пусто»
+     in each — the edge had handed back its copy from before the save
+     (x-vercel-cache STALE, age 86 s), and typing into those boxes would
+     have written over the saved text. So:
+       · signed in, the products come from GET /api/admin/overrides/ —
+         no-store, with the salon prices, the «ждут» counts and the owner's
+         own products — and the public feed's product half is not taken at
+         all (its settings half still is, key by key: adoptServer's `fed`);
+       · on the panel's screen, while it is not yet known whether this
+         browser is the owner's, the public answer's product half waits in
+         OV_PUB: it is taken the moment the answer is «no», or when the
+         admin read fails before any has landed (a copy ~150 s old beats a
+         new phone's empty one — and never beats a read the panel has);
+       · a product this page has written (any write to the product routes,
+         stamped in apiJson) keeps its local values against an answer the
+         server read before the write: the admin read that was in the air
+         (ADM_OV.wrote), or a public copy up to OV_LOCAL_MS old. The same
+         idea as ADM_SET_AT for the settings. The shop's own screens still
+         read the cached feed — the edge is there for the shoppers. */
+  var OV_LOCAL = {}, OV_LOCAL_MS = 180000;
+  var ADM_OV = { at: 0, busy: false, again: false, failedAt: 0, wrote: null };
+  var ADM_OV_RETRY_MS = 30000;
+  var OV_PUB = null;
+  var OV_MAPS = ["price", "stock", "seo", "subcat", "varimg", "video", "stockVar", "gallery", "desc", "proPrice", "sizes", "hidden"];
+  function ovWrote(id) {
+    if (id == null || id === "") return;
+    id = String(id);
+    OV_LOCAL[id] = Date.now();
+    if (ADM_OV.wrote) ADM_OV.wrote[id] = true;
+  }
+  /** The product ids a request writes: the path's own for /api/admin/products/<id>/,
+      the body's `id` / `product_id` / `items[].id` for /api/admin/overrides/. */
+  function ovWroteReq(url, body) {
+    var m = /^\/api\/admin\/(overrides|products)\/([^\/?#]*)/.exec(String(url || ""));
+    if (!m) return;
+    if (m[1] === "products") { if (m[2]) ovWrote(decodeURIComponent(m[2])); return; }
+    var b = body;
+    try { if (typeof b === "string") b = JSON.parse(b); } catch (e) { return; }
+    var list = b && Array.isArray(b.items) ? b.items : Array.isArray(b) ? b : [b];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && typeof list[i] === "object") ovWrote(list[i].id != null ? list[i].id : list[i].product_id);
+    }
+  }
+  /** The products a public answer must not touch: written here in the last OV_LOCAL_MS. */
+  function ovLocalKeep() {
+    var out = {}, now = Date.now();
+    for (var id in OV_LOCAL) {
+      if (Object.prototype.hasOwnProperty.call(OV_LOCAL, id) && now - OV_LOCAL[id] < OV_LOCAL_MS) out[id] = true;
+    }
+    return out;
+  }
+  /** What a public answer's product half is for: "take" it (a shopper), "hold"
+      it (the panel, owner or not still unknown) or leave it to the "admin" read. */
+  function ovPublicWay() {
+    if (SRV.admin === true) return "admin";
+    if (S.screen === "admin" && SRV.admin === null && !SRV.meDone) return "hold";
+    return "take";
+  }
+  /** The held public answer, taken now that the panel's own read will not come. */
+  function ovReleasePub() {
+    var j = OV_PUB;
+    OV_PUB = null;
+    if (!j) return;
+    adoptProducts(j, ovLocalKeep());
+    demoSave();
+    applyDemoOverrides();
+    if (!bootHeld) render();
+  }
+  /* The panel's own read of the products — once when the panel opens signed
+     in, again whenever the shop's feed would have been read (a journal undo,
+     the storefront opened in this tab). One at a time; one asked for while
+     another is out follows it, because the one out may have been read
+     before the change it was asked for. */
+  function loadAdminOverrides(force) {
+    if (SRV.admin !== true) return;
+    if (ADM_OV.busy) { if (force) ADM_OV.again = true; return; }
+    if (!force && (ADM_OV.at || (ADM_OV.failedAt && Date.now() - ADM_OV.failedAt < ADM_OV_RETRY_MS))) return;
+    ADM_OV.busy = true;
+    var wrote = ADM_OV.wrote = {};
+    var done = function (r) {
+      ADM_OV.busy = false;
+      if (ADM_OV.wrote === wrote) ADM_OV.wrote = null;
+      if (r && r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r && r.status === 200 && r.body && r.body.ok === true && r.body.overrides)) {
+        ADM_OV.failedAt = Date.now();
+        ovReleasePub();
+      } else {
+        ADM_OV.at = Date.now(); ADM_OV.failedAt = 0; OV_PUB = null;
+        waitAdopt(r.body.waiting);
+        adoptProducts(r.body, wrote);
+        demoSave();
+        applyDemoOverrides();
+        if (!bootHeld) render();
+      }
+      if (ADM_OV.again) { ADM_OV.again = false; loadAdminOverrides(true); }
+    };
+    apiJson("/api/admin/overrides/", FEED_FETCH).then(done, function () { done(null); });
+  }
+  /** The product half of an answer — the public feed's or the panel's own
+      read. `keep`: { id: true } for the products this page wrote after the
+      server read that answer; their local values stand. */
+  function adoptProducts(j, keep) {
     var ov = j.overrides || {};
+    keep = keep || {};
+    var mine = [];
+    for (var kid in keep) {
+      if (!Object.prototype.hasOwnProperty.call(keep, kid) || !keep[kid]) continue;
+      var held = { id: kid, v: {}, custom: null };
+      for (var mi = 0; mi < OV_MAPS.length; mi++) {
+        var map = DEMO[OV_MAPS[mi]];
+        if (map && Object.prototype.hasOwnProperty.call(map, kid)) held.v[OV_MAPS[mi]] = map[kid];
+      }
+      for (var ci = 0; ci < (DEMO.custom || []).length; ci++) {
+        if (DEMO.custom[ci] && String(DEMO.custom[ci].id) === kid) held.custom = DEMO.custom[ci];
+      }
+      mine.push(held);
+    }
     // product creation: the feed's own products replace the offline copy —
     // and a cart line pointing at one the feed no longer carries (hidden
     // since, or a server that predates the table) is dropped here, the one
     // place that can honestly say so (see the cart restore near the top)
-    if (Array.isArray(j.custom)) { DEMO.custom = j.custom; adoptCustom(DEMO.custom); }
+    if (Array.isArray(j.custom)) {
+      var custom = j.custom.filter(function (p) { return !(p && keep[String(p.id)]); });
+      for (var hi = 0; hi < mine.length; hi++) if (mine[hi].custom) custom.push(mine[hi].custom);
+      DEMO.custom = custom; adoptCustom(DEMO.custom);
+    }
     S.cart = S.cart.filter(function (l) {
       return l.type === "bundle" || l.type === "gift" || String(l.id).indexOf("c-") !== 0 || !!byIdOrNull(l.id);
     });
@@ -42472,6 +42639,14 @@
         DEMO.desc[id] = o.description;
       }
     });
+    // …and a product written here since that answer was read stays as this page has it
+    for (var ri = 0; ri < mine.length; ri++) {
+      for (var rj = 0; rj < OV_MAPS.length; rj++) {
+        var rm = OV_MAPS[rj];
+        if (Object.prototype.hasOwnProperty.call(mine[ri].v, rm)) DEMO[rm][mine[ri].id] = mine[ri].v[rm];
+        else delete DEMO[rm][mine[ri].id];
+      }
+    }
     /* «Показывать в магазине»: the hidden map is only known now, so the shop's
        product list is rebuilt after it — and a basket holding something the
        owner has just taken out of the shop loses that line, the same rule the
@@ -42490,6 +42665,11 @@
     S.cart = S.cart.filter(function (l) {
       return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
+  }
+  /** A public feed answer. `skipProducts`: its product half is not this
+      page's to take (ovPublicWay) — only the settings are. */
+  function adoptServer(j, skipProducts) {
+    if (!skipProducts) adoptProducts(j, ovLocalKeep());
     var s = j.settings || {};
     /* A key this page has written since it loaded is the owner's, not the
        feed's: /api/overrides/ is edge-cached for up to 30 s, and since 1a a
@@ -42596,7 +42776,17 @@
       // …counted here and not before the fetch: the shopper goes on shopping
       // while it is in flight, and only adoptServer's own filters count
       var cartWas = S.cart.length;
-      adoptServer(r.body);
+      /* The product half is the shop's, not the panel's: signed in, the
+         panel's own read takes its place (see OV_LOCAL). */
+      var way = ovPublicWay();
+      /* …kept aside while the panel has no read of its own yet: if that read
+         fails, a copy ~150 s old still beats a new phone's empty one. Never
+         once it has one — the panel's read is newer than anything the edge
+         can hand back. */
+      OV_PUB = way !== "take" && !ADM_OV.at ? r.body : null;
+      adoptServer(r.body, way !== "take");
+      // (asked again only once it has answered: at boot the sign-in check has usually asked already)
+      if (way === "admin") loadAdminOverrides(ADM_OV.at > 0);
       demoSave();
       applyDemoOverrides();
       /* per-size stock (r23): the shelf's per-size word arrives with THIS
@@ -42637,8 +42827,15 @@
       SRV.on = true;
       SRV.meDone = true;
       SRV.admin = r.status === 200 && r.body.ok === true;
+      ovAdminKnown();
       return SRV.admin;
-    }).catch(function () { SRV.meDone = true; SRV.admin = null; return null; });
+    }).catch(function () { SRV.meDone = true; SRV.admin = null; ovAdminKnown(); return null; });
+  }
+  /** Owner or not is known now: the products come from the panel's own read,
+      or the public answer held for that question is taken after all. */
+  function ovAdminKnown() {
+    if (SRV.admin === true) loadAdminOverrides(false);
+    else ovReleasePub();
   }
   /** One of the two boot questions came back without a render of its own:
       the panel's door may have to change from «Проверяем…» (admGateView). */
@@ -43066,6 +43263,7 @@
       SRV.busy = false;
       if (r.status === 200 && r.body.ok) {
         SRV.admin = true; SRV.err = "";
+        ADM_OV.at = 0;   // the products are read again, past the edge (loadAdminOverrides)
         loadSrvOrders(true);
       } else if (r.status === 429) SRV.err = "Слишком много попыток — подождите минуту.";
       else if (r.body.error === "not_configured") SRV.err = "Пароль ещё не настроен на сервере.";
@@ -43082,6 +43280,7 @@
     custHoldsFire();
     apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
       SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
+      ADM_OV.at = 0;
       ORDER_ONE.rows = []; ORDER_ONE.gone = ""; ORDER_ONE.err = "";
       // …and the summary goes with them, so signing back in asks again
       OVERVIEW.data = null; OVERVIEW.err = null; OVERVIEW.asked = false;
@@ -44963,6 +45162,8 @@
        — the record that it was taken back. (`typeof`: the test harnesses that
        run demoUndo on its own have no journal to keep.) */
     if (typeof jentryGone === "function") jentryGone(entry);
+    // the field's autosave record no longer describes the server (admAutosaveReopen)
+    if (entry.asKey && typeof admAutosaveReopen === "function") admAutosaveReopen(entry.asKey);
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -45454,7 +45655,13 @@
           return '<li class="adm-msg__li"><span class="adm-msg__nm">' + esc(admProdName(p.brand + " " + p.name)) + "</span>" +
             '<span class="adm-msg__st' + (out ? " adm-msg__st--out" : "") + '">' + (out ? "нет" : "мало") + "</span></li>";
         }).join("") + "</ul>" +
-        '<p class="adm-msg__p">Могу собрать заказ поставщику и отправить его вам на подпись.</p></div>';
+        /* …and the rest by number, with the way to all of them: the list
+           stopped at three with no word that there were more (verification
+           pass 25.09.2026, ai-assistant-ask) — the AI answer is told the
+           same (stockSummaryForPrompt, src/app/api/assistant/route.ts) */
+        (low.length > 3 ? '<p class="adm-msg__p">…и ещё ' + (low.length - 3) + " " + plural(low.length - 3) + "</p>" : "") +
+        '<p class="adm-msg__p">Могу собрать заказ поставщику и отправить его вам на подпись.</p>' +
+        (low.length > 3 ? aiGo("stock", "Открыть склад") : "") + "</div>";
     }
     /* The week's takings, when the assistant itself is off (no key on the
        server — probeAdmAI). The chip «Сколько продали за неделю?» lands here
@@ -46434,6 +46641,16 @@
     }
     return out.sort().join("\n");
   }
+  /** The model has just taken this box's text as it stands (S.promoForm.value
+      = the box). Said on the box itself, for the next render's morph to
+      compare its markup with — see admMorphNode. And that render is not
+      skipped as «nothing changed»: the markup string it would compare with
+      was drawn before the typing. */
+  function admHeld(el) {
+    if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
+    el.__admHeld = el.value;
+    admPaintedKey = "";
+  }
   function admMorphNode(from, to) {
     if (from.nodeType !== to.nodeType || (from.nodeType === 1 && from.tagName !== to.tagName)) {
       from.parentNode.replaceChild(to, from);
@@ -46447,6 +46664,23 @@
     // a value/checked/selected the app changed is applied; one the owner
     // changed by hand survives the render, which a rebuild never let it do
     var valWas = from.getAttribute("value"), chkWas = from.hasAttribute("checked");
+    /* «What the app last said» is the MODEL's value, not only the last
+       render's. A box that hands every keystroke to S as it stands (admHeld —
+       the promo form, the customer's points, the searches) is typed into with
+       no render, so its attribute still says what the render BEFORE the
+       typing drew. When the model then puts exactly that back — «Сумма» →
+       «Процент» empties the discount, a points add clears «+10» — the markup
+       went from "" to "", the box was left alone, and 150 typed as euros
+       stood in the percent box, in no draft, while «Создать» answered
+       «Проверьте размер скидки» under it (verification pass 25.09.2026,
+       panel-promo-create). So what the model took from the box stands in
+       for the attribute: a render carrying the typed text back still leaves
+       the box (and its caret) alone, one carrying anything else writes it. */
+    var held = from.__admHeld;
+    if (held !== undefined) {
+      from.__admHeld = undefined;
+      if (tag === "INPUT") valWas = held;
+    }
     /* …but only while the box is still the SAME field. The blog's title box
        is one <input> in RU and in EN, told apart by data-blogl alone; a new
        article's title is empty in both, so the markup said "" before the
@@ -46472,7 +46706,10 @@
       return;
     }
     if (tag === "TEXTAREA") {
-      if (otherField || from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
+      var txtWas = held !== undefined ? held : from.textContent;
+      if (otherField || to.textContent !== txtWas) { from.textContent = to.textContent; from.value = to.textContent; }
+      // the model holds what was typed: only the default text catches up
+      else if (from.textContent !== to.textContent) from.textContent = to.textContent;
       return;
     }
     if (tag === "SELECT") {
@@ -50777,6 +51014,22 @@
         translateTree(plist);
       }
     }
+  });
+  /* The panel's boxes whose keystroke goes into S as it stands and comes
+     back in the markup as that same string — so whatever the model later
+     puts in S reaches the box (admHeld, admMorphNode), a reset included.
+     Deliberately not every box: the product card keeps its typing in the
+     boxes (edKeepTyped); «Сообщение клиенту» draws the ready-made letter
+     into a box emptied by hand; the delivery table shows «нет» for an empty
+     cell (shipBoxShow). Marked there, a background render would write over
+     the typing. */
+  var ADM_HELD_SEL = "[data-promof],[data-promoq],[data-admcustq],[data-admcustpoints],[data-admcustnote]," +
+    "[data-admcustnotesf],[data-goodsq],[data-admorderq],[data-stockq],[data-posq],[data-posemail],[data-posphone]," +
+    "[data-posdiscount],[data-admq],[data-bundleq],[data-heroq],[data-heroimgq],[data-admblogtopic]," +
+    "[data-blogtoolurl],[data-blogtoolq],[data-admblogq]";
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (S.screen === "admin" && t && t.matches && t.matches(ADM_HELD_SEL)) admHeld(t);
   });
 
   /* blog (1a): the article's address, when its box is left. A draft's saves

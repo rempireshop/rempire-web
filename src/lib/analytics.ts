@@ -46,13 +46,15 @@ function productInfo(id: string): { id: string; name: string; brand: string } {
    at call time the way src/lib/orders.ts does it, once per summary, for the
    handful of ids the lists actually name — never for a catalogue id. */
 type Named = { id: string; name: string; brand: string };
-async function customNames(ids: string[]): Promise<Map<string, { name: string; brand: string }>> {
+/* …with the row's «Показывать в магазине» (`active`) beside the name: the
+   owner's own product is switched off THERE, not on an override row. */
+async function customNames(ids: string[]): Promise<Map<string, { name: string; brand: string; active: boolean }>> {
   const want = [...new Set(ids.filter((id) => id.startsWith("c-") && !BY_ID.has(id)))];
-  const out = new Map<string, { name: string; brand: string }>();
+  const out = new Map<string, { name: string; brand: string; active: boolean }>();
   if (!want.length) return out;
   try {
-    const { customMinByIds } = await import("@/lib/custom-products");
-    for (const [id, own] of await customMinByIds(want)) out.set(id, { name: own.min.n, brand: own.min.b });
+    const { customLabelsByIds } = await import("@/lib/custom-products");
+    for (const [id, own] of await customLabelsByIds(want)) out.set(id, own);
   } catch (err) {
     console.error("[analytics] custom products not loaded:", err);
   }
@@ -149,7 +151,8 @@ export type AnalyticsSummary = {
   kpi: { revenue: Kpi; orders: Kpi; aov: Kpi; conversion: Kpi };
   funnel: { sessions: number; product: number; addToCart: number; checkout: number; purchase: number };
   revenueByDay: Array<{ day: string; revenue: number; orders: number }>;
-  topProductsByRevenue: Array<{ id: string; name: string; brand: string; revenue: number }>;
+  /** `names`: a set's own name in each language (a set is a basket line too, «bundle:<id>»). */
+  topProductsByRevenue: Array<{ id: string; name: string; brand: string; revenue: number; names?: LineNames }>;
   topProductsByViews: Array<{ id: string; name: string; brand: string; views: number }>;
   viewedNotBought: Array<{ id: string; name: string; brand: string; views: number }>;
   brandRevenue: Array<{ brand: string; revenue: number; orders: number }>;
@@ -215,14 +218,55 @@ async function qRevenueByDay(from: Date, to: Date) {
 }
 
 async function qTopProductsByRevenue(from: Date, to: Date) {
-  const rows = await query<{ product_id: string; revenue: string }>(
-    `select item->>'id' as product_id, sum((item->>'sum')::numeric) as revenue
+  const rows = await query<{ product_id: string; revenue: string; title: string | null }>(
+    `select item->>'id' as product_id, sum((item->>'sum')::numeric) as revenue, max(item->>'title') as title
      from orders, jsonb_array_elements(items) as item
      where status in (${PAID_SQL}) and created_at >= $1 and created_at < $2 and item->>'id' is not null
      group by 1 order by revenue desc limit 10`,
     [from, to],
   );
-  return rows.map((r) => ({ ...productInfo(r.product_id), revenue: money(r.revenue) }));
+  const out: Array<Named & { revenue: number; names?: LineNames }> =
+    rows.map((r) => ({ ...productInfo(r.product_id), revenue: money(r.revenue) }));
+  await nameSetsAndCards(out, new Map(rows.map((r) => [r.product_id, r.title ?? ""])));
+  return out;
+}
+
+/* ---------- a basket line that is not a product --------------------------
+   A set is sold as ONE line, «bundle:<id>», and a gift card as «gift:<amount>»
+   (src/lib/orders.ts createOrder). Neither is in the catalogue, so
+   productInfo() handed the id back as the name and «Топ товаров» read
+   «bundle:beard» and «gift:50» (verification pass 25.09.2026, stats-ranges).
+   A gift card is «Подарочная карта 50 €» — the panel's dictionary says it in
+   ET and EN (a UI_RX rule in public/shop2/app.js). A set is its own name, in
+   the three languages it was written in (`names`, which the panel picks by
+   its language); a set deleted since keeps the title its order line was sold
+   under. */
+type LineNames = { RU: string; ET: string; EN: string };
+async function nameSetsAndCards(list: Array<Named & { names?: LineNames }>, soldAs: Map<string, string>): Promise<void> {
+  let sets: Record<string, { title: Record<string, string> }> = {};
+  if (list.some((r) => r.id.startsWith("bundle:"))) {
+    try {
+      const { bundleDefsForOrders } = await import("@/lib/bundles");
+      sets = await bundleDefsForOrders();
+    } catch (err) {
+      console.error("[analytics] sets not loaded:", err);
+    }
+  }
+  for (const row of list) {
+    const gift = /^gift:(\d+(?:\.\d+)?)$/.exec(row.id);
+    if (gift) {
+      row.name = `Подарочная карта ${String(Number(gift[1])).replace(".", ",")} €`;
+      row.brand = "";
+      continue;
+    }
+    if (!row.id.startsWith("bundle:")) continue;
+    const t = sets[row.id.slice("bundle:".length)]?.title;
+    const ru = t?.RU || soldAs.get(row.id) || "";
+    if (!ru) continue;
+    row.name = ru;
+    row.brand = "";
+    if (t) row.names = { RU: ru, ET: t.ET || ru, EN: t.EN || ru };
+  }
 }
 
 async function qBrandRevenue(from: Date, to: Date) {
@@ -722,17 +766,26 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
      list that would have reminded him to order it, and stay hidden for ever.
      So the main figure is clean and one line says how many are waiting
      behind the switch. */
-  const short: Array<[string, "low" | "out"]> = [];
-  const hidden: Array<[string, "low" | "out"]> = [];
+  const running: Array<[string, "low" | "out", boolean]> = [];
   for (const [id, o] of Object.entries(overrides)) {
     const stock = counted[id] ?? o.stock;
     if (stock !== "low" && stock !== "out") continue;
-    (o.hidden ? hidden : short).push([id, stock]);
+    running.push([id, stock, !!o.hidden]);
   }
   /* One round trip for both lists: the hidden ones are named too, because a
      row that says «2 скрытых товара заканчиваются» and nothing else can only
      be answered by reading every hidden product in the shop. */
-  const names = await customNames([...short, ...hidden].map(([id]) => id));
+  const names = await customNames(running.map(([id]) => id));
+  /* «Показывать в магазине» off is one switch in the panel and two places on
+     the server: `hidden` on the override row for a catalogue product, `active`
+     on the owner's own row (custom_products) — which this card never read,
+     so his own product switched off stayed in the number he acts on and out
+     of the hidden line (verification pass 25.09.2026, panel-overview). */
+  const short: Array<[string, "low" | "out"]> = [];
+  const hidden: Array<[string, "low" | "out"]> = [];
+  for (const [id, stock, off] of running) {
+    (off || names.get(id)?.active === false ? hidden : short).push([id, stock]);
+  }
   const resolve = (rows: Array<[string, "low" | "out"]>): OverviewLowStockItem[] => {
     const out: OverviewLowStockItem[] = [];
     for (const [id, stock] of rows) {

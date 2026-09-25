@@ -1647,7 +1647,7 @@
         "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
         "Числа совпадают с тем, что есть на самом деле.",
         "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить».",
-        "Скрытый товар считается отдельной строкой, и она открывает «Каталог → Скрытые»."
+        "Скрытый товар — свой или из каталога — отдельной строкой; она открывает «Каталог → Скрытые»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
       "risk": "med",
@@ -1668,7 +1668,7 @@
           "Under reviews, who wrote and the stars; under a request, the salon's name.",
           "The numbers match what is really there.",
           "Each line opens its own section; the dark button opens «Заказы» on «Отправить».",
-          "A hidden product gets a line of its own, and it opens «Каталог → Скрытые»."
+          "A hidden product, own or catalogue, has its own line opening «Каталог → Скрытые»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
@@ -1767,7 +1767,7 @@
         ],
         "why": "A code that does not work in a mailing looks like a swindle. A code sitting in an unfinished order does not delete either — the shop says so."
       },
-      "markedAt": "2026-09-25T11:50:31.414Z"
+      "markedAt": "2026-09-25T22:17:59.056Z"
     },
     {
       "id": "panel-gift-amounts",
@@ -2300,7 +2300,7 @@
       "risk": "med",
       "writes": false,
       "mark": "new",
-      "markedAt": "2026-09-25T18:35:33.655Z",
+      "markedAt": "2026-09-25T22:37:17.530Z",
       "en": {
         "title": "The panel on a phone: everything fits the screen",
         "steps": [
@@ -6898,12 +6898,14 @@
         "Открыть «Товары» → «Каталог» и нажать на строку товара.",
         "В «Объёмы и цены» изменить «Цена, €» у первого объёма.",
         "Нажать мимо поля — кнопки «Сохранить» больше нет.",
+        "Сразу обновить страницу и снова открыть этот товар.",
         "Открыть товар в магазине, посмотреть цену и положить его в корзину.",
         "В панели вписать в цену «abc» и нажать «← Товары».",
         "Нажать «Остаться», исправить цену и снова нажать «← Товары»."
       ],
       "expect": [
         "Вверху: «Сохраняем…», потом «Сохранено ✓».",
+        "После обновления в поле уже новая цена, а не прежняя.",
         "В магазине и в корзине одна и та же новая цена.",
         "«abc» не сохраняется: рыжая рамка и строка-подсказка под полем.",
         "С такой ценой «← Товары» спрашивает, выйти ли без сохранения.",
@@ -6918,12 +6920,14 @@
           "Open «Товары» → «Каталог» and tap the product's row.",
           "In «Объёмы и цены» (sizes and prices) change «Цена, €» for the first size.",
           "Tap outside the box — there is no «Сохранить» button any more.",
+          "Reload the page at once and open the same product again.",
           "Open the product in the shop, look at the price and put it in the cart.",
           "In the panel type «abc» as the price and press «← Товары».",
           "Press «Остаться» (stay), fix the price and press «← Товары» again."
         ],
         "expect": [
           "At the top: «Сохраняем…» (saving), then «Сохранено ✓» (saved).",
+          "After the reload the box already shows the new price, not the old one.",
           "The shop and the cart show the same new price.",
           "«abc» is not saved: a rust border and a hint line under the box.",
           "With that price «← Товары» asks whether to leave without saving.",
@@ -6932,7 +6936,7 @@
         "why": "A price that differs in the cart costs you money or a complaint. The price now saves itself as soon as you leave the box."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T22:28:23.727Z"
     },
     {
       "id": "goods-sizes",
@@ -7144,13 +7148,15 @@
         "Нажать мимо поля и открыть товар в магазине.",
         "Нажать на видео.",
         "В «Видео» нажать «Загрузить» и выбрать ролик больше 4 МБ.",
-        "Нажать «Убрать видео», потом «Вернуть» на полоске внизу."
+        "Нажать «Убрать видео», потом «Вернуть» на полоске внизу.",
+        "Снова нажать «Убрать видео», обновить страницу и открыть этот товар."
       ],
       "expect": [
         "Видео видно на странице товара.",
         "По нажатию оно начинает играть.",
         "Кнопка обещает «до 4 МБ»; ролик больше панель сразу не берёт и говорит почему.",
-        "«Вернуть» ставит ту же ссылку обратно."
+        "«Вернуть» ставит ту же ссылку обратно.",
+        "Второй раз видео тоже убирается: после обновления поле «Видео» пустое."
       ],
       "why": "Видео с укладкой продаёт воск лучше любого описания.",
       "risk": "low",
@@ -7162,18 +7168,20 @@
           "Tap outside the box and open the product in the shop.",
           "Press the video.",
           "Under «Видео» press «Загрузить» (upload) and pick a clip over 4 MB.",
-          "Press «Убрать видео» (remove), then «Вернуть» (undo) on the strip below."
+          "Press «Убрать видео» (remove), then «Вернуть» (undo) on the strip below.",
+          "Press «Убрать видео» again, reload the page and open the same product."
         ],
         "expect": [
           "The video is there on the product page.",
           "Pressing it starts the video playing.",
           "The button promises «до 4 МБ»; a bigger clip is refused at once, with the reason.",
-          "«Вернуть» puts the same link back."
+          "«Вернуть» puts the same link back.",
+          "The second removal holds too: after the reload the «Видео» box is empty."
         ],
         "why": "A styling video sells a wax better than any description."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-09-25T22:31:49.626Z"
     },
     {
       "id": "goods-new",
@@ -8305,9 +8313,9 @@
       "expect": [
         "Ответ пришёл на языке вопроса: на русский — по-русски, на английский — по-английски.",
         "Язык панели при этом не менялся.",
-        "В ответе настоящие номера заказов и названия товаров.",
+        "В ответе настоящие номера заказов и названия товаров, без общих отговорок.",
         "На «Что заканчивается…» — список: по товару на строке, справа выделенное «нет» или «мало».",
-        "Общих отговорок вместо конкретики нет.",
+        "Товаров больше, чем в списке: в конце «…и ещё N» и путь в «Склад».",
         "Кнопки под ответом открывают нужный раздел."
       ],
       "why": "Помощник — самый быстрый способ узнать, что делать, не листая пять экранов.",
@@ -8324,15 +8332,15 @@
         "expect": [
           "The answer comes in the language of the question: Russian for Russian, English for English.",
           "The panel's own language did not change.",
-          "It holds real order numbers and real product names.",
+          "It holds real order numbers and real product names, no vague answers.",
           "«Что заканчивается…» comes back as a list: a product a line, «нет»/«мало» at the right.",
-          "No vague answers instead of specifics.",
+          "More products than listed: the list ends «…и ещё N» and points to «Склад».",
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T07:31:40.050Z"
+      "markedAt": "2026-09-25T22:46:11.323Z"
     },
     {
       "id": "ai-assistant-voice",
@@ -8596,14 +8604,16 @@
       "steps": [
         "«Ещё» → «Аналитика».",
         "Переключить период: сегодня, 7 дней, 30 дней.",
-        "Сложить сегодняшние оплаченные заказы и сравнить с выручкой за сегодня."
+        "Сложить сегодняшние оплаченные заказы и сравнить с выручкой за сегодня.",
+        "Прочитать «Топ товаров», переключить панель на английский и прочитать снова."
       ],
       "expect": [
         "При смене периода цифры меняются.",
         "Под каждым числом — сравнение словами: «к прошлой неделе», «к прошлому месяцу».",
         "Четвёртое число называется «Покупают» — из 100 зашедших.",
         "Выручка за сегодня совпала с вашей суммой.",
-        "Один оплаченный заказ посчитан один раз, а не дважды."
+        "Один оплаченный заказ посчитан один раз, а не дважды.",
+        "В «Топ товаров» наборы и подарочные карты — названиями, не «bundle:…», на обоих языках."
       ],
       "why": "Посчитанная трижды продажа заставит закупить втрое больше.",
       "risk": "med",
@@ -8613,19 +8623,21 @@
         "steps": [
           "«Ещё» → «Аналитика».",
           "Switch the period: today, 7 days, 30 days.",
-          "Add up today's paid orders and compare with today's revenue."
+          "Add up today's paid orders and compare with today's revenue.",
+          "Read «Топ товаров», switch the panel to English and read it again."
         ],
         "expect": [
           "The figures change with the period.",
           "Under each number a comparison in words: vs. the week before, the month before.",
           "The fourth number is called «Покупают» — out of 100 visitors.",
           "Today's revenue matches your own sum.",
-          "One paid order is counted once, not twice."
+          "One paid order is counted once, not twice.",
+          "In «Топ товаров» sets and gift cards show names, not «bundle:…», in both languages."
         ],
         "why": "A sale counted three times makes you order three times too much."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T12:34:46.779Z"
+      "markedAt": "2026-09-25T22:51:11.320Z"
     },
     {
       "id": "stats-search",

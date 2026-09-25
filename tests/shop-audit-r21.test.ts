@@ -56,6 +56,9 @@ describe("loadServerOverrides: an open drawer after the feed drops a line", () =
     const calls: string[] = [];
     const S = { cart: [{ id: "a" }, { id: "b" }], cartOpen: opts.cartOpen, screen: "catalog" };
     const body = `
+      var OV_PUB = null;
+      function ovPublicWay() { return "take"; }   // a shopper: the feed is the shop
+      function loadAdminOverrides() {}
       ${slice("loadServerOverrides")}
       return loadServerOverrides();
     `;

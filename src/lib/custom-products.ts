@@ -507,6 +507,24 @@ export async function customMinByIds(ids: string[]): Promise<Map<string, MinWith
   return out;
 }
 
+/**
+ * Name, brand and «Показывать в магазине» of these own products, in one read —
+ * what a report needs to name a row and to tell a product on sale from one
+ * switched off (`active` false). «Обзор» counts a switched-off one apart from
+ * the ones to re-order (qOverviewLowStock in src/lib/analytics.ts).
+ */
+export async function customLabelsByIds(ids: string[]): Promise<Map<string, { name: string; brand: string; active: boolean }>> {
+  const want = [...new Set(ids.filter(isCustomId))];
+  const out = new Map<string, { name: string; brand: string; active: boolean }>();
+  if (!want.length) return out;
+  const holes = want.map((_, i) => `$${i + 1}`).join(",");
+  const rows = await query<{ id: string; brand: string; name: string; active: boolean | null }>(
+    `select id, brand, name, active from custom_products where id in (${holes})`, want,
+  );
+  for (const r of rows) out.set(r.id, { name: r.name, brand: r.brand, active: r.active !== false });
+  return out;
+}
+
 /** Every active custom product in the checkout's shape — the assistant's prompt. */
 export async function listCustomMin(): Promise<MinWithVariants[]> {
   return (await listCustomProducts({ activeOnly: true })).map(toMin);
