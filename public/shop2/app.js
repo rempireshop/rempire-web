@@ -2454,7 +2454,7 @@
       "+ Товар": "+ Toode",
       "Приёмка": "Vastuvõtt",
       "скоро": "varsti",
-      "Название, бренд, штрихкод": "Nimi, bränd, triipkood",
+      "Товар или штрихкод": "Toode või triipkood",
       "Таких товаров нет": "Selliseid tooteid pole",
       "Наборы выключены — в магазине их не видно нигде.": "Komplektid on välja lülitatud — poes neid kusagil ei näe.",
       "Показан": "Näidatakse",
@@ -5943,7 +5943,7 @@
       "+ Товар": "+ Product",
       "Приёмка": "Goods in",
       "скоро": "soon",
-      "Название, бренд, штрихкод": "Name, brand, barcode",
+      "Товар или штрихкод": "Product or barcode",
       "Таких товаров нет": "No products like that",
       "Наборы выключены — в магазине их не видно нигде.": "Sets are switched off — they are nowhere in the shop.",
       "Показан": "Shown",
@@ -41617,12 +41617,17 @@
     return '<div class="adm-screen adm-screen--tight adm-salon">' +
       admHead("", "Салон", admHelpBtnHTML("salon")) + admHelpHTML("salon", POS_HELP) +
       '<div class="adm-salon__grid">' +
-        /* the glass like every other search box (1a, screen 05); the three
-           things it finds by, listed like «Клиенты»' «Имя, почта, телефон,
-           компания», so the whole line still fits beside «Сканировать» */
+        /* the glass like every other search box (1a, screen 05), and the
+           words it must never lose: a barcode works here too. «Название,
+           бренд, штрихкод» (219 px in 16-px Golos) was cut at 390 px and
+           only fitted under 390 with the glass taken away (verification
+           pass 25.09.2026, panel-phone-fit); «Товар или штрихкод» is 160 px,
+           «Toode või triipkood» 146, «Product or barcode» 147 — whole beside
+           «Сканировать», glass and all, from 360 px up. A brand still finds
+           (posSearchResultsHTML), as on «Склад». */
         '<div class="adm-salon__find">' +
           admSearchHTML('<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
-            '" placeholder="Название, бренд, штрихкод" aria-label="Поиск товара" autocomplete="off">', "adm-salon__q") + scan +
+            '" placeholder="Товар или штрихкод" aria-label="Поиск товара" autocomplete="off">', "adm-salon__q") + scan +
         "</div>" +
         '<div class="adm-salon__list" id="poslist"' + (searching ? "" : " hidden") + ">" + posSearchResultsHTML() + "</div>" +
         '<div class="adm-salon__cart">' + (S.posDone ? admPosReceiptHTML() : posCartHTML()) + "</div>" +

@@ -2300,11 +2300,14 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-input--find { flex: 1 1 auto; min-width: 0; height: 52px; border-color: var(--a-ink); font-size: 16px; }
 /* the shared search label (app.js admSearchHTML) takes the row beside «Сканировать» */
 .adm-salon__q { flex: 1 1 auto; }
-/* Under 390 px — and on a narrow desktop, where the basket takes 300 px of
-   the row — the glass would push the end of «Название, бренд, штрихкод» out
-   of the box beside «Сканировать» (the one search here whose words must all
-   show: they say a barcode works too); the glass steps aside there. */
-@media (max-width: 389px) {
+/* «Товар или штрихкод» (160 px at 16 px; ET 146, EN 147) fits beside
+   «Сканировать» WITH the glass on every phone from 360 px up — the words are
+   the one thing here that must all show: they say a barcode works too. Only
+   under 360 px (and on a narrow desktop, where the basket takes 300 px of
+   the row) does the glass step aside for them. It used to go under 390 px,
+   and at 390 itself «Название, бренд, штрихкод» (219 px) ran out of the box
+   (verification pass 25.09.2026, panel-phone-fit). */
+@media (max-width: 359px) {
   .adm-salon__q .adm-search__i { display: none; }
   .adm2 .adm-salon__q > .adm-input { padding-left: 10px; }
 }
@@ -2316,8 +2319,8 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 @media (max-width: 1180px) {
   .adm-salon__grid { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 24px; }
   /* «Сканировать» keeps its word, under the icon, so the box keeps its whole
-     placeholder («Название, бренд или штрихкод» at 375 px and up, and beside
-     the basket column of a small desktop) */
+     placeholder («Товар или штрихкод» with the glass from 360 px up, and
+     beside the basket column of a small desktop) */
   .adm-salon__find { gap: 6px; }
   .adm-input--find { padding: 0 10px; }
   .adm-posscan {
