@@ -16,6 +16,7 @@ import { esc, normalizeLang } from "@/emails/layout";
 import { requireAdmin } from "@/lib/auth";
 import { SHOP_TZ } from "@/lib/day";
 import { getOrder, getOrderByNumber } from "@/lib/orders";
+import { isPosNoName } from "@/lib/pos-name";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,7 +165,7 @@ export async function GET(req: Request, ctx: Ctx) {
   <p class="sub">Mardi 1, 10145 Tallinn — Rempire Store OÜ</p>
   <div class="row"><span>${esc(t.order)}</span><span><b>${esc(order.number)}</b></span></div>
   <div class="row"><span>${esc(t.date)}</span><span>${esc(when(order.createdAt))}</span></div>
-  ${order.name && order.name !== "Продажа в салоне" ? `<div class="row"><span>${esc(t.customer)}</span><span>${esc(order.name)}</span></div>` : ""}
+  ${order.name && !isPosNoName(order.name) ? `<div class="row"><span>${esc(t.customer)}</span><span>${esc(order.name)}</span></div>` : ""}
   ${order.email ? `<div class="row muted"><span></span><span>${esc(order.email)}</span></div>` : ""}
   <table>
     <thead><tr><th>${esc(t.item)}</th><th class="num">${esc(t.qty)}</th><th class="num">${esc(t.price)}</th><th class="num">${esc(t.sum)}</th></tr></thead>

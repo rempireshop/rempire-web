@@ -6685,6 +6685,7 @@
         "На почту пришёл чек о продаже в салоне, а не «Заказ принят».",
         "В письме состав, скидка, итог и чем оплачено.",
         "Язык письма — из карточки клиента, а без карточки — язык кассы.",
+        "Без вписанного имени письмо начинается просто «Здравствуйте!» — никакой «Продажа в».",
         "Без вписанной почты письма нет, и экран его не обещает."
       ],
       "why": "Обещанный, но не отправленный чек вернёт клиента к вам за бумагой.",
@@ -6703,12 +6704,13 @@
           "The letter that arrives is a salon receipt, not «Заказ принят».",
           "It carries the items, the discount, the total and how it was paid.",
           "The letter's language comes from the customer's card, or from the till.",
+          "With no name typed, the letter opens with a plain «Hello!», never «Продажа в».",
           "With no address typed, there is no letter and none promised."
         ],
         "why": "A receipt promised and not sent is a customer who comes back demanding paper."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T11:08:27.233Z"
+      "markedAt": "2026-09-25T22:35:02.127Z"
     },
     {
       "id": "pos-no-stock",
