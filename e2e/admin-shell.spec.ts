@@ -375,7 +375,8 @@ test.describe("admin shell — Обзор counts a paid order", () => {
     await expect(row.locator(".adm-row__nm"))
       .toHaveText(n === 1 ? "заказ ждёт отправки" : /заказ(а|ов) ждут отправки/);
     // …and the header's own «Отправить N» agrees with it
-    await expect(page.locator('.adm-head [data-admtab="orders"]')).toHaveText(`Отправить ${n}`);
+    // (1a: the one dark button says what it sends — «Отправить 1 заказ», «Отправить 3 заказа»)
+    await expect(page.locator('.adm-head [data-admtab="orders"]')).toHaveText(new RegExp(`^Отправить ${n} заказ(а|ов)?$`));
 
     // the row is the way in: Заказы, already filtered to «Новые»
     await row.click();
@@ -438,7 +439,8 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
        take it back, and a journal line either way. */
     await page.locator("[data-admshipnow]").click();
     const card = page.locator(".adm-confirm");
-    await expect(card.locator(".adm-confirm__t")).toHaveText("Отметить отправленным?");
+    // (1a: in the Glossary's words — «Отметить отправленным» is struck out there)
+    await expect(card.locator(".adm-confirm__t")).toHaveText("Отправлен без этикетки?");
     await expect(card.locator(".adm-confirm__d")).toContainText(number);
     await page.locator("[data-admcancel]").click();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
@@ -599,12 +601,13 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await nav(page, "orders").click();
     await expect(page.locator("#orderlist")).toBeVisible();
     await fitsThePhone(page, "Заказы");
-    await page.locator("[data-admorder]").first().click();
-    await expect(page.locator('[data-admorder=""]')).toBeVisible();
-    // the card with its four-step strip, the primary button and the hint
-    await expect(page.locator(".adm-steps--4")).toBeVisible();
+    await page.locator("#orderlist [data-admorder]").first().click();
+    // 1a: on a phone the way back is the top bar's «← Заказы»
+    await expect(page.locator("[data-admtopback]")).toBeVisible();
+    // the card with its four-dot progress line, the pinned step and «⋯»
+    await expect(page.locator(".adm-prog--4")).toBeVisible();
     await fitsThePhone(page, "Заказ");
-    await page.locator('[data-admorder=""]').click();
+    await page.locator("[data-admtopback]").click();
 
     await nav(page, "goods").click();
     await expect(page.locator("#goodslist")).toBeVisible();

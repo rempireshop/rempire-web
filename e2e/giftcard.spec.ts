@@ -474,6 +474,8 @@ test.describe("gift card — refunds, both ways", () => {
             is spent from — the confirm card says so first, the server after. */
       await openOrder(page, giftOrder);
       await expect(page.locator("[data-giftused]")).toContainText(`${spent} €`);
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
       await expect(page.locator(".adm-propose__prev")).toContainText("уже потрачена");
@@ -486,6 +488,8 @@ test.describe("gift card — refunds, both ways", () => {
             and the money goes back onto the card, not to any bank. */
       await openOrder(page, shopOrder);
       await expect(page.locator(".adm-kv", { hasText: "Подарочная карта" })).toBeVisible();
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       const confirm = page.locator(".adm-confirm");
       await expect(confirm.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
@@ -504,6 +508,8 @@ test.describe("gift card — refunds, both ways", () => {
             card is cancelled with it and buys nothing any more. */
       await openOrder(page, giftOrder);
       await expect(page.locator("[data-giftused]")).toHaveCount(0);
+      await page.locator("[data-admordermore]:visible").first().click();   // 1a: «Вернуть деньги» is in «⋯»
+
       await page.locator("[data-admrefund]").click();
       await expect(page.locator(".adm-propose__prev")).toContainText("будет аннулирована");
       await expect(page.locator(".adm-propose__prev")).toContainText(card.code);

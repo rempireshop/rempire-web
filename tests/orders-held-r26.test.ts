@@ -106,6 +106,15 @@ const BODY = `
   function admRefundedTotal() { return 0; }
   function admInvoiceOverdue() { return 0; }
   function admOrders() { return SRV.orders; }
+  /* 1a: the chrome around the chips — the search box's icon, the dark
+     button, the «?» of «Возвраты», the skeleton — stubbed down to nothing */
+  var ADM_SEARCH_SVG = "";
+  function admPinnedHTML() { return ""; }
+  function admHelpBtnHTML() { return ""; }
+  function admHelpHTML() { return ""; }
+  function admSkelHTML() { return ""; }
+  function admWaitingCount() { return admLiveToShip().length; }
+  function admShipAllLabel(n) { return "Отправить " + n; }
   ${decl("ADM_ORDER_FILTERS")}
   ${slice("admOrderVM")}
   ${slice("shipRegFailed")}
@@ -127,6 +136,9 @@ const BODY = `
   ${slice("admOrderSearching")}
   ${slice("admOrderEmptyHTML")}
   ${slice("admOrderRows")}
+  ${slice("admOrderChipLit")}
+  ${slice("admOrdersPinHTML")}
+  ${slice("admOrderChipsHTML")}
   ${slice("admOrdersHTML")}
   return admOrdersHTML();
 `;
@@ -143,7 +155,8 @@ function screen(orders: ReturnType<typeof row>[]) {
   for (const key of KEYS) {
     const html = paint(orders, key);
     rows[key] = [...html.matchAll(/<row>([^<]*)<\/row>/g)].map((m) => m[1]);
-    for (const m of html.matchAll(/data-admfilter="([a-z]+)"[^>]*>([^<]*)<\/button>/g)) chips[m[1]] = m[2];
+    // 1a: the chip's word and its count are two nodes (<span>, <b>) — read as the eye does
+    for (const m of html.matchAll(/data-admfilter="([a-z]+)"[^>]*>(.*?)<\/button>/g)) chips[m[1]] = m[2].replace(/<[^>]+>/g, "");
   }
   return { chips, rows };
 }
@@ -158,7 +171,8 @@ describe("«Заказы»: an order that was paid too little for", () => {
   it("wears its own badge, not «Ждёт оплаты»", () => {
     const held = screen(SHOP).rows.all.find((r) => r.startsWith("R-10003"))!;
     expect(held).toContain("Заплатили меньше");
-    expect(held).toContain("adm-badge--warn");
+    // 1a (README § 3): rust FILL — the one kind of tag that means «only you can end this»
+    expect(held).toContain("adm-badge--warnfill");
     /* …and the abandoned checkout beside it still says what it always said,
        which is the whole reason the two needed telling apart. */
     const abandoned = screen(SHOP).rows.all.find((r) => r.startsWith("R-10002"))!;

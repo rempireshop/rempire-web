@@ -33,6 +33,9 @@ const card = new Function(`
   var SRV = { returnBusy: "" };
   function esc(s) { return String(s); }
   function admInvoiceDate(s) { return String(s); }
+  // 1a: what «Обработано» does is behind the notice's «?»
+  function admHelpBtnHTML() { return "<button>?</button>"; }
+  function admHelpHTML(k, text) { return "<div>" + text + "</div>"; }
   ${slice("admReturnCarrierNovaPost")}
   ${slice("admReturnStateHTML")}
   return admReturnStateHTML;

@@ -124,6 +124,16 @@ const BODY = `
   function admRefundedTotal() { return 0; }
   function admInvoiceOverdue() { return 0; }
   function admOrders() { return SRV.orders; }
+  /* 1a: the chrome around the chips — the search box's icon, the dark
+     button, the «?» of «Возвраты», the skeleton — stubbed down to nothing */
+  var ADM_SEARCH_SVG = "";
+  function admPinnedHTML() { return ""; }
+  function admHelpBtnHTML() { return ""; }
+  // the «?» paragraph, drawn: «Возвраты» keeps its one line behind it
+  function admHelpHTML(k, t) { return "<div>" + t + "</div>"; }
+  function admSkelHTML() { return ""; }
+  function admWaitingCount() { return admLiveToShip().length; }
+  function admShipAllLabel(n) { return "Отправить " + n; }
   ${decl("ADM_ORDER_FILTERS")}
   ${slice("admOrderVM")}
   ${slice("shipRegFailed")}
@@ -146,6 +156,9 @@ const BODY = `
   ${slice("admOrderSearching")}
   ${slice("admOrderEmptyHTML")}
   ${slice("admOrderRows")}
+  ${slice("admOrderChipLit")}
+  ${slice("admOrdersPinHTML")}
+  ${slice("admOrderChipsHTML")}
   ${slice("admOrdersHTML")}
   return admOrdersHTML();
 `;
@@ -164,8 +177,9 @@ function screen(orders: ReturnType<typeof row>[]): Screen {
   for (const key of KEYS) {
     const html = paint(orders, key);
     out.rows[key] = [...html.matchAll(/<row>([^<]*)<\/row>/g)].map((m) => m[1]);
-    for (const m of html.matchAll(/data-admfilter="([a-z]+)"[^>]*>([^<]*)<\/button>/g)) {
-      out.chips[m[1]] = m[2];
+    // 1a: the chip's word and its count are two nodes (<span>, <b>) — read as the eye does
+    for (const m of html.matchAll(/data-admfilter="([a-z]+)"[^>]*>(.*?)<\/button>/g)) {
+      out.chips[m[1]] = m[2].replace(/<[^>]+>/g, "");
     }
   }
   return out;
@@ -246,8 +260,10 @@ describe("«Заказы»: a chip's number and the rows behind it", () => {
     });
   }
 
-  it("«Все» carries no number — it is everything, and says so", () => {
-    expect(s.chips.all).toBe("Все");
+  /* 1a (screen 04): «Все» carries its number too — the orders the list holds,
+     which is exactly the rows it opens onto. */
+  it("«Все» counts everything the list holds — the rows it opens onto", () => {
+    expect(s.chips.all).toBe("Все " + SHOP.length);
     expect(s.rows.all.length).toBe(SHOP.length);
   });
 
