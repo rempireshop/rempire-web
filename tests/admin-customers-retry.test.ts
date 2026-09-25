@@ -45,12 +45,17 @@ function panel(S: Record<string, unknown>) {
     function fakeCustomers() { return []; }
     function admOrdersLabel(n) { return n + " заказов"; }
     function eur(n) { return n + " €"; }
-    function admCustBadge() { return ["Клиент", "adm-badge--quiet"]; }
+    function admCustTag() { return ["quiet", "Клиент"]; }
+    function admTagHTML(kind, text) { return '<span class="adm-tag">' + text + "</span>"; }
     var ADM_ROW_OPEN = "";
     var ADM_CUST_TIERS = [["", "Все"], ["news", "Подписаны"]];
     ${slice("admBackHTML")}
+    ${slice("admCustInTier")}
+    ${slice("admCustMatch")}
     ${slice("filteredAdminCustomers")}
+    ${slice("admCustRowHTML")}
     ${slice("admCustRowsHTML")}
+    ${slice("admCustChipsHTML")}
     ${slice("admCustomerCardHTML")}
     ${slice("admCustomersHTML")}
     function reload(d) { ${block("if (d.admreload) {")} }
@@ -86,6 +91,8 @@ describe("«Все клиенты» that did not load", () => {
   it("does not say «Никого не нашлось» under the error", () => {
     const html = panel(failedList()).list();
     expect(html, "a failed read drawn as a shop with no customers").not.toContain("Никого не нашлось");
+    // …nor as «Все 0» on the chips (1a: every chip carries a count)
+    expect(html, "the chips counted a list that never came").not.toContain("adm-chip__n");
   });
 
   it("still says «Никого не нашлось» when the list loaded and nobody matches", () => {
@@ -111,7 +118,8 @@ describe("A customer card that did not load", () => {
 
   it("offers «Повторить» under the way back", () => {
     const html = panel(failedCard()).list();
-    expect(html).toContain("<span>Все клиенты</span>");
+    // «← Клиенты» since 1a (screen 15)
+    expect(html).toContain("<span>Клиенты</span>");
     expect(html).toContain('<div class="adm-error"><span>Карточка клиента не загрузилась.</span>');
     expect(html, "no «Повторить» on the card").toContain('data-admreload="customer">Повторить</button>');
   });

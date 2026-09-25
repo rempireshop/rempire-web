@@ -68,9 +68,10 @@ function panel(answer: Record<string, unknown>) {
     return { add: applyAddPartner, undo: admUndoToast };
   `;
   const fns = new Function(
-    "S", "DEMO", "SRV", "PARTNER_ERRS", "apiSend", "render", "onShown", "onUndo", "setTimeout", "clearTimeout", body,
+    "S", "DEMO", "SRV", "PARTNER_ERRS", "custSend", "render", "onShown", "onUndo", "setTimeout", "clearTimeout", body,
   )(
     S, DEMO, { admin: true }, { error: "Не получилось добавить — попробуйте ещё раз" },
+    // the POST itself — held ten seconds before it goes since 1a (q3); this is the answer when it does
     () => Promise.resolve({ status: 200, body: answer }), () => {},
     (t: string) => shown.push(t), (p: unknown) => undone.push(p),
     (_f: () => void, ms: number) => { timers.push(ms); return 0; }, () => {},

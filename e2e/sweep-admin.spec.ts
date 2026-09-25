@@ -37,7 +37,7 @@ test.beforeEach(async ({}, testInfo) => {
  */
 const TABS: Array<[string, string]> = [
   ["over", "Обзор"], ["orders", "Заказы"], ["goods", "Каталог"], ["stock", "Склад"],
-  ["pos", "Салон"], ["people", "Все клиенты"], ["reviews", "Отзывы"],
+  ["pos", "Салон"], ["people", "Клиенты"], ["reviews", "Отзывы"],
   ["promos", "Промокоды"], ["gift", "Подарочные карты"], ["blog", "Блог"],
   ["stats", "Аналитика"], ["mail", "Письма"],
   ["apps", "Подключения"], ["setup", "Настройки"],

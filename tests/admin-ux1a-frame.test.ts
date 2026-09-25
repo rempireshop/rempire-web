@@ -115,7 +115,8 @@ describe("the phone's top bar", () => {
       [["section", "order"], {}, "Заказы"],
       [["section", "order"], { admCustOpen: "c1" }, "К клиенту"],
       [["edit"], {}, "Товары"],
-      [["section", "customer"], {}, "Все клиенты"],
+      // «← Клиенты», as the card's own link says it since 1a (screen 15)
+      [["section", "customer"], {}, "Клиенты"],
       [["section", "mail"], {}, "Все письма"],
       [["section", "setpage"], {}, "Настройки"],
       [["section", "blog"], {}, "Блог"],

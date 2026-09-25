@@ -494,8 +494,9 @@ describe("the moderation queue never lists one status' rows under another's chip
     const html = rig.html();
     expect(html).toContain("adm-skel");
     expect(html).not.toContain("<row:r1:pending>");
-    expect(html).toContain("Новые 2");
-    expect(html).toContain("Отклонённые 1");
+    // the word and its count, each its own node (1a: «Скрытые», one word for a hidden review)
+    expect(html).toContain('<span>Новые</span> <span class="adm-chip__n">2</span>');
+    expect(html).toContain('<span>Скрытые</span> <span class="adm-chip__n">1</span>');
   });
 
   it("a refetch that fails under the new chip shows the error, not the old status' rows", async () => {
