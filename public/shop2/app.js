@@ -7548,6 +7548,8 @@
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
     [/^Подарочная карта ([A-Z0-9-]+)$/, { ET: "Kinkekaart $1", EN: "Gift card $1" }],
+    // «Аналитика → Топ товаров»: a gift card sold, by its amount (src/lib/analytics.ts nameSetsAndCards)
+    [/^Подарочная карта (\d+(?:,\d+)?) €$/, { ET: "Kinkekaart $1 €", EN: "Gift card $1 €" }],
     [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }],
     // главный баннер
     [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
@@ -28297,7 +28299,13 @@
       return head + (statsErr || '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
     }
     head += statsErr;
-    var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, esc(eur(p.revenue)), p.revenue]; };
+    /* a set is its own name in the panel's language, a gift card «Подарочная
+       карта 50 €» (the dictionary's rule) — not «bundle:beard», «gift:50»
+       (src/lib/analytics.ts nameSetsAndCards; verification pass 25.09.2026) */
+    var prod = function (p) {
+      var nm = (p.names && p.names[S.lang]) || p.name;
+      return [(p.brand ? p.brand + " — " : "") + nm, esc(eur(p.revenue)), p.revenue];
+    };
     return head +
       '<div class="adm-kpis adm-kpis--4">' +
         admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct,

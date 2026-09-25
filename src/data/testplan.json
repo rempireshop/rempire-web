@@ -8549,14 +8549,16 @@
       "steps": [
         "«Ещё» → «Аналитика».",
         "Переключить период: сегодня, 7 дней, 30 дней.",
-        "Сложить сегодняшние оплаченные заказы и сравнить с выручкой за сегодня."
+        "Сложить сегодняшние оплаченные заказы и сравнить с выручкой за сегодня.",
+        "Прочитать «Топ товаров», переключить панель на английский и прочитать снова."
       ],
       "expect": [
         "При смене периода цифры меняются.",
         "Под каждым числом — сравнение словами: «к прошлой неделе», «к прошлому месяцу».",
         "Четвёртое число называется «Покупают» — из 100 зашедших.",
         "Выручка за сегодня совпала с вашей суммой.",
-        "Один оплаченный заказ посчитан один раз, а не дважды."
+        "Один оплаченный заказ посчитан один раз, а не дважды.",
+        "В «Топ товаров» наборы и подарочные карты — названиями, не «bundle:…», на обоих языках."
       ],
       "why": "Посчитанная трижды продажа заставит закупить втрое больше.",
       "risk": "med",
@@ -8566,19 +8568,21 @@
         "steps": [
           "«Ещё» → «Аналитика».",
           "Switch the period: today, 7 days, 30 days.",
-          "Add up today's paid orders and compare with today's revenue."
+          "Add up today's paid orders and compare with today's revenue.",
+          "Read «Топ товаров», switch the panel to English and read it again."
         ],
         "expect": [
           "The figures change with the period.",
           "Under each number a comparison in words: vs. the week before, the month before.",
           "The fourth number is called «Покупают» — out of 100 visitors.",
           "Today's revenue matches your own sum.",
-          "One paid order is counted once, not twice."
+          "One paid order is counted once, not twice.",
+          "In «Топ товаров» sets and gift cards show names, not «bundle:…», in both languages."
         ],
         "why": "A sale counted three times makes you order three times too much."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T12:34:46.779Z"
+      "markedAt": "2026-09-25T22:51:11.320Z"
     },
     {
       "id": "stats-search",
