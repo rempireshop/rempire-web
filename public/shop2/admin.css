@@ -1084,39 +1084,51 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 }
 .adm-sheet__row .adm-row__sub { margin-top: 0; }
 
-/* «Ещё» on a phone (1a, screen 14). It stands ON the tab bar, not over it:
-   «Ещё» stays lit underneath and the other four places stay one tap away
-   (the scrim stops at the bar too). Its rows are the design's — the
-   section's icon, its name, one line of what is waiting (rust when it wants
-   him), a chevron — and its foot is «Язык панели» with RU · ET · EN, then
-   «Открыть магазин ↗» and «Выйти» side by side. The bar below already
-   clears the home indicator, so the foot does not add the inset again. */
-.adm-scrim--more { bottom: var(--a-barh); }
-.adm-more { bottom: var(--a-barh); max-height: calc(100% - var(--a-barh) - 24px); }
-.adm-more .adm-sheet__body { padding: 4px 16px 0; }
+/* «Ещё» on a phone (1a, screen 14) is a page: the tab bar stays under it with
+   «Ещё» lit, the top bar shows the wordmark, and the screen it was opened
+   over is hidden rather than thrown away (.adm2--more — app.js
+   admMorePageHTML). The title carries the 1-px ink rule; the rows are the
+   design's — the section's icon, its name, one line of what is waiting (rust
+   when it wants him, and the words say so too), a chevron — and nothing in a
+   row is ever cut: a line too long for the width wraps. Then «Язык панели»
+   with RU · ET · EN, and «Открыть магазин ↗» and «Выйти» side by side. */
+.adm-more { display: none; }
 .adm-more__t {
-  font-family: Oswald, sans-serif; font-weight: 600; font-size: 30px; line-height: 33px; margin: 4px 0 0;
-  padding-bottom: 12px; border-bottom: 1px solid var(--a-ink);
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 30px; line-height: 33px; margin: 0;
 }
-.adm-more .adm-sheet__row {
+.adm-more__t:focus { outline: none; }
+.adm-more__list { border-top: 1px solid var(--a-ink); margin-top: 16px; }
+.adm-more__row {
   display: grid; grid-template-columns: 24px minmax(0, 1fr) 14px; gap: 14px; align-items: center;
-  height: auto; min-height: 60px; padding: 10px 0;
+  width: 100%; min-height: 64px; padding: 14px 0; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: var(--a-paper); color: var(--a-ink); text-align: left; font: inherit;
 }
-.adm-more .adm-sheet__row > svg { width: 22px; height: 22px; }
+.adm-more__row > svg { width: 22px; height: 22px; }
+.adm-more__row > .adm-more__chev { width: 14px; height: 14px; color: var(--a-muted); }
 .adm-more__txt { min-width: 0; display: flex; flex-direction: column; }
-.adm-more .adm-row__nm { font-size: 16px; line-height: 22px; }
-.adm-more .adm-row__sub { font-size: 13px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.adm-more .adm-sheet__row[aria-current="true"] .adm-row__nm { font-weight: 600; }
-.adm-more .adm-sheet__foot { padding: 20px 16px 16px; flex-direction: column; align-items: stretch; gap: 14px; }
+.adm-more .adm-row__nm { font-size: 16px; line-height: 22px; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.adm-more .adm-row__sub { font-size: 13px; line-height: 18px; margin-top: 0; overflow-wrap: anywhere; }
+.adm-more__row[aria-current="true"] .adm-row__nm { font-weight: 600; }
+.adm-more__foot { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
 .adm-more__lang { display: flex; align-items: center; gap: 12px; }
 .adm-more__lang > span { flex: 1; font-size: 14px; }
 .adm-more__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .adm-more__acts .adm-btn { width: 100%; height: 46px; padding: 0 10px; font-size: 14.5px; }
 .adm-more__acts [data-admlogout] { border-color: var(--a-edge); color: var(--a-muted); }
 
-/* «Ещё» and the assistant are bottom sheets only where there is a bottom bar;
-   on a desktop the same sections live in the sidebar and the assistant is a
-   380-px pane, so both sheets stay out of the way entirely. */
+/* Only where there is a tab bar to open it from. On a desktop the same six
+   sections live in the sidebar, so a page left open by a phone-width window
+   that grew stays out of the way and the screen shows as usual. */
+@media (max-width: 899px) {
+  .adm-more { display: block; padding: 20px 16px calc(var(--a-barh) + 28px); animation: adm-up .25s; }
+  .adm2--more .adm-page { display: none; }
+  /* the page has the panel's own top bar, even over a form whose save bar is
+     the phone's header — that bar belongs to the screen hidden under it */
+  body.adm-saving .adm2--more .adm-top { display: flex; }
+}
+
+/* The assistant is a bottom sheet only where there is a bottom bar; on a
+   desktop it is a 380-px pane, so a phone sheet stays out of the way. */
 @media (min-width: 900px) {
   .adm-sheet--phone, .adm-scrim--phone { display: none; }
 }

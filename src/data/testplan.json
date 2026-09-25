@@ -1490,14 +1490,15 @@
       "title": "Все разделы панели открываются",
       "steps": [
         "Нажать по очереди «Обзор», «Заказы», «Товары», «Салон».",
-        "Нажать «Ещё» и открыть по очереди «Клиенты», «Маркетинг», «Блог», «Аналитика», «Подключения», «Настройки».",
+        "Нажать «Ещё» и со страницы «Ещё» открыть по очереди «Клиенты», «Маркетинг», «Блог», «Аналитика», «Подключения», «Настройки».",
         "Из каждого вернуться кнопкой «Назад» телефона."
       ],
       "expect": [
         "Каждый раздел открывается и рисуется целиком.",
         "Пустых мест на экране нет.",
         "Надписей об ошибке нет.",
-        "«Назад» закрывает экран, а не выкидывает из панели."
+        "«Назад» закрывает экран, а не выкидывает из панели.",
+        "«Ещё» — отдельная страница, внизу горит «Ещё»; строки под разделами не обрезаны."
       ],
       "why": "Раздел, не открывающийся на телефоне, — это работа с компьютера. Надпись об ошибке на «Обзоре» или «Аналитике» значит, что не ответил сервер, а не что сломалась панель.",
       "risk": "low",
@@ -1507,18 +1508,19 @@
         "title": "Every panel section opens",
         "steps": [
           "Press «Обзор», «Заказы», «Товары» and «Салон» in turn.",
-          "Press «Ещё» and open «Клиенты», «Маркетинг», «Блог», «Аналитика», «Подключения» and «Настройки» in turn.",
+          "Press «Ещё» and, from the «Ещё» page, open «Клиенты», «Маркетинг», «Блог», «Аналитика», «Подключения» and «Настройки» in turn.",
           "Come back out of each one with the phone's own back button."
         ],
         "expect": [
           "Every section opens and draws in full.",
           "There are no empty patches on screen.",
           "There are no error messages.",
-          "Back closes the screen instead of throwing you out."
+          "Back closes the screen instead of throwing you out.",
+          "«Ещё» is its own page with «Ещё» lit below; no section line is cut."
         ],
         "why": "A section that fails on the phone is work for the computer. An error line on «Обзор» or «Аналитика» means the server did not answer, not that the panel is broken."
       },
-      "markedAt": "2026-09-23T12:00:25.282Z"
+      "markedAt": "2026-09-25T10:00:13.467Z"
     },
     {
       "id": "panel-frame-1a",
@@ -1530,7 +1532,7 @@
       "steps": [
         "На телефоне открыть панель и посмотреть на верхнюю полосу.",
         "Открыть заказ и нажать «← Заказы» в верхней полосе.",
-        "Нажать «Ещё» и прочитать строку под каждым разделом.",
+        "Нажать «Ещё» — открывается страница — и прочитать строку под каждым разделом.",
         "Нажать значок «Помощник» вверху справа, потом закрыть его.",
         "На компьютере свернуть «Помощник» стрелкой «›» и развернуть полосой справа.",
         "В карточке заказа открыть «⋯» → «Отменить заказ» и нажать «Не надо»."
@@ -1538,7 +1540,7 @@
       "expect": [
         "Вверху: REMPIRE и значок помощника справа; полоски «← В магазин» больше нет.",
         "«← Заказы» вверху закрывает карточку, как «Назад» телефона.",
-        "Под разделами «Ещё» — живые числа: заявки, отзывы, статьи, продажи; красным — что ждёт вас.",
+        "«Ещё» — страница, не шторка; под разделами живые числа, красным — что ждёт вас.",
         "На компьютере свёрнутый помощник — узкая полоса справа, он ничего не закрывает.",
         "В вопросе действие слева, «Не надо» справа; «Не надо» ничего не меняет.",
         "Язык панели и «Выйти» — в «Ещё» на телефоне, внизу меню на компьютере."
@@ -1551,15 +1553,15 @@
         "steps": [
           "On a phone open the panel and look at the bar at the top.",
           "Open an order and press «← Заказы» in the top bar.",
-          "Press «Ещё» and read the line under each section.",
+          "Press «Ещё» — a page opens — and read the line under each section.",
           "Press the «Помощник» icon at the top right, then close it.",
           "On a computer fold «Помощник» with «›» and open it again from the strip on the right.",
-          "On an order card open «⋯» → «Отменить заказ» and press «Не надо» (don't)."
+          "On an order card open «⋯» → «Отменить заказ» and press «Не надо» (cancel)."
         ],
         "expect": [
           "At the top: REMPIRE and the assistant's icon on the right; no «← В магазин» bar.",
           "«← Заказы» at the top closes the card, like the phone's back button.",
-          "Under «Ещё» sections, live numbers: requests, reviews, articles, sales; rust marks what waits.",
+          "«Ещё» is a page, not a sheet; live numbers under sections, rust marks what waits.",
           "On a computer the folded assistant is a narrow strip on the right, covering nothing.",
           "The question has the action left and «Не надо» right; «Не надо» changes nothing.",
           "Panel language and «Выйти»: in «Ещё» on a phone, under the menu on a computer."
@@ -1580,7 +1582,7 @@
         "В «Заказах» открыть карточку заказа и нажать «Назад» телефона.",
         "Открыть её снова, нажать «Отправлен без этикетки» и на вопросе нажать «Назад» дважды.",
         "В «Товарах» открыть товар на правку и нажать «Назад».",
-        "Нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
+        "В «Заказах» нажать «Ещё», потом «Назад»; открыть «Помощник» и снова «Назад».",
         "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
         "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад».",
         "Пройти «Обзор» → «Заказы» → «Клиенты» и нажимать «Назад», пока панель не закроется.",
@@ -1589,7 +1591,7 @@
       "expect": [
         "Карточка заказа закрывается, а панель остаётся.",
         "Первое «Назад» убирает вопрос, второе — карточку.",
-        "Редактор товара, «Ещё» и «Помощник» закрываются так же; раздел под ними остаётся.",
+        "Редактор товара и «Помощник» закрываются так же; со страницы «Ещё» — обратно в «Заказы».",
         "Сканер закрывается, камера гаснет, панель на месте.",
         "Каждое «Назад» подряд возвращает в предыдущий раздел; из панели уводит только с «Обзора».",
         "Ни одно нажатие не проходит впустую."
@@ -1603,7 +1605,7 @@
           "In «Заказы» open an order card and press the phone's back button.",
           "Open it again, press «Отправлен без этикетки», and press back twice on the question.",
           "In «Товары» open a product for editing and press back.",
-          "Press «Ещё», then back; open «Помощник» and press back again.",
+          "In «Заказы» press «Ещё», then back; open «Помощник» and press back again.",
           "Open «Товары» → «Склад», press «Сканировать», then back.",
           "Open a product for editing again, close it with «← Товары», then press back.",
           "Walk «Обзор» → «Заказы» → «Клиенты» and press back until the panel closes.",
@@ -1612,7 +1614,7 @@
         "expect": [
           "The order card closes and the panel stays.",
           "The first back clears the question, the second the card.",
-          "The product editor, «Ещё» and «Помощник» close the same way; the section under them stays.",
+          "The product editor and «Помощник» close the same way; the «Ещё» page returns to «Заказы».",
           "The scanner closes, the camera goes out, the panel stays.",
           "Each back in a row returns to the previous section; only «Обзор» leaves the panel.",
           "No press does nothing at all."
