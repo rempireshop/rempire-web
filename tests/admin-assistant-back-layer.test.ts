@@ -167,10 +167,12 @@ describe("on a desktop the docked assistant stays out of Back", () => {
 
 describe("a phone does not reopen the sheet by itself", () => {
   function load(phone: boolean, stored: Record<string, unknown>): Record<string, any> {
-    const S: Record<string, any> = { admNav: true, admAi: false, mailLang: "RU", voiceLang: "", mailTo: "" };
+    const S: Record<string, any> = { admNav: true, admNavAuto: false, admAi: false, mailLang: "RU", voiceLang: "", mailTo: "" };
     new Function(
       "S", "localStorage", "window", "ADM_PANES_LS",
       `var admPanesMailTo = "";
+       // the menu's fold for a reopened assistant (tests/admin-assistant-navfold.test.ts)
+       ${maybe("admNavAutoFold")}
        ${fn("admPanesLoad")}
        admPanesLoad();`,
     )(

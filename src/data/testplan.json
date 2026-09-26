@@ -1574,6 +1574,51 @@
       "markedAt": "2026-09-25T14:26:40.278Z"
     },
     {
+      "id": "panel-asst-menu-fold",
+      "area": "panel",
+      "who": "both",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Меню уступает место помощнику на ноутбуке",
+      "steps": [
+        "На ноутбуке сузить окно браузера до ширины меньше 1200 точек и открыть панель.",
+        "Открыть «Помощника» полосой справа, потом закрыть его стрелкой «›».",
+        "Снова открыть «Помощника» и развернуть меню стрелкой вверху меню.",
+        "Закрыть «Помощника».",
+        "Растянуть окно во весь экран (шире 1200 точек), открыть и закрыть «Помощника»."
+      ],
+      "expect": [
+        "Помощник открылся — меню слева само свернулось до значков.",
+        "Помощник закрыт — меню снова развёрнуто, с названиями разделов.",
+        "Развёрнутое вручную меню так и остаётся после закрытия помощника.",
+        "В широком окне меню не двигается, открыт помощник или нет.",
+        "В свёрнутом меню значки разделов нажимаются, подсказка называет раздел."
+      ],
+      "why": "На ноутбуке помощник и меню вместе оставляли для работы узкую полосу посередине.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "The menu makes room for the assistant on a laptop",
+        "steps": [
+          "On a laptop, narrow the browser window to under 1200 points and open the panel.",
+          "Open «Помощник» from the strip on the right, then close it with «›».",
+          "Open «Помощник» again and unfold the menu with the arrow at its top.",
+          "Close «Помощник».",
+          "Stretch the window to full screen (over 1200 points), open and close «Помощник»."
+        ],
+        "expect": [
+          "The assistant opens — the menu on the left folds to icons by itself.",
+          "The assistant closed — the menu is unfolded again, with section names.",
+          "A menu unfolded by hand stays unfolded after the assistant closes.",
+          "On a wide window the menu does not move, assistant open or not.",
+          "Folded, each section icon still works and its hint names the section."
+        ],
+        "why": "On a laptop the assistant and the menu together left the work a narrow strip in the middle."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-26T19:12:55.996Z"
+    },
+    {
       "id": "panel-back",
       "area": "panel",
       "who": "renat",

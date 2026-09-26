@@ -10457,7 +10457,8 @@
        here → the panel's. admPanesLoad() brings back the last one, and once it
        is set it stops following the panel — see admVoiceLang(). */
     voiceLang: "",
-    admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded
+    admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded — the owner's choice
+    admNavAuto: false,  // …folded anyway, for the open assistant on a laptop (admNavOpen)
     /* The assistant is not a permanent third column: it starts closed (a
        52-px strip on a desktop, an icon in the phone's top bar — 1a), and
        admPanesSave() remembers it per machine. */
@@ -20574,6 +20575,11 @@
         var asstPhone = false;
         try { asstPhone = window.matchMedia("(max-width: 899px)").matches; } catch (e2) {}
         if (typeof p.ai === "boolean") S.admAi = p.ai && !asstPhone;
+        /* An assistant brought back open is an assistant opening: on a
+           laptop-size window the menu folds for it as it would on a tap
+           (admNavAutoFold) — drawn, never stored, so closing it brings the
+           menu back after any number of reloads. */
+        S.admNavAuto = !!S.admAi && admNavAutoFold(window.innerWidth, asstPhone, S.admNav);
         // one of the three, spelled out: anything else and mailLang() keeps Russian
         if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
         // …and the microphone's, the same shape and for the same reason
@@ -20597,6 +20603,42 @@
       if (/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(typed)) admPanesMailTo = typed;
       localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang, voicelang: S.voiceLang, mailto: admPanesMailTo }));
     } catch (e) {}
+  }
+  /* The menu makes room for the assistant (Dim, 26.09.2026). On a laptop-size
+     window the open assistant (380 px on the right) and the open menu (232 on
+     the left) left the work a narrow column in the middle. So when the
+     assistant opens on a window under 1200 px, in the desktop layout (a phone
+     has no side menu), an open menu folds to its icons by itself, and comes
+     back when the assistant closes. Wider windows do not change.
+
+     The fold is the panel's, not the owner's. S.admNav stays his choice — the
+     one admPanesSave() keeps — and S.admNavAuto only says «folded for the
+     assistant». What is drawn is admNavOpen(), derived from the two and from
+     S.admAi, so every way the assistant closes (its «›», the strip, Escape,
+     the phone's Back, a question that needs the screen) brings the menu back
+     without each of them knowing about it, and no reload finds the fold
+     saved. A press of the fold button ends it: from then on the menu is where
+     he put it, open or folded, and the assistant closing changes nothing.
+     Decided at the moment the assistant opens only — a window resized while
+     it is open keeps what it has. */
+  function admNavAutoFold(width, phone, navOpen) {
+    return !phone && !!navOpen && width > 0 && width < 1200;
+  }
+  /** Is the sidebar drawn open? His choice, unless the open assistant folded it. */
+  function admNavOpen() {
+    return !!S.admNav && !(S.admAi && S.admNavAuto);
+  }
+  /** The fold button: the owner's own choice, made from what he sees — so the
+      first press on an automatically folded menu unfolds it, and it stays. */
+  function admNavToggle() {
+    S.admNav = !admNavOpen();
+    S.admNavAuto = false;
+  }
+  /** Every [data-admai] — the strip, the phone's icon, the pane's «›»: open
+      or shut, and the menu's answer as it opens. */
+  function admAiToggle() {
+    S.admAi = !S.admAi;
+    if (S.admAi) S.admNavAuto = admNavAutoFold(window.innerWidth, admAsstSheet(), S.admNav);
   }
   admPanesLoad();
 
@@ -23836,13 +23878,15 @@
     return '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admlogout>Выйти</button>';
   }
   function admSideHTML(waiting) {
-    var fold = S.admNav ? "Свернуть меню" : "Развернуть меню";
+    // what is drawn, the assistant's automatic fold included (admNavOpen)
+    var open = admNavOpen();
+    var fold = open ? "Свернуть меню" : "Развернуть меню";
     /* 1a: the wordmark alone at the top. «Админка» beside it was the thin
        top bar's word, and the bar is gone (README § 4). */
     return '<aside class="adm-side">' +
       '<div class="adm-side__top">' +
         '<div class="adm-side__mark">REMPIRE</div>' +
-        '<button class="adm-side__fold" data-admnav aria-expanded="' + S.admNav + '" title="' + fold +
+        '<button class="adm-side__fold" data-admnav aria-expanded="' + open + '" title="' + fold +
           '" aria-label="' + fold + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
           'stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
       "</div>" +
@@ -24959,7 +25003,7 @@
     /* The phone's «Ещё» page (admMorePageHTML) is drawn beside the screen, not
        instead of it: .adm2--more hides the screen while the page is up, so
        what was typed there is still there when Back brings it back. */
-    return '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") +
+    return '<div class="adm2' + (admNavOpen() ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") +
         (S.admMore ? " adm2--more" : "") + '">' +
         admTopHTML() +
         '<div class="adm2__frame">' +
@@ -49046,9 +49090,9 @@
       if (acctRowPick) acctShipChanged();
       return;
     }
-    if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
+    if (d.admnav !== undefined) { admNavToggle(); admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) {
-      S.admAi = !S.admAi;
+      admAiToggle();   // …and on a laptop the menu folds for it (Dim, 26.09.2026)
       if (t.closest(".adm-more")) S.admMore = false;   // opened from «Ещё»: the page gives way
       admPanesSave(); render(); admAiRefocus(); return;
     }
