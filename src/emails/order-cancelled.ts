@@ -264,21 +264,23 @@ const T: Record<ClosedKind, Record<Lang, Strings>> = {
       title: "Возврат отправлен",
       label: "Сумма возврата",
       detail: ["Мы отправили возврат на ", "."],
-      wait: "Банк переводит деньги не сразу: обычно они приходят в течение нескольких дней. Когда деньги будут у вас, мы напишем ещё раз. Если через десять дней их всё ещё нет — ответьте на это письмо.",
+      /* not the signature's «напишем ещё раз… десять дней» a second time — the
+         first live refund (R-100096, 26.09.2026) said it twice in a row */
+      wait: "Деньги идут тем же путём, каким пришли: на банковский счёт — обычно 1–2 рабочих дня, на карту — до 5 рабочих дней.",
     },
     et: {
       preheader: "Tagastus on panka saadetud.",
       title: "Tagastus saadetud",
       label: "Tagastatav summa",
       detail: ["Saatsime tagastuse summas ", "."],
-      wait: "Pank ei kanna raha kohe: tavaliselt jõuab see kohale mõne päevaga. Kui raha on teie kontol, kirjutame uuesti. Kui kümne päeva pärast seda ikka ei ole — vastake sellele kirjale.",
+      wait: "Raha liigub sama teed, kust tuli: pangakontole tavaliselt 1–2 tööpäeva, kaardile kuni 5 tööpäeva.",
     },
     en: {
       preheader: "The refund has been sent to the bank.",
       title: "Refund sent",
       label: "Refund amount",
       detail: ["We have sent a refund of ", "."],
-      wait: "A bank does not move money instantly: it usually arrives within a few days. We will write again once it is with you. If it still has not arrived after ten days, reply to this letter.",
+      wait: "The money travels the way it came: to a bank account usually 1–2 business days, to a card up to 5 business days.",
     },
   },
   refunded: {

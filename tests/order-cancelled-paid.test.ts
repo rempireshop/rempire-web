@@ -137,6 +137,14 @@ describe("«Деньги возвращены» and the points", () => {
     expect(sent.text).not.toContain("Баллы");
   });
 
+  it("says «we will write again… ten days» once, not twice — the first live refund, 26.09.2026", () => {
+    const once: Array<["ru" | "et" | "en", RegExp]> = [["ru", /десят/g], ["et", /kümne/g], ["en", /ten days/g]];
+    for (const [lang, word] of once) {
+      const sent = renderOrderCancelled(PAID, lang, { kind: "refund_sent", amount: 0.5 });
+      expect(sent.text.match(word)?.length, lang).toBe(1);
+    }
+  });
+
   it("tells a cancelled order that points paid for that they are back", () => {
     const free = { ...BASE, total: 0, payment: { status: "paid", method: "points" } };
     const ru = renderOrderCancelled(free, "ru", { kind: "cancelled", points: { back: 25, revoked: 0 } });
