@@ -74,8 +74,13 @@ test.describe("admin → the shop's open tab, without a reload", () => {
       const list = (await (await page.request.get("/api/admin/customers/")).json()).customers as Array<{ id: string; email: string }>;
       const id = list.find((c) => c.email === email)!.id;
 
-      // the retail price first, as this shopper sees it before the switch
+      /* the cabinet once, as a shopper who signed in there would have: the
+         shop asks who is signed in at boot only in a browser that has seen a
+         session (acctHint) — the code hook above signs in behind its back */
       const shop = await context.newPage();
+      await shop.goto(shopUrl("", "/account/"));
+      await expect(shop.locator("[data-logout]").first(), "the cabinet did not see the session").toBeVisible({ timeout: 15_000 });
+      // the retail price first, as this shopper sees it before the switch
       await shop.goto(shopUrl("", `/p/${PRODUCT_2.id}/`));
       const price = shop.locator("[data-price]").first();
       await expect(price).toHaveText(/\d/, { timeout: 15_000 });
