@@ -382,6 +382,8 @@ function overview(data: unknown, orders: unknown[] | null, toShip = 0): string {
     ${fn("admSkelHTML")}
     ${fn("admReviewWho")}
     ${fn("admTaskRow")}
+    function admCatalogList() { return []; }
+    ${fn("admLowRows")}
     ${fn("admOverviewHTML")}
     return admOverviewHTML();
   `)(data, orders, toShip) as string;

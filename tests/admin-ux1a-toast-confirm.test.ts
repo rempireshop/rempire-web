@@ -46,7 +46,7 @@ describe("the toast's undo — one word, one time, one place", () => {
     const slot = { innerHTML: "" };
     const S = { screen: "admin", toast: "R-100042 отправлен · письмо ушло", toastUndo };
     new Function("S", "toastSlot", "esc", "translateTree", "document",
-      `var toastPainted = ""; ${decl("ADM_UNDO_WORD")}; ${fn("paintToast")}; paintToast();`,
+      `var toastPainted = ""; ${decl("ADM_UNDO_WORD")}; ${fn("toastKey")}; ${fn("toastWait")}; ${fn("paintToast")}; paintToast();`,
     )(S, slot, esc, () => {}, { body: { classList: { toggle() {} } } });
     return slot.innerHTML;
   }

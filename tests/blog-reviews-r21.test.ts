@@ -253,6 +253,7 @@ function reviewsRig(answer: Any | "throw" | "degraded"): RevRig {
   const run = new Function(
     "S", "fetch", "render",
     `${sliceVar("REV_RETRY_MS")} ${sliceVar("revAskedAt")}
+     function reviewsFreshStamp() { return 0; }
      ${slice("loadReviews")} ${slice("reviewsUnknown")} ${slice("dbReviewsFor")}
      return { load: loadReviews, unknown: function (id) { return reviewsUnknown({ id: id }); },
               rows: function (id) { return dbReviewsFor({ id: id }); } };`,
@@ -396,9 +397,9 @@ async function moderate(answer: { status: number; body: Any } | "throw"): Promis
   let overview = 0, refetch = 0;
   const said: string[] = [];
   const apiSend = () => (answer === "throw" ? Promise.reject(new Error("504")) : Promise.resolve(answer));
-  const run = new Function("a", "apiSend", "toast", "loadAdminReviews", "loadOverview", MODERATE_BRANCH);
+  const run = new Function("a", "apiSend", "toast", "loadAdminReviews", "loadOverview", "shopPoke", MODERATE_BRANCH);
   run({ type: "moderate_review", id: "r1", value: "approved" }, apiSend,
-    (m: string) => said.push(m), () => { refetch++; }, () => { overview++; });
+    (m: string) => said.push(m), () => { refetch++; }, () => { overview++; }, () => {});
   await flush();
   await flush();
   return { overview, refetch, said };
@@ -417,7 +418,7 @@ function moderateTwice(): { sent: string[]; settle: Array<() => void>; done: () 
   // point, so it must not be re-created by the second push
   const factory = new Function(
     `${MODERATE_BRANCH_HEAD}
-     return function (a, apiSend, toast, loadAdminReviews, loadOverview) { ${MODERATE_BRANCH_BODY} };`,
+     return function (a, apiSend, toast, loadAdminReviews, loadOverview) { var shopPoke = function () {}; ${MODERATE_BRANCH_BODY} };`,
   ) as () => (...x: unknown[]) => void;
   const run = factory();
   const push = (value: string) =>

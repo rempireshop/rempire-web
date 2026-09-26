@@ -69,6 +69,7 @@ function approver(answer: PatchAnswer): { approve: (id: string) => void; toasts:
     loadAdminCustomerDetail: () => {},
     loadAdminCustomers: () => {},
     toast: (m: string) => toasts.push(m),
+    shopPoke: () => {},
   });
   return { approve, toasts };
 }
@@ -103,6 +104,7 @@ describe("«Одобрить Pro» reports the letter the route actually sent", 
       loadAdminCustomerDetail: () => {},
       loadAdminCustomers: () => {},
       toast: (m: string) => toasts.push(m),
+      shopPoke: () => {},
     });
     patch("c-1", { action: "reject" }, "Заявка отклонена");
     await settle();

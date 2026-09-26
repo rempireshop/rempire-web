@@ -285,7 +285,7 @@ test.describe("admin sweep 2 — the keyboard", () => {
     await page.locator('[data-partnerf="email"]').press("Enter");
     /* Enter is «Добавить партнёра». 1a (q3): no question — the form closes and
        the POST waits ten seconds; «Вернуть» brings the form back as typed. */
-    await expect(page.getByRole("status")).toContainText("Партнёр добавлен · письмо уйдёт через 10 с");
+    await expect(page.getByRole("status")).toContainText(/Партнёр добавлен · письмо уйдёт через \d+ с/);   // counts down (custHold)
     await expect(page.locator("[data-partnerform]")).toHaveCount(0);
     await page.locator(".adm-toast__undo").click();
     await expect(page.locator('[data-partnerf="email"]')).toHaveValue(enterEmail);

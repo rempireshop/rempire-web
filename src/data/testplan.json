@@ -1636,18 +1636,18 @@
       "steps": [
         "Открыть «Обзор».",
         "Прочитать блок «Сделать сегодня» и строки про отзывы и заявки партнёров.",
-        "Нажать на каждую строку в нём.",
-        "Нажать строку про скрытые товары и посмотреть, какой список открылся.",
-        "Нажать тёмную кнопку «Отправить N заказа».",
+        "Нажать строку «N товаров заканчиваются» и сравнить её число с чипом, который открылся.",
+        "Вернуться, нажать строку про скрытые товары и так же сравнить число.",
+        "Нажать остальные строки и тёмную кнопку «Отправить N заказа».",
         "Переключить панель на английский, потом на эстонский, и снова прочитать блок."
       ],
       "expect": [
         "Написано, сколько заказов ждут отправки; общего числа над блоком нет.",
         "Названы заканчивающиеся товары; по-английски и по-эстонски без русских слов и без «1 orders».",
         "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
-        "Числа совпадают с тем, что есть на самом деле.",
-        "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить».",
-        "Скрытый товар — свой или из каталога — отдельной строкой; она открывает «Каталог → Скрытые»."
+        "Строка товаров открывает «Каталог → Кончаются»; на чипе то же число, что на строке.",
+        "Скрытые заканчивающиеся — своей строкой; она открывает «Скрытые · кончаются» с тем же числом.",
+        "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
       "risk": "med",
@@ -1657,23 +1657,23 @@
         "steps": [
           "Open «Обзор» (overview).",
           "Read the «Сделать сегодня» (to do today) block and the review and partner rows.",
-          "Tap every line in it.",
-          "Press the row about hidden products and look at the list it opens.",
-          "Press the dark «Отправить N заказа» button.",
+          "Press the «N товаров заканчиваются» row and compare its number with the chip it opens.",
+          "Go back, press the row about hidden products and compare the number the same way.",
+          "Press the other rows and the dark «Отправить N заказа» button.",
           "Switch the panel to English, then to Estonian, and read the block again."
         ],
         "expect": [
           "It says how many orders wait to be sent; no total above the block.",
           "Running-out products are named; English and Estonian show no Russian words and no «1 orders».",
           "Under reviews, who wrote and the stars; under a request, the salon's name.",
-          "The numbers match what is really there.",
-          "Each line opens its own section; the dark button opens «Заказы» on «Отправить».",
-          "A hidden product, own or catalogue, has its own line opening «Каталог → Скрытые»."
+          "The products row opens «Каталог → Кончаются»; the chip shows the row's number.",
+          "Hidden products running out have their own row, opening «Скрытые · кончаются» with the same number.",
+          "Each line opens its own section; the dark button opens «Заказы» on «Отправить»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T22:50:03.653Z"
+      "markedAt": "2026-09-26T08:51:41.626Z"
     },
     {
       "id": "panel-partners-switch",
@@ -1690,7 +1690,7 @@
       ],
       "expect": [
         "Переключатель сохраняется сразу, без вопроса: вверху «Сохранено ✓», внизу «Вернуть».",
-        "Пример показывает, сколько платит каждый и сколько вернётся баллами.",
+        "Пример показывает, сколько платит каждый и сколько вернётся баллами; под заголовком одна линия.",
         "В кабинете покупателя появились баллы.",
         "Там же появилась кнопка «Стать партнёром».",
         "На кассе появилось «Использовать баллы».",
@@ -1709,7 +1709,7 @@
         ],
         "expect": [
           "The switch saves at once, with no question: «Сохранено ✓» at the top, «Вернуть» below.",
-          "The example shows what each one pays and what comes back as points.",
+          "The example shows what each pays and gets back in points; one line under its heading.",
           "The customer account now shows points.",
           "A «Стать партнёром» button has appeared there.",
           "«Использовать баллы» has appeared at the checkout.",
@@ -1718,7 +1718,7 @@
         "why": "With the switch off, half this plan has nothing to look at."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-09-26T08:58:13.881Z"
     },
     {
       "id": "panel-promo-create",
@@ -1917,13 +1917,13 @@
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
         "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии, выйти из поля.",
-        "Прочитать рыжие строки под полями и вверху, потом нажать «Оставить так» под обоими.",
+        "Прочитать рыжие строки у полей и вверху, потом нажать «Оставить так» у обоих.",
         "Сразу в кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva.",
         "Свернуть браузер и вернуться, потом обновить страницу и открыть панель.",
         "Очистить оба поля и выйти из поля."
       ],
       "expect": [
-        "Под полем Эстонии: «Ниже тарифа Montonio: 3,19 €» и кнопка «Оставить так».",
+        "На телефоне «Оставить так» вровень с полем Эстонии; под ними «Ниже тарифа Montonio: 3,19 €».",
         "Вверху страницы: «Не сохранено: цена ниже тарифа Montonio» — вопросов в окошке нет.",
         "После «Оставить так» у обоих — «Сохранено ✓».",
         "В кассе у Omniva 1 € — и после возврата в браузер, и после обновления.",
@@ -1938,13 +1938,13 @@
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
           "Type 1 into Estonia's Omniva box and 2 into Latvia's, and leave the box.",
-          "Read the rust lines under the boxes and at the top, then press «Оставить так» under both.",
+          "Read the rust lines by the boxes and at the top, then press «Оставить так» on both.",
           "Straight away, at the checkout with a cart under 59 €, pick Estonia, «Пакомат» and Omniva.",
           "Put the browser in the background and come back, then reload and open the panel.",
           "Clear both boxes and leave the box."
         ],
         "expect": [
-          "Under Estonia's box: «Ниже тарифа Montonio: 3,19 €» and an «Оставить так» button.",
+          "On a phone «Оставить так» sits level with Estonia's box, «Ниже тарифа Montonio: 3,19 €» below.",
           "At the top of the page: «Не сохранено: цена ниже тарифа Montonio» — no pop-up question.",
           "After «Оставить так» on both — «Сохранено ✓».",
           "At the checkout Omniva is 1 € — after coming back and after the reload.",
@@ -1954,7 +1954,7 @@
         "why": "A price below the rate is your call, but never by accident: the card asks once."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-09-26T09:06:38.977Z"
     },
     {
       "id": "panel-carton",
@@ -7947,15 +7947,16 @@
       "lang": "RU",
       "title": "Снять с клиента статус партнёра",
       "steps": [
+        "Открыть в магазине любой товар как этот партнёр — видна салонная цена.",
         "В «Клиентах» открыть партнёра и в «Статус» нажать «Розница».",
-        "Не перезагружая магазин, открыть в нём любой товар этого партнёра.",
+        "Не обновляя, вернуться во вкладку магазина и посмотреть на цену.",
         "Положить товар в корзину и дойти до кассы.",
         "Снова нажать «Партнёр» и посмотреть на цены ещё раз."
       ],
       "expect": [
         "Вопроса нет: переключатель встаёт сразу, внизу полоска с «Вернуть».",
         "Салонных цен в магазине больше нет — ни на карточке, ни в корзине.",
-        "Ничего перезагружать не нужно.",
+        "Ничего перезагружать не нужно: открытая вкладка магазина меняет цены сама за секунду.",
         "На кассе считают обычную цену.",
         "Включили обратно — салонные цены вернулись, второе письмо не ушло."
       ],
@@ -7963,19 +7964,20 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T11:20:35.840Z",
+      "markedAt": "2026-09-26T09:38:14.014Z",
       "en": {
         "title": "Taking partner status off a customer",
         "steps": [
-          "In «Клиенты» open a partner and press «Розница» under «Статус».",
-          "Without reloading the shop, open any product as that partner.",
+          "Open any product in the shop as that partner — the salon price shows.",
+          "In «Клиенты» open the partner and press «Розница» under «Статус».",
+          "Without reloading, go back to the shop's tab and look at the price.",
           "Put it in the cart and go through to the checkout.",
           "Press «Партнёр» again and look at the prices again."
         ],
         "expect": [
           "No question: the switch moves at once, with «Вернуть» on a strip below.",
           "Salon prices are gone from the shop — the card and the cart both.",
-          "Nothing needs reloading.",
+          "Nothing needs reloading: the open shop tab changes its prices within a second.",
           "The checkout charges the ordinary price.",
           "Switched back on, the salon prices return and no second letter goes."
         ],
@@ -7992,15 +7994,16 @@
       "steps": [
         "Открыть карточку клиента.",
         "В «Баллы» вписать «абв» и нажать кнопку под полем.",
-        "Вписать +10 и причину, нажать «Начислить +10».",
-        "Открыть кабинет этого клиента и посмотреть баллы.",
+        "В другой вкладке открыть кабинет этого клиента.",
+        "Вписать +10 и причину, нажать «Начислить +10» и смотреть на полоску внизу.",
         "Вписать −10, нажать «Списать −10» и сразу «Вернуть».",
         "Вписать в баллах пять, не нажимать и открыть карточку другого клиента."
       ],
       "expect": [
         "«абв» не отправляется: поле красное, под ним подсказка.",
         "Кнопка сама пишет, что сделает: «Начислить +10» или «Списать −10».",
-        "Число в плитке «Баллы» меняется сразу; через 5 секунд — и в кабинете.",
+        "Плитка «Баллы» меняется сразу; в строке и внизу — «сохранится через 5 с», счёт идёт вниз.",
+        "Через 5 секунд — «Баллы сохранены ✓»; открытый кабинет показывает новые баллы сам.",
         "После «Вернуть» баллы не списались.",
         "У другого клиента поля баллов и причины пустые."
       ],
@@ -8008,21 +8011,22 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T11:20:35.840Z",
+      "markedAt": "2026-09-26T09:38:14.014Z",
       "en": {
         "title": "Adding or removing points",
         "steps": [
           "Open a customer's card.",
           "In «Баллы» type «абв» and press the button under the box.",
-          "Type +10 and a reason, press «Начислить +10».",
-          "Open that customer's account and look at the points.",
+          "In another tab open that customer's account.",
+          "Type +10 and a reason, press «Начислить +10» and watch the strip at the bottom.",
           "Type −10, press «Списать −10» and at once «Вернуть».",
           "Type five in the points box, do not press it, and open another customer's card."
         ],
         "expect": [
           "«абв» is not sent: the box turns red with a hint under it.",
           "The button says what it will do: «Начислить +10» or «Списать −10».",
-          "The «Баллы» tile changes at once; after 5 seconds the account does too.",
+          "The «Баллы» tile changes at once; row and strip count «сохранится через 5 с» down.",
+          "After 5 seconds — «Баллы сохранены ✓»; the open account shows the new points by itself.",
           "After «Вернуть» no points were taken off.",
           "On the other card the points and reason boxes are empty."
         ],
@@ -8084,12 +8088,12 @@
       "steps": [
         "Открыть «Клиенты» → «Отзывы» → «Новые».",
         "Найти отзыв, который вы оставили в магазине, и нажать «Опубликовать».",
-        "Открыть товар в магазине.",
+        "Открыть этот товар в магазине — можно во вкладке, открытой заранее, без обновления.",
         "Вернуться, открыть «Опубликованные» и нажать «Скрыть».",
         "Нажать на имя автора отзыва, оставленного из кабинета."
       ],
       "expect": [
-        "Опубликованный отзыв виден на странице товара.",
+        "Опубликованный отзыв виден на странице товара сразу — открытая вкладка обновляется сама.",
         "После «Скрыть» он со страницы пропадает и лежит в «Скрытые».",
         "В «Скрытых» у отзыва есть «Опубликовать» — решение можно поменять.",
         "Имя автора открывает карточку этого клиента."
@@ -8098,18 +8102,18 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T11:20:35.840Z",
+      "markedAt": "2026-09-26T09:38:14.014Z",
       "en": {
         "title": "Moderating and publishing a review",
         "steps": [
           "«Клиенты» → «Отзывы» → the «Новые» tab.",
           "Find the review you left in the shop and press «Опубликовать».",
-          "Open the product in the shop.",
+          "Open that product in the shop — a tab opened beforehand is fine, no reload.",
           "Go back, open «Опубликованные» and press «Скрыть».",
           "Tap the author's name on a review left from an account."
         ],
         "expect": [
-          "The published review shows on the product page.",
+          "The published review shows on the product page at once — an open tab updates itself.",
           "After «Скрыть» it disappears from the page and sits under «Скрытые».",
           "Under «Скрытые» the review has «Опубликовать» — the decision can change.",
           "The author's name opens that customer's card."

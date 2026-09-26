@@ -1279,6 +1279,9 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   flex: 1; min-width: 0; font-size: 14px; line-height: 20px; padding: 8px 0;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
+/* «сохранится через 5 с» under a held change's sentence, counting down
+   (custHold in app.js): the pause is on purpose, and says so */
+.adm-toast__w { display: block; font-size: 12.5px; line-height: 18px; color: var(--a-dim); font-variant-numeric: tabular-nums; }
 .adm-toast__undo {
   border: 0; background: none; color: var(--a-onink); font-weight: 600; text-decoration: underline;
   text-underline-offset: 3px; font-size: 14px; height: 44px; padding: 0 8px; flex: none;
@@ -2968,6 +2971,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-cpts__hist { margin-top: 12px; }
 .adm-cpts__none { margin-top: 12px; padding: 14px 16px; }
 .adm-row--held { color: var(--a-muted); }
+/* …and what it waits for, in ink, counting down: «сохранится через 5 с» on a
+   held points row, «письмо уйдёт через 10 с» under the partner switch */
+.adm-hold { color: var(--a-ink); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm2 .adm-cnote { display: block; min-height: 84px; margin-top: 12px; }
 .adm-csec--write { margin-top: 22px; }
 .adm2 .adm-cwrite { height: 44px; padding: 0 18px; }
@@ -3705,6 +3711,14 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    one under the other on a phone; the ink rule over each column is the same
    1 px the rest of the panel is built from. */
 .adm-calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 32px; }
+/* The heading over the example and the rule over each column used to be two
+   ink lines, one under the other (Dim, 26.09.2026: «we have two lines there,
+   we can remove one»). Under this heading the columns' rules ARE its rule —
+   8 px under the words, as every section head's, split where the columns
+   split on a desk; on a phone the second one still parts partner from
+   shopper. The heading and the example are one block, so no form gap
+   opens between the words and their rule. */
+.adm-calcsec > .adm-sech { border-bottom: 0; }
 .adm-calc__c { border-top: 1px solid var(--a-ink); padding-top: 8px; min-width: 0; }
 .adm-calc__t { font-weight: 600; font-size: 14px; padding-bottom: 6px; }
 .adm-calc__r {
@@ -4632,6 +4646,17 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-rt .adm-rates__c--none .adm-hint--cell { grid-column: 2 / -1; }
 .adm-rt .adm-rates__c:last-child { border-top: 1px solid var(--a-rule); margin-top: 4px; padding-top: 10px; }
 .adm-rt .adm-rates__c:last-child .adm-tariffs__l { font-weight: 600; }
+/* a price under the tariff on this grid: «Оставить так» in the third track,
+   level with the box and centred on it as the label is; the rust sentence and
+   «вернуть» on a line of their own under box and button — where the sentence
+   has the width to be read in one line rather than wrapped into the 140 px
+   beside the box. The foot's two parts become the grid's own items. */
+.adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__f { display: contents; }
+.adm-rt .adm-rates__c:has(.adm-rt__keep) > .adm-tariffs__l,
+.adm-rt .adm-rates__c:has(.adm-rt__keep) > .adm-input { grid-row: 1; }
+.adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__acts { grid-column: 3; grid-row: 1; margin: 0; justify-self: start; max-width: 100%; }
+.adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__keep { width: auto; min-height: 44px; padding: 0 8px; }
+.adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__why { grid-column: 2 / -1; grid-row: 2; margin: 0; }
 /* the table from a 620-px page (a 1000-px window with the assistant folded):
    under it seven columns drew price boxes that showed one digit, so the
    country rows fold as on a phone */
@@ -4656,20 +4681,33 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
      box is being typed in, when the placeholder has gone */
   .adm-rt .adm-rates__c:not(.is-own):not(:focus-within) .adm-rt__f > .adm-hint--cell:not(.adm-hint--loss) { visibility: hidden; }
   .adm-rt__unit { display: none; }
+  /* a column again: «Оставить так» straight under the box, as wide as it */
+  .adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__f { display: block; }
+  .adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__acts { margin-top: 4px; justify-self: stretch; }
+  .adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__keep { width: 100%; min-height: 32px; padding: 4px 6px; }
+  .adm-rt .adm-rates__c:has(.adm-rt__keep) .adm-rt__why { margin-top: 2px; }
 }
 /* Montonio's price, grey IN an empty box; an own price bold */
 .adm-rates__c .adm-input::placeholder { color: var(--a-muted); opacity: .8; }
 .adm-rates__c.is-own .adm-input { font-weight: 600; border-color: var(--a-ink); }
 .adm-rates__c .adm-input[aria-invalid="true"] { border-color: var(--a-rust); }
 .adm-rt__legend { margin: 8px 0 0; }
-/* a price under the tariff, waiting for «Оставить так» */
-.adm-rt__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; }
+/* a price under the tariff, waiting for «Оставить так». The button belongs to
+   the box, the rust sentence and «вернуть» to the two of them (Dim,
+   26.09.2026: «the "keep it" and the box … seem not to be inline»). In a
+   column — the desktop table, the European fold — the button sits straight
+   under the box and exactly as wide as it, the sentence under both; the
+   phone's label · box · line grid puts it level with the box (see
+   `.adm-rt .adm-rates__c:has(.adm-rt__keep)` above). */
+.adm-rt__acts { display: flex; margin-top: 4px; }
 .adm-rt__keep {
-  min-height: 32px; padding: 0 10px; border: 1px solid var(--a-rust); background: var(--a-paper);
-  color: var(--a-rust); font-size: 12.5px; font-weight: 600;
+  width: 100%; min-height: 32px; padding: 4px 6px; border: 1px solid var(--a-rust); background: var(--a-paper);
+  color: var(--a-rust); font-size: 12.5px; line-height: 16px; font-weight: 600;
 }
-.adm-rt__acts .adm-rates__undo { width: auto; margin: 0; padding: 4px 0; }
-@media (max-width: 899px) { .adm-rt__keep { min-height: 44px; } .adm-rt__acts .adm-rates__undo { min-width: 44px; } }
+.adm-rt__why { display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; margin-top: 2px; }
+.adm-rt__why .adm-hint--cell { min-height: 0; padding-top: 0; }
+.adm-rt__why .adm-rates__undo { width: auto; margin: 0; padding: 4px 0; }
+@media (max-width: 899px) { .adm-rt__keep { min-height: 44px; } .adm-rt__why .adm-rates__undo { min-width: 44px; } }
 .adm-rates__c:has(.adm-rt__keep) .adm-input { border-color: var(--a-rust); color: var(--a-rust); }
 /* a held box's own «why not sent» line says what the rust line with «Оставить так» already says */
 .adm-rates__c:has(.adm-rt__keep) .adm-ashint { display: none; }

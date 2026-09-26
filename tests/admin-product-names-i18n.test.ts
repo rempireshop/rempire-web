@@ -114,6 +114,8 @@ function overview(lang: Lang): string {
     function admShipAllLabel(n) { return "Отправить " + n; }
     function admSkelHTML() { return ""; }
     function admReviewWho(r) { return r.name; }
+    function admCatalogList() { return []; }
+    ${slice("admLowRows")}
     ${slice("admProdName")}
     ${slice("admTaskRow")}
     ${slice("admOverviewHTML")}

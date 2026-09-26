@@ -1025,6 +1025,7 @@
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "Lai foto — JPEG, PNG või WebP, kuni 12 MB.",
       /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
       "В магазине": "Poes", "Кончаются": "Lõpevad", "Объёмы": "Mahud", "Виден": "Nähtav",
+      "Скрытые · кончаются": "Peidetud · lõpevad",
       "Ничего не нашли": "Midagi ei leitud",
       "Товар снова в магазине": "Toode on jälle poes", "Товар скрыт из магазина": "Toode on poest peidetud",
       "Заполнено на трёх языках": "Täidetud kolmes keeles",
@@ -3315,6 +3316,7 @@
       "Не получилось изменить статус": "Staatuse muutmine ebaõnnestus",
       "Партнёр добавлен · письмо ушло": "Partner lisatud · kiri saadetud", "Партнёр добавлен ✓": "Partner lisatud ✓",
       "Партнёр одобрен · письмо ушло": "Partner kinnitatud · kiri saadetud",
+      "Баллы сохранены ✓": "Punktid salvestatud ✓", "Заявка отклонена ✓": "Taotlus tagasi lükatud ✓",
       "Партнёр одобрен · письмо не ушло": "Partner kinnitatud · kiri ei läinud välja",
       "Партнёр одобрен · письмо уже отправляли": "Partner kinnitatud · kiri on juba saadetud",
       "Сделать партнёром?": "Teha partneriks?", "Перевести в розницу?": "Viia jaemüüki?",
@@ -4559,6 +4561,7 @@
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "A wide photo — JPEG, PNG or WebP, up to 12 MB.",
       /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
       "В магазине": "In the shop", "Кончаются": "Running low", "Объёмы": "Sizes", "Виден": "Visible",
+      "Скрытые · кончаются": "Hidden · running low",
       "Ничего не нашли": "Nothing found",
       "Товар снова в магазине": "The product is back in the shop", "Товар скрыт из магазина": "The product is hidden from the shop",
       "Заполнено на трёх языках": "Filled in in three languages",
@@ -6817,6 +6820,7 @@
       "Не получилось изменить статус": "Could not change the status",
       "Партнёр добавлен · письмо ушло": "Partner added · letter sent", "Партнёр добавлен ✓": "Partner added ✓",
       "Партнёр одобрен · письмо ушло": "Partner approved · letter sent",
+      "Баллы сохранены ✓": "Points saved ✓", "Заявка отклонена ✓": "Request declined ✓",
       "Партнёр одобрен · письмо не ушло": "Partner approved · letter did not go out",
       "Партнёр одобрен · письмо уже отправляли": "Partner approved · the letter was sent before",
       "Сделать партнёром?": "Make a partner?", "Перевести в розницу?": "Move to retail?",
@@ -7310,11 +7314,20 @@
     [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
     /* 1a «Клиенты»: the toasts of a held answer (q3) and a held points
        correction (q9) — a customer's name or a count spliced in */
-    [/^(.+) — партнёр · письмо уйдёт через 10 с$/, { ET: "$1 — partner · kiri läheb 10 s pärast", EN: "$1 — partner · the letter goes in 10 s" }],
+    /* …and since 26.09.2026 every one of them counts its wait down, once a
+       second — the seconds are the last number (custHold) */
+    [/^(.+) — партнёр · письмо уйдёт через (\d+) с$/, { ET: "$1 — partner · kiri läheb $2 s pärast", EN: "$1 — partner · the letter goes in $2 s" }],
     [/^Начислено 1 балл$/, { ET: "Lisatud 1 punkt", EN: "1 point added" }],
     [/^Начислено (\d+) балл(?:а|ов)?$/, { ET: "Lisatud $1 punkti", EN: "$1 points added" }],
     [/^Списано 1 балл$/, { ET: "Maha võetud 1 punkt", EN: "1 point taken off" }],
     [/^Списано (\d+) балл(?:а|ов)?$/, { ET: "Maha võetud $1 punkti", EN: "$1 points taken off" }],
+    [/^Цены для салонов включены · письмо уйдёт через (\d+) с$/, { ET: "Salongihinnad sisse lülitatud · kiri läheb $1 s pärast", EN: "Salon prices on · the letter goes in $1 s" }],
+    [/^Партнёр добавлен · письмо уйдёт через (\d+) с$/, { ET: "Partner lisatud · kiri läheb $1 s pärast", EN: "Partner added · the letter goes in $1 s" }],
+    // …and the wait on a line of its own — under the points toast, the points row, the partner switch
+    [/^сохранится через (\d+) с$/, { ET: "salvestub $1 s pärast", EN: "saves in $1 s" }],
+    [/^письмо уйдёт через (\d+) с$/, { ET: "kiri läheb $1 s pärast", EN: "the letter goes in $1 s" }],
+    [/^Сохранится через (\d+) с$/, { ET: "Salvestub $1 s pärast", EN: "Saves in $1 s" }],
+    [/^Письмо уйдёт через (\d+) с$/, { ET: "Kiri läheb $1 s pärast", EN: "The letter goes in $1 s" }],
     // «Отказать» on a partner request — the other half of the same card
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
@@ -14869,25 +14882,101 @@
      is met with one request per render. */
   var REV_RETRY_MS = 30000;
   var revAskedAt = {};
-  function loadReviews(id) {
+  /** `redraw`: the page already shows an answer that may now be wrong — a
+      review the owner has just hidden has to leave it even when the new
+      answer is an empty list. */
+  function loadReviews(id, redraw) {
     if (!id) return;
     var have = S.dbReviews[id];
     if (have === null || Array.isArray(have)) return;       // in flight, or answered
     if (have === false && Date.now() - (revAskedAt[id] || 0) < REV_RETRY_MS) return;
     S.dbReviews[id] = null;
     revAskedAt[id] = Date.now();
-    fetch("/api/reviews/?product=" + encodeURIComponent(id))
+    // after a publish or a hide in the panel, past every cache (shopPoke)
+    var fresh = reviewsFreshStamp(id);
+    fetch("/api/reviews/?product=" + encodeURIComponent(id) + (fresh ? "&fresh=" + fresh : ""))
       .then(function (r) { return r.json(); })
       .then(function (j) {
         var got = j && j.ok && !j.degraded && j.reviews ? j.reviews : false;
         S.dbReviews[id] = got;
         // an empty answer draws exactly what the first paint already drew
-        if (S.screen === "product" && S.productId === id && (got === false || got.length)) render();
+        if (S.screen === "product" && S.productId === id && (redraw || got === false || got.length)) render();
       })
       .catch(function () {
         S.dbReviews[id] = false;
         if (S.screen === "product" && S.productId === id) render();
       });
+  }
+  /* ---------- the panel tells the shop: what you show has just changed ------
+     Dim, 26.09.2026 (people-reviews, people-points, people-remove-partner):
+     «works but takes time». The panel and the shop are this one file on one
+     origin, and the owner checks a change in the shop — usually in another
+     tab of the same browser. That tab held what it had read: a product's
+     reviews for as long as it stayed open (and the browser and the CDN held
+     GET /api/reviews a minute longer still), the profile — points, partner
+     prices — until the tab was next brought to the front. Worse, bringing it
+     to the front INSIDE a held wait (custHold: points 5 s) fired the hold AND
+     re-read the profile in the same instant, so the profile came back from
+     before the change and was not asked again.
+
+     So the panel writes a key the moment a change has LANDED — never when it
+     is pressed — and every other open tab of the shop hears it (the storage
+     event fires in the other tabs only):
+       · the account key: the profile is asked again at once — the balance,
+         the tier, and with it every salon price (acctRefresh);
+       · the reviews key: that product's reviews are asked again, with the
+         time of the change in the URL, so neither the browser's copy nor the
+         CDN's can answer for them (reviewsFreshStamp). A product page opened
+         later in this browser reads the same key for ten minutes.
+     This tab does both itself, the admin and the shop being one page. Nothing
+     personal in either key: a time, and a product id. */
+  var ACCT_POKE_LS = "rempire-shop-poke-account";
+  var REV_POKE_LS = "rempire-shop-poke-reviews";
+  var SHOP_POKE_MS = 10 * 60 * 1000;
+  function shopPoke(kind, id) {
+    var at = Date.now();
+    try {
+      if (kind === "reviews") {
+        var map = reviewsPokes();
+        map[id || "*"] = at;
+        localStorage.setItem(REV_POKE_LS, JSON.stringify(map));
+      } else localStorage.setItem(ACCT_POKE_LS, String(at));
+    } catch (e) {}
+    if (kind === "reviews") reviewsPoked(id || "*");
+  }
+  /** product id (or «*», any) → when the panel last changed its reviews; the
+      last ten minutes only. */
+  function reviewsPokes() {
+    var out = {}, raw = null;
+    try { raw = JSON.parse(localStorage.getItem(REV_POKE_LS) || "null"); } catch (e) { raw = null; }
+    if (raw && typeof raw === "object") {
+      for (var k in raw) {
+        if (Object.prototype.hasOwnProperty.call(raw, k) && Date.now() - Number(raw[k]) < SHOP_POKE_MS) out[k] = Number(raw[k]);
+      }
+    }
+    return out;
+  }
+  function reviewsFreshStamp(id) {
+    var m = reviewsPokes();
+    return Math.max(m[id] || 0, m["*"] || 0) || 0;
+  }
+  /** The answer this tab holds for `id` (or for every product) is stale: it
+      goes, and the product on screen asks again. */
+  function reviewsPoked(id) {
+    for (var k in S.dbReviews) {
+      if (Object.prototype.hasOwnProperty.call(S.dbReviews, k) && (id === "*" || k === id) && S.dbReviews[k] !== null) delete S.dbReviews[k];
+    }
+    if (S.screen === "product" && S.productId && (id === "*" || S.productId === id)) loadReviews(S.productId, true);
+  }
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("storage", function (e) {
+      if (e.key === ACCT_POKE_LS) acctRefresh(0);
+      else if (e.key === REV_POKE_LS) {
+        var m = reviewsPokes(), newest = "", at = 0;
+        for (var k in m) if (m[k] > at) { at = m[k]; newest = k; }
+        if (newest) reviewsPoked(newest);
+      }
+    });
   }
   /** True while the shop cannot say whether this product has reviews. */
   function reviewsUnknown(p) {
@@ -18180,9 +18269,12 @@
    * seconds, which is what stops a flurry of tab switches becoming a flurry of
    * requests. Costs nothing for a visitor who is not signed in.
    */
-  function acctRefresh() {
+  /** `floor`: how recent an answer is recent enough — three seconds unless
+      said (a screen opened: fifteen; the panel's word that the profile has
+      just changed: none at all). */
+  function acctRefresh(floor) {
     if (!S.loggedIn) return;
-    if (Date.now() - acctFreshAt < 3000) return;
+    if (Date.now() - acctFreshAt < (typeof floor === "number" ? floor : 3000)) return;
     acctAsked = false;
     acctLoad();
   }
@@ -21305,6 +21397,30 @@
     for (var i = 0; i < (rows || 3); i++) out += "<i></i>";
     return '<div class="adm-skel adm-skel--rows" aria-busy="true">' + out + "</div>";
   }
+  /** «N товаров заканчиваются» and «N скрытых товаров заканчиваются»: how
+      many, and which, of the products «Каталог → Кончаются» and «Скрытые ·
+      кончаются» list. The summary counts them on the server by the same rule
+      (src/lib/stock-word.ts, qOverviewLowStock) — the first screen must not
+      wait for the whole shelf. Once the panel holds what those chips count —
+      the shelf (S.stockLevels) and the hidden own products (S.customAll) — the
+      row counts with the chips' own predicate instead, so a stock word or a
+      switch changed since the summary was read cannot put the row and the
+      list apart. With no server at all (the demo panel), the same. Sold-out
+      first, then by name, as the summary sorts. */
+  function admLowRows(o) {
+    if (o && !(S.stockLevels && S.customAll)) {
+      return { n: o.lowStock.total, items: o.lowStock.items || [],
+        hidN: typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0, hidItems: o.lowStock.hiddenItems || [] };
+    }
+    var all = admCatalogList();
+    var order = function (a, b) {
+      var ao = goodsStockWord(a) === "out", bo = goodsStockWord(b) === "out";
+      return ao === bo ? String(a.name).localeCompare(String(b.name), "ru") : ao ? -1 : 1;
+    };
+    var low = all.filter(function (p) { return goodsMatchesFilter(p, "low"); }).sort(order);
+    var hid = all.filter(function (p) { return goodsMatchesFilter(p, "offlow"); }).sort(order);
+    return { n: low.length, items: low, hidN: hid.length, hidItems: hid };
+  }
   function admOverviewHTML() {
     /* ONE call. Until 13.09.2026 this screen also asked for
        /api/admin/analytics?range=7d — sixteen queries, several of them
@@ -21318,8 +21434,10 @@
     var vms = admOrders().map(admOrderVM);
     var toShip = admLiveToShip();
 
-    var lowItems = o ? o.lowStock.items : lowStock();
-    var lowN = o ? o.lowStock.total : lowItems.length;
+    // the two stock rows: what «Каталог → Кончаются» / «Скрытые · кончаются» hold
+    var lowRows = admLowRows(o);
+    var lowItems = lowRows.items;
+    var lowN = lowRows.n;
     var shipN = admWaitingCount();
     var revN = o ? o.attention.reviewsPending : 0;
     var proN = o ? o.attention.proRequests : 0;
@@ -21344,7 +21462,7 @@
     /* …and the hidden products that are running out, which have had a row of
        their own since this morning and were missing from the number above it:
        «Сделать сегодня 4» over five rows is a number nobody can trust. */
-    var hidLow = o && typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0;
+    var hidLow = lowRows.hidN;
     /* No total beside «Сделать сегодня» any more (Dim, 25.09.2026, q15): it
        added orders to bottles to reviews, and the rows say each number on
        their own. */
@@ -21377,25 +21495,32 @@
       ["заказ придержан", "заказа придержаны", "заказов придержаны"],
       names(heldList, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="held"', true);
+    /* The row opens the list it counts: «Каталог» on «Кончаются», one entry a
+       product. It opened «Склад», whose chips count SIZES and leave out every
+       product nobody has counted — 12 on the row, no list anywhere saying 12
+       (Dim, 26.09.2026). */
     if (lowN) tasks += admTaskRow(lowN,
       ["товар заканчивается", "товара заканчиваются", "товаров заканчиваются"],
       names(lowItems, function (p) { return admProdName(p.name); }),
-      'data-admtab="stock"', true);
+      'data-admtab="goods" data-admfilter="low"', true);
     /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
        number above is «закажите ещё», and a product taken off sale is not
        that — but a bottle hidden BECAUSE it ran out must not vanish from the
        only list that would remind him to order it. */
-    var hidItems = (o && o.lowStock.hiddenItems) || [];
+    var hidItems = lowRows.hidItems;
     /* Where the row goes matters as much as the number. «Товары» alone opened
        the whole catalogue, where a hidden product sorts behind everything
        still on sale and usually past the 40-row cap — so the row counted
        them and then hid them again (Dim, 19.09.2026: «does not bring to
-       hidden product»). It opens «Каталог → Скрытые» now, and says which
-       ones, so the list is a place to look rather than a place to search. */
+       hidden product»). «Каталог → Скрытые» was the next answer, and it was
+       every hidden product: the row said 1 and the list held 2 (Dim,
+       26.09.2026). It opens «Скрытые · кончаются» — exactly the ones it
+       counts — and says which, so the list is a place to look rather than a
+       place to search. */
     if (hidLow) tasks += admTaskRow(hidLow,
       ["скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"],
       hidItems.length ? names(hidItems, function (p) { return admProdName(p.name); }) :"сняты с продажи — закажите, если вернёте в магазин",
-      'data-admtab="goods" data-admfilter="off"', true);
+      'data-admtab="goods" data-admfilter="offlow"', true);
     if (revN) tasks += admTaskRow(revN,
       ["отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"],
       names(who.reviews || [], admReviewWho), 'data-admtab="reviews"');
@@ -23271,6 +23396,11 @@
   var ADM_GOODS_FILTERS = [
     ["all", "Все"], ["on", "В магазине"], ["off", "Скрытые"], ["low", "Кончаются"]
   ];
+  /* …and the list «N скрытых товаров заканчиваются» on «Обзор» opens: hidden
+     AND running low. It opened «Скрытые» — every hidden product — so the row
+     said 1 and the list held 2 (Dim, 26.09.2026). A fifth chip only while it
+     is on or holds something: the four above stay the everyday row. */
+  var ADM_GOODS_OFFLOW = ["offlow", "Скрытые · кончаются"];
   function goodsOffSale(p) {
     return !!((p.custom && p.active === false) || shopHidden(p.id));
   }
@@ -23304,6 +23434,10 @@
    *     only once EVERY size is counted and at zero;
    *   · then the manual flag, for a product nobody has counted (or whose
    *     sizes are only partly counted, all of them at zero).
+   *
+   * The server counts «Обзор»'s two stock rows by a line-for-line copy of
+   * this and goodsRunsLow() below — src/lib/stock-word.ts, held to them by
+   * tests/overview-low-parity.test.ts. Change one, change the other.
    */
   function goodsStockWord(p) {
     if (p.stock === "out") return "out";
@@ -23341,6 +23475,7 @@
     if (f === "off") return goodsOffSale(p);
     if (f === "on") return !goodsOffSale(p);
     if (f === "low" || f === "out") return !goodsOffSale(p) && goodsRunsLow(p);
+    if (f === "offlow") return goodsOffSale(p) && goodsRunsLow(p);
     return true;
   }
   /** The search box, beside the tabs on a desktop and under them on a phone.
@@ -23354,7 +23489,13 @@
   function admCatalogHTML() {
     var f = goodsFilterNow();
     var all = admCatalogList();
-    return '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
+    /* «Скрытые · кончаются» — the list «Обзор»'s hidden row opens — joins the
+       row while it is on or has something in it (ADM_GOODS_OFFLOW). */
+    var chips = ADM_GOODS_FILTERS.slice();
+    if (f === ADM_GOODS_OFFLOW[0] || all.some(function (q) { return goodsMatchesFilter(q, ADM_GOODS_OFFLOW[0]); })) {
+      chips.push(ADM_GOODS_OFFLOW);
+    }
+    return '<div class="adm-chips" role="group" aria-label="Какие товары">' + chips.map(function (x) {
           /* Every chip says how many rows are behind it, zeros included — the
              same rule «Склад» now follows, and for the same reason: three of
              these four said nothing at all, so the only way to learn whether
@@ -23460,7 +23601,15 @@
   function admCatalogList() {
     var own = CATALOGUE.filter(function (p) { return p.custom; });
     var file = CATALOGUE.filter(function (p) { return !p.custom; });
-    var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(customProduct);
+    var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(function (c) {
+      /* …wearing its own stock word, as every product in CATALOGUE does
+         (applyDemoOverrides): customProduct() says «in» for all of them, so a
+         hidden own product set to «мало» was missing from «Скрытые ·
+         кончаются» while «Обзор» counted it. */
+      var p = customProduct(c);
+      if (DEMO.stock && DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
+      return p;
+    });
     // migration 147: a catalogue product switched off «Показывать в магазине»
     // is out of CATALOGUE — the panel is the one place it must still be found
     return own.concat(file, hidden, hiddenFileProducts());
@@ -30694,8 +30843,14 @@
        variable reads to it as loose fragments rather than one line */
     if (isFinite(n) && n >= 0 && n < price) {
       if (!shipAccepted(key, n)) {
-        return '<span class="adm-hint adm-hint--cell adm-hint--loss">Ниже тарифа Montonio: ' + money + "</span>" +
-          '<span class="adm-rt__acts"><button class="adm-rt__keep" type="button" data-shipaccept="' + esc(key) + '">Оставить так</button>' +
+        /* «Оставить так» first, the rust reason and «вернуть» after it: the
+           button belongs to the box — beside it on a phone, straight under it
+           and as wide as it in a desktop column — and the sentence under both.
+           With the reason first the button floated wherever the two wrapped
+           lines of it happened to end, never level with the box (Dim,
+           26.09.2026: «not inline»). admin.css places the two parts. */
+        return '<span class="adm-rt__acts"><button class="adm-rt__keep" type="button" data-shipaccept="' + esc(key) + '">Оставить так</button></span>' +
+          '<span class="adm-rt__why"><span class="adm-hint adm-hint--cell adm-hint--loss">Ниже тарифа Montonio: ' + money + "</span>" +
           '<button class="adm-rates__undo" type="button" data-shipclear="' + esc(key) + '">вернуть</button></span>';
       }
       return '<button class="adm-hint adm-hint--cell adm-rates__undo adm-hint--loss" type="button" data-shipclear="' +
@@ -33374,9 +33529,13 @@
             admPricingField("minRedeem", "Списание доступно от, баллов на счету", d.loyalty.minRedeem) + "</div>"
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
       /* The whole thing on one basket, both price lists side by side — and it
-         answers while he types, before anything is saved. */
-      admSecHeadHTML("Как это посчитается на заказе в " + eur(PRICING_EX_BASKET), "", "") +
-      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>") +
+         answers while he types, before anything is saved. One block with its
+         heading (.adm-calcsec): the columns' own ink rules are the heading's
+         rule here — two lines, one under the other, drew one idea twice
+         (Dim, 26.09.2026). */
+      '<div class="adm-calcsec">' +
+        admSecHeadHTML("Как это посчитается на заказе в " + eur(PRICING_EX_BASKET), "", "") +
+        '<div id="pricingcalc">' + admPricingCalcHTML() + "</div></div>") +
       "</div>";
   }
 
@@ -35849,26 +36008,80 @@
   var CUST_HOLDS = [];
   var custHoldSeq = 0;
   /** Hold one change. `o.fire(keepalive)` makes it; `o.cancel()` puts the
-      screen back when «Вернуть» is pressed in time. */
+      screen back when «Вернуть» is pressed in time. `o.text` is the toast's
+      sentence — or `o.text(s)`, the sentence with `s` seconds still to wait
+      in it («письмо уйдёт через 10 с»); `o.wait` puts «сохранится через 5 с»
+      on a line of its own under a sentence that has no number of its own.
+
+      The wait counts down where it is said (Dim, 26.09.2026, people-points /
+      people-remove-partner / people-reviews: «works but takes time»). The
+      toast said «письмо уйдёт через 10 с» for all ten seconds and the points
+      toast said nothing about a wait at all — so a pause that is there on
+      purpose looked like a slow shop. Now the toast's number and the held
+      row's «сохранится через N с» go 10, 9, … 1, once a second, painted in
+      place: the words node only, so «Вернуть» stays the same button under
+      the thumb. */
   function custHold(o) {
-    var h = { key: o.key, done: false, timer: 0, local: o.local || null };
+    var h = { key: o.key, done: false, timer: 0, tick: 0, until: Date.now() + o.ms, local: o.local || null, letter: !!o.letter };
     var drop = function () { CUST_HOLDS = CUST_HOLDS.filter(function (x) { return x !== h; }); };
+    var stop = function () { clearTimeout(h.timer); clearInterval(h.tick); drop(); };
     h.fire = function (keepalive) {
       if (h.done) return;
-      h.done = true; clearTimeout(h.timer); drop();
+      h.done = true; stop();
       o.fire(!!keepalive);
     };
     h.cancel = function () {
       if (h.done) return false;
-      h.done = true; clearTimeout(h.timer); drop();
+      h.done = true; stop();
       o.cancel();
       return true;
     };
     h.timer = setTimeout(function () { h.fire(false); }, o.ms);
     CUST_HOLDS.push(h);
     // the toast stays as long as the wait: an offer that fades first is no offer
-    toast(o.text, { prev: true, ms: o.ms, undo: function () { if (h.cancel()) { toast("Отменено"); render(); } } });
+    var counts = typeof o.text === "function";
+    var textAt = counts ? o.text : function () { return o.text; };
+    var offer = { prev: true, ms: o.ms, undo: function () { if (h.cancel()) { toast("Отменено"); render(); } } };
+    if (o.wait) offer.wait = custHoldWaitText(custHoldLeft(h), h.letter);
+    toast(textAt(custHoldLeft(h)), offer);
+    h.tick = setInterval(function () {
+      if (h.done) return;
+      var s = custHoldLeft(h);
+      if (S.toastUndo === offer) {
+        if (counts) toastRetext(textAt(s));
+        if (o.wait) toastRewait(offer.wait = custHoldWaitText(s, h.letter));
+      }
+      custHoldPaint(h, s);
+    }, 1000);
     return h;
+  }
+  /** Whole seconds a held change still waits: 10, 9, … 1 — never 0, it goes at 0. */
+  function custHoldLeft(h) {
+    return Math.max(1, Math.ceil((h.until - Date.now()) / 1000));
+  }
+  /** «сохранится через 5 с» / «письмо уйдёт через 10 с» under what is held —
+      the points row (after a « · »), the partner switch (a sentence of its
+      own: `cap`, «Письмо уйдёт через 10 с»). Its own node, repainted by the
+      tick. */
+  function custHoldWaitHTML(key, cap) {
+    var h = custHeld(key);
+    if (!h) return "";
+    return '<span class="adm-hold" data-holdleft="' + esc(key) + '" data-holdletter="' + (h.letter ? "1" : "") +
+      '" data-holdcap="' + (cap ? "1" : "") + '">' + custHoldWaitText(custHoldLeft(h), h.letter, cap) + "</span>";
+  }
+  /** One whole sentence per reading, the seconds its only hole (UI_RX). */
+  function custHoldWaitText(s, letter, cap) {
+    if (letter) return cap ? "Письмо уйдёт через " + s + " с" : "письмо уйдёт через " + s + " с";
+    return cap ? "Сохранится через " + s + " с" : "сохранится через " + s + " с";
+  }
+  function custHoldPaint(h, s) {
+    if (typeof document === "undefined") return;
+    var els = document.querySelectorAll("[data-holdleft]");
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].getAttribute("data-holdleft") !== h.key) continue;
+      els[i].textContent = custHoldWaitText(s, els[i].getAttribute("data-holdletter") === "1", els[i].getAttribute("data-holdcap") === "1");
+      translateTree(els[i]);
+    }
   }
   function custHeld(key) {
     for (var i = 0; i < CUST_HOLDS.length; i++) if (CUST_HOLDS[i].key === key) return CUST_HOLDS[i];
@@ -35932,11 +36145,13 @@
     var who = c.name || c.email;
     var fields = action === "approve" ? { tier: "pro", proRequestedAt: null } : { proRequestedAt: null };
     var was = custLocal(id, fields);
-    render();
     custHold({
-      key: "decide:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields },
+      key: "decide:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields }, letter: action === "approve",
       // one string per branch, so the dictionary rule sees the whole toast
-      text: action === "approve" ? who + " — партнёр · письмо уйдёт через 10 с" : "Заявка отклонена",
+      text: action === "approve"
+        ? function (s) { return who + " — партнёр · письмо уйдёт через " + s + " с"; }
+        : "Заявка отклонена",
+      wait: action !== "approve",
       fire: function (keepalive) {
         var back = function () { custLocal(id, was); };
         if (action === "approve") approveCustomer(id, keepalive, back);
@@ -35944,6 +36159,8 @@
       },
       cancel: function () { custLocal(id, was); }
     });
+    // drawn after the hold exists, so the switch says how long it waits (custHoldWaitHTML)
+    render();
   }
   /** `okMsg` is what the toast says when the write went through; `noMailMsg`,
       where one is given, is what it says instead when the answer carries a
@@ -35979,6 +36196,7 @@
         if (mine) S.admCustDetail = mergeInto(S.admCustDetail, { customer: r.body.customer });
         admCustAdopt(r.body.customer);
         if (mine) loadAdminCustomerDetail(id, true);
+        shopPoke("account");
         /* Three outcomes, not two. `skipped` is the route deciding the letter
            must NOT go — this address has been welcomed before — and saying so
            is not the same as reporting a failure, which is what «не ушло»
@@ -36005,7 +36223,8 @@
       "Партнёр одобрен · письмо уже отправляли", { keepalive: keepalive, onFail: onFail });
   }
   function rejectCustomer(id, keepalive, onFail) {
-    admCustPatch(id, { action: "reject" }, "", "", "", { keepalive: keepalive, onFail: onFail });
+    // the wait is over, and said so — the toast counted it down (custHold)
+    admCustPatch(id, { action: "reject" }, "Заявка отклонена ✓", "", "", { keepalive: keepalive, onFail: onFail });
   }
   /** The card's «Розница / Партнёр» (a pick: at once, README § 2). To a
       partner for the first time the route posts the welcome letter, so that
@@ -36025,13 +36244,14 @@
     if (value === "pro" && !c.proApprovedAt) {
       var fields = { tier: "pro" };
       var was = custLocal(id, fields);
-      render();
       custHold({
-        key: "tier:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields },
-        text: "Цены для салонов включены · письмо уйдёт через 10 с",
+        key: "tier:" + id, ms: CUST_LETTER_MS, local: { id: id, fields: fields }, letter: true,
+        text: function (s) { return "Цены для салонов включены · письмо уйдёт через " + s + " с"; },
         fire: function (keepalive) {
           if (keepalive) {
-            custSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { tier: "pro" }, true).catch(noop);
+            custSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { tier: "pro" }, true).then(function (r) {
+              if (r && r.status === 200 && r.body && r.body.ok) shopPoke("account");
+            }).catch(noop);
             journalNote(actionText(a));
             return;
           }
@@ -36041,6 +36261,7 @@
         },
         cancel: function () { custLocal(id, was); }
       });
+      render();
       return;
     }
     var entry = demoApply(a);
@@ -36123,6 +36344,10 @@
     var hint = pro
       ? "<span>Видит цены для салонов.</span>" + (pct ? " (−" + pct + " %)" : "")
       : c.proRequestedAt ? "<span>Ждёт решения по заявке — ответьте выше.</span>" : "<span>Обычные цены.</span>";
+    /* a switch whose letter is still held says so under it, counting down —
+       the switch moved at once, the letter has not gone yet (custHold) */
+    var wait = custHoldWaitHTML("tier:" + c.id, true) || custHoldWaitHTML("decide:" + c.id, true);
+    if (wait) hint += " " + wait;
     return '<section class="adm-csec adm-csec--tier">' +
       admSecHeadHTML("Статус", "custtier",
         "<span>Партнёр видит цены для салонов на карточках, в товаре и в корзине.</span> " +
@@ -36268,25 +36493,20 @@
     if (p.err) { S.admCustPtsErr = p.err; render(); refocus("[data-admcustpoints]"); return; }
     var n = p.n, note = String(S.admCustNote || "").trim();
     var cid = d.customer.id;
-    var pend = { delta: n, reason: "adjust", note: note, at: new Date().toISOString(), held: true };
+    var key = "pts:" + cid + ":" + (++custHoldSeq);
+    // `holdKey`: the history row says «сохранится через N с» until it goes (custHoldWaitHTML)
+    var pend = { delta: n, reason: "adjust", note: note, at: new Date().toISOString(), held: true, holdKey: key };
     CUST_PTS_PENDING[cid] = (CUST_PTS_PENDING[cid] || []).concat([pend]);
     var drop = function () {
       CUST_PTS_PENDING[cid] = (CUST_PTS_PENDING[cid] || []).filter(function (x) { return x !== pend; });
       if (!CUST_PTS_PENDING[cid].length) delete CUST_PTS_PENDING[cid];
     };
     S.admCustPoints = ""; S.admCustNote = ""; S.admCustPtsErr = "";
-    render();
-    /* …and the two boxes themselves: the page is patched, not redrawn, and a
-       box whose drawn value did not change keeps what was typed into it —
-       the reason stood there, ready for the next correction */
-    if (typeof document !== "undefined") {
-      var boxes = document.querySelectorAll("[data-admcustpoints],[data-admcustnote]");
-      for (var bi = 0; bi < boxes.length; bi++) boxes[bi].value = "";
-    }
     var k = Math.abs(n);
     custHold({
-      key: "pts:" + cid + ":" + (++custHoldSeq), ms: CUST_POINTS_MS,
+      key: key, ms: CUST_POINTS_MS,
       text: (n > 0 ? "Начислено " : "Списано ") + k + " " + pl(k, "балл", "балла", "баллов"),
+      wait: true,
       fire: function (keepalive) {
         custSend("/api/admin/customers/" + encodeURIComponent(cid) + "/", "PATCH", { pointsDelta: n, note: note }, keepalive).then(function (r) {
           drop();
@@ -36294,6 +36514,9 @@
           if (r.status === 200 && r.body.ok) {
             if (r.body.customer) admCustAdopt(r.body.customer);
             if (String(S.admCustOpen) === String(cid)) loadAdminCustomerDetail(cid, true);
+            // …and the wait is over: said, and told to the shop's open tabs (shopPoke)
+            toast("Баллы сохранены ✓");
+            shopPoke("account");
             render();
             return;
           }
@@ -36302,6 +36525,14 @@
       },
       cancel: function () { drop(); }
     });
+    render();
+    /* …and the two boxes themselves: the page is patched, not redrawn, and a
+       box whose drawn value did not change keeps what was typed into it —
+       the reason stood there, ready for the next correction */
+    if (typeof document !== "undefined") {
+      var boxes = document.querySelectorAll("[data-admcustpoints],[data-admcustnote]");
+      for (var bi = 0; bi < boxes.length; bi++) boxes[bi].value = "";
+    }
   }
   /** «Заметка»: the owner's own words about this customer — saves itself a
       second after the typing stops and when the box is left (1a autosave,
@@ -36433,8 +36664,10 @@
       still held (adjustCustomerPoints) is the top row until it goes. */
   function admLoyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
+    // a correction still held (custHold): «сохранится через 5 с», counting down
+    var wait = e.held && e.holdKey ? custHoldWaitHTML(e.holdKey) : "";
     return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + esc(loyaltyLabel(e)) + "</span>" +
-      '<span class="adm-row__sub">' + loyaltySub(e) + "</span></span>" +
+      '<span class="adm-row__sub">' + loyaltySub(e) + (wait ? " · " + wait : "") + "</span></span>" +
       '<span class="adm-row__amt">' + sign + e.delta + "</span></div>";
   }
   /* ---------- the list ---------------------------------------------------- */
@@ -36545,8 +36778,8 @@
     render();
     if (known && (known.tier === "pro" || known.proApprovedAt)) { applyAddPartner(a); return; }
     custHold({
-      key: "partner:" + email, ms: CUST_LETTER_MS,
-      text: "Партнёр добавлен · письмо уйдёт через 10 с",
+      key: "partner:" + email, ms: CUST_LETTER_MS, letter: true,
+      text: function (s) { return "Партнёр добавлен · письмо уйдёт через " + s + " с"; },
       fire: function (keepalive) { applyAddPartner(a, keepalive); },
       cancel: function () {
         S.partnerForm = { email: pf.email || "", company: pf.company || "", phone: pf.phone || "" };
@@ -36571,6 +36804,7 @@
         render(); refocus('[data-partnerf="email"]'); return;
       }
       var c = r.body.customer || {};
+      shopPoke("account");
       var entry = demoApply({ type: "add_partner", id: c.id, email: c.email || a.email, created: !!r.body.created, promoted: !!r.body.promoted });
       S.partnerErr = "";
       var mail = r.body.mail || {};
@@ -43447,6 +43681,12 @@
                a queue the owner had just emptied — and it is the screen he
                opens the panel on. Same door admOrdersChanged() uses. */
             loadOverview(true);
+            /* …and the product page asks for its reviews afresh, past every
+               cache on the way — this tab's copy, the browser's, the CDN's —
+               in this tab and in the shop's other open tabs (shopPoke). It
+               kept the list it had read before the publish: «works but takes
+               time» (Dim, 26.09.2026). */
+            shopPoke("reviews", (r.body.review && r.body.review.productId) || "");
             return;
           }
           toast("Не получилось сохранить отзыв");
@@ -43499,9 +43739,10 @@
       // (sanitizePointsAdjust) — the customers/[id] route resolves either
       var adjId = a.customerId || a.customerEmail;
       apiSend("/api/admin/customers/" + encodeURIComponent(adjId) + "/", "PATCH", { pointsDelta: a.delta, note: a.note || "" })
-        .then(function () {
+        .then(function (r) {
           loadAdminCustomers(true);
           if (S.admCustOpen === adjId) loadAdminCustomerDetail(adjId, true);
+          if (r && r.status === 200 && r.body && r.body.ok) shopPoke("account");
         }).catch(noop);
     }
     /* partners: the card's switch, and the undo of «+ Партнёр» — the route
@@ -43526,6 +43767,8 @@
              the switch back where it was and says so — the same toast as before. */
           if (r.status === 200 && r.body.ok) {
             admCustAdopt(r.body.customer);
+            // the partner's own shop, open in another tab, re-reads its prices now
+            shopPoke("account");
             /* A first flip to partner posts «Цены для салонов включены» with
                it (the route reports it in `mail`); a letter skipped because
                this address was welcomed before is not news to report. */
@@ -48056,9 +48299,11 @@
     // a queue row on «Обзор» carries the filter its section should open on
     if (go.filter && tab === "orders") S.admOrderFilter = go.filter;
     if (go.filter && tab === "people") S.admCustTier = go.filter;
-    /* «Каталог» takes one too — the «скрытые заканчиваются» row asks for
-       «Скрытые», and the shelf it wants starts at the top of that list. */
-    if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; }
+    /* «Каталог» takes one too — the two stock rows ask for «Кончаются» and
+       «Скрытые · кончаются», and the shelf they want starts at the top of
+       that list. A search left in the box goes: the row promised the whole
+       chip, and a list narrowed by last week's «awapuhi» is not it. */
+    if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; S.goodsQ = ""; }
     // …and a queue row may name the settings page it wants («Заполните IBAN»)
     if (go.setpage && tab === "setup") S.admSetPage = go.setpage;
     /* «Подключения» asks its probes again every time it is opened — Montonio's
@@ -48170,6 +48415,15 @@
          retail. Silent for a visitor who is not signed in. */
       acctRefresh();
     }
+    /* …and on the screens that show what the owner can change under an open
+       shop — the cabinet's points and request, and the prices a partner sees
+       on the catalogue and the product — the profile is asked again on the
+       way in: at once for the cabinet, at most every fifteen seconds for the
+       rest (Dim, 26.09.2026: a partner's open shop kept the salon prices
+       until it was put in the background and back). Navigation, never a
+       timer; nothing for a visitor who is not signed in. */
+    else if (screen === "account") acctRefresh();
+    else if (screen === "product" || screen === "catalog" || screen === "home") acctRefresh(15000);
     // leaving the receipt drops the receipt: the next one reads its own query
     // the receipt goes, and with it the method and the bank its retry picker
     // was set to — the next failed receipt seeds itself from its own order
@@ -48212,9 +48466,37 @@
      every frame it decodes) the bar never stood still long enough to be
      clicked. */
   var toastPainted = "";
+  function toastKey() {
+    var admin = S.screen === "admin" || S.screen === "scan";
+    return S.toast ? (admin ? "a" : "s") + (S.toastUndo ? "u" : "-") + "|" + S.toast + "|" + toastWait() : "";
+  }
+  /** «сохранится через 5 с» — the line under a held change's sentence (custHold). */
+  function toastWait() {
+    return S.toastUndo && S.toastUndo.wait ? String(S.toastUndo.wait) : "";
+  }
+  /** …and that line, counting down in place. */
+  function toastRewait(wait) {
+    var w = toastSlot.querySelector(".adm-toast__w");
+    if (!w) { paintToast(); return; }
+    w.textContent = wait;
+    translateTree(w);
+    toastPainted = toastKey();
+  }
+  /** A standing admin toast's words, changed in place — a held change
+      counting its wait down (custHold). Only the words node is rewritten:
+      «Вернуть» stays the button it was, focus and all. */
+  function toastRetext(msg) {
+    if (!S.toast) return;
+    S.toast = msg;
+    var t = toastSlot.querySelector(".adm-toast__t");
+    if (!t || !t.firstChild) { paintToast(); return; }
+    t.firstChild.nodeValue = msg;   // the words only — the wait line under them stays its own node
+    translateTree(t);
+    toastPainted = toastKey();
+  }
   function paintToast() {
     var admin = S.screen === "admin" || S.screen === "scan";
-    var key = S.toast ? (admin ? "a" : "s") + (S.toastUndo ? "u" : "-") + "|" + S.toast : "";
+    var key = toastKey();
     if (key === toastPainted) return;
     toastPainted = key;
     /* The message is text, never markup: «Добавлено: <name> · <size>» carries
@@ -48222,7 +48504,8 @@
        typed (security re-audit 04.09.2026). */
     toastSlot.innerHTML = !S.toast ? ""
       : admin
-        ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + esc(S.toast) + "</span>" +
+        ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + esc(S.toast) +
+          (toastWait() ? '<span class="adm-toast__w">' + esc(toastWait()) + "</span>" : "") + "</span>" +
           // the word is ADM_UNDO_WORD — «Вернуть» (1a), one place to change it
           (S.toastUndo ? '<button class="adm-toast__undo" data-admtoastundo>' + ADM_UNDO_WORD + "</button>" : "") +
           '<button class="adm-toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
