@@ -399,6 +399,58 @@ test.describe("admin shell — Обзор counts a paid order", () => {
   });
 });
 
+/* Dim, 26.09.2026 (panel-overview): «Hidden product count in overview is 1 —
+   but when I open it's 2. Same for "products running out" shows in overview
+   12». The server counted by one rule and the list filtered by another; the
+   rows opened «Склад» (sizes) and «Скрытые» (every hidden product). Each row
+   now opens the chip it counts, and the number on the row is the number on
+   the chip — the server's figure against the panel's own count of the list. */
+test.describe("admin shell — Обзор's stock rows open the list they count", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(229) });
+
+  test("«N товаров заканчиваются» → «Кончаются» N; «N скрытых…» → «Скрытые · кончаются» N", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the counts are viewport-independent");
+    test.setTimeout(120_000);
+    /* A catalogue product whose file word is «мало» and no other spec names —
+       hidden here, back on sale in `finally`. */
+    const HIDE_ID = "captain-fawcett-barberism-moustache-wax";
+    await loginAsAdmin(page);
+    const hide = (hidden: boolean) => page.request.put("/api/admin/overrides/", { data: { id: HIDE_ID, hidden } });
+    expect((await hide(true)).ok()).toBe(true);
+    try {
+      await page.reload();
+      await expect(page.locator('[data-admtab="orders"][aria-current]:visible').first()).toBeVisible();
+
+      const low = page.locator('.adm-list [data-admtab="goods"][data-admfilter="low"]').first();
+      await expect(low, "the catalogue file alone has products saying «мало»").toBeVisible();
+      const n = Number((await low.locator(".adm-row__big").textContent())?.trim());
+      expect(n).toBeGreaterThan(0);
+      const hid = page.locator('.adm-list [data-admtab="goods"][data-admfilter="offlow"]').first();
+      await expect(hid, "a hidden product saying «мало» has its own row").toBeVisible();
+      const m = Number((await hid.locator(".adm-row__big").textContent())?.trim());
+      expect(m).toBeGreaterThan(0);
+
+      await low.click();
+      const lowChip = page.locator('[data-goodsfilter="low"]');
+      await expect(lowChip).toHaveAttribute("aria-current", "true");
+      await expect(lowChip.locator(".adm-chip__n"), "the row's number is the chip's").toHaveText(String(n));
+
+      await nav(page, "over").click();
+      await page.locator('.adm-list [data-admtab="goods"][data-admfilter="offlow"]').first().click();
+      const offChip = page.locator('[data-goodsfilter="offlow"]');
+      await expect(offChip).toHaveAttribute("aria-current", "true");
+      await expect(offChip).toContainText("Скрытые · кончаются");
+      await expect(offChip.locator(".adm-chip__n"), "the hidden row's number is its chip's").toHaveText(String(m));
+      await expect(page.locator(`[data-admgoods="${HIDE_ID}"]`)).toBeVisible();
+      // «Скрытые» is every hidden product — the list the row no longer opens
+      const offAll = Number((await page.locator('[data-goodsfilter="off"] .adm-chip__n').textContent())?.trim());
+      expect(offAll).toBeGreaterThanOrEqual(m);
+    } finally {
+      expect((await hide(false)).ok()).toBe(true);
+    }
+  });
+});
+
 test.describe("admin shell — Заказы filters and the ship flow", () => {
   test.use({ extraHTTPHeaders: ipHeaders(124) });
 

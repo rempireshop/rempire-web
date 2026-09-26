@@ -21,6 +21,20 @@ const CATALOGUE = catalogueMin as Min[];
 const inStock = CATALOGUE.filter((p) => p.s === "in");
 const productA = inStock[0];
 const productB = inStock.find((p) => p.b !== productA.b)!;
+/* The catalogue file's own «мало» / «нет» — what the shop prints on those
+   cards until the owner says otherwise. «Заканчиваются» counts them since
+   26.09.2026 (src/lib/stock-word.ts): the row said 12 over a «Кончаются» chip
+   of ~78 because it did not. */
+const FILE_LOW = CATALOGUE.filter((p) => p.s === "low");
+const FILE_OUT = CATALOGUE.filter((p) => p.s === "out");
+/** The file's words set to «в наличии» by hand, so a case starts from an empty list. */
+async function quietFile() {
+  const ids = [...FILE_LOW, ...FILE_OUT].map((p) => p.id);
+  await query(
+    `insert into product_overrides (product_id, stock) values ${ids.map((_, i) => `($${i + 1}, 'in')`).join(", ")}`,
+    ids,
+  );
+}
 
 /** Mid-afternoon UTC, so "today" and "yesterday" cannot straddle a boundary. */
 const NOW = new Date("2026-06-15T14:00:00Z");
@@ -74,7 +88,14 @@ describe("getOverviewSummary", () => {
     const o = await getOverviewSummary(NOW);
     expect(o.orders).toEqual({ today: 0, yesterday: 0 });
     expect(o.revenue7d).toEqual({ total: 0, perDay: 0, orders: 0 });
-    expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [], hiddenItems: [] });
+    /* …but for the stock row, which is not invented: the catalogue file's own
+       «мало» and «нет», which the shop prints on those cards and «Каталог →
+       Кончаются» lists — the row opens that list and says its length. */
+    expect(o.lowStock).toMatchObject({ total: FILE_LOW.length + FILE_OUT.length, low: FILE_LOW.length, out: FILE_OUT.length, hidden: 0 });
+    expect(o.lowStock.items).toHaveLength(Math.min(20, o.lowStock.total));
+    expect(o.lowStock.items.slice(0, FILE_OUT.length).map((i) => i.stock)).toEqual(FILE_OUT.map(() => "out"));
+    await quietFile();
+    expect((await getOverviewSummary(NOW)).lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [], hiddenItems: [] });
     // `hidden` and `hiddenItems` are one statement in two halves (Dim, 19.09.2026):
     // how many are waiting behind the switch, and which ones. A fresh shop has to
     // pin both, or the card can go back to saying «2 скрытых товара заканчиваются»
@@ -142,6 +163,7 @@ describe("getOverviewSummary", () => {
   /* ---------- «Заканчиваются» ----------------------------------------------- */
 
   it("reads low stock from a real count where there is one, and from the manual override elsewhere", async () => {
+    await quietFile();
     // productA: counted for real. One unit in, default threshold 2 → «мало».
     const res = await move({ productId: productA.id, delta: 1, reason: "goods_in", actor: "test" });
     expect(res.skipped).toBeFalsy();
@@ -162,8 +184,9 @@ describe("getOverviewSummary", () => {
     });
   });
 
-  it("a real count beats the manual override for the same product", async () => {
-    await upsertOverride(productA.id, { stock: "out" });
+  it("a real count beats the owner's «мало» for the same product", async () => {
+    await quietFile();
+    await upsertOverride(productA.id, { stock: "low" });
     // Ten in the box: the badge follows the count, so it is not «заканчивается»
     await move({ productId: productA.id, delta: 10, reason: "goods_in", actor: "test" });
 
@@ -171,20 +194,39 @@ describe("getOverviewSummary", () => {
     expect(o.lowStock.total).toBe(0);
   });
 
-  /* …and the shop still refuses to sell that product, which is the point of
-     the manual «нет в наличии»: it is «Снять с продажи», and since r19 no
-     count may talk the storefront past it. This card is deliberately the one
-     place that looks past it the other way — «Заканчиваются» is a re-order
-     list, and a product with ten in the box is not running out. */
-  it("…while the shop itself goes on saying «нет в наличии» about it", async () => {
+  /* …but not a hand-set «Нет в наличии»: since r19 no count may talk the
+     storefront past it, so the shop says «нет», the catalogue badges it «Нет»
+     and lists it under «Кончаются» — the chip that took the place of «Нет в
+     наличии» (q17). This card used to be the one place that looked past it
+     («ten in the box is not running out»), and so said a number no list in
+     the panel held (Dim, 26.09.2026). One rule now, the list's. */
+  it("a hand-set «Нет в наличии» over ten in the box is on the list, as the shop says «нет»", async () => {
+    await quietFile();
     await upsertOverride(productA.id, { stock: "out" });
     await move({ productId: productA.id, delta: 10, reason: "goods_in", actor: "test" });
 
     expect((await getOverrides([productA.id]))[productA.id]?.stock).toBe("out");
-    expect((await getOverviewSummary(NOW)).lowStock.total).toBe(0);
+    const low = (await getOverviewSummary(NOW)).lowStock;
+    expect(low.total).toBe(1);
+    expect(low.items).toEqual([{ id: productA.id, name: productA.n, brand: productA.b, stock: "out" }]);
+  });
+
+  it("a size counted out on a product whose other sizes are full: on the list, once", async () => {
+    await quietFile();
+    const sizes = ["75 мл", "250 мл", "500 мл"];
+    const p = CATALOGUE.find((m) => m.id === "system-4-bio-botanical-shampoo")!;
+    await move({ productId: p.id, variant: sizes[0], delta: 1, reason: "goods_in", actor: "test" });
+    await move({ productId: p.id, variant: sizes[0], delta: -1, reason: "adjust", actor: "test" });
+    for (const v of sizes.slice(1)) await move({ productId: p.id, variant: v, delta: 10, reason: "goods_in", actor: "test" });
+    // the shop still sells it — the product's word is «в наличии» — but a size is gone
+    expect((await getOverrides([p.id]))[p.id]?.stock).toBe("in");
+    const low = (await getOverviewSummary(NOW)).lowStock;
+    expect(low.total).toBe(1);
+    expect(low.items).toEqual([{ id: p.id, name: p.n, brand: p.b, stock: "low" }]);
   });
 
   it("ignores an override row for a product the catalogue no longer carries", async () => {
+    await quietFile();
     await upsertOverride("a-product-that-was-discontinued", { stock: "out" });
     const o = await getOverviewSummary(NOW);
     expect(o.lowStock.total).toBe(0);

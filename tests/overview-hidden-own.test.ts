@@ -17,14 +17,24 @@ import { query } from "@/lib/db";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const NOW = new Date("2026-06-15T12:00:00Z");
-const CATALOGUE = catalogueMin as Array<{ id: string; n: string; b: string }>;
+const CATALOGUE = catalogueMin as Array<{ id: string; n: string; b: string; s: string }>;
 
 beforeAll(async () => {
   process.env.SESSION_SECRET = TEST_SECRET;
   await setupDb();
 });
 afterAll(teardownDb);
-beforeEach(truncateAll);
+/* The catalogue file's own «мало» / «нет» count too since 26.09.2026
+   (src/lib/stock-word.ts) — set to «в наличии» by hand here, so each case
+   below starts from an empty list and counts only what it adds. */
+beforeEach(async () => {
+  await truncateAll();
+  const ids = CATALOGUE.filter((p) => p.s !== "in").map((p) => p.id);
+  await query(
+    `insert into product_overrides (product_id, stock) values ${ids.map((_, i) => `($${i + 1}, 'in')`).join(", ")}`,
+    ids,
+  );
+});
 
 describe("«Заканчиваются» and the hidden line", () => {
   it("an own product switched off («Показывать в магазине» off) is in the hidden line, not the main one", async () => {
@@ -41,7 +51,7 @@ describe("«Заканчиваются» and the hidden line", () => {
   });
 
   it("a catalogue product hidden on its override row goes the same way", async () => {
-    const [a, b] = CATALOGUE;
+    const [a, b] = CATALOGUE.filter((p) => p.s === "in");
     await query("insert into product_overrides (product_id, stock) values ($1, 'low')", [a.id]);
     await query("insert into product_overrides (product_id, stock, hidden) values ($1, 'out', true)", [b.id]);
 

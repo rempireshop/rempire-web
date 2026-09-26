@@ -29,6 +29,9 @@ import { shopDay, shopDaySql, startOfShopDay } from "@/lib/day";
    itself renders — numeric stock over the manual override — instead of
    re-deriving it here. See getOverviewSummary() at the bottom of this file. */
 import { getOverrides, type OrderStatus } from "@/lib/orders";
+/* «Заканчивается» — the one rule the overview's stock rows and the panel's
+   «Каталог» chips both count by. See qOverviewLowStock(). */
+import { runsLow, shelfWord, type ShelfRow } from "@/lib/stock-word";
 
 /* ---------- catalogue lookups (name/brand for an id out of events/orders) */
 
@@ -734,80 +737,85 @@ async function qRevenue7d(from: Date, to: Date) {
 }
 
 /**
- * «Заканчиваются» — the same in/low/out the shop itself shows: a counted
- * (tracked) variant's real quantity where there is one, the owner's manual
- * override everywhere else. getOverrides() does that merge already, so this
- * reads it rather than re-deriving it and drifting from the badge.
+ * «Заканчиваются» — the two stock rows of «Сделать сегодня», counted by the
+ * rule the list they open filters by (src/lib/stock-word.ts, the port of
+ * goodsStockWord / goodsRunsLow in public/shop2/app.js), over the inputs that
+ * list is built from:
+ *   · every product the panel's «Каталог» lists — the whole catalogue file,
+ *     hidden ones included, and every one of the owner's own products — which
+ *     is the product set of the «Склад» table (getLevels), sizes and all;
+ *   · each product's word as the shop has it: the feed's (getOverrides — the
+ *     counted shelf, the owner's hand-set word, a hand-set «нет» always), and
+ *     the catalogue file's own `s` where there is no override at all. The shop
+ *     prints that `s` on the card («мало» on 69 products on staging), and the
+ *     panel's badge and chip read it; this count did not, so the row said 12
+ *     over a chip of ~78 (Dim, 26.09.2026);
+ *   · a counted size that is low or out puts its product on the list though
+ *     the product's word is «в наличии» — the chip's rule since q17 — and a
+ *     product is ONE entry however many of its sizes are short.
+ *
+ * Off sale — `hidden` on the override row, `active` off on the owner's own
+ * row — is counted apart (Dim, 19.09.2026): the main figure is «закажите
+ * ещё», and a product he took out of the shop is not that; but one hidden
+ * BECAUSE it ran out must not vanish from the only list that would remind him
+ * to order it. The hidden row opens «Каталог → Скрытые · кончаются», which is
+ * exactly this second list — not «Скрытые», which holds every hidden product.
+ *
+ * The r19 exception is gone with the second rule: a hand-set «Нет в
+ * наличии» over a counted shelf used to be left out here («ten in the box is
+ * not running out»), while the catalogue badged it «Нет» and listed it under
+ * «Кончаются» — the chip that took the place of «Нет в наличии» (q17). One
+ * rule, the list's.
+ *
  * Ids neither the catalogue nor the owner's own rows carry are dropped — a
- * leftover override row for a discontinued product is not something to go
- * and re-order.
+ * leftover override row for a discontinued product is not something to go and
+ * re-order, and the panel has no row to show for it.
  */
 async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
   const overrides = await getOverrides();
-  /* …with one exception, and only on this card. Since r19 a manual «нет в
-     наличии» survives the count in getOverrides(), because that setting is
-     «Снять с продажи» and the shop has to stop selling the product. But this
-     card is about the SHELF — «что заканчивается, закажите ещё» — and a
-     product the owner pulled with ten in the box is not running out. Where
-     there is a real count, it decides here, exactly as it did before that
-     rule existed. Best effort: no inventory module, no exception. */
-  let counted: Record<string, "in" | "low" | "out"> = {};
+  /* The shelf, as «Склад» and the catalogue chips read it. Best effort: with
+     no inventory module the words alone decide, as they did before there was
+     a shelf — and the owner's own products, which only this read names, are
+     looked up by their override rows instead. */
+  type Product = { name: string; brand: string; off: boolean; rows: ShelfRow[] };
+  const products = new Map<string, Product>();
+  for (const p of CATALOGUE) products.set(p.id, { name: p.n, brand: p.b, off: false, rows: [] });
   try {
-    const { productStockStates } = await import("@/lib/inventory");
-    counted = await productStockStates();
-  } catch (err) {
-    console.error("[analytics] numeric stock unavailable for «Заканчиваются»:", err);
-  }
-  /* Hidden products are counted, but separately (Dim, 19.09.2026). The card
-     asks «что заканчивается, закажите ещё», and a product he has taken off
-     sale is not something to re-order today — it does not belong in the
-     number he acts on. Dropping it outright is the other half of the trap
-     though: a bottle hidden BECAUSE it ran out would vanish from the only
-     list that would have reminded him to order it, and stay hidden for ever.
-     So the main figure is clean and one line says how many are waiting
-     behind the switch. */
-  const running: Array<[string, "low" | "out", boolean]> = [];
-  for (const [id, o] of Object.entries(overrides)) {
-    const stock = counted[id] ?? o.stock;
-    if (stock !== "low" && stock !== "out") continue;
-    running.push([id, stock, !!o.hidden]);
-  }
-  /* One round trip for both lists: the hidden ones are named too, because a
-     row that says «2 скрытых товара заканчиваются» and nothing else can only
-     be answered by reading every hidden product in the shop. */
-  const names = await customNames(running.map(([id]) => id));
-  /* «Показывать в магазине» off is one switch in the panel and two places on
-     the server: `hidden` on the override row for a catalogue product, `active`
-     on the owner's own row (custom_products) — which this card never read,
-     so his own product switched off stayed in the number he acts on and out
-     of the hidden line (verification pass 25.09.2026, panel-overview). */
-  const short: Array<[string, "low" | "out"]> = [];
-  const hidden: Array<[string, "low" | "out"]> = [];
-  for (const [id, stock, off] of running) {
-    (off || names.get(id)?.active === false ? hidden : short).push([id, stock]);
-  }
-  const resolve = (rows: Array<[string, "low" | "out"]>): OverviewLowStockItem[] => {
-    const out: OverviewLowStockItem[] = [];
-    for (const [id, stock] of rows) {
-      if (BY_ID.has(id)) out.push({ ...productInfo(id), stock });
-      else {
-        const n = names.get(id);
-        if (n) out.push({ id, name: n.name, brand: n.brand, stock });
-      }
+    const { getLevels } = await import("@/lib/inventory");
+    for (const r of await getLevels({ filter: "all", limit: 1000 })) {
+      let p = products.get(r.productId);
+      if (!p) products.set(r.productId, (p = { name: r.name, brand: r.brand, off: false, rows: [] }));
+      p.rows.push({ tracked: r.tracked, state: r.state });
+      if (r.offSale) p.off = true;
     }
-    out.sort((a, b) =>
-      a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1,
-    );
-    return out;
-  };
-  const items = resolve(short);
+  } catch (err) {
+    console.error("[analytics] the shelf is unavailable for «Заканчиваются»:", err);
+    const own = await customNames(Object.keys(overrides));
+    for (const [id, n] of own) products.set(id, { name: n.name, brand: n.brand, off: n.active === false, rows: [] });
+  }
+
+  const short: OverviewLowStockItem[] = [];
+  const hidden: OverviewLowStockItem[] = [];
+  for (const [id, p] of products) {
+    const o = overrides[id];
+    const word = o?.stock ?? BY_ID.get(id)?.s ?? "in";
+    if (!runsLow(word, p.rows)) continue;
+    /* «нет» where the shop says «нет в наличии» about the product; «мало» for
+       the rest — a product still on sale with a size or two gone. */
+    const stock = shelfWord(word, p.rows) === "out" ? "out" : "low";
+    (p.off || o?.hidden ? hidden : short).push({ id, name: p.name, brand: p.brand, stock });
+  }
+  const order = (a: OverviewLowStockItem, b: OverviewLowStockItem) =>
+    a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1;
+  short.sort(order);
+  hidden.sort(order);
   return {
-    total: items.length,
-    out: items.filter((i) => i.stock === "out").length,
-    low: items.filter((i) => i.stock === "low").length,
+    total: short.length,
+    out: short.filter((i) => i.stock === "out").length,
+    low: short.filter((i) => i.stock === "low").length,
     hidden: hidden.length,
-    items: items.slice(0, 20),
-    hiddenItems: resolve(hidden).slice(0, 20),
+    items: short.slice(0, 20),
+    hiddenItems: hidden.slice(0, 20),
   };
 }
 

@@ -16,6 +16,7 @@
  *     (src/lib/analytics.ts).
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import catalogueMin from "@/data/catalogue.min.json";
 import { getAnalyticsSummary, getOverviewSummary } from "@/lib/analytics";
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { addStockAlert, cartSnapshot, productsForAlerts } from "@/lib/customers";
@@ -372,6 +373,16 @@ describe("stock alerts for a custom product", () => {
 
 describe("analytics names a custom product", () => {
   const customer = { name: "Мария Тамм", email: "maria@example.com", phone: "+372 5555 5555" };
+  /* «Заканчиваются» counts the catalogue file's own «мало» / «нет» too since
+     26.09.2026 (src/lib/stock-word.ts); set to «в наличии» by hand, so the
+     cases below see only the products they add. */
+  async function quietFile() {
+    const ids = (catalogueMin as Array<{ id: string; s: string }>).filter((m) => m.s !== "in").map((m) => m.id);
+    await query(
+      `insert into product_overrides (product_id, stock) values ${ids.map((_, i) => `($${i + 1}, 'in')`).join(", ")}`,
+      ids,
+    );
+  }
 
   it("top products by revenue and by views, «смотрят, но не покупают», low stock — a name and a brand, never a bare id", async () => {
     const p = await createCustomProduct(BALM);
@@ -403,6 +414,7 @@ describe("analytics names a custom product", () => {
   });
 
   it("«Обзор» counts a custom product among «Заканчиваются» and drops an id nobody has", async () => {
+    await quietFile();
     const wax = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
     await query("insert into product_overrides (product_id, stock) values ($1, 'out'), ('c-gone-for-good', 'out')", [wax.id]);
     const ov = await getOverviewSummary(NOW);
@@ -418,6 +430,7 @@ describe("analytics names a custom product", () => {
      out must not disappear from the only list that would remind him. So it is
      counted apart, never in `total`, and the panel gives it its own line. */
   it("counts a hidden product that is running out apart from the ones on sale", async () => {
+    await quietFile();
     const wax = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
     const gone = await createCustomProduct({ brand: "Acme", name: "Clay", cat: "styling", price: 9 });
     await query("insert into product_overrides (product_id, stock) values ($1, 'out')", [wax.id]);

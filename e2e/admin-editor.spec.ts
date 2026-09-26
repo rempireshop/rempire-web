@@ -817,7 +817,9 @@ test.describe("admin — what the acceptance run found", () => {
     const w = watch(page);
     await openAdmin(page);
     await tab(page, "goods");
-    await expect(page.locator("[data-goodsfilter]"), "the products list has no status chips").toHaveCount(4);
+    /* the everyday four — «Скрытые · кончаются» joins them only while a hidden
+       product is running low (what «Обзор»'s hidden row opens) */
+    await expect(page.locator('[data-goodsfilter]:not([data-goodsfilter="offlow"])'), "the products list has no status chips").toHaveCount(4);
     await expect(page.locator('[data-goodsfilter="all"]')).toHaveAttribute("aria-current", "true");
     await expect(page.locator('[data-goodsfilter="low"]')).toContainText("Кончаются");
 
