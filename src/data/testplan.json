@@ -8776,13 +8776,15 @@
       "lang": "RU",
       "title": "«Что искали и не нашли»",
       "steps": [
-        "В магазине поискать «холодильник».",
+        "Открыть магазин; если внизу спрашивают про данные — нажать «Принять всё».",
+        "Поискать «холодильник» и сразу перейти в панель, не дожидаясь ответа.",
         "Открыть «Аналитика» → «Ещё цифры» → «Что искали и не нашли».",
         "Поискать в магазине «перхоть» и вернуться к списку."
       ],
       "expect": [
-        "«Холодильник» в списке есть.",
-        "«Перхоть» в списке нет — по ней товары нашлись."
+        "«Холодильник» в списке есть, хотя из магазина ушли сразу.",
+        "«Перхоть» в списке нет — по ней товары нашлись.",
+        "Под заголовком сказано: десять самых частых, из равных — последние."
       ],
       "why": "Если в список попадает всё подряд, читать его бесполезно.",
       "risk": "low",
@@ -8790,18 +8792,20 @@
       "en": {
         "title": "«Что искали и не нашли» (searched, not found)",
         "steps": [
-          "In the shop search for «холодильник» (fridge).",
+          "Open the shop; if the bar at the bottom asks about data, press «Принять всё».",
+          "Search for «холодильник» (fridge) and go straight to the panel without waiting.",
           "Open «Аналитика» → «Ещё цифры» → «Что искали и не нашли».",
           "Search the shop for «перхоть» (dandruff) and come back to the list."
         ],
         "expect": [
-          "«Холодильник» is in the list.",
-          "«Перхоть» is not — that search found products."
+          "«Холодильник» is in the list, although the shop was left at once.",
+          "«Перхоть» is not — that search found products.",
+          "The note under the title says: the ten most frequent, the latest among equals."
         ],
         "why": "If everything lands in this list, reading it is pointless."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T12:34:46.779Z"
+      "markedAt": "2026-09-26T09:02:18.787Z"
     },
     {
       "id": "stats-google",

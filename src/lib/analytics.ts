@@ -377,19 +377,28 @@ async function qViewedNotBought(from: Date, to: Date) {
 
 /** One grouped query; top overall and zero-result are two views of the same
  *  rows, split in JS — see the migration header for why `path` holds the
- *  query text and `value` the result count for type='search'. */
+ *  query text and `value` the result count for type='search'.
+ *
+ *  Equal counts go newest first. Both lists keep ten rows, and in a small
+ *  shop nearly every phrase has been searched once — so which ten of the
+ *  ties were shown used to be whatever order Postgres grouped them in, and
+ *  the phrase somebody searched a minute ago could be the one left out (Dim,
+ *  26.09.2026, /test «stats-search»: «Fridge is not in the list»). The zero
+ *  list breaks ties on its own zero-result searches' latest time. */
 async function qSearchTerms(from: Date, to: Date) {
-  const rows = await query<{ term: string; searches: string; zero_results: string }>(
-    `select path as term, count(*) as searches, count(*) filter (where value = 0) as zero_results
+  const rows = await query<{ term: string; searches: string; zero_results: string; last_at: string | Date; last_zero_at: string | Date | null }>(
+    `select path as term, count(*) as searches, count(*) filter (where value = 0) as zero_results,
+            max(at) as last_at, max(at) filter (where value = 0) as last_zero_at
      from events
      where type = 'search' and at >= $1 and at < $2 and path is not null
-     group by 1 order by searches desc limit 200`,
+     group by 1 order by searches desc, last_at desc, term limit 200`,
     [from, to],
   );
+  const time = (v: string | Date | null) => (v == null ? 0 : new Date(v).getTime());
   const top = rows.slice(0, 10).map((r) => ({ term: r.term, count: int(r.searches) }));
   const zero = rows
     .filter((r) => int(r.zero_results) > 0)
-    .sort((a, b) => int(b.zero_results) - int(a.zero_results))
+    .sort((a, b) => int(b.zero_results) - int(a.zero_results) || time(b.last_zero_at) - time(a.last_zero_at))
     .slice(0, 10)
     .map((r) => ({ term: r.term, count: int(r.zero_results) }));
   return { top, zero };

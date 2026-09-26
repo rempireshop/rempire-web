@@ -1918,8 +1918,8 @@
       "Топ товаров: на какую сумму заказали": "Enimmüüdud tooted: mis summas telliti",
       "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
         "See on tellimustes olevate kaupade hind, mitte saadud raha: soodustused, punktid, kinkekaardid ja tarne siia ei kuulu. Kui palju raha laekus, on ülal «Käibes».",
-      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
-        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.":
+        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse. Siin on kümme kõige sagedasemat, võrdsetest viimased.",
       "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "Mitu inimest jõudis igasse sammu. Tavaliselt numbrid kahanevad, aga sammu saab ka vahele jätta: kauba paneb ostukorvi otse kataloogist, kaardit avamata. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
@@ -5423,8 +5423,8 @@
       "Топ товаров: на какую сумму заказали": "Top products: what was ordered, by value",
       "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
         "This is the price of the goods in the orders, not the money received: discounts, points, gift cards and delivery are not in it. What actually came in is above, under “Revenue”.",
-      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
-        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.":
+        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it. These are the ten most frequent; among equals, the latest.",
       "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "How many people reached each step. The numbers usually go down, but a step can be skipped: a product goes into the basket straight from the catalogue, without opening its page. The biggest step down is where the buyers are lost.",
@@ -11738,11 +11738,17 @@
      700 ms debounce shared by the header search box, the search screen's
      own input and the "popular query" chips. */
   var searchTrackTimer = null;
+  /* The phrase whose search row is still to be written — set when the pause
+     in typing is over, cleared by whichever of trackSearch() and
+     flushSearchTrack() files it first, so a phrase is filed once. */
+  var searchOwed = "";
   function scheduleSearchTrack() {
     clearTimeout(searchTrackTimer);
     searchTrackTimer = setTimeout(function () {
+      searchTrackTimer = null;
       var q = String(S.query || "").trim();
       if (!q) return;
+      searchOwed = q;
       /* The model is asked only for a phrase the shop's own three passes
          could not answer, and the search event WAITS for its answer: the
          number that lands in the events table has to be the number the
@@ -11759,11 +11765,38 @@
       now succeeds drops out of that report by itself while the rescues stay
       countable (docs/audit/2026-09-07-search.md). */
   function trackSearch(q, rescued) {
+    if (searchOwed !== q) return;   // filed already, as the page was left (flushSearchTrack)
+    searchOwed = "";
     if (String(S.query || "").trim() !== q) return;   // typed on: a later run reports
     var body = { path: q, value: searchResults().length };
     if (rescued) body.productId = "ai";
     track("search", body);
   }
+  /* The page is going away, or out of sight — the shopper went to another
+     tab, another app, or straight to the panel. Dim, 26.09.2026, on /test
+     «stats-search»: «Fridge is not in the list in analytics.» The row waits
+     for the pause in typing and then for the model's answer — seconds on a
+     cold server — and a page left in that window took the timer with it: the
+     search never reached «Что искали и не нашли». So whatever is still owed
+     goes now, with the count on the screen at this moment — which is what
+     the shopper saw before leaving. sendBeacon (track) outlives the page. */
+  function flushSearchTrack() {
+    var q = String(S.query || "").trim();
+    if (searchTrackTimer) {
+      clearTimeout(searchTrackTimer);
+      searchTrackTimer = null;
+      if (q) searchOwed = q;
+    }
+    if (!searchOwed || searchOwed !== q) return;
+    searchOwed = "";
+    var body = { path: q, value: searchResults().length };
+    if (aiTermsFor(q).length) body.productId = "ai";
+    track("search", body);
+  }
+  window.addEventListener("pagehide", flushSearchTrack);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushSearchTrack();
+  });
   /* ---------- search, pass four: the model ---------------------------------
      POST /api/search turns a phrase the catalogue has no words for into words
      it does have (src/lib/search-terms.ts). It is asked at most ONCE per
@@ -28595,7 +28628,7 @@
     var cAll = a.traffic.countries.reduce(function (s, c) { return s + (c.sessions || 0); }, 0);
     return '<div class="adm-stats__more">' +
       admStatsFoldHTML("zero", "Что искали и не нашли",
-        "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.",
+        "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.",
         a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }), "Таких запросов нет", true) +
       /* The same `item.sum` as «Топ товаров» above — the price list, not the
          takings — and with one more hole of its own: the query behind it
