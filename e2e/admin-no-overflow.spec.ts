@@ -88,8 +88,7 @@ test.describe("admin on a phone — nothing wider than the screen", () => {
           font: parseFloat(getComputedStyle(input).fontSize),
         };
       });
-      // «Салон» lets the glass step aside under 390 px for its whole placeholder — the phone project is 375
-      if (sel === "[data-posq]") { expect(m, "«Салон»'s glass under 390 px").toBeNull(); continue; }
+      // «Салон» keeps its glass down to 360 px since its placeholder became «Товар или штрихкод» (26.09.2026)
       expect(m, `${sel}: no magnifier`).not.toBeNull();
       expect(Math.abs(m!.off), `${sel}: the glass is ${m!.off.toFixed(1)} px off the middle`).toBeLessThanOrEqual(1);
       expect(m!.clear, `${sel}: the words start under the glass`).toBeGreaterThanOrEqual(8);
