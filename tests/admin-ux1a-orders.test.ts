@@ -390,7 +390,7 @@ function overview(data: unknown, orders: unknown[] | null, toShip = 0): string {
 }
 const SUMMARY = {
   attention: { ordersToShip: 0, proRequests: 1, reviewsPending: 1, stockAlerts: 0, returnRequests: 0 },
-  lowStock: { total: 0, items: [], hidden: 0, hiddenItems: [] },
+  lowStock: { total: 0, low: 0, out: 0, items: [] },
   revenue7d: { total: 0, orders: 0, perDay: 0 },
   revenueByDay: [],
   attentionNames: { reviews: [{ name: "Марина К.", rating: 5 }], partners: [{ name: "Salon Olga OÜ" }] },

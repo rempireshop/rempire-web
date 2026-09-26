@@ -17,7 +17,8 @@
  *   · a hand-set «Нет в наличии» over a counted shelf was dropped by the
  *     server and kept by the list;
  *   · the hidden row opened «Скрытые» — every hidden product, running low or
- *     not.
+ *     not. (That row is gone since the same day, with the chip it later
+ *     opened: Dim decided a hidden product lives only under «Скрытые».)
  *
  * These two functions are the panel's two, line for line, and
  * tests/overview-low-parity.test.ts runs the app.js originals and these over

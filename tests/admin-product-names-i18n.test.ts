@@ -75,9 +75,12 @@ const LOW = [
   { id: "b", brand: "Rempire", name: "Beard balm — бальзам для бороды", stock: "low" },
   { id: "c", brand: "Paula's Choice", name: "BHA 2% Gentle Exfoliating Toner — тоник", stock: "out" },
 ];
+/* A hidden product running out, in the shape an older server still sent it.
+   The row that named it went on 26.09.2026 (Dim: a hidden product lives only
+   under «Скрытые»), so the panel must say nothing about it. */
 const HIDDEN = [{ id: "d", brand: "Davines", name: "OI Oil — масло для волос", stock: "out" }];
 
-/** «Обзор» with three products running out and one hidden one. */
+/** «Обзор» with three products running out (and a hidden one it ignores). */
 function overview(lang: Lang): string {
   const data = {
     lowStock: { items: LOW, total: LOW.length, hidden: HIDDEN.length, hiddenItems: HIDDEN },
@@ -128,21 +131,27 @@ describe("«Обзор → Сделать сегодня»: the products running
   it("EN: every name of the row loses its Russian tail, not only the last one", () => {
     const nodes = translated(overview("EN"), "EN");
     expect(nodes).toContain("Repair.Me.Wash — shampoo · Beard balm — balm for beard · BHA 2% Gentle Exfoliating Toner — toner");
-    expect(nodes).toContain("OI Oil — oil for hair");
     expect(nodes.filter((t) => CYR.test(t))).toEqual([]);
   });
 
   it("ET: the same row in Estonian", () => {
     const nodes = translated(overview("ET"), "ET");
     expect(nodes).toContain("Repair.Me.Wash — šampoon · Beard balm — palsam habemele · BHA 2% Gentle Exfoliating Toner — toonik");
-    expect(nodes).toContain("OI Oil — õli juustele");
     expect(nodes.filter((t) => CYR.test(t))).toEqual([]);
   });
 
   it("RU: the names stay exactly as the catalogue writes them", () => {
     const nodes = translated(overview("RU"), "RU");
     expect(nodes).toContain("Repair.Me.Wash — шампунь · Beard balm — бальзам для бороды · BHA 2% Gentle Exfoliating Toner — тоник");
-    expect(nodes).toContain("OI Oil — масло для волос");
+  });
+
+  it("no row for the hidden product in any language — it lives under «Скрытые» only", () => {
+    for (const lang of ["RU", "ET", "EN"] as const) {
+      const html = overview(lang);
+      expect(html, lang).not.toContain("OI Oil");
+      expect(html, lang).not.toMatch(/скрыт/i);
+      expect(html.match(/data-admtab="goods"/g), lang).toHaveLength(1);
+    }
   });
 });
 

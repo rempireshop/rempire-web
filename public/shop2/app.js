@@ -1025,7 +1025,6 @@
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "Lai foto — JPEG, PNG või WebP, kuni 12 MB.",
       /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
       "В магазине": "Poes", "Кончаются": "Lõpevad", "Объёмы": "Mahud", "Виден": "Nähtav",
-      "Скрытые · кончаются": "Peidetud · lõpevad",
       "Ничего не нашли": "Midagi ei leitud",
       "Товар снова в магазине": "Toode on jälle poes", "Товар скрыт из магазина": "Toode on poest peidetud",
       "Заполнено на трёх языках": "Täidetud kolmes keeles",
@@ -2272,11 +2271,6 @@
       "товар заканчивается": "toode saab otsa",
       "товара заканчиваются": "toodet saab otsa",
       "товаров заканчиваются": "toodet saab otsa",
-      "скрытый товар заканчивается": "peidetud toode saab otsa",
-      "скрытых товара заканчиваются": "peidetud toodet saab otsa",
-      "скрытых товаров заканчиваются": "peidetud toodet saab otsa",
-      "сняты с продажи — закажите, если вернёте в магазин":
-        "müügilt eemaldatud — tellige juurde, kui toote poodi tagasi",
       "отзыв ждёт проверки": "arvustus ootab ülevaatamist",
       "отзыва ждут проверки": "arvustust ootab ülevaatamist",
       "отзывов ждут проверки": "arvustust ootab ülevaatamist",
@@ -4561,7 +4555,6 @@
       "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "A wide photo — JPEG, PNG or WebP, up to 12 MB.",
       /* direction 1a — «Товары» → Каталог, the product card, «Новый товар» */
       "В магазине": "In the shop", "Кончаются": "Running low", "Объёмы": "Sizes", "Виден": "Visible",
-      "Скрытые · кончаются": "Hidden · running low",
       "Ничего не нашли": "Nothing found",
       "Товар снова в магазине": "The product is back in the shop", "Товар скрыт из магазина": "The product is hidden from the shop",
       "Заполнено на трёх языках": "Filled in in three languages",
@@ -5784,11 +5777,6 @@
       "товар заканчивается": "product running out",
       "товара заканчиваются": "products running out",
       "товаров заканчиваются": "products running out",
-      "скрытый товар заканчивается": "hidden product running out",
-      "скрытых товара заканчиваются": "hidden products running out",
-      "скрытых товаров заканчиваются": "hidden products running out",
-      "сняты с продажи — закажите, если вернёте в магазин":
-        "off sale — order more if you put them back in the shop",
       "отзыв ждёт проверки": "review waiting to be checked",
       "отзыва ждут проверки": "reviews waiting to be checked",
       "отзывов ждут проверки": "reviews waiting to be checked",
@@ -21399,29 +21387,25 @@
     for (var i = 0; i < (rows || 3); i++) out += "<i></i>";
     return '<div class="adm-skel adm-skel--rows" aria-busy="true">' + out + "</div>";
   }
-  /** «N товаров заканчиваются» and «N скрытых товаров заканчиваются»: how
-      many, and which, of the products «Каталог → Кончаются» and «Скрытые ·
-      кончаются» list. The summary counts them on the server by the same rule
-      (src/lib/stock-word.ts, qOverviewLowStock) — the first screen must not
-      wait for the whole shelf. Once the panel holds what those chips count —
-      the shelf (S.stockLevels) and the hidden own products (S.customAll) — the
-      row counts with the chips' own predicate instead, so a stock word or a
-      switch changed since the summary was read cannot put the row and the
-      list apart. With no server at all (the demo panel), the same. Sold-out
-      first, then by name, as the summary sorts. */
+  /** «N товаров заканчиваются»: how many, and which, of the products
+      «Каталог → Кончаются» lists. The summary counts them on the server by
+      the same rule (src/lib/stock-word.ts, qOverviewLowStock) — the first
+      screen must not wait for the whole shelf. Once the panel holds what that
+      chip counts — the shelf (S.stockLevels) and the hidden own products
+      (S.customAll), which it must leave out — the row counts with the chip's
+      own predicate instead, so a stock word or a switch changed since the
+      summary was read cannot put the row and the list apart. With no server
+      at all (the demo panel), the same. Sold-out first, then by name, as the
+      summary sorts. A hidden product is never here: it lives under
+      «Скрытые» only (Dim, 26.09.2026). */
   function admLowRows(o) {
-    if (o && !(S.stockLevels && S.customAll)) {
-      return { n: o.lowStock.total, items: o.lowStock.items || [],
-        hidN: typeof o.lowStock.hidden === "number" ? o.lowStock.hidden : 0, hidItems: o.lowStock.hiddenItems || [] };
-    }
-    var all = admCatalogList();
+    if (o && !(S.stockLevels && S.customAll)) return { n: o.lowStock.total, items: o.lowStock.items || [] };
     var order = function (a, b) {
       var ao = goodsStockWord(a) === "out", bo = goodsStockWord(b) === "out";
       return ao === bo ? String(a.name).localeCompare(String(b.name), "ru") : ao ? -1 : 1;
     };
-    var low = all.filter(function (p) { return goodsMatchesFilter(p, "low"); }).sort(order);
-    var hid = all.filter(function (p) { return goodsMatchesFilter(p, "offlow"); }).sort(order);
-    return { n: low.length, items: low, hidN: hid.length, hidItems: hid };
+    var low = admCatalogList().filter(function (p) { return goodsMatchesFilter(p, "low"); }).sort(order);
+    return { n: low.length, items: low };
   }
   function admOverviewHTML() {
     /* ONE call. Until 13.09.2026 this screen also asked for
@@ -21436,7 +21420,7 @@
     var vms = admOrders().map(admOrderVM);
     var toShip = admLiveToShip();
 
-    // the two stock rows: what «Каталог → Кончаются» / «Скрытые · кончаются» hold
+    // the stock row: what «Каталог → Кончаются» holds
     var lowRows = admLowRows(o);
     var lowItems = lowRows.items;
     var lowN = lowRows.n;
@@ -21461,10 +21445,6 @@
     var noIban = waiting.length > 0 && !companyIban();
     /* Money arrived and it was not enough — the queue nothing else leads to. */
     var heldList = admHeldOrders(), heldN = heldList.length;
-    /* …and the hidden products that are running out, which have had a row of
-       their own since this morning and were missing from the number above it:
-       «Сделать сегодня 4» over five rows is a number nobody can trust. */
-    var hidLow = lowRows.hidN;
     /* No total beside «Сделать сегодня» any more (Dim, 25.09.2026, q15): it
        added orders to bottles to reviews, and the rows say each number on
        their own. */
@@ -21501,28 +21481,14 @@
        product. It opened «Склад», whose chips count SIZES and leave out every
        product nobody has counted — 12 on the row, no list anywhere saying 12
        (Dim, 26.09.2026). */
+    /* A product taken off sale has no row here. From 19.09.2026 a hidden one
+       running low had a row of its own, and later a chip in «Каталог» for
+       that row to open. Dim, 26.09.2026: «Why do we have "hidden - running
+       low" category?!» — a hidden product lives only under «Скрытые». */
     if (lowN) tasks += admTaskRow(lowN,
       ["товар заканчивается", "товара заканчиваются", "товаров заканчиваются"],
       names(lowItems, function (p) { return admProdName(p.name); }),
       'data-admtab="goods" data-admfilter="low"', true);
-    /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
-       number above is «закажите ещё», and a product taken off sale is not
-       that — but a bottle hidden BECAUSE it ran out must not vanish from the
-       only list that would remind him to order it. */
-    var hidItems = lowRows.hidItems;
-    /* Where the row goes matters as much as the number. «Товары» alone opened
-       the whole catalogue, where a hidden product sorts behind everything
-       still on sale and usually past the 40-row cap — so the row counted
-       them and then hid them again (Dim, 19.09.2026: «does not bring to
-       hidden product»). «Каталог → Скрытые» was the next answer, and it was
-       every hidden product: the row said 1 and the list held 2 (Dim,
-       26.09.2026). It opens «Скрытые · кончаются» — exactly the ones it
-       counts — and says which, so the list is a place to look rather than a
-       place to search. */
-    if (hidLow) tasks += admTaskRow(hidLow,
-      ["скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"],
-      hidItems.length ? names(hidItems, function (p) { return admProdName(p.name); }) :"сняты с продажи — закажите, если вернёте в магазин",
-      'data-admtab="goods" data-admfilter="offlow"', true);
     if (revN) tasks += admTaskRow(revN,
       ["отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"],
       names(who.reviews || [], admReviewWho), 'data-admtab="reviews"');
@@ -23394,15 +23360,14 @@
      наличии» — every product in the shop with a size that is low or out, the
      list the owner reorders from. «Нет» on its own is «Склад»'s chip. The
      chip that shows the shop's products is «В магазине», the design's word
-     for it (the id stays "on"). */
+     for it (the id stays "on").
+     A hidden product is under «Скрытые» and nowhere else — never under
+     «Кончаются», whatever its stock (Dim, 26.09.2026). A fifth chip,
+     «hidden and running low», stood beside these four for a day; it went
+     with the «Обзор» row it existed for. */
   var ADM_GOODS_FILTERS = [
     ["all", "Все"], ["on", "В магазине"], ["off", "Скрытые"], ["low", "Кончаются"]
   ];
-  /* …and the list «N скрытых товаров заканчиваются» on «Обзор» opens: hidden
-     AND running low. It opened «Скрытые» — every hidden product — so the row
-     said 1 and the list held 2 (Dim, 26.09.2026). A fifth chip only while it
-     is on or holds something: the four above stay the everyday row. */
-  var ADM_GOODS_OFFLOW = ["offlow", "Скрытые · кончаются"];
   function goodsOffSale(p) {
     return !!((p.custom && p.active === false) || shopHidden(p.id));
   }
@@ -23437,7 +23402,7 @@
    *   · then the manual flag, for a product nobody has counted (or whose
    *     sizes are only partly counted, all of them at zero).
    *
-   * The server counts «Обзор»'s two stock rows by a line-for-line copy of
+   * The server counts «Обзор»'s stock row by a line-for-line copy of
    * this and goodsRunsLow() below — src/lib/stock-word.ts, held to them by
    * tests/overview-low-parity.test.ts. Change one, change the other.
    */
@@ -23477,7 +23442,6 @@
     if (f === "off") return goodsOffSale(p);
     if (f === "on") return !goodsOffSale(p);
     if (f === "low" || f === "out") return !goodsOffSale(p) && goodsRunsLow(p);
-    if (f === "offlow") return goodsOffSale(p) && goodsRunsLow(p);
     return true;
   }
   /** The search box, beside the tabs on a desktop and under them on a phone.
@@ -23491,13 +23455,7 @@
   function admCatalogHTML() {
     var f = goodsFilterNow();
     var all = admCatalogList();
-    /* «Скрытые · кончаются» — the list «Обзор»'s hidden row opens — joins the
-       row while it is on or has something in it (ADM_GOODS_OFFLOW). */
-    var chips = ADM_GOODS_FILTERS.slice();
-    if (f === ADM_GOODS_OFFLOW[0] || all.some(function (q) { return goodsMatchesFilter(q, ADM_GOODS_OFFLOW[0]); })) {
-      chips.push(ADM_GOODS_OFFLOW);
-    }
-    return '<div class="adm-chips" role="group" aria-label="Какие товары">' + chips.map(function (x) {
+    return '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
           /* Every chip says how many rows are behind it, zeros included — the
              same rule «Склад» now follows, and for the same reason: three of
              these four said nothing at all, so the only way to learn whether
@@ -23605,9 +23563,9 @@
     var file = CATALOGUE.filter(function (p) { return !p.custom; });
     var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(function (c) {
       /* …wearing its own stock word, as every product in CATALOGUE does
-         (applyDemoOverrides): customProduct() says «in» for all of them, so a
-         hidden own product set to «мало» was missing from «Скрытые ·
-         кончаются» while «Обзор» counted it. */
+         (applyDemoOverrides): customProduct() says «in» for all of them. No
+         list sorts a hidden product by that word since 26.09.2026 (it lives
+         under «Скрытые» only), but the product keeps the word it has. */
       var p = customProduct(c);
       if (DEMO.stock && DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
       return p;
@@ -48301,10 +48259,10 @@
     // a queue row on «Обзор» carries the filter its section should open on
     if (go.filter && tab === "orders") S.admOrderFilter = go.filter;
     if (go.filter && tab === "people") S.admCustTier = go.filter;
-    /* «Каталог» takes one too — the two stock rows ask for «Кончаются» and
-       «Скрытые · кончаются», and the shelf they want starts at the top of
-       that list. A search left in the box goes: the row promised the whole
-       chip, and a list narrowed by last week's «awapuhi» is not it. */
+    /* «Каталог» takes one too — the stock row asks for «Кончаются», and the
+       shelf it wants starts at the top of that list. A search left in the
+       box goes: the row promised the whole chip, and a list narrowed by last
+       week's «awapuhi» is not it. */
     if (go.filter && tab === "goods") { S.goodsFilter = go.filter; S.goodsShown = 40; S.goodsQ = ""; }
     // …and a queue row may name the settings page it wants («Заполните IBAN»)
     if (go.setpage && tab === "setup") S.admSetPage = go.setpage;

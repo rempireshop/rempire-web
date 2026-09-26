@@ -510,8 +510,8 @@ export async function customMinByIds(ids: string[]): Promise<Map<string, MinWith
 /**
  * Name, brand and «Показывать в магазине» of these own products, in one read —
  * what a report needs to name a row and to tell a product on sale from one
- * switched off (`active` false). «Обзор» counts a switched-off one apart from
- * the ones to re-order (qOverviewLowStock in src/lib/analytics.ts).
+ * switched off (`active` false). «Обзор» leaves a switched-off one out of the
+ * ones to re-order (qOverviewLowStock in src/lib/analytics.ts).
  */
 export async function customLabelsByIds(ids: string[]): Promise<Map<string, { name: string; brand: string; active: boolean }>> {
   const want = [...new Set(ids.filter(isCustomId))];
