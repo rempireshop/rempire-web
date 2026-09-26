@@ -276,18 +276,38 @@ describe("POST /api/search", () => {
 --------------------------------------------------------------------------- */
 type Shop = {
   scheduleSearchTrack: () => void;
+  /** What app.js runs on `pagehide` and on the page going out of sight. */
+  flushSearchTrack: () => void;
   setQuery: (q: string) => void;
   tracked: () => Array<{ type: string; extra: Record<string, unknown> }>;
   renders: () => number;
   terms: () => Record<string, string[]>;
+  /** With `held` timers: runs every timer still waiting (the 700 ms pause ends). */
+  fireTimers: () => void;
 };
 
-function shop(fetchImpl: unknown): Shop {
-  const ctx = vm.createContext({ setTimeout: (fn: () => void) => fn(), clearTimeout() {}, fetch: fetchImpl, Promise });
+function shop(fetchImpl: unknown, timers: "now" | "held" = "now"): Shop {
+  /* `held`: the pause in typing is a real wait that the test ends by hand —
+     how a page that is left DURING the pause is put under test. */
+  const waiting = new Map<number, () => void>();
+  let nextTimer = 1;
+  const clock =
+    timers === "now"
+      ? { setTimeout: (fn: () => void) => fn(), clearTimeout() {} }
+      : {
+          setTimeout: (fn: () => void) => { waiting.set(nextTimer, fn); return nextTimer++; },
+          clearTimeout: (id: number) => { waiting.delete(id); },
+        };
+  const ctx = vm.createContext({ ...clock, fetch: fetchImpl, Promise });
+  (ctx as { fireTimers?: () => void }).fireTimers = () => {
+    const due = [...waiting.values()];
+    waiting.clear();
+    for (const fn of due) fn();
+  };
   vm.runInContext(
     `
     ${sliceVar("SRCH_WIDEN")}
-    var AI_TERMS = {}, AI_SEARCH_OFF = false, aiSearchAsking = null, searchTrackTimer = null;
+    var AI_TERMS = {}, AI_SEARCH_OFF = false, aiSearchAsking = null, searchTrackTimer = null, searchOwed = "";
     var TRACKED = [], RENDERS = 0;
     var S = { query: "", lang: "RU", screen: "search" };
     function track(type, extra) { TRACKED.push({ type: type, extra: extra }); }
@@ -302,7 +322,9 @@ function shop(fetchImpl: unknown): Shop {
     ${slice("scheduleSearchTrack")}
     ${slice("trackSearch")}
     ${slice("askSearchAI")}
+    ${slice("flushSearchTrack")}
     this.scheduleSearchTrack = scheduleSearchTrack;
+    this.flushSearchTrack = flushSearchTrack;
     this.AI_TERMS = AI_TERMS;
     this.setQuery = function (q) { S.query = q; };
     this.tracked = function () { return TRACKED; };
@@ -414,5 +436,56 @@ describe("the storefront asking, and the search event that waits for the answer"
     s.scheduleSearchTrack();
     await flush();
     expect(s.tracked()[0].extra).toEqual({ path: "cheveux gras", value: 0 });
+  });
+});
+
+/* Dim, 26.09.2026, /test «stats-search»: «Fridge is not in the list in
+   analytics.» The row waits for the pause in typing and then for the model,
+   and a page left in that window — another tab, another app, straight to the
+   panel — took the row with it. What the page does as it goes. */
+describe("the search row, when the shopper leaves before it was filed", () => {
+  it("files a phrase left during the pause in typing, once", async () => {
+    const f = answer([]);
+    const s = shop(f, "held");
+    s.setQuery("fridge");
+    s.scheduleSearchTrack();
+    expect(s.tracked()).toHaveLength(0); // the pause is not over yet
+    s.flushSearchTrack(); // pagehide / hidden
+    expect(s.tracked()).toEqual([{ type: "search", extra: { path: "fridge", value: 0 } }]);
+    // the pause cannot end any more — the timer went with the page
+    s.fireTimers();
+    await flush();
+    expect(s.tracked()).toHaveLength(1);
+    expect(f).not.toHaveBeenCalled();
+  });
+
+  it("files a phrase left while the model was thinking, and the late answer adds no second row", async () => {
+    let release: (v: unknown) => void = () => {};
+    const f = vi.fn(() => new Promise((r) => { release = r; }));
+    const s = shop(f, "held");
+    s.setQuery("fridge");
+    s.scheduleSearchTrack();
+    s.fireTimers();
+    await flush();
+    expect(f).toHaveBeenCalledTimes(1); // the model is being asked
+    s.flushSearchTrack();
+    expect(s.tracked()).toEqual([{ type: "search", extra: { path: "fridge", value: 0 } }]);
+    release({ ok: true, status: 200, json: async () => ({ ok: true, terms: [] }) });
+    await flush();
+    expect(s.tracked()).toHaveLength(1);
+  });
+
+  it("sends nothing when nothing is owed — before any search, and after one was filed", async () => {
+    const s = shop(answer([]), "held");
+    s.flushSearchTrack();
+    expect(s.tracked()).toHaveLength(0);
+    s.setQuery("fridge");
+    s.scheduleSearchTrack();
+    s.fireTimers();
+    await flush();
+    expect(s.tracked()).toHaveLength(1); // filed the ordinary way
+    s.flushSearchTrack();
+    s.flushSearchTrack();
+    expect(s.tracked()).toHaveLength(1);
   });
 });

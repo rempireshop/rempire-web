@@ -31,11 +31,13 @@ import {
   getLoyaltyBalance,
   getLoyaltyHistory,
   listCustomersAdmin,
+  orderPointsMoved,
   PRICING_BOUNDS,
   proUnitPrice,
   quoteLoyaltyRedeem,
   redeemCapPoints,
   redeemLoyaltyPoints,
+  refundLoyaltyPoints,
   requestProTier,
   setCustomerTier,
 } from "@/lib/loyalty";
@@ -452,6 +454,150 @@ describe("loyalty ledger — a refund takes the points back with the money", () 
     const before = await getLoyaltyBalance(other.id);
     await setOrderStatus(other.order.id, "cancelled");
     expect(await getLoyaltyBalance(other.id)).toBe(before);
+  });
+});
+
+/* Dim, 26.09.2026, /test «order-refund-full»: «Text is there, but I'm not sure
+   if in the account the points were returned.» The refund posted ONE row with
+   the net of both halves — «Корректировка +N» — so neither «did my points come
+   back» nor «were the order's own taken off» could be read anywhere. */
+describe("loyalty ledger — a refund's points as two named lines", () => {
+  async function pricing() {
+    await query(
+      "insert into settings (key, value) values ($1, $2::jsonb) on conflict (key) do update set value = excluded.value",
+      ["pricing", JSON.stringify({ partnersOn: true, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 100, minRedeem: 1 } })],
+    );
+  }
+  /** A paid order of `email` that spent `spend` points and earned `earn` — the ledger rows the paid transition writes. */
+  async function paidWith(email: string, spend: number, earn: number, total = 40) {
+    await pricing();
+    const id = await recordLogin(email, "RU").then((c) => c.id);
+    await adjustLoyaltyPoints(id, 100, "seed");
+    const o = await createOrder({ lang: "ru", items: [{ id: plain.id, qty: 1 }], customer, shipping: ship }, { customerId: id });
+    await query("update orders set status = 'paid', total = $2, payment = '{\"status\":\"paid\"}'::jsonb where id = $1", [o.id, total]);
+    if (spend) await redeemLoyaltyPoints(id, o.id, spend, `списание на заказ ${o.number}`);
+    if (earn) await query("insert into loyalty_ledger (customer_id, delta, reason, order_id) values ($1, $2, 'earn', $3)", [id, earn, o.id]);
+    return { id, order: o };
+  }
+  const refundRows = async (orderId: string) =>
+    (await query<{ delta: number; ref: string | null }>(
+      "select delta, ref from loyalty_ledger where order_id = $1 and reason = 'adjust' order by id",
+      [orderId],
+    )).map((r) => ({ delta: Number(r.delta), ref: r.ref }));
+
+  it("gives the spent points back on one line and takes the earned ones off on another", async () => {
+    const { id, order: o } = await paidWith("two-lines@example.com", 10, 3);
+    expect(await getLoyaltyBalance(id)).toBe(93);
+    await setOrderStatus(o.id, "refunded", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+
+    const rows = await refundRows(o.id);
+    expect(rows.map((r) => r.delta)).toEqual([10, -3]);
+    const lines = (await getLoyaltyHistory(id)).filter((h) => h.orderId === o.id && h.reason === "adjust");
+    expect(lines.map((h) => [h.line, h.delta, h.orderNumber])).toEqual([
+      ["revoke", -3, o.number],
+      ["back", 10, o.number],
+    ]);
+    // and the order's own rows carry its number too — the screens print it
+    expect((await getLoyaltyHistory(id)).find((h) => h.reason === "earn")?.orderNumber).toBe(o.number);
+    expect(await orderPointsMoved(o.id)).toEqual({ back: 10, revoked: 3 });
+  });
+
+  it("posts nothing a second time — the card, the webhook and a retry all land on the same answer", async () => {
+    const { id, order: o } = await paidWith("again@example.com", 10, 3);
+    const first = await refundLoyaltyPoints(o.id, "возврат");
+    expect(first).toMatchObject({ ok: true, back: 10, revoked: 3, points: 7 });
+    const second = await refundLoyaltyPoints(o.id, "возврат");
+    expect(second).toMatchObject({ ok: true, already: true, points: 0 });
+    await setOrderStatus(o.id, "refunded", "admin");
+    expect(await refundRows(o.id)).toHaveLength(2);
+    expect(await getLoyaltyBalance(id)).toBe(100);
+  });
+
+  it("gives the points back when an order points paid for in full is cancelled — there is no refund to wait for", async () => {
+    const { id, order: o } = await paidWith("all-points@example.com", 25, 0, 0);
+    expect(await getLoyaltyBalance(id)).toBe(75);
+    await setOrderStatus(o.id, "cancelled", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    expect((await refundRows(o.id)).map((r) => r.delta)).toEqual([25]);
+  });
+
+  it("leaves an order with money in it alone on a cancel — its refund brings the points", async () => {
+    const { id, order: o } = await paidWith("money-cancel@example.com", 10, 3, 40);
+    await setOrderStatus(o.id, "cancelled", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(93);
+    expect(await refundRows(o.id)).toEqual([]);
+  });
+
+  it("puts the points back where they were when the refund is undone, and again when it is redone", async () => {
+    const { id, order: o } = await paidWith("undo@example.com", 10, 3);
+    await setOrderStatus(o.id, "refunded", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+
+    await setOrderStatus(o.id, "paid", "admin"); // the journal's «Вернуть»
+    expect(await getLoyaltyBalance(id), "the undo left the customer the spent points AND the order").toBe(93);
+    const undo = (await getLoyaltyHistory(id)).filter((h) => h.line === "undo");
+    expect(undo.map((h) => h.delta).sort((a, b) => a - b)).toEqual([-10, 3]);
+    expect(await orderPointsMoved(o.id)).toEqual({ back: 0, revoked: 0 });
+
+    await setOrderStatus(o.id, "refunded", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    expect(await refundRows(o.id)).toHaveLength(6);
+  });
+
+  it("keeps the points where the refund put them when the money really went back", async () => {
+    const { id, order: o } = await paidWith("money-back@example.com", 10, 3);
+    await setOrderStatus(o.id, "cancelled", "admin");
+    const { settleRefund } = await import("@/lib/payments/settle");
+    await settleRefund((await getOrder(o.id))!, {
+      ref: "money-back-1", amount: 40, status: "done", at: new Date().toISOString(), by: "admin",
+    }, { notify: false });
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    // a status click does not bring the money back, so it does not take the points either
+    await setOrderStatus(o.id, "paid", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+  });
+
+  it("the refund letter reads the ledger and says what moved", async () => {
+    const { order: o } = await paidWith("letter@example.com", 10, 3);
+    await setOrderStatus(o.id, "refunded", "admin");
+    const bodies: string[] = [];
+    const saved = { key: process.env.RESEND_API_KEY, retry: process.env.MAIL_RETRY_DELAY_MS };
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.MAIL_RETRY_DELAY_MS = "0";
+    vi.stubGlobal("fetch", async (_url: unknown, init: RequestInit) => {
+      bodies.push(String(init.body));
+      return new Response(JSON.stringify({ id: "msg_1" }), { status: 200, headers: { "content-type": "application/json" } });
+    });
+    try {
+      const { onOrderClosed } = await import("@/lib/mail-hooks");
+      const order = (await getOrder(o.id))!;
+      await onOrderClosed({ ...order, email: "letter@example.com" }, { kind: "refunded", amount: 40 });
+      const sent = JSON.parse(bodies[0]) as { text: string };
+      expect(sent.text).toContain("Баллы, потраченные на этот заказ, вернули на ваш счёт: 10.");
+      expect(sent.text).toContain("Баллы, начисленные за этот заказ, сняли: 3.");
+    } finally {
+      vi.unstubAllGlobals();
+      process.env.RESEND_API_KEY = saved.key;
+      process.env.MAIL_RETRY_DELAY_MS = saved.retry;
+      if (saved.key === undefined) delete process.env.RESEND_API_KEY;
+      if (saved.retry === undefined) delete process.env.MAIL_RETRY_DELAY_MS;
+    }
+  });
+
+  it("reads a net row written before 26.09.2026 as the whole reversal, and never pays it out again", async () => {
+    const { id, order: o } = await paidWith("legacy@example.com", 10, 3);
+    await query(
+      "insert into loyalty_ledger (customer_id, delta, reason, order_id, note) values ($1, 7, 'adjust', $2, 'возврат заказа')",
+      [id, o.id],
+    );
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    expect(await refundLoyaltyPoints(o.id)).toMatchObject({ ok: true, already: true, points: 0 });
+    await setOrderStatus(o.id, "refunded", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    // an undo of it takes back exactly what it gave
+    await setOrderStatus(o.id, "paid", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(93);
   });
 });
 

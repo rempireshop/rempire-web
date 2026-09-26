@@ -163,3 +163,38 @@ describe("a gift card the shop has bought back", () => {
     expect((await dead.json()).error).toBe("voided");
   });
 });
+
+/* Dim, 26.09.2026, /test «order-refund-full»: «Text is there, but I'm not sure
+   if in the account the points were returned.» The order's own row now says
+   what its refund did to the points — and says nothing while the bank has not
+   confirmed, because the points follow the money. */
+describe("the points of a refunded order, under the order", () => {
+  async function withPoints(order: Order, spent: number, earned: number): Promise<string> {
+    const { recordLogin } = await import("@/lib/customers");
+    const id = (await recordLogin(CUSTOMER.email, "RU")).id;
+    await query("insert into loyalty_ledger (customer_id, delta, reason, order_id) values ($1, 100, 'adjust', null)", [id]);
+    await query("insert into loyalty_ledger (customer_id, delta, reason, order_id) values ($1, $2, 'redeem', $3)", [id, -spent, order.id]);
+    await query("insert into loyalty_ledger (customer_id, delta, reason, order_id) values ($1, $2, 'earn', $3)", [id, earned, order.id]);
+    return id;
+  }
+
+  it("says nothing while the refund is only sent, and both halves once it is done", async () => {
+    const order = await bankPaid(GOODS);
+    await withPoints(order, 8, 2);
+    expect(await accountRow(order.number)).toMatchObject({ pointsBack: 0, pointsRevoked: 0 });
+
+    await settleRefund(
+      order,
+      { ref: "rf_pts", amount: order.total, status: "pending", at: new Date().toISOString(), by: "admin" },
+      { notify: false },
+    );
+    expect(await accountRow(order.number)).toMatchObject({ pointsBack: 0, pointsRevoked: 0 });
+
+    await settleRefund(
+      (await getOrder(order.id))!,
+      { ref: "rf_pts", amount: order.total, status: "done", at: new Date().toISOString(), by: "montonio" },
+      { notify: false },
+    );
+    expect(await accountRow(order.number)).toMatchObject({ pointsBack: 8, pointsRevoked: 2 });
+  });
+});

@@ -66,6 +66,45 @@ export interface ClosedOptions {
    * alone (cancelMoneyOf below).
    */
   value?: number;
+  /**
+   * What refunds (or a cancel with nothing to send back) did to the order's
+   * loyalty points so far — `back` on the customer's balance, `revoked` off
+   * it (src/lib/loyalty.ts orderPointsMoved). The letter gets a «Баллы» panel
+   * when either moved. Dim, 26.09.2026, on /test «order-refund-full»: the
+   * letter was right about the money and silent about the points, and he
+   * could not tell whether they had come back.
+   */
+  points?: { back: number; revoked: number };
+}
+
+/** The «Баллы» panel — one sentence per half that moved. */
+const POINTS: Record<Lang, { label: string; back: string; revoked: string }> = {
+  ru: {
+    label: "Баллы",
+    back: "Баллы, потраченные на этот заказ, вернули на ваш счёт: {n}.",
+    revoked: "Баллы, начисленные за этот заказ, сняли: {n}.",
+  },
+  et: {
+    label: "Punktid",
+    back: "Sellele tellimusele kulutatud punktid tagastasime teie kontole: {n}.",
+    revoked: "Selle tellimuse eest saadud punktid võtsime tagasi: {n}.",
+  },
+  en: {
+    label: "Points",
+    back: "The points you spent on this order are back in your account: {n}.",
+    revoked: "The points this order earned have been taken back: {n}.",
+  },
+};
+
+/** The sentences of the «Баллы» panel, or none when no point moved. */
+export function pointsLines(L: Lang, points: ClosedOptions["points"]): string[] {
+  const back = Math.max(0, Math.trunc(num(points?.back, 0)));
+  const revoked = Math.max(0, Math.trunc(num(points?.revoked, 0)));
+  const p = POINTS[L];
+  const out: string[] = [];
+  if (back > 0) out.push(p.back.replace("{n}", String(back)));
+  if (revoked > 0) out.push(p.revoked.replace("{n}", String(revoked)));
+  return out;
 }
 
 /**
@@ -310,11 +349,15 @@ export function renderOrderCancelled(
       ? esc(t.detail[0]) + money(amount, true) + esc(t.detail[1])
       : esc(paid ? paid.detail : t.detail[0]);
   const wait = gift ? gift.wait : t.wait;
+  /* A refund that has only been SENT moved no points yet — they follow the
+     money when the bank confirms, and the confirming letter says so. */
+  const points = kind === "refund_sent" ? [] : pointsLines(L, options.points);
 
   const body =
     rowTitle(t.title) +
     rowLead(`${esc(hello)} ${introHtml}`) +
     rowPanel(t.label, detailHtml, esc(wait)) +
+    (points.length ? rowPanel(POINTS[L].label, esc(points.join(" "))) : "") +
     rowNote([mailTextHtml(template, L, "signature", values)]);
 
   const html = shell({
@@ -332,6 +375,7 @@ export function renderOrderCancelled(
     "",
     `${t.label}: ${detail}`,
     wait,
+    ...(points.length ? ["", `${POINTS[L].label}: ${points.join(" ")}`] : []),
     "",
     signature,
     textFooter(L, c.serviceNote),

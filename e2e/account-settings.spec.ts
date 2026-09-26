@@ -189,6 +189,37 @@ test.describe("account — every field saves itself", () => {
     await expect(page.locator('[data-acctf="birthday"]')).toHaveValue("1991-05-18");
     await expect(line(page, "birthday")).toHaveText("");
   });
+
+  /* Dim, 26.09.2026, /test «mail-birthday»: «I put birthday 28.09.2026 and
+     said run now. 0 letters were sent.» The box's max is today, and a date
+     after it was dropped without a word — the birthday letter then had no
+     birthday to find. */
+  test("a birthday after today is refused out loud, and the stored one stays", async ({ page }) => {
+    const email = freshEmail("acct-bday-future");
+    await signIn(page, email);
+    const birthday = page.locator('[data-acctf="birthday"]');
+    const status = line(page, "birthday");
+    const sent = patches(page);
+    const inTwoDays = await page.evaluate(() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 2);
+      const p = (n: number) => (n < 10 ? "0" : "") + n;
+      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+    });
+
+    await leave(birthday, inTwoDays);
+    await expect(status).toHaveText("Эта дата ещё не наступила — проверьте год.");
+    await expect(status).toHaveClass(/acctst--err/);
+    await expect(birthday).toHaveAttribute("aria-invalid", "true");
+    await page.waitForTimeout(1_000); // the box's own 600 ms wait, and then some
+    expect(sent, "a date in the future was sent to the server").toHaveLength(0);
+    expect((await profile(page)).birthday).toBeNull();
+
+    // the same day and month in a year gone by is a birthday, and saves
+    await leave(birthday, "1990" + inTwoDays.slice(4));
+    await expect(status).toHaveText("Сохранено ✓");
+    expect((await profile(page)).birthday).toBe("1990" + inTwoDays.slice(4));
+  });
 });
 
 test.describe("account — the newsletter tick", () => {

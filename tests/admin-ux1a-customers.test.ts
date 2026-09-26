@@ -118,6 +118,8 @@ function panel(S: Any, opts: { partners?: boolean; answer?: (s: Sent) => Answer;
       return { txt: a.type, prev: a.type === "set_tier" ? { type: "set_tier", value: a.prev } : null };
     }
     ${SECTION}
+    ${slice("loyaltyLabel")}
+    ${slice("loyaltySub")}
     ${slice("admCustPendingN")}
     ${slice("admCustTabsHTML")}
     ${slice("admCustHeadHTML")}

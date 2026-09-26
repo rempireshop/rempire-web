@@ -249,6 +249,29 @@ describe("getAnalyticsSummary", () => {
     expect(a.zeroResultTerms).toEqual([{ term: "асдасд", count: 1 }]);
   });
 
+  /* Dim, 26.09.2026, /test «stats-search»: «Fridge is not in the list in
+     analytics.» The list keeps ten rows, and a phrase searched once ties with
+     every other phrase searched once — which ten of those were shown was
+     whatever order Postgres grouped them in. The one somebody searched a
+     minute ago is the one the owner is looking for. */
+  it("puts the newest of equally frequent phrases first, so a fresh search is never cut off", async () => {
+    for (let i = 0; i < 3; i += 1) await event({ at: days(3), sid: `w${i}`, type: "search", path: "wax", value: 0 });
+    for (let i = 1; i <= 12; i += 1) {
+      await event({ at: new Date(days(2).getTime() + i * 60_000), sid: `o${i}`, type: "search", path: `old${i}`, value: 0 });
+    }
+    await event({ at: new Date(NOW.getTime() - 5 * 60_000), sid: "dim", type: "search", path: "fridge", value: 0 });
+
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.zeroResultTerms).toHaveLength(10);
+    expect(a.zeroResultTerms.slice(0, 3)).toEqual([
+      { term: "wax", count: 3 },
+      { term: "fridge", count: 1 },
+      { term: "old12", count: 1 },
+    ]);
+    // the popular list breaks its ties the same way
+    expect(a.searchTerms.slice(0, 2).map((s) => s.term)).toEqual(["wax", "fridge"]);
+  });
+
   it("reads promo usage, gift cards, abandoned carts and low stock from their own tables", async () => {
     await query(
       "insert into promo_codes (code, kind, value) values ('SUVI10', 'percent', 10)",

@@ -1592,8 +1592,21 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
 }
 
 /**
- * Why nobody was due — the three conditions the birthday query applies, each
- * counted over the whole customer table. Best effort.
+ * Why nobody was due. Best effort.
+ *
+ * Only the customers whose birthday IS in this window are counted, each
+ * under the one thing that kept them out: no «хочу письма» tick, or this
+ * year's letter already gone. When there is nobody in the window at all,
+ * that is the answer — «нет дней рождения в эти дни» (`not_in_window`), or
+ * «дата рождения не указана» (`no_birthday`) when not one customer has given
+ * a date, or `nobody` for an empty table — said once, not counted.
+ *
+ * Until 26.09.2026 every condition was counted over the whole table, and the
+ * run's one-line reason is the biggest count. In a real shop most customers
+ * never type a birthday, so the line always read «дата рождения не указана»
+ * — even for Dim, testing with his own date in the window and the letter
+ * held back for a reason that was nowhere on screen (/test «mail-birthday»:
+ * «0 letters were sent»).
  */
 async function explainEmptyBirthdayQueue(
   skips: ReturnType<typeof counter>,
@@ -1602,26 +1615,25 @@ async function explainEmptyBirthdayQueue(
 ): Promise<void> {
   try {
     const holes = window.map((_, i) => `$${i + 1}`).join(",");
-    const mmdd = "(extract(month from c.birthday) * 100 + extract(day from c.birthday))";
+    const inWindow = `(extract(month from c.birthday) * 100 + extract(day from c.birthday)) in (${holes})`;
     const [row] = await query<Record<string, string | number>>(
       `select
-         count(*) filter (where c.birthday is null)::int as no_birthday,
-         count(*) filter (where c.birthday is not null and c.marketing is distinct from true)::int as no_marketing,
-         count(*) filter (where c.birthday is not null and c.marketing = true
-                            and ${mmdd} not in (${holes}))::int as not_in_window,
-         count(*) filter (where c.birthday is not null and c.marketing = true
-                            and ${mmdd} in (${holes})
+         count(*)::int as customers,
+         count(*) filter (where c.birthday is not null)::int as with_date,
+         count(*) filter (where ${inWindow} and c.marketing is distinct from true)::int as no_marketing,
+         count(*) filter (where ${inWindow} and c.marketing = true
                             and c.birthday_sent_year is not null
                             and c.birthday_sent_year >= $${window.length + 1})::int as already_sent
        from customers c`,
       [...window.map((d) => d.mmdd), maxYear],
     );
     if (!row) return;
-    skips.note("no_birthday", Number(row.no_birthday) || 0);
     skips.note("no_marketing", Number(row.no_marketing) || 0);
-    skips.note("not_in_window", Number(row.not_in_window) || 0);
     skips.note("already_sent", Number(row.already_sent) || 0);
-    if (!skips.map) skips.note("nobody", 1); // not one customer in the table
+    if (skips.map) return;
+    if (!(Number(row.customers) > 0)) skips.note("nobody", 1); // not one customer in the table
+    else if (!(Number(row.with_date) > 0)) skips.note("no_birthday", 1);
+    else skips.note("not_in_window", 1);
   } catch (err) {
     console.warn("[flows] birthday queue could not be explained:", (err as Error)?.message);
   }

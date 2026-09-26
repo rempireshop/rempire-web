@@ -313,6 +313,46 @@ describe("customer profile", () => {
     expect(body.customer.shipPref.machine).toBe("Solaris pakiautomaat");
   });
 
+  /* Dim, 26.09.2026, /test «mail-birthday»: he typed 28.09.2026 — two days
+     from now — and the birthday letter found nobody to greet. A birth date
+     after today is a slip of the year; the route says so, and the row keeps
+     the date it had instead of storing it (or, for a date nobody can read,
+     instead of quietly wiping the old one). */
+  it("PATCH /api/account/me refuses a birthday in the future or unreadable, and keeps the old one", async () => {
+    await recordLogin(EMAIL, "RU");
+    await updateCustomer(EMAIL, { birthday: "1990-04-17" });
+    const { PATCH } = await import("@/app/api/account/me/route");
+    const cookie = `rmp_cust=${makeCustomerToken(EMAIL)}`;
+    const patch = (birthday: unknown) =>
+      PATCH(
+        new Request("https://rempireshop.com/api/account/me/", {
+          method: "PATCH",
+          headers: { cookie, "content-type": "application/json", "x-forwarded-for": "203.0.113.19" },
+          body: JSON.stringify({ birthday, lang: "RU" }),
+        }),
+      );
+    const today = shopDay(new Date());
+
+    const future = await patch(addShopDays(today, 2));
+    expect(future.status).toBe(400);
+    expect(await future.json()).toMatchObject({ ok: false, error: "future_birthday" });
+    expect((await getCustomer(EMAIL))?.birthday).toBe("1990-04-17");
+
+    const nonsense = await patch("31.02.1990");
+    expect(nonsense.status).toBe(400);
+    expect(await nonsense.json()).toMatchObject({ ok: false, error: "bad_birthday" });
+    expect((await getCustomer(EMAIL))?.birthday).toBe("1990-04-17");
+
+    // a birth date this year — a child born this spring — is a date like any other
+    const thisYear = addShopDays(today, -10);
+    expect((await patch(thisYear)).status).toBe(200);
+    expect((await getCustomer(EMAIL))?.birthday).toBe(thisYear);
+
+    // and clearing it is still allowed
+    expect((await patch("")).status).toBe(200);
+    expect((await getCustomer(EMAIL))?.birthday).toBeNull();
+  });
+
   it("lists the orders that carry the address, newest first", async () => {
     await recordLogin(EMAIL, "RU");
     await insertOrder(EMAIL, new Date(Date.now() - 2 * DAY));

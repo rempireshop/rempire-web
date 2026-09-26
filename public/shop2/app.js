@@ -859,7 +859,8 @@
       "корзина стала заказом": "korvist sai tellimus",
       "дата рождения не указана": "sünnikuupäev puudub",
       "нет согласия на письма": "kirjade nõusolek puudub",
-      "дата не попадает в это окно": "kuupäev ei jää sellesse aknasse",
+      "нет дней рождения в эти дни": "neil päevil sünnipäevi pole",
+      "уже поздравили в этом году": "sel aastal juba õnnitletud",
       "в списке никого нет": "nimekirjas pole kedagi",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "Kiri on välja lülitatud — lülitage lüliti sisse ja käivitage uuesti.",
       "Почта не подключена — письма не отправлены.": "Post pole ühendatud — kirju ei saadetud.",
@@ -1128,6 +1129,8 @@
       "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
         "Kirjuta telefoninumber — sellele helistab kuller ja tuleb pakiautomaadi SMS.",
       "Проверьте номер — похоже, в нём не хватает цифр.": "Kontrolli numbrit — tundub, et mõni number on puudu.",
+      "Эта дата ещё не наступила — проверьте год.": "See kuupäev pole veel käes — kontrolli aastat.",
+      "Проверьте дату рождения.": "Kontrolli sünnikuupäeva.",
       "Введите e-mail — на него придёт подтверждение заказа.": "Sisesta e-posti aadress — sellele tuleb tellimuse kinnitus.",
       "В адресе не хватает знака @.": "Aadressist puudub @-märk.",
       "Проверьте e-mail — на него придёт подтверждение заказа": "Kontrolli e-posti aadressi — sellele tuleb tellimuse kinnitus",
@@ -1918,8 +1921,8 @@
       "Топ товаров: на какую сумму заказали": "Enimmüüdud tooted: mis summas telliti",
       "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
         "See on tellimustes olevate kaupade hind, mitte saadud raha: soodustused, punktid, kinkekaardid ja tarne siia ei kuulu. Kui palju raha laekus, on ülal «Käibes».",
-      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
-        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.":
+        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse. Siin on kümme kõige sagedasemat, võrdsetest viimased.",
       "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "Mitu inimest jõudis igasse sammu. Tavaliselt numbrid kahanevad, aga sammu saab ka vahele jätta: kauba paneb ostukorvi otse kataloogist, kaardit avamata. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
@@ -2027,6 +2030,10 @@
       "Не получилось отправить — попробуйте ещё раз": "Ei õnnestunud saata — proovige uuesti",
       "Заявка отправлена ✓": "Taotlus saadetud ✓",
       "Начислено": "Kogutud", "Списано": "Kasutatud", "Корректировка": "Korrigeeritud", "Сгорело": "Aegunud",
+      "Вернули баллы, потраченные на заказ": "Tellimusele kulutatud punktid tagastati",
+      "Сняли баллы, начисленные за заказ": "Tellimuse eest saadud punktid võeti tagasi",
+      "Заказ снова оплачен — баллы как были": "Tellimus on jälle makstud — punktid nagu enne",
+      "Потраченные баллы вернули:": "Kulutatud punktid tagastati:", "Баллы за заказ сняли:": "Tellimuse punktid võeti tagasi:",
       "Баллы": "Punktid",
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Logige omanikuna sisse, et näha päris kliente.",
       "Никого не нашлось.": "Kedagi ei leitud.",
@@ -4390,7 +4397,8 @@
       "корзина стала заказом": "the basket became an order",
       "дата рождения не указана": "no date of birth",
       "нет согласия на письма": "no consent to letters",
-      "дата не попадает в это окно": "the date is not in this window",
+      "нет дней рождения в эти дни": "no birthdays on these days",
+      "уже поздравили в этом году": "already greeted this year",
       "в списке никого нет": "there is nobody on the list",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "The letter is off — turn the switch on and run it again.",
       "Почта не подключена — письма не отправлены.": "Mail is not connected — no letters were sent.",
@@ -4655,6 +4663,8 @@
       "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
         "Enter your phone number — the courier rings it and the parcel locker texts it.",
       "Проверьте номер — похоже, в нём не хватает цифр.": "Check the number — it looks like a digit is missing.",
+      "Эта дата ещё не наступила — проверьте год.": "That date has not come yet — check the year.",
+      "Проверьте дату рождения.": "Check the date of birth.",
       "Введите e-mail — на него придёт подтверждение заказа.": "Enter your e-mail — the order confirmation goes there.",
       "В адресе не хватает знака @.": "The address is missing the @ sign.",
       "Проверьте e-mail — на него придёт подтверждение заказа": "Check your e-mail — the order confirmation goes there",
@@ -5423,8 +5433,8 @@
       "Топ товаров: на какую сумму заказали": "Top products: what was ordered, by value",
       "Это цена товаров в заказах, а не полученные деньги: скидки, баллы, подарочные карты и доставка сюда не входят. Сколько денег пришло — выше, в «Выручке».":
         "This is the price of the goods in the orders, not the money received: discounts, points, gift cards and delivery are not in it. What actually came in is above, under “Revenue”.",
-      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
-        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.":
+        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it. These are the ten most frequent; among equals, the latest.",
       "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
       "Сколько человек дошло до каждого шага. Обычно числа убывают, но шаг можно и перескочить: товар кладут в корзину прямо из каталога, не открывая карточку. Самая большая ступенька вниз — там и теряются покупатели.":
         "How many people reached each step. The numbers usually go down, but a step can be skipped: a product goes into the basket straight from the catalogue, without opening its page. The biggest step down is where the buyers are lost.",
@@ -5532,6 +5542,10 @@
       "Не получилось отправить — попробуйте ещё раз": "Could not send — please try again",
       "Заявка отправлена ✓": "Request sent ✓",
       "Начислено": "Earned", "Списано": "Redeemed", "Корректировка": "Adjustment", "Сгорело": "Expired",
+      "Вернули баллы, потраченные на заказ": "Points spent on the order given back",
+      "Сняли баллы, начисленные за заказ": "Points earned on the order taken back",
+      "Заказ снова оплачен — баллы как были": "The order is paid again — points as they were",
+      "Потраченные баллы вернули:": "Points spent, given back:", "Баллы за заказ сняли:": "Points for the order taken back:",
       "Баллы": "Points",
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
       "Никого не нашлось.": "Nobody found.",
@@ -7466,6 +7480,13 @@
     [/^На подарочную карту (.+) вернулось (.+)$/,
       { ET: "Kinkekaardile $1 tagastati $2", EN: "$2 went back onto gift card $1" }],
     [/^использовано (.+)$/, { ET: "kasutatud $1", EN: "$1 used" }],
+    // a refund's two lines in «Мои баллы» and on the customer card (loyaltyLabel)
+    [/^Вернули баллы, потраченные на заказ (\S+)$/,
+      { ET: "Tellimusele $1 kulutatud punktid tagastati", EN: "Points spent on order $1 given back" }],
+    [/^Сняли баллы, начисленные за заказ (\S+)$/,
+      { ET: "Tellimuse $1 eest saadud punktid võeti tagasi", EN: "Points earned on order $1 taken back" }],
+    [/^Заказ (\S+) снова оплачен — баллы как были$/,
+      { ET: "Tellimus $1 on jälle makstud — punktid nagu enne", EN: "Order $1 is paid again — points as they were" }],
     // «Запустить сейчас»: what the run did, and its line in the journal
     [/^Отправлено (\d+) · пропущено (\d+)$/, { ET: "Saadetud $1 · vahele jäetud $2", EN: "Sent $1 · skipped $2" }],
     /* «Никому не отправлено: срок из настройки ещё не прошёл» — the reason is a
@@ -11738,11 +11759,17 @@
      700 ms debounce shared by the header search box, the search screen's
      own input and the "popular query" chips. */
   var searchTrackTimer = null;
+  /* The phrase whose search row is still to be written — set when the pause
+     in typing is over, cleared by whichever of trackSearch() and
+     flushSearchTrack() files it first, so a phrase is filed once. */
+  var searchOwed = "";
   function scheduleSearchTrack() {
     clearTimeout(searchTrackTimer);
     searchTrackTimer = setTimeout(function () {
+      searchTrackTimer = null;
       var q = String(S.query || "").trim();
       if (!q) return;
+      searchOwed = q;
       /* The model is asked only for a phrase the shop's own three passes
          could not answer, and the search event WAITS for its answer: the
          number that lands in the events table has to be the number the
@@ -11759,11 +11786,38 @@
       now succeeds drops out of that report by itself while the rescues stay
       countable (docs/audit/2026-09-07-search.md). */
   function trackSearch(q, rescued) {
+    if (searchOwed !== q) return;   // filed already, as the page was left (flushSearchTrack)
+    searchOwed = "";
     if (String(S.query || "").trim() !== q) return;   // typed on: a later run reports
     var body = { path: q, value: searchResults().length };
     if (rescued) body.productId = "ai";
     track("search", body);
   }
+  /* The page is going away, or out of sight — the shopper went to another
+     tab, another app, or straight to the panel. Dim, 26.09.2026, on /test
+     «stats-search»: «Fridge is not in the list in analytics.» The row waits
+     for the pause in typing and then for the model's answer — seconds on a
+     cold server — and a page left in that window took the timer with it: the
+     search never reached «Что искали и не нашли». So whatever is still owed
+     goes now, with the count on the screen at this moment — which is what
+     the shopper saw before leaving. sendBeacon (track) outlives the page. */
+  function flushSearchTrack() {
+    var q = String(S.query || "").trim();
+    if (searchTrackTimer) {
+      clearTimeout(searchTrackTimer);
+      searchTrackTimer = null;
+      if (q) searchOwed = q;
+    }
+    if (!searchOwed || searchOwed !== q) return;
+    searchOwed = "";
+    var body = { path: q, value: searchResults().length };
+    if (aiTermsFor(q).length) body.productId = "ai";
+    track("search", body);
+  }
+  window.addEventListener("pagehide", flushSearchTrack);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushSearchTrack();
+  });
   /* ---------- search, pass four: the model ---------------------------------
      POST /api/search turns a phrase the catalogue has no words for into words
      it does have (src/lib/search-terms.ts). It is asked at most ONCE per
@@ -17602,7 +17656,11 @@
     offline: "Кабинет заработает, когда магазин подключат к серверу",
     // the profile form's phone, refused before it is sent — the checkout's
     // own rule and words (phoneOk / shipMsg)
-    bad_phone: "Проверьте номер — похоже, в нём не хватает цифр."
+    bad_phone: "Проверьте номер — похоже, в нём не хватает цифр.",
+    /* the birthday box: a date after today is not a birth date — refused
+       with words, where it used to be dropped without a sound (acctFieldChange) */
+    future_birthday: "Эта дата ещё не наступила — проверьте год.",
+    bad_birthday: "Проверьте дату рождения."
   };
   function acctErrWord(key) { return ACCT_ERRS[key] || "Не получилось — попробуйте ещё раз"; }
   function acctErrText() { return acctErrWord(S.acctErr); }
@@ -17665,6 +17723,19 @@
         "<span>Скачать счёт (PDF)</span>" + ' <span class="num">' + esc(o.invoice.number) + "</span></a>");
     }
     var pdfs = docs.length ? '<span class="rowcard__gifts">' + docs.join("") + "</span>" : "";
+    /* loyalty: what the refund (or a cancel with no money in it) did to this
+       order's points, under the order itself — pointsBack / pointsRevoked from
+       listCustomerOrders. Dim, 26.09.2026, on /test «order-refund-full»: «not
+       sure if in the account the points were returned». Words and figures are
+       separate nodes, for translateTree(). */
+    var ptsBack = Number(o.pointsBack) || 0, ptsOff = Number(o.pointsRevoked) || 0;
+    var pts = ptsBack > 0 || ptsOff > 0
+      ? '<span class="muted rowcard__pts">' +
+          (ptsBack > 0 ? '<span>Потраченные баллы вернули:</span> <span class="num">+' + ptsBack + "</span>" : "") +
+          (ptsBack > 0 && ptsOff > 0 ? " · " : "") +
+          (ptsOff > 0 ? '<span>Баллы за заказ сняли:</span> <span class="num">−' + ptsOff + "</span>" : "") +
+        "</span>"
+      : "";
     /* returns: «Хочу вернуть заказ» — the tick, and what the row says once it
        has been ticked. Both come from the server (returnable /
        returnRequestedAt, listCustomerOrders): a delivered order, inside the 30
@@ -17686,7 +17757,7 @@
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + refundChip +
       track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + ret + "</div>";
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pts + pdfs + ret + "</div>";
   }
   function screenAccount() {
     acctLoad();
@@ -18254,7 +18325,13 @@
     else p[f] = S.acctForm[f];
     return p;
   }
-  function isoToday() { return new Date().toISOString().slice(0, 10); }
+  /* The shopper's own calendar day, not UTC's: from midnight to 03:00 in
+     Tallinn UTC is still on yesterday, and a birthday typed as «today» then
+     read as a date in the future. */
+  function isoToday() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
 
   /* ---- the line under each control ----------------------------------------
      S.acctSt[f] — see its comment in S. The line lives in the markup
@@ -18362,6 +18439,12 @@
     clearTimeout(acctAutoT[f]); delete acctAutoT[f];
     if (f === "birthday") {
       clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+      /* …but a whole date AFTER today is not a year half-typed — a year
+         being typed only ever reads too early («0019»). Dim, 26.09.2026, on
+         /test «mail-birthday»: he typed 28.09.2026, the box was refused in
+         silence, and «Запустить сейчас» found no birthday to greet. Said
+         under the box now; the server keeps the date it had. */
+      if (el && el.validity && el.validity.rangeOverflow) { acctSt("birthday", "err:future_birthday"); return; }
       if (el && el.validity && !el.validity.valid) return;
       acctBirthdayT = setTimeout(function () { acctBirthdayT = 0; acctQueue("birthday"); }, 600);
       return;
@@ -18512,10 +18595,26 @@
 
   /* ---------- wholesale/loyalty: account-screen history + pro request ---- */
   var LOYALTY_REASON = { earn: "Начислено", redeem: "Списано", adjust: "Корректировка", expire: "Сгорело" };
+  /* A refund's two lines, in words (e.line — src/lib/loyalty-lines.ts). They
+     read «Корректировка» with «возврат заказа R-…» under it until 26.09.2026,
+     one net row for both halves, and Dim could not tell from the account
+     whether his points had come back (/test «order-refund-full»). Each is one
+     whole sentence with the number inside, translated by its own rule. */
+  function loyaltyLabel(e) {
+    var n = e.orderNumber ? String(e.orderNumber) : "";
+    if (e.line === "back") return n ? "Вернули баллы, потраченные на заказ " + n : "Вернули баллы, потраченные на заказ";
+    if (e.line === "revoke") return n ? "Сняли баллы, начисленные за заказ " + n : "Сняли баллы, начисленные за заказ";
+    if (e.line === "undo") return n ? "Заказ " + n + " снова оплачен — баллы как были" : "Заказ снова оплачен — баллы как были";
+    return LOYALTY_REASON[e.reason] || e.reason;
+  }
+  /** Under the label: the day, and the note — except on a refund line, whose label already says it. */
+  function loyaltySub(e) {
+    return shortDate(e.at) + (e.note && !e.line ? " · " + esc(e.note) : "");
+  }
   function loyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
-    return '<div class="adm__row"><span class="adm__nm">' + (LOYALTY_REASON[e.reason] || e.reason) +
-      '<span class="adm__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+    return '<div class="adm__row"><span class="adm__nm">' + esc(loyaltyLabel(e)) +
+      '<span class="adm__sub">' + loyaltySub(e) + "</span></span>" +
       '<span class="num">' + sign + e.delta + "</span></div>";
   }
   var ACCT_PRO_ERRS = {
@@ -25332,7 +25431,9 @@
     recovered: "корзина стала заказом",
     no_birthday: "дата рождения не указана",
     no_marketing: "нет согласия на письма",
-    not_in_window: "дата не попадает в это окно",
+    /* said once, when nobody's birthday falls between today and the day the
+       letter is set for (explainEmptyBirthdayQueue, src/lib/flows.ts) */
+    not_in_window: "нет дней рождения в эти дни",
     /* the discounted cart letter's own two (SKIP_REASONS, src/lib/flows.ts):
        they had no words here, so its «Последний запуск» dropped them and read
        «отправлено 0» with nothing beside it */
@@ -25341,14 +25442,26 @@
     nobody: "в списке никого нет",
     no_budget: "лимит писем на сегодня исчерпан"
   };
+  /* A letter's own word for a reason, where the shared one says less. «Письмо
+     уже уходило» is right for a basket; for the birthday it is once a YEAR,
+     and that is what the owner needs to read (Dim, 26.09.2026, /test
+     «mail-birthday»). */
+  var FLOW_SKIP_WORDS_OWN = {
+    birthday: { already_sent: "уже поздравили в этом году" }
+  };
+  function flowSkipWord(flow, k) {
+    var own = FLOW_SKIP_WORDS_OWN[flow];
+    return (own && own[k]) || FLOW_SKIP_WORDS[k] || "";
+  }
   /** « · срок из настройки ещё не прошёл 2» — every reason the run counted. */
-  function flowSkipsHTML(skips) {
+  function flowSkipsHTML(skips, flow) {
     var out = "";
     for (var k in skips) {
-      if (!FLOW_SKIP_WORDS[k]) continue;
+      var word = flowSkipWord(flow, k);
+      if (!word) continue;
       var n = Number(skips[k]) || 0;
       if (n <= 0) continue;
-      out += ' · <span>' + FLOW_SKIP_WORDS[k] + "</span>" + (n > 1 ? " " + n : "");
+      out += ' · <span>' + word + "</span>" + (n > 1 ? " " + n : "");
     }
     return out;
   }
@@ -25357,7 +25470,7 @@
     if (!r || !r.at) return "<span>Ещё не запускалось</span>";
     var line = "<span>Последний запуск:</span> " + esc(flowRunWhen(r.at)) + " — <span>отправлено</span> " + (Number(r.sent) || 0);
     if (Number(r.skipped) > 0) line += " · <span>пропущено</span> " + Number(r.skipped);
-    var why = flowSkipsHTML(r.skips);
+    var why = flowSkipsHTML(r.skips, flow);
     if (why) return line + why;
     // a run recorded before the shop counted its reasons — the two it knew
     if (r.reason === "disabled") line += " · <span>письмо было выключено</span>";
@@ -25386,7 +25499,7 @@
         /* Nothing went out and the server said why: the reason in words, not
            a pair of zeroes. The phrase is a dictionary key of its own, so the
            rule /^Никому не отправлено: (.+)$/ translates both halves. */
-        else if (!sentN && FLOW_SKIP_WORDS[r.body.reason]) toast("Никому не отправлено: " + FLOW_SKIP_WORDS[r.body.reason]);
+        else if (!sentN && flowSkipWord(flow, r.body.reason)) toast("Никому не отправлено: " + flowSkipWord(flow, r.body.reason));
         else toast("Отправлено " + (Number(r.body.sent) || 0) + " · пропущено " + (Number(r.body.skipped) || 0));
         loadFlowCounts(true);
         render();
@@ -28595,7 +28708,7 @@
     var cAll = a.traffic.countries.reduce(function (s, c) { return s + (c.sessions || 0); }, 0);
     return '<div class="adm-stats__more">' +
       admStatsFoldHTML("zero", "Что искали и не нашли",
-        "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.",
+        "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают. Здесь десять самых частых, из равных — последние.",
         a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }), "Таких запросов нет", true) +
       /* The same `item.sum` as «Топ товаров» above — the price list, not the
          takings — and with one more hole of its own: the query behind it
@@ -36320,8 +36433,8 @@
       still held (adjustCustomerPoints) is the top row until it goes. */
   function admLoyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
-    return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + (LOYALTY_REASON[e.reason] || e.reason) + "</span>" +
-      '<span class="adm-row__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+    return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + esc(loyaltyLabel(e)) + "</span>" +
+      '<span class="adm-row__sub">' + loyaltySub(e) + "</span></span>" +
       '<span class="adm-row__amt">' + sign + e.delta + "</span></div>";
   }
   /* ---------- the list ---------------------------------------------------- */

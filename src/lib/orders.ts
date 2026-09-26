@@ -34,12 +34,15 @@ import {
   proUnitPrice,
   quoteLoyaltyRedeem,
   refundLoyaltyPoints,
+  restoreLoyaltyPoints,
 } from "@/lib/loyalty";
 // Shipping defaults — src/lib/shipping.ts is a module of this build too (see
 // docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
 // cannot drift from it; the live computeShipping() call itself still goes
 // through the optional-neighbour door a few lines down.
 import { DEFAULT_SHIPPING_RULES, shippingZone } from "@/lib/shipping";
+// The refund ledger's reader — a leaf module (node:crypto and a type), no cycle.
+import { refundsOf } from "@/lib/payments/refund";
 import { NO_NOVAPOST_COUNTRIES } from "@/lib/shipping/country-prices";
 import { POS_NO_NAME } from "@/lib/pos-name";
 // media: what product_overrides.video_url is allowed to hold — a pure module
@@ -397,6 +400,18 @@ async function optionalData(name: "bundles.json"): Promise<AnyModule | null> {
     return null;
   } catch {
     return null;
+  }
+}
+
+/** What gift cards paid for this order, in euro — 0 without the module or on any hiccup. */
+async function giftPaidTotal(orderId: string): Promise<number> {
+  try {
+    const paid = fn(await optionalLib("giftcards"), "giftPaidByOrder");
+    const rows = paid ? ((await paid(orderId)) as Array<{ amount: number }>) : [];
+    return Array.isArray(rows) ? rows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0) : 0;
+  } catch (err) {
+    console.error("[orders] gift-card ledger unreadable:", err);
+    return 0;
   }
 }
 
@@ -2207,14 +2222,52 @@ export async function setOrderStatus(
      ones). Only off a paid order and only on a refund — a cancellation still
      holds the money. Idempotent per order, best effort: a points hiccup must
      never stop a refund being recorded. */
-  if (wasPaid && status === "refunded") {
+  /* …and a CANCELLATION of a paid order that has no money to send back —
+     points (and a promo) paid for all of it, so its total is 0 and no gift
+     card paid either. «Вернуть деньги» has nothing to refund on such an order,
+     so no refund will ever come through settleRefund(), and the cancel is the
+     only moment the points can come home: until 26.09.2026 they never did
+     (Dim's /test «order-refund-full» round — «not sure the points were
+     returned»). An order with money in it waits for its refund, as before. */
+  const nothingToRefund = wasPaid && status === "cancelled" && !((Number(after.total) || 0) > 0.004)
+    && !(await giftPaidTotal(id) > 0.004);
+  if (wasPaid && (status === "refunded" || nothingToRefund)) {
     try {
-      const out = await refundLoyaltyPoints(id, `возврат заказа ${after.number}`);
-      if (out.ok && out.points && !out.already) {
-        await writeAuditSafe(actor, "loyalty.refunded", { id, number: after.number, points: out.points });
+      const out = await refundLoyaltyPoints(
+        id,
+        `${status === "refunded" ? "возврат" : "отмена"} заказа ${after.number}`,
+      );
+      if (out.ok && (out.back || out.revoked) && !out.already) {
+        await writeAuditSafe(actor, "loyalty.refunded", {
+          id, number: after.number, points: out.points, back: out.back, revoked: out.revoked,
+        });
       }
     } catch (err) {
       console.error("[orders] returning the points of a refunded order failed:", err);
+    }
+  }
+
+  /* The undo of either: an order back in «оплачен» (or further) from
+     «возврат» or «отмена» — the journal's «Вернуть», «Изменить статус
+     вручную». The shelf follows that move back just below; the points now do
+     too, or a mis-pressed «возврат» undone a second later left the customer
+     with the spent points AND the order (restoreLoyaltyPoints). A no-op on an
+     order whose points never moved — a cancel that was waiting for its refund.
+     And never on an order whose money has really gone back (a confirmed
+     refund on its payment record): the points follow the money, and the money
+     is not coming back with a status click. */
+  const moneyBack = refundsOf(after.payment).filter((r) => r.status === "done").reduce((sum, r) => sum + r.amount, 0);
+  if (!wasPaid && (before.status === "cancelled" || before.status === "refunded")
+      && (PAID_ORDER_STATUSES as readonly string[]).includes(status) && !(moneyBack > 0.004)) {
+    try {
+      const out = await restoreLoyaltyPoints(id, `заказ ${after.number} снова оплачен`);
+      if (out.ok && (out.back || out.revoked)) {
+        await writeAuditSafe(actor, "loyalty.restored", {
+          id, number: after.number, points: out.points, back: out.back, revoked: out.revoked,
+        });
+      }
+    } catch (err) {
+      console.error("[orders] restoring the points of a re-opened order failed:", err);
     }
   }
 
