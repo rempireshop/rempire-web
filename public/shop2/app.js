@@ -18536,7 +18536,9 @@
          /test «mail-birthday»: he typed 28.09.2026, the box was refused in
          silence, and «Запустить сейчас» found no birthday to greet. Said
          under the box now; the server keeps the date it had. */
-      if (el && el.validity && el.validity.rangeOverflow) { acctSt("birthday", "err:future_birthday"); return; }
+      // a browser without a date box has no rangeOverflow: the ISO string says it too
+      var bd = el ? String(el.value || "") : "";
+      if ((el && el.validity && el.validity.rangeOverflow) || (/^\d{4}-\d\d-\d\d$/.test(bd) && bd > isoToday())) { acctSt("birthday", "err:future_birthday"); return; }
       if (el && el.validity && !el.validity.valid) return;
       acctBirthdayT = setTimeout(function () { acctBirthdayT = 0; acctQueue("birthday"); }, 600);
       return;
