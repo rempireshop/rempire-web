@@ -7158,7 +7158,9 @@
     [/^(\S+) × (\S+) × (\S+) см$/, { ET: "$1 × $2 × $3 cm", EN: "$1 × $2 × $3 cm" }],
     [/^ячейка (\S+)$/, { ET: "kapp $1", EN: "locker $1" }],
     [/^номер (\S+-0001)$/, { ET: "number $1", EN: "number $1" }],
+    [/^оплата 1 дн\.$/, { ET: "maksetähtaeg 1 p", EN: "payment in 1 day" }],
     [/^оплата (\d+) дн\.$/, { ET: "maksetähtaeg $1 p", EN: "payment in $1 days" }],
+    [/^напомнить за 1 дн\.$/, { ET: "meeldetuletus 1 p enne", EN: "reminder 1 day before" }],
     [/^напомнить за (\d+) дн\.$/, { ET: "meeldetuletus $1 p enne", EN: "reminder $1 days before" }],
     [/^Ниже тарифа Montonio: (.+) · вернуть$/, { ET: "Alla Montonio tariifi: $1 · taasta", EN: "Below Montonio's tariff: $1 · undo" }],
     [/^Ниже тарифа Montonio: (.+)$/, { ET: "Alla Montonio tariifi: $1", EN: "Below Montonio's tariff: $1" }],
@@ -7171,7 +7173,7 @@
        and gets one string each from pl(); Estonian and English take two, and
        only a literal «1» is singular — «21 заявка» is «21 requests». */
     [/^1 заявка$/, { ET: "1 taotlus", EN: "1 request" }],
-    [/^(\d+) заявк(?:а|и|ок)$/, { ET: "$1 taotlust", EN: "$1 requests" }],
+    [/^(\d+) (?:заявк[аи]|заявок)$/, { ET: "$1 taotlust", EN: "$1 requests" }],
     [/^1 отзыв$/, { ET: "1 arvustus", EN: "1 review" }],
     [/^(\d+) отзыв(?:а|ов)?$/, { ET: "$1 arvustust", EN: "$1 reviews" }],
     // …and under «Блог» and «Подключения» (the counts of src/lib/overview-extras.ts)
@@ -7310,13 +7312,18 @@
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
     /* «Брошенные корзины»: три числа в одной строке журнала — собирается в
        srvCartFlowSave(), поэтому ключа у неё быть не может. */
+    [/^Брошенные корзины: напоминание через (\d+) ч, скидка (\d+) % через 1 дн\.$/, {
+      ET: "Hüljatud korvid: meeldetuletus $1 h pärast, soodustus $2 % 1 päeva pärast.",
+      EN: "Abandoned carts: a reminder after $1 h, a $2 % discount after 1 day.",
+    }],
     [/^Брошенные корзины: напоминание через (\d+) ч, скидка (\d+) % через (\d+) дн\.$/, {
       ET: "Hüljatud korvid: meeldetuletus $1 h pärast, soodustus $2 % $3 päeva pärast.",
       EN: "Abandoned carts: a reminder after $1 h, a $2 % discount after $3 days.",
     }],
     /* «Письма за сегодня» и «займёт 3 дня» — числа в этих строках
        собираются на лету, ключа у них быть не может. */
-    [/^· (\d+) день$/, { ET: "· $1 päev", EN: "· $1 day" }],
+    [/^· 1 день$/, { ET: "· 1 päev", EN: "· 1 day" }],
+    [/^· (\d+) день$/, { ET: "· $1 päeva", EN: "· $1 days" }],
     [/^· (\d+) дня$/, { ET: "· $1 päeva", EN: "· $1 days" }],
     [/^· (\d+) дней$/, { ET: "· $1 päeva", EN: "· $1 days" }],
     [/^(\d+) дня$/, { ET: "$1 päeva", EN: "$1 days" }],
@@ -7362,7 +7369,9 @@
     [/^Возврат (\d+)$/, { ET: "Tagastus $1", EN: "Returns $1" }],
     [/^Правка карточки (\d+)$/, { ET: "Kaardi muudatus $1", EN: "Card changes $1" }],
     [/^Списание (\d+)$/, { ET: "Mahakandmine $1", EN: "Write-offs $1" }],
+    [/^Принято \+(\d+) · теперь 1 шт$/, { ET: "Vastu võetud +$1 · nüüd 1 tk", EN: "Taken in +$1 · now 1 pc" }],
     [/^Принято \+(\d+) · теперь (\d+) шт$/, { ET: "Vastu võetud +$1 · nüüd $2 tk", EN: "Taken in +$1 · now $2 pcs" }],
+    [/^Списано −(\d+) · теперь 1 шт$/, { ET: "Maha kantud −$1 · nüüd 1 tk", EN: "Written off −$1 · now 1 pc" }],
     [/^Списано −(\d+) · теперь (\d+) шт$/, { ET: "Maha kantud −$1 · nüüd $2 tk", EN: "Written off −$1 · now $2 pcs" }],
     [/^Показывать набор «(.+)»$/, { ET: "Näidata komplekti «$1»", EN: "Show the set “$1”" }],
     [/^Удалить набор «(.+)»\?$/, { ET: "Kustutada komplekt «$1»?", EN: "Delete the set “$1”?" }],
@@ -7413,6 +7422,7 @@
     [/^(.+) отправлен · письмо ушло$/,
       { ET: "$1 saadetud · kiri läks välja", EN: "$1 shipped · the letter has gone" }],
     [/^(.+) отменён$/, { ET: "$1 tühistatud", EN: "$1 cancelled" }],
+    [/^(.+): 1 шт$/, { ET: "$1: 1 tk", EN: "$1: 1 pc" }],
     [/^(.+): (\d+) шт$/, { ET: "$1: $2 tk", EN: "$1: $2 pcs" }],
     /* the confirm card before an order moves — one pre-line block, so the
        whole thing is one text node */
@@ -7463,6 +7473,9 @@
     [/^Никому не отправлено: (.+)$/, { ET: "Kellelegi ei saadetud: $1", EN: "Nothing went to anybody: $1" }],
     [/^Письмо «(.+)»: запущено вручную, отправлено (\d+)$/,
       { ET: "Kiri «$1»: käivitatud käsitsi, saadetud $2", EN: "Letter «$1»: run by hand, sent $2" }],
+    [/^Неоплаченные заказы: напоминание через 1, отмена через (\d+)$/,
+      { ET: "Maksmata tellimused: meeldetuletus 1 päeva pärast, tühistamine $1 päeva pärast",
+        EN: "Unpaid orders: reminder after 1 day, cancellation after $1 days" }],
     [/^Неоплаченные заказы: напоминание через (\d+), отмена через (\d+)$/,
       { ET: "Maksmata tellimused: meeldetuletus $1 päeva pärast, tühistamine $2 päeva pärast",
         EN: "Unpaid orders: reminder after $1 days, cancellation after $2 days" }],
@@ -7524,6 +7537,7 @@
     /* «от 5 баллов» — the loyalty floor, a number AND a word. Ahead of the
        bare «от <сумма>» below, which would otherwise match first and leave
        the word behind it in Russian. */
+    [/^от 1 баллов$/, { ET: "alates 1 punktist", EN: "from 1 point" }],
     [/^от (\d+) баллов$/, { ET: "alates $1 punktist", EN: "from $1 points" }],
     [/^от (\d.*)$/, { ET: "alates $1", EN: "from $1" }],
     [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Delivery — $1" }],
@@ -7547,6 +7561,7 @@
     [/^Пакомат (DPD|Omniva|SmartPosti|Unisend|Nova Post)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
     [/^Трек-номер: (.+)$/, { ET: "Jälgimisnumber: $1", EN: "Tracking number: $1" }],
     [/^Код сдачи посылки: (.+)$/, { ET: "Paki üleandmise kood: $1", EN: "Drop-off code: $1" }],
+    [/^Пакомат — 1 точка$/, { ET: "Pakiautomaat — 1 punkt", EN: "Parcel locker — 1 location" }],
     [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
     // the picker sheet counts on its own line
     [/^1 точка$/, { ET: "1 punkt", EN: "1 location" }],
@@ -7591,8 +7606,8 @@
     [/^Самовывоз — (.+)$/, { ET: "Järeletulek — $1", EN: "Pickup — $1" }],
     // phase 4: the slide count beside «Главный баннер», and the three confirm
     // cards in front of the rebuilt settings cards (one pre-line block each)
-    [/^(\d+) слайд$/, { ET: "$1 slaid", EN: "$1 slide" }],
-    [/^(\d+) слайд(?:а|ов)$/, { ET: "$1 slaidi", EN: "$1 slides" }],
+    [/^(1) слайд$/, { ET: "$1 slaid", EN: "$1 slide" }],
+    [/^(\d+) слайд(?:|а|ов)$/, { ET: "$1 slaidi", EN: "$1 slides" }],
     [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }],
     /* checkout-gaps: the applied promo code carries the code and the number
        inside the same line, so it cannot be a plain dictionary key. */
@@ -7655,9 +7670,12 @@
     [/^Показать 1 товар$/, { ET: "Näita 1 toodet", EN: "Show 1 product" }],
     [/^Показать (\d+) товар(?:|а|ов)$/, { ET: "Näita $1 toodet", EN: "Show $1 products" }],
     [/^Оплатить (.+)$/, { ET: "Maksa $1", EN: "Pay $1" }],
+    [/^Пакомат или пункт выдачи по умолчанию — 1 точка$/,
+      { ET: "Vaikimisi pakiautomaat või pakipunkt — 1 punkt", EN: "Default parcel locker or pickup point — 1 location" }],
     [/^Пакомат или пункт выдачи по умолчанию — (\d+) (?:точка|точки|точек)$/,
       { ET: "Vaikimisi pakiautomaat või pakipunkt — $1 punkti",
         EN: "Default parcel locker or pickup point — $1 locations" }],
+    [/^Пакомат по умолчанию — 1 точка$/, { ET: "Vaikimisi pakiautomaat — 1 punkt", EN: "Default parcel locker — 1 location" }],
     [/^Пакомат по умолчанию — (\d+) (?:точка|точки|точек)$/,
       { ET: "Vaikimisi pakiautomaat — $1 punkti", EN: "Default parcel locker — $1 locations" }],
     [/^Рег\. (.+)$/, { ET: "Reg-kood $1", EN: "Reg. no $1" }],
@@ -7677,10 +7695,12 @@
     [/^Показаны первые 24 из (\d+) по запросу «(.+)»$/,
       { ET: "Kuvatud esimesed 24, kokku $1 · otsing „$2“", EN: "First 24 shown, $1 in total · search “$2”" }],
     [/^Показаны первые 24 из (\d+)$/, { ET: "Kuvatud esimesed 24, kokku $1", EN: "First 24 shown, $1 in total" }],
+    [/^1 товар по запросу «(.+)»$/, { ET: "1 toode otsingule „$1“", EN: "1 product for “$1”" }],
     [/^(\d+) товар(?:|а|ов) по запросу «(.+)»$/,
       { ET: "$1 toodet otsingule „$2“", EN: "$1 products for “$2”" }],
     /* the assistant's offline answer (adminAnswer): the lead over its list —
        the names below it are nodes of their own, one a line */
+    [/^Заканчиваются 1 товар\. Срочно:$/, { ET: "Lõppemas on 1 toode. Kiireloomulised:", EN: "1 product is running low. Urgent:" }],
     [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно:$/,
       { ET: "Lõppemas on $1 toodet. Kiireloomulised:", EN: "$1 products are running low. Urgent:" }],
     // …and the line under that list when it shows only the first three
@@ -7750,15 +7770,16 @@
     [/^Первый объём покупатель видит первым\. Цена для салонов — на ([\d.,]+) % меньше, считается сама\.$/,
       { ET: "Esimest mahtu näeb ostja esimesena. Salongihind on $1 % väiksem ja arvutatakse ise.",
         EN: "The buyer sees the first size first. The salon price is $1 % less and is worked out by itself." }],
+    [/^1 из 3 языков$/, { ET: "1 keel 3-st", EN: "1 of 3 languages" }],
     [/^(\d+) из 3 языков$/, { ET: "$1 keelt 3-st", EN: "$1 of 3 languages" }],
     [/^салоны платят (.+)$/, { ET: "salongid maksavad $1", EN: "salons pay $1" }],
     [/^Черновик от (.+)$/, { ET: "Mustand $1", EN: "Draft of $1" }],
     // q41: «N человек ждут» under «Наличие» in the product card (edWaitText)
-    [/^(\d+) человек ждёт — получит письмо$/, { ET: "$1 inimene ootab — saab kirja", EN: "$1 person waiting — will get the letter" }],
-    [/^(\d+) человека? ждут — получат письмо$/, { ET: "$1 inimest ootab — saavad kirja", EN: "$1 people waiting — will get the letter" }],
-    [/^(\d+) человек ждёт — но письмо «Товар снова в наличии» выключено$/,
-      { ET: "$1 inimene ootab — aga kiri «Toode on taas laos» on välja lülitatud", EN: "$1 person waiting — but the “Back in stock” letter is switched off" }],
-    [/^(\d+) человека? ждут — но письмо «Товар снова в наличии» выключено$/,
+    [/^1 человек ждёт — получит письмо$/, { ET: "1 inimene ootab — saab kirja", EN: "1 person waiting — will get the letter" }],
+    [/^(\d+) человека? (?:ждёт — получит|ждут — получат) письмо$/, { ET: "$1 inimest ootab — saavad kirja", EN: "$1 people waiting — will get the letter" }],
+    [/^1 человек ждёт — но письмо «Товар снова в наличии» выключено$/,
+      { ET: "1 inimene ootab — aga kiri «Toode on taas laos» on välja lülitatud", EN: "1 person waiting — but the “Back in stock” letter is switched off" }],
+    [/^(\d+) человека? (?:ждёт|ждут) — но письмо «Товар снова в наличии» выключено$/,
       { ET: "$1 inimest ootab — aga kiri «Toode on taas laos» on välja lülitatud", EN: "$1 people waiting — but the “Back in stock” letter is switched off" }],
     [/^Объём (.+) убран$/, { ET: "Maht $1 eemaldatud", EN: "Size $1 removed" }],
     [/^Убрать (.+)\?$/, { ET: "Eemaldada $1?", EN: "Remove $1?" }],
@@ -7786,9 +7807,14 @@
     // 1a «Салон»: how many bottles the basket holds (posCartHTML)
     [/^(1) шт$/, { ET: "$1 tk", EN: "$1 pc" }],
     [/^(\d+) шт$/, { ET: "$1 tk", EN: "$1 pcs" }],
+    [/^1 поз\. · (.+) · остатки списаны$/,
+      { ET: "1 rida · $1 · jäägid maha kantud", EN: "1 line · $1 · stock written off" }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
     // the same line when the sale carried an e-mail and the letter really went
+    [/^1 поз\. · (.+) · остатки списаны · чек ушёл на почту$/,
+      { ET: "1 rida · $1 · jäägid maha kantud · tšekk läks e-postile",
+        EN: "1 line · $1 · stock written off · the receipt went by e-mail" }],
     [/^(\d+) поз\. · (.+) · остатки списаны · чек ушёл на почту$/,
       { ET: "$1 rida · $2 · jäägid maha kantud · tšekk läks e-postile",
         EN: "$1 lines · $2 · stock written off · the receipt went by e-mail" }],
@@ -7807,11 +7833,19 @@
     /* «По счёту — для компаний»: the three sentences that carry the payment
        term (settings.invoice.dueDays) — the method's hint, the note under the
        company form, and the receipt. */
+    [/^Счёт на почту, оплата в течение 1 дня$/,
+      { ET: "Arve e-postile, maksmine 1 päeva jooksul", EN: "Invoice by e-mail, payment within 1 day" }],
     [/^Счёт на почту, оплата в течение (\d+) (?:дня|дней)$/,
       { ET: "Arve e-postile, maksmine $1 päeva jooksul", EN: "Invoice by e-mail, payment within $1 days" }],
+    [/^Счёт придёт на почту сразу после оформления\. Оплата — переводом в течение 1 дня; заказ отправим после поступления денег\.$/,
+      { ET: "Arve tuleb e-postile kohe pärast tellimuse vormistamist. Maksmine ülekandega 1 päeva jooksul; tellimuse saadame teele pärast makse laekumist.",
+        EN: "The invoice arrives by e-mail right after checkout. Payment by bank transfer within 1 day; we ship the order once the payment arrives." }],
     [/^Счёт придёт на почту сразу после оформления\. Оплата — переводом в течение (\d+) (?:дня|дней); заказ отправим после поступления денег\.$/,
       { ET: "Arve tuleb e-postile kohe pärast tellimuse vormistamist. Maksmine ülekandega $1 päeva jooksul; tellimuse saadame teele pärast makse laekumist.",
         EN: "The invoice arrives by e-mail right after checkout. Payment by bank transfer within $1 days; we ship the order once the payment arrives." }],
+    [/^Оплатите в течение 1 дня — после оплаты отправим заказ\.$/,
+      { ET: "Tasuge 1 päeva jooksul — pärast makse laekumist saadame tellimuse teele.",
+        EN: "Please pay within 1 day — we ship the order as soon as the payment arrives." }],
     [/^Оплатите в течение (\d+) (?:дня|дней) — после оплаты отправим заказ\.$/,
       { ET: "Tasuge $1 päeva jooksul — pärast makse laekumist saadame tellimuse teele.",
         EN: "Please pay within $1 days — we ship the order as soon as the payment arrives." }],
@@ -7831,6 +7865,7 @@
     [/^Письмо ушло (.+)$/, { ET: "Kiri läks välja $1", EN: "Letter sent $1" }],
     [/^Письмо со счётом не ушло \((.+)\) — нажмите «Отправить счёт ещё раз»\.$/,
       { ET: "Arvega kiri ei läinud välja ($1) — vajutage «Saada arve uuesti».", EN: "The invoice letter did not go out ($1) — press “Send the invoice again”." }],
+    [/^Просрочен на 1 день\.$/, { ET: "Üle tähtaja 1 päev.", EN: "1 day overdue." }],
     [/^Просрочен на (\d+) (?:день|дня|дней)\.$/, { ET: "Üle tähtaja $1 päeva.", EN: "$1 days overdue." }],
     [/^(.+) уже был оплачен$/, { ET: "$1 oli juba makstud", EN: "$1 was already paid" }],
     [/^(.+) оплачен по счёту · письмо ушло$/, { ET: "$1 makstud arve alusel · kiri läks välja", EN: "$1 paid by invoice · the letter has gone" }],
@@ -7841,6 +7876,8 @@
       { ET: "$1 makstud arve alusel · kiri ei läinud välja", EN: "$1 paid by invoice · the letter did not go out" }],
     [/^Заказ (.+): оплачен по счёту (.+)$/, { ET: "Tellimus $1: makstud arve $2 alusel", EN: "Order $1: paid by invoice $2" }],
     [/^Счёт (.+) \((.+)\): отправлен ещё раз$/, { ET: "Arve $1 ($2): saadetud uuesti", EN: "Invoice $1 ($2): sent again" }],
+    [/^Счета для компаний: префикс «(.*)», срок оплаты 1 день$/,
+      { ET: "Ettevõtete arved: prefiks «$1», maksetähtaeg 1 päev", EN: "Company invoices: prefix “$1”, payment term 1 day" }],
     [/^Счета для компаний: префикс «(.*)», срок оплаты (\d+) (?:день|дня|дней)$/,
       { ET: "Ettevõtete arved: prefiks «$1», maksetähtaeg $2 päeva", EN: "Company invoices: prefix “$1”, payment term $2 days" }],
     // …and the two dunning intervals, each logged only when it actually moved
@@ -7872,16 +7909,16 @@
       { ET: "Uudiskiri «$1»: saadetud $2, vigu $3", EN: "Newsletter «$1»: $2 sent, $3 failed" }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\.$/,
       { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5.",
-        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English." }],
+        EN: "The letter «$1» goes out to subscribers: $2 — $3 in Russian, $4 in Estonian, $5 in English." }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Эстонского текста нет — эти подписчики получат русскую версию\.$/,
       { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Eestikeelset teksti pole — need tellijad saavad venekeelse versiooni.",
-        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian text — these subscribers get the Russian version." }],
+        EN: "The letter «$1» goes out to subscribers: $2 — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian text — these subscribers get the Russian version." }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Английского текста нет — эти подписчики получат русскую версию\.$/,
       { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
-        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no English text — these subscribers get the Russian version." }],
+        EN: "The letter «$1» goes out to subscribers: $2 — $3 in Russian, $4 in Estonian, $5 in English. There is no English text — these subscribers get the Russian version." }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Эстонского и английского текста нет — эти подписчики получат русскую версию\.$/,
       { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
-        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian or English text — these subscribers get the Russian version." }],
+        EN: "The letter «$1» goes out to subscribers: $2 — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian or English text — these subscribers get the Russian version." }],
     /* ---- r16: «Журнал изменений» -----------------------------------------
        Every line of the change log, and every confirm card that is built from
        the same sentence (actionText). They live at the END of this list on
@@ -7913,9 +7950,15 @@
     [/^Письмо «(.+)»: (.+)$/, { ET: "Kiri «$1»: $2", EN: "Letter “$1”: $2" }],
     [/^Скидка в поздравлении: (.+) %$/,
       { ET: "Soodustus õnnitluses: $1 %", EN: "Discount in the birthday letter: $1 %" }],
+    [/^Поздравление: за 1 день до дня рождения$/,
+      { ET: "Õnnitlus: 1 päev enne sünnipäeva", EN: "Birthday letter: 1 day before the birthday" }],
     [/^Поздравление: за (\d+) (?:день|дня|дней) до дня рождения$/,
       { ET: "Õnnitlus: $1 päeva enne sünnipäeva", EN: "Birthday letter: $1 days before the birthday" }],
     [/^Поздравление: (.+)$/, { ET: "Õnnitlus: $1", EN: "Birthday letter: $1" }],
+    [/^через 1 день$/, { ET: "1 päeva pärast", EN: "after 1 day" }],
+    [/^через (\d+) (?:день|дня|дней)$/, { ET: "$1 päeva pärast", EN: "after $1 days" }],
+    [/^Доставлен сам: (.+) · через 1 день$/,
+      { ET: "Ise kohale toimetatud: $1 · 1 päeva pärast", EN: "Delivered by itself: $1 · after 1 day" }],
     [/^Доставлен сам: (.+) · через (\d+) (?:день|дня|дней)$/,
       { ET: "Ise kohale toimetatud: $1 · $2 päeva pärast", EN: "Delivered by itself: $1 · after $2 days" }],
     [/^Доставлен сам: (.+) · (.+)$/,
@@ -7923,13 +7966,17 @@
     [/^ИИ-чат для покупателей: (.+)$/, { ET: "AI-vestlus ostjatele: $1", EN: "The AI chat for shoppers: $1" }],
     [/^Наборы на сайте: (.+)$/, { ET: "Komplektid saidil: $1", EN: "Sets on the site: $1" }],
     [/^Набор «(.+)»: (.+)$/, { ET: "Komplekt «$1»: $2", EN: "Set “$1”: $2" }],
+    [/^Баннер: 1 слайд, первый — «(.*)»$/,
+      { ET: "Bänner: 1 slaid, esimene — «$1»", EN: "Banner: 1 slide, the first is “$1”" }],
     [/^Баннер: (\d+) (?:слайд|слайда|слайдов), первый — «(.*)»$/,
       { ET: "Bänner: $1 slaidi, esimene — «$2»", EN: "Banner: $1 slides, the first is “$2”" }],
+    [/^Тексты писем: 1 свой текст$/, { ET: "Kirjade tekstid: 1 oma tekst", EN: "Letter texts: 1 of your own" }],
     [/^Тексты писем: (\d+) (?:свой текст|своих текста|своих текстов)$/,
       { ET: "Kirjade tekstid: $1 oma teksti", EN: "Letter texts: $1 of your own" }],
     [/^Подкатегория «(.+)»: (.+)$/, { ET: "Alamkategooria «$1»: $2", EN: "Subcategory “$1”: $2" }],
     [/^Фото по объёмам «(.+)»: (.+)$/, { ET: "Fotod mahtude kaupa «$1»: $2", EN: "Photos by size “$1”: $2" }],
     [/^Видео «(.+)»: (.+)$/, { ET: "Video «$1»: $2", EN: "Video “$1”: $2" }],
+    [/^Фото «(.+)»: 1 фотография$/, { ET: "Fotod «$1»: 1 foto", EN: "Photos “$1”: 1" }],
     [/^Фото «(.+)»: (\d+) (?:фотография|фотографии|фотографий)$/,
       { ET: "Fotod «$1»: $2 fotot", EN: "Photos “$1”: $2" }],
     [/^Фото «(.+)»: (.+)$/, { ET: "Fotod «$1»: $2", EN: "Photos “$1”: $2" }],
@@ -8015,6 +8062,7 @@
     [/^(название компании|рег\. номер|номер KMKR|адрес|почта|телефон|IBAN|банк) → (.+)$/,
       { ET: "$1 → $2", EN: "$1 → $2" }],
     /* a promo code's own conditions, each its own fact in the same list */
+    [/^1 использование$/, { ET: "1 kasutuskord", EN: "1 use" }],
     [/^(\d+) (?:использование|использования|использований)$/,
       { ET: "$1 kasutuskorda", EN: "$1 uses" }],
     [/^Номиналы подарочной карты: (.+)$/,

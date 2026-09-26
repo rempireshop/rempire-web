@@ -6764,6 +6764,47 @@
       "markedAt": "2026-09-25T22:35:02.127Z"
     },
     {
+      "id": "pos-count-en-one",
+      "area": "stock",
+      "who": "dim",
+      "device": "any",
+      "lang": "EN",
+      "title": "Одна штука по-английски — в единственном числе",
+      "steps": [
+        "Переключить панель на английский.",
+        "В «Салоне» продать одну бутылку любого товара и прочитать строку под суммой.",
+        "На «Складе» найти товар по полному названию, чтобы нашёлся ровно один.",
+        "Переключить панель на эстонский и повторить поиск."
+      ],
+      "expect": [
+        "Под суммой продажи — «1 line · …», а не «1 lines».",
+        "Над найденным товаром — «1 product for “…”», а не «1 products».",
+        "По-эстонски там же «1 toode otsingule …», без «toodet».",
+        "Русских слов в этих строках нет."
+      ],
+      "why": "На стенде панель писала «1 lines» и «1 products» — по-английски так не говорят.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-26T02:14:59.255Z",
+      "en": {
+        "title": "One item reads as one in English",
+        "steps": [
+          "Switch the panel to English.",
+          "In «Салон» sell one bottle of any product and read the line under the total.",
+          "In «Склад» search a product by its full name, so exactly one is found.",
+          "Switch the panel to Estonian and search again."
+        ],
+        "expect": [
+          "Under the total: «1 line · …», not «1 lines».",
+          "Above the product found: «1 product for “…”», not «1 products».",
+          "In Estonian the same line reads «1 toode otsingule …», without «toodet».",
+          "No Russian words in these lines."
+        ],
+        "why": "On staging the panel wrote «1 lines» and «1 products», which is not English."
+      }
+    },
+    {
       "id": "pos-no-stock",
       "area": "stock",
       "who": "renat",
