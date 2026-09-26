@@ -41,6 +41,8 @@ import {
 // cannot drift from it; the live computeShipping() call itself still goes
 // through the optional-neighbour door a few lines down.
 import { DEFAULT_SHIPPING_RULES, shippingZone } from "@/lib/shipping";
+// The refund ledger's reader — a leaf module (node:crypto and a type), no cycle.
+import { refundsOf } from "@/lib/payments/refund";
 import { NO_NOVAPOST_COUNTRIES } from "@/lib/shipping/country-prices";
 import { POS_NO_NAME } from "@/lib/pos-name";
 // media: what product_overrides.video_url is allowed to hold — a pure module
@@ -2250,9 +2252,13 @@ export async function setOrderStatus(
      вручную». The shelf follows that move back just below; the points now do
      too, or a mis-pressed «возврат» undone a second later left the customer
      with the spent points AND the order (restoreLoyaltyPoints). A no-op on an
-     order whose points never moved — a cancel that was waiting for its refund. */
+     order whose points never moved — a cancel that was waiting for its refund.
+     And never on an order whose money has really gone back (a confirmed
+     refund on its payment record): the points follow the money, and the money
+     is not coming back with a status click. */
+  const moneyBack = refundsOf(after.payment).filter((r) => r.status === "done").reduce((sum, r) => sum + r.amount, 0);
   if (!wasPaid && (before.status === "cancelled" || before.status === "refunded")
-      && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
+      && (PAID_ORDER_STATUSES as readonly string[]).includes(status) && !(moneyBack > 0.004)) {
     try {
       const out = await restoreLoyaltyPoints(id, `заказ ${after.number} снова оплачен`);
       if (out.ok && (out.back || out.revoked)) {

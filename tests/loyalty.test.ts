@@ -545,6 +545,19 @@ describe("loyalty ledger — a refund's points as two named lines", () => {
     expect(await refundRows(o.id)).toHaveLength(6);
   });
 
+  it("keeps the points where the refund put them when the money really went back", async () => {
+    const { id, order: o } = await paidWith("money-back@example.com", 10, 3);
+    await setOrderStatus(o.id, "cancelled", "admin");
+    const { settleRefund } = await import("@/lib/payments/settle");
+    await settleRefund((await getOrder(o.id))!, {
+      ref: "money-back-1", amount: 40, status: "done", at: new Date().toISOString(), by: "admin",
+    }, { notify: false });
+    expect(await getLoyaltyBalance(id)).toBe(100);
+    // a status click does not bring the money back, so it does not take the points either
+    await setOrderStatus(o.id, "paid", "admin");
+    expect(await getLoyaltyBalance(id)).toBe(100);
+  });
+
   it("the refund letter reads the ledger and says what moved", async () => {
     const { order: o } = await paidWith("letter@example.com", 10, 3);
     await setOrderStatus(o.id, "refunded", "admin");
