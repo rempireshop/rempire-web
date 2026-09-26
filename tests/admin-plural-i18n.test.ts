@@ -182,3 +182,184 @@ describe("the ones the owner saw on staging", () => {
     expect(tr("· 21 день", "EN")).toBe("· 21 days");
   });
 });
+
+/* ---- the count in a node of its own --------------------------------------
+   «Обзор → Сделать сегодня» draws its rows as a big figure and, beside it,
+   the words — two nodes. translateTree() reads the words alone, and pl()
+   gives 21, 31, … Russian's «one» form, so an ET/EN panel said «21 order
+   waiting to ship», «21 product running out». The rows are rendered here by
+   app.js's own admTaskRow(), with the very argument each call site passes,
+   and translated by app.js's own translateTree() over a small stand-in DOM. */
+
+/** `<head> { … }` cut out of app.js by brace matching, `head` included. */
+function block(head: string): string {
+  const start = src.indexOf(head);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has «${head}»`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces after «${head}» in app.js`);
+}
+const fnSrc = (name: string) => block(`function ${name}(`);
+const varSrc = (name: string, open: "[" | "{") => {
+  const start = src.indexOf(`var ${name} = ${open}`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer declares ${name}`);
+  const close = open === "[" ? "]" : "}";
+  let depth = 0;
+  for (let i = src.indexOf(open, start); i < src.length; i++) {
+    if (src[i] === open) depth++;
+    else if (src[i] === close && --depth === 0) return `${src.slice(start, i + 1)};`;
+  }
+  throw new Error(`unbalanced ${name}`);
+};
+
+/* The stand-in DOM: elements with attributes, text nodes, a tree walker —
+   what translateTree() touches, nothing more. */
+interface TNode { nodeValue: string; parentElement: TEl }
+interface TEl {
+  tagName: string; attrs: Record<string, string>; kids: Array<TEl | TNode>; parentElement: TEl | null;
+  getAttribute(n: string): string | null; closest(sel: string): null; querySelectorAll(sel: string): TEl[];
+}
+const ENT: Record<string, string> = { "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"' };
+function parseHTML(html: string): TEl {
+  const el = (tagName: string, attrs: Record<string, string>, parent: TEl | null): TEl => ({
+    tagName, attrs, kids: [], parentElement: parent,
+    getAttribute(n) { return Object.prototype.hasOwnProperty.call(this.attrs, n) ? this.attrs[n] : null; },
+    closest() { return null; },
+    querySelectorAll() { return []; },
+  });
+  const root = el("DIV", {}, null);
+  let cur = root;
+  for (const m of html.matchAll(/<(\/?)([a-z][a-z0-9]*)([^>]*)>|([^<]+)/gi)) {
+    if (m[4] !== undefined) { cur.kids.push({ nodeValue: m[4].replace(/&(?:amp|lt|gt|quot);/g, (e) => ENT[e]), parentElement: cur }); continue; }
+    if (m[1]) { cur = cur.parentElement ?? root; continue; }
+    const attrs: Record<string, string> = {};
+    for (const a of m[3].matchAll(/([\w-]+)="([^"]*)"/g)) attrs[a[1]] = a[2].replace(/&(?:amp|lt|gt|quot);/g, (e) => ENT[e]);
+    const child = el(m[2].toUpperCase(), attrs, cur);
+    cur.kids.push(child);
+    if (!/^(br|img|path|input)$/i.test(m[2])) cur = child;
+  }
+  return root;
+}
+function textNodes(root: TEl): TNode[] {
+  const out: TNode[] = [];
+  const walk = (e: TEl) => { for (const k of e.kids) ("tagName" in k ? walk(k) : out.push(k)); };
+  walk(root);
+  return out;
+}
+function textOf(e: TEl): string {
+  return e.kids.map((k) => ("tagName" in k ? textOf(k) : k.nodeValue)).join("");
+}
+function find(e: TEl, cls: string): TEl | null {
+  if ((e.attrs.class || "").split(/\s+/).includes(cls)) return e;
+  for (const k of e.kids) if ("tagName" in k) { const f = find(k, cls); if (f) return f; }
+  return null;
+}
+
+// This repository's own source only.
+const translateTree = new Function("S", "document", "NodeFilter", `
+  ${varSrc("UI", "{")}
+  ${varSrc("UI_RX", "[")}
+  ${fnSrc("trName")}
+  ${varSrc("TAIL_EXACT", "{")}
+  ${varSrc("NAME_TAILS", "{")}
+  ${varSrc("NAME_FRAGS", "[")}
+  ${fnSrc("trText")}
+  var NAME_CTX = ".never";
+  var TR_ATTRS = ["placeholder", "aria-label", "title", "label"];
+  ${fnSrc("translateTree")}
+  return translateTree;
+`);
+function translated(html: string, lang: Lang): TEl {
+  const root = parseHTML(html);
+  const doc = { createTreeWalker: (r: TEl) => { const list = textNodes(r); let i = 0; return { nextNode: () => list[i++] ?? null }; } };
+  translateTree({ lang }, doc, { SHOW_TEXT: 4 })(root);
+  return root;
+}
+
+// This repository's own source only.
+const admTaskRow = new Function(`
+  ${fnSrc("pl")}
+  ${fnSrc("esc")}
+  ${fnSrc("admTaskRow")}
+  return admTaskRow;
+`)() as (n: number, label: unknown, detail: string, attrs: string, warn?: boolean) => string;
+
+/* Every count row of «Сделать сегодня», as its call site writes it: the
+   count's name and the label argument — whatever shape it has. */
+const ROWS = [...src.matchAll(/admTaskRow\((\w+),\s*((?:pl\(\1, |\[)"[^"\n]+", "[^"\n]+", "[^"\n]+"(?:\)|\]))/g)].map((m) => ({ n: m[1], arg: m[2] }));
+
+describe("«Сделать сегодня»: the figure and the words apart, and still one sentence in ET and EN", () => {
+  it("finds every count row of «Обзор»", () => {
+    expect(ROWS.map((r) => r.n)).toEqual(["shipN", "overN", "heldN", "lowN", "hidLow", "revN", "proN", "retN"]);
+  });
+  for (const row of ROWS) {
+    it(row.n, () => {
+      // the call site's own argument, cut out of this repository's app.js above
+      const label = (n: number) => new Function("pl", row.n, `return ${row.arg};`)(
+        (k: number, a: string, b: string, c: string) => { const x = k % 10, y = k % 100; return x === 1 && y !== 11 ? a : x >= 2 && x <= 4 && (y < 10 || y >= 20) ? b : c; }, n);
+      const wrong: string[] = [];
+      for (const lang of ["EN", "ET"] as const) {
+        const read = (n: number) => {
+          const root = translated(admTaskRow(n, label(n), "Mart Tamm", 'data-admtab="orders"'), lang);
+          return `${textOf(find(root, "adm-row__big")!)} ${textOf(find(root, "adm-todo__t")!)}`;
+        };
+        const two = read(2);
+        for (const n of [1, 2, 5, 11, 21, 22, 31]) {
+          const out = read(n);
+          if (CYR.test(out)) wrong.push(`${lang} ${n}: Russian left — «${out}»`);
+          if (n === 1 && out === swap(two, 2, 1)) wrong.push(`${lang} 1: «${out}» — the plural`);
+          if (n > 2 && out !== swap(two, 2, n)) wrong.push(`${lang} ${n}: «${out}», but 2 reads «${two}»`);
+        }
+      }
+      expect(wrong).toEqual([]);
+    });
+  }
+  it("Russian keeps pl()'s own form — «21 заказ ждёт отправки»", () => {
+    const html = admTaskRow(21, ["заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"], "", "");
+    expect(textOf(find(parseHTML(html), "adm-todo__t")!)).toBe("заказ ждёт отправки");
+    expect(textOf(find(parseHTML(admTaskRow(1, ["заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"], "", "")), "adm-todo__t")!))
+      .toBe("заказ ждёт отправки");
+  });
+  it("a row with words and no count («Заполните IBAN») is drawn as before", () => {
+    const html = admTaskRow("!" as unknown as number, "Заполните IBAN — счета не уходят", "", 'data-admtab="setup"');
+    expect(html).toContain('<span class="adm-row__nm adm-todo__t">Заполните IBAN — счета не уходят</span>');
+  });
+});
+
+/* «Ещё»: its status lines carry the figure inside each piece («21 заявка ·
+   3 отзыва», painted a node per piece), so the rules above read the count
+   with the words. Rendered by app.js's own admMoreLine() and admPiecesHTML(). */
+describe("«Ещё»: the status lines under «Клиенты», «Блог» and «Подключения»", () => {
+  const moreLine = new Function("OVERVIEW", `
+    ${fnSrc("pl")}
+    ${fnSrc("esc")}
+    function eur(n) { return n + " €"; }
+    ${varSrc("ADM_MORE", "[")}
+    ${fnSrc("admPiecesHTML")}
+    ${fnSrc("admMoreLine")}
+    return function (key) { var l = admMoreLine(key); return l[2] ? admPiecesHTML(l[0]) : l[0]; };
+  `) as (o: unknown) => (key: string) => string;
+  for (const key of ["people", "blog", "apps"]) {
+    it(key, () => {
+      const wrong: string[] = [];
+      for (const lang of ["EN", "ET"] as const) {
+        const read = (n: number) => textOf(translated(moreLine({ data: {
+          attention: { proRequests: n, reviewsPending: n },
+          blog: { published: n, drafts: n },
+          integrations: { problems: n },
+        } })(key), lang));
+        const two = read(2);
+        for (const n of [1, 2, 5, 11, 21, 22]) {
+          const out = read(n);
+          if (CYR.test(out)) wrong.push(`${lang} ${n}: Russian left — «${out}»`);
+          if (n === 1 && out === swap(two, 2, 1)) wrong.push(`${lang} 1: «${out}» — the plural`);
+          if (n > 2 && out !== swap(two, 2, n)) wrong.push(`${lang} ${n}: «${out}», but 2 reads «${two}»`);
+        }
+      }
+      expect(wrong).toEqual([]);
+    });
+  }
+});

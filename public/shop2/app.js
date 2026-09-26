@@ -8264,8 +8264,11 @@
          Estonian text, an article's title in a link. [data-notr] marks them. */
       if (el && el.closest && el.closest("[data-notr]")) continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
-      var tr = trText(t, lang, allowName);
-      if (tr !== t) node.nodeValue = raw.replace(t, tr);
+      /* a count's words standing apart from their figure (admTaskRow) name
+         the key that reads right for that figure in ET and EN */
+      var from = (el && el.getAttribute && el.getAttribute("data-trkey")) || t;
+      var tr = trText(from, lang, allowName);
+      if (tr !== from) node.nodeValue = raw.replace(t, tr);
     }
     /* [label] is in the list because TR_ATTRS is: an <optgroup> carries its
        heading there and nowhere else, so without it the four group headings
@@ -21155,11 +21158,23 @@
   }
   /* 1a (screen 03): a row of «Сделать сегодня» — the big number (rust when it
      is something only he can end), what it is, whose, and the chevron. The
-     whole row is the door; `attrs` is the section and the chip it opens. */
+     whole row is the door; `attrs` is the section and the chip it opens.
+     `label` is the words — or, for a count, their three Russian forms, and
+     the row picks one by `n` (pl). The figure and the words are two nodes,
+     so translateTree() reads the words without the number, and Russian's
+     «one» form is also its form for 21, 31, … — which ET and EN say only of
+     1: «21 заказ ждёт отправки» came out «21 order waiting to ship». For
+     those counts the words name the key to translate instead (data-trkey):
+     the «few» form, which ET and EN read as the plural it is. */
   function admTaskRow(n, label, detail, attrs, warn) {
+    var words = label, trKey = "";
+    if (label && typeof label === "object") {
+      words = pl(n, label[0], label[1], label[2]);
+      if (words === label[0] && Number(n) !== 1) trKey = label[1];
+    }
     return '<button class="adm-row adm-row--click adm-todo" ' + attrs + '>' +
       '<span class="adm-row__big' + (warn ? " adm-row__big--warn" : "") + '">' + n + "</span>" +
-      '<span class="adm-row__body"><span class="adm-row__nm adm-todo__t">' + label + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm adm-todo__t"' + (trKey ? ' data-trkey="' + esc(trKey) + '"' : "") + ">" + words + "</span>" +
       (detail ? '<span class="adm-row__sub adm-row__sub--one">' + esc(detail) + "</span>" : "") + "</span>" +
       '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
   }
@@ -21241,7 +21256,7 @@
     var who = (o && o.attentionNames) || {};
     var tasks = "";
     if (shipN) tasks += admTaskRow(shipN,
-      pl(shipN, "заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"),
+      ["заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"],
       names(toShip, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="new"');
     if (noIban) tasks += admTaskRow("!",
@@ -21252,7 +21267,7 @@
          and redrew the screen it was on (map defect 1, 24.09.2026). */
       'data-admtab="setup" data-admsetpage="company"', true);
     if (overN) tasks += admTaskRow(overN,
-      pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
+      ["счёт просрочен", "счёта просрочены", "счетов просрочены"],
       names(overdue, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="invoice"', true);
     /* Money arrived and it was not enough. Nothing was fulfilled and nothing
@@ -21260,11 +21275,11 @@
        he can end — and it was findable nowhere: the order keeps the status
        «новый» and sat in «Все» behind «Ждёт оплаты» (Dim, 19.09.2026). */
     if (heldN) tasks += admTaskRow(heldN,
-      pl(heldN, "заказ придержан", "заказа придержаны", "заказов придержаны"),
+      ["заказ придержан", "заказа придержаны", "заказов придержаны"],
       names(heldList, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="held"', true);
     if (lowN) tasks += admTaskRow(lowN,
-      pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
+      ["товар заканчивается", "товара заканчиваются", "товаров заканчиваются"],
       names(lowItems, function (p) { return admProdName(p.name); }),
       'data-admtab="stock"', true);
     /* …and the ones behind the switch, counted apart (Dim, 19.09.2026). The
@@ -21279,14 +21294,14 @@
        hidden product»). It opens «Каталог → Скрытые» now, and says which
        ones, so the list is a place to look rather than a place to search. */
     if (hidLow) tasks += admTaskRow(hidLow,
-      pl(hidLow, "скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"),
+      ["скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются"],
       hidItems.length ? names(hidItems, function (p) { return admProdName(p.name); }) :"сняты с продажи — закажите, если вернёте в магазин",
       'data-admtab="goods" data-admfilter="off"', true);
     if (revN) tasks += admTaskRow(revN,
-      pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
+      ["отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"],
       names(who.reviews || [], admReviewWho), 'data-admtab="reviews"');
     if (proN) tasks += admTaskRow(proN,
-      pl(proN, "заявка на партнёрство", "заявки на партнёрство", "заявок на партнёрство"),
+      ["заявка на партнёрство", "заявки на партнёрство", "заявок на партнёрство"],
       names(who.partners || [], function (p) { return p && p.name; }), 'data-admtab="people" data-admfilter="pending"');
     /* returns: the tick from «Кабинет → Мои заказы» arrives here, in the same
        queue a new review and a partner request arrive in — the shop has one
@@ -21295,7 +21310,7 @@
        holds nothing else — instead of dropping him into «В пути» among all the
        other parcels. The names under it still say whose. */
     if (retN) tasks += admTaskRow(retN,
-      pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
+      ["заявка на возврат", "заявки на возврат", "заявок на возврат"],
       names(retList, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="returns"', true);
     /* The first open: until the summary has answered, the rows it feeds are
