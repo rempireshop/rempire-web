@@ -1408,7 +1408,8 @@ seed-файла, DPD и Nova Post не предлагаются, «Создат�
 | `src/lib/parcel-points.ts` | Живой фид, кэш, откат на seed |
 | `src/lib/shipping/montonio.ts` | Montonio Shipping: точки, отправления, этикетки, `fetchMontonioRates()`, `fetchMontonioCarriers()` (логотипы) |
 | `src/lib/shipping/webhook.ts` | `shipment.statusUpdated`: проверка токена, словарь статусов в `settings.shipping_statuses`, `statusMeaning()` (белый список как запасной путь) |
-| `src/lib/shipping/shipment-sync.ts` | Одно обновление статуса отправления для вебхука и ночной сверки (`applyShipmentUpdate()`: без отката назад, опоздавший трек-номер, отказ в журнал, «Доставлен»); `syncStaleShipments()` — ночная сверка `GET /shipments/{id}` (24.09.2026) |
+| `src/lib/shipping/shipment-sync.ts` | Одно обновление статуса отправления для вебхука и ночной сверки (`applyShipmentUpdate()`: без отката назад, опоздавший трек-номер, отказ в журнал, «Доставлен»; с 26.09.2026 вебхук записывает посылку в заказ, у которого нет её номера); `syncStaleShipments()` — ночная сверка `GET /shipments/{id}` (24.09.2026) |
+| `src/lib/shipping/shipment-adopt.ts` | «Создать этикетку» без ответа Montonio (R-100098, 26.09.2026): прежде чем бронировать, ищет посылку, которая уже есть, — номер из журнала по этому заказу, проверка `GET /shipments/{id}`, `merchantReference`; найденная привязывается к заказу, вторая не создаётся |
 | `src/app/api/shipping/carriers/route.ts` | Логотипы перевозчиков для кассы (публичный, 503 без ключей) |
 | `src/app/api/shipping/notify/route.ts` | Вебхук Montonio о статусе посылки |
 | `src/lib/shipping/montonio-mock.ts` | `SHIPPING_PROVIDER=mock` — заглушка отправления и этикетки для браузерных тестов |

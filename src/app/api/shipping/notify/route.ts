@@ -146,10 +146,18 @@ export async function POST(req: Request) {
      the word onto the order (never backwards: a retried event can be two days
      late), a tracking code the order lacks (a parcel registered after the
      button press — a repaired refusal), the journal row for a refusal, and
-     «delivered» closing a `shipped` order. Only the status and a missing
-     tracking code are ever written: the id was written by «Создать этикетку»
-     from Montonio's own answer, and a webhook is not the place to invent a
-     parcel the panel never booked.
+     «delivered» closing a `shipped` order. On an order that already holds a
+     parcel, only the status and a missing tracking code are ever written.
+
+     On an order that holds NO parcel id, the event's parcel is recorded whole
+     (since 26.09.2026). This used to say a webhook «is not the place to
+     invent a parcel the panel never booked» — and then R-100098 showed the
+     parcel the panel DID book, whose answer our fetch had given up on: this
+     event was the only place its id existed, and without it the next press
+     would have booked a second one. Nothing is invented: the id, the carrier
+     and the tracking code are Montonio's own, signed. No call goes back to
+     Montonio from here — the event carries all of it, and the answer stays
+     fast.
 
      The refusal is read TWO ways, because only one is documented: the word
      `registrationFailed`, and the event NAME `shipment.registrationFailed`
@@ -167,6 +175,10 @@ export async function POST(req: Request) {
         trackingCode: event.trackingCode,
         trackingUrl: event.trackingUrl,
         dropOffPin: event.dropOffPin,
+        carrier: event.carrier,
+        country: event.country,
+        method: event.method,
+        createdAt: event.createdAt,
       },
       { source: "webhook" },
     );
@@ -182,6 +194,7 @@ export async function POST(req: Request) {
     number: order.number,
     applied: result.applied || undefined,
     stale: result.stale || undefined,
+    adopted: result.adopted || undefined,
     ignored: result.otherShipment ? "other_shipment" : undefined,
   });
 }

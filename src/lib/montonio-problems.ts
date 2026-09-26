@@ -1172,3 +1172,63 @@ export function shipmentRegistrationFailed(detail?: string | null): ShipmentRefu
     messages: SHIPMENT_TEXT.registration_failed,
   };
 }
+
+/* ---------- shipments: a booking nobody knows the outcome of -------------- */
+
+/**
+ * `booking_unknown` from POST /api/admin/shipments — the parcel may exist.
+ *
+ * R-100098, the first live hour (26.09.2026): our fetch gave up on
+ * `POST /shipments` after ten seconds, the panel said «не удалось», and
+ * Montonio had booked the parcel all the same. A second press would have paid
+ * for a second one. So the button now says which of three things is true:
+ *   · `timeout` — this press got no definite answer (a timeout, a dropped
+ *     connection, a 5xx): wait, press again, the shop checks first;
+ *   · `waiting` — an earlier press got no answer and nothing has turned up
+ *     yet: still no second booking; after BOOKING_UNCERTAIN_MS with nothing
+ *     found, the button books again;
+ *   · `unlinked` — Montonio has reported a parcel for this order but the shop
+ *     has no id for it anywhere: it never books, and says who can fix it.
+ * The panel prints these as they are (srvMsg in public/shop2/app.js).
+ */
+export type BookingUnknownReason = "timeout" | "waiting" | "unlinked";
+
+const BOOKING_UNKNOWN_TEXT: Record<BookingUnknownReason, Trilingual> = {
+  timeout: {
+    RU:
+      "Montonio не ответил вовремя — посылка могла уже создаться. Подождите минуту и нажмите «Создать этикетку» ещё раз: " +
+      "магазин сначала проверит, есть ли она у Montonio, и вторую не создаст.",
+    ET:
+      "Montonio ei vastanud õigel ajal — pakk võib juba olemas olla. Oodake minut ja vajutage uuesti «Loo silt»: " +
+      "pood kontrollib enne, kas Montoniol see juba on, ja teist ei loo.",
+    EN:
+      "Montonio did not answer in time — the parcel may already exist. Wait a minute and press «Create the label» again: " +
+      "the shop checks with Montonio first and will not create a second one.",
+  },
+  waiting: {
+    RU:
+      "Магазин ещё не знает, создал ли Montonio посылку по прошлому нажатию, поэтому вторую не создаёт. " +
+      "Подождите минуту и нажмите ещё раз. Если через 10 минут посылка так и не найдётся, кнопка создаст её.",
+    ET:
+      "Pood ei tea veel, kas Montonio lõi eelmise vajutusega paki, seepärast teist ei looda. " +
+      "Oodake minut ja vajutage uuesti. Kui 10 minuti pärast pakki ikka ei leita, loob nupp selle.",
+    EN:
+      "The shop does not know yet whether Montonio created the parcel on the last press, so it does not create a second one. " +
+      "Wait a minute and press again. If no parcel has turned up after 10 minutes, the button creates it.",
+  },
+  unlinked: {
+    RU:
+      "Montonio уже сообщил о посылке для этого заказа, но без её номера — вторую магазин не создаст. " +
+      "Найдите посылку в Montonio по номеру заказа и напишите Диму: он привяжет её к заказу.",
+    ET:
+      "Montonio on selle tellimuse paki kohta juba teada andnud, aga ilma selle numbrita — teist pakki pood ei loo. " +
+      "Leidke pakk Montoniost tellimuse numbri järgi ja kirjutage Dimile: tema seob selle tellimusega.",
+    EN:
+      "Montonio has already reported a parcel for this order, but without its number — the shop will not create a second one. " +
+      "Find the parcel in Montonio by the order number and write to Dim: he links it to the order.",
+  },
+};
+
+export function shipmentBookingUnknown(reason: BookingUnknownReason): { reason: BookingUnknownReason; messages: Trilingual } {
+  return { reason, messages: BOOKING_UNKNOWN_TEXT[reason] };
+}

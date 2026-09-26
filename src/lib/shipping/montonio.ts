@@ -54,6 +54,29 @@ const SANDBOX_BASE = "https://sandbox-shipping.montonio.com/api/v2";
 /** The docs recommend an hour on the auth token. */
 const TOKEN_TTL_SECONDS = 3600;
 const REQUEST_TIMEOUT_MS = 10_000;
+/**
+ * `POST /shipments` gets its own, longer wait — and only it.
+ *
+ * With `synchronous: true` Montonio answers after the CARRIER has answered it,
+ * and on the first live hour (26.09.2026, R-100098, DPD parcel machine) that
+ * took longer than the ten seconds every other call is given. Our fetch gave
+ * up, Montonio did not: the parcel was booked, and the shop reported «not
+ * reachable» over it. 25 s covers a slow carrier and still leaves the route
+ * (maxDuration 60 in POST /api/admin/shipments) time for the pickup-point and
+ * constraints reads in front of it. A wait that runs out even so is answered
+ * `booking_unknown`, never «nothing was booked» — see createMontonioShipment().
+ */
+export const CREATE_TIMEOUT_MS = 25_000;
+/**
+ * How long «we do not know whether Montonio booked it» holds the button.
+ *
+ * Montonio's `shipment.registered` webhook arrives within seconds of the
+ * booking (R-100098: 19:33:03 UTC, moments after the press) and stores the
+ * parcel on the order (src/lib/shipping/shipment-sync.ts). Ten minutes is that
+ * with a wide margin, and still short enough that a booking which really never
+ * reached Montonio can be made again the same afternoon.
+ */
+export const BOOKING_UNCERTAIN_MS = 10 * 60_000;
 /** Same six hours the carrier feeds are cached for — machine lists barely move. */
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -130,7 +153,11 @@ export type MontonioShippingErrorCode =
   | "no_courier_service"
   | "point_unresolved"
   | "not_shippable"
-  | "label_not_ready";
+  | "label_not_ready"
+  /* `POST /shipments` ended without a definite answer — a timeout, a dropped
+     connection, a 5xx, a 2xx we could not read. The parcel may exist. Only
+     createMontonioShipment() throws it; see bookingRefusedForSure(). */
+  | "booking_unknown";
 
 export class MontonioShippingError extends Error {
   constructor(
@@ -235,6 +262,13 @@ export interface MontonioShipment {
    */
   dismissed?: boolean;
   createdAt: string;
+  /**
+   * Our order number as Montonio has it on the shipment — read by
+   * getMontonioShipment() only, so a parcel found by id can be checked to be
+   * THIS order's before it is adopted (src/lib/shipping/shipment-adopt.ts).
+   * Not stored on the order.
+   */
+  merchantReference?: string;
 }
 
 export interface MontonioLabelFile {
@@ -270,7 +304,7 @@ export function shippingAuthToken(config: MontonioConfig): string {
 async function call<T>(
   config: MontonioConfig,
   path: string,
-  init?: { method?: string; body?: unknown },
+  init?: { method?: string; body?: unknown; timeoutMs?: number },
 ): Promise<T> {
   const url = `${montonioShippingBaseUrl(config.env)}${path}`;
   const headers: Record<string, string> = {
@@ -285,14 +319,22 @@ async function call<T>(
       method: init?.method ?? "GET",
       headers,
       body: init?.body === undefined ? undefined : JSON.stringify(init.body),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(init?.timeoutMs ?? REQUEST_TIMEOUT_MS),
       cache: "no-store",
     });
   } catch {
     throw new MontonioShippingError("unreachable", path);
   }
 
-  const text = await res.text();
+  /* The same timer is still running while the body streams in, so a slow
+     body is a timeout too — and until 26.09.2026 it escaped as a bare
+     DOMException that no caller recognised as «Montonio did not answer». */
+  let text: string;
+  try {
+    text = await res.text();
+  } catch {
+    throw new MontonioShippingError("unreachable", path, res.status);
+  }
   if (res.status === 404) throw new MontonioShippingError("not_found", path, 404);
   if (!res.ok) {
     console.error("[montonio shipping]", init?.method ?? "GET", path, res.status, text.slice(0, 400));
@@ -1351,12 +1393,43 @@ async function shipmentParts(
 }
 
 /**
+ * Did `POST /shipments` fail in a way that PROVES no shipment was created?
+ *
+ * Only Montonio's own refusal proves it: a 4xx with its reason in the body —
+ * a bad phone, an unknown carrier, keys it does not know. Everything else is
+ * «we do not know», and until 26.09.2026 the route treated it as «no»: our
+ * fetch timed out after ten seconds on R-100098, the button was freed «since
+ * nothing was booked», and Montonio's `shipment.registered` for that very
+ * order arrived a moment later. So:
+ *   · a timeout or a dropped connection (`unreachable`) — the request may have
+ *     arrived and been acted on;
+ *   · a 5xx — Montonio's own server failed, possibly after the insert;
+ *   · 408 and 409 — a timeout at their end, or a conflict with something that
+ *     already exists;
+ *   · a 2xx we could not read, or one without an id — a 2xx is a creation.
+ * A 404 on the endpoint itself is definite: nothing there took the request.
+ */
+export function bookingRefusedForSure(err: unknown): boolean {
+  if (!(err instanceof MontonioShippingError)) return false;
+  if (err.code === "not_found") return true;
+  if (err.code !== "rejected") return false;
+  const s = typeof err.status === "number" ? err.status : 0;
+  return s >= 400 && s < 500 && s !== 408 && s !== 409;
+}
+
+/**
  * Register one order with a carrier through Montonio.
  *
  * Synchronous by default: the admin presses a button and wants the tracking
  * code on the screen, not a webhook twenty seconds later. Asynchronous mode
  * still works (`synchronous: false`), it just answers with status `pending` and
  * empty tracking fields — reference § Create Shipment.
+ *
+ * Every failure of the booking call itself that is not a definite refusal
+ * (bookingRefusedForSure above) is rethrown as `booking_unknown`: the parcel
+ * may exist, and the caller must not free the button as if it did not. A
+ * failure BEFORE the call — no keys, a pickup order, a point Montonio does
+ * not know — keeps its own code: nothing was sent, so nothing can exist.
  */
 export async function createMontonioShipment(
   order: Order,
@@ -1422,16 +1495,30 @@ export async function createMontonioShipment(
   if (linked) payload.montonioOrderUuid = linked;
   if (order.notes) payload.orderComment = String(order.notes).slice(0, 500);
 
-  const body = await call<{
+  type Booked = {
     id?: string;
     status?: string;
     createdAt?: string;
     shippingMethod?: { carrierCode?: string; countryCode?: string };
     parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
-  }>(config, "/shipments", { method: "POST", body: payload });
+  };
+  let body: Booked;
+  try {
+    body = await call<Booked>(config, "/shipments", { method: "POST", body: payload, timeoutMs: CREATE_TIMEOUT_MS });
+  } catch (err) {
+    if (bookingRefusedForSure(err)) throw err;
+    const was = err instanceof MontonioShippingError ? err : null;
+    console.error("[montonio shipping] POST /shipments ended without an answer —", was ? was.message : err);
+    throw new MontonioShippingError(
+      "booking_unknown",
+      was ? `${was.code}${was.detail ? `: ${was.detail}` : ""}` : "no answer",
+      was?.status,
+    );
+  }
 
   const shipmentId = str(body.id);
-  if (!shipmentId) throw new MontonioShippingError("bad_response", "no shipment id");
+  // a 2xx IS a creation — one whose id we could not read is still a parcel
+  if (!shipmentId) throw new MontonioShippingError("booking_unknown", "bad_response: no shipment id");
   const first = body.parcels?.[0];
 
   return {
@@ -1542,7 +1629,11 @@ export async function repairMontonioShipment(
    registration webhook or by polling GET /shipments/{id})». Corrected
    18.09.2026, docs/montonio-shipping-audit.md § 5.1. */
 
-/** One shipment as Montonio currently has it — used to pick up a late tracking code. */
+/**
+ * One shipment as Montonio currently has it — used to pick up a late tracking
+ * code, and to check a parcel found by id before it is adopted (its
+ * `merchantReference` is the order number we booked it under).
+ */
 export async function getMontonioShipment(shipmentId: string): Promise<MontonioShipment> {
   const config = montonioShippingConfig();
   if (!config) throw new MontonioShippingError("not_configured");
@@ -1550,6 +1641,7 @@ export async function getMontonioShipment(shipmentId: string): Promise<MontonioS
     id?: string;
     status?: string;
     createdAt?: string;
+    merchantReference?: string;
     shippingMethod?: { type?: string; carrierCode?: string; countryCode?: string };
     parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
   }>(config, `/shipments/${encodeURIComponent(shipmentId)}`);
@@ -1565,6 +1657,7 @@ export async function getMontonioShipment(shipmentId: string): Promise<MontonioS
     trackingUrl: str(first?.trackingLink),
     dropOffPin: str(first?.dropOffPin),
     createdAt: str(body.createdAt),
+    merchantReference: str(body.merchantReference),
   };
 }
 
@@ -1665,10 +1758,11 @@ export async function saveShipmentOnOrder(
 }
 
 /**
- * How long a booking claim below stays in the way. Long enough that a slow
- * Montonio is never overtaken by an impatient second press, short enough that
- * a request which died mid-call does not lock the button while the owner is
- * still looking at the card.
+ * How long a press is taken to be still INSIDE Montonio. A second press within
+ * it is told «уже создаётся» (409 in_progress); a claim older than this that
+ * nobody resolved belongs to a request that died mid-call, and is treated as
+ * the unknown outcome it is (BOOKING_UNCERTAIN_MS). The repair slot below uses
+ * it as its whole lifetime.
  */
 export const SHIPMENT_CLAIM_MS = 120_000;
 
@@ -1685,8 +1779,14 @@ export const SHIPMENT_CLAIM_MS = 120_000;
  *
  * The claim is the database's own clock, never the caller's: two serverless
  * instances do not share a wristwatch. It is dropped by releaseShipmentSlot()
- * when the call fails, overwritten by the shipment itself when it succeeds,
- * and ignored once SHIPMENT_CLAIM_MS has passed.
+ * when Montonio refused for sure, overwritten by the shipment itself when it
+ * succeeds, and turned into `bookingUncertainAt` by markBookingUncertain()
+ * when nobody knows (26.09.2026, R-100098).
+ *
+ * Both markers hold the slot for BOOKING_UNCERTAIN_MS, not two minutes: a
+ * claim nobody resolved is a press that died somewhere in or after its call
+ * to Montonio, which is the same «the parcel may exist» as a timeout. Until
+ * 26.09.2026 it lapsed after SHIPMENT_CLAIM_MS and the next press booked.
  */
 export async function claimShipmentSlot(orderId: string): Promise<boolean> {
   const rows = await query<{ id: string }>(
@@ -1698,17 +1798,84 @@ export async function claimShipmentSlot(orderId: string): Promise<boolean> {
             updated_at = now()
       where id = $1
         and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') = ''
-        and coalesce((shipping -> 'montonio' ->> 'bookingAt')::bigint, 0)
-            < (extract(epoch from now()) * 1000)::bigint - $2::bigint
+        and coalesce((shipping -> 'montonio' ->> 'bookingAt')::float8, 0)
+            < (extract(epoch from now()) * 1000)::float8 - $2::float8
+        and coalesce((shipping -> 'montonio' ->> 'bookingUncertainAt')::float8, 0)
+            < (extract(epoch from now()) * 1000)::float8 - $2::float8
       returning id`,
-    [orderId, SHIPMENT_CLAIM_MS],
+    [orderId, BOOKING_UNCERTAIN_MS],
   );
   return rows.length > 0;
 }
 
-/** Give the slot back — the booking failed, so the next press may try again. */
+/** Give the slot back — Montonio refused for sure, so the next press may try again. */
 export async function releaseShipmentSlot(orderId: string): Promise<void> {
   await saveShipmentOnOrder(orderId, { bookingAt: null });
+}
+
+/**
+ * The booking call ended and nobody knows whether Montonio made the parcel:
+ * the claim becomes `bookingUncertainAt`, on the database's clock, and holds
+ * the button for BOOKING_UNCERTAIN_MS unless the parcel turns up first (the
+ * webhook, or a press that finds it — src/lib/shipping/shipment-adopt.ts).
+ */
+export async function markBookingUncertain(orderId: string): Promise<void> {
+  await query(
+    `update orders
+        set shipping = coalesce(shipping, '{}'::jsonb)
+                       || jsonb_build_object('montonio',
+                            coalesce(shipping -> 'montonio', '{}'::jsonb)
+                            || jsonb_build_object('bookingUncertainAt', (extract(epoch from now()) * 1000)::bigint,
+                                                  'bookingAt', null)),
+            updated_at = now()
+      where id = $1`,
+    [orderId],
+  );
+}
+
+/** Why a claim was refused, read on the database's clock. Ages are ms, or null when unset. */
+export interface BookingSlotState {
+  shipmentId: string;
+  bookingAgeMs: number | null;
+  uncertainAgeMs: number | null;
+}
+
+export async function bookingSlotState(orderId: string): Promise<BookingSlotState> {
+  const rows = await query<{ sid: string | null; booking: number | string | null; uncertain: number | string | null }>(
+    `select coalesce(shipping -> 'montonio' ->> 'shipmentId', '') as sid,
+            (extract(epoch from now()) * 1000)::float8 - (shipping -> 'montonio' ->> 'bookingAt')::float8 as booking,
+            (extract(epoch from now()) * 1000)::float8 - (shipping -> 'montonio' ->> 'bookingUncertainAt')::float8 as uncertain
+       from orders where id = $1`,
+    [orderId],
+  );
+  const r = rows[0];
+  const age = (v: number | string | null | undefined) => (v === null || v === undefined ? null : Number(v));
+  return { shipmentId: String(r?.sid ?? ""), bookingAgeMs: age(r?.booking), uncertainAgeMs: age(r?.uncertain) };
+}
+
+/**
+ * Put a parcel that Montonio already has onto an order that holds none — and
+ * say whether it went in. Conditional, like the claim: if another press or the
+ * webhook stored a shipment in the meantime, that one stands and this writes
+ * nothing. Clears both booking markers — the question they held open is
+ * answered.
+ */
+export async function adoptShipmentOnOrder(
+  orderId: string,
+  record: Partial<MontonioShipment> & Record<string, unknown>,
+): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `update orders
+        set shipping = coalesce(shipping, '{}'::jsonb)
+                       || jsonb_build_object('montonio',
+                            coalesce(shipping -> 'montonio', '{}'::jsonb) || $2::jsonb),
+            updated_at = now()
+      where id = $1
+        and coalesce(shipping -> 'montonio' ->> 'shipmentId', '') = ''
+      returning id`,
+    [orderId, jsonbParam({ ...record, bookingAt: null, bookingUncertainAt: null })],
+  );
+  return rows.length > 0;
 }
 
 /**

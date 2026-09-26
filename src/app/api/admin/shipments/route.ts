@@ -68,17 +68,48 @@
  * Montonio, and the panel told the owner to set the label aside and «create it
  * anew» — which could only ever repeat the refusal. Sandbox cannot produce
  * this state at all: it never calls a carrier (docs/montonio-untested.md, S1).
+ *
+ * **No answer is not «no»** (since 26.09.2026, R-100098 — the first live
+ * hour). Our fetch gave up on `POST /shipments` after ten seconds, the route
+ * freed the button «since nothing was booked» and answered 502 — and Montonio,
+ * which had simply been waiting on DPD, booked the parcel and said so by
+ * webhook a moment later. A second press would have paid for a second one.
+ * Now:
+ *   · the booking call waits 25 s (CREATE_TIMEOUT_MS) and this route may run
+ *     60 (maxDuration below), so a slow carrier is an answer, not a timeout;
+ *   · a failure that does not PROVE nothing was created — a timeout, a 5xx, a
+ *     2xx we could not read — is `504 booking_unknown`: the slot is not given
+ *     back, the order carries `bookingUncertainAt`, the journal
+ *     `shipment.booking_unknown`, and the panel says to wait a minute and
+ *     press again. Only Montonio's own 4xx refusal frees the button at once;
+ *   · every press on an order with no parcel id first ADOPTS the parcel
+ *     Montonio may already have — the webhook stores its id on the order now,
+ *     and one the journal ties to the order is asked for by id and taken over
+ *     (src/lib/shipping/shipment-adopt.ts). Answered like `reused`, with
+ *     `adopted: true`, journalled `shipment.adopt`;
+ *   · with nothing found, a booking goes ahead only once the marker is older
+ *     than BOOKING_UNCERTAIN_MS (10 min — the webhook comes in seconds); until
+ *     then the answer is `409 booking_unknown` again. A Montonio status on the
+ *     order with no id anywhere is never outwaited (`unlinked`).
  */
 import { requireAdmin } from "@/lib/auth";
-import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
+import {
+  shipmentBookingUnknown,
+  shipmentRegistrationFailed,
+  type BookingUnknownReason,
+} from "@/lib/montonio-problems";
 import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
 import type { Order } from "@/lib/orders";
 import {
+  BOOKING_UNCERTAIN_MS,
   MontonioShippingError,
+  SHIPMENT_CLAIM_MS,
+  bookingSlotState,
   claimRepairSlot,
   claimShipmentSlot,
   createMontonioShipment,
   getMontonioShipment,
+  markBookingUncertain,
   releaseRepairSlot,
   releaseShipmentSlot,
   repairMontonioShipment,
@@ -88,6 +119,7 @@ import {
   type MontonioShipment,
 } from "@/lib/shipping/montonio";
 import { shippingMockOn } from "@/lib/shipping/montonio-mock";
+import { adoptFromJournal, unlinkedParcelStatus, type Adoption } from "@/lib/shipping/shipment-adopt";
 import {
   getParcelSettings,
   noteLockerSize,
@@ -97,6 +129,12 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* The booking alone may wait CREATE_TIMEOUT_MS (25 s) for a carrier that
+   registers synchronously, after the pickup-point and constraints reads
+   (10 s each at worst). Without this the platform's default could end the
+   function first — mid-booking, which is the one place it must not stop.
+   60 is Vercel Hobby's ceiling and what the shop's other long routes use. */
+export const maxDuration = 60;
 
 /** Which failures are the operator's fault (400) and which are ours (502). */
 const CLIENT_ERRORS = new Set(["not_shippable", "point_unresolved", "no_courier_service"]);
@@ -147,6 +185,56 @@ function cleanBox(raw: unknown): { length: number; width: number; height: number
     out[side] = Math.round((cm / 100) * 100) / 100;
   }
   return out as { length: number; width: number; height: number };
+}
+
+/**
+ * «We do not know whether Montonio made the parcel» — never a booking, always
+ * the sentence that says to wait and press again (src/lib/montonio-problems.ts).
+ */
+function bookingUnknown(reason: BookingUnknownReason, status: number, detail?: string): Response {
+  const reading = shipmentBookingUnknown(reason);
+  return Response.json(
+    {
+      ok: false,
+      error: "booking_unknown",
+      reason,
+      messages: reading.messages,
+      retryAfterMs: reason === "unlinked" ? undefined : 60_000,
+      ...(detail ? { detail } : {}),
+    },
+    { status, headers: { "cache-control": "no-store" } },
+  );
+}
+
+/** A parcel the order holds — found now or a moment ago — as the panel reads it. */
+function storedResponse(order: Order, shipment: MontonioShipment & Record<string, unknown>): Response {
+  // a refused parcel is still the refusal; the next press repairs it
+  if (registrationRefused(shipment)) return refusedResponse(shipment);
+  return Response.json(
+    {
+      ok: true,
+      reused: true,
+      // «found at Montonio», not «made by this button» — the panel says so
+      ...(shipment.adoptedFrom ? { adopted: true } : {}),
+      shipment: { ...shipment, dismissed: false },
+      order,
+    },
+    { headers: { "cache-control": "no-store" } },
+  );
+}
+
+/** Another press or the webhook stored a parcel between our read and our write. */
+async function storedSinceRead(orderId: string): Promise<Response> {
+  let fresh: Order | null = null;
+  try {
+    fresh = await getOrder(orderId);
+  } catch (err) {
+    console.error("[api/admin/shipments] order re-read failed:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+  const shipment = fresh ? shipmentOnOrder(fresh) : null;
+  if (!fresh || !shipment) return bookingUnknown("waiting", 409);
+  return storedResponse(fresh, shipment);
 }
 
 /** A Montonio call that failed, as the panel reads it — booking and repair alike. */
@@ -375,10 +463,9 @@ export async function POST(req: Request) {
       }
       await writeAuditSafe("admin", "shipment.step", { orderId: order.id, number: order.number, labelStep: true });
     }
-    return Response.json(
-      { ok: true, reused: true, shipment: { ...existing, dismissed: false }, order },
-      { headers: { "cache-control": "no-store" } },
-    );
+    /* `adopted: true` on a parcel the shop found rather than booked — the
+       webhook recorded it after an unanswered press (see the header). */
+    return storedResponse(order, existing);
   }
 
   // An unpaid parcel is a parcel nobody has been charged for.
@@ -386,12 +473,36 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "not_paid", detail: order.status }, { status: 409 });
   }
 
+  /* Before anything is booked: the parcel Montonio may ALREADY have for this
+     order — the one an unanswered press left behind (R-100098). The journal is
+     asked, each candidate is checked with Montonio by id, and the first that
+     is really this order's is adopted (src/lib/shipping/shipment-adopt.ts).
+     A candidate Montonio cannot be asked about right now is not a «no».
+     The e2e carrier has no GET and never loses an answer, so it is not asked. */
+  if (!shippingMockOn()) {
+    let found: Adoption;
+    try {
+      found = await adoptFromJournal(order);
+    } catch (err) {
+      console.error("[api/admin/shipments] could not look for an existing parcel:", err);
+      return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+    }
+    if (found.kind === "adopted") return storedResponse(order, found.shipment);
+    if (found.kind === "taken") return storedSinceRead(order.id);
+    if (found.unverified) return bookingUnknown("waiting", 409);
+  }
+  /* Montonio has told us about a parcel for this order and the shop cannot
+     name it: that is proof, not doubt, so no window outlasts it. */
+  const unlinked = unlinkedParcelStatus(order);
+  if (unlinked) return bookingUnknown("unlinked", 409, unlinked);
+
   /* The slot is taken BEFORE Montonio is called. Everything above ran against
      a snapshot of the order, and between "there is no shipment here" and the
      write at the bottom sits a live call to a carrier: a press that timed out
      on the owner's phone and was pressed again booked — and paid for — a
-     second parcel. `false` means another press is inside that call right now
-     (claimShipmentSlot, which expires by itself). */
+     second parcel. The claim is refused while another press is inside that
+     call, and for BOOKING_UNCERTAIN_MS after a press that got no answer
+     (claimShipmentSlot); which of the two it is decides the sentence. */
   let claimed = false;
   try {
     claimed = await claimShipmentSlot(order.id);
@@ -399,25 +510,70 @@ export async function POST(req: Request) {
     console.error("[api/admin/shipments] could not claim the booking slot:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
   }
-  if (!claimed) return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
+  if (!claimed) {
+    let slot;
+    try {
+      slot = await bookingSlotState(order.id);
+    } catch (err) {
+      console.error("[api/admin/shipments] could not read the booking slot:", err);
+      return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+    }
+    // the webhook (or the other press) recorded the parcel since our read
+    if (slot.shipmentId) return storedSinceRead(order.id);
+    // the other press is still inside Montonio
+    if (slot.bookingAgeMs !== null && slot.bookingAgeMs < SHIPMENT_CLAIM_MS) {
+      return Response.json({ ok: false, error: "in_progress" }, { status: 409 });
+    }
+    // an earlier press got no answer, and nothing has turned up yet
+    return bookingUnknown("waiting", 409);
+  }
 
   let shipment;
   try {
     // the door and «Другая коробка» — pressOptions() above says how each is decided
     shipment = await createMontonioShipment(order, await pressOptions(body));
   } catch (err) {
-    // nothing was booked, so the button must work again at once
+    if (err instanceof MontonioShippingError && err.code === "booking_unknown") {
+      /* Montonio may have booked it (R-100098). The slot is NOT given back:
+         it becomes the marker, the journal says so, and the next press looks
+         for the parcel before it may book. If even the marker cannot be
+         written, the claim itself still holds the button for the same window. */
+      await markBookingUncertain(order.id).catch((e) =>
+        console.error("[api/admin/shipments] could not mark the booking uncertain:", e),
+      );
+      console.error(`[api/admin/shipments] no answer for ${order.number}: ${err.detail ?? ""}`);
+      await writeAuditSafe("admin", "shipment.booking_unknown", {
+        orderId: order.id,
+        number: order.number,
+        provider: "montonio",
+        detail: err.detail,
+        waitMinutes: Math.round(BOOKING_UNCERTAIN_MS / 60_000),
+      });
+      return bookingUnknown("timeout", 504, err.detail);
+    }
+    // Montonio refused for sure, or nothing was sent: the button must work again at once
     await releaseShipmentSlot(order.id).catch(() => {});
     return montonioFailure(err, "create");
   }
 
   try {
-    // the claim goes out with the same write that records the parcel
-    await saveShipmentOnOrder(order.id, { ...shipment, bookingAt: null });
+    /* The claim and any old marker go out with the same write that records the
+       parcel. `adoptedFrom` too: if the webhook recorded this very parcel while
+       we waited, it is still the one this press booked, not one «found». */
+    await saveShipmentOnOrder(order.id, { ...shipment, bookingAt: null, bookingUncertainAt: null, adoptedFrom: null });
   } catch (err) {
     // The parcel exists at the carrier; losing the row is bad but not fatal —
-    // report it with the tracking code so nobody books it twice.
+    // report it with the tracking code so nobody books it twice. The claim
+    // stays, and the journal row below is what the next press adopts it from.
     console.error("[api/admin/shipments] could not store the shipment:", err);
+    await writeAuditSafe("admin", "shipment.store_failed", {
+      orderId: order.id,
+      number: order.number,
+      provider: "montonio",
+      shipmentId: shipment.shipmentId,
+      carrier: shipment.carrier,
+      trackingCode: shipment.trackingCode || undefined,
+    });
     return Response.json({ ok: false, error: "store_failed", shipment }, { status: 500 });
   }
 
