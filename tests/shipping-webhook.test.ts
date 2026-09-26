@@ -332,6 +332,11 @@ describe("the envelope Montonio documents", () => {
       trackingCode: "CC548936341EE",
       trackingUrl: "https://minu.omniva.ee/track/CC548936341EE?language=et",
       dropOffPin: "",
+      // the shipment's own details, for an order that has no id for it yet (R-100098)
+      carrier: "omniva",
+      country: "EE",
+      method: "pickupPoint",
+      createdAt: "2026-09-18T10:51:55.288Z",
     });
   });
 

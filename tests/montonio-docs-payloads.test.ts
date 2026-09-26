@@ -478,6 +478,13 @@ describe("the shipping webhook Montonio documents", () => {
       // the documented sample's parcel carries a trackingLink and no dropOffPin
       trackingUrl: "https://minu.omniva.ee/track/CC548936341EE?language=et",
       dropOffPin: "",
+      /* …and the rest of the shipment, read since 26.09.2026: an event about a
+         parcel the order has no id for (R-100098 — the booking's answer was
+         lost to a timeout) records the whole parcel from this signed copy. */
+      carrier: "omniva",
+      country: "EE",
+      method: "pickupPoint",
+      createdAt: "2024-06-13T10:51:55.288Z",
     });
   });
 

@@ -78,6 +78,17 @@ export interface ShipmentEvent {
   trackingUrl: string;
   /** `data.parcels[0].dropOffPin`, when the carrier issued one. */
   dropOffPin: string;
+  /**
+   * The rest of the shipment the signed `data` carries — `shippingMethod`'s
+   * carrierCode / countryCode / type and the shipment's own `createdAt`.
+   * Read since 26.09.2026 so that an event about a parcel the order has no id
+   * for (R-100098: the booking's answer was lost to a timeout) records the
+   * whole parcel, from Montonio's signed word, without a second call.
+   */
+  carrier: string;
+  country: string;
+  method: "pickupPoint" | "courier" | "";
+  createdAt: string;
 }
 
 /**
@@ -95,8 +106,18 @@ export function isLabelFileEvent(event: string): boolean {
   return /^labelfile\./i.test(String(event || "").trim());
 }
 
-/** What the white list makes of a status — "" when it recognises neither. */
-export type ShipmentMeaning = "delivered" | "returned" | "";
+/**
+ * What a status means to the shop — "" when nothing here recognises it.
+ *
+ * `delivered` / `returned` are the white list's, and they are the only two
+ * that ACT (applyShipmentUpdate closes a shipped order on `delivered`).
+ * `registered` is Montonio's own documented word for «the carrier accepted the
+ * parcel», named since 26.09.2026: the first live one was journalled as
+ * `meaning: "unknown"`, which read as a word nobody understood, on the one
+ * event every label produces. It moves nothing — registering is not shipping,
+ * and «Отправлен» stays the owner's own step.
+ */
+export type ShipmentMeaning = "delivered" | "returned" | "registered" | "";
 
 function str(v: unknown): string {
   return typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "";
@@ -144,6 +165,11 @@ function readEvent(claims: Record<string, unknown>): ShipmentEvent {
     return "";
   };
   const parcel = obj(Array.isArray(data.parcels) ? data.parcels[0] : undefined);
+  /* `shippingMethod` lives in `data` (the guide's decoded payload); a flat
+     token may carry it at the top. `type` is NOT picked through pick(): at
+     the top level of the claims a `type` could be the event's own name. */
+  const method = obj(data.shippingMethod ?? claims.shippingMethod);
+  const kind = str(method.type);
   return {
     event: pick("event", "eventType", "type", "topic"),
     shipmentId: pick("shipmentId", "id"),
@@ -152,6 +178,10 @@ function readEvent(claims: Record<string, unknown>): ShipmentEvent {
     trackingCode: pick("trackingCode", "carrierParcelId") || str(parcel.carrierParcelId),
     trackingUrl: pick("trackingLink", "trackingUrl") || str(parcel.trackingLink),
     dropOffPin: pick("dropOffPin") || str(parcel.dropOffPin),
+    carrier: str(method.carrierCode),
+    country: str(method.countryCode).toUpperCase(),
+    method: kind === "courier" ? "courier" : kind === "pickupPoint" ? "pickupPoint" : "",
+    createdAt: str(data.createdAt),
   };
 }
 
@@ -211,6 +241,8 @@ export function verifyShipmentWebhook(body: unknown, config: MontonioConfig): Sh
 export function statusMeaning(status: string): ShipmentMeaning {
   if (looksReturned(status)) return "returned";
   if (looksDelivered(status)) return "delivered";
+  // Montonio's lifecycle word, exactly — informational only (see ShipmentMeaning)
+  if (String(status ?? "").trim().toLowerCase() === "registered") return "registered";
   return "";
 }
 
@@ -223,7 +255,7 @@ export interface ShipmentStatusNote {
   last: string;
   /** The event that carried it last — `shipment.statusUpdated` unless Montonio sends more. */
   event: string;
-  /** What the white list made of it: "delivered", "returned", or "" for неизвестно. */
+  /** What statusMeaning() made of it: "delivered", "returned", "registered", or "" for неизвестно. */
   meaning: ShipmentMeaning;
   /** One shipment id carrying it, so a puzzling word can be looked up at Montonio. */
   shipment: string;
@@ -246,7 +278,7 @@ function note(raw: unknown): ShipmentStatusNote | null {
     first: str(r.first),
     last: str(r.last),
     event: str(r.event),
-    meaning: r.meaning === "delivered" || r.meaning === "returned" ? r.meaning : "",
+    meaning: r.meaning === "delivered" || r.meaning === "returned" || r.meaning === "registered" ? r.meaning : "",
     shipment: str(r.shipment),
   };
 }

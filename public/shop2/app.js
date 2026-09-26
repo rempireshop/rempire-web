@@ -573,6 +573,12 @@
         "Vedaja ei võtnud pakki vastu",
       "Посылка снова отправлена перевозчику":
         "Pakk saadeti vedajale uuesti",
+      "Montonio не ответил вовремя — посылка могла создаться":
+        "Montonio ei vastanud õigel ajal — pakk võib olla loodud",
+      "Посылка найдена в Montonio и привязана к заказу":
+        "Pakk leiti Montoniost ja seoti tellimusega",
+      "Посылка создана, но не записалась в заказ":
+        "Pakk on loodud, aga tellimusele ei salvestunud",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -2461,6 +2467,8 @@
       "Для самовывоза и электронных заказов этикетка не нужна.": "Järeletuleku ja e-tellimuste puhul pole silti vaja.",
       "Этикетка создаётся после оплаты.": "Silt luuakse pärast maksmist.",
       "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "Silti juba luuakse — oota minut ja ava tellimus uuesti.",
+      "Montonio не ответил вовремя — посылка могла уже создаться. Подождите минуту и нажмите ещё раз: магазин сначала проверит и вторую не создаст.": "Montonio ei vastanud õigel ajal — pakk võib juba olemas olla. Oodake minut ja vajutage uuesti: pood kontrollib enne ja teist ei loo.",
+      "Посылка нашлась в Montonio — этикетка готова, вторая не создана ✓": "Pakk leiti Montoniost — silt on valmis, teist ei loodud ✓",
       "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте.": "Saadetis on Montonios loodud, aga tellimusele ei salvestunud. Otsi see Montoniost üles — teist korda ära loo.",
       "Сообщение клиенту": "Sõnum kliendile",
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
@@ -4112,6 +4120,12 @@
         "The carrier would not take the parcel",
       "Посылка снова отправлена перевозчику":
         "The parcel was sent to the carrier again",
+      "Montonio не ответил вовремя — посылка могла создаться":
+        "Montonio did not answer in time — the parcel may have been created",
+      "Посылка найдена в Montonio и привязана к заказу":
+        "The parcel was found at Montonio and linked to the order",
+      "Посылка создана, но не записалась в заказ":
+        "The parcel was created but not saved onto the order",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -5970,6 +5984,8 @@
       "Для самовывоза и электронных заказов этикетка не нужна.": "Pickup and electronic orders need no label.",
       "Этикетка создаётся после оплаты.": "The label is created after payment.",
       "Этикетка уже создаётся — подождите минуту и откройте заказ заново.": "The label is already being created — wait a minute and open the order again.",
+      "Montonio не ответил вовремя — посылка могла уже создаться. Подождите минуту и нажмите ещё раз: магазин сначала проверит и вторую не создаст.": "Montonio did not answer in time — the parcel may already exist. Wait a minute and press again: the shop checks first and will not create a second one.",
+      "Посылка нашлась в Montonio — этикетка готова, вторая не создана ✓": "The parcel was found at Montonio — the label is ready, no second one was created ✓",
       "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте.": "The shipment was created in Montonio but was not saved onto the order. Find it in Montonio — do not create a second one.",
       "Сообщение клиенту": "Message to the customer",
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
@@ -31405,6 +31421,12 @@
     /* «Создать этикетку» on a refused parcel — the same shipment sent to the
        carrier again with PATCH (Montonio, 24.09.2026). */
     "shipment.repair": "Посылка снова отправлена перевозчику",
+    /* R-100098, 26.09.2026: a press Montonio did not answer in time, the
+       parcel it made anyway found and put on the order, and a parcel booked
+       whose row did not save. */
+    "shipment.booking_unknown": "Montonio не ответил вовремя — посылка могла создаться",
+    "shipment.adopt": "Посылка найдена в Montonio и привязана к заказу",
+    "shipment.store_failed": "Посылка создана, но не записалась в заказ",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
     /* Seven actions the server writes and this table did not name, so the
@@ -44575,7 +44597,12 @@
        «Не удалось создать этикетку» was false twice over — it said nothing
        happened, and it invited a second press, which after a minute books
        (and pays for) a second parcel. */
-    store_failed: "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте."
+    store_failed: "Отправление создано в Montonio, но не записалось в заказ. Найдите его в Montonio — второй раз не создавайте.",
+    /* Montonio did not answer in time and may have made the parcel anyway —
+       R-100098, 26.09.2026. The server sends its own sentence (srvMsg); this
+       is only the fallback, and it must never read «не удалось»: that invites
+       the second press that would pay for a second parcel. */
+    booking_unknown: "Montonio не ответил вовремя — посылка могла уже создаться. Подождите минуту и нажмите ещё раз: магазин сначала проверит и вторую не создаст."
   };
   /* Montonio found no courier for the order's country. Two different
      stories: an order placed before the checkout asked for the real country
@@ -44633,7 +44660,10 @@
         var entry = demoApply({
           type: "order_label", id: String(id), number: row ? row.number : String(id), value: true, done: true
         });
-        toast(r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
+        /* `adopted`: the parcel an unanswered press left at Montonio, found and
+           put on the order instead of booked again (R-100098). */
+        toast(r.body.adopted ? "Посылка нашлась в Montonio — этикетка готова, вторая не создана ✓"
+          : r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
         /* The size is spent: the next order starts from the suggestion again,
            and the suggestion has just learned this one. Re-read rather than
            patched locally — the server decides what `recent` says. */
@@ -44656,7 +44686,9 @@
          (docs/montonio-untested.md § S1). */
       toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail)
         : srvMsg(r.body) || SHIP_ERR[shipErr] || "Не удалось создать этикетку");
-      if (shipErr === "registration_failed") admOrderListsReload();
+      /* `booking_unknown` re-reads too: the webhook may have put the parcel on
+         the order since, and the card should show it without another press. */
+      if (shipErr === "registration_failed" || shipErr === "booking_unknown") admOrderListsReload();
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }

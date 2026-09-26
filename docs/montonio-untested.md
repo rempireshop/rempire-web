@@ -77,7 +77,7 @@ not from our own output.
 | S2 | **Phone-number validation** | Sandbox guide: «The POST /shipments endpoint skips phone number and address validation.» Every wrong `phoneCountryCode` we ever sent passed. | `tests/shipping-montonio.test.ts` (`splitPhone` across all 32 destinations, fixed 18.09.2026) + S1's refusal path |
 | S3 | **Address validation** | Same sentence | Same |
 | S4 | **A real label PDF** | Sandbox guide: «The system generates dummy labels.» `normaliseLabelPdf()` has never seen a real Montonio label. | `tests/shipping-label-pdf.test.ts` rebuilds the same nesting with pdf-lib. An unrecognised file is served unchanged, so the failure is soft |
-| S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one. **24.09.2026:** a lost event is no longer lost for good — Montonio retries for 1.5–2 days, and on their advice the daily cron re-asks `GET /shipments/{id}` for every shipment quiet for 12 hours (`syncStaleShipments`, `tests/shipment-poll.test.ts`) |
+| S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one. **24.09.2026:** a lost event is no longer lost for good — Montonio retries for 1.5–2 days, and on their advice the daily cron re-asks `GET /shipments/{id}` for every shipment quiet for 12 hours (`syncStaleShipments`, `tests/shipment-poll.test.ts`). **26.09.2026:** the first live word was `registered` (R-100098) and was journalled `meaning: "unknown"`; it now reads `meaning: "registered"` — informational only, it moves no order (registering is not shipping) |
 | S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | Nothing. We never read the flag and never send dimensions — see Part 5, D6 |
 | ~~S7~~ | ~~**A SmartPosti drop-off code** (`dropOffPin`)~~ · **not applicable, 22.09.2026** | Montonio's written answer of 22.09.2026: a drop-off / door code works **only on the merchant's own direct contract with the carrier**, and only with that carrier's help; it is aimed at marketplaces. A normal merchant simply **scans the label at the parcel machine**. **Omniva has no such option at all.** So this is not «untested» — there is nothing here for a shop like ours to test | Nothing, and nothing wanted. See Part 5, D7 |
 | S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | **Implemented 24.09.2026**, but a refusal cannot happen in sandbox (S1), so the PATCH has never met a real carrier | Montonio's answer of 24.09.2026 (below) made it the design: on a refused parcel the step button reads «Отправить заново» and PATCHes the SAME shipment, as often as pressed (audit 18.09 F15, map defect #19) — `tests/shipment-repair.test.ts`; live check `live-label-repair` in /test. Part 5, D8 |
@@ -287,6 +287,25 @@ sandbox could not tell us.
     again (`PATCH`, Montonio's recommended way), never a second one. Refused
     again usually means a wrong phone or address: have it corrected, press
     again.
+  - **What happened live, 26.09.2026 (R-100098, DPD parcel machine).** The
+    press timed out: our fetch gave `POST /shipments` ten seconds, the route
+    took that for «nothing was booked», freed the button and answered 502.
+    Montonio had booked it — `shipment.registered` for shipment
+    `3888e013-c3a6-4ead-9609-292447179f52` arrived at 19:33:03 UTC — but the
+    webhook wrote only the status word onto the order, so the id lived in one
+    journal row and a second press would have paid for a second parcel.
+    **What the button does now:** the booking waits 25 s (the route may run
+    60); a timeout, a 5xx or an unreadable 2xx answers «Montonio не ответил
+    вовремя — подождите минуту и нажмите ещё раз» and holds the button for 10
+    minutes instead of freeing it; only Montonio's own 4xx refusal frees it at
+    once. Every press first looks for the parcel Montonio may already have —
+    the webhook now stores its id on the order, and an id the journal ties to
+    the order is checked with `GET /shipments/{id}` and adopted
+    («Посылка нашлась в Montonio», journal «Посылка найдена в Montonio и
+    привязана к заказу»). **R-100098 itself:** one press adopts `3888e013…`
+    from that journal row; no second parcel is booked. Check: /test
+    `live-label-slow`; code: `src/lib/shipping/shipment-adopt.ts`,
+    `tests/shipment-booking-unknown.test.ts`.
 - [ ] **Do not look for a drop-off code on the A4 slip.** Blank is correct.
       Montonio, in writing on 22.09.2026: a door code needs the merchant's own
       direct contract with the carrier and is aimed at marketplaces, and Omniva

@@ -27,6 +27,11 @@
  *      hears it from the shop and not from the customer;
  *   4. «delivered» closes a `shipped` order, as the white list decides.
  *
+ * And, from the webhook only (26.09.2026, R-100098): news about a parcel on an
+ * order that holds NO shipment id records that parcel on the order — the
+ * booking's answer was lost to a timeout and Montonio booked it anyway, so the
+ * event is the only place its id exists. Journalled as `shipment.adopt`.
+ *
  * Nothing here is written twice: every step either checks what is stored or
  * is idempotent (setOrderStatus only moves `shipped` → `delivered` once).
  */
@@ -34,6 +39,7 @@ import { query } from "@/lib/db";
 import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
 import { getOrder, setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
 import {
+  adoptShipmentOnOrder,
   getMontonioShipment,
   isMontonioShippingConfigured,
   saveShipmentOnOrder,
@@ -53,6 +59,11 @@ export interface ShipmentUpdate {
   trackingCode?: string;
   trackingUrl?: string;
   dropOffPin?: string;
+  /** The rest of the shipment, when the news carries it (the webhook's signed `data`). */
+  carrier?: string;
+  country?: string;
+  method?: "pickupPoint" | "courier" | "";
+  createdAt?: string;
 }
 
 export interface ShipmentApplied {
@@ -69,6 +80,8 @@ export interface ShipmentApplied {
   /** The order transition applied, if any. */
   applied: "" | "delivered";
   meaning: ShipmentMeaning;
+  /** The order held no shipment id and now holds this one (webhook only). */
+  adopted: boolean;
 }
 
 /**
@@ -109,8 +122,9 @@ export function isFinalShipmentStatus(status: unknown): boolean {
 const httpUrl = (v: unknown) => (typeof v === "string" && /^https?:\/\//i.test(v.trim()) ? v.trim() : "");
 
 /**
- * Apply one status to one order. Throws only when closing the order failed —
- * the webhook turns that into a 503 (Montonio will retry), the poll counts it.
+ * Apply one status to one order. Throws only when closing the order failed, or
+ * when a parcel the order had no id for could not be recorded — the webhook
+ * turns that into a 503 (Montonio will retry), the poll counts it.
  */
 export async function applyShipmentUpdate(
   order: Order,
@@ -128,6 +142,7 @@ export async function applyShipmentUpdate(
     refused: false,
     applied: "",
     meaning,
+    adopted: false,
   };
 
   const stored = shipmentOnOrder(order);
@@ -172,7 +187,66 @@ export async function applyShipmentUpdate(
     out.tracking = true;
   }
 
-  if (Object.keys(patch).length) {
+  /* The order holds NO shipment id and the news names one. R-100098,
+     26.09.2026: the booking's own answer was lost to a timeout, Montonio had
+     booked the parcel anyway, and this event was the only place its id
+     existed. Only the status word used to be written here, so the shop went
+     on believing there was no parcel and the next «Создать этикетку» would
+     have booked — and paid for — a second one. Now the parcel is written down
+     whole, from Montonio's signed word (id, carrier, tracking, the lot), and
+     the button finds it and answers `reused`.
+     Only from the webhook: the signature is what makes it believable, and the
+     poll only ever asks about ids the order already holds. Conditional, like
+     the booking claim: a shipment stored a moment earlier — by the press that
+     booked it — is never replaced, and the news is applied to THAT instead. */
+  if (!stored && id && opts.source === "webhook") {
+    const url = httpUrl(update.trackingUrl);
+    const record: Record<string, unknown> = {
+      ...patch,
+      provider: "montonio",
+      shipmentId: id,
+      carrier: String(update.carrier ?? "").trim() || undefined,
+      country: String(update.country ?? "").trim().toUpperCase() || undefined,
+      method: update.method || undefined,
+      trackingCode: code || undefined,
+      trackingUrl: url || undefined,
+      dropOffPin: String(update.dropOffPin ?? "").trim() || undefined,
+      createdAt: String(update.createdAt ?? "").trim() || now,
+      dismissed: false,
+      adoptedFrom: "webhook",
+      adoptedAt: now,
+    };
+    let took = false;
+    try {
+      took = await adoptShipmentOnOrder(order.id, record);
+    } catch (err) {
+      /* Unlike a lost status word, a lost id is the whole bug: thrown, so the
+         webhook answers 503 and Montonio sends the event again (15 tries over
+         1.5–2 days) rather than the parcel going unrecorded. */
+      console.error(`[shipment sync] could not record parcel ${id} on ${order.number}`, err);
+      throw err;
+    }
+    if (!took) {
+      const fresh = await getOrder(order.id).catch(() => null);
+      if (fresh && shipmentOnOrder(fresh)) return applyShipmentUpdate(fresh, update, opts);
+    } else {
+      out.adopted = true;
+      out.written = "status" in patch;
+      out.tracking = !!code;
+      console.error(`[shipment sync] ${order.number} had no parcel id — recorded ${id} from the webhook`);
+      await writeAuditSafe("system", "shipment.adopt", {
+        orderId: order.id,
+        number: order.number,
+        provider: "montonio",
+        shipmentId: id,
+        carrier: record.carrier,
+        code: word || undefined,
+        trackingCode: code || undefined,
+        event: update.event || undefined,
+        source: "webhook",
+      });
+    }
+  } else if (Object.keys(patch).length) {
     try {
       await saveShipmentOnOrder(order.id, patch);
       out.written = "status" in patch;

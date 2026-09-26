@@ -9502,6 +9502,53 @@
       "markedAt": "2026-09-24T17:20:14.754Z"
     },
     {
+      "id": "live-label-slow",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Montonio отвечает медленно: второе нажатие не создаёт вторую посылку",
+      "steps": [
+        "В боевом магазине открыть заказ R-100098 — 26.09 Montonio не ответил на него вовремя.",
+        "Нажать «Создать этикетку».",
+        "Открыть журнал и посмотреть последние строки.",
+        "Дима находит в Montonio отправления заказа R-100098.",
+        "Если на другом заказе Montonio снова не ответит вовремя — подождать минуту и нажать ещё раз."
+      ],
+      "expect": [
+        "Появилась «Посылка»: DPD, пакомат и трек-номер.",
+        "Тост: «Посылка нашлась в Montonio — этикетка готова, вторая не создана ✓».",
+        "В журнале строка «Посылка найдена в Montonio и привязана к заказу».",
+        "PDF этикетки открывается.",
+        "В Montonio у R-100098 одно отправление, не два.",
+        "Медленный ответ: тост «Montonio не ответил вовремя», второе нажатие посылку не создаёт."
+      ],
+      "why": "Молчание Montonio — не отказ: второе нажатие заплатило бы за вторую посылку.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "Montonio answers slowly: a second press does not create a second parcel",
+        "steps": [
+          "On the live shop, open order R-100098 — on 26.09 Montonio did not answer it in time.",
+          "Press «Создать этикетку» (create label).",
+          "Open the journal and look at the latest lines.",
+          "Dim finds the shipments of order R-100098 in Montonio.",
+          "If Montonio is slow again on another order — wait a minute and press again."
+        ],
+        "expect": [
+          "«Посылка» appears: DPD, the locker and a tracking number.",
+          "Toast: the parcel was found at Montonio, no second one was created.",
+          "The journal has «Посылка найдена в Montonio и привязана к заказу».",
+          "The label PDF opens.",
+          "Montonio holds one shipment for R-100098, not two.",
+          "Slow answer: toast «Montonio did not answer in time», and the second press creates nothing."
+        ],
+        "why": "Montonio's silence is not a refusal: a second press would have paid for a second parcel."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-26T20:02:10.268Z"
+    },
+    {
       "id": "live-cron",
       "area": "live",
       "who": "dim",

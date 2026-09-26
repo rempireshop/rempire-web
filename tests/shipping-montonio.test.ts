@@ -1182,7 +1182,11 @@ describe("the shipping routes", () => {
   });
 
   /* …and a booking Montonio refused must not leave the button locked: there is
-     no parcel, so the owner has to be able to press again at once. */
+     no parcel, so the owner has to be able to press again at once.
+     «Refused» means Montonio's own 4xx with its reason. Until 26.09.2026 this
+     test refused with a 500 — and a 500, like a timeout, does NOT prove
+     nothing was created (R-100098: the parcel existed). That case now holds
+     the slot: tests/shipment-booking-unknown.test.ts. */
   it("gives the slot back when Montonio refuses, so the next press goes through", async () => {
     withKeys();
     let attempts = 0;
@@ -1191,7 +1195,7 @@ describe("the shipping routes", () => {
       vi.fn(async (input: string | URL | Request) => {
         if (!/\/shipments$/.test(String(input))) throw new Error(`unexpected fetch: ${String(input)}`);
         attempts += 1;
-        return attempts === 1 ? json({ message: "nope" }, 500) : json(SHIPMENT_BODY);
+        return attempts === 1 ? json({ message: "nope" }, 400) : json(SHIPMENT_BODY);
       }),
     );
     const order = await paidOrder({
