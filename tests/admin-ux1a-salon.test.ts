@@ -100,6 +100,8 @@ function salon(opts: { S?: Partial<State>; analytics?: Analytics; admin?: boolea
     ${fn("posTotalsHTML")}
     ${decl("POS_HOW")}
     ${decl("POS_GONE")}
+    function trName(n, L) { return L === "EN" ? String(n).replace("— шампунь", "— shampoo").replace("— спрей", "— spray") : n; }
+    ${fn("admProdName")}
     ${fn("posConfirmDetail")}
     ${fn("posPinHTML")}
     ${decl("POS_DISCS")}
@@ -187,6 +189,13 @@ describe("«Салон» 1a — the confirm sheet says the money and the method 
     const s = salon({ S: { posCart: [{ id: "sys4", variant: "500 мл", qty: 1 }, { id: "touch", variant: "", qty: 1 }], posDiscount: "10" } });
     expect(s.confirm("cash")).toBe("46,8 € · наличные\n\nBio Botanical Shampoo — шампунь 500 мл × 1\nTouchable — спрей × 1");
     expect(s.confirm("terminal").split("\n")[0]).toBe("46,8 € · терминал");
+  });
+
+  // 26.09.2026 staging: an EN panel showed «— шампунь» on this sheet while the rest of the till said «shampoo»
+  it("names the products in the panel language", () => {
+    const s = salon({ S: { lang: "EN", posCart: [{ id: "sys4", variant: "500 мл", qty: 1 }], posDiscount: "" } });
+    expect(s.confirm("cash")).toContain("Bio Botanical Shampoo — shampoo 500 мл × 1");
+    expect(s.confirm("cash")).not.toContain("шампунь");
   });
 });
 

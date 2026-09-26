@@ -41650,7 +41650,8 @@
   function posConfirmDetail(how) {
     var lines = S.posCart.map(function (l) {
       var p = byId(l.id);
-      return (p ? p.name : l.id) + (l.variant ? " " + l.variant : "") + " × " + l.qty;
+      // the product's type word follows the panel language, as on every other till line (26.09.2026)
+      return (p ? admProdName(p.name) : l.id) + (l.variant ? " " + l.variant : "") + " × " + l.qty;
     });
     return eur(posTotals().total) + " · " + POS_HOW[how] + "\n\n" + lines.join("\n");
   }
