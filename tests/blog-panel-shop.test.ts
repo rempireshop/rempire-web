@@ -481,7 +481,7 @@ function moderate(answer: Answer): Promise<Moderation> {
   // сегодня»; revQueue: one review's calls run one at a time — both halves
   // are tests/blog-reviews-r21.test.ts's
   const run = new Function(
-    "a", "apiSend", "toast", "loadAdminReviews", "loadOverview",
+    "a", "apiSend", "toast", "loadAdminReviews", "loadOverview", "shopPoke",
     `${sliceVar("REVQ")} ${slice("revQueue")} ${branch}`,
   );
   run(
@@ -490,6 +490,7 @@ function moderate(answer: Answer): Promise<Moderation> {
     (m: string) => toasts.push(m),
     () => { reloads++; },
     () => {},
+    () => {},   // the shop's open tabs (shopPoke): nothing to tell here
   );
   return flush().then(() => ({ toasts, reloads }));
 }
