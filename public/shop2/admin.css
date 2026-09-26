@@ -3705,6 +3705,14 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    one under the other on a phone; the ink rule over each column is the same
    1 px the rest of the panel is built from. */
 .adm-calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 32px; }
+/* The heading over the example and the rule over each column used to be two
+   ink lines, one under the other (Dim, 26.09.2026: «we have two lines there,
+   we can remove one»). Under this heading the columns' rules ARE its rule —
+   8 px under the words, as every section head's, split where the columns
+   split on a desk; on a phone the second one still parts partner from
+   shopper. The heading and the example are one block, so no form gap
+   opens between the words and their rule. */
+.adm-calcsec > .adm-sech { border-bottom: 0; }
 .adm-calc__c { border-top: 1px solid var(--a-ink); padding-top: 8px; min-width: 0; }
 .adm-calc__t { font-weight: 600; font-size: 14px; padding-bottom: 6px; }
 .adm-calc__r {

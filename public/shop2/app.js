@@ -33320,9 +33320,13 @@
             admPricingField("minRedeem", "Списание доступно от, баллов на счету", d.loyalty.minRedeem) + "</div>"
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
       /* The whole thing on one basket, both price lists side by side — and it
-         answers while he types, before anything is saved. */
-      admSecHeadHTML("Как это посчитается на заказе в " + eur(PRICING_EX_BASKET), "", "") +
-      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>") +
+         answers while he types, before anything is saved. One block with its
+         heading (.adm-calcsec): the columns' own ink rules are the heading's
+         rule here — two lines, one under the other, drew one idea twice
+         (Dim, 26.09.2026). */
+      '<div class="adm-calcsec">' +
+        admSecHeadHTML("Как это посчитается на заказе в " + eur(PRICING_EX_BASKET), "", "") +
+        '<div id="pricingcalc">' + admPricingCalcHTML() + "</div></div>") +
       "</div>";
   }
 
