@@ -15,12 +15,14 @@
  *     an id out of the list it was offered (`candidates` — the catalogue
  *     slice for the topic, in stock and not hidden; the route builds it). A
  *     card inside a heading is lifted out and put under the section's first
- *     paragraph, one inside a list right after the list; an unknown or a
- *     repeated id loses its tag and keeps its words, so an invented product
- *     can never become a card. A card of its own that stands straight under
- *     a heading, before the first words or right behind another card is
- *     lifted and placed like the ones below — the model's cards keep the
- *     same rules as the placed ones;
+ *     paragraph, one inside a list after the paragraph that follows the list
+ *     (and dropped when none does); an unknown or a repeated id loses its
+ *     tag and keeps its words, so an invented product can never become a
+ *     card. A card of its own that stands straight under a heading or a
+ *     list, before the first words or right behind another card is lifted
+ *     and placed like the ones below — the model's cards keep the same rules
+ *     as the placed ones, the ceiling included: past POST_CARDS_MAX the
+ *     moved ones go first, then the last in the text;
  *   - the ids the model only *named* (its `products` — a string or an
  *     `{id, after}` each) get a card after the paragraph `after` points at,
  *     a heading's words or the paragraph's number, or, without a usable
@@ -31,9 +33,10 @@
  *     topic and the article's own words, the slice's own order breaking
  *     ties — so a model that wrote no cards at all still yields an article
  *     with its products in it;
- *   - never two cards in a row, never more than POST_CARDS_MAX, and at least
- *     one card in the last third of the text — before the closing paragraph
- *     when there is room, so the article still ends in words.
+ *   - never two cards in a row, never a card straight under a heading or a
+ *     list, never more than POST_CARDS_MAX, and at least one card in the
+ *     last third of the text — before the closing paragraph when there is
+ *     room, so the article still ends in words.
  *
  * Pure: strings in, strings out; the catalogue and the database are the
  * route's business. Runs over sanitised HTML (sanitizeHtml() in src/lib/
@@ -163,6 +166,15 @@ export function cardIds(html: string): string[] {
 function isParagraph(b: Block): boolean {
   return b.tag === "p" || b.tag === "text";
 }
+function isHeading(b: Block): boolean {
+  return b.tag === "h2" || b.tag === "h3";
+}
+/* A card straight under a bullet list reads as the list's last item that
+   lost its bullet (staging, 26.09.2026: the fifth card of «Как создать
+   летний образ…» stood right after one). A list is never a card's anchor. */
+function isList(b: Block): boolean {
+  return b.tag === "ul" || b.tag === "ol";
+}
 function hasCard(b: Block): boolean {
   return b.html.includes("data-product");
 }
@@ -179,10 +191,11 @@ function isPlainParagraph(b: Block | undefined): b is Block {
   return !!b && isParagraph(b) && !hasCard(b);
 }
 /** A block a card may follow: not a heading (a card under a heading stands
-    before the section's words), no card in it, no card right after it. */
+    before the section's words), not a list, no card in it, no card right
+    after it. */
 function eligible(live: Block[], i: number): boolean {
   const b = live[i];
-  if (!b || b.tag === "h2" || b.tag === "h3" || hasCard(b)) return false;
+  if (!b || isHeading(b) || isList(b) || hasCard(b)) return false;
   const next = live[i + 1];
   return !(next && cardAlone(next)); // never two cards in a row
 }
@@ -328,8 +341,18 @@ function spreadAnchor(live: Block[]): number {
 function preferredAnchor(live: Block[], w: Wanted, cand: CardCandidate): number {
   if (w.from) {
     const i = live.indexOf(w.from);
-    // out of a heading: under the section's first paragraph; out of a list: right after the list
-    if (i >= 0) return w.from.tag === "h2" || w.from.tag === "h3" ? paragraphAfter(live, i) : i;
+    if (i >= 0) {
+      // out of a heading: under the section's first paragraph
+      if (isHeading(w.from)) return paragraphAfter(live, i);
+      /* out of a list, or from right under one: after the next paragraph —
+         and out of the article when no paragraph follows (ai-blog-cards e2,
+         26.09.2026; «right after the list» was the rule until then) */
+      if (isList(w.from)) {
+        const j = paragraphAfter(live, i);
+        return j === i ? -1 : j;
+      }
+      return i;
+    }
   }
   const paras = paragraphs(live);
   if (typeof w.after === "number") {
@@ -361,13 +384,19 @@ function preferredAnchor(live: Block[], w: Wanted, cand: CardCandidate): number 
   }
   return spreadAnchor(live);
 }
-/** The paragraph the card goes after, or -1 when no place keeps the rules. */
+/** The paragraph the card goes after, or -1 when no place keeps the rules.
+    When the wanted one cannot take it: the next place down, then the
+    nearest one up, and the closing paragraph only when nothing else will
+    do, so the article still ends in words. A card that came from a list
+    only moves down — the paragraph after the list, or nowhere. */
 function anchorFor(live: Block[], w: Wanted, cand: CardCandidate): number {
   const wanted = preferredAnchor(live, w, cand);
   if (wanted < 0) return -1;
-  for (let i = wanted; i < live.length; i++) if (eligible(live, i)) return i;
-  for (let i = wanted - 1; i >= 0; i--) if (eligible(live, i)) return i;
-  return -1;
+  if (eligible(live, wanted)) return wanted;
+  const last = live.length - 1;
+  for (let i = wanted + 1; i < last; i++) if (eligible(live, i)) return i;
+  if (!(w.from && isList(w.from))) for (let i = Math.min(wanted, last) - 1; i >= 0; i--) if (eligible(live, i)) return i;
+  return wanted < last && eligible(live, last) ? last : -1;
 }
 /** Where the last third of the text begins. */
 function lastThird(live: Block[]): number {
@@ -437,25 +466,48 @@ export function placeArticleCards(
      paragraph when it cleans the body (BLOG_DROP_EMPTY in public/shop2/
      app.js), so one standing between two cards here kept them apart only
      until the owner opened the article — there they touched. */
-  const live = blocks.filter((b) => !(b.tag === "p" && !b.html.replace(P_SHELL_RX, "").replace(BLANK_RX, "")));
-  let have = seen.size;
+  const isBlank = (b: Block) => b.tag === "p" && !b.html.replace(P_SHELL_RX, "").replace(BLANK_RX, "");
+  const live = blocks.filter((b) => !isBlank(b));
 
   /* 1b. …and the model's cards keep the rules the placed ones keep: never
-     two in a row, never straight under a heading, never before the first
-     words (verification on staging, 25.09.2026: two cards back to back
-     under «Выбор средств для ухода»). A card that breaks one is lifted and
-     goes back in through the same door as the rest (step 4) — out from
-     under a heading to the section's first paragraph, out from behind
-     another card to the next paragraph that has room. */
+     two in a row, never straight under a heading or a list, never before
+     the first words (verification on staging, 25.09.2026: two cards back to
+     back under «Выбор средств для ухода»; 26.09.2026: one under a bullet
+     list). A card that breaks one is lifted and goes back in through the
+     same door as the rest (step 4) — out from under a heading to the
+     section's first paragraph, out from under a list to the paragraph after
+     it, out from behind another card to the next paragraph that has room. */
   for (let i = 0; i < live.length; i++) {
     const id = cardAlone(live[i]);
     if (!id) continue;
     const prev = live[i - 1];
-    if (prev && prev.tag !== "h2" && prev.tag !== "h3" && !hasCard(prev)) continue;
+    if (prev && !isHeading(prev) && !isList(prev) && !hasCard(prev)) continue;
     live.splice(i, 1);
     i--;
     queue.push(prev ? { id, from: prev } : { id });
   }
+
+  /* 1c. …and no more than `max` of them. The ceiling held only for the cards
+     this module adds, so a model that wrote five kept five (staging,
+     26.09.2026, ai-blog-cards e2). The ones standing where the model put
+     them come first, in the order they stand; the ones that had to be moved
+     are the first to go. A card that goes loses its tag and keeps its words,
+     and a line that held nothing else goes with it. Its product stays in
+     `seen`, so nothing below brings it back. */
+  const own = [...cardIds(live.map((b) => b.html).join("")), ...queue.map((w) => w.id)];
+  if (own.length > max) {
+    const keep = new Set(own.slice(0, max));
+    for (let i = 0; i < live.length; i++) {
+      const b = live[i];
+      if (!hasCard(b)) continue;
+      const html = b.html.replace(CARD_RX, (m: string, id: string, inner: string) => (keep.has(id) ? m : inner));
+      if (html === b.html) continue;
+      b.html = html;
+      if (isBlank(b)) live.splice(i--, 1);
+    }
+    for (let k = queue.length - 1; k >= 0; k--) if (!keep.has(queue[k].id)) queue.splice(k, 1);
+  }
+  let have = Math.min(own.length, max);
 
   /* 2. the products the model named but gave no card */
   for (const p of picks || []) {
@@ -481,6 +533,19 @@ export function placeArticleCards(
     if (!cand) continue;
     const at = anchorFor(live, w, cand);
     if (at >= 0) live.splice(at + 1, 0, cardBlock(w.id));
+  }
+  /* 4b. a card with no place left — one under a list that closes the
+     article — leaves it short: topped up from the candidates like step 3 */
+  const inText = cardIds(live.map((b) => b.html).join(""));
+  if (inText.length < min) {
+    for (const c of ranked()) {
+      if (inText.length >= min) break;
+      seen.add(c.id);
+      const at = anchorFor(live, { id: c.id }, c);
+      if (at < 0) continue;
+      live.splice(at + 1, 0, cardBlock(c.id));
+      inText.push(c.id);
+    }
   }
   /* 5. one card in the last third: another product when there is room for
      one, else the last card moved there */

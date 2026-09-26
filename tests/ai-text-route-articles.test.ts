@@ -99,9 +99,12 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
        offered for a beard topic, the invented id never existed; the oil it
        named got its card, after the paragraph that names it, and a second
        product from the slice fills the article up to the minimum (src/lib/
-       blog-cards.ts), so `products` is the cards as they stand */
-    expect(t.products[0]).toBe("proraso-beard-oil-azur-lime-30ml");
+       blog-cards.ts), so `products` is the cards as they stand — the
+       second one after the opening paragraph, since a card never stands
+       straight under the list and the closing words stay last */
+    expect(t.products).toContain("proraso-beard-oil-azur-lime-30ml");
     expect(t.products).toHaveLength(2);
+    expect(t.body.startsWith(`<p>Зимой борода становится суше.</p><p><a data-product="${t.products[0]}"></a></p><h2>`)).toBe(true);
     expect(t.products).not.toContain("system-4-bio-botanical-shampoo");
     expect(t.products).not.toContain("not-in-the-slice");
     expect(t.body).toContain('<p>Proraso <strong>Beard Oil</strong> после умывания.</p><p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>');
@@ -168,6 +171,38 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(t.body).toContain('<p>Второй абзац о масле.</p><p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>');
     expect(t.body).toContain('<p>Третий абзац о бальзаме.</p><p><a data-product="proraso-wood-spice-beard-balm-100ml"></a></p>');
     expect(t.products).toEqual(["proraso-beard-oil-azur-lime-30ml", "proraso-wood-spice-beard-balm-100ml"]);
+  });
+
+  /* ai-blog-cards e2 (staging, 26.09.2026): five cards the model wrote
+     itself, the fifth straight under a bullet list. Four stay, none under
+     the list — and «Товары в статье» (the shelf under the published
+     article) lists exactly the four in the text, not the fifth the model
+     also named. */
+  it("post_full: five cards of the model's own — four stay, none under a list, and `products` is those four", async () => {
+    const OFFER = [
+      "proraso-beard-oil-azur-lime-30ml", "proraso-wood-spice-beard-balm-100ml", "proraso-azur-lime-after-shave-balm-100-ml",
+      "proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml", "proraso-red-nourishing-aftershave-lotion-100ml",
+    ];
+    const c = (id: string) => `<p><a data-product="${id}"></a></p>`;
+    const body =
+      "<p>Зимой борода сохнет.</p>" + c(OFFER[0]) +
+      "<h2>Бальзам</h2><p>Бальзам утром.</p>" + c(OFFER[1]) +
+      "<p>После бритья — бальзам с лаймом.</p>" + c(OFFER[2]) +
+      "<p>Для чувствительной кожи — синий.</p>" + c(OFFER[3]) +
+      "<ul><li>раз</li><li>два</li></ul>" + c(OFFER[4]) +
+      "<p>Заходите на Mardi 1.</p>";
+    vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify({ ...ARTICLE, body, products: OFFER }))));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({
+      task: "post_full", lang: "RU",
+      input: { topic: "уход за бородой зимой", products: OFFER.map((id) => ({ id, brand: "Proraso", name: id })) },
+    }, admin));
+    expect(res.status).toBe(200);
+    const t = (await res.json()).text as { body: string; products: string[] };
+    const cards = [...t.body.matchAll(/<a data-product="([^"]+)"/g)].map((m) => m[1]);
+    expect(cards).toEqual(OFFER.slice(0, 4));
+    expect(t.body).toContain("<ul><li>раз</li><li>два</li></ul><p>Заходите на Mardi 1.</p>");
+    expect(t.products).toEqual(cards);
   });
 
   /* «Показывать в магазине» off, or the stock set to «нет» — by hand or by

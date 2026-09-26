@@ -452,17 +452,19 @@ export async function POST(req: NextRequest) {
     }
     if (post && result.text && typeof result.text === "object") {
       const t = result.text as Record<string, unknown>;
-      /* The cards: the model's own kept (known ids only), the products it
-         named given one, the article filled up to the minimum from the
-         slice — src/lib/blog-cards.ts. `products` is then the cards as they
-         stand, then whatever else it named: what the editor lists under
-         «Товары в статье». */
+      /* The cards: the model's own kept (known ids only, four at most), the
+         products it named given one, the article filled up to the minimum
+         from the slice — src/lib/blog-cards.ts. `products` is then the cards
+         as they stand and nothing else: what the editor lists under «Товары
+         в статье» and the article shows again under «Товары из статьи». A
+         product the model named but the text has no card for — the fifth
+         of five, dropped at the ceiling (staging, 26.09.2026) — came back
+         through here into that list, and the shelf under the article showed
+         the card the text had just lost. */
       const picks = (t.products as CardPick[]).filter((c) => post.allowed.has(c.id));
       const placed = placeArticleCards(keepKnownCards(String(t.body ?? ""), post.allowed), picks, post.refs, { topic: post.topic });
       t.body = placed.html;
-      const ids = placed.cards.slice();
-      for (const c of picks) if (!ids.includes(c.id)) ids.push(c.id);
-      t.products = ids.slice(0, POST_PRODUCTS_MAX);
+      t.products = placed.cards.filter((id, i) => placed.cards.indexOf(id) === i).slice(0, POST_PRODUCTS_MAX);
     }
     if (task === "newsletter" && result.text && typeof result.text === "object") {
       const t = result.text as Record<string, unknown>;

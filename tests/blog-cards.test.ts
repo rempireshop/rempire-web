@@ -62,6 +62,9 @@ function expectRules(html: string, opts: { min?: number; max?: number } = {}) {
   for (let i = 1; i < blocks.length; i++) {
     const two = blocks[i].html.includes("data-product") && blocks[i - 1].html.includes("data-product");
     expect(two, `two cards in a row at block ${i}: ${blocks[i - 1].html} ${blocks[i].html}`).toBe(false);
+    // ai-blog-cards e2 (staging, 26.09.2026): a card straight under a bullet list
+    const list = blocks[i - 1].tag === "ul" || blocks[i - 1].tag === "ol";
+    expect(list && blocks[i].html.includes("data-product"), `a card right after a list: ${blocks[i - 1].html} ${blocks[i].html}`).toBe(false);
   }
   for (const b of blocks) {
     if (b.tag !== "p" && b.tag !== "text") expect(b.html, `a card inside <${b.tag}>`).not.toContain("data-product");
@@ -153,7 +156,9 @@ describe("placeArticleCards — the model's own cards", () => {
     expect(out.html).toContain("<h2>Масло  каждый вечер</h2>");
     expect(blockAfter(out.html, "Proraso делает масло")).toBe(card(OIL));
     expect(out.html).toContain("<ul><li></li><li>горошина бальзама</li></ul>");
-    expect(blockAfter(out.html, "горошина бальзама")).toBe(card(BALM));
+    // not right under the list any more (ai-blog-cards e2): after the next paragraph
+    expect(blockAfter(out.html, "горошина бальзама")).toBe(H3);
+    expect(blockAfter(out.html, "шампунь для волос сушит")).toBe(card(BALM));
   });
 
   it("leaves a card the owner's way — inline in a sentence — alone, and counts it", () => {
@@ -243,12 +248,18 @@ describe("placeArticleCards — an article that came back without cards", () => 
   });
 
   it("uses the closing paragraph only when it is the one place in the last third", () => {
-    // a list before the closing words: the third card stands after the list, and the article still ends in words
-    const roomy = placeArticleCards([P0, H1, P_OIL, P_HOW, H2, P_BALM, UL, H3, "<h2>Ещё раз</h2>", "<h2>И ещё</h2>", P_END].join(""), [], CANDS, { topic: TOPIC });
+    // a paragraph before the closing words: the third card stands there, and the article still ends in words
+    const roomy = placeArticleCards([P0, H1, P_OIL, P_HOW, H2, P_BALM, UL, H3, "<h2>Ещё раз</h2>", P_WASH, P_END].join(""), [], CANDS, { topic: TOPIC });
     expectRules(roomy.html);
     expect(roomy.cards).toHaveLength(3);
-    expect(blockAfter(roomy.html, "горошина бальзама")).toBe(card(roomy.cards[2]));
+    expect(blockAfter(roomy.html, "шампунь для волос сушит")).toBe(card(roomy.cards[2]));
     expect(roomy.html.endsWith(P_END)).toBe(true);
+    // a list is not room: never a card straight under it (ai-blog-cards e2), so the closing words it is
+    const listed = placeArticleCards([P0, H1, P_OIL, P_HOW, H2, P_BALM, UL, H3, "<h2>Ещё раз</h2>", "<h2>И ещё</h2>", P_END].join(""), [], CANDS, { topic: TOPIC });
+    expectRules(listed.html);
+    expect(listed.cards).toHaveLength(3);
+    expect(blockAfter(listed.html, "горошина бальзама")).toBe(H3);
+    expect(listed.html.endsWith(P_END + card(listed.cards[2]))).toBe(true);
     // nothing but headings before the closing words: the card has one place to stand
     const tight = placeArticleCards([P0, H1, P_OIL, P_HOW, H2, P_BALM, UL, H3, "<h2>Ещё раз</h2>", "<h2>И ещё</h2>", "<h2>Напоследок</h2>", P_END].join(""), [], CANDS, { topic: TOPIC });
     expectRules(tight.html);
@@ -343,5 +354,98 @@ describe("placeArticleCards — the model's own cards keep the same rules as the
     expectRules(out.html);
     expect(splitBlocks(out.html)[0].html).toBe(HP0);
     expect(out.cards).toContain(SHAMPOO);
+  });
+});
+
+/* ---- ai-blog-cards e2 (verification pass on staging, 26.09.2026) ----------
+   «Как создать летний образ в мужском уходе», written whole by «Написать
+   статью целиком», came back with FIVE cards — Bio Botanical Shampoo,
+   Touchable, Night.Rider, Bio Botanical Serum, Un.Tangled Spray — and the
+   last one straight under a bullet list. The ceiling (POST_CARDS_MAX) held
+   only for the cards this module adds; the model's own were all kept. And a
+   card lifted out of a list, or one the model wrote right after it, was put
+   «right after the list» on purpose. Now: at most four per article (the
+   cards that stand where the model put them first, in the order they
+   stand; the ones that had to be moved are the first to go), and never a
+   card directly after a list — it goes after the next paragraph, or out of
+   the article when no paragraph follows. */
+describe("placeArticleCards — at most four, and never straight under a list", () => {
+  const TOUCH = "kevin-murphy-touchable";
+  const NIGHT = "kevin-murphy-night-rider";
+  const SERUM = "system-4-bio-botanical-serum";
+  const UNTANGLED = "kevin-murphy-untangled";
+  const SUMMER: CardCandidate[] = [
+    { id: SHAMPOO, brand: "System 4", name: "Bio Botanical Shampoo — шампунь", category: "hair" },
+    { id: TOUCH, brand: "Kevin.Murphy", name: "Touchable — спрей", category: "styling" },
+    { id: NIGHT, brand: "Kevin.Murphy", name: "Night.Rider — паста", category: "styling" },
+    { id: SERUM, brand: "System 4", name: "Bio Botanical Serum — сыворотка", category: "hair" },
+    { id: UNTANGLED, brand: "Kevin.Murphy", name: "Un.Tangled — спрей", category: "hair" },
+  ];
+  const S0 = "<p>Летом волосы и кожа головы сохнут от солнца и солёной воды.</p>";
+  const SH1 = "<h2>Очищение</h2>";
+  const S1 = "<p>Мягкий шампунь без сульфатов очищает и не сушит кожу головы.</p>";
+  const SH2 = "<h2>Укладка</h2>";
+  const S2 = "<p>Лёгкий спрей даёт объём и не утяжеляет.</p>";
+  const S3 = "<p>Для текстуры подойдёт паста с матовым финишем.</p>";
+  const SH3 = "<h2>Уход</h2>";
+  const S4 = "<p>Сыворотка на кончики держит влагу до следующего мытья.</p>";
+  const SUL = "<ul><li>после душа</li><li>на влажные кончики</li></ul>";
+  const S5 = "<p>Заходите на Mardi 1 — подберём уход под ваши волосы.</p>";
+
+  it("the staging article: five of the model's cards, the fifth under a list — four stay, none under the list", () => {
+    const body = [S0, SH1, S1, card(SHAMPOO), SH2, S2, card(TOUCH), S3, card(NIGHT), SH3, S4, card(SERUM), SUL, card(UNTANGLED), S5].join("");
+    const picks = SUMMER.map((c) => ({ id: c.id }));
+    const out = placeArticleCards(body, picks, SUMMER, { topic: "летний образ в мужском уходе" });
+    expectRules(out.html);
+    expect(out.cards).toEqual([SHAMPOO, TOUCH, NIGHT, SERUM]);
+    expect(out.html, "the fifth card is still in the text").not.toContain(UNTANGLED);
+    expect(blockAfter(out.html, "на влажные кончики")).toBe(S5);
+  });
+
+  it("six cards where the model put them: the first four stay, the rest go and leave no empty line", () => {
+    const paras = Array.from({ length: 7 }, (_, i) => `<p>Абзац ${i + 1}: борода, масло и бальзам.</p>`);
+    const ids = [OIL, BALM, CAPTAIN, FOAM, OIL_BIG, SHAMPOO];
+    const body = paras.map((p, i) => p + (ids[i] ? card(ids[i]) : "")).join("");
+    const out = placeArticleCards(body, [], CANDS, { topic: TOPIC });
+    expectRules(out.html);
+    expect(out.cards).toEqual([OIL, BALM, CAPTAIN, FOAM]);
+    expect(out.html).not.toContain(OIL_BIG);
+    expect(out.html).not.toContain(SHAMPOO);
+    expect(out.html).toBe(paras.map((p, i) => p + (i < 4 ? card(ids[i]) : "")).join(""));
+  });
+
+  it("a card of the owner's kind, inline in a sentence, counts too — an extra one keeps its words", () => {
+    const inline = `<p>Возьмите <a data-product="${SHAMPOO}" href="/shop2/p/${SHAMPOO}/">System 4 шампунь</a> на лето.</p>`;
+    const body = [S0, card(TOUCH), S1, card(NIGHT), S2, card(SERUM), S3, card(UNTANGLED), S4, inline, S5].join("");
+    const out = placeArticleCards(body, [], SUMMER, { topic: "лето" });
+    expectRules(out.html);
+    expect(out.cards).toEqual([TOUCH, NIGHT, SERUM, UNTANGLED]);
+    expect(out.html).toContain("<p>Возьмите System 4 шампунь на лето.</p>");
+  });
+
+  it("the model's card right after a list moves after the next paragraph", () => {
+    const body = [P0, H1, P_OIL, card(OIL), P_HOW, H2, P_BALM, UL, card(BALM), H3, P_WASH, P_END].join("");
+    const out = placeArticleCards(body, [], CANDS, { topic: TOPIC });
+    expectRules(out.html);
+    expect(blockAfter(out.html, "горошина бальзама")).toBe(H3);
+    expect(blockAfter(out.html, "шампунь для волос сушит")).toBe(card(BALM));
+  });
+
+  it("…and leaves the article when no paragraph follows the list — which is then topped up to the minimum", () => {
+    const body = [P0, H1, P_OIL, card(OIL), P_HOW, H2, P_BALM, UL, card(BALM)].join("");
+    const out = placeArticleCards(body, [], CANDS, { topic: TOPIC });
+    expectRules(out.html);
+    expect(out.cards).not.toContain(BALM);
+    expect(out.cards[0]).toBe(OIL);
+    expect(out.html.endsWith(UL), "a card still stands under the closing list").toBe(true);
+  });
+
+  it("a product the model named never lands under a list either, even when its paragraph is taken", () => {
+    // the balm takes the paragraph above the list; the Captain, pointed at the same section, used to slip in under the list
+    const out = placeArticleCards(ARTICLE, [{ id: BALM }, { id: CAPTAIN, after: "Бальзам утром" }], CANDS, { topic: TOPIC });
+    expectRules(out.html);
+    expect(blockAfter(out.html, "Wood &amp; Spice")).toBe(card(BALM));
+    expect(blockAfter(out.html, "горошина бальзама")).toBe(H3);
+    expect(blockAfter(out.html, "шампунь для волос сушит")).toBe(card(CAPTAIN));
   });
 });

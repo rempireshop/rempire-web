@@ -96,6 +96,8 @@ describe("buildPostFullPrompt — a whole article, not an outline", () => {
     expect(system).toMatch(/the category the article is about, a brand or a product it names/);
     expect(system).toMatch(/never two cards one after another/);
     expect(system).toMatch(/never inside a heading or a list/);
+    // …nor right under a list, where it reads as the list's last item (ai-blog-cards e2, 26.09.2026)
+    expect(system).toMatch(/never straight under a list/);
     expect(system).toMatch(/at least one of them in the last third of the text, before the closing paragraph/);
     expect(system, "the model may write the name and the price itself, and print them twice")
       .toMatch(/no href, no other attribute/i);
