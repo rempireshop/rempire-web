@@ -1917,13 +1917,13 @@
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата».",
         "Вписать 1 в поле Omniva у Эстонии и 2 — у Латвии, выйти из поля.",
-        "Прочитать рыжие строки под полями и вверху, потом нажать «Оставить так» под обоими.",
+        "Прочитать рыжие строки у полей и вверху, потом нажать «Оставить так» у обоих.",
         "Сразу в кассе с корзиной до 59 € выбрать Эстонию, «Пакомат» и Omniva.",
         "Свернуть браузер и вернуться, потом обновить страницу и открыть панель.",
         "Очистить оба поля и выйти из поля."
       ],
       "expect": [
-        "Под полем Эстонии: «Ниже тарифа Montonio: 3,19 €» и кнопка «Оставить так».",
+        "На телефоне «Оставить так» вровень с полем Эстонии; под ними «Ниже тарифа Montonio: 3,19 €».",
         "Вверху страницы: «Не сохранено: цена ниже тарифа Montonio» — вопросов в окошке нет.",
         "После «Оставить так» у обоих — «Сохранено ✓».",
         "В кассе у Omniva 1 € — и после возврата в браузер, и после обновления.",
@@ -1938,13 +1938,13 @@
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата».",
           "Type 1 into Estonia's Omniva box and 2 into Latvia's, and leave the box.",
-          "Read the rust lines under the boxes and at the top, then press «Оставить так» under both.",
+          "Read the rust lines by the boxes and at the top, then press «Оставить так» on both.",
           "Straight away, at the checkout with a cart under 59 €, pick Estonia, «Пакомат» and Omniva.",
           "Put the browser in the background and come back, then reload and open the panel.",
           "Clear both boxes and leave the box."
         ],
         "expect": [
-          "Under Estonia's box: «Ниже тарифа Montonio: 3,19 €» and an «Оставить так» button.",
+          "On a phone «Оставить так» sits level with Estonia's box, «Ниже тарифа Montonio: 3,19 €» below.",
           "At the top of the page: «Не сохранено: цена ниже тарифа Montonio» — no pop-up question.",
           "After «Оставить так» on both — «Сохранено ✓».",
           "At the checkout Omniva is 1 € — after coming back and after the reload.",
@@ -1954,7 +1954,7 @@
         "why": "A price below the rate is your call, but never by accident: the card asks once."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-09-26T09:06:38.977Z"
     },
     {
       "id": "panel-carton",

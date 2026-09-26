@@ -30640,8 +30640,14 @@
        variable reads to it as loose fragments rather than one line */
     if (isFinite(n) && n >= 0 && n < price) {
       if (!shipAccepted(key, n)) {
-        return '<span class="adm-hint adm-hint--cell adm-hint--loss">Ниже тарифа Montonio: ' + money + "</span>" +
-          '<span class="adm-rt__acts"><button class="adm-rt__keep" type="button" data-shipaccept="' + esc(key) + '">Оставить так</button>' +
+        /* «Оставить так» first, the rust reason and «вернуть» after it: the
+           button belongs to the box — beside it on a phone, straight under it
+           and as wide as it in a desktop column — and the sentence under both.
+           With the reason first the button floated wherever the two wrapped
+           lines of it happened to end, never level with the box (Dim,
+           26.09.2026: «not inline»). admin.css places the two parts. */
+        return '<span class="adm-rt__acts"><button class="adm-rt__keep" type="button" data-shipaccept="' + esc(key) + '">Оставить так</button></span>' +
+          '<span class="adm-rt__why"><span class="adm-hint adm-hint--cell adm-hint--loss">Ниже тарифа Montonio: ' + money + "</span>" +
           '<button class="adm-rates__undo" type="button" data-shipclear="' + esc(key) + '">вернуть</button></span>';
       }
       return '<button class="adm-hint adm-hint--cell adm-rates__undo adm-hint--loss" type="button" data-shipclear="' +
