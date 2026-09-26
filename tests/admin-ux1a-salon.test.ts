@@ -45,6 +45,7 @@ type State = {
   posDiscount: string; posDiscOther: boolean; posBusy: boolean; posErr: string;
   posDone: null | { orderId: string; number: string; total: number; items: number; how: string; mailed: boolean };
   stockLevels: unknown[];
+  lang?: string;
 };
 type Product = { id: string; brand: string; name: string; price: number; stock: string; sizes?: string[]; prices?: number[] };
 type Analytics = Record<string, { data: null | { topProductsByRevenue: Array<{ id: string }> }; err: null | string; at: number }>;
