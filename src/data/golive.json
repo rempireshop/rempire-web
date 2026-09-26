@@ -729,6 +729,23 @@
       }
     },
     {
+      "id": "stock-import",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "needs": [
+        "run-reset"
+      ],
+      "title": "Перенести остатки из Shopify — после обнуления",
+      "detail": "Решено 26.09.2026 (вариант 1b): остаток каждого размера из Shopify становится счётом в «Складе», «мало» — только на последней штуке. В тот же день Claude заново читает Shopify, показывает сухой прогон «было → станет» и пишет через открытую панель. Только после обнуления: оно стирает склад. Размеры с 0 на плюс отправят письма «Сообщить, когда появится».",
+      "en": {
+        "title": "Bring the stock over from Shopify — after the reset",
+        "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. On the day Claude re-reads Shopify, shows the before → after dry run and writes through the open panel. Only after the reset: the reset clears the stock. Sizes going from 0 to a positive count send the «Сообщить, когда появится» letters."
+      }
+    },
+    {
       "id": "unpaid-flow",
       "area": "switches",
       "who": [

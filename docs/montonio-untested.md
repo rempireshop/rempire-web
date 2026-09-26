@@ -256,6 +256,15 @@ sandbox could not tell us.
       Montonio agreed in writing (23.09.2026) that a few real €1 orders to
       ourselves, refunded by us, are fine — exactly to walk the refund and
       the carrier-refusal paths once for real.
+      **The €1 product** (Dim, 26.09.2026): «REMPIRE Тестовый платёж — не
+      продаётся», id `c-rempire-testovyj-platezh-ne-prodaetsya`, 1 €, created
+      hidden. A hidden product cannot be ordered (the checkout answers
+      «нет в наличии»), so at the start of the hour switch its «Показывать в
+      магазине» on, buy it with **«Самовывоз в салоне»** (always free — the
+      order is exactly 1 €), and at the end of the hour switch it off and
+      delete it. The shop is still on the staging address then, and the
+      Google feed still comes from Shopify, so an hour of it on show reaches
+      nobody.
 - [ ] Pay it with a **bank link** (not a card): that is the method most
       customers use and the only one whose refundability is in doubt.
 - [ ] Back in the shop, the address should be `/shop2/done/?n=R-…&s=paid` and
