@@ -218,7 +218,7 @@ test.describe("admin — the customer card", () => {
     await expect(pro, "the switch waited for the server").toHaveAttribute("aria-current", "true");
     await expect(page.locator(".adm-skel"), "the card blanked instead of moving the switch").toHaveCount(0);
     await expect(page.locator(".adm-chd .adm-tag").first()).toHaveText("Партнёр");
-    await expect(page.getByRole("status")).toContainText("письмо уйдёт через 10 с");
+    await expect(page.getByRole("status")).toContainText(/письмо уйдёт через \d+ с/);   // it counts down now: 10, 9, … (custHold)
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     // …and the PATCH goes when the ten seconds are up
     await expect.poll(() => !!release, { timeout: 20_000, message: "the held PATCH never left" }).toBe(true);

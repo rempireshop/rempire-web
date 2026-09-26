@@ -146,7 +146,7 @@ test.describe("admin sections — Клиенты", () => {
     await expect(approve, "the pending request has no «Сделать партнёром» on its row").toBeVisible();
     await approve.click();
     await expect(page.locator(".adm-confirm"), "the approval asked first — 1a holds it instead").toHaveCount(0);
-    await expect(page.getByRole("status")).toContainText("письмо уйдёт через 10 с");
+    await expect(page.getByRole("status")).toContainText(/письмо уйдёт через \d+ с/);   // it counts down now: 10, 9, … (custHold)
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await expect.poll(async () => {
       const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);
@@ -561,7 +561,7 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
       (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST", { timeout: 25_000 });
     await page.locator("[data-admpartnersave]").click();
     await expect(page.locator(".adm-confirm"), "«+ Партнёр» asked first — 1a holds the letter instead").toHaveCount(0);
-    await expect(page.getByRole("status")).toContainText("Партнёр добавлен · письмо уйдёт через 10 с");
+    await expect(page.getByRole("status")).toContainText(/Партнёр добавлен · письмо уйдёт через \d+ с/);   // counts down (custHold)
     const answer = await (await post).json();
     expect(answer.ok, "POST /api/admin/customers/ refused the partner").toBe(true);
     expect(answer.created).toBe(true);

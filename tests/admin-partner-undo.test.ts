@@ -53,6 +53,7 @@ function panel(answer: Record<string, unknown>) {
     function demoSave() {}
     function applyDemoOverrides() {}
     function srvPush() {}
+    function shopPoke() {}   // the shop's other tabs: nothing to tell in a test
     function paintToast() { if (S.toast) onShown(S.toast + (S.toastUndo ? " [Отменить]" : "")); }
     function patchHeader() {}
     function patchNav() {}

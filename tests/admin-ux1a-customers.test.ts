@@ -67,6 +67,10 @@ function panel(S: Any, opts: { partners?: boolean; answer?: (s: Sent) => Answer;
   const applied: Any[] = [];
   const journal: string[] = [];
   const specs: Record<string, Any> = {};
+  // the countdown painted in place (toastRetext / toastRewait) and the word to the shop (shopPoke)
+  const retexts: string[] = [];
+  const rewaits: string[] = [];
+  const pokes: string[] = [];
   let renders = 0;
   const answer = opts.answer ?? (() => ({ status: 200, body: { ok: true, customer: null } }));
   const env: Record<string, unknown> = {
@@ -109,6 +113,9 @@ function panel(S: Any, opts: { partners?: boolean; answer?: (s: Sent) => Answer;
     LOYALTY_REASON: { adjust: "Корректировка" },
     ADM_ROW_OPEN: " data-admrowopen",
     refocus: () => {}, translateTree: () => {}, noop: () => {},
+    shopPoke: (kind: string) => { pokes.push(kind); },
+    toastRetext: (m: string) => { retexts.push(m); },
+    toastRewait: (w: string) => { rewaits.push(w); },
     loadSrvOrders: () => {}, admCurOrder: () => null, admOrderCardHTML: () => "", admOrderMissingHTML: () => "",
   };
   const body = `
@@ -135,7 +142,7 @@ function panel(S: Any, opts: { partners?: boolean; answer?: (s: Sent) => Answer;
   const keys = Object.keys(env);
   const api = new Function(...keys, "applied", body)(...keys.map((k) => env[k]), applied) as Any;
   const rig = {
-    ...api, sent, toasts, applied, journal, specs,
+    ...api, sent, toasts, applied, journal, specs, retexts, rewaits, pokes,
     get renders() { return renders; },
     /** «Вернуть» on the newest toast that offers one. */
     undo() { const t = [...toasts].reverse().find((x) => x.undo); t!.undo!.undo(); },
@@ -337,6 +344,101 @@ describe("points: «Начислить +10» / «Списать −5», held fiv
     expect(q.balance(T.admCustDetail.customer)).toBe(7);
     vi.advanceTimersByTime(10000);
     expect(q.sent).toEqual([]);
+  });
+});
+
+/* Dim, 26.09.2026 (people-points, people-remove-partner, people-reviews:
+   «works but takes time»). The waits are on purpose — points five seconds,
+   a letter ten — but nothing on screen said so: the points toast named the
+   points and nothing else, and «письмо уйдёт через 10 с» said 10 for all ten
+   seconds. Every held change now counts its wait down where it is said, and
+   says when it has landed. */
+describe("a held change says it is waiting, counts down, and says when it has landed", () => {
+  it("points: «сохранится через 5 с» under the toast and on the row, 5 … 1, then «Баллы сохранены ✓»", async () => {
+    const S: Any = { admCustOpen: "c1", admCustDetail: { customer: { ...REQ, pointsBalance: 7 }, history: [], orders: [], reviews: [] }, admCustPoints: "+10", admCustNote: "", admCustomers: [] };
+    const p = panel(S, { answer: () => ({ status: 200, body: { ok: true, customer: { ...REQ, pointsBalance: 17 } } }) });
+    p.adjust("c1");
+    // the sentence is what it was; the wait is a line of its own under it
+    expect(p.toasts[0].msg).toBe("Начислено 10 баллов");
+    expect(p.toasts[0].undo!.wait).toBe("сохранится через 5 с");
+    // the held row says the same, at once
+    const card = p.card();
+    expect(card).toMatch(/<div class="adm-row adm-row--held">[\s\S]*?<span class="adm-hold" data-holdleft="pts:c1:\d+" data-holdletter="" data-holdcap="">сохранится через 5 с<\/span>/);
+    // the toast on screen is this one: its wait line counts down in place
+    S.toastUndo = p.toasts[0].undo;
+    vi.advanceTimersByTime(1000);
+    expect(p.rewaits.at(-1)).toBe("сохранится через 4 с");
+    vi.advanceTimersByTime(3000);
+    expect(p.rewaits).toEqual(["сохранится через 4 с", "сохранится через 3 с", "сохранится через 2 с", "сохранится через 1 с"]);
+    expect(p.retexts, "the sentence itself has no number to count").toEqual([]);
+    expect(p.sent).toEqual([]);
+    vi.advanceTimersByTime(1000);
+    expect(p.sent).toHaveLength(1);
+    await flush();
+    expect(p.toasts.at(-1)!.msg).toBe("Баллы сохранены ✓");
+    // …and the shop's other open tabs are told the profile changed — only now, once it has landed
+    expect(p.pokes).toEqual(["account"]);
+    // the countdown stops with the hold
+    const n = p.rewaits.length;
+    vi.advanceTimersByTime(5000);
+    expect(p.rewaits).toHaveLength(n);
+  });
+
+  it("a letter's own number counts: «письмо уйдёт через 10 с» … «через 1 с»", () => {
+    const S: Any = { admCustomers: [{ ...REQ }], admCustTier: "", admCustQ: "" };
+    const p = panel(S);
+    p.decide("c1", "approve");
+    expect(p.toasts[0].msg).toBe("Мария — партнёр · письмо уйдёт через 10 с");
+    expect(p.toasts[0].undo!.wait, "the number is in the sentence — no second line").toBeUndefined();
+    S.toastUndo = p.toasts[0].undo;
+    vi.advanceTimersByTime(3000);
+    expect(p.retexts).toEqual([
+      "Мария — партнёр · письмо уйдёт через 9 с", "Мария — партнёр · письмо уйдёт через 8 с", "Мария — партнёр · письмо уйдёт через 7 с",
+    ]);
+  });
+
+  it("the partner switch says the letter is still waiting under it", () => {
+    const S: Any = { admCustOpen: "c1", admCustDetail: { customer: { ...REQ, proRequestedAt: null }, history: [], orders: [], reviews: [] }, admCustomers: [{ ...REQ, proRequestedAt: null }], admCustPoints: "", admCustNote: "" };
+    const p = panel(S);
+    p.setTier("pro");
+    expect(p.card()).toContain('<span class="adm-hold" data-holdleft="tier:c1" data-holdletter="1" data-holdcap="1">Письмо уйдёт через 10 с</span>');
+    vi.advanceTimersByTime(10000);
+    expect(p.card(), "gone once the letter has gone").not.toContain("data-holdleft");
+  });
+
+  it("«Отказать»: the sentence as before, the wait under it, «Заявка отклонена ✓» when it has landed", async () => {
+    const S: Any = { admCustomers: [{ ...REQ }], admCustTier: "", admCustQ: "" };
+    const p = panel(S, { answer: () => ({ status: 200, body: { ok: true, customer: { ...REQ, proRequestedAt: null } } }) });
+    p.decide("c1", "reject");
+    expect(p.toasts[0].msg).toBe("Заявка отклонена");
+    expect(p.toasts[0].undo!.wait).toBe("сохранится через 10 с");
+    vi.advanceTimersByTime(10000);
+    await flush();
+    expect(p.toasts.at(-1)!.msg).toBe("Заявка отклонена ✓");
+    expect(p.pokes).toEqual(["account"]);
+  });
+
+  it("the countdown's words are ET and EN too", () => {
+    const tr = new Function("S", "LANG", `
+      var S = { lang: LANG };
+      ${decl("UI")}
+      ${decl("UI_RX")}
+      ${decl("NAME_FRAGS")}
+      ${slice("trText")}
+      return function (s) { return trText(s, LANG, false); };
+    `);
+    const et = tr(null, "ET") as (s: string) => string;
+    const en = tr(null, "EN") as (s: string) => string;
+    expect(en("сохранится через 4 с")).toBe("saves in 4 s");
+    expect(et("сохранится через 4 с")).toBe("salvestub 4 s pärast");
+    expect(en("письмо уйдёт через 7 с")).toBe("the letter goes in 7 s");
+    expect(en("Письмо уйдёт через 8 с")).toBe("The letter goes in 8 s");
+    expect(et("Сохранится через 9 с")).toBe("Salvestub 9 s pärast");
+    expect(en("Мария — партнёр · письмо уйдёт через 3 с")).toBe("Мария — partner · the letter goes in 3 s");
+    expect(et("Цены для салонов включены · письмо уйдёт через 6 с")).toBe("Salongihinnad sisse lülitatud · kiri läheb 6 s pärast");
+    expect(en("Партнёр добавлен · письмо уйдёт через 2 с")).toBe("Partner added · the letter goes in 2 s");
+    expect(en("Баллы сохранены ✓")).toBe("Points saved ✓");
+    expect(et("Заявка отклонена ✓")).toBe("Taotlus tagasi lükatud ✓");
   });
 });
 

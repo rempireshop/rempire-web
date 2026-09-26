@@ -1279,6 +1279,9 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   flex: 1; min-width: 0; font-size: 14px; line-height: 20px; padding: 8px 0;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
+/* «сохранится через 5 с» under a held change's sentence, counting down
+   (custHold in app.js): the pause is on purpose, and says so */
+.adm-toast__w { display: block; font-size: 12.5px; line-height: 18px; color: var(--a-dim); font-variant-numeric: tabular-nums; }
 .adm-toast__undo {
   border: 0; background: none; color: var(--a-onink); font-weight: 600; text-decoration: underline;
   text-underline-offset: 3px; font-size: 14px; height: 44px; padding: 0 8px; flex: none;
@@ -2968,6 +2971,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-cpts__hist { margin-top: 12px; }
 .adm-cpts__none { margin-top: 12px; padding: 14px 16px; }
 .adm-row--held { color: var(--a-muted); }
+/* …and what it waits for, in ink, counting down: «сохранится через 5 с» on a
+   held points row, «письмо уйдёт через 10 с» under the partner switch */
+.adm-hold { color: var(--a-ink); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm2 .adm-cnote { display: block; min-height: 84px; margin-top: 12px; }
 .adm-csec--write { margin-top: 22px; }
 .adm2 .adm-cwrite { height: 44px; padding: 0 18px; }
