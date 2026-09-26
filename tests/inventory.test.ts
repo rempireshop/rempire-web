@@ -80,9 +80,10 @@ describe("inventory", () => {
     it("above the threshold is in", () => {
       expect(deriveState(3, 2)).toBe("in");
     });
-    it("a missing/invalid threshold falls back to 2", () => {
-      expect(deriveState(2, NaN)).toBe("low");
-      expect(deriveState(3, -1)).toBe("in");
+    it("a missing/invalid threshold falls back to 1 — «мало» only on the last unit", () => {
+      expect(deriveState(1, NaN)).toBe("low");
+      expect(deriveState(2, NaN)).toBe("in");
+      expect(deriveState(2, -1)).toBe("in");
     });
   });
 
@@ -347,7 +348,7 @@ describe("inventory", () => {
       const a = await setLevel(plain.id, "", { ean: "11112222" });
       expect(a.qty).toBe(0);
       expect(a.ean).toBe("11112222");
-      expect(a.lowThreshold).toBe(2); // the column default, untouched
+      expect(a.lowThreshold).toBe(1); // the column default (215_low_threshold_one.sql), untouched
 
       const b = await setLevel(plain.id, "", { lowThreshold: 5 });
       expect(b.ean).toBe("11112222"); // untouched by a patch that didn't mention it
@@ -374,14 +375,16 @@ describe("inventory", () => {
        grid used to redden a remainder at a flat «3 или меньше» in the code
        and in words, while «Склад» next door filtered on the row's own
        threshold — one warehouse, two ideas of «мало». Dim settled it: the
-       per-row threshold, default 2. That default lives in this column, so it
-       is worth one test that says the whole sentence rather than only the
-       number (`db/migrations/090_inventory.sql`, `deriveState` above). */
-    it("a size nobody has set a threshold on warns at 2, so 3 is «in» and 2 is «low»", async () => {
+       per-row threshold, default 2 — and on 26.09.2026 moved the default to
+       1, «мало» only on the last unit. That default lives in this column, so
+       it is worth one test that says the whole sentence rather than only the
+       number (`db/migrations/215_low_threshold_one.sql`, `deriveState` above;
+       tests/low-threshold-one.test.ts holds every other place it lives). */
+    it("a size nobody has set a threshold on warns at 1, so 2 is «in» and 1 is «low»", async () => {
       const row = await setLevel(plain.id, "", { ean: "77778888" });
-      expect(row.lowThreshold).toBe(2);
-      expect(deriveState(3, row.lowThreshold)).toBe("in");
-      expect(deriveState(2, row.lowThreshold)).toBe("low");
+      expect(row.lowThreshold).toBe(1);
+      expect(deriveState(2, row.lowThreshold)).toBe("in");
+      expect(deriveState(1, row.lowThreshold)).toBe("low");
     });
 
     /* «Причина (видна в истории)» is what the box under it promises, and a

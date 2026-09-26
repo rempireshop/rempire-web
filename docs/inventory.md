@@ -11,7 +11,7 @@
 
 - **Остаток** — сколько единиц товара сейчас на складе. Число, а не слово.
 - **Порог «мало»** — при каком остатке товар помечается жёлтым «мало» (по
-  умолчанию 2 штуки).
+  умолчанию 1 штука: «мало» — только последняя; 2 и больше — «в наличии»).
 - **«Не учтено»** — товар ещё ни разу не сканировали и не считали. Это не
   значит, что его нет — просто по нему пока нет настоящих цифр, и на сайте
   для него по-прежнему действует старая ручная отметка «в наличии / мало /
@@ -120,7 +120,7 @@
 «Нет», «Не учтено») ищут по всему складу, а не по тому, что уже на экране.
 
 **Красное число остатка** значит «не больше порога «мало»» — своего у каждого
-объёма, по умолчанию 2. Порог меняется кнопкой «Править» в той же строке.
+объёма, по умолчанию 1. Порог меняется кнопкой «Править» в той же строке.
 Такое же правило теперь и в «Товаре» → «Размеры и цены».
 
 **Значок «Скрыт»** в строке значит, что товар снят с продажи: в его карточке
@@ -191,7 +191,7 @@
 
 ```sql
 stock_levels(product_id text, variant text default '', qty int not null default 0,
-             low_threshold int default 2, ean text, updated_at,
+             low_threshold int default 1 (2 until 215_low_threshold_one.sql), ean text, updated_at,
              primary key(product_id, variant))
 stock_moves(id bigserial, at, product_id, variant, delta int,
             reason text check in ('sale_web','sale_pos','goods_in','adjust','return',
@@ -409,7 +409,7 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   a time over several evenings, so this is the only thing that says where it
   got to.
 - A row's remainder is red when the SERVER says the row is not `in` — its own
-  `low_threshold`, default 2 (`deriveState`, `src/lib/inventory.ts`). The
+  `low_threshold`, default 1 (`DEFAULT_LOW_THRESHOLD`, `src/lib/inventory.ts`). The
   product editor's grid uses the same rule now (`edStockLow()`); it used to
   redden at a flat «3 or fewer», in the code and in its own hint, which
   disagreed with the «Мало» chip one screen away.
@@ -746,7 +746,8 @@ drift apart.
   each of its parts off the shelf at its own size and quantity (and a refund
   puts them back), and that a webhook retry never decrements twice.
   Also the sentence the product editor now says out loud: a size nobody has
-  set a threshold on warns at 2, so 3 is `in` and 2 is `low`.
+  set a threshold on warns at 1, so 2 is `in` and 1 is `low`
+  (`tests/low-threshold-one.test.ts` holds every other place the default lives).
 - `tests/inventory-bind-route.test.ts` — the bind/lookup HTTP contract: both
   doors' 401, the bind + lookup round-trip, `ean_taken` naming the bottle that
   holds the code, `ean: null` freeing it, `bad_ean`/`bad_threshold`, and

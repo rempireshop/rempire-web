@@ -6438,14 +6438,15 @@
         "Вписать причину, потом поменять порог «мало ≤» и нажать «Готово» на клавиатуре.",
         "Открыть «История →» и вернуться.",
         "Вписать число прямо между «−» и «+», поменять штрихкод и снова открыть историю.",
-        "Попробовать вписать в порог букву вместо числа."
+        "Попробовать вписать в порог букву вместо числа.",
+        "У другого объёма, где «мало ≤» 1, вписать остаток 1, потом 2."
       ],
       "expect": [
         "Кнопки «Сохранить» нет: вверху «Сохранено ✓» после каждого поля.",
         "«Назад» телефона из истории возвращает на «Склад», а не на «Обзор».",
         "В истории строка «правка карточки · ваша причина», без числа справа.",
         "После числа сверху строка «ручная правка» с новым остатком.",
-        "Метка у объёма становится «мало», когда остаток не выше порога.",
+        "Метка «мало», пока остаток не выше порога: при пороге 1 — только последняя штука.",
         "Букву поле не отправляет: красная рамка, подсказка и вверху «Не сохранено — проверьте поле»."
       ],
       "why": "Стёртый порог означает, что товар кончится, а вы об этом не узнаете.",
@@ -6459,20 +6460,21 @@
           "Type a reason, then change the «мало ≤» (low) threshold and press Done on the keyboard.",
           "Open «История →» and come back.",
           "Type a number straight between «−» and «+», change the barcode and open the history again.",
-          "Try typing a letter instead of a number into the threshold."
+          "Try typing a letter instead of a number into the threshold.",
+          "On another size whose «мало ≤» is 1, type a stock of 1, then 2."
         ],
         "expect": [
           "There is no «Сохранить» button: «Сохранено ✓» shows at the top after each field.",
           "The phone's Back from the history returns to «Склад», not to «Обзор».",
           "The history shows «правка карточки · your reason», with no number on the right.",
           "After the number the top row reads «ручная правка» with the new stock.",
-          "The size's tag turns «мало» when the stock is at or under its threshold.",
+          "The tag reads «мало» at or under the threshold: at 1, only the last unit.",
           "A letter is not sent: red frame, hint, and «Не сохранено — проверьте поле» on top."
         ],
         "why": "A wiped threshold means the product runs out and nobody tells you."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T14:07:04.083Z"
+      "markedAt": "2026-09-26T19:12:32.593Z"
     },
     {
       "id": "stock-history",

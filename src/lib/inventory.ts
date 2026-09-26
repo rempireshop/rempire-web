@@ -111,9 +111,17 @@ function cleanActor(v: unknown): string {
    0 is always "out" — a fresh seeded row (qty 0, no moves yet) never reaches
    here because callers only trust a row once it has moved (see module doc).
    At or under the threshold (and above 0) is "low"; above it is "in". */
+
+/** The «мало» threshold of a size nobody has set one on: «мало» only on the
+    LAST unit — 0 «нет», 1 «мало», 2 or more «в наличии» (Dim, 26.09.2026;
+    it was 2 until then). The column default says the same
+    (db/migrations/215_low_threshold_one.sql), and so do the panel's own
+    fallbacks in public/shop2/app.js and tools/seed-stock.mjs. */
+export const DEFAULT_LOW_THRESHOLD = 1;
+
 export function deriveState(qty: number, lowThreshold: number): StockState {
   const q = Number.isFinite(Number(qty)) ? Number(qty) : 0;
-  const t = Number.isFinite(Number(lowThreshold)) && Number(lowThreshold) >= 0 ? Number(lowThreshold) : 2;
+  const t = Number.isFinite(Number(lowThreshold)) && Number(lowThreshold) >= 0 ? Number(lowThreshold) : DEFAULT_LOW_THRESHOLD;
   if (q <= 0) return "out";
   if (q <= t) return "low";
   return "in";
@@ -364,9 +372,9 @@ async function applyMove(
   // its first move without a separate "create the level" step.
   await q(
     `insert into stock_levels (product_id, variant, qty, low_threshold, updated_at)
-     values ($1, $2, 0, 2, now())
+     values ($1, $2, 0, $3, now())
      on conflict (product_id, variant) do nothing`,
-    [productId, variant],
+    [productId, variant, DEFAULT_LOW_THRESHOLD],
   );
   // Locked read: setQty()'s delta is computed from THIS value, inside the same
   // transaction, so a concurrent move cannot make the "set to N" stale between
@@ -1135,7 +1143,7 @@ export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?
     const row = byKey.get(key);
     const p = BY_ID.get(productId) ?? custom.byId.get(productId);
     const qty = row ? Number(row.qty) || 0 : 0;
-    const lowThreshold = row ? Number(row.low_threshold) || 0 : 2;
+    const lowThreshold = row ? Number(row.low_threshold) || 0 : DEFAULT_LOW_THRESHOLD;
     return {
       productId,
       variant,
