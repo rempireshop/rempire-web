@@ -165,3 +165,36 @@ describe("The card's sentence follows the amount on every order", () => {
     expect(card(row).text(row, 30)).toContain("Вернём на подарочную карту: 20 € · на счёт покупателя: 10 €");
   });
 });
+
+/* order-refund-retry e4 (staging, 26.09.2026, R-100092): an order paid by a
+   gift card, 4 € of its 9 € already back on the card. A freshly opened
+   «Вернуть деньги» said only «Вернём на подарочную карту: 5 € · на счёт
+   покупателя: 0 €» — the gift-card branch returned before the «По заказу уже
+   возвращено …» wording, which only the Montonio sentences carried. Every
+   path says it now, on a line of its own under the order. */
+describe("The card says what is already back, on every payment path", () => {
+  const ALREADY = "По заказу уже возвращено 4 €, осталось 5 €.";
+
+  it("a gift-card order", () => {
+    const row = { ...ROW, refundable: 5, refunded: 4, refund: { gift: 5, money: 0 } };
+    expect(card(row).text(row)).toBe(
+      "R-100042 · Mart Tamm\n" + ALREADY +
+      "\nВернём на подарочную карту: 5 € · на счёт покупателя: 0 €\nКартой снова можно будет платить. Клиенту уйдёт письмо.");
+    // …and a part of it typed into the box keeps the line
+    expect(card(row).text(row, 2).split("\n")[1]).toBe(ALREADY);
+  });
+
+  it("an order paid partly by a gift card", () => {
+    const row = { ...ROW, refundable: 5, refunded: 4, refund: { gift: 2, money: 3 } };
+    const lines = card(row).text(row).split("\n");
+    expect(lines[1]).toBe(ALREADY);
+    expect(lines[2]).toBe("Вернём на подарочную карту: 2 € · на счёт покупателя: 3 €");
+  });
+
+  it("Montonio keeps its own sentence, and a first refund says nothing of the kind", () => {
+    const row = { ...ROW, refundable: 5, refunded: 4, refund: { gift: 0, money: 5 } };
+    expect(card(row).text(row)).toContain("По заказу уже возвращено 4 €. Осталось 5 €");
+    const fresh = { ...ROW, refundable: 9, refunded: 0, refund: { gift: 9, money: 0 } };
+    expect(card(fresh).text(fresh)).not.toContain("уже возвращено");
+  });
+});

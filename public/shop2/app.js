@@ -7981,6 +7981,11 @@
     [/^По заказу уже возвращено (.+)\. Вернём ещё (.+) из оставшихся (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, статус заказа и склад не изменятся\.$/,
       { ET: "Tellimuse eest on juba tagastatud $1. Tagastame veel $2 (jäänud on $3) Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, tellimuse staatus ja laoseis ei muutu.",
         EN: "$1 has already been refunded on this order. We will send $2 more of the $3 left back through Montonio, the way the money came. The customer gets a letter; the order's status and the stock stay as they are." }],
+    /* …and the line above the gift-card split once a refund has happened
+       (order-refund-retry e4) */
+    [/^По заказу уже возвращено (.+), осталось (.+)\.$/,
+      { ET: "Tellimuse eest on juba tagastatud $1, jäänud on $2.",
+        EN: "$1 has already been refunded on this order; $2 is left." }],
     /* the gift-card split: two facts of one list, so two rules rather than
        one sentence with a « · » inside it (admRefundConfirmText) */
     [/^Вернём на подарочную карту: (.+)$/,
@@ -43933,17 +43938,26 @@
     if (rv.gift > 0.004) {
       var gift = Math.round(Math.min(amount, rv.gift) * 100) / 100;
       var money = Math.round((amount - gift) * 100) / 100;
+      /* What is already back, on a line of its own under the order — the
+         Montonio sentences below open with it, and this branch returned
+         before them, so a card opened after a refund on a gift-card order
+         never said that one had happened (order-refund-retry e4, staging
+         26.09.2026, R-100092). Its own line, because the split under it is
+         a list and this is a sentence. */
+      var already = v.refunded > 0.004
+        ? "\nПо заказу уже возвращено " + eur(v.refunded) + ", осталось " + eur(v.refundable) + "."
+        : "";
       /* The split is a LIST and what follows it is prose, so they are two
          lines rather than one sentence with a « · » buried in it: the card
          paints a line's facts one element each (admDetailHTML), and a « · »
          inside prose would cut a sentence in half where no key can reach
          either piece. Three lines, three straight chains. */
       if (money > 0.004) {
-        return v.number + " · " + v.who +
+        return v.number + " · " + v.who + already +
           "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
           "\nСначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.";
       }
-      return v.number + " · " + v.who +
+      return v.number + " · " + v.who + already +
         "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
         "\nКартой снова можно будет платить. Клиенту уйдёт письмо.";
     }
