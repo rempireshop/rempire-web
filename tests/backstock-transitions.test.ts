@@ -187,12 +187,13 @@ describe("the count: a size back from zero is a comeback, a size moving between 
     expect(sent).toHaveLength(1);
   });
 
-  it("in → «мало» (10 → 2) and «мало» → in (2 → 10) send nothing", async () => {
+  // 1, not 2: «мало» only on the last unit (215_low_threshold_one.sql)
+  it("in → «мало» (10 → 1) and «мало» → in (1 → 10) send nothing", async () => {
     await shelf(10);
     await waiting();
-    await move({ productId: PRODUCT, variant: "75 мл", delta: -8, reason: "sale_web" });
+    await move({ productId: PRODUCT, variant: "75 мл", delta: -9, reason: "sale_web" });
     expect((await productStockStates([PRODUCT]))[PRODUCT]).toBe("low");
-    await move({ productId: PRODUCT, variant: "75 мл", delta: 8, reason: "goods_in" });
+    await move({ productId: PRODUCT, variant: "75 мл", delta: 9, reason: "goods_in" });
     expect((await productStockStates([PRODUCT]))[PRODUCT]).toBe("in");
     expect(sent).toHaveLength(0);
   });

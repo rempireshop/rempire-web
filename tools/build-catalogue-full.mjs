@@ -232,7 +232,8 @@ for (const [rawH, rs] of active) {
     // keep curated entry but refresh stock from the live export
     const e = { ...existing.get(h) };
     const q = rs.reduce((s, r) => s + (parseInt(r[C.qty]) || 0), 0);
-    e.stock = q <= 0 ? "out" : q <= 2 ? "low" : "in";
+    // «мало» only on the last unit (Dim, 26.09.2026): 0 out, 1 low, 2+ in
+    e.stock = q <= 0 ? "out" : q <= 1 ? "low" : "in";
     /* …and rebuild varImg from the export's own Variant Image column: the
        original prototype guessed [0,1,2], which showed the 250ml pair shot
        for a selected 75ml bottle. The CSV knows which photo belongs to
@@ -275,7 +276,7 @@ for (const [rawH, rs] of active) {
   const entry = {
     id: h, brand, name, cat,
     price, img: imgUrl(h, 0),
-    stock: qty <= 0 ? "out" : qty <= 2 ? "low" : "in",
+    stock: qty <= 0 ? "out" : qty <= 1 ? "low" : "in",   // 0 out, 1 low, 2+ in — as above
   };
   if (uniq.length > 1) {
     entry.img2 = imgUrl(h, 1);

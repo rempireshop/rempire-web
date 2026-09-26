@@ -111,9 +111,11 @@ async function main() {
       if (ean) withEan++;
 
       try {
+        /* low_threshold 1: «мало» only on the last unit — DEFAULT_LOW_THRESHOLD
+           in src/lib/inventory.ts, db/migrations/215_low_threshold_one.sql. */
         const res = await db.query(
           `insert into stock_levels (product_id, variant, qty, low_threshold, ean, updated_at)
-           values ($1, $2, 0, 2, $3, now())
+           values ($1, $2, 0, 1, $3, now())
            on conflict (product_id, variant) do update set
              ean = coalesce(stock_levels.ean, excluded.ean),
              updated_at = now()

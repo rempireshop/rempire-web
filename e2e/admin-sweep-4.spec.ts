@@ -779,7 +779,7 @@ test.describe("admin — a warehouse row saves itself, and the blog card says wh
       page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && r.request().method() === "PUT");
     await page.locator(`[data-stockedit="${key}"]`).click();
     const low = page.locator(`[data-stocklowinput="${key}"]`);
-    const was = (await low.inputValue()) || "2";
+    const was = (await low.inputValue()) || "1";   // the default «мало ≤» since 215_low_threshold_one.sql
     await low.fill(String(Number(was) + 1));
     const put = inventoryPut();
     await low.press("Enter");   // a number leaves on Enter or blur (ADM_SAVE_POLICY.count)

@@ -1049,8 +1049,8 @@
       "Чтобы страница осталась, но не продавалась, выберите «Нет».":
         "Kui leht peab jääma, aga toodet ei müüda, valige «Otsas».",
       "Убрать объём": "Eemalda maht", "Первый объём покупатель видит первым.": "Esimest mahtu näeb ostja esimesena.",
-      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).":
-        "Tühi jääk — «arvestamata»: seda mahtu pole veel loetud. Punane jääk — aeg juurde tellida: see pole suurem kui «vähe» lävi, vaikimisi 2 (muudetakse «Laos»).",
+      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 1 (меняется на «Складе»).":
+        "Tühi jääk — «arvestamata»: seda mahtu pole veel loetud. Punane jääk — aeg juurde tellida: see pole suurem kui «vähe» lävi, vaikimisi 1 (muudetakse «Laos»).",
       "Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.":
         "Triipkoodi loeb välja kõrval olev skanneri nupp, või selle saab käsitsi sisestada.",
       "× убирает объём из магазина вместе с его остатком и штрихкодом.":
@@ -2623,7 +2623,7 @@
       "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
-      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 2; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 1; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 1; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa selle mahu «vähe» läve. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
@@ -4585,8 +4585,8 @@
       "Чтобы страница осталась, но не продавалась, выберите «Нет».":
         "To keep the page but stop selling, choose «Out».",
       "Убрать объём": "Remove the size", "Первый объём покупатель видит первым.": "The buyer sees the first size first.",
-      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).":
-        "An empty stock is «untracked»: nobody has counted this size yet. A red stock means time to reorder: it is at or below the «low» threshold, 2 by default (changed on «Stock»).",
+      "Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 1 (меняется на «Складе»).":
+        "An empty stock is «untracked»: nobody has counted this size yet. A red stock means time to reorder: it is at or below the «low» threshold, 1 by default (changed on «Stock»).",
       "Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.":
         "The scanner button beside the box reads the barcode, or you can type it in.",
       "× убирает объём из магазина вместе с его остатком и штрихкодом.":
@@ -6132,7 +6132,7 @@
       "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
-      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 2 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 1; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 1 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below this size's «low» threshold. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
@@ -37527,7 +37527,7 @@
   }
   /** Is this size's remainder low enough to draw red? The row's OWN «Порог
       «мало»» (`state`, from deriveState() in src/lib/inventory.ts — server
-      default 2), never a number written into this screen. The grid used to
+      default 1 since 26.09.2026), never a number written into this screen. The grid used to
       say a flat «3 или меньше», so a size the «Мало» chip on «Склад» listed
       was black here, and a size set to warn at 5 stayed black at 4: one
       warehouse, two different ideas of «мало» (Dim: «We should use 2»). */
@@ -38624,7 +38624,7 @@
     }).join("");
     var help = "<span>Первый объём покупатель видит первым.</span> " +
       (salonCol ? "<span>Пустая цена салона — на " + edSalonPct() + " % меньше обычной; у объёмов ниже она считается сама.</span> " : "") +
-      "<span>Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 2 (меняется на «Складе»).</span> " +
+      "<span>Пустой остаток — «не учтено»: этот объём ещё не считали. Красный остаток — пора дозаказать: он не больше порога «мало», по умолчанию 1 (меняется на «Складе»).</span> " +
       "<span>Штрихкод считывает кнопка сканера рядом с полем, или его можно вписать руками.</span> " +
       (p.custom
         ? "<span>× убирает объём из магазина вместе с его остатком и штрихкодом.</span>"
@@ -39609,11 +39609,13 @@
     return !!r.tracked || stockBurstDelta(stockKey(r.productId, r.variant)) !== 0;
   }
   /** "none" | "out" | "low" | "in" — deriveState() of src/lib/inventory.ts, on the
-      count the row shows and against the row's OWN «мало ≤» (not a flat 3). */
+      count the row shows and against the row's OWN «мало ≤» (not a flat 3).
+      A row without one warns at 1 — «мало» only on the last unit, the
+      server's DEFAULT_LOW_THRESHOLD (Dim, 26.09.2026). */
   function stockShownState(r) {
     if (!stockShownTracked(r)) return "none";
     var q = stockShownQty(r), t = Number(r.lowThreshold);
-    if (!isFinite(t) || t < 0) t = 2;
+    if (!isFinite(t) || t < 0) t = 1;
     return q <= 0 ? "out" : q <= t ? "low" : "in";
   }
   /* The status tag the design gives every size: outlined green, rust outline,
@@ -39736,7 +39738,7 @@
     r.qty = res && typeof res.qtyAfter === "number" ? res.qtyAfter : before + applied;
     r.tracked = true;
     var t = Number(r.lowThreshold);
-    r.state = r.qty <= 0 ? "out" : r.qty <= (isFinite(t) && t >= 0 ? t : 2) ? "low" : "in";
+    r.state = r.qty <= 0 ? "out" : r.qty <= (isFinite(t) && t >= 0 ? t : 1) ? "low" : "in";
     var v = r.variant || "";
     var a = how.type === "stock_set"
       ? { type: "stock_set", product_id: r.productId, variant: v, qty: r.qty }
@@ -39879,7 +39881,7 @@
         STOCK_WHY_USED[key] = why;
         var t = Number(r.lowThreshold);
         return stockLevelSaveDetailed({ productId: r.productId, variant: r.variant || "",
-          lowThreshold: isFinite(t) && t >= 0 ? t : 2, ref: why }).then(function (res) {
+          lowThreshold: isFinite(t) && t >= 0 ? t : 1, ref: why }).then(function (res) {
           if (res.ok) { S.stockMoves = null; STOCK.movesAsked = false; return true; }
           stockWhyDrop(key, why);
           return res.error === "offline" ? false : { refused: stockSaveErrText(res) || "Причина не сохранилась — попробуйте ещё раз." };

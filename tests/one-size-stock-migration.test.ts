@@ -328,8 +328,9 @@ describe("a count with no volume on it lands on the volume the product has", () 
     const res = await POST(post({ productId: ONE, delta: 6, reason: "goods_in", ref: "чат" }));
     expect(res.status).toBe(200);
 
+    // low_threshold 1: the default of a row the move itself created (215_low_threshold_one.sql)
     expect(await levels(ONE)).toEqual([
-      { product_id: ONE, variant: rung(ONE), qty: 6, low_threshold: 2, ean: null },
+      { product_id: ONE, variant: rung(ONE), qty: 6, low_threshold: 1, ean: null },
     ]);
   });
 
