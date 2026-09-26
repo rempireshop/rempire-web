@@ -29,8 +29,8 @@ import { shopDay, shopDaySql, startOfShopDay } from "@/lib/day";
    itself renders — numeric stock over the manual override — instead of
    re-deriving it here. See getOverviewSummary() at the bottom of this file. */
 import { getOverrides, type OrderStatus } from "@/lib/orders";
-/* «Заканчивается» — the one rule the overview's stock rows and the panel's
-   «Каталог» chips both count by. See qOverviewLowStock(). */
+/* «Заканчивается» — the one rule the overview's stock row and the panel's
+   «Каталог» chip both count by. See qOverviewLowStock(). */
 import { runsLow, shelfWord, type ShelfRow } from "@/lib/stock-word";
 
 /* ---------- catalogue lookups (name/brand for an id out of events/orders) */
@@ -699,17 +699,13 @@ export type OverviewSummary = {
    * and this one extra (indexed, grouped, seven rows) query instead.
    */
   revenueByDay: Array<{ day: string; revenue: number; orders: number }>;
+  /** Products on sale that are running low or out — never one taken off
+      sale, which lives under «Скрытые» only. See qOverviewLowStock(). */
   lowStock: {
     total: number;
     low: number;
     out: number;
-    /** Low or out AND off sale — counted, but not in `total`. See qOverviewLowStock(). */
-    hidden: number;
     items: OverviewLowStockItem[];
-    /** The same products by name, so the row can say WHICH ones are waiting
-        behind the switch — a bare count sent the owner to a list of every
-        hidden product to go and find them (Dim, 19.09.2026). */
-    hiddenItems: OverviewLowStockItem[];
   };
   /** The five queues the owner is the only one who can empty. */
   attention: {
@@ -746,8 +742,8 @@ async function qRevenue7d(from: Date, to: Date) {
 }
 
 /**
- * «Заканчиваются» — the two stock rows of «Сделать сегодня», counted by the
- * rule the list they open filters by (src/lib/stock-word.ts, the port of
+ * «Заканчиваются» — the stock row of «Сделать сегодня», counted by the rule
+ * the list it opens filters by (src/lib/stock-word.ts, the port of
  * goodsStockWord / goodsRunsLow in public/shop2/app.js), over the inputs that
  * list is built from:
  *   · every product the panel's «Каталог» lists — the whole catalogue file,
@@ -764,11 +760,12 @@ async function qRevenue7d(from: Date, to: Date) {
  *     product is ONE entry however many of its sizes are short.
  *
  * Off sale — `hidden` on the override row, `active` off on the owner's own
- * row — is counted apart (Dim, 19.09.2026): the main figure is «закажите
- * ещё», and a product he took out of the shop is not that; but one hidden
- * BECAUSE it ran out must not vanish from the only list that would remind him
- * to order it. The hidden row opens «Каталог → Скрытые · кончаются», which is
- * exactly this second list — not «Скрытые», which holds every hidden product.
+ * row — is left out: the figure is «закажите ещё», and a product he took out
+ * of the shop is not that. From 19.09.2026 such a product was counted apart,
+ * for a row of its own («N скрытых товаров заканчиваются») and a chip it
+ * opened («Скрытые · кончаются»); on 26.09.2026 Dim decided a hidden product
+ * lives only under «Скрытые», and both went — so did the `hidden` and
+ * `hiddenItems` this summary carried for them.
  *
  * The r19 exception is gone with the second rule: a hand-set «Нет в
  * наличии» over a counted shelf used to be left out here («ten in the box is
@@ -804,27 +801,23 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
   }
 
   const short: OverviewLowStockItem[] = [];
-  const hidden: OverviewLowStockItem[] = [];
   for (const [id, p] of products) {
     const o = overrides[id];
+    // off sale: «Скрытые» only, never «Кончаются» (the panel's goodsMatchesFilter)
+    if (p.off || o?.hidden) continue;
     const word = o?.stock ?? BY_ID.get(id)?.s ?? "in";
     if (!runsLow(word, p.rows)) continue;
     /* «нет» where the shop says «нет в наличии» about the product; «мало» for
        the rest — a product still on sale with a size or two gone. */
     const stock = shelfWord(word, p.rows) === "out" ? "out" : "low";
-    (p.off || o?.hidden ? hidden : short).push({ id, name: p.name, brand: p.brand, stock });
+    short.push({ id, name: p.name, brand: p.brand, stock });
   }
-  const order = (a: OverviewLowStockItem, b: OverviewLowStockItem) =>
-    a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1;
-  short.sort(order);
-  hidden.sort(order);
+  short.sort((a, b) => (a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1));
   return {
     total: short.length,
     out: short.filter((i) => i.stock === "out").length,
     low: short.filter((i) => i.stock === "low").length,
-    hidden: hidden.length,
     items: short.slice(0, 20),
-    hiddenItems: hidden.slice(0, 20),
   };
 }
 

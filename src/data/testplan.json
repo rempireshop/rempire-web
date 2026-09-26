@@ -1682,7 +1682,7 @@
         "Открыть «Обзор».",
         "Прочитать блок «Сделать сегодня» и строки про отзывы и заявки партнёров.",
         "Нажать строку «N товаров заканчиваются» и сравнить её число с чипом, который открылся.",
-        "Вернуться, нажать строку про скрытые товары и так же сравнить число.",
+        "Вернуться, поискать в блоке строку про скрытые товары и открыть «Каталог → Скрытые».",
         "Нажать остальные строки и тёмную кнопку «Отправить N заказа».",
         "Переключить панель на английский, потом на эстонский, и снова прочитать блок."
       ],
@@ -1691,7 +1691,7 @@
         "Названы заканчивающиеся товары; по-английски и по-эстонски без русских слов и без «1 orders».",
         "Под отзывами — кто написал и звёзды, под заявкой — название салона.",
         "Строка товаров открывает «Каталог → Кончаются»; на чипе то же число, что на строке.",
-        "Скрытые заканчивающиеся — своей строкой; она открывает «Скрытые · кончаются» с тем же числом.",
+        "Строки про скрытые товары нет; они только под чипом «Скрытые», чипов четыре.",
         "Каждая строка открывает свой раздел; тёмная кнопка — «Заказы» на чипе «Отправить»."
       ],
       "why": "Неверное число на этом экране — это забытый заказ.",
@@ -1703,7 +1703,7 @@
           "Open «Обзор» (overview).",
           "Read the «Сделать сегодня» (to do today) block and the review and partner rows.",
           "Press the «N товаров заканчиваются» row and compare its number with the chip it opens.",
-          "Go back, press the row about hidden products and compare the number the same way.",
+          "Go back, look in the block for a row about hidden products and open «Каталог → Скрытые».",
           "Press the other rows and the dark «Отправить N заказа» button.",
           "Switch the panel to English, then to Estonian, and read the block again."
         ],
@@ -1712,13 +1712,13 @@
           "Running-out products are named; English and Estonian show no Russian words and no «1 orders».",
           "Under reviews, who wrote and the stars; under a request, the salon's name.",
           "The products row opens «Каталог → Кончаются»; the chip shows the row's number.",
-          "Hidden products running out have their own row, opening «Скрытые · кончаются» with the same number.",
+          "No row about hidden products; they live only under the «Скрытые» chip, four chips in all.",
           "Each line opens its own section; the dark button opens «Заказы» on «Отправить»."
         ],
         "why": "A wrong number on this screen is a forgotten order."
       },
       "mark": "redo",
-      "markedAt": "2026-09-26T08:51:41.626Z"
+      "markedAt": "2026-09-26T19:37:36.421Z"
     },
     {
       "id": "panel-partners-switch",

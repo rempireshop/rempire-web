@@ -91,19 +91,14 @@ describe("getOverviewSummary", () => {
     /* …but for the stock row, which is not invented: the catalogue file's own
        «мало» and «нет», which the shop prints on those cards and «Каталог →
        Кончаются» lists — the row opens that list and says its length. */
-    expect(o.lowStock).toMatchObject({ total: FILE_LOW.length + FILE_OUT.length, low: FILE_LOW.length, out: FILE_OUT.length, hidden: 0 });
+    expect(o.lowStock).toMatchObject({ total: FILE_LOW.length + FILE_OUT.length, low: FILE_LOW.length, out: FILE_OUT.length });
     expect(o.lowStock.items).toHaveLength(Math.min(20, o.lowStock.total));
     expect(o.lowStock.items.slice(0, FILE_OUT.length).map((i) => i.stock)).toEqual(FILE_OUT.map(() => "out"));
     await quietFile();
-    expect((await getOverviewSummary(NOW)).lowStock).toEqual({ total: 0, low: 0, out: 0, hidden: 0, items: [], hiddenItems: [] });
-    // `hidden` and `hiddenItems` are one statement in two halves (Dim, 19.09.2026):
-    // how many are waiting behind the switch, and which ones. A fresh shop has to
-    // pin both, or the card can go back to saying «2 скрытых товара заканчиваются»
-    // with nothing behind the number — the same invented figure as «вчера — 5»,
-    // one row further down. The list has to BE there and be empty: the panel reads
-    // it to decide whether to draw the row at all.
-    expect(o.lowStock.hiddenItems).toEqual([]);
-    expect(o.lowStock.hiddenItems).toHaveLength(o.lowStock.hidden);
+    /* No `hidden` / `hiddenItems` any more: the row they fed («N скрытых
+       товаров заканчиваются») was removed on 26.09.2026 — a hidden product
+       lives only under «Скрытые» (Dim). */
+    expect((await getOverviewSummary(NOW)).lowStock).toEqual({ total: 0, low: 0, out: 0, items: [] });
     expect(o.attention).toEqual({
       ordersToShip: 0,
       proRequests: 0,

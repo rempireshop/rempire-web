@@ -419,17 +419,16 @@ describe("analytics names a custom product", () => {
     await query("insert into product_overrides (product_id, stock) values ($1, 'out'), ('c-gone-for-good', 'out')", [wax.id]);
     const ov = await getOverviewSummary(NOW);
     expect(ov.lowStock).toEqual({
-      total: 1, out: 1, low: 0, hidden: 0,
+      total: 1, out: 1, low: 0,
       items: [{ id: wax.id, name: "Wax", brand: "Acme", stock: "out" }],
-      hiddenItems: [],
     });
   });
 
   /* Dim, 19.09.2026: the number he acts on is «закажите ещё», and a product
-     he has taken off sale is not that — but a bottle hidden BECAUSE it ran
-     out must not disappear from the only list that would remind him. So it is
-     counted apart, never in `total`, and the panel gives it its own line. */
-  it("counts a hidden product that is running out apart from the ones on sale", async () => {
+     he has taken off sale is not that. It was counted apart, on a row of its
+     own, until 26.09.2026 — then Dim decided a hidden product lives only
+     under «Скрытые», and the row went. It is still never in `total`. */
+  it("leaves a hidden product that is running out out of the ones on sale — and out of the summary", async () => {
     await quietFile();
     const wax = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
     const gone = await createCustomProduct({ brand: "Acme", name: "Clay", cat: "styling", price: 9 });
@@ -438,11 +437,7 @@ describe("analytics names a custom product", () => {
 
     const ov = await getOverviewSummary(NOW);
     expect(ov.lowStock.total, "a hidden product must not be in the figure he acts on").toBe(1);
-    expect(ov.lowStock.hidden).toBe(1);
     expect(ov.lowStock.items.map((i) => i.id)).toEqual([wax.id]);
-    /* …and named, because the row that counts them has to be able to say
-       which ones: a bare number sent the owner to look through every hidden
-       product in the shop (Dim, 19.09.2026). */
-    expect(ov.lowStock.hiddenItems).toEqual([{ id: gone.id, name: "Clay", brand: "Acme", stock: "out" }]);
+    expect(JSON.stringify(ov.lowStock)).not.toContain(gone.id);
   });
 });

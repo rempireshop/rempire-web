@@ -611,10 +611,10 @@
       "blocking": false,
       "optional": true,
       "title": "Скрытый товар в «Складе» — решено 19.09",
-      "detail": "Считается отдельно, а не выбрасывается: скрытый товар не попадает в «заканчиваются», но получает собственную строку на «Обзоре» — чтобы бутылка, спрятанная ИМЕННО потому, что кончилась, не исчезла из единственного списка, который о ней напомнит. В тот же день строка научилась называть товары и вести в «Каталог → Скрытые».",
+      "detail": "19.09 скрытый товар стали считать отдельно: в «заканчиваются» он не попадал, но получил свою строку на «Обзоре», а позже — свой чип «Скрытые · кончаются» в «Каталоге». 26.09.2026 Дима решил: скрытый товар живёт только в «Скрытых». Отдельная строка и чип убраны; в «Кончаются» и в строку «N товаров заканчиваются» скрытый товар по-прежнему не попадает.",
       "en": {
         "title": "A hidden product in «Склад» — decided 19.09",
-        "detail": "Counted apart rather than dropped: a hidden product stays out of «running low» but gets a line of its own on the overview — so a bottle hidden BECAUSE it ran out does not vanish from the only list that would remind him. The same day that line learned to name the products and to lead to «Каталог → Скрытые»."
+        "detail": "On 19.09 a hidden product began to be counted apart: kept out of «running low», but given a row of its own on the overview, and later its own chip «Скрытые · кончаются» in «Каталог». On 26.09.2026 Dim decided a hidden product lives only under «Скрытые». The separate row and the chip were removed; a hidden product still never counts in «Кончаются» or in the «N товаров заканчиваются» row."
       }
     },
     {

@@ -1,6 +1,6 @@
 /**
- * «Обзор → Сделать сегодня»: the number on a stock row is the number of rows
- * in the list that row opens — for the ordinary row and for the hidden one.
+ * «Обзор → Сделать сегодня»: the number on the stock row is the number of
+ * rows in the list that row opens.
  *
  * Dim, 26.09.2026 (panel-overview, «bad»): «Hidden product count in overview
  * is 1 — but when I open it's 2. Same for "products running out" shows in
@@ -12,15 +12,22 @@
  * a row that said 12: the catalogue file's own «мало», which the shop prints
  * on 69 product cards, never reached the server's count.
  *
- * Three proofs, all against public/shop2/app.js as it is (functions cut out by
+ * Later the same day, looking at «Каталог»: «Why do we have "hidden - running
+ * low" category?!» — and he decided a hidden product lives only under
+ * «Скрытые». The hidden row on «Обзор» and its chip «Скрытые · кончаются» are
+ * gone; a hidden product is still never in «Кончаются» or its row.
+ *
+ * Four proofs, all against public/shop2/app.js as it is (functions cut out by
  * source text, the tests/admin-goods-r26.test.ts technique):
  *   1. src/lib/stock-word.ts and the panel's two functions give the same word
  *      and the same «кончается» for every shape a product's shelf can take;
  *   2. over one real database — file words, counted sizes, a hand-set «нет»,
  *      hidden catalogue and own products — getOverviewSummary() counts exactly
- *      the products the «Каталог» chips list, and names the same ones;
- *   3. the rows open those chips, and once the panel holds the shelf the row
- *      counts with the chip's own predicate.
+ *      the products the «Кончаются» chip lists, names the same ones, and
+ *      leaves every hidden product to «Скрытые»;
+ *   3. the row opens that chip, and once the panel holds the shelf the row
+ *      counts with the chip's own predicate;
+ *   4. «Каталог» has its four chips and no fifth.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -122,7 +129,7 @@ type ClientProduct = { id: string; brand: string; name: string; stock: string; c
     shelf) and the catalogue file. rebuildCatalogue() and applyDemoOverrides()'s
     stock line are mirrored here; admCatalogList(), customProduct() and the
     chip predicates are app.js's own. */
-async function panelCatalogue(): Promise<{ low: string[]; offlow: string[]; off: string[] }> {
+async function panelCatalogue(): Promise<{ low: string[]; off: string[] }> {
   const [ov, levels, all] = await Promise.all([getOverrides(), getLevels({ filter: "all", limit: 1000 }), listCustomProducts()]);
   const DEMO = { stock: {} as Record<string, string>, hidden: {} as Record<string, boolean> };
   for (const [id, o] of Object.entries(ov)) {
@@ -156,8 +163,8 @@ async function panelCatalogue(): Promise<{ low: string[]; offlow: string[]; off:
     ${slice("goodsMatchesFilter")}
     var list = admCatalogList();
     var ids = function (f) { return list.filter(function (p) { return goodsMatchesFilter(p, f); }).map(function (p) { return p.id; }); };
-    return { low: ids("low"), offlow: ids("offlow"), off: ids("off") };
-  `) as (...a: unknown[]) => { low: string[]; offlow: string[]; off: string[] };
+    return { low: ids("low"), off: ids("off") };
+  `) as (...a: unknown[]) => { low: string[]; off: string[] };
   return run(DEMO, FILE, customAll.filter((c) => c.active !== false), customAll, levels);
 }
 
@@ -191,11 +198,10 @@ describe("one database: the row's number is the chip's list", () => {
     expect(expected, "the catalogue file carries words of its own").toBeGreaterThan(0);
     expect(panel.low).toHaveLength(expected);
     expect(ov.lowStock.total, "before: 0 over a chip of 74 — the file's words never reached the server").toBe(expected);
-    expect(ov.lowStock.hidden).toBe(0);
-    expect(panel.offlow).toEqual([]);
+    expect(panel.off).toEqual([]);
   });
 
-  it("every kind of product at once: the same count and the same products, ordinary and hidden", async () => {
+  it("every kind of product at once: the same count and the same products; the hidden ones only under «Скрытые»", async () => {
     // a ladder with one size counted out and the rest full — «кончается» in the list
     const halfOut = withLadder("in", 2);
     await count(halfOut.id, halfOut.sizes[0], 0);
@@ -211,7 +217,7 @@ describe("one database: the row's number is the chip's list", () => {
     // the file says «мало», the owner said «в наличии» — not on the list
     const fixedByHand = fileWord("low")[0];
     await query("insert into product_overrides (product_id, stock) values ($1, 'in')", [fixedByHand.id]);
-    // hidden catalogue products: one running low, one not — only the first is the hidden row
+    // hidden catalogue products: one running low, one not — neither is «Кончаются»
     const hiddenLow = fileWord("in").find((p) => ![halfOut.id, twoLow.id, stopped.id].includes(p.id))!;
     const hiddenFull = fileWord("in").find((p) => ![halfOut.id, twoLow.id, stopped.id, hiddenLow.id].includes(p.id))!;
     await query("insert into product_overrides (product_id, stock, hidden) values ($1, 'low', true), ($2, null, true)", [hiddenLow.id, hiddenFull.id]);
@@ -233,11 +239,17 @@ describe("one database: the row's number is the chip's list", () => {
     expect(ov.lowStock.total).toBe(panel.low.length);
     expect(ov.lowStock.low + ov.lowStock.out).toBe(ov.lowStock.total);
 
-    // the hidden row: running low AND off sale — what «Скрытые · кончаются» lists
-    expect(panel.offlow.sort()).toEqual([hiddenLow.id, ownOffLow.id].sort());
-    expect(ov.lowStock.hidden, "before: the row said 2 and opened «Скрытые», which lists 4").toBe(panel.offlow.length);
-    expect(ov.lowStock.hiddenItems.map((i) => i.id).sort()).toEqual(panel.offlow.slice().sort());
-    // «Скрытые» itself is every hidden product — the list the hidden row must NOT open
+    /* A hidden product running low is in neither list nor number (Dim,
+       26.09.2026: a hidden product lives only under «Скрытые») — the
+       catalogue one hidden on its override row and the owner's own one
+       switched off alike. */
+    for (const id of [hiddenLow.id, ownOffLow.id]) {
+      expect(panel.low, id).not.toContain(id);
+      expect(ov.lowStock.items.map((i) => i.id), id).not.toContain(id);
+    }
+    // …and the summary no longer carries a hidden count for a row that is gone
+    expect(Object.keys(ov.lowStock).sort()).toEqual(["items", "low", "out", "total"]);
+    // «Скрытые» holds every hidden product, running low or not
     expect(panel.off.sort()).toEqual([hiddenLow.id, hiddenFull.id, ownOffLow.id, ownOffFine.id].sort());
   });
 
@@ -260,7 +272,7 @@ describe("one database: the row's number is the chip's list", () => {
 
 /* ---------- 3. the rows open those chips ------------------------------------- */
 
-describe("«Сделать сегодня»: the stock rows open the list they count", () => {
+describe("«Сделать сегодня»: the stock row opens the list it counts", () => {
   const overviewSrc = () => slice("admOverviewHTML");
 
   it("«N товаров заканчиваются» opens «Каталог → Кончаются», not «Склад» (which counts sizes)", () => {
@@ -269,11 +281,14 @@ describe("«Сделать сегодня»: the stock rows open the list they c
     expect(row.slice(0, 400)).toContain(`'data-admtab="goods" data-admfilter="low"'`);
   });
 
-  it("«N скрытых товаров заканчиваются» opens «Скрытые · кончаются», not every hidden product", () => {
+  it("there is no row for hidden products any more — they live under «Скрытые» (Dim, 26.09.2026)", () => {
     const overview = overviewSrc();
-    const row = overview.slice(overview.indexOf('"скрытый товар заканчивается"'));
-    expect(row.slice(0, 400)).toContain(`'data-admtab="goods" data-admfilter="offlow"'`);
-    expect(overview).not.toContain('data-admfilter="off"\'');
+    expect(overview).not.toContain("скрытый товар заканчивается");
+    expect(overview).not.toContain("скрытых товаров заканчиваются");
+    expect(overview).not.toContain('data-admfilter="offlow"');
+    expect(overview).not.toContain('data-admfilter="off"');
+    // the only goods row «Сделать сегодня» has is the one above
+    expect(overview.match(/data-admtab="goods"/g)).toHaveLength(1);
   });
 
   it("arriving from a row drops a search left in the box, so the list is the whole chip", () => {
@@ -297,7 +312,7 @@ describe("«Сделать сегодня»: the stock rows open the list they c
     ${slice("admLowRows")}
     return admLowRows(SUMMARY);
   `) as (o: unknown, levels: unknown, customAll: unknown, list: ClientProduct[]) => {
-    n: number; items: Array<{ id: string }>; hidN: number; hidItems: Array<{ id: string }>;
+    n: number; items: Array<{ id: string }>;
   })(o, levels, customAll, list);
   const LIST: ClientProduct[] = [
     { id: "a", brand: "B", name: "Бета", stock: "low" },
@@ -305,60 +320,68 @@ describe("«Сделать сегодня»: the stock rows open the list they c
     { id: "c", brand: "B", name: "Гамма", stock: "in" },
     { id: "c-own", brand: "Acme", name: "Clay", stock: "low", custom: true, active: false },
   ];
+  // an older server's answer, with the hidden figures it no longer sends — read by nobody
   const SUMMARY = { lowStock: { total: 7, low: 6, out: 1, hidden: 3, items: [{ id: "x" }], hiddenItems: [{ id: "y" }] } };
 
-  it("with the summary alone, the summary's figures", () => {
+  it("with the summary alone, the summary's figures — and nothing about hidden products", () => {
     const r = rows(SUMMARY, null, null, LIST);
-    expect([r.n, r.hidN, r.items.map((i) => i.id), r.hidItems.map((i) => i.id)]).toEqual([7, 3, ["x"], ["y"]]);
+    expect(r).toEqual({ n: 7, items: [{ id: "x" }] });
   });
 
-  it("with the shelf and the own products loaded, the chips' own count — sold-out first", () => {
+  it("with the shelf and the own products loaded, the chip's own count — sold-out first, the hidden one left out", () => {
     const r = rows(SUMMARY, [], [], LIST);
     expect(r.n).toBe(2);
     expect(r.items.map((i) => i.id)).toEqual(["b", "a"]);
-    expect(r.hidN).toBe(1);
-    expect(r.hidItems.map((i) => i.id)).toEqual(["c-own"]);
+    expect(Object.keys(r).sort()).toEqual(["items", "n"]);
   });
 
-  it("no server at all (the demo panel): the same chips", () => {
+  it("no server at all (the demo panel): the same chip", () => {
     const r = rows(null, null, null, LIST);
-    expect([r.n, r.hidN]).toEqual([2, 1]);
+    expect(r.n).toBe(2);
+    expect(r.items.map((i) => i.id)).not.toContain("c-own");
   });
 });
 
-/* ---------- the new chip -------------------------------------------------- */
+/* ---------- 4. «Каталог»: four chips ------------------------------------------ */
 
-describe("«Каталог»: the chip the hidden row opens", () => {
-  it("is its own entry beside the four, which stay four", () => {
-    expect(decl("ADM_GOODS_OFFLOW")).toContain('["offlow", "Скрытые · кончаются"]');
-    expect(decl("ADM_GOODS_FILTERS")).not.toContain("offlow");
+describe("«Каталог»: «Все · В магазине · Скрытые · Кончаются», and no fifth", () => {
+  const html = new Function("LIST", "F", `
+    var S = { goodsFilter: F, stockLevels: [] };
+    function admCatalogList() { return LIST; }
+    function admCatalogRows() { return ""; }
+    function shopHidden() { return false; }
+    ${decl("ADM_GOODS_FILTERS")}
+    ${slice("goodsOffSale")}
+    ${slice("goodsStockWord")}
+    ${slice("goodsRunsLow")}
+    ${slice("goodsFilterNow")}
+    ${slice("goodsMatchesFilter")}
+    ${slice("admCatalogHTML")}
+    return admCatalogHTML();
+  `) as (list: ClientProduct[], f: string) => string;
+  const hiddenLow: ClientProduct = { id: "c-own", brand: "Acme", name: "Clay", stock: "low", custom: true, active: false };
+  const hiddenFine: ClientProduct = { id: "c-2", brand: "Acme", name: "Paste", stock: "in", custom: true, active: false };
+  const fine: ClientProduct = { id: "a", brand: "B", name: "Бета", stock: "in" };
+  const low: ClientProduct = { id: "b", brand: "B", name: "Альфа", stock: "low" };
+  const chip = (h: string, key: string) =>
+    new RegExp(`data-goodsfilter="${key}" aria-current="(?:true|false)"><span>[^<]+</span> <b class="adm-chip__n">(\\d+)</b>`).exec(h)?.[1];
+
+  it("the «Скрытые · кончаются» chip is gone, its key and its word with it", () => {
+    // booleans, not toContain: a failing toContain over app.js prints all of it
+    for (const s of ["ADM_GOODS_OFFLOW", '"offlow"', "Скрытые · кончаются"]) expect(src.includes(s), s).toBe(false);
+    expect(decl("ADM_GOODS_FILTERS")).toContain('["off", "Скрытые"]');
   });
 
-  it("is drawn while it is on or holds anything, with its count", () => {
-    const html = new Function("LIST", "F", `
-      var S = { goodsFilter: F, stockLevels: [] };
-      function admCatalogList() { return LIST; }
-      function admCatalogRows() { return ""; }
-      function shopHidden() { return false; }
-      ${decl("ADM_GOODS_FILTERS")}
-      ${decl("ADM_GOODS_OFFLOW")}
-      ${slice("goodsOffSale")}
-      ${slice("goodsStockWord")}
-      ${slice("goodsRunsLow")}
-      ${slice("goodsFilterNow")}
-      ${slice("goodsMatchesFilter")}
-      ${slice("admCatalogHTML")}
-      return admCatalogHTML();
-    `) as (list: ClientProduct[], f: string) => string;
-    const hiddenLow: ClientProduct = { id: "c-own", brand: "Acme", name: "Clay", stock: "low", custom: true, active: false };
-    const fine: ClientProduct = { id: "a", brand: "B", name: "Бета", stock: "in" };
-    const hiddenFine: ClientProduct = { ...fine, id: "c-2", custom: true, active: false };
-    const on = html([hiddenLow, fine], "offlow");
-    expect(on).toMatch(/data-goodsfilter="offlow" aria-current="true"><span>Скрытые · кончаются<\/span> <b class="adm-chip__n">1<\/b>/);
-    expect(html([hiddenLow, fine], "all")).toContain('data-goodsfilter="offlow" aria-current="false"');
-    // nothing hidden is running low and the chip is not on: four chips, as ever
-    expect(html([fine, hiddenFine], "all")).not.toContain('data-goodsfilter="offlow"');
-    // …but on, it stays, saying 0, so the list under it is not a mystery
-    expect(html([fine], "offlow")).toMatch(/data-goodsfilter="offlow" aria-current="true"><span>Скрытые · кончаются<\/span> <b class="adm-chip__n">0<\/b>/);
+  it("a hidden product running low: four chips; it counts under «Скрытые», never under «Кончаются»", () => {
+    const h = html([hiddenLow, hiddenFine, fine, low], "all");
+    expect(h.match(/data-goodsfilter="/g)).toHaveLength(4);
+    expect([chip(h, "all"), chip(h, "on"), chip(h, "off"), chip(h, "low")]).toEqual(["4", "2", "2", "1"]);
+  });
+
+  it("the three hidden-row strings are out of the dictionaries too", () => {
+    for (const s of ["скрытый товар заканчивается", "скрытых товара заканчиваются", "скрытых товаров заканчиваются",
+      "сняты с продажи — закажите, если вернёте в магазин"]) {
+      expect(src.includes(`"${s}"`), s).toBe(false);
+    }
   });
 });
