@@ -170,36 +170,22 @@ export async function settleRefund(
      same shape voidGiftCards() promises just above. Best effort either way — a
      points hiccup must never stop a refund being recorded. */
   if (fully) {
-
     try {
-
       const { refundLoyaltyPoints } = await import("@/lib/loyalty");
-
       const back = await refundLoyaltyPoints(order.id, `возврат заказа ${order.number}`);
-
-      if (back.ok && back.points && !back.already) {
-
+      if (back.ok && (back.back || back.revoked) && !back.already) {
         await writeAuditSafe(entry.by || "system", "loyalty.refunded", {
-
           id: order.id,
-
           number: order.number,
-
           points: back.points,
-
+          back: back.back,
+          revoked: back.revoked,
         });
-
       }
-
     } catch (err) {
-
       console.error("[payments/settle] returning the points of a refunded order failed:", err);
-
     }
-
   }
-
-
 
   let status = String(order.status ?? "");
   if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {

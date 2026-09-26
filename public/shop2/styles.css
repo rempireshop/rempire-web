@@ -1102,6 +1102,9 @@ body:has(.stickybar) .ftr {
 .rowcard__ret { flex-basis: 100%; }
 .rowcard__retdone { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .rowcard__retnote { flex-basis: 100%; font-size: 12.5px; }
+/* loyalty: what a refund did to the order's points — its own line under the
+   order's facts, like the two above (acctOrderRow, 26.09.2026). */
+.rowcard__pts { flex-basis: 100%; }
 
 /* ---------- checkout ---------- */
 .cohdr {

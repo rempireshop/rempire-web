@@ -478,6 +478,20 @@ async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
   return ok ? { ok } : { ok, reason: "send_failed" };
 }
 
+/** What refunds did to this order's points — none on any hiccup: the letter goes either way. */
+async function refundPointsOf(order: OrderLike): Promise<{ back: number; revoked: number } | undefined> {
+  const id = typeof order.id === "string" ? order.id : "";
+  if (!id) return undefined;
+  try {
+    const { orderPointsMoved } = await import("@/lib/loyalty");
+    const moved = await orderPointsMoved(id);
+    return moved.back > 0 || moved.revoked > 0 ? moved : undefined;
+  } catch (err) {
+    console.error("[mail-hooks] refund points unreadable:", err);
+    return undefined;
+  }
+}
+
 /**
  * The order is closed without a parcel: cancelled, or the money sent back.
  *
@@ -515,7 +529,12 @@ export async function onOrderClosed(
        the letter says «мы вернём» rather than «не списаны» for a paid order
        (src/emails/order-cancelled.ts cancelMoneyOf). */
     const value = kind === "cancelled" && typeof options.value === "number" ? options.value : undefined;
-    const mail = renderOrderCancelled(order, lang, { kind, amount, giftAmount, giftCode, value });
+    /* The points the order's refund (or a cancel with no money in it) moved —
+       read off the ledger as the letter leaves, so every door that sends this
+       letter tells the same story. Not on «Возврат отправлен»: points follow
+       the money when the bank confirms. */
+    const points = kind === "refund_sent" ? undefined : await refundPointsOf(order);
+    const mail = renderOrderCancelled(order, lang, { kind, amount, giftAmount, giftCode, value, points });
     const res = await sendRendered(to, mail, {
       tags: { template: kind === "cancelled" ? "order-cancelled" : kind === "refund_sent" ? "order-refund-sent" : "order-refunded" },
       idempotencyKey: `${kind}:${orderNumber(order)}:${amount.toFixed(2)}${giftAmount > 0 ? `:gc${giftAmount.toFixed(2)}` : ""}`,

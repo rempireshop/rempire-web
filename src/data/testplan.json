@@ -4481,19 +4481,19 @@
       "lang": "RU",
       "title": "Вернуть деньги целиком",
       "steps": [
-        "Открыть небольшой заказ, оплаченный картой или банком.",
+        "Открыть небольшой заказ покупателя с кабинетом, оплаченный картой или банком, — лучше с баллами.",
         "Нажать «⋯» → «Вернуть деньги».",
         "Проверить сумму в окошке — там весь остаток — и подтвердить.",
         "Обновить карточку через минуту, а с настоящим банком — когда он подтвердит.",
-        "Открыть кабинет этого покупателя и найти блок с баллами."
+        "Открыть кабинет этого покупателя: «Баллы лояльности» и «Мои заказы»."
       ],
       "expect": [
         "В «Доставка и оплата» появилась строка «Возвращено X из Y».",
-        "Покупателю сразу ушло письмо «Деньги возвращены».",
         "С настоящим банком там же написано «Возврат … в обработке у Montonio».",
-        "Когда банк подтвердил возврат, у заказа стоит «возврат».",
-        "Тогда же товары из заказа вернулись на склад.",
-        "В баллах покупателя появилась строка «Корректировка»."
+        "Когда банк подтвердил возврат, у заказа стоит «возврат», товары вернулись на склад.",
+        "Письмо «Деньги возвращены» пришло; в нём блок «Баллы», если заказ тратил или давал баллы.",
+        "В баллах кабинета: «Вернули баллы, потраченные на заказ R-…» и «Сняли баллы, начисленные…».",
+        "В «Мои заказы» под этим заказом: «Потраченные баллы вернули» и «Баллы за заказ сняли»."
       ],
       "why": "Ошибка здесь стоит ровно столько, сколько написано в поле суммы.",
       "risk": "high",
@@ -4502,23 +4502,23 @@
       "en": {
         "title": "Refunding the whole amount",
         "steps": [
-          "Open a small order paid by card or by bank.",
+          "Open a small order of a buyer with an account, paid by card or by bank — ideally with points.",
           "Press «⋯» → «Вернуть деньги» (refund).",
           "Check the amount in the box — the whole balance — and confirm.",
           "Refresh the card a minute later — with the real bank, once it confirms.",
-          "Open that buyer's account and find the points block."
+          "Open that buyer's account: «Баллы лояльности» (points) and «Мои заказы» (my orders)."
         ],
         "expect": [
           "A «Возвращено X из Y» line appears in «Доставка и оплата».",
-          "The buyer gets the «Деньги возвращены» letter straight away.",
           "With the real bank it also says «Возврат … в обработке у Montonio».",
-          "Once the bank confirms the refund, the order carries «возврат».",
-          "The goods from the order go back into stock at that point.",
-          "The buyer's points gain a «Корректировка» line."
+          "Once the bank confirms, the order carries «возврат» and the goods are back in stock.",
+          "The «Деньги возвращены» letter came, with a «Баллы» block if the order spent or earned points.",
+          "In the account's points: «Вернули баллы, потраченные на заказ R-…» and «Сняли баллы, начисленные…».",
+          "Under the order in «Мои заказы»: «Потраченные баллы вернули» and «Баллы за заказ сняли»."
         ],
         "why": "A mistake here costs exactly what is typed in the amount field."
       },
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-26T09:29:28.542Z"
     },
     {
       "id": "order-refund-retry",
@@ -4579,14 +4579,16 @@
         "Нажать «⋯» → «Отменить заказ» и прочитать окошко.",
         "Подтвердить.",
         "Посмотреть остатки товаров из этого заказа.",
-        "Повторить с оплаченным заказом и прочитать письмо «Заказ отменён» у клиента."
+        "Повторить с оплаченным заказом и прочитать письмо «Заказ отменён» у клиента.",
+        "Если есть заказ, целиком оплаченный баллами, — отменить и его и открыть кабинет покупателя."
       ],
       "expect": [
         "В окошке написано, что отмена деньги не возвращает.",
         "Там же сказано, что для возврата есть отдельная кнопка.",
         "После отмены товары вернулись на склад.",
         "Письмо «Заказ отменён» уходит через десять секунд; «Вернуть» на полоске его останавливает.",
-        "У оплаченного заказа письмо обещает вернуть деньги, а не «не списаны»."
+        "У оплаченного заказа письмо обещает вернуть деньги, а не «не списаны».",
+        "Заказ целиком за баллы: баллы сразу вернулись в кабинет, письмо про это говорит."
       ],
       "why": "Если бы окошко обещало возврат, покупатель остался бы без денег и без товара.",
       "risk": "high",
@@ -4598,19 +4600,21 @@
           "Press «⋯» → «Отменить заказ» (cancel order) and read the box.",
           "Confirm.",
           "Look at the stock of the products from that order.",
-          "Repeat with a paid order and read the customer's «Заказ отменён» letter."
+          "Repeat with a paid order and read the customer's «Заказ отменён» letter.",
+          "If there is an order paid entirely with points, cancel it too and open the buyer's account."
         ],
         "expect": [
           "The box says outright that cancelling returns no money.",
           "It says a separate button does the refund.",
           "After cancelling, the goods are back in stock.",
           "The «Заказ отменён» letter leaves ten seconds later; «Вернуть» on the bar stops it.",
-          "For a paid order the letter says the money comes back — never «not charged»."
+          "For a paid order the letter says the money comes back — never «not charged».",
+          "Paid all in points: points back in the account at once; the letter says so."
         ],
         "why": "If the box promised a refund, the buyer would lose both money and goods."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T22:41:11.172Z"
+      "markedAt": "2026-09-26T09:30:25.935Z"
     },
     {
       "id": "order-giftcard-pdf",

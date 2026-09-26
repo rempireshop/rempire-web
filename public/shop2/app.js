@@ -2030,6 +2030,10 @@
       "Не получилось отправить — попробуйте ещё раз": "Ei õnnestunud saata — proovige uuesti",
       "Заявка отправлена ✓": "Taotlus saadetud ✓",
       "Начислено": "Kogutud", "Списано": "Kasutatud", "Корректировка": "Korrigeeritud", "Сгорело": "Aegunud",
+      "Вернули баллы, потраченные на заказ": "Tellimusele kulutatud punktid tagastati",
+      "Сняли баллы, начисленные за заказ": "Tellimuse eest saadud punktid võeti tagasi",
+      "Заказ снова оплачен — баллы как были": "Tellimus on jälle makstud — punktid nagu enne",
+      "Потраченные баллы вернули:": "Kulutatud punktid tagastati:", "Баллы за заказ сняли:": "Tellimuse punktid võeti tagasi:",
       "Баллы": "Punktid",
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Logige omanikuna sisse, et näha päris kliente.",
       "Никого не нашлось.": "Kedagi ei leitud.",
@@ -5538,6 +5542,10 @@
       "Не получилось отправить — попробуйте ещё раз": "Could not send — please try again",
       "Заявка отправлена ✓": "Request sent ✓",
       "Начислено": "Earned", "Списано": "Redeemed", "Корректировка": "Adjustment", "Сгорело": "Expired",
+      "Вернули баллы, потраченные на заказ": "Points spent on the order given back",
+      "Сняли баллы, начисленные за заказ": "Points earned on the order taken back",
+      "Заказ снова оплачен — баллы как были": "The order is paid again — points as they were",
+      "Потраченные баллы вернули:": "Points spent, given back:", "Баллы за заказ сняли:": "Points for the order taken back:",
       "Баллы": "Points",
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
       "Никого не нашлось.": "Nobody found.",
@@ -7472,6 +7480,13 @@
     [/^На подарочную карту (.+) вернулось (.+)$/,
       { ET: "Kinkekaardile $1 tagastati $2", EN: "$2 went back onto gift card $1" }],
     [/^использовано (.+)$/, { ET: "kasutatud $1", EN: "$1 used" }],
+    // a refund's two lines in «Мои баллы» and on the customer card (loyaltyLabel)
+    [/^Вернули баллы, потраченные на заказ (\S+)$/,
+      { ET: "Tellimusele $1 kulutatud punktid tagastati", EN: "Points spent on order $1 given back" }],
+    [/^Сняли баллы, начисленные за заказ (\S+)$/,
+      { ET: "Tellimuse $1 eest saadud punktid võeti tagasi", EN: "Points earned on order $1 taken back" }],
+    [/^Заказ (\S+) снова оплачен — баллы как были$/,
+      { ET: "Tellimus $1 on jälle makstud — punktid nagu enne", EN: "Order $1 is paid again — points as they were" }],
     // «Запустить сейчас»: what the run did, and its line in the journal
     [/^Отправлено (\d+) · пропущено (\d+)$/, { ET: "Saadetud $1 · vahele jäetud $2", EN: "Sent $1 · skipped $2" }],
     /* «Никому не отправлено: срок из настройки ещё не прошёл» — the reason is a
@@ -17708,6 +17723,19 @@
         "<span>Скачать счёт (PDF)</span>" + ' <span class="num">' + esc(o.invoice.number) + "</span></a>");
     }
     var pdfs = docs.length ? '<span class="rowcard__gifts">' + docs.join("") + "</span>" : "";
+    /* loyalty: what the refund (or a cancel with no money in it) did to this
+       order's points, under the order itself — pointsBack / pointsRevoked from
+       listCustomerOrders. Dim, 26.09.2026, on /test «order-refund-full»: «not
+       sure if in the account the points were returned». Words and figures are
+       separate nodes, for translateTree(). */
+    var ptsBack = Number(o.pointsBack) || 0, ptsOff = Number(o.pointsRevoked) || 0;
+    var pts = ptsBack > 0 || ptsOff > 0
+      ? '<span class="muted rowcard__pts">' +
+          (ptsBack > 0 ? '<span>Потраченные баллы вернули:</span> <span class="num">+' + ptsBack + "</span>" : "") +
+          (ptsBack > 0 && ptsOff > 0 ? " · " : "") +
+          (ptsOff > 0 ? '<span>Баллы за заказ сняли:</span> <span class="num">−' + ptsOff + "</span>" : "") +
+        "</span>"
+      : "";
     /* returns: «Хочу вернуть заказ» — the tick, and what the row says once it
        has been ticked. Both come from the server (returnable /
        returnRequestedAt, listCustomerOrders): a delivered order, inside the 30
@@ -17729,7 +17757,7 @@
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + refundChip +
       track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + ret + "</div>";
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pts + pdfs + ret + "</div>";
   }
   function screenAccount() {
     acctLoad();
@@ -18567,10 +18595,26 @@
 
   /* ---------- wholesale/loyalty: account-screen history + pro request ---- */
   var LOYALTY_REASON = { earn: "Начислено", redeem: "Списано", adjust: "Корректировка", expire: "Сгорело" };
+  /* A refund's two lines, in words (e.line — src/lib/loyalty-lines.ts). They
+     read «Корректировка» with «возврат заказа R-…» under it until 26.09.2026,
+     one net row for both halves, and Dim could not tell from the account
+     whether his points had come back (/test «order-refund-full»). Each is one
+     whole sentence with the number inside, translated by its own rule. */
+  function loyaltyLabel(e) {
+    var n = e.orderNumber ? String(e.orderNumber) : "";
+    if (e.line === "back") return n ? "Вернули баллы, потраченные на заказ " + n : "Вернули баллы, потраченные на заказ";
+    if (e.line === "revoke") return n ? "Сняли баллы, начисленные за заказ " + n : "Сняли баллы, начисленные за заказ";
+    if (e.line === "undo") return n ? "Заказ " + n + " снова оплачен — баллы как были" : "Заказ снова оплачен — баллы как были";
+    return LOYALTY_REASON[e.reason] || e.reason;
+  }
+  /** Under the label: the day, and the note — except on a refund line, whose label already says it. */
+  function loyaltySub(e) {
+    return shortDate(e.at) + (e.note && !e.line ? " · " + esc(e.note) : "");
+  }
   function loyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
-    return '<div class="adm__row"><span class="adm__nm">' + (LOYALTY_REASON[e.reason] || e.reason) +
-      '<span class="adm__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+    return '<div class="adm__row"><span class="adm__nm">' + esc(loyaltyLabel(e)) +
+      '<span class="adm__sub">' + loyaltySub(e) + "</span></span>" +
       '<span class="num">' + sign + e.delta + "</span></div>";
   }
   var ACCT_PRO_ERRS = {
@@ -36389,8 +36433,8 @@
       still held (adjustCustomerPoints) is the top row until it goes. */
   function admLoyaltyRowHTML(e) {
     var sign = e.delta > 0 ? "+" : "";
-    return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + (LOYALTY_REASON[e.reason] || e.reason) + "</span>" +
-      '<span class="adm-row__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+    return '<div class="adm-row' + (e.held ? " adm-row--held" : "") + '"><span class="adm-row__body"><span class="adm-row__nm">' + esc(loyaltyLabel(e)) + "</span>" +
+      '<span class="adm-row__sub">' + loyaltySub(e) + "</span></span>" +
       '<span class="adm-row__amt">' + sign + e.delta + "</span></div>";
   }
   /* ---------- the list ---------------------------------------------------- */

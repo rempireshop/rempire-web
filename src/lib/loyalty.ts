@@ -1,5 +1,6 @@
 import { query, withTx } from "@/lib/db";
 import { normalizeEmail, normalizeLangCode } from "@/lib/customers";
+import { POINTS_BACK_REF, POINTS_LINES_SQL, POINTS_REVOKE_REF, pointsLineOf, type PointsLine } from "@/lib/loyalty-lines";
 /* Type only — erased at build, so this module stays importable from
    src/lib/orders.ts (which imports it) without a runtime cycle. */
 import type { OrderStatus } from "@/lib/orders";
@@ -232,6 +233,15 @@ export interface LedgerEntry {
   reason: "earn" | "redeem" | "adjust" | "expire";
   orderId: string | null;
   note: string | null;
+  /** The order's own number, for a row that belongs to one — what the screens print. */
+  orderNumber?: string | null;
+  /**
+   * On a refund's rows (src/lib/loyalty-lines.ts): `back` — the points the
+   * order spent, returned; `revoke` — the points it earned, taken off; `undo`
+   * — either of those put back as the order returned to «оплачен». Absent on
+   * every other row.
+   */
+  line?: PointsLine;
 }
 
 interface LedgerDbRow {
@@ -241,18 +251,31 @@ interface LedgerDbRow {
   reason: string;
   order_id: string | null;
   note: string | null;
+  ref?: string | null;
+  order_number?: string | null;
 }
 
 function toEntry(r: LedgerDbRow): LedgerEntry {
+  const reason = (["earn", "redeem", "adjust", "expire"].includes(r.reason) ? r.reason : "adjust") as LedgerEntry["reason"];
+  const delta = Math.trunc(num(r.delta));
+  const line = pointsLineOf({ reason, orderId: r.order_id, ref: r.ref ?? null, delta });
   return {
     id: Number(r.id),
     at: new Date(r.at as string).toISOString(),
-    delta: Math.trunc(num(r.delta)),
-    reason: (["earn", "redeem", "adjust", "expire"].includes(r.reason) ? r.reason : "adjust") as LedgerEntry["reason"],
+    delta,
+    reason,
     orderId: r.order_id,
     note: r.note,
+    orderNumber: r.order_number ?? null,
+    ...(line ? { line } : {}),
   };
 }
+
+/* The history's own select: the order's number rides along (the screens print
+   «заказ R-…», never a uuid) and so does the ref, which is what tells a
+   refund's two lines apart (loyalty-lines.ts). */
+const HISTORY_SELECT = `select l.id, l.at, l.delta, l.reason, l.order_id, l.note, l.ref, o.number as order_number
+       from loyalty_ledger l left join orders o on o.id = l.order_id`;
 
 export async function getLoyaltyBalance(customerId: string): Promise<number> {
   if (!UUID_RE.test(customerId)) return 0;
@@ -266,8 +289,8 @@ export async function getLoyaltyBalance(customerId: string): Promise<number> {
 export async function getLoyaltyHistory(customerId: string, limit = 20): Promise<LedgerEntry[]> {
   if (!UUID_RE.test(customerId)) return [];
   const rows = await query<LedgerDbRow>(
-    `select id, at, delta, reason, order_id, note from loyalty_ledger
-     where customer_id = $1 order by at desc, id desc limit $2`,
+    `${HISTORY_SELECT}
+     where l.customer_id = $1 order by l.at desc, l.id desc limit $2`,
     [customerId, Math.min(Math.max(Math.trunc(Number(limit)) || 20, 1), 100)],
   );
   return rows.map(toEntry);
@@ -411,56 +434,135 @@ export async function redeemLoyaltyPoints(
  * loyaltyShortfall) must not be handed back in full, and an order that earned
  * nothing has nothing to take off.
  *
- * ONE compensating row, carrying the net of the two. Not one row per line:
- * loyalty_ledger_refund_once_idx (101_loyalty_refund_once.sql) is unique on
- * order_id for reason='adjust', so an order that both earned and spent has
- * room for exactly one — and the net is what the balance has to move by
- * either way. 'adjust' because loyalty_ledger.reason's check constraint
+ * TWO rows, one per half, since 26.09.2026 (214_loyalty_refund_lines.sql).
+ * It was one row carrying the net of the two — «Корректировка +5» on an order
+ * that spent 10 and earned 5 — and Dim, on /test «order-refund-full», could
+ * not tell from the account whether his points had come back at all. Now:
+ * `back` puts the SPENT points on the balance again, `revoke` takes the
+ * EARNED ones off, each named by its ref (src/lib/loyalty-lines.ts) and each
+ * printed in words on «Мои баллы» and under the order in «Мои заказы».
+ * 'adjust' because loyalty_ledger.reason's check constraint
  * (100_tiers_loyalty.sql) has no 'reverse', and a compensating entry is
- * exactly what an adjustment is; it reads as «Корректировка» with the order
- * number in the note on «Мои баллы».
+ * exactly what an adjustment is.
  *
  * The balance may legitimately go negative: the points were earned and then
  * spent elsewhere. Redeeming already clamps at zero (redeemLoyaltyPoints /
  * quoteLoyaltyRedeem), so a negative balance simply buys nothing until it is
  * earned back.
  *
- * Idempotent per order — any existing 'adjust' row carrying this order id
- * means the reversal is posted (a second «возврат» on the card, a webhook
- * retry) — with the same select-then-insert in one transaction as earning and
- * redeeming, and the unique index behind it for two refund doors landing at
- * once: «Вернуть деньги» in the admin and Montonio's refund webhook.
+ * Idempotent per order: what is posted is the DIFFERENCE between what the two
+ * lines should stand at and what the order's rows already say, so a second
+ * «возврат» on the card or a webhook retry posts nothing. The order row is
+ * locked for the length of it, and each row's ref (unique,
+ * 191_gift_loyalty_once.sql) is the backstop for two refund doors landing at
+ * once — «Вернуть деньги» in the admin and Montonio's refund webhook.
+ *
+ * `back` / `revoked` in the answer are what THIS call moved; `points` is
+ * their net, as it always was.
  */
-export async function refundLoyaltyPoints(orderId: string, note = ""): Promise<LedgerWrite> {
+export async function refundLoyaltyPoints(orderId: string, note = ""): Promise<PointsWrite> {
+  return settleOrderPoints(orderId, true, note);
+}
+
+/**
+ * The refund taken back: an order that was refunded — or cancelled with
+ * nothing to send back — and is then set to «оплачен» again (the journal's
+ * undo, «Изменить статус вручную»). The shelf already follows that move back
+ * (setOrderStatus in src/lib/orders.ts); until 26.09.2026 the points did not,
+ * and a mis-pressed «возврат» undone a second later left the customer with the
+ * spent points AND the order. Posts the two lines back to zero; a no-op on an
+ * order whose points never moved.
+ */
+export async function restoreLoyaltyPoints(orderId: string, note = ""): Promise<PointsWrite> {
+  return settleOrderPoints(orderId, false, note);
+}
+
+export interface PointsWrite extends LedgerWrite {
+  /** Points put back on the balance by this call (negative on an undo). */
+  back?: number;
+  /** Points taken off by this call (negative on an undo). */
+  revoked?: number;
+}
+
+/** Both of the above: bring the order's two refund lines to `reversed` ? the whole : nothing. */
+async function settleOrderPoints(orderId: string, reversed: boolean, note: string): Promise<PointsWrite> {
   if (!UUID_RE.test(orderId)) return { ok: false, error: "bad_order" };
   try {
     return await withTx(async (q) => {
-      const rows = await q<{ customer_id: string; delta: number | string; reason: string }>(
-        "select customer_id, delta, reason from loyalty_ledger where order_id = $1 order by id asc",
+      // one door at a time per order — the refund route and the webhook race by design
+      await q("select id from orders where id = $1 for update", [orderId]);
+      const rows = await q<{ customer_id: string; delta: number | string; reason: string; ref: string | null }>(
+        "select customer_id, delta, reason, ref from loyalty_ledger where order_id = $1 order by id asc",
         [orderId],
       );
-      if (rows.some((r) => r.reason === "adjust")) return { ok: true, already: true, points: 0 };
 
       let customerId = "";
-      let net = 0;
+      let spent = 0;
+      let earned = 0;
+      let backNow = 0;
+      let revokedNow = 0;
+      let legacy = false;
+      let seq = 0;
       for (const r of rows) {
-        if (r.reason !== "earn" && r.reason !== "redeem") continue;
-        if (!customerId) customerId = r.customer_id;
-        net -= Math.trunc(num(r.delta));
+        const d = Math.trunc(num(r.delta));
+        if (r.reason === "earn" || r.reason === "redeem") {
+          if (!customerId) customerId = r.customer_id;
+          if (r.reason === "earn") earned += d;
+          else spent -= d;
+          continue;
+        }
+        if (r.reason !== "adjust") continue;
+        const ref = r.ref ?? "";
+        if (ref.startsWith(POINTS_BACK_REF)) { backNow += d; seq += 1; }
+        else if (ref.startsWith(POINTS_REVOKE_REF)) { revokedNow -= d; seq += 1; }
+        else if (!ref) legacy = true;
       }
-      if (!customerId || !net) return { ok: true, points: 0 };
+      if (!customerId) return { ok: true, points: 0, back: 0, revoked: 0 };
+      /* A net row from before 214 (no ref) stood for the whole reversal: read
+         it as both halves posted in full, so it is never paid out again. */
+      if (legacy) { backNow += spent; revokedNow += earned; }
 
-      await q(
-        `insert into loyalty_ledger (customer_id, delta, reason, order_id, note)
-         values ($1, $2, 'adjust', $3, $4)`,
-        [customerId, net, orderId, note || null],
-      );
-      return { ok: true, points: net };
+      const back = (reversed ? spent : 0) - backNow;
+      const revoked = (reversed ? earned : 0) - revokedNow;
+      if (!back && !revoked) return { ok: true, already: backNow !== 0 || revokedNow !== 0 || legacy, points: 0, back: 0, revoked: 0 };
+
+      if (back) {
+        await q(
+          `insert into loyalty_ledger (customer_id, delta, reason, order_id, note, ref)
+           values ($1, $2, 'adjust', $3, $4, $5)`,
+          [customerId, back, orderId, note || null, `${POINTS_BACK_REF}${orderId}:${seq}`],
+        );
+        seq += 1;
+      }
+      if (revoked) {
+        await q(
+          `insert into loyalty_ledger (customer_id, delta, reason, order_id, note, ref)
+           values ($1, $2, 'adjust', $3, $4, $5)`,
+          [customerId, -revoked, orderId, note || null, `${POINTS_REVOKE_REF}${orderId}:${seq}`],
+        );
+      }
+      return { ok: true, points: back - revoked, back, revoked };
     });
   } catch (err) {
     if (isUniqueViolation(err)) return { ok: true, already: true };
     throw err;
   }
+}
+
+/**
+ * What refunds have done to this order's points so far — `back` on the
+ * balance, `revoked` off it — for the letter that says so
+ * (src/lib/mail-hooks.ts onOrderClosed). Zero and zero for an order whose
+ * points never moved. Best effort at the caller.
+ */
+export async function orderPointsMoved(orderId: string): Promise<{ back: number; revoked: number }> {
+  if (!UUID_RE.test(orderId)) return { back: 0, revoked: 0 };
+  const rows = await query<{ back: string | number; revoked: string | number }>(
+    `select ${POINTS_LINES_SQL.back} as back, ${POINTS_LINES_SQL.revoked} as revoked
+       from loyalty_ledger where order_id = $1 and reason = 'adjust'`,
+    [orderId],
+  );
+  return { back: Math.trunc(num(rows[0]?.back)), revoked: Math.trunc(num(rows[0]?.revoked)) };
 }
 
 /**
@@ -619,9 +721,9 @@ async function balanceForEmail(addr: string): Promise<number> {
 async function historyForEmail(addr: string, limit: number): Promise<LedgerEntry[]> {
   if (!addr) return [];
   const rows = await query<LedgerDbRow>(
-    `select id, at, delta, reason, order_id, note from loyalty_ledger
-      where customer_id = (select id from customers where email = $1)
-      order by at desc, id desc limit $2`,
+    `${HISTORY_SELECT}
+      where l.customer_id = (select id from customers where email = $1)
+      order by l.at desc, l.id desc limit $2`,
     [addr, Math.min(Math.max(Math.trunc(Number(limit)) || 20, 1), 100)],
   );
   return rows.map(toEntry);

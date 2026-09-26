@@ -29,6 +29,7 @@ import { addShopDays, shopDay } from "@/lib/day";
 // account screen and the route alike. src/lib/returns.ts imports nothing but
 // the database, which is what keeps this module the leaf it has always been.
 import { canRequestReturn, returnRequestedAt } from "@/lib/returns";
+import { POINTS_LINES_SQL } from "@/lib/loyalty-lines";
 
 export const CUSTOMER_COOKIE = "rmp_cust";
 export const CUSTOMER_SESSION_DAYS = 90;
@@ -505,6 +506,14 @@ export interface CustomerOrder {
      is what the bank has confirmed, `refundPending` what is on its way. */
   refunded: number;
   refundPending: number;
+  /* What a refund (or a cancel with no money to send back) did to this
+     order's points: `pointsBack` — spent on it and back on the balance;
+     `pointsRevoked` — earned by it and taken off again. Zero and zero on
+     every other order (src/lib/loyalty-lines.ts). Dim, 26.09.2026, on /test
+     «order-refund-full»: «not sure if in the account the points were
+     returned» — the row now says so under the order itself. */
+  pointsBack: number;
+  pointsRevoked: number;
   /* The printable gift cards this order bought, if any — code plus the signed
      link to /api/giftcards/<code>/pdf/. Until 07.09.2026 that link existed
      only on the receipt screen, so closing the tab left the buyer with the
@@ -554,7 +563,7 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
      fields are waiting for. The sub-select is the same `where`/`order by`/
      `limit` as the query beside it, so the two cannot disagree about which
      twenty orders they are talking about. */
-  const [rows, cardsByOrder] = await Promise.all([
+  const [rows, cardsByOrder, pointsByOrder] = await Promise.all([
     query<{
       id: string;
       number: string;
@@ -573,6 +582,7 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       [addr, n],
     ),
     giftCardsForEmail(addr, n),
+    refundPointsForEmail(addr, n),
   ]);
 
   /* invoiceOf() is the one reader of the invoice record, and it lives in
@@ -639,12 +649,43 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
          tell «отправлен» from «возвращено» instead of guessing from status. */
       refunded: refundedMoney(payment, "done"),
       refundPending: refundedMoney(payment, "pending"),
+      pointsBack: pointsByOrder.get(r.id)?.back ?? 0,
+      pointsRevoked: pointsByOrder.get(r.id)?.revoked ?? 0,
       giftCards: (cardsByOrder.get(r.id) ?? []).map((c) => (holds[r.id] ? { ...c, held: true as const } : c)),
       invoice: inv ? { number: inv.number, pdfUrl: accountInvoicePath(r.number) } : null,
       returnable: canRequestReturn(ret),
       returnRequestedAt: returnRequestedAt(ret),
     };
   });
+}
+
+/**
+ * `order_id → {back, revoked}` — the refund lines of the loyalty ledger for
+ * the same orders listCustomerOrders() is about to return, asked by the
+ * address and the limit so the three queries leave together. Only orders a
+ * refund touched are in it. Empty when anything goes wrong: the points under
+ * an order are a courtesy, never the reason «Мои заказы» fails to open.
+ */
+async function refundPointsForEmail(addr: string, limit: number): Promise<Map<string, { back: number; revoked: number }>> {
+  const out = new Map<string, { back: number; revoked: number }>();
+  try {
+    const rows = await query<{ order_id: string; back: string | number; revoked: string | number }>(
+      `select order_id, ${POINTS_LINES_SQL.back} as back, ${POINTS_LINES_SQL.revoked} as revoked
+         from loyalty_ledger
+        where reason = 'adjust'
+          and order_id in (select id from orders where lower(email) = $1 order by created_at desc limit $2)
+        group by order_id`,
+      [addr, limit],
+    );
+    for (const r of rows) {
+      const back = Math.trunc(Number(r.back) || 0);
+      const revoked = Math.trunc(Number(r.revoked) || 0);
+      if (back || revoked) out.set(r.order_id, { back, revoked });
+    }
+  } catch (err) {
+    console.error("[customers] refund points unavailable:", err);
+  }
+  return out;
 }
 
 /**

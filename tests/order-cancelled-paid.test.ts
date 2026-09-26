@@ -102,3 +102,44 @@ describe("«Заказ отменён» on a paid order", () => {
     expect(ru.text).toContain("Деньги за этот заказ мы вернём тем же путём, каким они пришли.");
   });
 });
+
+/* Dim, 26.09.2026, /test «order-refund-full»: the letter was right about the
+   money and silent about the points. It now says what moved — and only when
+   something did. */
+describe("«Деньги возвращены» and the points", () => {
+  const REFUNDED = { ...PAID, status: "refunded" };
+
+  it("names both halves, in each language, in both copies", () => {
+    const points = { back: 10, revoked: 3 };
+    const ru = renderOrderCancelled(REFUNDED, "ru", { kind: "refunded", amount: 12.49, points });
+    for (const copy of [ru.text, ru.html]) {
+      expect(copy).toContain("Баллы, потраченные на этот заказ, вернули на ваш счёт: 10.");
+      expect(copy).toContain("Баллы, начисленные за этот заказ, сняли: 3.");
+    }
+    const et = renderOrderCancelled(REFUNDED, "et", { kind: "refunded", amount: 12.49, points });
+    expect(et.text).toContain("Sellele tellimusele kulutatud punktid tagastasime teie kontole: 10.");
+    expect(et.text).toContain("Selle tellimuse eest saadud punktid võtsime tagasi: 3.");
+    const en = renderOrderCancelled(REFUNDED, "en", { kind: "refunded", amount: 12.49, points });
+    expect(en.text).toContain("The points you spent on this order are back in your account: 10.");
+    expect(en.text).toContain("The points this order earned have been taken back: 3.");
+  });
+
+  it("says only the half that moved, and nothing when neither did", () => {
+    const only = renderOrderCancelled(REFUNDED, "ru", { kind: "refunded", amount: 12.49, points: { back: 0, revoked: 4 } });
+    expect(only.text).toContain("Баллы, начисленные за этот заказ, сняли: 4.");
+    expect(only.text).not.toContain("вернули на ваш счёт");
+    const none = renderOrderCancelled(REFUNDED, "ru", { kind: "refunded", amount: 12.49 });
+    expect(none.text).not.toContain("Баллы");
+  });
+
+  it("promises nothing about points while the refund is only sent — they follow the money", () => {
+    const sent = renderOrderCancelled(PAID, "ru", { kind: "refund_sent", amount: 12.49, points: { back: 10, revoked: 3 } });
+    expect(sent.text).not.toContain("Баллы");
+  });
+
+  it("tells a cancelled order that points paid for that they are back", () => {
+    const free = { ...BASE, total: 0, payment: { status: "paid", method: "points" } };
+    const ru = renderOrderCancelled(free, "ru", { kind: "cancelled", points: { back: 25, revoked: 0 } });
+    expect(ru.text).toContain("Баллы, потраченные на этот заказ, вернули на ваш счёт: 25.");
+  });
+});

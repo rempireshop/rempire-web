@@ -1,0 +1,33 @@
+-- 214_loyalty_refund_lines.sql — a refund's points as two lines, not one net
+--
+-- Dim, 26.09.2026, on /test «order-refund-full»: «Text is there, but I'm not
+-- sure if in the account the points were returned.» A refunded order used to
+-- post ONE ledger row carrying the net of what it spent and what it earned
+-- (101_loyalty_refund_once.sql) — «Корректировка +5» on an order that spent 10
+-- points and earned 5, which answers neither question the customer and the
+-- owner actually ask: did my points come back, and were the order's own taken
+-- off?
+--
+-- So a refund now writes up to two `adjust` rows for the order, each named by
+-- its `ref` (src/lib/loyalty.ts refundLoyaltyPoints, src/lib/loyalty-lines.ts):
+--
+--   loyalty-back:<order>:<n>     the points the order SPENT, back on the balance
+--   loyalty-revoke:<order>:<n>   the points the order EARNED, taken back off it
+--
+-- and, when a refund or a cancellation is undone back to «оплачен», the rows
+-- that put the balance where it was before (the same two refs, the other sign).
+--
+-- 101's index allowed one `adjust` row per order and is what stood in the way.
+-- It goes; what stops a refund from posting twice is now the order row locked
+-- in the same transaction plus loyalty_ledger_ref_idx
+-- (191_gift_loyalty_once.sql) on each row's ref — two doors landing together
+-- («Вернуть деньги» in the admin and Montonio's refund webhook) compute the
+-- same ref and the second one is refused. A net row written before this file
+-- (no ref) is read as the whole reversal having been posted, so nothing is
+-- ever handed back twice.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite (the test suite).
+
+drop index if exists loyalty_ledger_refund_once_idx;
