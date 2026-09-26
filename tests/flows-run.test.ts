@@ -419,6 +419,93 @@ describe("runBirthdays() — the skip says why", () => {
   });
 });
 
+/* Dim, 26.09.2026, /test «mail-birthday»: «I put birthday 28.09.2026 and said
+   run now. 0 letters were sent.» The shop on staging has dozens of customers
+   and nearly none of them gave a birthday, so the reason the run printed —
+   the biggest count over the whole table — was always «дата рождения не
+   указана», whatever actually held HIS letter back. */
+describe("runBirthdays() — the reason is about the window, in a shop full of customers", () => {
+  const SEP26 = Date.parse("2026-09-26T09:00:00Z"); // noon in Tallinn
+
+  async function strangers(n: number): Promise<void> {
+    for (let i = 0; i < n; i += 1) {
+      await query("insert into customers (email, lang, marketing) values ($1, 'RU', $2)", [`nobday-${i}@example.com`, i % 2 === 0]);
+    }
+    // …and a few with a date far from this window, some ticked, some not
+    for (let i = 0; i < 3; i += 1) {
+      await query("insert into customers (email, lang, birthday, marketing) values ($1, 'RU', $2, $3)", [`march-${i}@example.com`, `1985-03-0${i + 1}`, i === 0]);
+    }
+  }
+
+  it("greets a date typed inside the head start — two days before, with «за 3 дня» — and once only", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    await strangers(8);
+    const dim = await customer("1990-09-28");
+    const run = await runBirthdays(SEP26);
+    expect(run.sent).toBe(1);
+    expect(await sentYear(dim)).toBe(2026);
+    // the code still has its fortnight from the birthday: 2 + 14 days
+    await expectCodeLastsAllOf(SEP26 + 16 * DAY);
+
+    const again = await runBirthdays(SEP26 + 3600_000);
+    expect(again.sent).toBe(0);
+    expect(again.reason).toBe("already_sent");
+    expect(again.skips).toEqual({ already_sent: 1 });
+    // the next day and the birthday itself: still nothing more
+    expect((await runBirthdays(SEP26 + DAY)).sent).toBe(0);
+    expect((await runBirthdays(SEP26 + 2 * DAY)).sent).toBe(0);
+    expect(sent).toHaveLength(1);
+  });
+
+  it("reads only the day and the month: a birth date this year is greeted like any other", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    const baby = await customer("2026-03-01");
+    const dated = await customer("2026-09-28"); // a row from before the form refused a future date
+    const run = await runBirthdays(SEP26);
+    expect(run.sent).toBe(1);
+    expect(await sentYear(dated)).toBe(2026);
+    expect(await sentYear(baby)).toBeNull();
+    expect((await runBirthdays(Date.parse("2027-03-01T09:00:00Z"))).sent).toBe(1);
+    expect(await sentYear(baby)).toBe(2027);
+  });
+
+  it("says «нет согласия» for a date in the window without the tick — not «дата не указана»", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    await strangers(8);
+    await query("insert into customers (email, lang, birthday, marketing) values ('dim@example.com', 'RU', '1990-09-28', false)");
+    const run = await runBirthdays(SEP26);
+    expect(run.sent).toBe(0);
+    expect(run.reason).toBe("no_marketing");
+    expect(run.skips).toEqual({ no_marketing: 1 });
+  });
+
+  it("says «уже поздравили» when this year's letter went — even after the date was changed", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    await strangers(8);
+    // greeted in March under another date, then the date was typed again
+    await customer("1990-09-28", 2026);
+    const run = await runBirthdays(SEP26);
+    expect(run.sent).toBe(0);
+    expect(run.reason).toBe("already_sent");
+    expect(run.skips).toEqual({ already_sent: 1 });
+  });
+
+  it("says once that nobody's birthday is in these days, when that is the whole answer", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    await strangers(8);
+    const run = await runBirthdays(SEP26);
+    expect(run).toMatchObject({ sent: 0, skipped: 0, reason: "not_in_window", skips: { not_in_window: 1 } });
+  });
+
+  it("says «дата рождения не указана» only when not one customer has given a date", async () => {
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+    for (let i = 0; i < 4; i += 1) await query("insert into customers (email, lang, marketing) values ($1, 'RU', true)", [`nb-${i}@example.com`]);
+    expect(await runBirthdays(SEP26)).toMatchObject({ sent: 0, reason: "no_birthday", skips: { no_birthday: 1 } });
+    await query("delete from customers");
+    expect(await runBirthdays(SEP26)).toMatchObject({ sent: 0, reason: "nobody", skips: { nobody: 1 } });
+  });
+});
+
 describe("POST /api/admin/flows/run/", () => {
   async function run(body: unknown, cookie: string | null = adminCookieHeader()) {
     const { POST } = await import("@/app/api/admin/flows/run/route");

@@ -88,6 +88,18 @@ describe("the words for every reason a run can give", () => {
     expect(missing, "a reason the panel cannot say drops out of «Последний запуск»").toEqual([]);
   });
 
+  /* Dim, 26.09.2026, /test «mail-birthday»: «0 letters were sent» — and the
+     line under the letter did not say that his letter had gone this year. */
+  it("speak of the birthday in the birthday's own words, and of a basket in the basket's", () => {
+    const html = build<(skips: Record<string, number>, flow: string) => string>(
+      ["FLOW_SKIP_WORDS", "FLOW_SKIP_WORDS_OWN"], ["flowSkipWord", "flowSkipsHTML"], {}, "flowSkipsHTML",
+    );
+    expect(html({ already_sent: 1 }, "birthday")).toBe(" · <span>уже поздравили в этом году</span>");
+    expect(html({ not_in_window: 1 }, "birthday")).toBe(" · <span>нет дней рождения в эти дни</span>");
+    expect(html({ no_marketing: 2 }, "birthday")).toBe(" · <span>нет согласия на письма</span> 2");
+    expect(html({ already_sent: 3 }, "abandoned")).toBe(" · <span>письмо уже уходило</span> 3");
+  });
+
   it("no longer promise three hours — the wait is the owner's number now", () => {
     const words = build<Record<string, string>>(["FLOW_SKIP_WORDS"], [], {}, "FLOW_SKIP_WORDS");
     expect(words.too_fresh).not.toContain("трёх часов");

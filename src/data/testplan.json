@@ -5730,16 +5730,16 @@
       "steps": [
         "В «Письмах» открыть «Скидка ко дню рождения», включить и в «Когда уходит» выбрать «за 3 дня».",
         "Там же поставить «Скидка в поздравлении» 15 %.",
-        "В кабинете вписать дату рождения послезавтра, галочку про письма не ставить.",
+        "Войти в кабинет адресом, которому в этом году поздравления ещё не было.",
+        "Вписать дату рождения послезавтра с годом 2026, потом тот же день с годом 1990; галочку про письма не ставить.",
         "Нажать «Запустить сейчас» в этом письме, потом поставить галочку и нажать ещё дважды.",
-        "Проверить почту и применить промокод на кассе.",
-        "Нажать «Отписаться» внизу письма и открыть карточку клиента."
+        "Проверить почту, применить промокод на кассе, потом нажать «Отписаться» внизу письма и открыть карточку клиента."
       ],
       "expect": [
+        "С годом 2026 под полем «Эта дата ещё не наступила»; с 1990 — «Сохранено ✓».",
         "Без галочки тост говорит: нет согласия на письма.",
-        "С галочкой — «Отправлено 1 · пропущено 0» и «Последний запуск».",
-        "Письмо пришло, в нём личный промокод на 15 %.",
-        "Третье нажатие говорит, что письмо уже уходило.",
+        "С галочкой — «Отправлено 1 · пропущено 0», письмо с личным промокодом на 15 %.",
+        "Третье нажатие говорит: уже поздравили в этом году.",
         "Код срабатывает на кассе и живёт две недели после дня рождения.",
         "После «Отписаться» страница подтверждает отписку, в карточке — «Отписался по ссылке в письме»."
       ],
@@ -5747,22 +5747,22 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T11:50:31.414Z",
+      "markedAt": "2026-09-26T09:09:38.558Z",
       "en": {
         "title": "The birthday letter",
         "steps": [
           "In «Letters» open «Birthday discount», switch it on and under «When it goes out» choose «3 days before».",
           "In the same place set «Discount in the greeting» to 15 %.",
-          "In the account enter a birthday the day after tomorrow, and leave the e-mail box unticked.",
+          "Sign in to the account with an address that has had no birthday letter this year.",
+          "Enter a birthday the day after tomorrow with the year 2026, then the same day with 1990; leave the e-mail box unticked.",
           "Tap «Run now» in that letter, then tick the box and tap it twice more.",
-          "Check the mailbox and apply the promo code at the checkout.",
-          "Tap «Unsubscribe» at the bottom of the letter and open the customer's card."
+          "Check the mailbox, apply the promo code at the checkout, then tap «Unsubscribe» at the bottom of the letter and open the customer's card."
         ],
         "expect": [
+          "With 2026 the field says «That date has not come yet»; with 1990 — «Saved ✓».",
           "Without the tick the toast says: no consent to letters.",
-          "With the tick — «Sent 1 · skipped 0» and «Last run».",
-          "The letter came, with a personal 15 % promo code in it.",
-          "The third press says the letter has gone already.",
+          "With the tick: «Sent 1 · skipped 0», and a personal 15 % code arrives.",
+          "The third press says: already greeted this year.",
           "The code works at the checkout and lives two weeks after the birthday.",
           "After «Unsubscribe» the page confirms it; the card says «Unsubscribed from the link in a letter»."
         ],

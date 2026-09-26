@@ -9,6 +9,7 @@
 import { clientIp, rateLimit } from "@/lib/auth";
 import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import {
+  birthdayProblem,
   getCustomer,
   listCustomerOrders,
   recordLogin,
@@ -109,6 +110,14 @@ export async function PATCH(req: Request) {
   const patch: Record<string, unknown> = {};
   for (const key of ["name", "phone", "birthday", "lang", "shipPref"] as const) {
     if (key in body) patch[key] = body[key];
+  }
+  /* A birthday that cannot be a birth date is refused with its reason, and
+     the row keeps the date it had — it used to be stored as sent (a date in
+     the future) or as nothing at all (a date nobody could read). The form
+     prints the reason under the box (ACCT_ERRS, public/shop2/app.js). */
+  if ("birthday" in body) {
+    const problem = birthdayProblem(body.birthday);
+    if (problem) return Response.json({ ok: false, error: problem }, { status: 400, headers: NO_STORE });
   }
   /* The consent tick travels with the rest of the form but is not a profile
      field: it goes through src/lib/consent.ts, which stamps when and where

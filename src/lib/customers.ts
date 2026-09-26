@@ -94,6 +94,27 @@ export function normalizeBirthday(v: unknown): string | null {
 }
 
 /**
+ * Why the account form's birthday cannot be stored — or null when it can
+ * (an empty value clears it, which is allowed).
+ *
+ * Until 26.09.2026 a date nobody could parse was stored as «no birthday»,
+ * silently wiping the one the row had, and a date in the future was stored
+ * as it came. Dim typed 28.09.2026 to test «Письмо ко дню рождения»; a
+ * birth date after today is a typo in the year, not a customer. One day of
+ * slack past the Tallinn date: a shopper far to the east is already on
+ * tomorrow. The birthday letter itself reads only the day and the month
+ * (runBirthdays, src/lib/flows.ts), so a real year this side of today — a
+ * child born this spring — is kept and greeted like any other.
+ */
+export function birthdayProblem(v: unknown, now: Date = new Date()): "bad_birthday" | "future_birthday" | null {
+  if (v == null || v === "") return null;
+  const iso = normalizeBirthday(v);
+  if (!iso) return "bad_birthday";
+  const latest = addShopDays(shopDay(now), 1);
+  return latest && iso > latest ? "future_birthday" : null;
+}
+
+/**
  * «Доставка по умолчанию» — the account's standing delivery choice, in the
  * checkout's own words (db/migrations/051_customer_ship_pref.sql). Until
  * 10.09.2026 it lived in the shopper's browser only, so it never followed

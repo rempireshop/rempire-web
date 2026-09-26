@@ -859,7 +859,8 @@
       "корзина стала заказом": "korvist sai tellimus",
       "дата рождения не указана": "sünnikuupäev puudub",
       "нет согласия на письма": "kirjade nõusolek puudub",
-      "дата не попадает в это окно": "kuupäev ei jää sellesse aknasse",
+      "нет дней рождения в эти дни": "neil päevil sünnipäevi pole",
+      "уже поздравили в этом году": "sel aastal juba õnnitletud",
       "в списке никого нет": "nimekirjas pole kedagi",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "Kiri on välja lülitatud — lülitage lüliti sisse ja käivitage uuesti.",
       "Почта не подключена — письма не отправлены.": "Post pole ühendatud — kirju ei saadetud.",
@@ -1128,6 +1129,8 @@
       "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
         "Kirjuta telefoninumber — sellele helistab kuller ja tuleb pakiautomaadi SMS.",
       "Проверьте номер — похоже, в нём не хватает цифр.": "Kontrolli numbrit — tundub, et mõni number on puudu.",
+      "Эта дата ещё не наступила — проверьте год.": "See kuupäev pole veel käes — kontrolli aastat.",
+      "Проверьте дату рождения.": "Kontrolli sünnikuupäeva.",
       "Введите e-mail — на него придёт подтверждение заказа.": "Sisesta e-posti aadress — sellele tuleb tellimuse kinnitus.",
       "В адресе не хватает знака @.": "Aadressist puudub @-märk.",
       "Проверьте e-mail — на него придёт подтверждение заказа": "Kontrolli e-posti aadressi — sellele tuleb tellimuse kinnitus",
@@ -4390,7 +4393,8 @@
       "корзина стала заказом": "the basket became an order",
       "дата рождения не указана": "no date of birth",
       "нет согласия на письма": "no consent to letters",
-      "дата не попадает в это окно": "the date is not in this window",
+      "нет дней рождения в эти дни": "no birthdays on these days",
+      "уже поздравили в этом году": "already greeted this year",
       "в списке никого нет": "there is nobody on the list",
       "Письмо выключено — включите переключатель и запустите ещё раз.": "The letter is off — turn the switch on and run it again.",
       "Почта не подключена — письма не отправлены.": "Mail is not connected — no letters were sent.",
@@ -4655,6 +4659,8 @@
       "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
         "Enter your phone number — the courier rings it and the parcel locker texts it.",
       "Проверьте номер — похоже, в нём не хватает цифр.": "Check the number — it looks like a digit is missing.",
+      "Эта дата ещё не наступила — проверьте год.": "That date has not come yet — check the year.",
+      "Проверьте дату рождения.": "Check the date of birth.",
       "Введите e-mail — на него придёт подтверждение заказа.": "Enter your e-mail — the order confirmation goes there.",
       "В адресе не хватает знака @.": "The address is missing the @ sign.",
       "Проверьте e-mail — на него придёт подтверждение заказа": "Check your e-mail — the order confirmation goes there",
@@ -17635,7 +17641,11 @@
     offline: "Кабинет заработает, когда магазин подключат к серверу",
     // the profile form's phone, refused before it is sent — the checkout's
     // own rule and words (phoneOk / shipMsg)
-    bad_phone: "Проверьте номер — похоже, в нём не хватает цифр."
+    bad_phone: "Проверьте номер — похоже, в нём не хватает цифр.",
+    /* the birthday box: a date after today is not a birth date — refused
+       with words, where it used to be dropped without a sound (acctFieldChange) */
+    future_birthday: "Эта дата ещё не наступила — проверьте год.",
+    bad_birthday: "Проверьте дату рождения."
   };
   function acctErrWord(key) { return ACCT_ERRS[key] || "Не получилось — попробуйте ещё раз"; }
   function acctErrText() { return acctErrWord(S.acctErr); }
@@ -18287,7 +18297,13 @@
     else p[f] = S.acctForm[f];
     return p;
   }
-  function isoToday() { return new Date().toISOString().slice(0, 10); }
+  /* The shopper's own calendar day, not UTC's: from midnight to 03:00 in
+     Tallinn UTC is still on yesterday, and a birthday typed as «today» then
+     read as a date in the future. */
+  function isoToday() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
 
   /* ---- the line under each control ----------------------------------------
      S.acctSt[f] — see its comment in S. The line lives in the markup
@@ -18395,6 +18411,12 @@
     clearTimeout(acctAutoT[f]); delete acctAutoT[f];
     if (f === "birthday") {
       clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+      /* …but a whole date AFTER today is not a year half-typed — a year
+         being typed only ever reads too early («0019»). Dim, 26.09.2026, on
+         /test «mail-birthday»: he typed 28.09.2026, the box was refused in
+         silence, and «Запустить сейчас» found no birthday to greet. Said
+         under the box now; the server keeps the date it had. */
+      if (el && el.validity && el.validity.rangeOverflow) { acctSt("birthday", "err:future_birthday"); return; }
       if (el && el.validity && !el.validity.valid) return;
       acctBirthdayT = setTimeout(function () { acctBirthdayT = 0; acctQueue("birthday"); }, 600);
       return;
@@ -25365,7 +25387,9 @@
     recovered: "корзина стала заказом",
     no_birthday: "дата рождения не указана",
     no_marketing: "нет согласия на письма",
-    not_in_window: "дата не попадает в это окно",
+    /* said once, when nobody's birthday falls between today and the day the
+       letter is set for (explainEmptyBirthdayQueue, src/lib/flows.ts) */
+    not_in_window: "нет дней рождения в эти дни",
     /* the discounted cart letter's own two (SKIP_REASONS, src/lib/flows.ts):
        they had no words here, so its «Последний запуск» dropped them and read
        «отправлено 0» with nothing beside it */
@@ -25374,14 +25398,26 @@
     nobody: "в списке никого нет",
     no_budget: "лимит писем на сегодня исчерпан"
   };
+  /* A letter's own word for a reason, where the shared one says less. «Письмо
+     уже уходило» is right for a basket; for the birthday it is once a YEAR,
+     and that is what the owner needs to read (Dim, 26.09.2026, /test
+     «mail-birthday»). */
+  var FLOW_SKIP_WORDS_OWN = {
+    birthday: { already_sent: "уже поздравили в этом году" }
+  };
+  function flowSkipWord(flow, k) {
+    var own = FLOW_SKIP_WORDS_OWN[flow];
+    return (own && own[k]) || FLOW_SKIP_WORDS[k] || "";
+  }
   /** « · срок из настройки ещё не прошёл 2» — every reason the run counted. */
-  function flowSkipsHTML(skips) {
+  function flowSkipsHTML(skips, flow) {
     var out = "";
     for (var k in skips) {
-      if (!FLOW_SKIP_WORDS[k]) continue;
+      var word = flowSkipWord(flow, k);
+      if (!word) continue;
       var n = Number(skips[k]) || 0;
       if (n <= 0) continue;
-      out += ' · <span>' + FLOW_SKIP_WORDS[k] + "</span>" + (n > 1 ? " " + n : "");
+      out += ' · <span>' + word + "</span>" + (n > 1 ? " " + n : "");
     }
     return out;
   }
@@ -25390,7 +25426,7 @@
     if (!r || !r.at) return "<span>Ещё не запускалось</span>";
     var line = "<span>Последний запуск:</span> " + esc(flowRunWhen(r.at)) + " — <span>отправлено</span> " + (Number(r.sent) || 0);
     if (Number(r.skipped) > 0) line += " · <span>пропущено</span> " + Number(r.skipped);
-    var why = flowSkipsHTML(r.skips);
+    var why = flowSkipsHTML(r.skips, flow);
     if (why) return line + why;
     // a run recorded before the shop counted its reasons — the two it knew
     if (r.reason === "disabled") line += " · <span>письмо было выключено</span>";
@@ -25419,7 +25455,7 @@
         /* Nothing went out and the server said why: the reason in words, not
            a pair of zeroes. The phrase is a dictionary key of its own, so the
            rule /^Никому не отправлено: (.+)$/ translates both halves. */
-        else if (!sentN && FLOW_SKIP_WORDS[r.body.reason]) toast("Никому не отправлено: " + FLOW_SKIP_WORDS[r.body.reason]);
+        else if (!sentN && flowSkipWord(flow, r.body.reason)) toast("Никому не отправлено: " + flowSkipWord(flow, r.body.reason));
         else toast("Отправлено " + (Number(r.body.sent) || 0) + " · пропущено " + (Number(r.body.skipped) || 0));
         loadFlowCounts(true);
         render();

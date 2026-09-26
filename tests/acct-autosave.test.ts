@@ -57,6 +57,8 @@ type Shop = {
   typed: (f: string, v: string) => void;
   addrTyped: (k: string, v: string) => void;
   left: (f: string) => void;
+  /** A box left with its own validity — the date box reports its range (min/max). */
+  leftBox: (f: string, validity: Record<string, boolean>) => void;
   go: (screen: string) => void;
   leave: () => void;
   seed: () => void;
@@ -108,7 +110,8 @@ function shop(): Shop {
     acctSeedForm();
     return {
       S: S, st: st, typed: acctTyped, addrTyped: acctAddrTyped, go: go, leave: acctLeave, seed: acctSeedForm,
-      left: function (f) { acctFieldChange(f, { validity: { valid: true } }); }
+      left: function (f) { acctFieldChange(f, { validity: { valid: true } }); },
+      leftBox: function (f, validity) { acctFieldChange(f, { validity: validity }); }
     };
   `;
   const fetchStub = (url: string, init: { method: string; body: string; keepalive?: boolean }) => {
@@ -231,6 +234,50 @@ describe("going away sends what was typed", () => {
     await s.answer();                 // name lands
     expect(s.sent).toHaveLength(2);   // …and the phone is still sent
     expect(s.sent[1].body).toMatchObject({ phone: "+372 5123 4567" });
+  });
+});
+
+/* Dim, 26.09.2026, /test «mail-birthday»: «I put birthday 28.09.2026 and said
+   run now. 0 letters were sent.» The box has max = today, so a date after
+   it is out of range — and the form took «out of range» to mean «a year
+   still being typed» and returned without a word. Nothing was saved, and
+   nothing said so. A year being typed only ever reads too EARLY («0019»). */
+describe("the birthday box", () => {
+  it("says why a date after today is not saved, and sends nothing", () => {
+    const s = shop();
+    s.typed("birthday", "2026-09-28");
+    s.leftBox("birthday", { valid: false, rangeOverflow: true, rangeUnderflow: false });
+    vi.advanceTimersByTime(PAUSE * 3);
+    expect(s.sent).toHaveLength(0);
+    expect(s.S.acctSt.birthday).toBe("err:future_birthday");
+  });
+
+  it("still waits quietly while a year is half-typed", () => {
+    const s = shop();
+    s.typed("birthday", "0019-09-28");
+    s.leftBox("birthday", { valid: false, rangeOverflow: false, rangeUnderflow: true });
+    vi.advanceTimersByTime(PAUSE * 3);
+    expect(s.sent).toHaveLength(0);
+    expect(s.S.acctSt.birthday).toBe("");
+  });
+
+  it("saves a real date after the refusal, and the line says so", async () => {
+    const s = shop();
+    s.typed("birthday", "2026-09-28");
+    s.leftBox("birthday", { valid: false, rangeOverflow: true });
+    s.typed("birthday", "1990-09-28");
+    expect(s.S.acctSt.birthday, "the refusal outlived the new typing").toBe("");
+    s.leftBox("birthday", { valid: true });
+    vi.advanceTimersByTime(600);
+    expect(s.sent).toHaveLength(1);
+    expect(s.sent[0].body).toMatchObject({ birthday: "1990-09-28" });
+    await s.answer();
+    expect(s.S.acctSt.birthday).toBe("saved");
+  });
+
+  it("has words for the refusal, the server's included", () => {
+    expect(src).toContain('future_birthday: "Эта дата ещё не наступила — проверьте год."');
+    expect(src).toContain('bad_birthday: "Проверьте дату рождения."');
   });
 });
 
