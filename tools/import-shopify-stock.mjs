@@ -327,6 +327,8 @@ const fromOf = (r) => `${r.title || r.handle}${r.options.length ? " · " + r.opt
  *   unknown    [{ handle, from, qty }] — a Shopify handle the new catalogue does not have
  *   untouched  [id] — catalogue products no Shopify row and no owner row reached
  *   ownerRows  [{ productId, variant, qty|null, how, seen, decided, problem? }]
+ *
+ * @param {{ inventory: any, catalogue: any, ownerRows?: any[], use?: string, only?: Set<string> | null, skipZero?: boolean }} opts
  */
 export function buildPlan({ inventory, catalogue, ownerRows = [], use = "available", only = null, skipZero = false }) {
   if (use !== "available" && use !== "onHand") throw new ImportError("--use must be available or onHand");
@@ -566,7 +568,15 @@ function adminHeaders(cookie, extra = {}) {
   return { cookie: `${ADMIN_COOKIE}=${cookie}`, accept: "application/json", ...extra };
 }
 
-/** The live «Склад» — every row, read-only. Throws with the reason on anything but 200 ok. */
+/**
+ * @typedef {(url: string, init: any) => Promise<Response>} FetchLike
+ */
+
+/**
+ * The live «Склад» — every row, read-only. Throws with the reason on anything but 200 ok.
+ *
+ * @param {{ base: string, cookie: string, fetchImpl?: FetchLike }} opts
+ */
 export async function readShelf({ base, cookie, fetchImpl = fetch }) {
   const res = await fetchImpl(`${base}/api/admin/inventory/?filter=all&limit=1000`, {
     headers: adminHeaders(cookie),
@@ -584,6 +594,9 @@ export async function readShelf({ base, cookie, fetchImpl = fetch }) {
  * have is skipped (the route would CREATE a row under that label — a stray
  * shelf line nothing sells from). Stops at the first 401: re-running replays
  * the finished rows and continues with the rest.
+ *
+ * @param {{ rows: any[], base: string, cookie: string, ref: string, run: string, fetchImpl?: FetchLike,
+ *           pause?: number, sleep?: (ms: number) => Promise<void>, say?: (line: string) => void }} opts
  */
 export async function applyPlan({ rows, base, cookie, ref, run, fetchImpl = fetch, pause = 60, sleep, say = () => {} }) {
   const wait = sleep || ((ms) => new Promise((ok) => setTimeout(ok, ms)));

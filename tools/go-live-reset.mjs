@@ -892,6 +892,9 @@ const padL = (s, n) => String(s).padStart(n, " ");
  * (main() reads it off process.execArgv). The morning's command carries the
  * env file; a line that drops it answers «DATABASE_URL is not set» at the
  * worst possible moment (audit 27.09.2026, G2).
+ *
+ * @param {any} report
+ * @param {{ url?: string, launcher?: string }} [opts]
  */
 export function formatReport(report, { url, launcher = "node" } = {}) {
   const L = [];

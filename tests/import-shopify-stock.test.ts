@@ -49,7 +49,7 @@ type Built = {
 type Catalogue = { ids: Set<string>; ladders: Record<string, string[]>; names: Record<string, string> };
 
 const read = (text: string, opts: Record<string, unknown> = {}) => readInventoryCsv(text, opts) as unknown as Inventory;
-const plan = (o: Record<string, unknown>) => buildPlan(o) as unknown as Built;
+const plan = (o: Record<string, unknown>) => buildPlan(o as unknown as Parameters<typeof buildPlan>[0]) as unknown as Built;
 
 /* ---------- a shop small enough to read at a glance ------------------------ */
 
