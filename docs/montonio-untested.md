@@ -16,6 +16,16 @@ returns, international pricing per carrier). Quoted and matched to our
 questions in `docs/montonio-questions.md` § «Answers, 24.09.2026»; the rows
 it changed here are S5, S8, S9, S14 and D8.
 
+**Updated 27.09.2026** after the live hour of 26.09.2026 (staging, live keys,
+orders R-100095…R-100098: bank link, card and Google Pay settled; a cancelled
+payment; a full and a partial refund sent; a real DPD parcel-machine label) and
+the go-live readiness pass (`docs/audit-2026-09-27-readiness.md`). Its item
+F17 of the 18.09 audit is closed here: S6, D6, Part 3.1, Part 4 and Part 5 said
+«not applied» for work that landed on 18.09 (`3be3ae6`, `928597f`); § 3.3 now
+says the order must be «Отправлен» before a delivered event closes it; § 3.4 no
+longer says a same-day refund is refused — the live hour disproved it. What the
+live hour did not prove is the «after the switch» list in `docs/go-live.md`.
+
 **Updated 27.09.2026** — readiness pass B1, B9, B10
 (`docs/audit-2026-09-27-readiness.md`), after the live hour left R-100095 (full
 €1) and R-100096 (partial €0.50) at PENDING:
@@ -103,7 +113,7 @@ not from our own output.
 | S3 | **Address validation** | Same sentence | Same |
 | S4 | **A real label PDF** | Sandbox guide: «The system generates dummy labels.» `normaliseLabelPdf()` has never seen a real Montonio label. | `tests/shipping-label-pdf.test.ts` rebuilds the same nesting with pdf-lib. An unrecognised file is served unchanged, so the failure is soft |
 | S5 | **A real tracking number and a real `shipment.statusUpdated` vocabulary** | Nothing ships | `settings.shipping_statuses` records every word that ever arrives (`src/lib/shipping/webhook.ts`); the delivered/returned allow-list is still a guess and is marked as one. **24.09.2026:** a lost event is no longer lost for good — Montonio retries for 1.5–2 days, and on their advice the daily cron re-asks `GET /shipments/{id}` for every shipment quiet for 12 hours (`syncStaleShipments`, `tests/shipment-poll.test.ts`). **26.09.2026:** the first live word was `registered` (R-100098) and was journalled `meaning: "unknown"`; it now reads `meaning: "registered"` — informational only, it moves no order (registering is not shipping) |
-| S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | Nothing. We never read the flag and never send dimensions — see Part 5, D6 |
+| S6 | **`constraints.parcelDimensionsRequired: true`** | Needs a live carrier/method combination that has it | **Read since 18.09.2026** (`3be3ae6`): `parcelDimensionsRequired()` in `src/lib/shipping/montonio.ts` reads the flag and the carton is declared wherever Montonio asks (25 × 18 × 8 cm since 23.09, migration 203) — `tests/shipping-parcel.test.ts`. What has never happened is a live method that sets the flag. Part 5, D6 |
 | ~~S7~~ | ~~**A SmartPosti drop-off code** (`dropOffPin`)~~ · **not applicable, 22.09.2026** | Montonio's written answer of 22.09.2026: a drop-off / door code works **only on the merchant's own direct contract with the carrier**, and only with that carrier's help; it is aimed at marketplaces. A normal merchant simply **scans the label at the parcel machine**. **Omniva has no such option at all.** So this is not «untested» — there is nothing here for a shop like ours to test | Nothing, and nothing wanted. See Part 5, D7 |
 | S8 | **`PATCH /shipments/{id}`** — the documented repair for a failed registration | **Implemented 24.09.2026**, but a refusal cannot happen in sandbox (S1), so the PATCH has never met a real carrier | Montonio's answer of 24.09.2026 (below) made it the design: on a refused parcel the step button reads «Отправить заново» and PATCHes the SAME shipment, as often as pressed (audit 18.09 F15, map defect #19) — `tests/shipment-repair.test.ts`; live check `live-label-repair` in /test. Part 5, D8 |
 | S9 | **The parcel-events webhook being registered** | It is registered through the API only — Montonio's Partner System has no screen for it (their webhooks guide, read 23.09.2026); `tools/montonio-webhook.mjs register` does it. Nothing in this shop can notice it was skipped | `GET /api/admin/montonio/` asks `GET /webhooks` and reports it. Registered 23.09.2026 with three events; **24.09.2026: must be registered again with four** (`shipment.labelsCreated` added — docs/go-live.md) |
@@ -181,9 +191,10 @@ Owner-verified in the Partner System, 18.09.2026:
 
 Nothing in the code can do any of these. In the order they bite.
 
-- [ ] **Switch on «Refundable bank payments»** in the Partner System, in
+- [x] **Switch on «Refundable bank payments»** in the Partner System, in
       **live** mode. Without it no refund on a bank-link order will ever work.
-      This is the single most important line in this document.
+      This is the single most important line in this document. **Done:
+      Montonio confirmed by e-mail on 23.09.2026 that refunds are active.**
 
   > **What it costs, from Montonio's written answer of 22.09.2026 and their
   > published price list at `montonio.com/et/hinnapaketid`, read the same day.**
@@ -214,12 +225,16 @@ Nothing in the code can do any of these. In the order they bite.
       Events: at least `shipment.registered`, `shipment.registrationFailed`,
       `shipment.statusUpdated`.
       (The *payment* webhook needs nothing: `notificationUrl` rides on every
-      order.)
+      order.) **Done for staging on 23.09.2026, re-registered with four events
+      on 25.09; moving it to rempireshop.com is step 8 of the day in
+      `docs/go-live.md`.**
 - [ ] **Configure a recurring courier pickup** in the Montonio system.
       Montonio's written answer of 22.09.2026: **a pickup cannot be ordered
       through the API at all** (S12), and a standing pickup is what they advise
       instead. Nothing in the code can do it and nothing in the code will
-      notice it was skipped — the parcels simply sit here.
+      notice it was skipped — the parcels simply sit here. **Decided at the
+      last meeting with Renat before the launch** (`docs/go-live.md`, T-1):
+      a recurring pickup per carrier, or a drop-off routine.
 - [ ] **Business verification** for production API keys.
 - [ ] Confirm the **live** `GET /stores/payment-methods` list is not empty. The
       guide: «if empty that means the paymentMethods have not been enabled for
@@ -231,7 +246,9 @@ Nothing in the code can do any of these. In the order they bite.
 - [ ] `MONTONIO_SECRET_KEY` — **live** key, from the same pair
 - [ ] `MONTONIO_ENV=live`
 - [ ] `PUBLIC_BASE_URL=https://<the live domain>` — without it a proxy's `Host`
-      header decides where Montonio sends the payment confirmation
+      header decides where Montonio sends the payment confirmation. It is the
+      staging host today; it becomes `https://rempireshop.com` on the day,
+      step 5 of `docs/go-live.md` — Redeploy, then DNS at once
 - [ ] `SESSION_SECRET`
 - [ ] `PAYMENT_PROVIDER` **unset** (or `montonio`) — never `mock`
 - [ ] Redeploy. Vercel env changes need a rebuild, and both Vercel and CI skip a
@@ -253,7 +270,7 @@ sandbox could not tell us.
 
 - [ ] **Before the keys even reach Vercel**, ask the live account from this
       machine — GET only, no order, no money (added 23.09.2026):
-      `node --env-file=.env.montonio-live tools/montonio-live-check.mjs`, then
+      `node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs`, then
       `tools/fetch-montonio-tariffs.mjs --dry` with the same file. It reads the
       enabled payments and EUR banks per country, compares every carrier the
       checkout offers (lockers and courier, per country) with what the account
@@ -261,11 +278,10 @@ sandbox could not tell us.
       **Unisend off** although the checkout offers it — the first thing this
       check is expected to name.
 - [ ] **Open «Подключения» in the panel.** Its Montonio rows are fed by
-      `GET /api/admin/montonio/`, which is on this branch; the panel half is a
-      patch handed to Dim separately, because `public/shop2/app.js` was owned
-      by another agent on 18.09.2026. Until it is applied, read the same
-      answer straight from the route (it is admin-only, so open it in the
-      browser you are already logged into the panel with). Three things:
+      `GET /api/admin/montonio/`; the panel half landed on 18.09.2026
+      (`928597f` — the rows, one sentence per refusal, the pending line), so
+      the screen shows it and the raw route is only needed to see the JSON.
+      Three things:
   - [ ] `env` says **live**
   - [ ] the enabled methods list contains `paymentInitiation` (bank links)
   - [ ] **`refundableBankPayments`** — this is the one. `false` means the
@@ -287,7 +303,8 @@ sandbox could not tell us.
       «нет в наличии»), so at the start of the hour switch its «Показывать в
       магазине» on, buy it with **«Самовывоз в салоне»** (always free — the
       order is exactly 1 €), and at the end of the hour switch it off and
-      delete it. The shop is still on the staging address then, and the
+      delete it (if it is still there, it goes in the T-1 clean-up of
+      `docs/go-live.md`). The shop is still on the staging address then, and the
       Google feed still comes from Shopify, so an hour of it on show reaches
       nobody.
 - [ ] Pay it with a **bank link** (not a card): that is the method most
@@ -336,8 +353,16 @@ sandbox could not tell us.
       direct contract with the carrier and is aimed at marketplaces, and Omniva
       has no such option at all (S7). **Scan the label at the parcel machine**
       like any other merchant.
-- [ ] Hand the parcel over and watch the order: within a day or two the
-      `shipment.statusUpdated` webhook should move it to «Доставлен» by itself.
+- [ ] Hand the parcel over and **press «Отправлен» on the order the same
+      day.** That press is what sends the customer the tracking letter, and it
+      is also the precondition for everything below: a delivered event closes
+      an order **only from «Отправлен»** (`applyShipmentUpdate()` in
+      `src/lib/shipping/shipment-sync.ts`, called by both the webhook and the
+      nightly re-ask — `order.status === "shipped"`). An order left at
+      «Оплачен» stays there when the parcel is delivered, and no letter ever
+      tells the customer it went (readiness B13).
+- [ ] Then watch the order: within a day or two the `shipment.statusUpdated`
+      webhook should move it from «Отправлен» to «Доставлен» by itself.
       If it never does, S9 (the webhook) or S5 (an unknown status word) is why;
       `settings.shipping_statuses` will show which. The nightly re-ask
       (24.09.2026) closes it a day later even if the webhook is lost — the
@@ -345,9 +370,14 @@ sandbox could not tell us.
 
 ### 3.4 The refund — the whole point of this document
 
-- [ ] **Wait one business day.** Montonio: «The funds have arrived to the
-      merchant's settlement account… This typically takes 1 business day.» A
-      same-day refund will be refused and that is **normal**, not a fault.
+- [ ] ~~**Wait one business day** — a same-day refund will be refused.~~
+      **Disproved live on 26.09.2026:** the live hour's refunds were accepted
+      the same day. What can stall a refund is not the settlement but the
+      store's **balance** at Montonio, which refunds are paid from: after the
+      daily payout it can be empty, and the refund then sits `PENDING`
+      (`INSUFFICIENT_FUNDS`) until Montonio cancels it after ten days. How to
+      fund it is a question put to Montonio (readiness B3); until they answer,
+      the fallback is a bank transfer to the customer and «возврат» by hand.
 - [ ] Press **«Вернуть деньги»** on that order. Read what happens:
 
 | What the panel says | What it means | What to do |
@@ -400,7 +430,7 @@ sandbox could not tell us.
 | A readiness probe: enabled methods, `isRefundableType` from a real order, carriers and contracts, registered webhooks, stuck refunds — recorded in `settings.montonio_readiness` | `src/app/api/admin/montonio/route.ts` | nothing at all |
 | A label refused for a shipment the carrier never registered, with the same words | `src/app/api/admin/shipments/[id]/label/route.ts` | `POST /label-files` failing inside Montonio with nothing to explain it |
 | Every documented payload above, pinned | `tests/montonio-docs-payloads.test.ts`, `tests/montonio-problems.test.ts` | fixtures written to match our own code |
-| The panel half — one sentence per refusal, the pending line, the readiness rows | **not applied**: `public/shop2/app.js` was another agent's on 18.09.2026. The exact patch (10 hunks, `node --check` and `i18n-gaps` clean) is in the hand-off report | — |
+| The panel half — one sentence per refusal, the pending line, the readiness rows | **landed 18.09.2026** (`928597f`, «Панель говорит, что именно ответил Montonio»): `public/shop2/app.js` — the «Подключения» rows, one sentence per refusal, the pending line, the journal labels in RU/ET/EN | the raw JSON route as the only place to read it |
 
 ### Does Montonio expose which products are active?
 
@@ -430,9 +460,11 @@ sandbox could not tell us.
 
 ## Part 5 — Decisions still open
 
-Each of these is written out in full in the two audits. None is applied,
+Each of these is written out in full in the two audits. They were held back
 because each changes what counts as paid, what is refunded, what is trusted
-from a webhook, or what the shop charges.
+from a webhook, or what the shop charges — and most have since been decided
+and built: D1–D3, D6, D8, D9 and D10 are done, D7 is closed as not applicable.
+**Still open: D4 and D5.**
 
 | # | Open question | Written up in |
 |---|---|---|
@@ -441,7 +473,7 @@ from a webhook, or what the shop charges.
 | ~~D3~~ | ~~A reconcile pass over `GET /orders/:orderUuid` for lost webhooks (P10)~~ · **done 19.09.2026**. Nightly, through the same `settlePayment()` door — `src/lib/payments/reconcile.ts`, `/api/cron/payments-reconcile/`, `tests/payments-reconcile.test.ts` | payments audit § B1 |
 | D4 | Send `expiresIn`, matched to the unpaid-order cron (P11) | payments audit § B2 |
 | D5 | Enforce Montonio's own 0.05 € refund floor in the panel | payments audit § C3 |
-| D6 | Read `constraints.parcelDimensionsRequired` and declare a carton (S6) | shipping audit § 1.6 |
+| ~~D6~~ | ~~Read `constraints.parcelDimensionsRequired` and declare a carton (S6)~~ · **done 18.09.2026** (`3be3ae6`). `parcelDimensionsRequired()` in `src/lib/shipping/montonio.ts`; the carton is 25 × 18 × 8 cm since 23.09 (migration 203) — `tests/shipping-parcel.test.ts` | shipping audit § 1.6 |
 | ~~D7~~ | ~~`lockerSize`, or `defaultLockerSize` on the contract (S7)~~ · **closed 22.09.2026, not applicable.** Montonio's written answer: a drop-off code works only on the merchant's own direct contract with the carrier, with that carrier's help, and is aimed at marketplaces; Omniva has no such option at all. A normal merchant scans the label at the parcel machine. There is nothing left to decide | shipping audit § 4 |
 | ~~D8~~ | ~~Implement `PATCH /shipments/{id}` so a refused parcel can be repaired from the panel (S8)~~ · **done 24.09.2026**, on Montonio's written «that's exactly the right and recommended approach». «Отправить заново» on a refused parcel asks `GET` first, then PATCHes the same shipment; repeatable — `src/app/api/admin/shipments/route.ts`, `tests/shipment-repair.test.ts` | shipping audit § 1.5 |
 | ~~D9~~ | ~~A pending refund still sends the customer «Деньги возвращены»~~ · **done 19.09.2026** (b361c71). A refund Montonio has only accepted now sends its own letter, «Возврат отправлен», and «Деньги возвращены» waits for the webhook | this branch, `src/app/api/admin/orders/[id]/refund/route.ts` |

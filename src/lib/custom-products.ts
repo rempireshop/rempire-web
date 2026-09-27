@@ -480,10 +480,24 @@ export function toMin(p: CustomProduct): MinWithVariants {
   };
 }
 
-/** The active rows' ids and stamps, newest first — the sitemap the app serves (src/app/sitemap-custom.xml/route.ts). */
+/**
+ * The ids and stamps of the rows a visitor can actually open, newest first —
+ * the sitemap the app serves (src/app/sitemap-custom.xml/route.ts).
+ *
+ * TWO switches take an own product off the shop, and both have to be asked:
+ * the row's own `active` («Снять с продажи») and product_overrides.hidden
+ * («Показывать в магазине», db/migrations/147), which src/middleware.ts
+ * answers with a 404 for any id, custom or not. Until 27.09.2026 only the
+ * first was asked here, so a product hidden with the second stayed in the
+ * sitemap — a URL Google was told to fetch and then got a 404 for (audit
+ * 27.09.2026, G21).
+ */
 export async function listCustomSitemapRows(): Promise<Array<{ id: string; updatedAt: string }>> {
   const rows = await query<{ id: string; updated_at: string | Date }>(
-    "select id, updated_at from custom_products where active order by created_at desc, id",
+    `select c.id, c.updated_at from custom_products c
+      where c.active
+        and not exists (select 1 from product_overrides o where o.product_id = c.id and o.hidden)
+      order by c.created_at desc, c.id`,
   );
   return rows.map((r) => ({ id: r.id, updatedAt: iso(r.updated_at) }));
 }

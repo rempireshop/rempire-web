@@ -1,8 +1,9 @@
 # Going live — the whole list
 
-Written 18.09.2026, target **next week**. This is the spine; the detailed
-documents it points at are written by the work itself and are named where they
-exist.
+Written 18.09.2026; **restated 27.09.2026** after the go-live readiness pass
+(`docs/audit-2026-09-27-readiness.md`), whose corrected order of the day is
+Stage 4 below. This is the spine; the detailed documents it points at are
+written by the work itself and are named where they exist.
 
 Three columns of responsibility, and the rule is that **Claude does everything
 that can be done in the repository**. What is left for a person is left because
@@ -16,15 +17,18 @@ it needs a credential, a physical object, or a judgement only the owner can make
 
 Nothing here is a surprise: every item comes from reading Montonio's own
 documentation against our code, from the owner's acceptance testing, or from the
-audit. Where an item is already built, it says so.
+audits. Where an item is already built, it says so.
 
 This list is also a page — **`/golive/`** on the staging domain. Same items, the
-owner shown on each one, the dependencies drawn, and the whole of stage 4 and 5
-shut behind stage 0–3 because that is the rule: everything done on diipsolutions
-before the domain moves. It is built from `src/data/golive.json`, which is
-written out of this file, so this document stays the spine — but the page is
-what gets worked from a phone, and it is where Claude ticks an item off as the
-work lands (`PUT /api/golive/`). Change this file and the page's file together.
+owner shown on each one, the dependencies drawn, and **phase B (the day and
+after) shut behind phase A (stages 0–3 and the day before)**, because that is
+the rule: everything done on diipsolutions before the domain moves. Since
+27.09.2026 nothing in phase A waits for DNS any more — the Merchant Center feeds
+and the first real order moved to the day, where they belong — so phase A can
+actually close. It is built from `src/data/golive.json`, which is written out of
+this file, so this document stays the spine — but the page is what gets worked
+from a phone, and it is where Claude ticks an item off as the work lands
+(`PUT /api/golive/`). Change this file and the page's file together.
 
 ---
 
@@ -32,28 +36,26 @@ work lands (`PUT /api/golive/`). Change this file and the page's file together.
 
 | | | status |
 |---|---|---|
-| D | **Take a copy of the database and verify it reads back.** Railway's Backups tab is Pro-only (checked 23.09), so the copy is a file: `node --env-file=.env.railway.txt tools/db-backup.mjs` (pg_dump in Docker; `docs/go-live-reset.md` step 1). Restore proven on a test database 23.09. Everything below is reversible only from this. | to do |
+| D | **Take a copy of the database and verify it reads back.** Railway's Backups tab is Pro-only (checked 23.09), so the copy is a file: `.env.railway.txt` with **two** lines — `DATABASE_URL=<Railway's DATABASE_PUBLIC_URL>` and `DATABASE_SSL_NO_VERIFY=1` (the reset tool needs it: Railway signs its certificate with its own CA) — then `node --env-file=.env.railway.txt tools/db-backup.mjs` (pg_dump in Docker; `docs/go-live-reset.md` step 1). Restore proven on a test database 23.09. The file is kept until the **end** of launch day. | done 23.09; again T-1 and on the morning |
 | D | Confirm the production database is the same Railway instance staging uses. It is, as of 18.09 — worth re-confirming the day of. | confirmed 18.09 |
 
 ---
 
 ## Stage 1 — Montonio, which gates the most
 
-Most of this is one meeting. Until it happens, several things below cannot be
-finished, and two cannot even be tested.
-
 | | | status |
 |---|---|---|
-| D R | **Finish the Montonio account** and obtain **live API keys**. Dim signed in with a «Juhataja» account and took the keys on 23.09. They live in a password manager — never in a chat, Telegram or an e-mail — and reach Vercel only on the day of the live check (Stage 4). | done 23.09 |
-| R | **Activate «Refundable bank payments»** in live mode. It is a separate product and **cannot be activated in test mode at all** — their panel says so. «Bank payments» alone does not include refunds. This is why three refunds failed on 18.09; it was never our code and never the balance. **Only a Montonio account holding the «Juhataja» (manager) role or above can switch it on — Renat's account, not Dim's** (Montonio, in writing, 22.09.2026). It has a price: with refunds on, **payouts arrive one business day later and in the merchant's own company name.** **Requested 23.09 — the panel shows it «In review»; the live refund waits for «Completed».** | in review |
-| D | **Set up the live Partner System** (looked at 23.09). Bank links and cards ready. Payment links (10 €/month) and BLIK (zloty only) are not needed. Omniva, DPD, SmartPosti and International Shipping (Nova Post) are on; **Unisend is off although the checkout offers it** — turn it on: parcel-machine hand-over, default size S, SMS return code on. Return codes on for Omniva and DPD too. Add-ons: «Parcel delay and risk notifications» yes (it flags a parcel nobody collects, which costs the delivery twice); tracking page and tracking e-mails no — the shop sends its own letters. Sender address Mardi 1, where returns come back. | in progress |
-| D C | **Check the live account without money**: put the live pair in `.env.montonio-live` (gitignored), run `node --env-file=.env.montonio-live tools/montonio-live-check.mjs` and, for prices, `tools/fetch-montonio-tariffs.mjs --dry` with the same file; then delete the file. GET requests only. It says which payments and banks are on per country, whether every carrier the checkout offers can be booked, and whether the parcel webhook is registered. **Ran 23.09:** all 105 checkout routes bookable; 11 zloty-only Polish banks hidden by the checkout; the parcel webhook not yet registered. | done 23.09 |
-| D C | **Register the parcel webhook** — Montonio has no screen for it, API only: `node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/` — trailing slash, or the POST is lost in a 308. Registered 23.09 with three events (`shipment.registered`, `shipment.registrationFailed`, `shipment.statusUpdated`; src/data/golive.json «shipping-webhook»). Re-point it at rempireshop.com when the domain moves. | done 23.09 |
-| D | **Re-register the parcel webhook with the new event list (24.09).** Montonio's answer of 24.09.2026 gave the full enum — six events. The shop now subscribes four: the three above plus **`shipment.labelsCreated`** (`EVENTS` in `tools/montonio-webhook.mjs`); the two `labelFile.*` events are about label PDFs, which the shop makes synchronously, so they are not asked for (and are acknowledged and ignored if they ever arrive). Montonio has no «update webhook» call, so: `… tools/montonio-webhook.mjs list` (note the old id) → `… register https://…/api/shipping/notify/` → `… delete <old id>` → `list` again shows one webhook with four events. Between register and delete an event may arrive twice; the route is idempotent. **Not urgent**: the three registered events already cover everything that moves an order — and since 24.09 the daily cron re-asks Montonio (`GET /shipments/{id}`) for every shipment quiet for 12 hours and applies the answer as the webhook would (`syncStaleShipments`, `src/lib/shipping/shipment-sync.ts`), so a lost event costs at most a day — so this can wait for the domain move, which needs a `register` anyway — but it must be done then, with this list. Needs the live keys and Dim's OK; Claude did not run it. | to do |
-| ~~D~~ | ~~Enable the PIN service on the DPD carrier account.~~ ~~Set `defaultLockerSize` on the SmartPosti contract.~~ **Cancelled 22.09** — Montonio's written answer of 22.09.2026: a drop-off / door code works **only on a merchant's own direct contract with the carrier**, is arranged with that carrier's help, and is aimed at marketplace platforms; **Omniva has no such option at all.** A normal merchant — which this shop is — **scans the printed label at the parcel machine** and the parcel goes. There is nothing to switch on, and a **blank drop-off code line is the normal outcome, not a fault.** The `dropOffPin` plumbing stays as it is: the panel and the A4 slip print a code only when one actually arrives. | cancelled |
-| C | Rebuild the tariff mirror **with keys**, so locker prices come from the `parcelMachine` subtype instead of a subtype-blind row from an undocumented endpoint. `tools/fetch-montonio-tariffs.mjs` already prefers the right rate — it has only ever run without credentials. **Ran 23.09 with the live keys: the store's contract prices match the table in all 111 rows — nothing to overlay.** The checkout price is the calculator's price + 24 % VAT, rounded up to …,X9; the calculator shows prices without VAT. | done 23.09 |
-| C | Produce the pricing grid — country × weight band × locker size — and the break-even flat price per zone. Tool and `docs/delivery-pricing.md` being built now. Done as `docs/montonio-routes.md`. | done 22.09 |
-| R D | **Choose the flat price per zone** from that grid. Renat charges one price per country and absorbs the variance, so this is his margin decision, taken with real numbers instead of guesses. The tool names three candidates per country — break-even at a typical order, midpoint, and never-loses — and says which order size each one starts losing at. Cancelled: delivery follows Montonio's calculator — type, then carrier, each at its own price. | cancelled 22.09 |
+| D R | **Finish the Montonio account** and obtain **live API keys**. Dim signed in with a «Juhataja» account and took the keys on 23.09. They live in a password manager — never in a chat, Telegram or an e-mail. | done 23.09 |
+| R | **Activate «Refundable bank payments»** in live mode — a separate product that cannot be activated in test mode at all. **Montonio confirmed by e-mail on 23.09 that refunds are active** for Rempire Shop. Payouts now arrive the next business day, as one sum in the company's name — reconcile against Montonio's report. | done 23.09 |
+| D | **Set up the live Partner System.** Omniva, DPD, SmartPosti, Unisend, International Shipping (Nova Post) on; SMS return codes on Omniva, DPD and Unisend; Unisend parcel-machine hand-over, default size S; «Parcel delay and risk notifications» active. Checked in the live account 25.09. | done 25.09 |
+| D C | **Check the live account without money**: `node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs` and `tools/fetch-montonio-tariffs.mjs --dry` with the same file. GET requests only. All 105 checkout routes bookable; 11 zloty-only Polish banks hidden. (The file on disk is `.env.montonio-live.txt` — older lines here said `.env.montonio-live`.) | done 23.09 |
+| D C | **Register the parcel webhook** — API only: `node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/` — trailing slash, or the POST is lost in a 308. Re-registered 25.09 with the four events (`shipment.registered`, `shipment.registrationFailed`, `shipment.statusUpdated`, `shipment.labelsCreated`). Moving it to rempireshop.com is step 8 of the day. | done 25.09 |
+| ~~D~~ | ~~Enable the PIN service on the DPD carrier account; `defaultLockerSize` on SmartPosti.~~ **Cancelled 22.09** — Montonio, in writing: a drop-off code works only on a merchant's own direct carrier contract; a normal merchant scans the printed label at the parcel machine. A blank drop-off code line is normal. | cancelled |
+| C | Rebuild the tariff mirror **with keys**. Ran 23.09 with the live keys: the contract prices match the table in all 111 rows. The checkout price is the calculator's price + 24 % VAT, rounded up to …,X9. | done 23.09 |
+| C | The pricing grid — `docs/montonio-routes.md`. The flat price per zone was cancelled 22.09: delivery follows Montonio's calculator. | done 22.09 |
+| D | **The live keys and `MONTONIO_ENV=live` in Vercel → Production**, together, and a redeploy. From then on every order on staging is real money. | done 26.09 |
+| D C | **The live hour on staging**, orders R-100095…R-100098: bank link, card and Google Pay settled; a cancelled payment; a full and a partial refund sent; a real DPD parcel-machine label (R-100098). Not proven live: a refund reaching the customer and «Деньги возвращены», a carrier refusal, Omniva / SmartPosti / Unisend / Nova Post, a courier booking, the «Отправлен» letter — Stage 5. | done 26.09 |
+| D | **Ask Montonio how a refund is funded after the daily payout** (readiness B3). Montonio pays refunds out of the store's balance; after the payout it can be empty → PENDING (INSUFFICIENT_FUNDS) → cancelled after 10 days. `docs/payments.md` says a same-day refund is refused — the live hour disproved that. Fallback until they answer: a bank transfer to the customer and «возврат» by hand. Does not hold the launch. | to ask |
 
 ---
 
@@ -61,34 +63,24 @@ finished, and two cannot even be tested.
 
 | | | status |
 |---|---|---|
-| ~~R~~ | ~~Weigh the products.~~ **Cancelled 18.09** — the owner's decision, and the reasoning is worth keeping. Montonio bills `max(actualWeight, volumetricWeight)` and volumetric is dimensions ÷ 5000, so a 30×30×30 carton is 5.4 kg *whatever is inside it*. At this shop's parcel sizes the declared box is what gets paid for, not the contents. A small default carton captures nearly all of the saving with none of the work, and the rare heavy order is an accepted loss taken deliberately in exchange for one stable price. Nothing waits on this any more. **24.09.2026:** Montonio answered that the price is based on the **real** weight for now (the volumetric divisor, 4000, is not applied to the price). The decision stands — every label declares one weight, 0.9 kg, the first tier up to 1 kg — and the box now matters only for a DPD locker abroad (category XS) and the locker door. `MONTONIO_PRICES_VOLUMETRIC` in `src/lib/shipping/parcel.ts` is the switch if that changes. | cancelled |
-| R | ~~Which Kevin.Murphy sprays are pressurised aerosols.~~ **Closed by Dim, 19.09.2026: «forget about it, it's fine».** Nothing in the shop asks the question any more. | closed |
-| R | Whether to give **Shopify collaborator access** to import existing products and customers. Optional. If it happens: **imported customers arrive with no marketing consent** (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in. | undecided |
+| ~~R~~ | ~~Weigh the products.~~ **Cancelled 18.09** — every label declares one weight, 0.9 kg; Montonio prices by the real weight (24.09). `MONTONIO_PRICES_VOLUMETRIC` in `src/lib/shipping/parcel.ts` is the switch if that changes. | cancelled |
+| R | ~~Which Kevin.Murphy sprays are pressurised aerosols.~~ **Closed by Dim, 19.09.2026.** | closed |
+| R | Whether to give **Shopify collaborator access** to import existing products and customers. Optional. **Imported customers arrive with no marketing consent** (Dim, 18.09) — which is not the same as opting them out. | undecided |
 
 ---
 
 ## Stage 2b — Google Shopping, which carries free traffic
 
-Found on 19.09.2026 and written down nowhere until then. Merchant Center
-account `5819586565` («Rempire Tower Shop») is **live and earning**: 175 clicks
-in 28 days from free listings, ad spend €0.00, 1.63K approved / 325 limited /
-17 not approved. Every product in it is fed by **six `Shopify App API`
-sources** of 328 products each — Estonia, Latvia, Lithuania and Finland in
-English, a Russian one for Belarus/Georgia/Kazakhstan+3, and one covering 82
-more countries. The overview's "1.97K products" is the same 328 items counted
-once per market. "Found by Google", crawling `rempireshop.com`, has found **2**.
-
-So the day Shopify is switched off, those six feeds stop updating, the listings
-go stale and drop, and the free traffic goes with them. This is a go-live
-dependency, not a later job.
+Merchant Center account `5819586565` («Rempire Tower Shop») is **live and
+earning** — 175 free clicks in 28 days, every product fed by **six `Shopify App
+API` sources**. The day Shopify is switched off those feeds stop updating, so
+this is a go-live dependency, not a later job.
 
 | | | status |
 |---|---|---|
-| D R | **Where `rempireshop.com` points today, and which domain the account has claimed.** Decides whether the cutover is a feed swap or also a re-verification. Nothing else here can be planned until it is answered. | blocking |
-| D | **Build a feed from the shop's own catalogue and add it beside the Shopify ones.** **Built 23.09:** three live feeds, `/feed/google-en.xml`, `-et.xml` and `-ru.xml`, answered by the shop on every fetch (`src/lib/merchant-feed.ts`) — every size its own item at the checkout's price, stock per size, hidden products left out, links always on rempireshop.com. The old `tools/build-merchant-feed.mjs` and its static file are gone. Left: on the switch day add them in Merchant Center beside the Shopify ones — `docs/merchant-feed.md`, steps A–F. The item ids are new, so Google reviews every item (1–3 days): beside, not instead. | built, not submitted |
-| D | **Rewrite the shipping policies from the real Montonio prices.** They are Shopify's today — a flat €15.00, 4–12 days, one per country. **Covered by the feed since 23.09:** every item carries its own `g:shipping` per country — the cheapest locker and courier the checkout charges, 0 € from the free-delivery threshold — and an item's own shipping outranks the account's policies. The Shopify policies are deleted once the Shopify sources are (`docs/merchant-feed.md`, step C). | built, not submitted |
-| D | Remove the Shopify feeds, **only after ours has run for a day**. The shop has ~224 products against Shopify's 328; worth seeing in advance which listings would vanish. | after |
-| D | A week after the switch, compare the clicks with the 175 they were. A fall is nearly always products failing review, or feed shipping disagreeing with the page. | after |
+| D R | Where `rempireshop.com` points and which domain the account has claimed: Shopify today; claimed by a DNS TXT record (Cloudflare) and meta tags the shop now carries itself. The switch is a feed swap, not a re-verification. | done 23.09 |
+| D | **The shop's own feeds**: `/feed/google-en.xml`, `-et.xml`, `-ru.xml`, built live on every fetch (`src/lib/merchant-feed.ts`). Adding them in Merchant Center needs rempireshop.com to serve the new shop — **step 11 of the day**, not a phase-A item. | built 23.09 |
+| D | **Shipping in Merchant Center** — covered by the feed: every item carries its own `g:shipping`, which outranks the account's flat €15 policies. The Shopify policies go with the Shopify sources (Stage 5). | covered 23.09 |
 
 ---
 
@@ -96,57 +88,131 @@ dependency, not a later job.
 
 | | | status |
 |---|---|---|
-| C | The eight answered go-live decisions. Four shipping ones are being built now: declare a **small** default carton and read the required-dimensions flag, choose locker size at label time with an automated default, open the rest of Europe as an editable list, and show a refused registration instead of reporting success. No weight modelling — decided against on 18.09, see Stage 2. The per-shipment override is the safety valve and has to be one tap. All four built 18–19.09; since 23.09 the carton is 25 × 18 × 8 and the default locker S (migration 203). | done 19.09 |
-| C | ~~The four payment ones~~ **Done, night of 19.09**: a short-paid order is held rather than marked paid (`payment.held`, `shortPayment` in `src/lib/payments/apply.ts`); both webhook checks tightened and a mismatch re-asks Montonio through `GET /orders/:uuid`; a nightly sweep picks up orders stuck unpaid because their notification never arrived (`src/lib/payments/reconcile.ts`). On 19.09 a held order also became findable from the list — its own badge, a «Придержаны» chip and a row in «Сделать сегодня». | done |
-| C | Harden every path the sandbox cannot exercise, and write `docs/montonio-untested.md` — the honest inventory of what has never run and what must be checked by hand in the first live hour. | done |
-| C | ~~Fix the **13 end-to-end failures**~~ **Done 18.09**, merge `0fbd940` — «thirteen red browser probes, two real bugs»; the other eleven were probes that had fallen behind the shop. The unit suite is 4400+ and green. The browser suite has not been run since: one more run belongs in «Final pass» below. | done |
-| C | The go-live reset tool and `docs/go-live-reset.md`. Dry run by default, explicit confirmation to clear, asserts the keep-list survived. Tool, doc and `tests/go-live-reset.test.ts`. | done 19.09 |
-| D C | ~~The Google Shopping feed is a Merchant Center risk and must not be submitted as it stands.~~ Found 18.09 by the SEO audit (staging host, file stock only, not in the build); Dim, 19.09.2026: not that one. **Replaced 23.09** by the live feeds above — stock from the overrides and the counted shelf, links on the live domain, nothing to run by hand. Nothing is submitted before the switch. | done 23.09 |
-| C | Replace `public/shop/legal.js` — the fallback privacy policy still names **Shopify** as the data processor. Unreachable today, embarrassing on a live shop. | to do |
-| C | ~~Correct the panel's «проверьте баланс в его панели»~~ **Done 18.09.** By Montonio's own documentation a refund with no money behind it is answered `200 PENDING`, never an HTTP error — so the panel was sending the owner to look at the one thing it could never be. Each documented refusal now carries three sentences of its own (`src/lib/montonio-problems.ts`), and a test stops any of them mentioning the balance again. | done |
-| C | Final pass: regenerate the bundle and the prerender, full suite, push, and confirm `index.html` carries no `localhost:` and exactly two `boot.js` references. | at the end |
+| C | The eight answered go-live decisions (four shipping, four payment). Built 18–19.09; carton 25 × 18 × 8, default locker S (migration 203). | done 19.09 |
+| C | Harden every path the sandbox cannot exercise, and `docs/montonio-untested.md`. | done |
+| C | The 13 end-to-end failures — merge `0fbd940`. | done 18.09 |
+| C | The go-live reset tool and `docs/go-live-reset.md`. **27.09:** order numbers continue after the highest one instead of restarting at R-100001 (the live hour's numbers are already in the live Montonio account); the command carries `--env-file=.env.railway.txt` and says which line is missing when Railway's certificate cannot be verified. | done |
+| C | **`public/shop/legal.js`** — it held the old Shopify store's policies, naming Shopify as the data processor 22 times, on every page. It is not dead weight (the router's list of policy pages, the Russian titles ET/EN translate, the last-resort text), so it was replaced: now the shop's own Russian pages word for word, written from `legal.ru.js` by `tools/sync-legal-fallback.mjs`, a test keeps the two identical. | done 27.09 |
+| C | **The Shopify stock import tool** — `tools/import-shopify-stock.mjs`, reading Shopify's own inventory export; the two merch decisions of 26.09 in `tools/shopify-stock-owner-rows.json`. On the 26.09 capture: 322 rows, the same as the draft. | done 27.09 |
+| C | ~~«Проверьте баланс в его панели»~~ — removed 18.09; each documented refusal has its own sentences (`src/lib/montonio-problems.ts`). | done |
+| C | **Final pass** — T-1, below. | the day before |
 
 ---
 
-## Stage 4 — the switches, the day itself
+## Stage 3b — the day before (T-1)
 
-In order. Several of these are only correct **together**.
+Everything here can be done while rempireshop.com is still on Shopify, which is
+why it is phase A on `/golive/`.
 
 | | | status |
 |---|---|---|
-| D | Set the live Montonio keys **and** the environment flag together. Half of this pair is worse than neither. Vercel → Production: `MONTONIO_ACCESS_KEY`, `MONTONIO_SECRET_KEY`, `MONTONIO_ENV=live`, then redeploy. Keep the sandbox pair for later checks. **Before this step, finish every /test check that pays in the sandbox** — after it, every order on staging is real money. | to do |
-| D | Set `PUBLIC_BASE_URL`. Without it the prerender writes live URLs carrying `noindex` — the pages say «noindex, nofollow» today and `robots.txt` is the staging policy. **Not before the domain moves**: while the live keys are tried on diipsolutions, leave it unset — set to rempireshop.com while that domain is still on Shopify, it sends Montonio's payment confirmations to Shopify and orders never turn paid. | to do |
-| D | Set `SESSION_SECRET`. It is now load-bearing for the order-status token that recovers an abandoned basket. Unset, it **fails closed silently**: basket recovery simply never works and nothing says so. Set: the panel login refuses without it, and the panel works on staging — same Vercel project. | done |
-| C | Regenerate and deploy so the pages carry the production robots policy. Must happen **after** `PUBLIC_BASE_URL` is set, not before. | after D |
-| D | **Run the reset tool** — dry run first, read it, then confirm. | after the snapshot |
-| D | Switch on the unpaid-payment flow if wanted. It cancels after 7 days and releases the historic backlog **silently**, which is the behaviour chosen on 17.09. It is off today. | optional |
-| D | Point the domain at Vercel — DNS is at **ASCIO**. | to do |
-| D | Verify the function region is still `fra1`. Set in `vercel.json` and in the dashboard; they agree. | done 14.09 |
-| D | Confirm the two cron schedules in `vercel.json` are what you want running against real customers. | to check |
+| C | **Final pass, one push**: the whole unit suite and the e2e suite; a local production prerender check — `PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check` (not committed; put the generated files back); `index.html` has no `localhost:` and exactly two `boot.js` references. **The same push removes the footer «Админка» link** (`.ftr__admin` in `public/shop2/app.js`) — Renat is told first and uses `/admin`. | to do |
+| D R | **Delete everything made during the checks.** The reset keeps own products, product edits, promo codes, sets, blog posts, newsletters and settings, so by hand: the test products (`c-davienness-nelya-shampun` «50 кг» €500, `c-davines-cheap-price`, `c-davines-ochen-klassnyj-shampun` «Очень классный» €10, «Claude test товар», the €1 product `c-rempire-testovyj-platezh-ne-prodaetsya`); the hoodie's test prices (`c-rempire-hoodie` XXS €1, XXL €100); test promo codes (CLAUDE10 / CLAUDETEST10-style) and any 100 % code; test sets, blog posts and newsletter drafts. Gift cards go only with `--gift-cards-are-test-cards` — check them in the dry run. Then `/feed/google-en.xml` on staging shows none of it. | to do |
+| D R | **The last meeting with Renat.** 1) Which automatic letters go on right after the reset: unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. 2) How courier parcels leave — Montonio cannot order a pickup by API: a recurring pickup per carrier in the Montonio account, or a drop-off. 3) How a refund is paid after the payout (Stage 1, last row). 4) What Renat must know: a full refund returns every line to stock (write off the unsellable by hand), a partial one moves neither stock nor points; the footer link goes, sign in at `rempireshop.com/admin`. | to do |
+| D | **Close out the live-hour orders** (R-100095…R-100098 are real money; the reset deletes them and later refund notices for them are ignored): the refunds completed in Montonio; Montonio's report kept for the accountant; the DPD parcel 3888e013 cancelled if never handed over. Renat presses nothing on old orders — «Создать этикетку» on a sandbox-paid order books a real parcel. The sandbox refunds turning «overdue» ~29.09 are expected until the reset. | to do |
+| D | **Rehearse the reset**: `.env.railway.txt` (two lines), one `db-backup`, a dry run — `node --env-file=.env.railway.txt tools/go-live-reset.mjs`. | to do |
+| D C | **Rehearse the stock import**: Shopify → Products → Inventory → Export (all variants, CSV); `node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu` with `RMP_ADMIN_COOKIE`. Writes nothing. «NEED A DECISION» should be empty. | to do |
+| D | **Vercel environment**: `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_TO`, `SESSION_SECRET` (never rotate), `DATABASE_SSL_*`, `MONTONIO_ENV=live` + the live pair; `PAYMENT_PROVIDER` unset. `PUBLIC_BASE_URL` is the staging host today and changes only on the day. Crons (`vercel.json`): flows `0 7 * * *` UTC = 10:00 Tallinn (09:00 after 25.10), events retention `30 3 * * *`. Region `fra1`. | to do |
+| D | **Add `rempireshop.com` and `www.rempireshop.com` in Vercel** (Settings → Domains): www → 308 → apex; apex is the address `PUBLIC_BASE_URL` will name, so Montonio's notices arrive with no redirect. `rempireshop.diipsolutions.eu` stays attached with **no** redirect. Write down the A and CNAME values Vercel asks for. «Invalid configuration» until DNS moves is normal. | to do |
+| D | **DNS at Cloudflare** (not ASCIO — that is only the registrar): TTL 300 on `A @` and `CNAME www`; note the rollback values `A @ 23.227.38.65`, `CNAME www shops.myshopify.com`. The keep-list, untouched on the day: `TXT google-site-verification`, `MX route1–3.mx.cloudflare.net` + SPF, `resend._domainkey`, `send` (MX + TXT) and `rsend`, `_dmarc`, `img.rempireshop.com` (R2 photos). | to do |
+| D | **Vercel plan**: Hobby forbids commercial use (`docs/HOSTING.md`). **Decided 27.09.2026 (Dim): stay on Hobby for now**; revisit if Vercel writes about commercial use, a third cron is needed, the functions hit Hobby's limits, or a second person needs the project. | decided |
 
 ---
 
-## Stage 5 — the first hour live
+## Stage 4 — the day, in order
+
+Tuesday to Thursday, from about 08:30 Tallinn time. **In order** — several steps
+are only correct together. On `/golive/` each is its own numbered row.
+
+1. **Backup.** `node --env-file=.env.railway.txt tools/db-backup.mjs` — a ✓ line
+   and dozens of tables. No ✓ — stop.
+2. **Reset — before 10:00 or after 11:00 Tallinn** (the flows cron fires in the
+   10:00 hour; the 09:00 hour after 25.10). Dry run, read it, paste the printed
+   `--clear --confirm "…"` line — **without `--stock`** (the 153 bound barcodes
+   stay; step 4 sets the counts). Dry run again: `0` everywhere under CLEAR.
+   Open «Подключения». Order numbers continue after the highest one.
+   `docs/go-live-reset.md`.
+3. **Automatic letters on** — exactly what the meeting with Renat agreed
+   («Маркетинг → Письма»), never before the reset.
+4. **Stock from Shopify — the last thing before DNS.** A fresh export
+   (Shopify → Products → Inventory → Export → all variants, CSV), then:
+
+   ```
+   RMP_ADMIN_COOKIE=<rmp_admin cookie of a signed-in panel> \
+     node tools/import-shopify-stock.mjs --csv <export.csv> --base https://rempireshop.diipsolutions.eu
+   … the same --apply --confirm ИМПОРТ
+   ```
+
+   (PowerShell: `$env:RMP_ADMIN_COOKIE="…"` first.) The dry run prints
+   before → after per size, what needs a decision, what has no shelf row and
+   what gets overwritten; `--apply` writes each count absolutely through
+   `POST /api/admin/inventory/moves/` («ручная правка», «Импорт из Shopify»),
+   one idempotency key per row — a second run replays, it does not write
+   twice. Formats read: Shopify's inventory export with a row per location
+   (`Location`, `Available`, `On hand`, with or without «(not editable)» /
+   «(current)»; «On hand (new)» ignored) or the older one with a column per
+   location (available only). Hand decisions: `tools/shopify-stock-owner-rows.json`
+   (`--owner-rows <file>` for another). «мало» only on the last unit
+   (threshold 1, migration 215). After the reset because the reset empties the
+   test «Сообщить, когда появится» requests. Shopify keeps selling until DNS:
+   an order there after the export is written off by hand (step 13).
+5. **`PUBLIC_BASE_URL=https://rempireshop.com` → Redeploy → READY.** That
+   redeploy is the «regenerate»: canonicals, robots and sitemap for the live
+   domain. **No orders on staging from here** — Montonio's notice and return
+   addresses already name rempireshop.com, which is still Shopify.
+6. **DNS at once**: `A @` and `CNAME www` to Vercel's values, «DNS only» (grey
+   cloud); nothing else touched. Verify: `https://rempireshop.com/shop2/` 200
+   with no `x-robots-tag`; `www` → 308 → apex; `/robots.txt` and `/sitemap.xml`
+   on rempireshop.com; one `/products/…` → 301; `/feed/google-en.xml` 200; a
+   POST to `/api/payments/notify/` answers **400, not 308**.
+7. **Smoke**: `npm run smoke -- https://rempireshop.com`.
+8. **Parcel webhook**: `node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs list`
+   → `… register https://rempireshop.com/api/shipping/notify/` → «Подключения»
+   green → `… delete <old id>` → `list` shows one webhook, four events.
+9. **Renat** signs in at `rempireshop.com/admin` (the session is per address),
+   adds it to the home screen again, switches notifications on there.
+10. **First real order** on rempireshop.com — bank link, «Самовывоз в салоне»;
+    refund it the next business day and see «Деньги возвращены» arrive.
+11. **Merchant Center**, `docs/merchant-feed.md` step B: our three feeds beside
+    the Shopify sources; the Shopify sources untouched.
+12. **Search Console**: submit `https://rempireshop.com/sitemap.xml`, request
+    indexing.
+13. **Shopify orders** at 12:00, 18:00 and the next morning (72 hours in all) —
+    fulfil and write off by hand; Shopify's domain untouched until Merchant
+    step E. **At the end of the day delete `.env.railway.txt` and
+    `.env.montonio-live.txt`.**
+
+**Rollbacks.** The database: `pg_restore` from step 1 (`docs/go-live-reset.md`,
+«Если всё-таки надо откатиться»). The build: `PUBLIC_BASE_URL` back to
+`https://rempireshop.diipsolutions.eu` + Redeploy, or Vercel's Instant Rollback.
+DNS: `A @ 23.227.38.65`, `CNAME www shops.myshopify.com`. The parcel webhook:
+register the staging address again.
+
+---
+
+## Stage 5 — after the switch
 
 | | | status |
 |---|---|---|
-| D | Work through `docs/montonio-untested.md` by hand. It exists because these paths **cannot** be proved in a sandbox: a real refund, a carrier actually refusing a registration, a real label PDF, phone and address validation the sandbox skips entirely. | after cutover |
-| D | Place one real order, end to end, and refund it. This is the first time refunds will ever have run. | after cutover |
-| C | Smoke the live site and compare against staging. | after cutover |
-| D | Confirm something tells you when a payment webhook fails. | to check |
+| D | **What the live hour did not prove** (`docs/montonio-untested.md`): a refund reaching the customer and «Деньги возвращены»; the «Отправлен» letter on the first real parcel; a carrier refusal and «Отправить заново»; Omniva, SmartPosti, Unisend, Nova Post, a courier booking, a non-DPD label. Each on the first real order where it comes up. | after the switch |
+| D C | **Every morning**, until something reports failures by itself: «Обзор» and «Подключения», and the flows cron's line in the Vercel log (no `CRON_SECRET` = a silent 503). Silence looks exactly like «no orders». | daily |
+| D | **Keep the staging address** attached, no redirect, at least 6 weeks: notices for older orders, Renat's home-screen app, old push subscriptions. | 6 weeks |
+| D | **Remove the Shopify feeds and shipping policies** — only once ours are «Approved» (`docs/merchant-feed.md`, C–E). | after review |
+| D | **A week later compare the clicks** with the 175 they were (`docs/merchant-feed.md`, F). | a week later |
+| D | **A database copy once a week** — Railway Hobby makes none (`tools/db-backup.mjs`), or Railway Pro. | weekly |
+| D R | **Hand the services' billing to Renat** in the first month (`docs/renat-services.md`): Railway on the company card (an unpaid Railway bill stops the shop), OpenAI to the shop's account with a ~$10 limit and a new `OPENAI_API_KEY` + Redeploy, Zone.ee renewal date and registrant Rempire Store OÜ, Montonio invoices and delay e-mails, Shopify orders and customers exported before the plan is cancelled, the Telegram bot handed over through BotFather. | first month |
 
 ---
 
 ## Still undecided, not blocking
 
-- A hidden **catalogue** product now drops out of «Мало»/«Нет», the «Склад» tab
-  count and the assistant's low-stock answer, where before it nagged. Deliberate,
-  and reversible in about five lines if Renat disagrees.
-- **The second Fable 5.1 pass.** The first was done on 18.09: a regression
-  review of the diff, 56 findings in `docs/audit-2026-09-18-findings.md`, more
-  than forty of them closed — including the only serious one, a double refund on
-  a mixed tender. The second, the go-live readiness pass, **moves to after
-  launch week** (Dim, 19.09). It does not block the launch.
+- A hidden **catalogue** product lives only under «Скрытые» (Dim, 26.09.2026).
+- **The go-live readiness pass** was done on 27.09.2026 (Opus 5.5, Dim's
+  choice): `docs/audit-2026-09-27-readiness.md`. The first pass (18.09, 56
+  findings, `docs/audit-2026-09-18-findings.md`) has more than forty closed.
+- After launch: the Estonian subsection words in the section titles
+  (Search Console, 21.09).
+
 ---
 
 ## What is already done, so nobody redoes it
@@ -154,6 +220,7 @@ In order. Several of these are only correct **together**.
 The function region moved to Frankfurt (14.09). Twenty owner decisions from the
 audit are built and merged (17.09). The whole of round 23 is merged and deployed:
 the scanner, per-size stock, the blog cover, three panel bugs, both Montonio
-audits, and two chip fixes — 171 test files, 3834 tests, green, at `df09a8e`.
-Every shipping webhook was being silently discarded and now is not. The phone
-country code was `372` for 28 of 32 destinations and now is not.
+audits, and two chip fixes. Every shipping webhook was being silently discarded
+and now is not. The phone country code was `372` for 28 of 32 destinations and
+now is not. The live hour of 26.09 took real money by bank link, card and
+Google Pay on the staging shop.

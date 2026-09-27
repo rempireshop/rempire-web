@@ -2,9 +2,11 @@
  * GET /sitemap-custom.xml — what exists only in the database and so is not
  * in the static sitemap the build wrote:
  *
- *   · the owner's own products (custom_products, ids `c-…`), every active
- *     one in the three languages with its hreflang cluster — the same rows
- *     tools/prerender-shop2.mjs writes for the catalogue;
+ *   · the owner's own products (custom_products, ids `c-…`), every one that
+ *     is active AND not hidden with «Показывать в магазине»
+ *     (listCustomSitemapRows()), in the three languages with its hreflang
+ *     cluster — the same rows tools/prerender-shop2.mjs writes for the
+ *     catalogue;
  *   · the blog posts published AFTER the last build — the prerender records
  *     the slugs it wrote pages for in src/data/blog.prerendered.json, and
  *     the published posts not in that list are named here (plus the /blog/

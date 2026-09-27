@@ -2,12 +2,12 @@
  * What the LIVE Montonio account can actually do — asked before a customer
  * can pay, with GET requests only. No order, no shipment, no refund, no money.
  *
- *   1. Put the live pair in `.env.montonio-live` in this folder (`.env*` is
+ *   1. Put the live pair in `.env.montonio-live.txt` in this folder (`.env*` is
  *      gitignored, so it cannot be committed):
  *        MONTONIO_ACCESS_KEY=…
  *        MONTONIO_SECRET_KEY=…
  *        MONTONIO_ENV=live
- *   2. node --env-file=.env.montonio-live tools/montonio-live-check.mjs
+ *   2. node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs
  *   3. Delete the file. The keys belong in Vercel and a password manager.
  *
  * It answers four questions the sandbox cannot (docs/montonio-untested.md):
@@ -25,7 +25,7 @@
  *     events?
  *
  * Prices are a separate, equally read-only run with the same file:
- *   node --env-file=.env.montonio-live tools/fetch-montonio-tariffs.mjs --dry
+ *   node --env-file=.env.montonio-live.txt tools/fetch-montonio-tariffs.mjs --dry
  *
  * Exit code 1 when something the shop relies on is missing, 0 otherwise. The
  * access key is masked in everything printed.
@@ -202,7 +202,7 @@ function why(r) {
 async function main() {
   const cfg = config();
   if (!cfg) {
-    console.error("No MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY. Run:\n  node --env-file=.env.montonio-live tools/montonio-live-check.mjs");
+    console.error("No MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY. Run:\n  node --env-file=.env.montonio-live.txt tools/montonio-live-check.mjs");
     process.exit(2);
   }
   const mask = (s) => String(s).split(cfg.accessKey).join("***");
@@ -287,7 +287,7 @@ async function main() {
   }
 
   say(`\n${problems.length ? `✗ ${problems.length} to fix: ${problems.join("; ")}` : "✓ nothing missing"}`);
-  say("Prices: node --env-file=.env.montonio-live tools/fetch-montonio-tariffs.mjs --dry");
+  say("Prices: node --env-file=.env.montonio-live.txt tools/fetch-montonio-tariffs.mjs --dry");
   process.exit(problems.length ? 1 : 0);
 }
 

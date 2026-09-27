@@ -1,24 +1,24 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-09-18",
+  "asOf": "2026-09-27",
   "phases": [
     {
       "id": "a",
-      "name": "Шаг A — всё на diipsolutions",
-      "note": "Всё, что делается и проверяется на стенде. Пока здесь не закрыт каждый обязательный пункт, к шагу B переходить нельзя.",
+      "name": "Шаг A — до дня запуска, всё на diipsolutions",
+      "note": "Всё, что делается и проверяется на стенде, — включая то, что делается накануне. Пока здесь не закрыт каждый обязательный пункт, шаг B не открывается.",
       "en": {
-        "name": "Phase A — everything on diipsolutions",
-        "note": "Everything that is done and proved on staging. Until every blocking item here is done, phase B does not start."
+        "name": "Phase A — before the day, everything on diipsolutions",
+        "note": "Everything that is done and proved on staging — including what is done the day before. Until every blocking item here is done, phase B stays shut."
       }
     },
     {
       "id": "b",
-      "name": "Шаг B — переключение на живой домен",
-      "note": "День запуска и первый живой час. Открывается сам, когда закрыт шаг A.",
+      "name": "Шаг B — день запуска и первые недели",
+      "note": "Переключение на rempireshop.com строго по порядку, потом — что смотреть в первые дни. Открывается сам, когда закрыт шаг A.",
       "en": {
-        "name": "Phase B — the switch to the live domain",
-        "note": "The day of the cutover and the first hour live. It opens by itself once phase A is closed."
+        "name": "Phase B — the day of the switch, and the first weeks",
+        "note": "The switch to rempireshop.com, strictly in order, then what to watch in the first days. It opens by itself once phase A is closed."
       }
     }
   ],
@@ -57,10 +57,10 @@
       "id": "google",
       "phase": "a",
       "name": "Google Shopping — на нём висит бесплатный трафик",
-      "note": "Merchant Center живой и приносит переходы, но все товары в нём приходят из Shopify. Выключить Shopify, не подготовив это, значит выключить и их.",
+      "note": "Merchant Center живой и приносит переходы, но все товары в нём приходят из Shopify. Здесь — что готово заранее; сами фиды добавляются в день запуска, после DNS (шаг B).",
       "en": {
         "name": "Google Shopping, which carries free traffic",
-        "note": "Merchant Center is live and earning, but every product in it is fed by Shopify. Switching Shopify off without preparing this switches the traffic off too."
+        "note": "Merchant Center is live and earning, but every product in it is fed by Shopify. This is what is ready in advance; the feeds themselves are added on the day, after DNS (phase B)."
       }
     },
     {
@@ -71,6 +71,16 @@
       "en": {
         "name": "The code, all of it Claude's",
         "note": "Dim does not come in here. It shows what is being built and what is queued behind it."
+      }
+    },
+    {
+      "id": "t1",
+      "phase": "a",
+      "name": "Накануне — T-1",
+      "note": "За день до запуска. Всё здесь можно сделать и проверить, пока rempireshop.com ещё на Shopify, — поэтому это шаг A, а не день запуска.",
+      "en": {
+        "name": "The day before — T-1",
+        "note": "The day before the launch. Everything here can be done and checked while rempireshop.com is still on Shopify — which is why it is phase A and not the day itself."
       }
     },
     {
@@ -86,21 +96,21 @@
     {
       "id": "switches",
       "phase": "b",
-      "name": "Переключатели — в день запуска",
-      "note": "По порядку. Несколько из них правильны только вместе.",
+      "name": "День запуска — по порядку",
+      "note": "Вторник–четверг, с ~08:30 по Таллинну. Шаги строго по порядку: несколько из них правильны только вместе. Откат — в docs/go-live.md.",
       "en": {
-        "name": "The switches, the day itself",
-        "note": "In order. Several of these are only correct together."
+        "name": "The day — in order",
+        "note": "Tuesday to Thursday, from about 08:30 Tallinn time. Strictly in order: several steps are only correct together. Rollbacks are in docs/go-live.md."
       }
     },
     {
-      "id": "firsthour",
+      "id": "after",
       "phase": "b",
-      "name": "Первый живой час",
-      "note": "То, что нельзя доказать нигде, кроме живого магазина.",
+      "name": "После запуска — первые дни и недели",
+      "note": "То, что нельзя доказать нигде, кроме живого магазина, и то, что делается, когда он уже работает.",
       "en": {
-        "name": "The first hour live",
-        "note": "What cannot be proved anywhere but on the live shop."
+        "name": "After the switch — the first days and weeks",
+        "note": "What cannot be proved anywhere but on the live shop, and what is done once it is running."
       }
     }
   ],
@@ -115,10 +125,10 @@
       "blocking": true,
       "outside": "Railway",
       "title": "Снять копию базы и убедиться, что она читается",
-      "detail": "Первая копия снята 23.09.2026: 0,23 МБ, 30 таблиц; восстановлена в чистую базу — число строк во всех 30 совпало с живой (61 заказ, 6 клиентов). Вторая — утром запуска, шаг 1 чистки. Кнопки на Railway нет: вкладка Backups работает только на плане Pro (23.09.2026). Копия — файл: Railway → Postgres → Variables → DATABASE_PUBLIC_URL в файл .env.railway.txt строкой DATABASE_URL=…, затем node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump в Docker; Docker Desktop должен быть запущен). Файл ложится в домашнюю папку, rempire-backups, и сразу читается обратно; восстановление проверено на пробной базе. Потом .env.railway.txt удалить. Один раз сейчас — для проверки, второй — утром запуска перед чисткой.",
+      "detail": "Первая копия снята 23.09.2026: 0,23 МБ, 30 таблиц; восстановлена в чистую базу — число строк во всех 30 совпало с живой (61 заказ, 6 клиентов). Кнопки на Railway нет: вкладка Backups работает только на плане Pro (23.09.2026). Копия — файл: Railway → Postgres → Variables → DATABASE_PUBLIC_URL в файл .env.railway.txt двумя строками — DATABASE_URL=… и DATABASE_SSL_NO_VERIFY=1 (вторая нужна инструменту чистки: сертификат Railway подписан его собственным центром), затем node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump в Docker; Docker Desktop должен быть запущен). Файл ложится в домашнюю папку, rempire-backups, и сразу читается обратно; восстановление проверено на пробной базе. Файл .env.railway.txt держать до вечера дня запуска и удалить в конце дня. Ещё одна копия — накануне (пункт «Репетиция чистки»), и последняя — утром запуска, шаг 1 дня.",
       "en": {
         "title": "Take a copy of the database and verify it reads back",
-        "detail": "First copy taken 23.09.2026: 0.23 MB, 30 tables; restored into a clean database — row counts matched the live one in all 30 (61 orders, 6 customers). The second is on launch morning, step 1 of the clean-up. Railway has no button for it: the Backups tab works only on the Pro plan (23.09.2026). The copy is a file: Railway → Postgres → Variables → DATABASE_PUBLIC_URL into .env.railway.txt as DATABASE_URL=…, then node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump in Docker; Docker Desktop must be running). The file lands in the home folder, rempire-backups, and is read back at once; restoring was proven on a test database. Then delete .env.railway.txt. Once now as a check, and again on launch morning before the clean-up."
+        "detail": "First copy taken 23.09.2026: 0.23 MB, 30 tables; restored into a clean database — row counts matched the live one in all 30 (61 orders, 6 customers). Railway has no button for it: the Backups tab works only on the Pro plan (23.09.2026). The copy is a file: Railway → Postgres → Variables → DATABASE_PUBLIC_URL into .env.railway.txt as two lines — DATABASE_URL=… and DATABASE_SSL_NO_VERIFY=1 (the reset tool needs the second: Railway signs its certificate with its own CA), then node --env-file=.env.railway.txt tools/db-backup.mjs (pg_dump in Docker; Docker Desktop must be running). The file lands in the home folder, rempire-backups, and is read back at once; restoring was proven on a test database. Keep .env.railway.txt until the evening of launch day and delete it at the end of the day. One more copy the day before (the item «Rehearse the reset»), and the last on launch morning, step 1 of the day."
       }
     },
     {
@@ -223,10 +233,10 @@
         "montonio-keys"
       ],
       "title": "Зарегистрировать вебхук посылок",
-      "detail": "Сделано 23.09.2026: зарегистрирован на https://rempireshop.diipsolutions.eu/api/shipping/notify/, три события; проверка боевого аккаунта после этого — всё зелёное. Экрана для этого у Montonio нет — только API (их руководство по вебхукам, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. Подписывает shipment.registered, shipment.registrationFailed и shipment.statusUpdated; list показывает, что стоит. Без него посылки доходят, а заказы сами не закрываются. При переезде домена: register на rempireshop.com, потом delete старого.",
+      "detail": "Сделано 23.09.2026: зарегистрирован на https://rempireshop.diipsolutions.eu/api/shipping/notify/, три события; проверка боевого аккаунта после этого — всё зелёное. Экрана для этого у Montonio нет — только API (их руководство по вебхукам, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — со слешем в конце, иначе POST теряется в 308. list показывает, что стоит. Без него посылки доходят, а заказы сами не закрываются. Перенос на rempireshop.com — шаг 8 дня запуска («Вебхук посылок — на rempireshop.com»).",
       "en": {
         "title": "Register the parcel webhook",
-        "detail": "Done 23.09.2026: registered at https://rempireshop.diipsolutions.eu/api/shipping/notify/, three events; the live-account check afterwards is all green. Montonio has no screen for it — API only (their webhooks guide, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. It subscribes shipment.registered, shipment.registrationFailed and shipment.statusUpdated; list shows what is there. Without it parcels arrive and orders never close by themselves. When the domain moves: register rempireshop.com, then delete the old one."
+        "detail": "Done 23.09.2026: registered at https://rempireshop.diipsolutions.eu/api/shipping/notify/, three events; the live-account check afterwards is all green. Montonio has no screen for it — API only (their webhooks guide, 23.09.2026). node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs register https://rempireshop.diipsolutions.eu/api/shipping/notify/ — with the trailing slash, or the POST is lost in a 308. list shows what is there. Without it parcels arrive and orders never close by themselves. Moving it to rempireshop.com is step 8 of the day («The parcel webhook — onto rempireshop.com»)."
       }
     },
     {
@@ -316,6 +326,60 @@
       "en": {
         "title": "Choose the flat price per zone — cancelled 22.09",
         "detail": "The decision went another way. Dim, 22.09.2026: delivery as in Montonio's calculator — delivery type first, then the carrier, each at its own price. Prices are worked out for Renat's real carton, 25 × 18 × 8 cm, not a 30 cm cube. There is no flat price per zone any more."
+      }
+    },
+    {
+      "id": "live-keys-env",
+      "area": "montonio",
+      "who": [
+        "dim"
+      ],
+      "status": "done",
+      "blocking": true,
+      "outside": "Vercel",
+      "needs": [
+        "montonio-keys"
+      ],
+      "title": "Боевые ключи Montonio и флаг окружения — поставлены 26.09",
+      "detail": "Сделано 26.09.2026: в Vercel → Production стоят MONTONIO_ACCESS_KEY и MONTONIO_SECRET_KEY (боевая пара) и MONTONIO_ENV=live, проект пересобран. Половина этой пары хуже, чем ни одной, — поэтому вместе. С этого момента каждый заказ на стенде — настоящие деньги: песочные проверки /test больше не проводить. Песочная пара — в менеджере паролей, для проверок потом.",
+      "en": {
+        "title": "Live Montonio keys and the environment flag — set 26.09",
+        "detail": "Done 26.09.2026: Vercel → Production holds MONTONIO_ACCESS_KEY and MONTONIO_SECRET_KEY (the live pair) and MONTONIO_ENV=live, and the project was redeployed. Half of this pair is worse than neither — hence together. From then on every order on staging is real money: no more sandbox checks from /test. The sandbox pair is in the password manager, for later checks."
+      }
+    },
+    {
+      "id": "live-hour",
+      "area": "montonio",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "done",
+      "blocking": true,
+      "needs": [
+        "live-keys-env"
+      ],
+      "title": "Живой час на стенде — 26.09",
+      "detail": "Сделано 26.09.2026 на rempireshop.diipsolutions.eu с боевыми ключами, заказы R-100095…R-100098. Прошли по-настоящему: оплата банковской ссылкой, картой и Google Pay — деньги пришли; отменённая оплата; полный и частичный возврат отправлены в Montonio; настоящая этикетка DPD в пакомат (R-100098) — медленный ответ Montonio после этого больше не бронирует вторую посылку. Не доказано живьём (пункт «Что живой час не доказал» после запуска): что возврат дошёл до покупателя и письмо «Деньги возвращены», отказ перевозчика и «Отправить заново», Omniva, SmartPosti, Unisend, Nova Post, заказ курьера, письмо «Отправлен». Закрыть заказы этого часа до чистки — пункт «Закрыть заказы живого часа».",
+      "en": {
+        "title": "The live hour on staging — 26.09",
+        "detail": "Done 26.09.2026 on rempireshop.diipsolutions.eu with the live keys, orders R-100095…R-100098. Proven for real: payment by bank link, by card and by Google Pay — the money arrived; a cancelled payment; a full and a partial refund sent to Montonio; a real DPD parcel-machine label (R-100098) — after which a slow Montonio answer no longer books a second parcel. Not proven live (the item «What the live hour did not prove», after the switch): that a refund reached the customer and the «Деньги возвращены» letter, a carrier refusing and «Отправить заново», Omniva, SmartPosti, Unisend, Nova Post, a courier booking, the «Отправлен» letter. Closing this hour's orders before the reset is the item «Close out the live-hour orders»."
+      }
+    },
+    {
+      "id": "refund-funding",
+      "area": "montonio",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "outside": "Montonio",
+      "title": "Спросить Montonio: чем платить возврат после ежедневной выплаты",
+      "detail": "Montonio платит возврат из баланса магазина у себя. После ежедневной выплаты на счёт баланс может быть пустым — тогда возврат висит PENDING (INSUFFICIENT_FUNDS), а через 10 дней Montonio его отменяет. Что в docs/payments.md написано «возврат в тот же день откажут» — живой час опроверг. Вопрос Montonio: как пополнить баланс под возврат или зачесть его из следующих оплат. Пока ответа нет, запасной путь: перевести деньги покупателю банком и отметить «возврат» в панели руками. Порядок решаем на встрече с Ренатом. Запуск этот пункт не держит.",
+      "en": {
+        "title": "Ask Montonio how a refund is funded after the daily payout",
+        "detail": "Montonio pays a refund out of the shop's balance with them. After the daily payout to the bank that balance can be empty — the refund then sits PENDING (INSUFFICIENT_FUNDS), and after 10 days Montonio cancels it. What docs/payments.md says — «a same-day refund is refused» — the live hour disproved. The question for Montonio: how to top up the balance for a refund, or net it against the next payments. Until they answer, the fallback: pay the customer by bank transfer and mark «возврат» in the panel by hand. The procedure is settled at the meeting with Renat. This item does not hold the launch."
       }
     },
     {
@@ -418,13 +482,13 @@
       "who": [
         "dim"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
-      "title": "Собрать фид из каталога магазина и добавить его рядом с фидами Shopify",
-      "detail": "Готово 23.09: магазин сам отдаёт три фида — https://rempireshop.com/feed/google-en.xml, google-et.xml и google-ru.xml (английский, эстонский, русский). Каждый собирается заново при каждом запросе из живого каталога: цена каждого объёма — та же, что берёт касса; наличие по объёмам; скрытые товары в фид не попадают; фото, описания, бренд, штрихкод, если Ренат отсканировал его в «Складе»; доставка по каждой стране — как на кассе. Ссылки всегда ведут на rempireshop.com. Старый tools/build-merchant-feed.mjs и статичный google-shopping.xml удалены. Осталось: в день переключения добавить три фида в Merchant Center рядом с шестью фидами Shopify — по шагам в docs/merchant-feed.md. Номера товаров в фиде новые, Google проверяет каждый 1–3 дня, поэтому фиды Shopify не трогаем, пока наши не одобрены.",
+      "title": "Собрать фид из каталога магазина",
+      "detail": "Готово 23.09: магазин сам отдаёт три фида — https://rempireshop.com/feed/google-en.xml, google-et.xml и google-ru.xml (английский, эстонский, русский). Каждый собирается заново при каждом запросе из живого каталога: цена каждого объёма — та же, что берёт касса; наличие по объёмам; скрытые товары в фид не попадают; фото, описания, бренд, штрихкод, если Ренат отсканировал его в «Складе»; доставка по каждой стране — как на кассе. Ссылки всегда ведут на rempireshop.com. Добавить их в Merchant Center можно только когда rempireshop.com откроет новый магазин — это шаг 11 дня запуска («Merchant Center: три наших фида рядом с Shopify»), поэтому здесь пункт закрыт, а не ждёт DNS.",
       "en": {
-        "title": "Build a feed from the shop's own catalogue and add it alongside the Shopify ones",
-        "detail": "Built 23.09: the shop serves three feeds itself — https://rempireshop.com/feed/google-en.xml, google-et.xml and google-ru.xml (English, Estonian, Russian). Each is rebuilt on every fetch from the live catalogue: every size at the price the checkout charges, stock per size, hidden products left out, photos, descriptions, brand, the barcode where Renat has scanned one in «Склад», and delivery per country at the checkout's prices. Links always point at rempireshop.com. The old tools/build-merchant-feed.mjs and the static google-shopping.xml are gone. Left: on the switch day, add the three feeds in Merchant Center beside the six Shopify ones — step by step in docs/merchant-feed.md. The item ids are new, so Google reviews every item (1–3 days); the Shopify sources stay until ours are approved."
+        "title": "Build a feed from the shop's own catalogue",
+        "detail": "Built 23.09: the shop serves three feeds itself — https://rempireshop.com/feed/google-en.xml, google-et.xml and google-ru.xml (English, Estonian, Russian). Each is rebuilt on every fetch from the live catalogue: every size at the price the checkout charges, stock per size, hidden products left out, photos, descriptions, brand, the barcode where Renat has scanned one in «Склад», and delivery per country at the checkout's prices. Links always point at rempireshop.com. They can be added in Merchant Center only once rempireshop.com opens the new shop — that is step 11 of the day («Merchant Center: our three feeds beside Shopify's»), so this item is closed here rather than waiting for DNS."
       }
     },
     {
@@ -433,43 +497,13 @@
       "who": [
         "dim"
       ],
-      "status": "doing",
+      "status": "done",
       "blocking": true,
-      "title": "Переписать доставку в Merchant Center по настоящим ценам Montonio",
-      "detail": "Закрыто фидом (23.09): у каждого товара в фиде своя доставка по каждой стране — самый дешёвый пакомат и курьер, ровно так, как считает касса, и 0 € от порога бесплатной доставки (59 € по Эстонии, Латвии, Литве и Финляндии, 200 € по остальной Европе). Доставка, указанная у товара, важнее политики аккаунта, так что плоские 15 € от Shopify наши товары не перебьют. Политики Shopify удалить, когда удалены фиды Shopify — docs/merchant-feed.md, шаг C.",
+      "title": "Доставка в Merchant Center — закрыта фидом",
+      "detail": "Закрыто фидом (23.09): у каждого товара в фиде своя доставка по каждой стране — самый дешёвый пакомат и курьер, ровно так, как считает касса, и 0 € от порога бесплатной доставки (59 € по Эстонии, Латвии, Литве и Финляндии, 200 € по остальной Европе). Доставка, указанная у товара, важнее политики аккаунта, так что плоские 15 € от Shopify наши товары не перебьют. Политики Shopify удаляются вместе с фидами Shopify, после запуска — пункт «Убрать фиды Shopify» (docs/merchant-feed.md, шаги C и E).",
       "en": {
-        "title": "Rewrite the Merchant Center shipping policies from the real Montonio prices",
-        "detail": "Covered by the feed (23.09): every item carries its own delivery price per country — the cheapest locker and courier, exactly as the checkout computes them, and €0 from the free-delivery threshold (€59 in Estonia, Latvia, Lithuania and Finland, €200 in the rest of Europe). An item's own shipping outranks the account's policies, so Shopify's flat €15 cannot override ours. Delete the Shopify policies once the Shopify sources are gone — docs/merchant-feed.md, step C."
-      }
-    },
-    {
-      "id": "google-cutover",
-      "area": "google",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "blocking": false,
-      "title": "Убрать фиды Shopify — только после того, как свой отработал сутки",
-      "detail": "Состояние на 23.09.2026: шесть источников Shopify App API по 327 товаров, ещё 7 товаров «Найдено Google» с rempireshop.com; 22 правила доставки Shopify «flat 15 € / 4–12 дней» — у наших товаров своя доставка в фиде, она важнее. Ссылка «Оформить» в Business info — https://rempireshop.com/cart/{id}:1 (формат Shopify): магазин её понимает, id — наши id из фида. В день переключения Claude добавляет три наших фида в Merchant Center; источники Shopify удаляются только когда наши товары «Одобрены».",
-      "en": {
-        "title": "Remove the Shopify feeds — only after ours has run for a day",
-        "detail": "State on 23.09.2026: six Shopify App API sources of 327 products each, plus 7 products «Found by Google» on rempireshop.com; 22 Shopify shipping policies «flat €15 / 4–12 days» — our items carry their own shipping in the feed, which wins. The checkout link in Business info is https://rempireshop.com/cart/{id}:1 (Shopify's format): the shop answers it, with our feed ids. On switch day Claude adds our three feeds in Merchant Center; the Shopify sources are deleted only once our products are «Approved»."
-      }
-    },
-    {
-      "id": "google-clicks",
-      "area": "google",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "blocking": false,
-      "title": "Через неделю после переключения сверить переходы с тем, что было",
-      "detail": "На 19.09 было 175 переходов за 28 дней бесплатными карточками, реклама не тратилась. Если после переключения число ушло вниз, причина почти всегда одна из двух: товары не прошли модерацию или доставка в фиде не сходится со страницей.",
-      "en": {
-        "title": "A week after the switch, compare the clicks with what they were",
-        "detail": "On 19.09 it was 175 clicks in 28 days from free listings, with no ad spend. If the number falls after the switch the cause is nearly always one of two: products failing review, or feed shipping that disagrees with the page."
+        "title": "Merchant Center shipping — covered by the feed",
+        "detail": "Covered by the feed (23.09): every item carries its own delivery price per country — the cheapest locker and courier, exactly as the checkout computes them, and €0 from the free-delivery threshold (€59 in Estonia, Latvia, Lithuania and Finland, €200 in the rest of Europe). An item's own shipping outranks the account's policies, so Shopify's flat €15 cannot override ours. The Shopify policies go with the Shopify feeds, after the switch — the item «Remove the Shopify feeds» (docs/merchant-feed.md, steps C and E)."
       }
     },
     {
@@ -541,10 +575,10 @@
       "status": "done",
       "blocking": true,
       "title": "Инструмент обнуления перед запуском и docs/go-live-reset.md",
-      "detail": "Сделано 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md и tests/go-live-reset.test.ts. Без аргументов только печатает, что сделал бы; стирает лишь с длинным подтверждением и проверяет, что оставляемое осталось. Запуск — пункт «Запустить чистку» в день переключения.",
+      "detail": "Сделано 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md и tests/go-live-reset.test.ts. Без аргументов только печатает, что сделал бы; стирает лишь с длинным подтверждением и проверяет, что оставляемое осталось. 27.09.2026: нумерация заказов после чистки продолжается после самого большого номера, а не с R-100001 — номера живого часа уже лежат в боевом кабинете Montonio; команда запускается с --env-file=.env.railway.txt и подсказывает, если не хватает строки про сертификат. Запуск — шаг 2 дня запуска.",
       "en": {
         "title": "The go-live reset tool and `docs/go-live-reset.md`",
-        "detail": "Done 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md and tests/go-live-reset.test.ts. Without arguments it only prints what it would do; it clears only with a long confirmation and checks that the keep-list survived. Running it is the item «Run the reset tool» on the day."
+        "detail": "Done 18–19.09.2026: tools/go-live-reset.mjs, docs/go-live-reset.md and tests/go-live-reset.test.ts. Without arguments it only prints what it would do; it clears only with a long confirmation and checks that the keep-list survived. 27.09.2026: after the reset the order numbers continue after the highest one instead of restarting at R-100001 — the live hour's numbers are already in the live Montonio account; the command runs with --env-file=.env.railway.txt and says which line is missing when the certificate cannot be verified. Running it is step 2 of the day."
       }
     },
     {
@@ -553,13 +587,28 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
-      "title": "Заменить public/shop/legal.js",
-      "detail": "Запасная политика конфиденциальности до сих пор называет обработчиком данных Shopify. Сегодня до неё не добраться, на живом магазине — стыдно.",
+      "title": "Заменить public/shop/legal.js — сделано 27.09",
+      "detail": "Сделано 27.09.2026. legal.js грузится на каждой странице, и в нём лежали политики старого магазина на Shopify — английский текст, Shopify назван обработчиком данных 22 раза. Файл нужен: по его ключам роутер открывает страницы правил, prerender их пишет, а его русские заголовки переводятся на ET/EN. Теперь это русские страницы самого магазина слово в слово (public/shop/legal.ru.js; пишет tools/sync-legal-fallback.mjs, тест держит их одинаковыми) — с настоящими обработчиками: Vercel, Railway, Cloudflare, Resend, Montonio. Слова Shopify нет ни в одном файле правил.",
       "en": {
-        "title": "Replace `public/shop/legal.js`",
-        "detail": "The fallback privacy policy still names Shopify as the data processor. Unreachable today, embarrassing on a live shop."
+        "title": "Replace `public/shop/legal.js` — done 27.09",
+        "detail": "Done 27.09.2026. legal.js is loaded on every page, and it held the old Shopify store's policies — English text, Shopify named as the data processor 22 times. The file is needed: the router opens the policy pages by its keys, the prerender writes them, and its Russian titles are what ET/EN translate. It is now the shop's own Russian pages word for word (public/shop/legal.ru.js; written by tools/sync-legal-fallback.mjs, a test keeps the two identical) — naming the real processors: Vercel, Railway, Cloudflare, Resend, Montonio. No policy file mentions Shopify any more."
+      }
+    },
+    {
+      "id": "code-stock-import",
+      "area": "code",
+      "who": [
+        "claude"
+      ],
+      "status": "done",
+      "blocking": true,
+      "title": "Инструмент переноса остатков из Shopify — в репозитории",
+      "detail": "Сделано 27.09.2026: tools/import-shopify-stock.mjs. Берёт собственную выгрузку Shopify (Products → Inventory → Export): её Handle — это id товара у нас, размер ищется по каталогу. Показывает сухой прогон «было → станет» по живому «Складу», пишет только с --apply --confirm ИМПОРТ через ту же дверь, что и панель (абсолютное число, «Импорт из Shopify»), повторный запуск не пишет второй раз. Два решения Димы от 26.09 про мерч — в tools/shopify-stock-owner-rows.json. На снимке 26.09 — 322 строки, как у черновика. Как запускать — docs/go-live.md, шаг 4 дня.",
+      "en": {
+        "title": "The Shopify stock import tool — in the repository",
+        "detail": "Done 27.09.2026: tools/import-shopify-stock.mjs. It reads Shopify's own export (Products → Inventory → Export): its Handle is our product id, the size is looked up in the catalogue. It shows a before → after dry run against the live «Склад», writes only with --apply --confirm ИМПОРТ through the same door the panel uses (an absolute count, «Импорт из Shopify»), and a second run does not write twice. Dim's two merch decisions of 26.09 are in tools/shopify-stock-owner-rows.json. On the 26.09 capture: 322 rows, as the draft had. How to run it: docs/go-live.md, step 4 of the day."
       }
     },
     {
@@ -592,13 +641,216 @@
         "code-e2e",
         "code-reset",
         "code-legal",
-        "code-balance-copy"
+        "code-balance-copy",
+        "code-stock-import",
+        "admin-link-off"
       ],
-      "title": "Последний проход: пересобрать бандл и страницы, прогнать всё, запушить",
-      "detail": "И убедиться, что в index.html нет ни одного localhost: и ровно две ссылки на boot.js.",
+      "title": "Последний проход накануне: всё прогнать, один пуш",
+      "detail": "Накануне, одним пушем — legal.js и снятая ссылка «Админка». Перед пушем: модульные тесты и браузерные (e2e) целиком; локальная проверка боевого пререндера — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (результат не коммитить, собранные файлы вернуть); в index.html нет ни одного localhost: и ровно две ссылки на boot.js. После пуша — сборка на Vercel зелёная, стенд открывается.",
       "en": {
-        "title": "Final pass: regenerate the bundle and the prerender, full suite, push",
-        "detail": "And confirm `index.html` carries no `localhost:` and exactly two `boot.js` references."
+        "title": "The final pass the day before: run everything, one push",
+        "detail": "The day before, in one push — legal.js and the footer «Админка» link removed. Before the push: the whole unit suite and the browser (e2e) suite; a local check of the production prerender — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (do not commit the result; put the generated files back); index.html carries no localhost: and exactly two boot.js references. After the push: the Vercel build is green and staging opens."
+      }
+    },
+    {
+      "id": "test-data-cleanup",
+      "area": "t1",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Удалить всё, что делалось во время проверок",
+      "detail": "Чистка перед запуском стирает заказы, клиентов, отзывы и аналитику, но ОСТАВЛЯЕТ свои товары, правки товаров, промокоды, наборы, статьи, рассылки и настройки — всё тестовое там убрать руками, до чистки. Свои товары-пробы — удалить: c-davienness-nelya-shampun («50 кг», 500 €), c-davines-cheap-price, c-davines-ochen-klassnyj-shampun («Очень классный», 10 €), «Claude test товар», товар за 1 € c-rempire-testovyj-platezh-ne-prodaetsya. Неверные тестовые цены — исправить: c-rempire-hoodie, XXS 1 € и XXL 100 €. «Маркетинг → Промокоды»: тестовые коды (CLAUDE10, CLAUDETEST10 и похожие) и любой код на 100 % — удалить. «Товары → Наборы», блог и «Маркетинг → Рассылка» — пробные наборы, статьи и черновики убрать. Подарочные карты чистка стирает только с --gift-cards-are-test-cards — в сухом прогоне убедиться, что все они тестовые. В конце открыть https://rempireshop.diipsolutions.eu/feed/google-en.xml — ни одного тестового товара и цены.",
+      "en": {
+        "title": "Delete everything made during the checks",
+        "detail": "The go-live reset deletes orders, customers, reviews and analytics, but KEEPS own products, product edits, promo codes, sets, blog posts, newsletters and settings — anything test-made there goes by hand, before the reset. Own test products — delete: c-davienness-nelya-shampun («50 кг», €500), c-davines-cheap-price, c-davines-ochen-klassnyj-shampun («Очень классный», €10), «Claude test товар», the €1 product c-rempire-testovyj-platezh-ne-prodaetsya. Wrong test prices — fix: c-rempire-hoodie, XXS €1 and XXL €100. «Маркетинг → Промокоды»: test codes (CLAUDE10, CLAUDETEST10 and the like) and any 100 % code — delete. «Товары → Наборы», the blog and «Маркетинг → Рассылка»: test sets, posts and drafts — remove. The reset deletes gift cards only with --gift-cards-are-test-cards — in the dry run make sure every one is a test card. Finally open https://rempireshop.diipsolutions.eu/feed/google-en.xml — not one test product or price."
+      }
+    },
+    {
+      "id": "renat-meeting",
+      "area": "t1",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Последняя встреча с Ренатом перед запуском",
+      "detail": "Решить вместе и записать. 1) Какие автописьма включить сразу после чистки («Маркетинг → Письма»): неоплаченные заказы, снова в наличии, брошенная корзина, скидка по брошенной корзине, день рождения. Заявки «Сообщить, когда появится» принимаются и при выключенном письме — и молча остаются без ответа; неоплаченные при выключенном письме висят «новыми» навсегда. Включает их шаг 3 дня — не раньше чистки. 2) Как посылки уходят курьером: заказать курьера через API Montonio нельзя — постоянный вызов в кабинете Montonio по каждому перевозчику или сдача в пункт. 3) Как платить возврат после ежедневной выплаты — по ответу Montonio, а до него: перевод банком и «возврат» руками. 4) Что Ренату знать: полный возврат возвращает на склад каждую строку (испорченное списать руками), частичный — ни склад, ни баллы; ссылка «Админка» из подвала уходит накануне — вход по rempireshop.com/admin, и в день запуска войти там заново.",
+      "en": {
+        "title": "The last meeting with Renat before the launch",
+        "detail": "Decide together and write it down. 1) Which automatic letters go on right after the reset («Маркетинг → Письма»): unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. «Сообщить, когда появится» sign-ups are accepted while that letter is off — and silently never answered; with the unpaid letter off, unpaid orders stay «новый» for ever. Step 3 of the day switches them on — never before the reset. 2) How courier parcels leave: Montonio's API cannot order a pickup — a recurring pickup in the Montonio account per carrier, or a drop-off at a point. 3) How a refund is paid after the daily payout — as Montonio answers, and until then: a bank transfer and «возврат» by hand. 4) What Renat needs to know: a full refund puts every line back on the shelf (write off anything unsellable by hand), a partial one moves neither stock nor points; the footer «Админка» link goes the day before — sign in at rempireshop.com/admin, and sign in there again on the day."
+      }
+    },
+    {
+      "id": "live-hour-closeout",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Montonio",
+      "needs": [
+        "live-hour"
+      ],
+      "title": "Закрыть заказы живого часа — до чистки",
+      "detail": "Заказы R-100095…R-100098 — настоящие деньги, а чистка их удалит, и поздние уведомления Montonio о них магазин уже не примет. До чистки: в кабинете Montonio убедиться, что возвраты живого часа завершены; сохранить отчёт Montonio по этим заказам для бухгалтера; посылку DPD 3888e013 (R-100098) отменить в Montonio, если её так и не сдали. Ренат старые заказы в панели не трогает: «Создать этикетку» у заказа, оплаченного в песочнице, бронирует настоящую платную посылку. Песочные возвраты (R-100050, R-100054…) около 29.09 станут «просроченными» и покрасят «Подключения» и «Обзор» в красный — это нормально до чистки.",
+      "en": {
+        "title": "Close out the live-hour orders — before the reset",
+        "detail": "Orders R-100095…R-100098 are real money, the reset deletes them, and the shop will not accept Montonio's late notices about them afterwards. Before the reset: in the Montonio account make sure the live hour's refunds completed; keep Montonio's report of these orders for the accountant; cancel the DPD parcel 3888e013 (R-100098) in Montonio if it was never handed over. Renat touches no old order in the panel: «Создать этикетку» on an order paid in the sandbox books a real, paid parcel. The sandbox refunds (R-100050, R-100054…) turn «overdue» around 29.09 and paint «Подключения» and «Обзор» red — expected until the reset."
+      }
+    },
+    {
+      "id": "admin-link-off",
+      "area": "t1",
+      "who": [
+        "claude",
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "title": "Убрать ссылку «Админка» из подвала магазина",
+      "detail": "Ссылка внизу каждой страницы говорит любому, кто её увидит, где панель. Дим, 21.09.2026: на запуске она уходит, и Ренат открывает панель по адресу /admin — короткий адрес, который можно набрать, и он уже работает (редирект на /shop2/admin/, next.config.ts). Убрать `.ftr__admin` в public/shop2/app.js накануне — тем же пушем, что и «Последний проход». Ссылка, которой нет, — это не защита: пароль остаётся единственной. Но и подсказывать адрес незачем. Сказать Ренату ДО того, как убрали (пункт «Последняя встреча с Ренатом»): он ходит туда этой кнопкой каждый день.",
+      "en": {
+        "title": "Take the «Админка» link out of the shop's footer",
+        "detail": "A link at the bottom of every page tells anyone who sees it where the panel is. Dim, 21.09.2026: at the switch it comes off and Renat opens the panel at /admin — a short address he can type, already working (a redirect to /shop2/admin/ in next.config.ts). Remove `.ftr__admin` in public/shop2/app.js the day before — in the same push as «Final pass». A missing link is not a security measure — the password stays the only one — but there is no reason to advertise the address either. Tell Renat BEFORE it goes (the item «The last meeting with Renat»): that button is how he gets there every day."
+      }
+    },
+    {
+      "id": "reset-rehearsal",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Railway",
+      "needs": [
+        "snapshot"
+      ],
+      "title": "Репетиция чистки: файл, копия, сухой прогон",
+      "detail": "Накануне, чтобы утром не узнать, что не подключается. В папке rempire-web файл .env.railway.txt из двух строк: DATABASE_URL= (Railway → Postgres → Variables → DATABASE_PUBLIC_URL) и DATABASE_SSL_NO_VERIFY=1 — без второй инструмент чистки не примет сертификат Railway. Docker Desktop запущен. Копия: node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓ и десятки таблиц. Сухой прогон: node --env-file=.env.railway.txt tools/go-live-reset.mjs — ничего не меняет; прочитать подарочные карты, клиентов с согласием на рассылку и строку order_number_seq (продолжит после самого большого номера, не с R-100001). Файл не удалять до конца дня запуска. docs/go-live-reset.md, шаги 1–5.",
+      "en": {
+        "title": "Rehearse the reset: the file, a copy, a dry run",
+        "detail": "The day before, so the morning does not find out it cannot connect. In the rempire-web folder, .env.railway.txt with two lines: DATABASE_URL= (Railway → Postgres → Variables → DATABASE_PUBLIC_URL) and DATABASE_SSL_NO_VERIFY=1 — without the second the reset tool refuses Railway's certificate. Docker Desktop running. A copy: node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line and dozens of tables. A dry run: node --env-file=.env.railway.txt tools/go-live-reset.mjs — it changes nothing; read the gift cards, the customers with marketing consent and the order_number_seq line (it continues after the highest number, not at R-100001). Keep the file until the end of launch day. docs/go-live-reset.md, steps 1–5."
+      }
+    },
+    {
+      "id": "stock-rehearsal",
+      "area": "t1",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Shopify",
+      "needs": [
+        "code-stock-import"
+      ],
+      "title": "Репетиция переноса остатков: сухой прогон",
+      "detail": "Накануне. Shopify → Products → Inventory → Export → все варианты, CSV. Потом сухой прогон по стенду: RMP_ADMIN_COOKIE (значение cookie rmp_admin из вошедшей панели, в чат не вставлять) и node tools/import-shopify-stock.mjs --csv <файл> --base https://rempireshop.diipsolutions.eu. Ничего не пишет. Прочитать: сколько строк «было → станет» (26.09 было 322), список «NEED A DECISION» — должен быть пуст (два мерч-товара решены в tools/shopify-stock-owner-rows.json), «no «Склад» row under that label», «will be OVERWRITTEN» и порог «мало», отличный от 1. Товары Shopify, которых нет в каталоге, не пишутся — это нормально.",
+      "en": {
+        "title": "Rehearse the stock import: a dry run",
+        "detail": "The day before. Shopify → Products → Inventory → Export → all variants, CSV. Then a dry run against staging: RMP_ADMIN_COOKIE (the rmp_admin cookie of a signed-in panel — never pasted into a chat) and node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu. It writes nothing. Read: how many before → after rows (322 on 26.09), the «NEED A DECISION» list — it should be empty (the two merch products are decided in tools/shopify-stock-owner-rows.json), «no «Склад» row under that label», «will be OVERWRITTEN» and any «мало» threshold other than 1. Shopify products missing from the catalogue are not written — that is expected."
+      }
+    },
+    {
+      "id": "vercel-env-check",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Vercel",
+      "title": "Проверить переменные и расписания в Vercel",
+      "detail": "Vercel → Settings → Environment Variables, Production. Стоят: CRON_SECRET (без него ночные задания молча отвечают 503), RESEND_API_KEY, RESEND_TO (куда уходит письмо «новый заказ» — без него его просто нет), SESSION_SECRET (никогда не менять: на нём сессии, ссылки заказов и PDF подарочных карт), DATABASE_SSL_* как стоят сейчас, MONTONIO_ENV=live и боевая пара. PAYMENT_PROVIDER не задан (никогда не mock). PUBLIC_BASE_URL сегодня — адрес стенда; меняется в день запуска, шаг 5, не раньше. Расписания в vercel.json: письма, сверка оплат и посылок — 07:00 UTC (10:00 по Таллинну, 09:00 после 25.10), чистка событий — 03:30 UTC. Регион функций — fra1.",
+      "en": {
+        "title": "Check the variables and the schedules in Vercel",
+        "detail": "Vercel → Settings → Environment Variables, Production. Set: CRON_SECRET (without it the nightly jobs answer 503 silently), RESEND_API_KEY, RESEND_TO (where the «new order» letter goes — without it there is none), SESSION_SECRET (never change it: sessions, order links and gift-card PDFs rest on it), DATABASE_SSL_* as they are now, MONTONIO_ENV=live and the live pair. PAYMENT_PROVIDER unset (never mock). PUBLIC_BASE_URL is the staging address today; it changes on the day, step 5, not before. The schedules in vercel.json: letters, the payment and parcel re-checks — 07:00 UTC (10:00 Tallinn, 09:00 after 25.10); event clean-up — 03:30 UTC. Function region fra1."
+      }
+    },
+    {
+      "id": "session-secret",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "done",
+      "title": "Поставить SESSION_SECRET",
+      "detail": "Стоит: вход в панель без него невозможен — /api/admin/login отвечает not_configured, если SESSION_SECRET нет или он короче 16 знаков, а Дим и Ренат входят на стенде. Живой домен обслуживает тот же проект Vercel.",
+      "en": {
+        "title": "Set `SESSION_SECRET`",
+        "detail": "Set: the panel cannot be entered without it — /api/admin/login answers not_configured when SESSION_SECRET is missing or under 16 characters, and Dim and Renat sign in on staging. The live domain is served by the same Vercel project."
+      },
+      "blocking": true
+    },
+    {
+      "id": "region-fra1",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "done",
+      "title": "Проверить, что регион функций всё ещё fra1",
+      "detail": "Задан в vercel.json и в панели; они совпадают. Проверено 14.09.",
+      "en": {
+        "title": "Verify the function region is still `fra1`",
+        "detail": "Set in `vercel.json` and in the dashboard; they agree. Done 14.09."
+      },
+      "blocking": true,
+      "outside": "Vercel"
+    },
+    {
+      "id": "vercel-domain",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Vercel",
+      "title": "Добавить rempireshop.com и www в Vercel",
+      "detail": "Vercel → проект → Settings → Domains → Add: rempireshop.com и www.rempireshop.com. www — перенаправление 308 на rempireshop.com; основной адрес — rempireshop.com без www: на нём будет PUBLIC_BASE_URL, и уведомления Montonio приходят туда же без редиректа (POST через редирект теряется). rempireshop.diipsolutions.eu остаётся в проекте, БЕЗ перенаправления — на нём старые адреса уведомлений, приложение Рената на экране телефона и push. Записать значения, которые Vercel просит для DNS (A для rempireshop.com, CNAME для www), — они нужны на шаге 6. Пока DNS указывает на Shopify, Vercel пишет «Invalid configuration» — это нормально, ничего не переключается.",
+      "en": {
+        "title": "Add rempireshop.com and www in Vercel",
+        "detail": "Vercel → project → Settings → Domains → Add: rempireshop.com and www.rempireshop.com. www — a 308 redirect to rempireshop.com; the main address is rempireshop.com without www: PUBLIC_BASE_URL will be that, and Montonio's notices arrive there with no redirect (a POST through a redirect is lost). rempireshop.diipsolutions.eu stays on the project, with NO redirect — the old notice addresses, Renat's home-screen app and push live on it. Write down the values Vercel asks for in DNS (A for rempireshop.com, CNAME for www) — step 6 needs them. While DNS still points at Shopify, Vercel says «Invalid configuration» — that is normal, nothing moves."
+      }
+    },
+    {
+      "id": "dns-keeplist",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": true,
+      "outside": "Cloudflare",
+      "title": "DNS: TTL 5 минут, список «не трогать» и значения для отката",
+      "detail": "DNS rempireshop.com — в Cloudflare (ASCIO и Zone — только регистратор). Накануне у двух записей, которые будут меняться, — A @ и CNAME www — поставить TTL 5 минут (300). Записать значения для отката: A @ → 23.227.38.65 и CNAME www → shops.myshopify.com. В день запуска меняются ТОЛЬКО эти две записи. Всё остальное не трогать: TXT google-site-verification (на нём Merchant Center и Search Console), MX route1–3.mx.cloudflare.net и SPF (почта info@ и shop@), resend._domainkey, send (MX и TXT) и rsend — отправка писем Resend, _dmarc, img.rempireshop.com (фото товаров в R2).",
+      "en": {
+        "title": "DNS: a 5-minute TTL, the do-not-touch list and the rollback values",
+        "detail": "DNS for rempireshop.com is at Cloudflare (ASCIO and Zone are only the registrar). The day before, set a 5-minute TTL (300) on the two records that will change — A @ and CNAME www. Write down the rollback values: A @ → 23.227.38.65 and CNAME www → shops.myshopify.com. On the day ONLY these two records change. Touch nothing else: TXT google-site-verification (Merchant Center and Search Console rest on it), MX route1–3.mx.cloudflare.net and SPF (mail for info@ and shop@), resend._domainkey, send (MX and TXT) and rsend — Resend's sending, _dmarc, img.rempireshop.com (product photos in R2)."
+      }
+    },
+    {
+      "id": "vercel-plan",
+      "area": "t1",
+      "who": [
+        "dim"
+      ],
+      "status": "done",
+      "blocking": false,
+      "outside": "Vercel",
+      "title": "Тариф Vercel — остаёмся на Hobby, решено 27.09",
+      "detail": "Решение Димы 27.09.2026: остаёмся на Hobby пока. Условия Hobby запрещают коммерческое использование (docs/HOSTING.md), Pro — 20 $/мес. Пересмотреть, если Vercel напишет о коммерческом использовании, если понадобится третье ночное задание (на Hobby их два, оба заняты), если функции упрутся в лимиты Hobby по времени или объёму, или если в проект нужно пустить второго человека.",
+      "en": {
+        "title": "The Vercel plan — staying on Hobby, decided 27.09",
+        "detail": "Dim's decision of 27.09.2026: stay on Hobby for now. Hobby's terms forbid commercial use (docs/HOSTING.md); Pro is $20/month. Revisit if Vercel writes about commercial use, if a third nightly job is needed (Hobby allows two, both taken), if the functions hit Hobby's time or size limits, or if a second person needs access to the project."
       }
     },
     {
@@ -623,14 +875,14 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": false,
       "optional": true,
-      "title": "Второй проход Fable 5.1 — после недели запуска",
-      "detail": "Первый сделан 18.09: разбор диффа на регрессии, 56 находок, docs/audit-2026-09-18-findings.md — из них закрыто больше сорока, включая единственную серьёзную (двойной возврат на смешанной оплате). Второй — проверка готовности к запуску — переносится на после недели запуска (Дима, 19.09). Запуску не мешает.",
+      "title": "Второй проход — проверка готовности к запуску, сделана 27.09",
+      "detail": "Первый сделан 18.09: разбор диффа на регрессии, 56 находок, docs/audit-2026-09-18-findings.md — из них закрыто больше сорока, включая единственную серьёзную (двойной возврат на смешанной оплате). Второй — проверка готовности к запуску — сделан 27.09.2026 на Opus 5.5 (выбор Димы): docs/audit-2026-09-27-readiness.md, две части — день запуска и деньги. Его поправки к порядку дня — в этом списке и в docs/go-live.md.",
       "en": {
-        "title": "The second Fable 5.1 pass — after launch week",
-        "detail": "The first was done on 18.09: a regression review of the diff, 56 findings, docs/audit-2026-09-18-findings.md — more than forty of them closed, including the only serious one (a double refund on a mixed tender). The second, the go-live readiness pass, moves to after launch week (Dim, 19.09). It does not block the launch."
+        "title": "The second pass — the go-live readiness pass, done 27.09",
+        "detail": "The first was done on 18.09: a regression review of the diff, 56 findings, docs/audit-2026-09-18-findings.md — more than forty of them closed, including the only serious one (a double refund on a mixed tender). The second, the go-live readiness pass, was done on 27.09.2026 on Opus 5.5 (Dim's choice): docs/audit-2026-09-27-readiness.md, in two parts — the day and the money. Its corrections to the order of the day are in this list and in docs/go-live.md."
       }
     },
     {
@@ -649,65 +901,21 @@
       }
     },
     {
-      "id": "live-keys-env",
+      "id": "day-backup",
       "area": "switches",
       "who": [
         "dim"
       ],
       "status": "todo",
+      "outside": "Railway",
       "needs": [
-        "montonio-keys"
+        "reset-rehearsal"
       ],
-      "title": "Поставить боевые ключи Montonio и флаг окружения — вместе",
-      "detail": "Половина этой пары хуже, чем ни одной. В Vercel → Production: MONTONIO_ACCESS_KEY и MONTONIO_SECRET_KEY (боевая пара) и MONTONIO_ENV=live, потом пересобрать — без пересборки Vercel переменные не видит. Песочную пару сохранить в менеджере паролей: она ещё нужна для проверок. И до этого шага закончить в /test всё, что платит в песочнице: после него каждый заказ на стенде — настоящие деньги.",
+      "title": "1. Копия базы — утром, до всего",
+      "detail": "С ~08:30 по Таллинну. node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓, десятки таблиц, файл в rempire-backups. Отката у чистки нет, откат — это восстановление из этой копии (docs/go-live-reset.md, «Если всё-таки надо откатиться»). Нет строки с ✓ — дальше не идти.",
       "en": {
-        "title": "Set the live Montonio keys and the environment flag together",
-        "detail": "Half of this pair is worse than neither. In Vercel → Production: MONTONIO_ACCESS_KEY and MONTONIO_SECRET_KEY (the live pair) and MONTONIO_ENV=live, then redeploy — Vercel does not see a variable without a rebuild. Keep the sandbox pair in the password manager; later checks still need it. And before this step, finish every /test check that pays in the sandbox: after it, every order on staging is real money."
-      }
-    },
-    {
-      "id": "public-base-url",
-      "area": "switches",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "title": "Поставить PUBLIC_BASE_URL",
-      "detail": "Без него страницы пересобираются с боевыми адресами, но с «noindex, nofollow» — сегодня они именно такие, а robots.txt стендовый. Но не раньше переезда домена: пока боевые ключи проверяются на diipsolutions, PUBLIC_BASE_URL не ставить. Со значением rempireshop.com, который ещё на Shopify, Montonio отправит подтверждения оплаты туда — и заказы никогда не станут оплаченными.",
-      "en": {
-        "title": "Set `PUBLIC_BASE_URL`",
-        "detail": "Without it the prerender writes live URLs carrying `noindex` — the pages say «noindex, nofollow» today and `robots.txt` is the staging policy. But not before the domain moves: while the live keys are being tried on diipsolutions, leave PUBLIC_BASE_URL unset. Set to rempireshop.com while that domain is still on Shopify, it sends Montonio's payment confirmations to Shopify — and orders never turn paid."
-      }
-    },
-    {
-      "id": "session-secret",
-      "area": "switches",
-      "who": [
-        "dim"
-      ],
-      "status": "done",
-      "title": "Поставить SESSION_SECRET",
-      "detail": "Стоит: вход в панель без него невозможен — /api/admin/login отвечает not_configured, если SESSION_SECRET нет или он короче 16 знаков, а Дим и Ренат входят на стенде. Живой домен обслуживает тот же проект Vercel.",
-      "en": {
-        "title": "Set `SESSION_SECRET`",
-        "detail": "Set: the panel cannot be entered without it — /api/admin/login answers not_configured when SESSION_SECRET is missing or under 16 characters, and Dim and Renat sign in on staging. The live domain is served by the same Vercel project."
-      }
-    },
-    {
-      "id": "regenerate",
-      "area": "switches",
-      "who": [
-        "claude"
-      ],
-      "status": "todo",
-      "needs": [
-        "public-base-url"
-      ],
-      "title": "Пересобрать страницы и выложить, чтобы они несли боевую политику для поисковиков",
-      "detail": "Строго после того, как выставлен PUBLIC_BASE_URL, не раньше. Иначе в боевые адреса снова уедет «noindex».",
-      "en": {
-        "title": "Regenerate and deploy so the pages carry the production robots policy",
-        "detail": "Must happen after `PUBLIC_BASE_URL` is set, not before. Otherwise `noindex` rides out on the live URLs again."
+        "title": "1. A copy of the database — in the morning, before anything",
+        "detail": "From about 08:30 Tallinn time. node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line, dozens of tables, the file in rempire-backups. The reset has no undo; the undo is a restore from this copy (docs/go-live-reset.md, «if you do have to roll back»). No ✓ line — stop here."
       }
     },
     {
@@ -718,47 +926,76 @@
       ],
       "status": "todo",
       "needs": [
-        "snapshot",
-        "code-reset"
+        "day-backup",
+        "code-reset",
+        "test-data-cleanup",
+        "live-hour-closeout"
       ],
-      "title": "Запустить инструмент обнуления",
-      "detail": "Сначала сухой прогон, прочитать его, и только потом подтвердить.",
+      "title": "2. Чистка — без --stock, до 10:00",
+      "detail": "До 10:00 по Таллинну или после 11:00: ночное задание писем приходит в 07:00 UTC (10:00–10:59 по Таллинну, 09:00–09:59 после 25.10). Сухой прогон — node --env-file=.env.railway.txt tools/go-live-reset.mjs — прочитать; потом вставить строку, которую он напечатал (--gift-cards-are-test-cards — только если карты проверены). БЕЗ --stock: 153 штрихкода остаются, числа на полке ставит шаг 4. Ещё раз сухой прогон: в CLEAR везде 0. Открыть «Подключения»: красное от песочных возвратов и посылок должно уйти. Нумерация заказов продолжится после самого большого номера, не с R-100001. docs/go-live-reset.md.",
       "en": {
-        "title": "Run the reset tool",
-        "detail": "Dry run first, read it, then confirm."
+        "title": "2. The reset — without --stock, before 10:00",
+        "detail": "Before 10:00 Tallinn time or after 11:00: the nightly letters job fires at 07:00 UTC (10:00–10:59 Tallinn, 09:00–09:59 after 25.10). Dry run — node --env-file=.env.railway.txt tools/go-live-reset.mjs — read it; then paste the line it printed (--gift-cards-are-test-cards only once the cards are checked). WITHOUT --stock: the 153 barcodes stay, step 4 sets the shelf counts. Dry run again: 0 everywhere under CLEAR. Open «Подключения»: the red from sandbox refunds and parcels should be gone. Order numbers continue after the highest one, not at R-100001. docs/go-live-reset.md."
+      }
+    },
+    {
+      "id": "flows-on",
+      "area": "switches",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "needs": [
+        "run-reset",
+        "renat-meeting"
+      ],
+      "title": "3. Включить автописьма, о которых договорились",
+      "detail": "«Маркетинг → Письма»: включить ровно то, о чём договорились на встрече с Ренатом, — не больше и не раньше чистки (иначе неоплаченные отменят и напишут тестовым ящикам, брошенная корзина — тоже). Без «Снова в наличии» заявки «Сообщить, когда появится» молча остаются без ответа; без «Неоплаченных» такой заказ висит «новым» навсегда.",
+      "en": {
+        "title": "3. Switch on the automatic letters that were agreed",
+        "detail": "«Маркетинг → Письма»: switch on exactly what was agreed at the meeting with Renat — nothing more, and never before the reset (the unpaid-order letter would cancel test orders and write to test mailboxes, and so would the abandoned cart). Without «Снова в наличии» a «Сообщить, когда появится» sign-up is silently never answered; without the unpaid letter such an order stays «новый» for ever."
       }
     },
     {
       "id": "stock-import",
       "area": "switches",
       "who": [
-        "dim"
+        "dim",
+        "claude"
       ],
       "status": "todo",
       "needs": [
-        "run-reset"
+        "run-reset",
+        "stock-rehearsal"
       ],
-      "title": "Перенести остатки из Shopify — после обнуления",
-      "detail": "Решено 26.09.2026 (вариант 1b): остаток каждого размера из Shopify становится счётом в «Складе», «мало» — только на последней штуке. В тот же день Claude заново читает Shopify, показывает сухой прогон «было → станет» и пишет через открытую панель. Только после обнуления: оно стирает склад. Размеры с 0 на плюс отправят письма «Сообщить, когда появится».",
+      "title": "4. Остатки из Shopify — последним перед DNS",
+      "detail": "Решено 26.09.2026 (вариант 1b): остаток каждого размера из Shopify становится счётом в «Складе», «мало» — только на последней штуке. Свежая выгрузка: Shopify → Products → Inventory → Export. Сухой прогон по стенду — node tools/import-shopify-stock.mjs --csv <файл> --base https://rempireshop.diipsolutions.eu с RMP_ADMIN_COOKIE — прочитать «было → станет»; потом то же с --apply --confirm ИМПОРТ. Чистка склад не трогает (она без --stock), каждое число пишется абсолютно — тестовые продажи в истории на результат не влияют. После чистки — потому что она стёрла тестовые заявки «Сообщить, когда появится», и размер с 0 на плюс не напишет тестовым ящикам. Shopify продаёт до самого DNS: заказ Shopify после выгрузки списать в «Складе» руками (шаг 13).",
       "en": {
-        "title": "Bring the stock over from Shopify — after the reset",
-        "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. On the day Claude re-reads Shopify, shows the before → after dry run and writes through the open panel. Only after the reset: the reset clears the stock. Sizes going from 0 to a positive count send the «Сообщить, когда появится» letters."
-      }
+        "title": "4. Stock from Shopify — the last thing before DNS",
+        "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. A fresh export: Shopify → Products → Inventory → Export. A dry run against staging — node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu with RMP_ADMIN_COOKIE — read the before → after; then the same with --apply --confirm ИМПОРТ. The reset leaves the stock alone (it runs without --stock) and every count is written absolutely, so the test sales in the history do not change the result. After the reset because it deleted the test «Сообщить, когда появится» requests, so a size going from 0 to a count writes to no test mailbox. Shopify keeps selling until DNS: a Shopify order after the export is written off in «Склад» by hand (step 13)."
+      },
+      "outside": "Shopify"
     },
     {
-      "id": "unpaid-flow",
+      "id": "public-base-url",
       "area": "switches",
       "who": [
         "dim"
       ],
       "status": "todo",
-      "optional": true,
-      "title": "Включить, если нужно, обработку неоплаченных заказов",
-      "detail": "Она отменяет их через 7 дней и молча отпускает накопившийся хвост — так решили 17.09. Сегодня выключена.",
+      "title": "5. PUBLIC_BASE_URL = https://rempireshop.com → Redeploy → READY",
+      "detail": "Сегодня PUBLIC_BASE_URL — адрес стенда. Vercel → Settings → Environment Variables → Production: PUBLIC_BASE_URL = https://rempireshop.com. Потом Deployments → Redeploy текущей production-сборки и дождаться READY — эта пересборка и есть «пересобрать страницы»: пререндер пишет боевые адреса, robots и карту сайта без noindex. С этой минуты на стенде заказов не делать: адреса уведомлений и возврата Montonio уже указывают на rempireshop.com, а он ещё на Shopify. Поэтому шаг 6 — сразу. Наоборот нельзя: DNS раньше — и rempireshop.com показывает стендовый robots «Disallow: /» и noindex, пока идёт сборка.",
       "en": {
-        "title": "Switch on the unpaid-payment flow if wanted",
-        "detail": "It cancels after 7 days and releases the historic backlog silently, which is the behaviour chosen on 17.09. It is off today."
-      }
+        "title": "5. PUBLIC_BASE_URL = https://rempireshop.com → Redeploy → READY",
+        "detail": "Today PUBLIC_BASE_URL is the staging address. Vercel → Settings → Environment Variables → Production: PUBLIC_BASE_URL = https://rempireshop.com. Then Deployments → Redeploy the current production deployment and wait for READY — that rebuild IS «regenerate the pages»: the prerender writes the live addresses, robots and the sitemap without noindex. From this minute no orders on staging: Montonio's notice and return addresses already point at rempireshop.com, which is still Shopify. Hence step 6 at once. The other way round is wrong: DNS first, and rempireshop.com serves the staging robots «Disallow: /» and noindex while the build runs."
+      },
+      "outside": "Vercel",
+      "needs": [
+        "stock-import",
+        "vercel-domain",
+        "vercel-env-check"
+      ]
     },
     {
       "id": "domain-dns",
@@ -767,94 +1004,21 @@
         "dim"
       ],
       "status": "todo",
-      "title": "Направить домен на Vercel",
-      "detail": "DNS rempireshop.com обслуживает Cloudflare (серверы имён albert/april.ns.cloudflare.com; ASCIO — только регистратор), проверено 23.09.2026. Переключение — записи A/CNAME для rempireshop.com и www в Cloudflare на Vercel, режим «DNS only» (серое облако), иначе Cloudflare встанет между Vercel и его сертификатом. НЕ трогать: TXT google-site-verification (на нём держится подтверждение сайта в Merchant Center), MX route1–3.mx.cloudflare.net и SPF — на них живёт почта домена. За день до переключения поставить TTL записей 5 минут.",
+      "title": "6. DNS — сразу, как только READY",
+      "detail": "В Cloudflare поменять ровно две записи на значения из Vercel (записаны накануне): A @ и CNAME www, режим «DNS only» (серое облако) — иначе Cloudflare встанет между Vercel и его сертификатом. Больше ничего не трогать (пункт накануне «DNS: TTL 5 минут…»). Проверить: https://rempireshop.com/shop2/ — 200 и без заголовка x-robots-tag; https://www.rempireshop.com/ — 308 на rempireshop.com; /robots.txt и /sitemap.xml — боевые, на rempireshop.com; один старый адрес Shopify /products/… — 301 на /shop2/p/…; /feed/google-en.xml — 200; POST на /api/payments/notify/ — 400, а не 308. Откат: A @ → 23.227.38.65, CNAME www → shops.myshopify.com.",
       "en": {
-        "title": "Point the domain at Vercel",
-        "detail": "DNS for rempireshop.com is served by Cloudflare (nameservers albert/april.ns.cloudflare.com; ASCIO is only the registrar), checked 23.09.2026. The switch: A/CNAME records for rempireshop.com and www in Cloudflare pointing at Vercel, «DNS only» (grey cloud), or Cloudflare sits between Vercel and its certificate. Do NOT touch: the TXT google-site-verification record (Merchant Center's site verification rests on it), MX route1–3.mx.cloudflare.net and SPF — the domain's mail lives on them. Set the records' TTL to 5 minutes a day before."
-      }
-    },
-    {
-      "id": "region-fra1",
-      "area": "switches",
-      "who": [
-        "dim"
-      ],
-      "status": "done",
-      "title": "Проверить, что регион функций всё ещё fra1",
-      "detail": "Задан в vercel.json и в панели; они совпадают. Проверено 14.09.",
-      "en": {
-        "title": "Verify the function region is still `fra1`",
-        "detail": "Set in `vercel.json` and in the dashboard; they agree. Done 14.09."
-      }
-    },
-    {
-      "id": "crons",
-      "area": "switches",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "title": "Проверить два расписания в vercel.json",
-      "detail": "Это то, что должно работать на живых покупателях?",
-      "en": {
-        "title": "Confirm the two cron schedules in `vercel.json`",
-        "detail": "Are they what you want running against real customers?"
-      }
-    },
-    {
-      "id": "admin-link-off",
-      "area": "switches",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "blocking": false,
-      "title": "Убрать ссылку «Админка» из подвала магазина",
-      "detail": "Ссылка внизу каждой страницы говорит любому, кто её увидит, где панель. Дим, 21.09.2026: на запуске она уходит, и Ренат открывает панель по адресу /admin — короткий адрес, который можно набрать, и он уже работает (редирект на /shop2/admin/, next.config.ts). Убрать `.ftr__admin` в public/shop2/app.js, пересобрать и выложить. Ссылка, которой нет, — это не защита: пароль остаётся единственной. Но и подсказывать адрес незачем. Сказать Ренату ДО того, как убрали: он ходит туда этой кнопкой каждый день.",
-      "en": {
-        "title": "Take the «Админка» link out of the shop's footer",
-        "detail": "A link at the bottom of every page tells anyone who sees it where the panel is. Dim, 21.09.2026: at the switch it comes off and Renat opens the panel at /admin — a short address he can type, already working (a redirect to /shop2/admin/ in next.config.ts). Remove `.ftr__admin` in public/shop2/app.js, rebuild, deploy. A missing link is not a security measure — the password stays the only one — but there is no reason to advertise the address either. Tell Renat BEFORE it goes: that button is how he gets there every day."
-      }
-    },
-    {
-      "id": "untested-by-hand",
-      "area": "firsthour",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
+        "title": "6. DNS — at once, as soon as READY",
+        "detail": "In Cloudflare change exactly two records to the values from Vercel (written down the day before): A @ and CNAME www, «DNS only» (grey cloud) — otherwise Cloudflare sits between Vercel and its certificate. Touch nothing else (the T-1 item «DNS: a 5-minute TTL…»). Check: https://rempireshop.com/shop2/ — 200 and no x-robots-tag header; https://www.rempireshop.com/ — 308 to rempireshop.com; /robots.txt and /sitemap.xml — the production ones, on rempireshop.com; one old Shopify address /products/… — 301 to /shop2/p/…; /feed/google-en.xml — 200; a POST to /api/payments/notify/ — 400, not 308. Rollback: A @ → 23.227.38.65, CNAME www → shops.myshopify.com."
+      },
+      "outside": "Cloudflare",
       "needs": [
-        "code-untested",
-        "domain-dns"
-      ],
-      "title": "Пройти docs/montonio-untested.md руками",
-      "detail": "Он существует потому, что эти пути нельзя доказать в песочнице: настоящий возврат, настоящий отказ перевозчика в регистрации, настоящий PDF наклейки, проверка телефона и адреса, которую песочница пропускает целиком.",
-      "en": {
-        "title": "Work through `docs/montonio-untested.md` by hand",
-        "detail": "It exists because these paths cannot be proved in a sandbox: a real refund, a carrier actually refusing a registration, a real label PDF, phone and address validation the sandbox skips entirely."
-      }
-    },
-    {
-      "id": "real-order",
-      "area": "firsthour",
-      "who": [
-        "dim"
-      ],
-      "status": "todo",
-      "needs": [
-        "domain-dns"
-      ],
-      "title": "Сделать один настоящий заказ от начала до конца и вернуть за него деньги",
-      "detail": "Возвраты в этот момент отработают впервые в жизни.",
-      "en": {
-        "title": "Place one real order, end to end, and refund it",
-        "detail": "This is the first time refunds will ever have run."
-      }
+        "public-base-url",
+        "dns-keeplist"
+      ]
     },
     {
       "id": "smoke-live",
-      "area": "firsthour",
+      "area": "switches",
       "who": [
         "claude"
       ],
@@ -862,25 +1026,233 @@
       "needs": [
         "domain-dns"
       ],
-      "title": "Прогнать смоук по живому сайту и сравнить со стендом",
-      "detail": "Тот же набор проверок, что по стенду, — разница и есть отчёт.",
+      "title": "7. Смоук по живому сайту",
+      "detail": "npm run smoke -- https://rempireshop.com — тот же набор проверок, что по стенду, только чтение. Разница со стендом и есть отчёт.",
       "en": {
-        "title": "Smoke the live site and compare against staging",
-        "detail": "The same set of checks as staging — the difference is the report."
+        "title": "7. Smoke the live site",
+        "detail": "npm run smoke -- https://rempireshop.com — the same read-only checks as against staging. The difference from staging is the report."
       }
     },
     {
-      "id": "webhook-alarm",
-      "area": "firsthour",
+      "id": "webhook-move",
+      "area": "switches",
       "who": [
         "dim"
       ],
       "status": "todo",
-      "title": "Убедиться, что что-то сообщает, когда уведомление об оплате не дошло",
-      "detail": "Молчание в этом месте выглядит ровно как «заказов нет».",
+      "outside": "Montonio",
+      "needs": [
+        "domain-dns"
+      ],
+      "title": "8. Вебхук посылок — на rempireshop.com",
+      "detail": "node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs list — записать id старого → … register https://rempireshop.com/api/shipping/notify/ (со слешем в конце) → «Подключения» зелёные → … delete <старый id> → list показывает один вебхук с четырьмя событиями. Уведомления об оплате ничего не требуют: адрес едет с каждым заказом из PUBLIC_BASE_URL.",
       "en": {
-        "title": "Confirm something tells you when a payment webhook fails",
-        "detail": "Silence here looks exactly like «no orders»."
+        "title": "8. The parcel webhook — onto rempireshop.com",
+        "detail": "node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs list — note the old id → … register https://rempireshop.com/api/shipping/notify/ (trailing slash) → «Подключения» green → … delete <the old id> → list shows one webhook with four events. Payment notices need nothing: their address travels with every order, from PUBLIC_BASE_URL."
+      }
+    },
+    {
+      "id": "renat-signin",
+      "area": "switches",
+      "who": [
+        "renat"
+      ],
+      "status": "todo",
+      "needs": [
+        "domain-dns"
+      ],
+      "title": "9. Ренат входит в панель на rempireshop.com",
+      "detail": "Вход — по адресу, поэтому на новом адресе заново: rempireshop.com/admin, пароль. Добавить панель на экран телефона заново с этого адреса и включить уведомления о заказах там же — подписка старого адреса к новому не переходит.",
+      "en": {
+        "title": "9. Renat signs in to the panel on rempireshop.com",
+        "detail": "Signing in is per address, so again on the new one: rempireshop.com/admin, the password. Add the panel to the phone's home screen again from this address and switch order notifications on there — the old address's subscription does not carry over."
+      }
+    },
+    {
+      "id": "real-order",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "needs": [
+        "domain-dns",
+        "webhook-move"
+      ],
+      "title": "10. Первый настоящий заказ на rempireshop.com",
+      "detail": "Небольшой заказ на rempireshop.com, оплата банковской ссылкой, «Самовывоз в салоне». Вернуться на страницу «заказ принят», заказ «оплачен» в панели, письмо пришло, номер — после номеров живого часа. Вернуть деньги — на следующий рабочий день, и проверить, что возврат дошёл и пришло письмо «Деньги возвращены».",
+      "en": {
+        "title": "10. The first real order on rempireshop.com",
+        "detail": "A small order on rempireshop.com, paid by bank link, «Самовывоз в салоне». Back on the «order received» page, the order «оплачен» in the panel, the letter arrived, the number after the live hour's numbers. Refund it the next business day and check that the refund arrived and the «Деньги возвращены» letter came."
+      }
+    },
+    {
+      "id": "merchant-feeds",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "outside": "Merchant Center",
+      "needs": [
+        "domain-dns",
+        "google-feed"
+      ],
+      "title": "11. Merchant Center: три наших фида рядом с Shopify",
+      "detail": "docs/merchant-feed.md, шаг B: добавить https://rempireshop.com/feed/google-en.xml, google-et.xml и google-ru.xml рядом с шестью источниками Shopify. Источники Shopify и его домен не трогать: номера товаров в наших фидах новые, Google проверяет каждый 1–3 дня.",
+      "en": {
+        "title": "11. Merchant Center: our three feeds beside Shopify's",
+        "detail": "docs/merchant-feed.md, step B: add https://rempireshop.com/feed/google-en.xml, google-et.xml and google-ru.xml beside the six Shopify sources. Leave Shopify's sources and its domain alone: our feed ids are new, and Google reviews every item in 1–3 days."
+      }
+    },
+    {
+      "id": "search-console",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "outside": "Search Console",
+      "needs": [
+        "domain-dns"
+      ],
+      "title": "12. Search Console: карта сайта и запрос индексации",
+      "detail": "Свойство sc-domain:rempireshop.com (подтверждено TXT-записью, она остаётся): отправить https://rempireshop.com/sitemap.xml и запросить индексацию главной и двух-трёх разделов.",
+      "en": {
+        "title": "12. Search Console: the sitemap and an indexing request",
+        "detail": "The property sc-domain:rempireshop.com (verified by the TXT record, which stays): submit https://rempireshop.com/sitemap.xml and request indexing for the home page and two or three sections."
+      }
+    },
+    {
+      "id": "shopify-watch",
+      "area": "switches",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "outside": "Shopify",
+      "needs": [
+        "domain-dns"
+      ],
+      "title": "13. Заказы Shopify — в 12:00, 18:00 и утром; удалить два файла .env",
+      "detail": "DNS расходится не мгновенно: часть покупателей ещё попадает в Shopify. Заказы Shopify проверить в 12:00, 18:00 и на следующее утро (и дальше 72 часа), каждый — выполнить и списать в «Складе» руками. Домен в Shopify не трогать до шага E docs/merchant-feed.md. В конце дня удалить .env.railway.txt и .env.montonio-live.txt.",
+      "en": {
+        "title": "13. Shopify orders at 12:00, 18:00 and next morning; delete the two .env files",
+        "detail": "DNS does not move everywhere at once: some shoppers still reach Shopify. Check Shopify's orders at 12:00, 18:00 and the next morning (and for 72 hours), fulfil each one and write it off in «Склад» by hand. Leave the domain in Shopify alone until step E of docs/merchant-feed.md. At the end of the day delete .env.railway.txt and .env.montonio-live.txt."
+      }
+    },
+    {
+      "id": "untested-by-hand",
+      "area": "after",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "needs": [
+        "code-untested",
+        "real-order"
+      ],
+      "title": "Что живой час не доказал — проверить на первых заказах",
+      "detail": "docs/montonio-untested.md. Живой час 26.09 доказал оплату и этикетку DPD; не доказано: возврат, дошедший до покупателя, и письмо «Деньги возвращены»; письмо «Отправлен» с трек-номером (проверить на первой настоящей посылке); отказ перевозчика и «Отправить заново»; Omniva, SmartPosti, Unisend, Nova Post, заказ курьера, PDF этикетки не DPD. Каждое — на первом настоящем заказе, где оно встретится.",
+      "en": {
+        "title": "What the live hour did not prove — check it on the first orders",
+        "detail": "docs/montonio-untested.md. The live hour of 26.09 proved payment and a DPD label; not proven: a refund reaching the customer and the «Деньги возвращены» letter; the «Отправлен» letter with its tracking number (check on the first real parcel); a carrier refusing and «Отправить заново»; Omniva, SmartPosti, Unisend, Nova Post, a courier booking, a non-DPD label PDF. Each one on the first real order where it comes up."
+      }
+    },
+    {
+      "id": "webhook-alarm",
+      "area": "after",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "title": "Каждое утро смотреть, что ночь прошла",
+      "detail": "Пока о сбоях ничего не сообщает само: застрявший или отменённый возврат, оплата, найденная ночной сверкой, отказ перевозчика, вернувшаяся посылка, не сработавшее ночное задание. Каждое утро: «Обзор» и «Подключения» в панели и в логе Vercel строка ночного задания (без CRON_SECRET оно молча отвечает 503). Молчание здесь выглядит ровно как «заказов нет».",
+      "en": {
+        "title": "Every morning, check that the night went through",
+        "detail": "For now nothing reports a failure by itself: a stuck or cancelled refund, a payment found by the nightly re-check, a carrier refusal, a returned parcel, a nightly job that did not run. Every morning: «Обзор» and «Подключения» in the panel and the nightly job's line in the Vercel log (without CRON_SECRET it answers 503 silently). Silence here looks exactly like «no orders»."
+      }
+    },
+    {
+      "id": "staging-host",
+      "area": "after",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "outside": "Vercel",
+      "title": "Не отключать адрес стенда ещё 6 недель",
+      "detail": "rempireshop.diipsolutions.eu остаётся в проекте Vercel, без перенаправления, минимум 6 недель: на него приходят уведомления Montonio о заказах, созданных до переключения, на нём приложение Рената на экране телефона и старые push-подписки.",
+      "en": {
+        "title": "Keep the staging address for 6 more weeks",
+        "detail": "rempireshop.diipsolutions.eu stays on the Vercel project, with no redirect, for at least 6 weeks: Montonio's notices for orders created before the switch arrive there, and Renat's home-screen app and the old push subscriptions live on it."
+      }
+    },
+    {
+      "id": "google-cutover",
+      "area": "after",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Убрать фиды Shopify — только после того, как свой отработал сутки",
+      "detail": "docs/merchant-feed.md, шаги C–E. Состояние на 23.09.2026: шесть источников Shopify App API по 327 товаров, ещё 7 товаров «Найдено Google» с rempireshop.com; 22 правила доставки Shopify «flat 15 € / 4–12 дней» — у наших товаров своя доставка в фиде, она важнее. Ссылка «Оформить» в Business info — https://rempireshop.com/cart/{id}:1 (формат Shopify): магазин её понимает, id — наши id из фида. Источники Shopify и его политики доставки удаляются только когда наши товары «Одобрены».",
+      "en": {
+        "title": "Remove the Shopify feeds — only after ours has run for a day",
+        "detail": "docs/merchant-feed.md, steps C–E. State on 23.09.2026: six Shopify App API sources of 327 products each, plus 7 products «Found by Google» on rempireshop.com; 22 Shopify shipping policies «flat €15 / 4–12 days» — our items carry their own shipping in the feed, which wins. The checkout link in Business info is https://rempireshop.com/cart/{id}:1 (Shopify's format): the shop answers it, with our feed ids. The Shopify sources and their shipping policies are deleted only once our products are «Approved»."
+      },
+      "needs": [
+        "merchant-feeds"
+      ]
+    },
+    {
+      "id": "google-clicks",
+      "area": "after",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "blocking": false,
+      "title": "Через неделю после переключения сверить переходы с тем, что было",
+      "detail": "На 19.09 было 175 переходов за 28 дней бесплатными карточками, реклама не тратилась. Если после переключения число ушло вниз, причина почти всегда одна из двух: товары не прошли модерацию или доставка в фиде не сходится со страницей.",
+      "en": {
+        "title": "A week after the switch, compare the clicks with what they were",
+        "detail": "On 19.09 it was 175 clicks in 28 days from free listings, with no ad spend. If the number falls after the switch the cause is nearly always one of two: products failing review, or feed shipping that disagrees with the page."
+      },
+      "needs": [
+        "google-cutover"
+      ]
+    },
+    {
+      "id": "backups-weekly",
+      "area": "after",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "outside": "Railway",
+      "title": "Копия базы — раз в неделю",
+      "detail": "Автоматических копий на Railway Hobby нет. Раз в неделю node --env-file=.env.railway.txt tools/db-backup.mjs (файл .env.railway.txt создать на время и удалить) — или перейти на Railway Pro, где есть кнопка снимков.",
+      "en": {
+        "title": "A copy of the database — once a week",
+        "detail": "Railway Hobby makes no automatic copies. Once a week node --env-file=.env.railway.txt tools/db-backup.mjs (create .env.railway.txt for the occasion and delete it) — or move to Railway Pro, which has a snapshot button."
+      }
+    },
+    {
+      "id": "services-handover",
+      "area": "after",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "title": "Передать оплату сервисов Ренату — в первый месяц",
+      "detail": "docs/renat-services.md. Railway: карта компании вместо карты Димы — важнее всего: неоплата Railway останавливает базу, а с ней магазин (карта Димы остаётся до переключения). OpenAI: перенести на аккаунт магазина (rempireshopinfo@), карта компании, месячный лимит около 10 $, новый ключ — в Vercel OPENAI_API_KEY и Redeploy. Zone.ee: дата продления домена и владелец — Rempire Store OÜ. Montonio: счета на компанию, письма о задержке посылок — на ящик, который читает Ренат. Shopify: выгрузить заказы и покупателей, потом отменить тариф. Telegram-бот @rempireshop_bot: передать владение через BotFather, после того как Ренат нажмёт Start.",
+      "en": {
+        "title": "Hand the services' billing over to Renat — in the first month",
+        "detail": "docs/renat-services.md. Railway: the company card instead of Dim's — the most important one: an unpaid Railway bill stops the database and the shop with it (Dim's card stays until the switch). OpenAI: move to the shop's account (rempireshopinfo@), the company card, a monthly limit of about $10, the new key into Vercel OPENAI_API_KEY and Redeploy. Zone.ee: the domain's renewal date, and the registrant — Rempire Store OÜ. Montonio: invoices to the company, parcel-delay e-mails to a mailbox Renat reads. Shopify: export the orders and customers, then cancel the plan. The Telegram bot @rempireshop_bot: transfer ownership through BotFather after Renat presses Start."
       }
     }
   ]

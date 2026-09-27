@@ -11,12 +11,12 @@
  * the owner waiting, against the only copy, is how shops die. This is that job
  * written down instead.
  *
- *   node tools/go-live-reset.mjs                 # DRY RUN — prints, changes nothing
- *   node tools/go-live-reset.mjs --clear --confirm "…"   # the real thing
+ *   node --env-file=.env.railway.txt tools/go-live-reset.mjs                 # DRY RUN — prints, changes nothing
+ *   node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "…"   # the real thing
  *
  * Read docs/go-live-reset.md before running it. Its first instruction is to
- * take a Railway snapshot and check that the snapshot exists, because nothing
- * here is undoable and a rollback is a restore.
+ * take a copy of the database (tools/db-backup.mjs) and check that it reads
+ * back, because nothing here is undoable and a rollback is a restore.
  *
  * ---------------------------------------------------------------------------
  * THE FOUR RULES THIS FILE IS BUILT ON
@@ -207,9 +207,12 @@ export const PLAN = [
     table: "orders",
     verdict: "clear",
     why:
-      "Every test basket that reached the bank's page. The reason the whole exercise exists. Clearing them also " +
-      "restarts order_number_seq at 100001, so the first real order is R-100001 — safe only because the table " +
-      "ends empty, which is asserted.",
+      "Every test basket that reached the bank's page. The reason the whole exercise exists. The NUMBERS do " +
+      "not start again: an order number is the merchantReference Montonio keeps for good, and since the live " +
+      "hour of 26.09.2026 R-100095…R-100098 exist in the LIVE Montonio account. A first real order numbered " +
+      "R-100001 would one day be followed by a second R-100095. So order_number_seq continues after the highest " +
+      "number the shop has ever handed out — read inside the transaction, before the delete — and never moves " +
+      "lower (nextOrderNumber()).",
   },
   {
     table: "order_messages",
@@ -495,6 +498,42 @@ async function one(db, sql, params) {
   return r[0] || {};
 }
 
+/** Where order numbering began (db/migrations/001_core.sql) and the floor it never goes under. */
+export const FIRST_ORDER_NUMBER = 100001;
+
+/**
+ * The number the first order after the clear will get — and the proof of it.
+ *
+ * Until 27.09.2026 the clear restarted order_number_seq at 100001. That was
+ * harmless while every order had gone to the Montonio SANDBOX; it stopped
+ * being harmless on 26.09.2026, when the live hour ran on the staging shop
+ * with the live keys and R-100095…R-100098 became merchantReferences in the
+ * LIVE Montonio account, where the shop's refunds, reports and support look
+ * orders up. A restart at 100001 hands out R-100095 a second time a few
+ * months later (audit 27.09.2026, G26).
+ *
+ * So the sequence continues instead: after the highest `R-<n>` in `orders`,
+ * and never below the sequence's own next value — a number can have left the
+ * building for an order that has since been deleted by hand, and the sequence
+ * is the only thing that remembers it. Never below 100001 either.
+ *
+ * Read INSIDE the clear's transaction and BEFORE its deletes: after them the
+ * table is empty and «the highest number» is nothing at all.
+ */
+export async function nextOrderNumber(db) {
+  const hi = await one(
+    db,
+    `select coalesce(max((substring(number from '^R-([0-9]{1,15})$'))::bigint), 0)::text as n from orders`,
+  );
+  const seq = await one(db, "select last_value::text as last, is_called from order_number_seq");
+  const highest = Number(hi.n || 0);
+  const last = Number(seq.last || 0);
+  const seqNext = seq.is_called === true || seq.is_called === "t" ? last + 1 : last;
+  const next = Math.max(FIRST_ORDER_NUMBER, highest + 1, seqNext);
+  if (!Number.isSafeInteger(next)) throw new Error(`go-live-reset: an order number out of range (${next})`);
+  return { highest: highest || null, seqNext, next };
+}
+
 /**
  * The gift-card liability check, and it has to run BEFORE the orders are gone:
  * once `orders` is empty every card looks like an orphan.
@@ -737,6 +776,8 @@ export async function goLiveReset(db, opts = {}) {
     look,
     settingsKeysGoing,
     settingsKeysPresent: settingsPresent,
+    /* The dry run's answer; a clear reads it again inside its transaction. */
+    orderNumbers: await nextOrderNumber(db),
     changed: { promoCodes: 0, newsletters: 0, sequence: false, invoiceYears: before.tables.invoice_counters.n },
   };
 
@@ -768,6 +809,9 @@ export async function goLiveReset(db, opts = {}) {
   await db.query("begin isolation level repeatable read");
   try {
     const beforeTx = await snapshot(db, settingsKeysGoing);
+    /* Before the deletes, in the same snapshot — see nextOrderNumber(). */
+    const numbers = await nextOrderNumber(db);
+    report.orderNumbers = numbers;
 
     for (const t of DELETE_ORDER) await db.query(`delete from ${t}`);
     if (stock) for (const t of STOCK_ORDER) await db.query(`delete from ${t}`);
@@ -794,10 +838,13 @@ export async function goLiveReset(db, opts = {}) {
     for (const k of settingsKeysGoing) await db.query("delete from settings where key = $1", [k]);
 
     /* Only because the table ends empty. ALTER SEQUENCE … RESTART is DDL and
-       rolls back with everything else, unlike setval(). */
+       rolls back with everything else, unlike setval(). The value is an
+       integer this file computed (nextOrderNumber() checks it is safe), never
+       text from the database or the command line. It is at least where the
+       sequence already was, so this can only ever move the numbering on. */
     const left = await one(db, "select count(*)::int as n from orders");
     if (Number(left.n) === 0) {
-      await db.query("alter sequence order_number_seq restart with 100001");
+      await db.query(`alter sequence order_number_seq restart with ${numbers.next}`);
       report.changed.sequence = true;
     }
 
@@ -839,7 +886,17 @@ export function maskUrl(url) {
 const pad = (s, n) => String(s).padEnd(n, " ");
 const padL = (s, n) => String(s).padStart(n, " ");
 
-export function formatReport(report, { url } = {}) {
+/**
+ * `launcher` is how the pasteable line at the bottom starts — `node`, or
+ * `node --env-file=.env.railway.txt` when that is how this run was started
+ * (main() reads it off process.execArgv). The morning's command carries the
+ * env file; a line that drops it answers «DATABASE_URL is not set» at the
+ * worst possible moment (audit 27.09.2026, G2).
+ *
+ * @param {any} report
+ * @param {{ url?: string, launcher?: string }} [opts]
+ */
+export function formatReport(report, { url, launcher = "node" } = {}) {
   const L = [];
   const dry = report.mode === "dry";
   const w = Math.max(...PLAN.map((p) => p.table.length)) + 2;
@@ -906,7 +963,14 @@ export function formatReport(report, { url } = {}) {
   );
   L.push(`  settings keys removed  ${report.settingsKeysPresent.length ? report.settingsKeysPresent.join(", ") : "(none of them are set)"}`);
   if (!report.testplan) L.push("  settings.testplan_answers  KEPT — the acceptance record. --testplan clears it.");
-  L.push(`  order_number_seq      ${report.changed.sequence ? "restarted at 100001" : "restart to 100001 once orders is empty"}`);
+  const on = report.orderNumbers;
+  if (on) {
+    const after = on.highest ? `after R-${on.highest}, the highest number handed out so far` : "nothing handed out yet";
+    L.push(
+      `  order_number_seq      ${report.changed.sequence ? "continues" : "will continue"} at R-${on.next} — ${after};` +
+        " never restarted lower, Montonio keeps the old numbers",
+    );
+  }
   L.push(`  invoice_counters      ${report.changed.invoiceYears} year row(s) — the numbering starts again at 1`);
   L.push("");
 
@@ -949,7 +1013,7 @@ export function formatReport(report, { url } = {}) {
       (report.testplan ? " --testplan" : "") +
       (report.guard.blocked ? " --gift-cards-are-test-cards" : "");
     L.push("Nothing was changed. To do it for real:");
-    L.push(`  node tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"${flags}`);
+    L.push(`  ${launcher} tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"${flags}`);
     if (report.guard.blocked) L.push("  — and only after you have looked at the gift cards above.");
   } else {
     L.push("Done, in one transaction, with every KEEP table verified unchanged before the commit.");
@@ -977,15 +1041,44 @@ function parseArgs(argv) {
 
 const USAGE = `go-live-reset — remove the staging test data before the shop opens.
 
-  node tools/go-live-reset.mjs                          dry run: prints, changes nothing
-  node tools/go-live-reset.mjs --clear --confirm "…"    clears, in one transaction
+  node --env-file=.env.railway.txt tools/go-live-reset.mjs                          dry run: prints, changes nothing
+  node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "…"    clears, in one transaction
 
-  --stock                        also clear stock_levels AND stock_moves (never one alone)
+  .env.railway.txt holds DATABASE_URL=<Railway's DATABASE_PUBLIC_URL> and, on a
+  second line, DATABASE_SSL_NO_VERIFY=1 (Railway signs its certificate with a
+  private CA) — or DATABASE_SSL_CA with that CA. docs/go-live-reset.md, step 1.
+
+  --stock                        also clear stock_levels AND stock_moves (never one alone) — NOT on launch day
   --testplan                     also clear settings.testplan_answers
   --gift-cards-are-test-cards    proceed past the gift-card liability check
   DB_DRIVER=pglite               run against an empty in-memory Postgres instead
 
-Read docs/go-live-reset.md first. Its first step is the Railway snapshot.`;
+Read docs/go-live-reset.md first. Its first step is the database copy (tools/db-backup.mjs).`;
+
+/**
+ * How this run was started, for the pasteable line: `node` plus any
+ * --env-file the operator gave node itself. Only --env-file is carried over;
+ * nothing else from execArgv is worth repeating, and nothing here is secret —
+ * it is a file NAME, never its contents.
+ */
+export function launcherFrom(execArgv = []) {
+  const out = ["node"];
+  for (let i = 0; i < execArgv.length; i++) {
+    const a = String(execArgv[i]);
+    if (/^--env-file(-if-exists)?=/.test(a)) out.push(a);
+    else if ((a === "--env-file" || a === "--env-file-if-exists") && execArgv[i + 1]) out.push(`${a}=${execArgv[++i]}`);
+  }
+  return out.join(" ");
+}
+
+/* The errors node-postgres gives when the server's certificate chain ends in a
+   CA Node does not trust — Railway's own, every time (docs/backend.md). */
+const TLS_UNTRUSTED = new Set([
+  "SELF_SIGNED_CERT_IN_CHAIN",
+  "DEPTH_ZERO_SELF_SIGNED_CERT",
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+  "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+]);
 
 async function connect() {
   if (process.env.DB_DRIVER === "pglite") {
@@ -996,12 +1089,28 @@ async function connect() {
   }
   const url = process.env.DATABASE_URL;
   if (!url) {
-    console.error("DATABASE_URL is not set. Put it in .env.local (see docs/backend.md) or run with DB_DRIVER=pglite.");
+    console.error(
+      "DATABASE_URL is not set. Start the tool with the file from docs/go-live-reset.md, step 1:\n" +
+        "  node --env-file=.env.railway.txt tools/go-live-reset.mjs\n" +
+        "(or run with DB_DRIVER=pglite for an empty in-memory database).",
+    );
     process.exit(1);
   }
   const { default: pg } = await import("pg");
   const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
-  await client.connect();
+  try {
+    await client.connect();
+  } catch (err) {
+    if (err && TLS_UNTRUSTED.has(err.code)) {
+      console.error(
+        `Could not verify the database's certificate (${err.code}). Railway signs it with its own CA.\n` +
+          "Add one line to .env.railway.txt — DATABASE_SSL_NO_VERIFY=1 — or DATABASE_SSL_CA with Railway's CA,\n" +
+          "and run the same command again. Nothing was changed.",
+      );
+      process.exit(1);
+    }
+    throw err;
+  }
   return { db: client, close: () => client.end(), url };
 }
 
@@ -1015,14 +1124,15 @@ async function main() {
     console.error(`Unknown argument: ${args.unknown}\n\n${USAGE}`);
     process.exit(2);
   }
+  const launcher = launcherFrom(process.execArgv);
   if (args.clear && args.confirm !== CONFIRM_PHRASE) {
     console.error(
       "--clear needs the confirmation, spelled exactly. Paste this line:\n\n" +
-        `  node tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"` +
+        `  ${launcher} tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"` +
         (args.stock ? " --stock" : "") +
         (args.testplan ? " --testplan" : "") +
         (args.giftCardsAreTest ? " --gift-cards-are-test-cards" : "") +
-        "\n\nAnd take the Railway snapshot first — docs/go-live-reset.md, step 1.",
+        "\n\nAnd take the database copy first — docs/go-live-reset.md, step 1.",
     );
     process.exit(2);
   }
@@ -1034,7 +1144,7 @@ async function main() {
   const { db, close, url } = await connect();
   try {
     const report = await goLiveReset(db, args);
-    console.log(formatReport(report, { url }));
+    console.log(formatReport(report, { url, launcher }));
   } finally {
     await close();
   }
