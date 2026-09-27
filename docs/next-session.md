@@ -1,4 +1,41 @@
-# Where we stopped — 18→19.09.2026
+# Where we stopped — 27.09.2026
+
+**The launch is next.** Everything below this section is the history of 18–19.09
+and has not been rewritten; read it for context, not for state.
+
+- **The live hour ran on 26.09.2026** on the staging shop with the live Montonio
+  keys (`MONTONIO_ENV=live` in Vercel since that day — every staging order is
+  real money now). Bank link, card and Google Pay settled; a cancelled payment;
+  a full and a partial refund sent; a real DPD parcel-machine label for
+  R-100098, whose slow answer led to the fix that stops a second paid parcel
+  (merge `4acae96`).
+- **The go-live readiness pass was done on 27.09.2026** —
+  `docs/audit-2026-09-27-readiness.md`, part A (the day, configuration, domain)
+  and part B (money, orders, shipping, letters). Its verdict: a date can be
+  picked, at least three working days out; taking money is ready, giving it
+  back is not proven.
+- **Three branches worked it the same day:** refunds (`src/lib/payments`),
+  alerts and the shipment re-check, and the launch procedure
+  (`fix-v5-launch`: the order of the day, the reset's order numbers,
+  `legal.js`, the hidden-product sitemap, the stock import tool). Each reports
+  on its own; what the readiness pass left open is in its tables.
+- **The day itself is written in `docs/go-live.md`**, Stage 4, thirteen steps,
+  and on `/golive/` as numbered rows in phase B. Phase A now ends with a
+  «the day before» list (clean-up of test data, the last meeting with Renat,
+  closing the live-hour orders, both rehearsals, Vercel domains and
+  environment, the DNS keep-list); nothing in phase A waits for DNS any more.
+- **Decided by Dim on 27.09.2026:** stay on Vercel Hobby for now; test data is
+  removed by hand the day before (the reset keeps own products, promo codes,
+  sets, posts, newsletters); which automatic letters go on after the reset is
+  agreed with Renat at the last meeting and switched on right after it.
+- **Waiting on Montonio:** how a refund is funded after the daily payout (B3).
+- **Env files:** the live Montonio pair is in `.env.montonio-live.txt` and the
+  database URL in `.env.railway.txt` (plus `DATABASE_SSL_NO_VERIFY=1`); both
+  are deleted at the end of launch day, not before.
+
+---
+
+# Where we stopped — 18→19.09.2026 (history)
 
 Two parts: the night's work, and what Dim's own pass over `/test/` on the
 morning of the 19th turned up. The night is the second half of this file and it
