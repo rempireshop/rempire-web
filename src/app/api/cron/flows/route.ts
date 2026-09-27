@@ -29,7 +29,7 @@ import { timingSafeEqual } from "node:crypto";
 import { runFlows } from "@/lib/flows";
 import { resumeParkedNewsletters } from "@/lib/newsletters";
 import { reconcileUnpaidOrders, type ReconcileReport } from "@/lib/payments/reconcile";
-import { recheckPendingRefunds, REFUND_RECHECK_BUDGET_MS } from "@/lib/payments/refund-recheck";
+import { recheckPendingRefunds, REFUND_RECHECK_BUDGET_MS, type RefundRecheckReport } from "@/lib/payments/refund-recheck";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,7 +53,24 @@ type SweepAnswer = Partial<ReconcileReport> & { error?: string };
  * — which nobody reads — and nowhere in Vercel's log, which is where anybody
  * asking «what happened last night» looks.
  */
-function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>, payments?: SweepAnswer): string {
+type RefundAnswer = Partial<RefundRecheckReport> & { error?: string };
+
+/** « · refunds: asked 1, done 1, …» — the pending-refund re-check (refund-recheck.ts, audit 27.09.2026 B9) on the same line. */
+function refundPart(refunds?: RefundAnswer): string {
+  if (!refunds) return "";
+  if (refunds.error) return ` · refunds: ${refunds.error}`;
+  return (
+    ` · refunds: asked ${refunds.asked ?? 0}, done ${refunds.done ?? 0}, failed ${refunds.failed ?? 0}, ` +
+    `pending ${refunds.pending ?? 0}, unknown ${(refunds.unknown ?? 0) + (refunds.missing ?? 0)}` +
+    (refunds.skipped ? ` (${refunds.skipped})` : "")
+  );
+}
+
+function flowsLogLine(
+  report: Awaited<ReturnType<typeof runFlows>>,
+  payments?: SweepAnswer,
+  refunds?: RefundAnswer,
+): string {
   const flows = ["abandoned", "abandonedDiscount", "backstock", "birthday", "unpaid"] as const;
   const s = report.shipments;
   /* The parcel backup poll (src/lib/shipping/shipment-sync.ts) on the same
@@ -84,7 +101,7 @@ function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>, payments?: S
         const r = report[k];
         return `${k}: sent ${r.sent}, skipped ${r.skipped}${r.reason ? ` (${r.reason})` : ""}`;
       })
-      .join(" · ") + parcels + delivered + pay + ` · ${report.ms} ms`
+      .join(" · ") + parcels + delivered + pay + refundPart(refunds) + ` · ${report.ms} ms`
   );
 }
 
@@ -134,16 +151,12 @@ export async function GET(req: Request) {
        capped so the parked campaigns below keep theirs: no new question after
        30 s of this function's minute, and one question takes at most 15 s.
        It never throws; caught here all the same, for the same reason. */
-    let refunds;
+    let refunds: RefundAnswer;
     try {
+      // its counts ride the morning's one log line below (flowsLogLine)
       refunds = await recheckPendingRefunds({
         budgetMs: Math.max(0, Math.min(REFUND_RECHECK_BUDGET_MS, 30_000 - (Date.now() - started))),
       });
-      console.info(
-        `[api/cron/flows] refunds: asked ${refunds.asked}, done ${refunds.done}, failed ${refunds.failed}, ` +
-          `pending ${refunds.pending}, unknown ${refunds.unknown + refunds.missing}` +
-          (refunds.skipped ? ` (${refunds.skipped})` : ""),
-      );
     } catch (err) {
       console.error("[api/cron/flows] the refund re-check failed:", err);
       refunds = { error: "failed" };
@@ -154,7 +167,7 @@ export async function GET(req: Request) {
        the same thing per letter; this is the copy that survives in Vercel's
        log beside everything else that happened at that hour — written after
        the payment sweep since 27.09.2026, so the line carries it too (B14). */
-    console.info(`[api/cron/flows] ${flowsLogLine(report, reconciled)}`);
+    console.info(`[api/cron/flows] ${flowsLogLine(report, reconciled, refunds)}`);
     /* …and the campaigns that ran out of day. A «Рассылка» bigger than the
        free plan's hundred letters stops at the cap and parks itself
        (src/lib/mail-budget.ts, src/lib/newsletters.ts): nothing in a
