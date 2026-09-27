@@ -325,6 +325,16 @@ export const PLAN = [
       "addresses that are being deleted in the same transaction. Emptying it is what lets the letter itself go " +
       "back to 'draft' and be sent for real.",
   },
+  {
+    table: "owner_alerts",
+    verdict: "clear",
+    why:
+      "The owner's alerts already sent, one row per event (217_owner_alerts.sql, src/lib/owner-alerts.ts): a " +
+      "refund Montonio could not pay, a payment the nightly check found, a parcel refused or sent back. Every row " +
+      "is about a test order this tool deletes. And it must go, not merely may: a row is a once-only key built " +
+      "from an order number (`payment_recovered:R-100001`), so if the numbers start again after the reset a " +
+      "stale key would silence the first real alert of that kind for that number.",
+  },
 
   /* ---- the schema cannot decide -------------------------------------------- */
   {
@@ -392,6 +402,7 @@ export const DELETE_ORDER = [
   "events",
   "idempotency_keys",
   "invoice_counters",
+  "owner_alerts",
   "orders",
   "customers",
 ];

@@ -28,7 +28,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { runFlows } from "@/lib/flows";
 import { resumeParkedNewsletters } from "@/lib/newsletters";
-import { reconcileUnpaidOrders } from "@/lib/payments/reconcile";
+import { reconcileUnpaidOrders, type ReconcileReport } from "@/lib/payments/reconcile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,22 +38,52 @@ export const maxDuration = 60;
 
 const NO_STORE = { "cache-control": "no-store" };
 
-/** `abandoned: sent 1, skipped 2 (too_fresh) · abandonedDiscount: …` — counts and codes only, never an address. */
-function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>): string {
+/** What the payment sweep answered — its report, or the handler's own `{ error }`. */
+type SweepAnswer = Partial<ReconcileReport> & { error?: string };
+
+/**
+ * `abandoned: sent 1, skipped 2 (too_fresh) · abandonedDiscount: … · shipments: …
+ * · delivered: … · payments: …` — counts and codes only, never an address and
+ * never an order number.
+ *
+ * Readiness pass 27.09.2026, B14: the line used to stop at the letters and
+ * three numbers of the parcel poll, so a parcel that came back, an order the
+ * nightly close closed and a payment the sweep found were in the JSON answer
+ * — which nobody reads — and nowhere in Vercel's log, which is where anybody
+ * asking «what happened last night» looks.
+ */
+function flowsLogLine(report: Awaited<ReturnType<typeof runFlows>>, payments?: SweepAnswer): string {
   const flows = ["abandoned", "abandonedDiscount", "backstock", "birthday", "unpaid"] as const;
   const s = report.shipments;
   /* The parcel backup poll (src/lib/shipping/shipment-sync.ts) on the same
      line: a lost webhook it found is otherwise visible nowhere. */
   const parcels = s
-    ? ` · shipments: checked ${s.checked}, changed ${s.changed}, errors ${s.errors}${s.reason ? ` (${s.reason})` : ""}`
+    ? ` · shipments: checked ${s.checked}, changed ${s.changed}, refused ${s.refused}, returned ${s.returned ?? 0}, ` +
+      `closed ${s.closed}, errors ${s.errors}${s.notFound ? ` (404: ${s.notFound})` : ""}, left ${s.left}${s.reason ? ` (${s.reason})` : ""}`
     : "";
+  /* …the nightly close (src/lib/delivery.ts): what it closed, and the parcels
+     it left open because they are coming back */
+  const d = report.delivered;
+  const delivered = d
+    ? ` · delivered: closed ${d.closed}, checked ${d.checked}, returned ${d.returned ?? 0}${d.reason ? ` (${d.reason})` : ""}`
+    : "";
+  /* …and the payment sweep (src/lib/payments/reconcile.ts): a payment found
+     here is a webhook that never arrived. */
+  const pay = !payments
+    ? ""
+    : payments.error
+      ? ` · payments: ${payments.error}`
+      : payments.skipped
+        ? ` · payments: skipped (${payments.skipped})`
+        : ` · payments: checked ${payments.checked ?? 0}, found paid ${payments.settled ?? 0}, ` +
+          `odd ${payments.odd ?? 0}, no answer ${payments.unknown ?? 0}`;
   return (
     flows
       .map((k) => {
         const r = report[k];
         return `${k}: sent ${r.sent}, skipped ${r.skipped}${r.reason ? ` (${r.reason})` : ""}`;
       })
-      .join(" · ") + parcels + ` · ${report.ms} ms`
+      .join(" · ") + parcels + delivered + pay + ` · ${report.ms} ms`
   );
 }
 
@@ -78,12 +108,6 @@ export async function GET(req: Request) {
   }
   try {
     const report = await runFlows();
-    /* One line in the log per morning (Dim, 23.09.2026: an abandoned-cart
-       letter that did not come, and nothing anywhere to say whether the 07:00
-       run had even looked at the basket). The panel's «Последний запуск» says
-       the same thing per letter; this is the copy that survives in Vercel's
-       log beside everything else that happened at that hour. */
-    console.info(`[api/cron/flows] ${flowsLogLine(report)}`);
     /* …and, on the same daily trip, the lost-webhook sweep
        (/api/cron/payments-reconcile, src/lib/payments/reconcile.ts). It rides
        here because Vercel's Hobby plan allows exactly two cron jobs and both
@@ -95,13 +119,20 @@ export async function GET(req: Request) {
        seven-day «unpaid» cancel, which is a different feature and is off.
        Its own failure must never cost Renat his morning letters, so it is
        caught here rather than in the handler's catch. */
-    let reconciled;
+    let reconciled: SweepAnswer;
     try {
       reconciled = await reconcileUnpaidOrders();
     } catch (err) {
       console.error("[api/cron/flows] the payment sweep failed:", err);
       reconciled = { error: "failed" };
     }
+    /* One line in the log per morning (Dim, 23.09.2026: an abandoned-cart
+       letter that did not come, and nothing anywhere to say whether the 07:00
+       run had even looked at the basket). The panel's «Последний запуск» says
+       the same thing per letter; this is the copy that survives in Vercel's
+       log beside everything else that happened at that hour — written after
+       the payment sweep since 27.09.2026, so the line carries it too (B14). */
+    console.info(`[api/cron/flows] ${flowsLogLine(report, reconciled)}`);
     /* …and the campaigns that ran out of day. A «Рассылка» bigger than the
        free plan's hundred letters stops at the cap and parks itself
        (src/lib/mail-budget.ts, src/lib/newsletters.ts): nothing in a

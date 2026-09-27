@@ -877,10 +877,10 @@
       ],
       "status": "todo",
       "title": "Убедиться, что что-то сообщает, когда уведомление об оплате не дошло",
-      "detail": "Молчание в этом месте выглядит ровно как «заказов нет».",
+      "detail": "С 27.09 магазин сам присылает оповещение на телефон (пуш и Telegram; письмо на shop@ — если телефон не получил), когда: возврат не дошёл до покупателя или Montonio его отменил; «Вернуть деньги» отклонён; оплату нашла только ночная сверка (уведомление потерялось); заплатили меньше; перевозчик не принял посылку; посылка возвращается. Каждое — один раз. «Обзор» краснеет, если ночная проверка не запускалась больше суток. Осталось проверить вживую — пункты /test «live-alerts», «live-reconcile», «live-cron». Молчание в этом месте выглядит ровно как «заказов нет».",
       "en": {
         "title": "Confirm something tells you when a payment webhook fails",
-        "detail": "Silence here looks exactly like «no orders»."
+        "detail": "Since 27.09 the shop notifies the phone by itself (push and Telegram; a letter to shop@ if no phone took it) when: a refund did not reach the buyer or Montonio cancelled it; «Вернуть деньги» was refused; only the nightly check found a payment (the webhook was lost); a short payment; the carrier refused a parcel; a parcel is coming back. Each one once. «Обзор» turns red when the nightly check has not run for over a day. Still to verify live — /test checks «live-alerts», «live-reconcile», «live-cron». Silence here looks exactly like «no orders»."
       }
     }
   ]

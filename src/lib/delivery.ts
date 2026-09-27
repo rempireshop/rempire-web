@@ -185,6 +185,32 @@ function shipmentIdOf(shipping: unknown): string {
 }
 
 /**
+ * B14 (readiness pass 27.09.2026): a parcel this pass finds on its way back
+ * used to be a number in the cron's JSON and nothing else — the order stayed
+ * «Отправлен» and nobody was told. It goes through the one door every piece
+ * of parcel news goes through (applyShipmentUpdate in
+ * src/lib/shipping/shipment-sync.ts, as the nightly poll): the word onto the
+ * order, so the card can say it, and on the move INTO `returned` a journal
+ * row, which pings Renat's phone (src/lib/owner-alerts.ts). Once per parcel —
+ * the next night finds the word already stored. Loaded lazily (shipment-sync
+ * reads this module's white list through src/lib/shipping/webhook.ts) and
+ * never throws: the close of the other orders must go on.
+ */
+async function noteReturned(orderId: string, shipmentId: string, status: string, now: number): Promise<void> {
+  try {
+    const [{ getOrder }, { applyShipmentUpdate }] = await Promise.all([
+      import("@/lib/orders"),
+      import("@/lib/shipping/shipment-sync"),
+    ]);
+    const order = await getOrder(orderId);
+    if (!order) return;
+    await applyShipmentUpdate(order, { status, shipmentId }, { source: "poll", now: new Date(now) });
+  } catch (err) {
+    console.error(`[delivery] could not record the returned parcel on ${orderId}:`, err);
+  }
+}
+
+/**
  * One pass. `now` is injectable for the tests, exactly like runFlows().
  *
  * Best effort per order: a carrier that does not answer leaves that one alone
@@ -219,6 +245,7 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
         const shipment = await getMontonioShipment(shipmentId);
         if (looksReturned(shipment.status)) {
           returned += 1;
+          await noteReturned(row.id, shipmentId, shipment.status, now);
           continue;
         }
         if (settings.useCarrier && looksDelivered(shipment.status)) deliver = true;
@@ -240,6 +267,6 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
       console.error(`[delivery] could not close ${row.number}:`, err);
     }
   }
-  //  is reported so the nightly line says why a parcel did not close
+  // `returned` is reported so the nightly line says why a parcel did not close
   return { closed, checked: rows.length, returned };
 }

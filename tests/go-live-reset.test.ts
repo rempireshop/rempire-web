@@ -190,6 +190,8 @@ async function seedUsedShop(): Promise<void> {
   await query("insert into carts (email, items, total, reminded_at) values ('cart.test@example.com', '[]'::jsonb, 30, now())");
   await query("insert into cart_writes (email, day, n) values ('cart.test@example.com', '2026-09-17', 4)");
   await query("insert into cart_returns default values");
+  // an alert the owner already got about a test order (217_owner_alerts.sql)
+  await query("insert into owner_alerts (key, kind, number, delivered) values ('payment_recovered:R-100001', 'payment_recovered', 'R-100001', true)");
   await query(
     "insert into login_codes (email, code_hash, expires_at) values ('renat.test@example.com', 'deadbeef', now() + interval '10 minutes')",
   );
@@ -255,7 +257,7 @@ describe("the plan", () => {
   });
 
   it("gives every table a verdict and an argument", () => {
-    expect(plan.length).toBe(30 + 1); // 30 tables from db/migrations (213 added cart_returns), plus _migrations
+    expect(plan.length).toBe(31 + 1); // 31 tables from db/migrations (213 added cart_returns, 217 owner_alerts), plus _migrations
     for (const p of plan) {
       expect(["clear", "keep", "ask"]).toContain(p.verdict);
       expect(p.why.length).toBeGreaterThan(60);

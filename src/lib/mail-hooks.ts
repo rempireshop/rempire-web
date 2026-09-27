@@ -219,8 +219,13 @@ function ownerPush(order: OrderLike): PushMessage {
  * Nothing here can fail the order: every channel swallows its own failure and
  * answers false. Promise.all is safe only because of that — one rejection
  * would take the other down with it.
+ *
+ * Exported since 27.09.2026 for the owner's alerts (src/lib/owner-alerts.ts —
+ * a refund Montonio could not pay, a lost payment webhook, a parcel refused
+ * or sent back): the same three channels, in the same order, so an alert
+ * reaches him exactly where a paid order does.
  */
-async function pingOwner(subject: string, body: string, push?: PushMessage): Promise<boolean> {
+export async function pingOwner(subject: string, body: string, push?: PushMessage): Promise<boolean> {
   const [tg, pushed] = await Promise.all([
     forwardTelegram(body),
     push ? pushOwner(push) : Promise.resolve(false),

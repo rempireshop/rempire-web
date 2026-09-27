@@ -13,7 +13,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { query } from "@/lib/db";
-import type { MontonioShipment } from "@/lib/shipping/montonio";
+import { MontonioShippingError, type MontonioShipment } from "@/lib/shipping/montonio";
 import { SHIPMENT_POLL_LIMIT, syncStaleShipments } from "@/lib/shipping/shipment-sync";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
 
@@ -206,6 +206,65 @@ describe("the nightly shipment poll", () => {
     const run = await syncStaleShipments({ now: NOW, fetchShipment, configured, budgetMs: 1_000 });
     expect(run.checked).toBeLessThan(6);
     expect(run.left).toBe(6 - run.checked);
+  });
+
+  /* B12, readiness pass 27.09.2026: the queue is sorted by `polledAt`, and a
+     failed check used to write none — so twenty sandbox ids answering 404
+     under the live keys took all twenty places every night, and a real parcel
+     behind them was never asked about. */
+  it("a parcel Montonio cannot answer for goes to the back of the queue, with why", async () => {
+    const bad: Array<{ id: string; shipmentId: string }> = [];
+    for (let i = 0; i < SHIPMENT_POLL_LIMIT; i++) bad.push(await orderWith({ status: "inTransit", statusAt: ago(40), polledAt: ago(30) }));
+    const good = await orderWith({ status: "inTransit", statusAt: ago(40), polledAt: ago(29) });
+    const answers: Record<string, Error> = {};
+    for (const b of bad) answers[b.shipmentId] = new MontonioShippingError("not_found", `/shipments/${b.shipmentId}`, 404);
+
+    const m = montonio(answers);
+    const first = await syncStaleShipments({ now: NOW, fetchShipment: m.fetchShipment, configured });
+    expect(first).toMatchObject({ checked: SHIPMENT_POLL_LIMIT, errors: SHIPMENT_POLL_LIMIT, notFound: SHIPMENT_POLL_LIMIT, left: 1 });
+    expect(m.asked).not.toContain(good.shipmentId);
+    // the check happened, and what went wrong is on the parcel: Montonio has no such shipment
+    expect(await montonioOf(bad[0].id)).toMatchObject({ polledAt: new Date(NOW).toISOString(), pollError: "not_found", status: "inTransit" });
+
+    // the next night the parcel nobody asked about goes first
+    const m2 = montonio(answers);
+    await syncStaleShipments({ now: NOW + 24 * HOUR, fetchShipment: m2.fetchShipment, configured });
+    expect(m2.asked[0]).toBe(good.shipmentId);
+  });
+
+  it("any other failure is written down as `error`, and the next answer clears it", async () => {
+    const o = await orderWith({ status: "inTransit", statusAt: ago(40) });
+    await syncStaleShipments({ now: NOW, fetchShipment: montonio({ [o.shipmentId]: new Error("timeout") }).fetchShipment, configured });
+    expect(await montonioOf(o.id)).toMatchObject({ polledAt: new Date(NOW).toISOString(), pollError: "error" });
+    // not asked again the same night it failed — it waits its quiet hours like any other
+    const again = montonio({});
+    await syncStaleShipments({ now: NOW + HOUR, fetchShipment: again.fetchShipment, configured });
+    expect(again.asked).toEqual([]);
+
+    await syncStaleShipments({ now: NOW + 24 * HOUR, fetchShipment: montonio({ [o.shipmentId]: { status: "awaitingCollection" } }).fetchShipment, configured });
+    const m = await montonioOf(o.id);
+    expect(m.status).toBe("awaitingCollection");
+    expect(m.pollError ?? null).toBeNull();
+  });
+
+  /* B14: a parcel nobody collected, found by the poll — a journal row, once;
+     the order is not closed and not moved. */
+  it("a parcel on its way back: journalled once, the order left as it is", async () => {
+    const o = await orderWith({ status: "awaitingCollection", statusAt: ago(40) });
+    const m = montonio({ [o.shipmentId]: { status: "returned" } });
+    const run = await syncStaleShipments({ now: NOW, fetchShipment: m.fetchShipment, configured });
+    expect(run).toMatchObject({ checked: 1, changed: 1, returned: 1, closed: 0 });
+    expect(await statusOf(o.id)).toBe("shipped");
+    const rows = await journal("shipment.returned");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      actor: "system",
+      payload: { shipmentId: o.shipmentId, carrier: "omniva", code: "returned", orderStatus: "shipped", source: "poll" },
+    });
+    // final now: the poll leaves it alone, and nothing is written twice
+    const next = await syncStaleShipments({ now: NOW + 24 * HOUR, fetchShipment: m.fetchShipment, configured });
+    expect(next.checked).toBe(0);
+    expect(await journal("shipment.returned")).toHaveLength(1);
   });
 
   it("counts a shipment Montonio would not answer for and carries on", async () => {

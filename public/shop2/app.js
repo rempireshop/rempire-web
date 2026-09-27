@@ -579,6 +579,8 @@
         "Pakk leiti Montoniost ja seoti tellimusega",
       "Посылка создана, но не записалась в заказ":
         "Pakk on loodud, aga tellimusele ei salvestunud",
+      "Посылка возвращается — покупатель не забрал":
+        "Pakk tuleb tagasi — klient ei võtnud välja",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -2280,6 +2282,14 @@
       "отзыв ждёт проверки": "arvustus ootab ülevaatamist",
       "отзыва ждут проверки": "arvustust ootab ülevaatamist",
       "отзывов ждут проверки": "arvustust ootab ülevaatamist",
+      /* 27.09.2026: the carrier has the parcel, «Отправлен» never pressed (B13);
+         the nightly job has stopped (B11) */
+      "посылка уже в пути — нажмите «Отправлен»": "pakk on juba teel — vajutage «Teele saadetud»",
+      "посылки уже в пути — нажмите «Отправлен»": "pakki on juba teel — vajutage «Teele saadetud»",
+      "посылок уже в пути — нажмите «Отправлен»": "pakki on juba teel — vajutage «Teele saadetud»",
+      "Ночная проверка не запускалась больше суток": "Öine kontroll pole üle ööpäeva käivitunud",
+      "Ночная проверка ещё ни разу не запускалась": "Öine kontroll pole veel kordagi käivitunud",
+      "Письма, сверка оплат и посылок не идут — напишите Диму": "Kirjad ning maksete ja pakkide kontroll seisavad — kirjutage Dimile",
       "заявка на партнёрство": "partnerlustaotlus",
       "заявки на партнёрство": "partnerlustaotlust",
       "заявок на партнёрство": "partnerlustaotlust",
@@ -2347,6 +2357,14 @@
       "Перевозчик не принял посылку: трек-номера нет. Нажмите «Отправить заново» — Montonio повторит это же отправление, второй посылки не будет. Не прошло снова — чаще всего неверен телефон или адрес: напишите Диму.":
         "Vedaja ei võtnud pakki vastu: jälgimisnumbrit ei ole. Vajutage «Saada uuesti» — Montonio kordab sama saadetist, teist pakki ei teki. Kui jälle ei õnnestu, on enamasti vale telefon või aadress: kirjutage Dimile.",
       "Отправить заново": "Saada uuesti",
+      // 27.09.2026: a parcel nobody collected, on its way back (B14); one the carrier has, not marked sent (B13)
+      "Посылка возвращается": "Pakk tuleb tagasi", "Возвращается": "Tuleb tagasi",
+      "Покупатель не забрал посылку — перевозчик везёт её обратно в магазин. Свяжитесь с покупателем.":
+        "Klient ei võtnud pakki välja — vedaja toob selle poodi tagasi. Võtke kliendiga ühendust.",
+      "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги.":
+        "Klient ei võtnud seda välja. Võtke temaga ühendust: saata uuesti või raha tagasi.",
+      "Посылка уже в пути": "Pakk on juba teel",
+      "Нажмите «Отправлен», чтобы покупатель получил трек-номер.": "Vajutage «Teele saadetud», et klient saaks jälgimisnumbri.",
       "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
@@ -4120,6 +4138,8 @@
         "The parcel was found at Montonio and linked to the order",
       "Посылка создана, но не записалась в заказ":
         "The parcel was created but not saved onto the order",
+      "Посылка возвращается — покупатель не забрал":
+        "Parcel coming back — the customer did not collect it",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -5794,6 +5814,14 @@
       "отзыв ждёт проверки": "review waiting to be checked",
       "отзыва ждут проверки": "reviews waiting to be checked",
       "отзывов ждут проверки": "reviews waiting to be checked",
+      /* 27.09.2026: the carrier has the parcel, «Отправлен» never pressed (B13);
+         the nightly job has stopped (B11) */
+      "посылка уже в пути — нажмите «Отправлен»": "parcel already on its way — press «Shipped»",
+      "посылки уже в пути — нажмите «Отправлен»": "parcels already on their way — press «Shipped»",
+      "посылок уже в пути — нажмите «Отправлен»": "parcels already on their way — press «Shipped»",
+      "Ночная проверка не запускалась больше суток": "The nightly check has not run for over a day",
+      "Ночная проверка ещё ни разу не запускалась": "The nightly check has never run yet",
+      "Письма, сверка оплат и посылок не идут — напишите Диму": "Letters and the payment and parcel checks are stalled — write to Dim",
       "заявка на партнёрство": "partner request",
       "заявки на партнёрство": "partner requests",
       "заявок на партнёрство": "partner requests",
@@ -5861,6 +5889,14 @@
       "Перевозчик не принял посылку: трек-номера нет. Нажмите «Отправить заново» — Montonio повторит это же отправление, второй посылки не будет. Не прошло снова — чаще всего неверен телефон или адрес: напишите Диму.":
         "The carrier would not take the parcel: there is no tracking number. Press «Send again» — Montonio repeats this same shipment, no second parcel appears. If it fails again, the phone or address is usually wrong: write to Dim.",
       "Отправить заново": "Send again",
+      // 27.09.2026: a parcel nobody collected, on its way back (B14); one the carrier has, not marked sent (B13)
+      "Посылка возвращается": "Parcel coming back", "Возвращается": "Coming back",
+      "Покупатель не забрал посылку — перевозчик везёт её обратно в магазин. Свяжитесь с покупателем.":
+        "The customer did not collect the parcel — the carrier is bringing it back to the shop. Contact the customer.",
+      "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги.":
+        "The customer did not collect it. Contact them: send it again or refund the money.",
+      "Посылка уже в пути": "The parcel is already on its way",
+      "Нажмите «Отправлен», чтобы покупатель получил трек-номер.": "Press «Shipped» so the customer gets the tracking number.",
       "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
@@ -21140,6 +21176,21 @@
        18.09.2026 F15 (map defect #19): the card used to advise a step the
        server refused. */
     var shipRefused = hasShipment && shipRegFailed(mont.status);
+    /* What the carrier itself says about the parcel — Montonio's word on the
+       order (the webhook, the nightly poll), normalised the way the server's
+       white list reads it (looksReturned / looksDelivered in
+       src/lib/delivery.ts). Two readings, both for the owner's eyes only;
+       neither moves a status (readiness pass 27.09.2026):
+         · `parcelBack` — nobody collected it and it is coming back (B14);
+         · `carrierHas` — handed over: in transit, waiting in the machine, or
+           delivered. On an order still «оплачен» that means «Отправлен» was
+           never pressed, so the customer has no tracking letter (B13). */
+    var cword = hasShipment && !mont.dismissed ? String(mont.status == null ? "" : mont.status).trim().toLowerCase().replace(/[\s_-]+/g, "") : "";
+    var parcelBack = cword === "returned" || cword === "return" || cword === "returning" ||
+      cword.indexOf("returned") === 0 || cword.indexOf("returnto") === 0;
+    var carrierHas = !parcelBack && (cword === "intransit" || cword === "awaitingcollection" ||
+      cword.indexOf("delivered") === 0 || cword === "completed" || cword === "finished" ||
+      cword === "pickedup" || cword === "collected" || cword === "handedover");
     /* «По счёту — для компаний»: the invoice record the server put on the
        order (src/lib/invoices.ts) and the company it is made out to. An
        unpaid order with an invoice is waiting for a bank transfer, not for
@@ -21201,6 +21252,8 @@
       hasShipment: hasShipment,
       labeled: labeled,
       shipRefused: shipRefused,
+      parcelBack: parcelBack,
+      carrierHas: carrierHas,
       shipment: labeled ? mont : null,
       tracking: (labeled && mont.trackingCode) || ""
     };
@@ -21290,7 +21343,14 @@
       not only behind its own chip. Gone once the money has gone back — the
       «Возврат» badge is the whole story then. */
   function admReturnBadge(v) {
-    if (!v.returnAskedAt || v.status === "refunded") return "";
+    /* B14 (27.09.2026): the other way an order comes back — the carrier is
+       returning a parcel nobody collected. The badge beside it still says
+       «Отправлен» (nothing closes it), so this chip is what makes it findable
+       in «В пути» and «Все»; gone once the money has gone back or the order
+       is closed. */
+    var back = v.parcelBack && (v.status === "shipped" || v.status === "paid")
+      ? '<span class="adm-badge adm-tag adm-badge--warn">Посылка возвращается</span>' : "";
+    if (!v.returnAskedAt || v.status === "refunded") return back;
     /* …and once he has pressed «Обработано» the row stops shouting. It does
        not go quiet altogether: the request is still a fact about this order,
        and the owner who comes back to it a week later must be able to see at a
@@ -21512,10 +21572,36 @@
        first few names travel with the summary (src/lib/overview-names.ts) */
     var who = (o && o.attentionNames) || {};
     var tasks = "";
+    /* The nightly job has stopped (readiness pass 27.09.2026, B11): the
+       automatic letters, the check that finds lost payments, the parcel
+       re-check and the nightly «Доставлен» all ride it, and all of them stop
+       without a sound. The server says when it last ran (src/lib/overview-
+       extras.ts cronHealth — more than 26 h, or never on a live shop that has
+       been taking orders). First, and in the rust ink: nothing else on this
+       list can be trusted while it is red. It opens «Письма», whose rows say
+       «Последний запуск» per letter. */
+    var cron = o && o.cron;
+    if (cron && cron.stale) tasks += admTaskRow("!",
+      cron.lastRunAt ? "Ночная проверка не запускалась больше суток" : "Ночная проверка ещё ни разу не запускалась",
+      "Письма, сверка оплат и посылок не идут — напишите Диму",
+      'data-admtab="mail"', true);
     if (shipN) tasks += admTaskRow(shipN,
       ["заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"],
       names(toShip, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="new"');
+    /* B13 (27.09.2026): the carrier already has the parcel — in transit, in
+       the machine, even delivered — and the order still says «оплачен»:
+       «Отправлен» was never pressed, so the customer never got the letter
+       with the tracking number, and the order sits in «Отправить» for ever.
+       Nothing changes the status by itself (the press is what sends the
+       letter); this row says which ones, and one order opens its own card. */
+    var moving = (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
+      .filter(function (v) { return v.toShip && v.labeled && v.carrierHas; });
+    var movingN = moving.length;
+    if (movingN) tasks += admTaskRow(movingN,
+      ["посылка уже в пути — нажмите «Отправлен»", "посылки уже в пути — нажмите «Отправлен»", "посылок уже в пути — нажмите «Отправлен»"],
+      names(moving, function (v) { return v.who; }),
+      movingN === 1 ? 'data-admorder="' + esc(moving[0].id) + '"' : 'data-admtab="orders" data-admfilter="new"', true);
     if (noIban) tasks += admTaskRow("!",
       "Заполните IBAN — счета не уходят",
       "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»",
@@ -22479,9 +22565,16 @@
     }
     var code = String(mont.trackingCode || "");
     var failed = shipRegFailed(mont.status);
+    /* B14 (27.09.2026): the carrier's own word says the parcel is coming
+       back — the same reading as the order's VM (`parcelBack`). */
+    var back = !failed && v.parcelBack;
     return '<section class="adm-osec adm-ship">' +
-      admSecHeadHTML("Посылка", "", "", failed ? admTagHTML("alert", "Перевозчик не принял") : "") +
+      admSecHeadHTML("Посылка", "", "", failed ? admTagHTML("alert", "Перевозчик не принял")
+        : back ? admTagHTML("alert", "Возвращается") : "") +
       '<div class="adm-ship__where">' + esc((who ? who + " · " : "") + (where || "")) + "</div>" +
+      (back
+        ? '<div class="adm-hint">Покупатель не забрал посылку — перевозчик везёт её обратно в магазин. Свяжитесь с покупателем.</div>'
+        : "") +
       /* A refused registration first, because the two sentences under it are
          both false about one: there is no tracking code coming, and the
          parcel is not «waiting for the carrier». */
@@ -22591,12 +22684,37 @@
         btn: admOrderStepBtn(v, false)
       };
     }
+    /* A parcel handed over without «Отправлен» and now on its way back (B14):
+       «Отправлен» would send the customer a tracking letter for it, so there
+       is no dark button — «Написать клиенту» takes its place. */
+    if (v.paid && v.parcelBack) {
+      return { key: "ship", title: "Посылка возвращается",
+        sub: "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги." };
+    }
     if (v.paid) {
-      return { key: "ship", title: "Отнести посылку", sub: "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.",
+      /* B13 (27.09.2026): the carrier says it already has the parcel, and
+         «Отправлен» was never pressed — the customer has no tracking letter.
+         Same step, same button; the words say it is overdue, not ahead. */
+      return { key: "ship",
+        title: v.carrierHas ? "Посылка уже в пути" : "Отнести посылку",
+        sub: v.carrierHas
+          ? "Нажмите «Отправлен», чтобы покупатель получил трек-номер."
+          : "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.",
         help: "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.",
         btn: admOrderStepBtn(v, false) };
     }
     if (v.shipped) {
+      /* B14 (27.09.2026): nobody collected the parcel and the carrier is
+         sending it back. The order stays «Отправлен» — the shop closes
+         nothing by itself — and the card says what is going on and what is
+         his to do. «Доставлен» stays the button: a customer who comes to the
+         salon for it after all is a delivery. */
+      if (v.parcelBack) {
+        return { key: "delivery", title: "Посылка возвращается",
+          sub: "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги.",
+          help: "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.",
+          btn: admOrderStepBtn(v, false) };
+      }
       return { key: "delivery", title: "Ждём доставки", sub: "Последний шаг, без письма.",
         help: "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.",
         btn: admOrderStepBtn(v, false) };
@@ -31429,6 +31547,9 @@
     "shipment.booking_unknown": "Montonio не ответил вовремя — посылка могла создаться",
     "shipment.adopt": "Посылка найдена в Montonio и привязана к заказу",
     "shipment.store_failed": "Посылка создана, но не записалась в заказ",
+    /* 27.09.2026 (B14): the carrier is sending back a parcel nobody collected
+       — written once per parcel, and it is also a ping on the owner's phone */
+    "shipment.returned": "Посылка возвращается — покупатель не забрал",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
     /* Seven actions the server writes and this table did not name, so the

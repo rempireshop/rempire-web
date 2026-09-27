@@ -847,20 +847,47 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
 export type AuditPrev = { before: unknown };
 
 export async function writeAudit(actor: string, action: string, payload?: unknown, prev?: AuditPrev): Promise<void> {
-  if (prev) {
-    await query("insert into admin_audit (actor, action, payload, prev) values ($1, $2, $3::jsonb, $4::jsonb)", [
-      actor,
-      action,
-      jsonbParam(payload),
-      jsonbParam(prev.before),
-    ]);
-    return;
+  let id: number | undefined;
+  try {
+    const rows = prev
+      ? await query<{ id: string | number }>(
+          "insert into admin_audit (actor, action, payload, prev) values ($1, $2, $3::jsonb, $4::jsonb) returning id",
+          [actor, action, jsonbParam(payload), jsonbParam(prev.before)],
+        )
+      : await query<{ id: string | number }>(
+          "insert into admin_audit (actor, action, payload) values ($1, $2, $3::jsonb) returning id",
+          [actor, action, jsonbParam(payload)],
+        );
+    const n = Number(rows[0]?.id);
+    id = Number.isFinite(n) ? n : undefined;
+  } finally {
+    /* …even when the row did not save: the refund that failed does not stop
+       having failed because the journal was unreachable. */
+    await alertOwnerFromJournal(actor, action, payload, id);
   }
-  await query("insert into admin_audit (actor, action, payload) values ($1, $2, $3::jsonb)", [
-    actor,
-    action,
-    jsonbParam(payload),
-  ]);
+}
+
+/**
+ * The journal rows that reach Renat's phone — a refund Montonio could not
+ * pay or cancelled, a payment only the nightly check found, a short payment,
+ * a parcel the carrier refused or sent back (readiness pass 27.09.2026, B11).
+ * The words, the once-only key and the channels are src/lib/owner-alerts.ts
+ * (OWNER_ALERT_ACTIONS there; a test holds the two lists together); this is
+ * only the door, so that no caller has to remember to knock. Loaded for these
+ * rows alone, never throws, and inside a request the send waits until the
+ * response has gone (`after()`).
+ */
+export const OWNER_ALERT_ACTION =
+  /^(order\.(refund|refund_stuck|refund_failed|payment_recovered|payment_held|payment_odd)|shipment\.(registration_failed|returned))$/;
+
+async function alertOwnerFromJournal(actor: string, action: string, payload: unknown, id: number | undefined): Promise<void> {
+  if (!OWNER_ALERT_ACTION.test(action)) return;
+  try {
+    const { alertFromJournal } = await import("@/lib/owner-alerts");
+    await alertFromJournal({ id, actor, action, payload });
+  } catch (err) {
+    console.error(`[orders] the owner's alert for "${action}" was not sent:`, err);
+  }
 }
 
 /** Same, for places where a missing database must not break the request. */
