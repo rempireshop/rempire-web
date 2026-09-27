@@ -40,6 +40,11 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* Up to four Montonio calls in a row, 10 s each (the stored link, a fresh
+   POST /label-files, its PDF, and GET /shipments for a missing drop-off code),
+   then the PDF rewrite. A 10 s default is one slow call (audit 27.09.2026,
+   B17). */
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
 

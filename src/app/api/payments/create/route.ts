@@ -38,6 +38,10 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* POST /orders to Montonio is given 15 s (src/lib/payments/montonio.ts): on
+   a 10 s default the function would die first, and the shopper would get a
+   platform error instead of «попробуйте ещё раз» (audit 27.09.2026, B17). */
+export const maxDuration = 60;
 
 const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 60_000;

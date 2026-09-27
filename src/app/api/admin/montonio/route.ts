@@ -82,6 +82,9 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* Five probes at once, the slowest of them GET /orders/:uuid with a 15 s
+   timeout — past a 10 s default on a slow day (audit 27.09.2026, B17). */
+export const maxDuration = 60;
 
 const NO_STORE = { "cache-control": "no-store" } as const;
 

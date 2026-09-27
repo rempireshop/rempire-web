@@ -29,6 +29,7 @@ import { timingSafeEqual } from "node:crypto";
 import { runFlows } from "@/lib/flows";
 import { resumeParkedNewsletters } from "@/lib/newsletters";
 import { reconcileUnpaidOrders } from "@/lib/payments/reconcile";
+import { recheckPendingRefunds, REFUND_RECHECK_BUDGET_MS } from "@/lib/payments/refund-recheck";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -102,6 +103,27 @@ export async function GET(req: Request) {
       console.error("[api/cron/flows] the payment sweep failed:", err);
       reconciled = { error: "failed" };
     }
+    /* …and the other half of the same safety net: refunds Montonio accepted
+       (PENDING) whose SUCCESSFUL / CANCELED webhook never came, asked about in
+       Montonio's own refund list and recorded through the webhook's code
+       (src/lib/payments/refund-recheck.ts, audit 27.09.2026 B9). Its time is
+       capped so the parked campaigns below keep theirs: no new question after
+       30 s of this function's minute, and one question takes at most 15 s.
+       It never throws; caught here all the same, for the same reason. */
+    let refunds;
+    try {
+      refunds = await recheckPendingRefunds({
+        budgetMs: Math.max(0, Math.min(REFUND_RECHECK_BUDGET_MS, 30_000 - (Date.now() - started))),
+      });
+      console.info(
+        `[api/cron/flows] refunds: asked ${refunds.asked}, done ${refunds.done}, failed ${refunds.failed}, ` +
+          `pending ${refunds.pending}, unknown ${refunds.unknown + refunds.missing}` +
+          (refunds.skipped ? ` (${refunds.skipped})` : ""),
+      );
+    } catch (err) {
+      console.error("[api/cron/flows] the refund re-check failed:", err);
+      refunds = { error: "failed" };
+    }
     /* …and the campaigns that ran out of day. A «Рассылка» bigger than the
        free plan's hundred letters stops at the cap and parks itself
        (src/lib/mail-budget.ts, src/lib/newsletters.ts): nothing in a
@@ -122,7 +144,7 @@ export async function GET(req: Request) {
       newsletters = { error: "failed" };
     }
     return Response.json(
-      { ok: true, ...report, payments: reconciled, newsletters },
+      { ok: true, ...report, payments: reconciled, refunds, newsletters },
       { headers: NO_STORE },
     );
   } catch (err) {

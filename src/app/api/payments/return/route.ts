@@ -21,6 +21,11 @@ import { guardTokenChecks } from "@/lib/payments/token-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* The webhook's twin: the same GET /orders/:uuid check (15 s timeout) and the
+   same settlePayment() — claim, stock, points, cards, letter — on the
+   shopper's own return. A 10 s default could stop it between «оплачен» and
+   the rest (audit 27.09.2026, B17). */
+export const maxDuration = 60;
 
 function done(
   base: string,

@@ -1,5 +1,8 @@
+import { jsonbParam, query } from "@/lib/db";
+import { readRefundStatusDescription } from "@/lib/montonio-problems";
 import {
   claimOrderPaid,
+  getOrder,
   PAID_ORDER_STATUSES,
   setOrderPayment,
   setOrderStatus,
@@ -8,7 +11,17 @@ import {
 } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome, type OrderLike } from "./apply";
 import { issueOrderGiftCards, notifyOrderClosed, notifyOrderPaid } from "./mail-hook";
-import { foldRefund, fullyRefunded, refundedTotal, type RefundEntry } from "./refund";
+import {
+  foldRefund,
+  fullyRefunded,
+  refundableAmount,
+  refundedTotal,
+  refundsOf,
+  type FoldedRefund,
+  type RefundEntry,
+  type RefundNotification,
+  type RefundStatus,
+} from "./refund";
 import { PaymentError, type VerifyResult } from "./types";
 
 /**
@@ -71,6 +84,15 @@ export async function settlePayment(
 export interface SettleRefundOutcome {
   /** False when this refund id had already been recorded — a webhook retry. */
   applied: boolean;
+  /**
+   * True when THIS call moved the refund to done for the first time — the
+   * moment «Деньги возвращены» goes (foldRefund, RefundEntry.doneAt).
+   */
+  becameDone: boolean;
+  /** The refund's status as the ledger now holds it — a late PENDING leaves a DONE one done. */
+  refundStatus: RefundStatus;
+  /** Set when the notice was a step back from a finished refund and was not applied. */
+  kept?: RefundStatus;
   /** Everything sent back on this order, after folding this refund in. */
   refundedTotal: number;
   /** True once the refunds cover the order and it moved to «возврат». */
@@ -81,48 +103,115 @@ export interface SettleRefundOutcome {
   voided: string[];
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Write the folded ledger ONLY if `orders.payment.refunds` is still the array
+ * it was folded from. False — nothing written — when somebody else wrote in
+ * between, and the caller folds again from a fresh read.
+ *
+ * jsonb equality is by value (key order, `1` vs `1.0`), so the array as this
+ * process read it compares equal to what is stored for as long as nobody has
+ * written. Missing and JSON `null` are the same «no refunds yet».
+ */
+async function writeRefundLedgerIf(orderId: string, expected: unknown, folded: FoldedRefund): Promise<boolean> {
+  const rows = await query<{ id: string }>(
+    `update orders
+        set payment = coalesce(payment, '{}'::jsonb) || $2::jsonb, updated_at = now()
+      where id = $1 and coalesce(payment -> 'refunds', 'null'::jsonb) = $3::jsonb
+      returning id`,
+    [
+      orderId,
+      jsonbParam({ refunds: folded.refunds, refundedTotal: folded.refundedTotal }),
+      jsonbParam(expected === undefined ? null : expected),
+    ],
+  );
+  return rows.length > 0;
+}
+
+function storedRefunds(payment: unknown): unknown {
+  return payment && typeof payment === "object" ? (payment as { refunds?: unknown }).refunds : undefined;
+}
+
 /**
  * One refund → the order, and everything that hangs off it.
  *
- * The single door for both ways money goes back — «Вернуть деньги» in the
- * admin and the provider's refund webhook (which is how a refund made inside
- * Montonio's own portal reaches this shop at all). Written to be safe when run
- * twice, in either order, exactly like settlePayment() above:
+ * The single door for every way money goes back — «Вернуть деньги» in the
+ * admin, the provider's refund webhook (which is how a refund made inside
+ * Montonio's own portal reaches this shop at all), and the nightly re-check
+ * of a refund whose webhook never came (src/lib/payments/refund-recheck.ts).
+ * Written to be safe when run twice, in either order, exactly like
+ * settlePayment() above:
  *
  *   · the same refund id folds into the existing entry rather than adding a
- *     second one (foldRefund), so Montonio's 48-hour retry costs nothing;
- *   · the customer's letter goes out on the first arrival only — a PENDING
- *     that later turns SUCCESSFUL updates the ledger and writes no second
- *     letter, the same rule `alreadyPaid` draws for the confirmation;
- *   · the order becomes «возврат» only once the refunds cover its total, and
- *     that move is what puts a counted shelf back (setOrderStatus).
+ *     second one (foldRefund), so Montonio's 48-hour retry costs nothing, and
+ *     a finished refund is never moved back to pending (B10);
+ *   · the ledger is written only over the array it was folded from; a door
+ *     that lost the race folds again from what the winner wrote. So of two
+ *     arrivals of the same SUCCESSFUL, exactly one sees the refund become
+ *     done — and a line written in between is never lost;
+ *   · the customer's letters: «Возврат отправлен» on the first sighting of a
+ *     refund that is still pending, «Деньги возвращены» on the one fold that
+ *     moves it to done — the first sighting, or PENDING → SUCCESSFUL later
+ *     (audit 27.09.2026, B1). Never a second time for the same refund;
+ *   · the order becomes «возврат» only once the refunds that are DONE cover
+ *     its total, and that move — claimed, so two doors cannot both make it —
+ *     is what puts a counted shelf back (setOrderStatus).
  */
 export async function settleRefund(
   order: OrderLike,
   entry: RefundEntry,
   opts: { notify?: boolean } = {},
 ): Promise<SettleRefundOutcome> {
-  const folded = foldRefund(order.payment, entry);
-  await setOrderPayment(order.id, {
-    refunds: folded.refunds,
-    refundedTotal: folded.refundedTotal,
-  });
+  let current: OrderLike = order;
+  let folded = foldRefund(current.payment, entry);
+  if (UUID_RE.test(String(order.id ?? ""))) {
+    for (let attempt = 1; ; attempt++) {
+      if (await writeRefundLedgerIf(order.id, storedRefunds(current.payment), folded)) break;
+      const fresh = await getOrder(order.id);
+      if (!fresh) {
+        folded = { ...folded, applied: false, becameDone: false };
+        break;
+      }
+      current = { ...order, payment: fresh.payment, status: fresh.status };
+      folded = foldRefund(current.payment, entry);
+      if (attempt >= 3) {
+        /* Three writers in a row got there first — or the stored array cannot
+           be compared the way it was read. Write the fold made from the
+           freshest read, unconditionally: what the code did before the
+           comparison existed, and never worse than that. */
+        console.error(`[payments/settle] refund ${entry.ref} on ${order.number}: the ledger kept moving; written anyway`);
+        await setOrderPayment(order.id, { refunds: folded.refunds, refundedTotal: folded.refundedTotal });
+        break;
+      }
+    }
+  } else {
+    await setOrderPayment(order.id, { refunds: folded.refunds, refundedTotal: folded.refundedTotal });
+  }
+  const stored = folded.entry;
+  if (folded.kept) {
+    console.warn(
+      `[payments/settle] refund ${entry.ref} on ${order.number}: a late «${entry.status}» after «${folded.kept}» was not applied`,
+    );
+  }
   await writeAuditSafe(entry.by || "system", "order.refund", {
     orderId: order.id,
     number: order.number,
     ref: entry.ref,
-    amount: entry.amount,
-    status: entry.status,
-    to: entry.to ?? "provider",
-    code: entry.code,
+    amount: stored.amount,
+    status: stored.status,
+    to: stored.to ?? "provider",
+    code: stored.code,
     refundedTotal: folded.refundedTotal,
     repeat: !folded.applied,
+    ...(folded.becameDone && !folded.applied ? { confirmed: true } : {}),
+    ...(folded.kept ? { kept: folded.kept, refused: entry.status } : {}),
   });
 
   /* «Covered» is measured against what the customer gave, not against the
      money alone: an order a gift card paid for has a total of 0 and is fully
      refunded only once the card has its balance back (refundValue below). */
-  const value = await refundValue(order);
+  const value = await refundValue(current);
   /* Measured against the money that has actually gone back, not against every
      refund on the ledger. A refund Montonio has merely accepted sits at
      PENDING until it has the balance — up to ten days, and it may then be
@@ -187,9 +276,12 @@ export async function settleRefund(
     }
   }
 
-  let status = String(order.status ?? "");
+  let status = String(current.status ?? "");
   if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
-    const moved = await setOrderStatus(order.id, "refunded", entry.by || "system");
+    /* Claimed, not written: two doors finishing the same refund in the same
+       second (the webhook and the nightly re-check) both read «оплачен», and
+       only the one whose UPDATE moves the row puts the shelf back. */
+    const moved = await setOrderStatus(order.id, "refunded", entry.by || "system", { unless: ["refunded"] });
     status = moved?.status ?? "refunded";
   }
 
@@ -197,24 +289,141 @@ export async function settleRefund(
      is not a failure — a rejected one is a warning for Renat, not news for the
      customer. `notify: false` is for the caller that sends its own (the admin
      route, which knows the language and the amount before this returns). */
-  if (opts.notify !== false && folded.applied && entry.status !== "failed") {
+  if (opts.notify !== false && stored.status !== "failed") {
     /* PENDING is «отправлено», not «возвращено» (the owner's decision of
        19.09.2026). Montonio answers 200 PENDING for a refund it has merely
        accepted; it can still fail for want of balance and it cancels itself
-       after ten days, so this letter promises nothing and says when to worry.
-       The confirming webhook comes back through this same door with `done` and
-       sends the real one — a different idempotency key, so both go out.
+       after ten days, so that letter promises nothing and says when to worry
+       — and promises a second one: «Как только деньги будут у вас, мы напишем
+       ещё раз». The second is `becameDone`: the fold that first moves this
+       refund to done, whichever door it arrives through — the confirming
+       webhook, the nightly re-check — and on no other (audit 27.09.2026, B1).
+       A refund whose FIRST answer is already done gets only this one; if the
+       door that recorded it sends its own (the admin route, `notify: false`),
+       the webhook that follows finds it done and writes nothing.
        A gift card is money already back on the card, never pending. */
-    const kind = entry.to !== "giftcard" && entry.status === "pending" ? "refund_sent" : "refunded";
-    await notifyOrderClosed(
-      { ...order, status },
-      entry.to === "giftcard"
-        ? { kind: "refunded", amount: entry.amount, giftAmount: entry.amount, giftCode: entry.code }
-        : { kind, amount: entry.amount },
-    );
+    const kind = folded.becameDone
+      ? "refunded"
+      : folded.applied && stored.status === "pending"
+        ? stored.to === "giftcard"
+          ? "refunded"
+          : "refund_sent"
+        : null;
+    if (kind) {
+      await notifyOrderClosed(
+        { ...current, status },
+        stored.to === "giftcard"
+          ? { kind: "refunded", amount: stored.amount, giftAmount: stored.amount, giftCode: stored.code }
+          : { kind, amount: stored.amount },
+      );
+    }
   }
 
-  return { applied: folded.applied, refundedTotal: folded.refundedTotal, fully, status, voided };
+  return {
+    applied: folded.applied,
+    becameDone: folded.becameDone,
+    refundStatus: stored.status,
+    ...(folded.kept ? { kept: folded.kept } : {}),
+    refundedTotal: folded.refundedTotal,
+    fully,
+    status,
+    voided,
+  };
+}
+
+/**
+ * A refund the PROVIDER reports — its webhook, or its own refund list read by
+ * the nightly re-check — recorded exactly the same way whichever of the two
+ * brought it. The notify route and src/lib/payments/refund-recheck.ts both
+ * come through here, so a refund whose SUCCESSFUL webhook was lost and is
+ * found the next morning gets the same clamp, the same journal rows, the same
+ * letter, stock, points and cards as if the webhook had arrived.
+ *
+ * `by` is who is reporting it (`webhook`, or `system` for the re-check) — the
+ * journal row's actor. The entry keeps who made the refund (foldRefund).
+ */
+export async function recordProviderRefund(
+  order: Order,
+  note: Pick<RefundNotification, "refundRef" | "amount" | "status" | "detail" | "statusDescription">,
+  by: string,
+): Promise<SettleRefundOutcome & { amount: number }> {
+  /* Montonio may report a refund larger than what is left to refund — a
+     second portal refund racing this one, or a figure we already recorded
+     under another id. Clamped so the ledger can never say more went back than
+     the order was worth; the audit row keeps what was actually reported.
+     Against what the customer GAVE — the money plus what a gift card paid
+     (refundValue), the same figure every other refund calculation uses — and
+     not against `orders.total` alone, which would shrink a 30 € bank refund to
+     10 € on an order a 20 € card had already had back, and then tell the
+     customer that 10 € in a letter.
+     What is already recorded under THIS refund's own id does not narrow it:
+     the admin route records the entry the moment Montonio answers and the
+     webhook for the same refund follows (PENDING → SUCCESSFUL), and folding
+     that in must leave the amount where it was rather than zero it. */
+  const others = refundsOf(order.payment).filter((r) => r.ref !== note.refundRef);
+  const amount = Math.min(note.amount, refundableAmount(await refundValue(order), { refunds: others }));
+
+  /* The reason a refund did not reach the customer, and the only place it is
+     ever said. `POST /refunds` answers 200 PENDING for a refund it cannot fund
+     and explains nothing; days later the webhook arrives carrying
+     `refundStatusDescription` — INSUFFICIENT_FUNDS, DECLINED,
+     EXPIRED_OR_CANCELLED_CARD … — and until 18.09.2026 the word went into the
+     ledger entry's `detail` and nowhere a human would look. Now it is a
+     journal row of its own, with a code the panel can translate.
+     Only when there IS something to explain: the guide prints `null` for a
+     refund that simply worked, and a SUCCESSFUL refund with a description is
+     still worth recording (a partial success has a story). */
+  if (note.statusDescription) {
+    const why = readRefundStatusDescription(note.statusDescription);
+    console.error(
+      `payments/notify: refund ${note.refundRef} on ${order.number} — ${note.status} · ${note.statusDescription}`,
+    );
+    /* Once per refund and reason, not once per delivery. This row is written
+       BEFORE the settle below on purpose — the settle can throw, the webhook
+       answers 503, and Montonio redelivers, and the one row that explains a
+       stuck refund must survive that rather than depend on it. The cost was
+       that every redelivery wrote it again (audit F19), so the owner opened a
+       journal with «Возврат не дошёл до покупателя» three times over for one
+       refund. Asked, then written; a read that fails writes anyway, because a
+       duplicated explanation is better than a missing one. */
+    let already = false;
+    try {
+      const [seen] = await query<{ n: number }>(
+        "select count(*)::int as n from admin_audit where action = 'order.refund_stuck'" +
+          " and payload->>'ref' = $1 and payload->>'code' = $2",
+        [note.refundRef, note.statusDescription],
+      );
+      already = Number(seen?.n) > 0;
+    } catch (err) {
+      console.error("payments/notify: could not check for an earlier refund_stuck row", err);
+    }
+    if (!already) {
+      await writeAuditSafe("system", "order.refund_stuck", {
+        orderId: order.id,
+        number: order.number,
+        amount,
+        ref: note.refundRef,
+        code: note.statusDescription,
+        reason: why.reason,
+        status: note.status,
+      });
+    }
+  }
+
+  const out = await settleRefund(
+    order,
+    {
+      ref: note.refundRef,
+      amount,
+      status: note.status,
+      at: new Date().toISOString(),
+      by,
+      detail: note.detail,
+    },
+    // nothing left to give back under this id means nothing to write about
+    { notify: amount > 0 },
+  );
+  return { ...out, amount };
 }
 
 /**

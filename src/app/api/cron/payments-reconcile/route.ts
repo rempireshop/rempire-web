@@ -25,6 +25,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { reconcileUnpaidOrders } from "@/lib/payments/reconcile";
+import { recheckPendingRefunds } from "@/lib/payments/refund-recheck";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,7 +55,17 @@ export async function GET(req: Request) {
   }
   try {
     const report = await reconcileUnpaidOrders();
-    return Response.json({ ok: true, ...report }, { headers: NO_STORE });
+    /* The refund half of the same safety net (src/lib/payments/refund-recheck.ts):
+       refunds still PENDING after a day, looked up in Montonio's own list. It
+       never throws, and a second run finds nothing left to do. */
+    let refunds;
+    try {
+      refunds = await recheckPendingRefunds();
+    } catch (err) {
+      console.error("[api/cron/payments-reconcile] the refund re-check failed:", err);
+      refunds = { error: "failed" };
+    }
+    return Response.json({ ok: true, ...report, refunds }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/cron/payments-reconcile] failed:", err);
     return Response.json({ ok: false, error: "server_error" }, { status: 500, headers: NO_STORE });
