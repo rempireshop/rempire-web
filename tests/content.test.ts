@@ -237,6 +237,28 @@ describe("legal placeholders", () => {
       expect(src, f).toContain("{{regCode}}");
     }
   });
+
+  it("no policy page loaded by the shop names Shopify — legal.js is the shop's own Russian pages, word for word", async () => {
+    /* public/shop/legal.js is on every page (public/shop2/index.html). Until
+       27.09.2026 it was the harvested Shopify policy text, and its privacy
+       policy named Shopify as the data processor 22 times (audit 27.09.2026,
+       G8). It is written from legal.ru.js now; this is what keeps the two in
+       step: edit legal.ru.js, run `node tools/sync-legal-fallback.mjs`. */
+    const { legalFallbackSource, readVar, SRC, OUT } = await import("../tools/sync-legal-fallback.mjs");
+    expect(readFileSync(OUT, "utf8").replace(/\r\n/g, "\n"), "run: node tools/sync-legal-fallback.mjs").toBe(legalFallbackSource());
+    const LEGAL = readVar(OUT, "LEGAL") as Record<string, { title: string; html: string }>;
+    expect(LEGAL).toEqual(readVar(SRC, "LEGAL_RU"));
+
+    for (const f of ["legal.js", "legal.ru.js", "legal.et.js", "legal.en.js"]) {
+      expect(readFileSync(`public/shop/${f}`, "utf8"), f).not.toMatch(/shopify/i);
+    }
+    // the processors the shop really uses, as its own privacy policy names them
+    for (const name of ["Vercel", "Railway", "Cloudflare", "Resend", "Montonio"]) {
+      expect(LEGAL.privacy.html, name).toContain(name);
+    }
+    // the router's list of pages is unchanged — src/data/legal-slugs.json is what the 404 page and prebuild read
+    expect(Object.keys(LEGAL)).toEqual(JSON.parse(readFileSync("src/data/legal-slugs.json", "utf8")));
+  });
 });
 
 /* ---------- what the assistant may do ----------------------------------- */

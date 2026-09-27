@@ -185,12 +185,14 @@ function descFor(p, code) {
 
 /* ---------- policy pages and sets ---------------------------------------
 
-   legalFor() mirrors the function of the same name in app.js exactly, plus
-   one step app.js does not have yet: a LEGAL_EN, if public/shop/legal.en.js
-   is ever written. Until it is, English falls back to LEGAL — whose bodies
-   are English and whose *titles* are Russian (docs/audit item 14). The title
-   is therefore taken through the interface dictionary rather than printed
-   raw, so the English policy page does not carry a Russian <title>.
+   legalFor() mirrors the function of the same name in app.js exactly. All
+   three languages have their own file today (legal.ru.js, legal.et.js,
+   legal.en.js), so LEGAL is reached only for a page a language file lacks.
+   LEGAL is the Russian pages word for word since 27.09.2026
+   (tools/sync-legal-fallback.mjs; before that, the harvested Shopify text) —
+   so where it IS reached for ET or EN, the title is taken through the
+   interface dictionary rather than printed raw, and the page does not carry
+   a Russian <title>.
 
    BUNDLES is optional in app.js (`typeof BUNDLES === "undefined"` → no
    sets), so it is optional here: no file, no set pages, no sitemap rows. */
