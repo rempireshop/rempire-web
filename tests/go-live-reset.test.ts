@@ -26,6 +26,7 @@ import {
   byVerdict,
   formatReport,
   goLiveReset,
+  launcherFrom,
   maskUrl,
   schemaMissing,
   schemaProblems,
@@ -60,6 +61,7 @@ type Report = {
     boundEans: number;
   };
   settingsKeysPresent: string[];
+  orderNumbers: { highest: number | null; seqNext: number; next: number };
   changed: { promoCodes: number; newsletters: number; sequence: boolean; invoiceYears: number };
 };
 type PlanRow = { table: string; verdict: string; why: string; never?: boolean };
@@ -94,6 +96,14 @@ const ALL_TABLES = plan.map((p) => p.table).filter((t) => t !== "_migrations");
 async function count(table: string): Promise<number> {
   const r = await query<{ n: number }>(`select count(*)::int as n from ${table}`);
   return Number(r[0].n);
+}
+
+/** The number the next order really gets — through the column default, as the checkout does. */
+async function newOrderNumber(): Promise<string> {
+  const r = await query<{ number: string }>(
+    "insert into orders (status, items, subtotal, total) values ('new', '[]'::jsonb, 0, 0) returning number",
+  );
+  return r[0].number;
 }
 
 /* ---------- a shop that has been staging for four months ----------------- */
@@ -156,6 +166,11 @@ async function seedUsedShop(): Promise<void> {
   const customer = String(cust[0].id);
 
   /* --- months of orders --------------------------------------------------- */
+  /* The sequence where months of staging left it, set BEFORE the orders so
+     they are R-100042…R-100044 in every test — the sequence is not owned by a
+     column, so the truncate's `restart identity` never resets it and the
+     numbers would otherwise depend on how many tests ran first. */
+  await exec("alter sequence order_number_seq restart with 100042");
   const mk = async (status: string, total: number, invoiceNo: string | null) => {
     const r = await query<{ id: string }>(
       `insert into orders (status, email, name, items, subtotal, total, customer_id, invoice)
@@ -169,7 +184,6 @@ async function seedUsedShop(): Promise<void> {
   await mk("refunded", 30, "2026-0002");
   await query("insert into order_messages (order_id, direction, body) values ($1, 'out', 'Заказ отправлен')", [paidOrder]);
   await query("insert into invoice_counters (year, last) values (2026, 2)");
-  await exec("alter sequence order_number_seq restart with 100042");
 
   /* --- a gift card the paid order bought, part-spent --------------------- */
   await query(
@@ -321,6 +335,18 @@ describe("dry run", () => {
     const text = formatReport(await run({ stock: true, testplan: true }), {});
     expect(text).toContain(`--confirm "${CONFIRM_PHRASE}" --stock --testplan --gift-cards-are-test-cards`);
     expect(text).toContain("STOCK — clearing, because --stock was given");
+  });
+
+  it("keeps the env file the run was started with in the pasteable command", async () => {
+    /* The morning's command is `node --env-file=.env.railway.txt …`; a
+       pasteable line without it answers «DATABASE_URL is not set» (G2). */
+    const launcher = launcherFrom(["--env-file=.env.railway.txt"]);
+    expect(launcher).toBe("node --env-file=.env.railway.txt");
+    const text = formatReport(await run({}), { launcher });
+    expect(text).toContain(`  node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"`);
+    // the two-argument spelling, and nothing else from node's own flags
+    expect(launcherFrom(["--no-warnings", "--env-file", ".env.railway.txt"])).toBe("node --env-file=.env.railway.txt");
+    expect(launcherFrom([])).toBe("node");
   });
 
   it("shows the owner what only he can judge", async () => {
@@ -477,15 +503,50 @@ describe("the clear", () => {
     expect(await count("settings")).toBe(6);
   });
 
-  it("starts the order numbers and the invoice numbers again", async () => {
+  it("starts the invoice numbers again but CONTINUES the order numbers after the highest one", async () => {
+    /* Until 27.09.2026 this asserted R-100001. The live hour of 26.09.2026 put
+       R-100095…R-100098 into the LIVE Montonio account, where an order number
+       is the merchantReference refunds and reports look orders up by — so a
+       restart hands a real customer a number Montonio already holds (G26). */
     const report = await run(CLEAR_OK);
     expect(report.changed.sequence).toBe(true);
     expect(await count("invoice_counters")).toBe(0);
+    expect(report.orderNumbers).toEqual({ highest: 100044, seqNext: 100045, next: 100045 });
 
-    const r = await query<{ number: string }>(
-      "insert into orders (status, items, subtotal, total) values ('new', '[]'::jsonb, 0, 0) returning number",
-    );
-    expect(r[0].number).toBe("R-100001");
+    expect(await newOrderNumber()).toBe("R-100045");
+    expect(formatReport(report, {})).toContain("order_number_seq      continues at R-100045 — after R-100044");
+  });
+
+  it("goes past a number the sequence never handed out — never reusing one", async () => {
+    // an order that was numbered by hand, above where the sequence stands
+    await query("insert into orders (number, status, items, subtotal, total) values ('R-100098', 'paid', '[]'::jsonb, 1, 1)");
+    const report = await run(CLEAR_OK);
+    expect(report.orderNumbers.next).toBe(100099);
+    expect(await newOrderNumber()).toBe("R-100099");
+  });
+
+  it("never moves the sequence back — a number handed out for an order deleted since still counts", async () => {
+    // the orders R-100045…R-100199 existed once and were deleted by hand
+    await exec("alter sequence order_number_seq restart with 100200");
+    const report = await run(CLEAR_OK);
+    expect(report.orderNumbers).toEqual({ highest: 100044, seqNext: 100200, next: 100200 });
+    expect(await newOrderNumber()).toBe("R-100200");
+  });
+
+  it("starts at R-100001 only in a shop that has never numbered an order", async () => {
+    await exec("truncate orders restart identity cascade");
+    await exec("alter sequence order_number_seq restart with 100001");
+    const report = await run(CLEAR_OK);
+    expect(report.orderNumbers).toEqual({ highest: null, seqNext: 100001, next: 100001 });
+    expect(await newOrderNumber()).toBe("R-100001");
+  });
+
+  it("says in the dry run where the numbering will continue, and moves nothing", async () => {
+    const report = await run({});
+    expect(report.orderNumbers.next).toBe(100045);
+    expect(formatReport(report, {})).toContain("order_number_seq      will continue at R-100045");
+    // the dry run read the sequence without advancing it
+    expect(await newOrderNumber()).toBe("R-100045");
   });
 
   it("reports before and after for every table", async () => {
