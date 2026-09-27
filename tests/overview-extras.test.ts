@@ -11,7 +11,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { exec, query } from "@/lib/db";
 import { montonioReadinessRows } from "@/lib/montonio-problems";
-import { getOverviewExtras } from "@/lib/overview-extras";
+import { cronHealth, CRON_STALE_HOURS, getOverviewExtras } from "@/lib/overview-extras";
 import { setSetting } from "@/lib/orders";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
@@ -95,6 +95,68 @@ describe("getOverviewExtras", () => {
   });
 });
 
+/* Readiness pass 27.09.2026, B11: the nightly job carries the letters, the
+   check that finds lost payments, the parcel re-check and the nightly
+   «Доставлен» — and when it stops, all of them stop without a sound. «Обзор»
+   turns red when its last run is more than CRON_STALE_HOURS old. */
+describe("cronHealth — is the nightly job still running", () => {
+  const HOUR = 60 * 60 * 1000;
+  const NOW = Date.parse("2026-09-27T12:00:00Z");
+  const at = (hoursAgo: number) => new Date(NOW - hoursAgo * HOUR).toISOString();
+  const LIVE = { VERCEL_ENV: "production", CRON_SECRET: "s" };
+
+  beforeAll(async () => { await setupDb(); });
+  afterAll(teardownDb);
+  beforeEach(async () => { await exec("truncate settings, orders restart identity cascade"); });
+
+  it("reads the cron's own stamp in settings.flow_runs — the newest, whichever letter", async () => {
+    await setSetting("flow_runs", {
+      abandoned: { at: at(30), sent: 0, skipped: 0, by: "cron" },
+      unpaid: { at: at(5), sent: 0, skipped: 0, by: "cron" },
+    });
+    expect(await cronHealth(envOf(LIVE), NOW)).toEqual({ lastRunAt: at(5), stale: false });
+  });
+
+  it(`red after ${CRON_STALE_HOURS} hours — one late run is not an alarm, a missed day is`, async () => {
+    await setSetting("flow_runs", { unpaid: { at: at(CRON_STALE_HOURS - 1), sent: 0, skipped: 0, by: "cron" } });
+    expect((await cronHealth(envOf(LIVE), NOW))?.stale).toBe(false);
+    await setSetting("flow_runs", { unpaid: { at: at(CRON_STALE_HOURS + 1), sent: 0, skipped: 0, by: "cron" } });
+    expect(await cronHealth(envOf(LIVE), NOW)).toEqual({ lastRunAt: at(CRON_STALE_HOURS + 1), stale: true });
+  });
+
+  it("«Запустить сейчас» in the panel is not the cron running", async () => {
+    await setSetting("flow_runs", {
+      abandoned: { at: at(1), sent: 1, skipped: 0, by: "admin" },
+      unpaid: { at: at(50), sent: 0, skipped: 0, by: "cron" },
+    });
+    expect(await cronHealth(envOf(LIVE), NOW)).toEqual({ lastRunAt: at(50), stale: true });
+  });
+
+  it("never ran: red at once on the live shop without CRON_SECRET (the route answers 503 to Vercel)", async () => {
+    expect(await cronHealth(envOf({ VERCEL_ENV: "production" }), NOW)).toEqual({ lastRunAt: null, stale: true });
+  });
+
+  it("never ran, secret set: red once the shop's first order is older than a missed day — not on a fresh reset", async () => {
+    expect(await cronHealth(envOf(LIVE), NOW)).toEqual({ lastRunAt: null, stale: false });
+    await query("insert into orders (email, name, status, created_at) values ('a@b.c', 'A', 'paid', $1)", [at(3)]);
+    expect((await cronHealth(envOf(LIVE), NOW))?.stale).toBe(false);
+    await query("insert into orders (email, name, status, created_at) values ('a@b.c', 'A', 'paid', $1)", [at(CRON_STALE_HOURS + 2)]);
+    expect((await cronHealth(envOf(LIVE), NOW))?.stale).toBe(true);
+  });
+
+  it("a laptop, a preview, the tests: no cron there, never red for that", async () => {
+    await query("insert into orders (email, name, status, created_at) values ('a@b.c', 'A', 'paid', $1)", [at(500)]);
+    expect(await cronHealth(envOf({}), NOW)).toEqual({ lastRunAt: null, stale: false });
+    expect(await cronHealth(envOf({ VERCEL_ENV: "preview" }), NOW)).toEqual({ lastRunAt: null, stale: false });
+  });
+
+  it("rides getOverviewExtras", async () => {
+    await setSetting("flow_runs", { unpaid: { at: new Date().toISOString(), sent: 0, skipped: 0, by: "cron" } });
+    const x = await withEnv(ALL_MAIL_AND_GSC, (env) => getOverviewExtras(env));
+    expect(x.cron).toMatchObject({ stale: false });
+  });
+});
+
 describe("GET /api/admin/overview carries them", () => {
   beforeAll(async () => {
     process.env.SESSION_SECRET = TEST_SECRET;
@@ -119,6 +181,8 @@ describe("GET /api/admin/overview carries them", () => {
     expect(body.attention).toBeDefined();
     expect(body.blog).toEqual({ published: 1, drafts: 0 });
     expect(body).toHaveProperty("integrations");
+    // …and the nightly job's health, for the red row of «Сделать сегодня»
+    expect(body.cron).toMatchObject({ lastRunAt: null });
   });
 });
 

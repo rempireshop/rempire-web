@@ -25,7 +25,11 @@
  *      shipment repaired with PATCH, or one Montonio re-tried by itself;
  *   3. a refusal (`registrationFailed`) goes into the journal, so the owner
  *      hears it from the shop and not from the customer;
- *   4. «delivered» closes a `shipped` order, as the white list decides.
+ *   4. «delivered» closes a `shipped` order, as the white list decides;
+ *   5. (since 27.09.2026, B14) a parcel coming back (`returned`) goes into
+ *      the journal once, and never moves the order.
+ * The journal rows of 3 and 5 reach the owner's phone by themselves
+ * (writeAudit → src/lib/owner-alerts.ts).
  *
  * And, from the webhook only (26.09.2026, R-100098): news about a parcel on an
  * order that holds NO shipment id records that parcel on the order — the
@@ -42,6 +46,7 @@ import {
   adoptShipmentOnOrder,
   getMontonioShipment,
   isMontonioShippingConfigured,
+  MontonioShippingError,
   saveShipmentOnOrder,
   shipmentOnOrder,
   type MontonioShipment,
@@ -82,6 +87,8 @@ export interface ShipmentApplied {
   meaning: ShipmentMeaning;
   /** The order held no shipment id and now holds this one (webhook only). */
   adopted: boolean;
+  /** The carrier is sending the parcel back — journalled, once per parcel. */
+  returned: boolean;
 }
 
 /**
@@ -143,6 +150,7 @@ export async function applyShipmentUpdate(
     applied: "",
     meaning,
     adopted: false,
+    returned: false,
   };
 
   const stored = shipmentOnOrder(order);
@@ -171,7 +179,11 @@ export async function applyShipmentUpdate(
     // the same word again: still news that Montonio is talking about it
     patch.statusAt = now;
   }
-  if (opts.source === "poll") patch.polledAt = now;
+  if (opts.source === "poll") {
+    patch.polledAt = now;
+    // an answer at last: the failure an earlier night wrote down is over (B12)
+    if (stored && stored.pollError) patch.pollError = null;
+  }
 
   /* A parcel registered after the button press — a PATCH that answered
      `pending`, or Montonio's own retry — has its tracking code only in the
@@ -271,6 +283,8 @@ export async function applyShipmentUpdate(
   const alreadyKnown = opts.source === "poll" && norm(stored?.status) === "registrationfailed";
   if ((failedWord || failedEvent) && !alreadyPast && !alreadyKnown) {
     console.error(`[shipment sync] carrier refused the parcel for ${order.number} (${opts.source})`);
+    const refusedId = id || stored?.shipmentId || "";
+    const repeat = norm(stored?.status) === "registrationfailed" || (await refusedBefore(refusedId));
     await writeAuditSafe("system", "shipment.registration_failed", {
       orderId: order.id,
       number: order.number,
@@ -280,8 +294,39 @@ export async function applyShipmentUpdate(
       reason: shipmentRegistrationFailed(word).reason,
       event: update.event || undefined,
       source: opts.source === "poll" ? "poll" : undefined,
+      /* The same refusal heard again — a webhook retry, the second of two
+         event types, the poll after an event that left the word at
+         `pending`. Still a row, as it always was, but not a second ping on
+         the owner's phone (src/lib/owner-alerts.ts reads this). */
+      repeat: repeat || undefined,
     });
     out.refused = true;
+  }
+
+  /* B14 (readiness pass 27.09.2026): the carrier is sending the parcel back —
+     nobody collected it from the machine in the carrier's window (Omniva 4
+     days, SmartPosti and DPD 7…, see looksReturned in src/lib/delivery.ts).
+     The order stays where it is — it is not delivered, and it is not the
+     shop's to close — and used to stay there in silence, counted only in the
+     cron's JSON. Now it is a journal row, and through the journal a ping on
+     Renat's phone (src/lib/owner-alerts.ts), and the order card says so.
+     Once per parcel: the row is written on the move INTO `returned`, so a
+     retried webhook, the nightly poll and the nightly close all find the
+     word already stored and stay quiet. */
+  const wasReturned = statusMeaning(String(stored?.status ?? "")) === "returned";
+  if (meaning === "returned" && !out.stale && !wasReturned && (stored || out.adopted)) {
+    console.error(`[shipment sync] the parcel for ${order.number} is on its way back (${opts.source})`);
+    await writeAuditSafe("system", "shipment.returned", {
+      orderId: order.id,
+      number: order.number,
+      provider: "montonio",
+      shipmentId: id || stored?.shipmentId || undefined,
+      carrier: String(stored?.carrier ?? update.carrier ?? "").trim() || undefined,
+      code: word,
+      orderStatus: order.status,
+      source: opts.source === "poll" ? "poll" : undefined,
+    });
+    out.returned = true;
   }
 
   /* The white-list fallback, doing the one thing it is trusted with — and
@@ -295,6 +340,29 @@ export async function applyShipmentUpdate(
   }
 
   return out;
+}
+
+/**
+ * Has this shipment's refusal already been journalled since it was last sent
+ * to the carrier again? «Отправить заново» that went through writes
+ * `shipment.repair` (POST /api/admin/shipments); a refusal after that is news,
+ * one before it is the same refusal heard twice. False when the journal cannot
+ * say — a second ping is better than a missing one.
+ */
+async function refusedBefore(shipmentId: string): Promise<boolean> {
+  if (!shipmentId) return false;
+  try {
+    const [row] = await query<{ n: number }>(
+      `select count(*)::int as n from admin_audit
+        where action = 'shipment.registration_failed' and payload ->> 'shipmentId' = $1
+          and id > coalesce((select max(id) from admin_audit
+                              where action = 'shipment.repair' and payload ->> 'shipmentId' = $1), 0)`,
+      [shipmentId],
+    );
+    return Number(row?.n) > 0;
+  } catch {
+    return false;
+  }
 }
 
 /* ---------- the nightly poll --------------------------------------------- */
@@ -325,8 +393,12 @@ export interface ShipmentSyncRun {
   refused: number;
   /** …whose order was closed as delivered. */
   closed: number;
+  /** …that the carrier is sending back (B14) — journalled. */
+  returned: number;
   /** GETs Montonio did not answer, or updates that could not be written. */
   errors: number;
+  /** …of which Montonio answered 404 — no such shipment (a sandbox id under live keys). */
+  notFound: number;
   /** Quiet shipments left for the next run (limit or time budget). */
   left: number;
   reason?: string;
@@ -365,7 +437,9 @@ export async function syncStaleShipments(
     configured?: () => boolean;
   } = {},
 ): Promise<ShipmentSyncRun> {
-  const run: ShipmentSyncRun = { checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, errors: 0, left: 0 };
+  const run: ShipmentSyncRun = {
+    checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, returned: 0, errors: 0, notFound: 0, left: 0,
+  };
   const configured = opts.configured ?? (() => isMontonioShippingConfigured());
   if (!configured()) return { ...run, reason: "not_configured" };
 
@@ -434,13 +508,42 @@ export async function syncStaleShipments(
       if (result.written) run.changed += 1;
       if (result.tracking) run.tracking += 1;
       if (result.refused) run.refused += 1;
+      if (result.returned) run.returned += 1;
       if (result.applied === "delivered") run.closed += 1;
     } catch (err) {
       /* not configured after all, a 404, a timeout, a close that failed —
          this one waits for tomorrow, the next is still asked */
       run.errors += 1;
+      const code = err instanceof MontonioShippingError ? err.code : "error";
+      if (code === "not_found") run.notFound += 1;
       console.error(`[shipment sync] ${id}:`, err);
+      await notePollFailure(id, code, now);
     }
   }
   return run;
+}
+
+/**
+ * B12 (readiness pass 27.09.2026): a check that failed is still a check.
+ *
+ * The queue is sorted by `polledAt`, least recently asked first — and
+ * `polledAt` used to be written only by an answer (applyShipmentUpdate). So a
+ * shipment Montonio would not answer for kept the oldest time in the shop and
+ * went first again the next night, and the night after: twenty sandbox ids
+ * that answer 404 under the live keys took all twenty places every night, and
+ * a real parcel behind them was never asked about at all.
+ *
+ * Now the time goes on the parcel either way, with what went wrong beside it:
+ * `pollError` is Montonio's error code — `not_found` for a 404, i.e. «Montonio
+ * has no shipment with this id» — or `error` for anything else (a timeout, a
+ * close that failed). A failing parcel therefore goes to the back of the queue
+ * and waits its SHIPMENT_QUIET_HOURS like any other; the next answer clears the
+ * error. Best effort: a write that fails is logged, and the run goes on.
+ */
+async function notePollFailure(orderId: string, code: string, now: number): Promise<void> {
+  try {
+    await saveShipmentOnOrder(orderId, { polledAt: new Date(now).toISOString(), pollError: code });
+  } catch (err) {
+    console.error(`[shipment sync] could not record the failed check on ${orderId}:`, err);
+  }
 }

@@ -9596,6 +9596,98 @@
       "markedAt": "2026-09-26T20:02:10.268Z"
     },
     {
+      "id": "live-carrier-has",
+      "area": "live",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Посылка уже в пути, а «Отправлен» не нажат",
+      "steps": [
+        "Создать этикетку для настоящего заказа и сдать посылку в пакомат.",
+        "«Отправлен» не нажимать.",
+        "На следующий день открыть «Обзор».",
+        "Нажать строку «посылка уже в пути — нажмите «Отправлен»».",
+        "В карточке нажать «Отправлен»."
+      ],
+      "expect": [
+        "В «Сделать сегодня» рыжая строка с именем покупателя.",
+        "Нажатие на строку открывает карточку этого заказа.",
+        "В карточке: «Посылка уже в пути» и просьба нажать «Отправлен».",
+        "До нажатия заказ остаётся «Оплачен» — сам статус не меняется.",
+        "После «Отправлен» строка пропала, покупателю ушло письмо с трек-номером."
+      ],
+      "why": "Без «Отправлен» покупатель не получает трек-номер, а заказ вечно висит в «Отправить».",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "The parcel is on its way but «Отправлен» was not pressed",
+        "steps": [
+          "Make a label for a real order and drop the parcel at a machine.",
+          "Do not press «Отправлен».",
+          "Open «Обзор» the next day.",
+          "Tap the row «посылка уже в пути — нажмите «Отправлен»».",
+          "On the card press «Отправлен»."
+        ],
+        "expect": [
+          "A rust row in «Сделать сегодня» with the buyer's name.",
+          "Tapping the row opens that order's card.",
+          "The card says «Посылка уже в пути» and asks to press «Отправлен».",
+          "Until then the order stays «Оплачен» — nothing changes the status by itself.",
+          "After «Отправлен» the row is gone and the buyer got the tracking letter."
+        ],
+        "why": "Without «Отправлен» the buyer never gets a tracking number, and the order sits in «Отправить» for ever."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-27T10:14:58.628Z"
+    },
+    {
+      "id": "live-parcel-returned",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Посылку не забрали из пакомата",
+      "steps": [
+        "Дима отправляет настоящую посылку в пакомат на своё имя и не забирает её.",
+        "Ждать, пока перевозчик вернёт её: Omniva 4 дня, SmartPosti и DPD 7.",
+        "Нажать на пришедшее оповещение.",
+        "Открыть «Заказы» → «В пути».",
+        "Открыть «Ещё» → «Настройки» → «Журнал»."
+      ],
+      "expect": [
+        "Пришло оповещение «📦 Посылка возвращается» с номером заказа.",
+        "В карточке: «Посылка возвращается» и что делать дальше.",
+        "В разделе «Посылка» рыжая метка «Возвращается».",
+        "В «В пути» у заказа метка «Посылка возвращается».",
+        "Заказ остался «Отправлен» — сам не закрылся и не отменился.",
+        "В журнале строка «Посылка возвращается — покупатель не забрал»."
+      ],
+      "why": "Невостребованная посылка едет обратно за счёт магазина; раньше об этом не говорил никто.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "A parcel nobody collected from the machine",
+        "steps": [
+          "Dim sends a real parcel to a machine in his own name and does not collect it.",
+          "Wait until the carrier returns it: Omniva 4 days, SmartPosti and DPD 7.",
+          "Tap the notification that arrives.",
+          "Open «Заказы» → «В пути».",
+          "Open «Ещё» → «Настройки» → «Журнал»."
+        ],
+        "expect": [
+          "A notification «📦 Посылка возвращается» arrived with the order number.",
+          "The card says «Посылка возвращается» and what to do next.",
+          "«Посылка» carries a rust «Возвращается» tag.",
+          "In «В пути» the order carries «Посылка возвращается».",
+          "The order stayed «Отправлен» — not closed and not cancelled by itself.",
+          "The journal has «Посылка возвращается — покупатель не забрал»."
+        ],
+        "why": "An uncollected parcel travels back at the shop's cost; until now nothing said so."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-27T10:14:58.628Z"
+    },
+    {
       "id": "live-cron",
       "area": "live",
       "who": "dim",
@@ -9611,8 +9703,9 @@
       "expect": [
         "Письма пришли сами, без единого нажатия.",
         "Счётчики «Ждут письма» сдвинулись.",
-        "Заказ сам стал оплаченным: ночная сверка спросила Montonio и нашла платёж.",
-        "В логе утреннего запуска Vercel есть «shipments: checked …» — сверка посылок с Montonio."
+        "Заказ сам стал оплаченным, на телефон пришло «Оплату нашла ночная проверка».",
+        "В логе утреннего запуска есть «shipments», «delivered» и «payments» с числами.",
+        "На «Обзоре» нет красной строки «Ночная проверка не запускалась больше суток»."
       ],
       "why": "Расписание одно на все автоматические письма: не запустилось — не ушло ни одно.",
       "risk": "high",
@@ -9628,13 +9721,14 @@
         "expect": [
           "The letters arrived on their own, with nothing pressed.",
           "The «Ждут письма» counters have moved.",
-          "The order became paid by itself: the nightly check asked Montonio and found the payment.",
-          "The morning run's Vercel log has «shipments: checked …» — the parcel check with Montonio."
+          "The order became paid by itself; the phone got «Оплату нашла ночная проверка».",
+          "The morning run's Vercel log has «shipments», «delivered» and «payments» with counts.",
+          "«Обзор» has no red row «Ночная проверка не запускалась больше суток»."
         ],
         "why": "One schedule carries every automatic letter: if it stops, none go."
       },
       "mark": "redo",
-      "markedAt": "2026-09-24T16:52:23.267Z"
+      "markedAt": "2026-09-27T10:14:58.628Z"
     },
     {
       "id": "live-reconcile",
@@ -9650,13 +9744,14 @@
       "expect": [
         "Ответ {ok:true} и числа: сколько заказов проверили и сколько закрыли.",
         "Заказ с потерянным уведомлением стал оплаченным; в журнале это названо сверкой.",
+        "На телефон пришло «⚠️ Оплату нашла ночная проверка» с номером заказа.",
         "Без заголовка CRON_SECRET маршрут отвечает отказом."
       ],
       "why": "Уведомление может не дойти. Тогда деньги у Montonio, а заказ висит «ждёт оплаты», и никто об этом не узнает.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-19T00:00:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-27T10:14:58.628Z",
       "en": {
         "title": "The nightly payment check",
         "steps": [
@@ -9666,10 +9761,54 @@
         "expect": [
           "{ok:true} and the counts: how many orders were checked and how many were closed.",
           "An order whose notification was lost is now paid; the journal calls it the check.",
+          "The phone got «⚠️ Оплату нашла ночная проверка» with the order number.",
           "Without the CRON_SECRET header the route refuses."
         ],
         "why": "A notification can go missing. The money is then with Montonio while the order waits for payment and nobody hears about it."
       }
+    },
+    {
+      "id": "live-alerts",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Оповещение, когда с деньгами или посылкой что-то не так",
+      "steps": [
+        "Держать рядом телефон с включёнными оповещениями (проверка «Оповещения о заказе на телефон»).",
+        "Дождаться первого такого случая: возврат не дошёл или отменён, заплатили меньше, оплату нашла ночная проверка, перевозчик не принял посылку.",
+        "Нажать на оповещение.",
+        "Открыть «Ещё» → «Настройки» → «Журнал»."
+      ],
+      "expect": [
+        "Пришло одно оповещение на случай, даже если Montonio присылал новость несколько раз.",
+        "В нём по-русски сказано, что случилось и что делать.",
+        "Нажатие открывает карточку этого заказа.",
+        "В журнале есть строка про этот случай.",
+        "Если телефон оповещение не получил — оно пришло в Telegram или письмом на shop@."
+      ],
+      "why": "Раньше телефон звонил только об оплаченном заказе; о сбоях вы узнавали от покупателя.",
+      "risk": "high",
+      "writes": false,
+      "en": {
+        "title": "A notification when money or a parcel goes wrong",
+        "steps": [
+          "Keep the phone with notifications on at hand (see «Order notifications on your phone»).",
+          "Wait for the first such case: a refund not through or cancelled, a short payment, a payment found by the nightly check, a parcel the carrier refused.",
+          "Tap the notification.",
+          "Open «Ещё» → «Настройки» → «Журнал»."
+        ],
+        "expect": [
+          "One notification per case, even if Montonio sent the news several times.",
+          "It says in Russian what happened and what to do.",
+          "Tapping it opens that order's card.",
+          "The journal has a line about the case.",
+          "If the phone did not get it, it came by Telegram or e-mail to shop@."
+        ],
+        "why": "Until now the phone rang only for a paid order; failures you heard of from the buyer."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-27T10:14:58.628Z"
     },
     {
       "id": "live-google-verified",

@@ -294,7 +294,8 @@ const ROWS = [...src.matchAll(/admTaskRow\((\w+),\s*((?:pl\(\1, |\[)"[^"\n]+", "
 describe("«Сделать сегодня»: the figure and the words apart, and still one sentence in ET and EN", () => {
   it("finds every count row of «Обзор»", () => {
     // no hidLow since 26.09.2026: a hidden product lives only under «Скрытые» (Dim)
-    expect(ROWS.map((r) => r.n)).toEqual(["shipN", "overN", "heldN", "lowN", "revN", "proN", "retN"]);
+    // movingN since 27.09.2026: a parcel the carrier has and «Отправлен» was never pressed (B13)
+    expect(ROWS.map((r) => r.n)).toEqual(["shipN", "movingN", "overN", "heldN", "lowN", "revN", "proN", "retN"]);
   });
   for (const row of ROWS) {
     it(row.n, () => {

@@ -1901,7 +1901,11 @@ export interface FlowsReport {
     tracking: number;
     refused: number;
     closed: number;
+    /** Parcels the carrier is sending back, journalled this run (B14). */
+    returned?: number;
     errors: number;
+    /** …of the errors, Montonio's 404: no shipment with that id (B12). */
+    notFound?: number;
     left: number;
     reason?: string;
   };
