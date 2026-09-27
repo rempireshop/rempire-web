@@ -289,6 +289,30 @@ describe("sitemap-custom.xml", () => {
     expect(xml).not.toContain(b.id);
   });
 
+  it("leaves out an active product whose «Показывать в магазине» is off — its page answers 404", async () => {
+    /* Two switches can take an own product off the shop: its row's `active`
+       («Снять с продажи») and product_overrides.hidden («Показывать в
+       магазине», migration 147), which src/middleware.ts answers with a 404
+       for any id. The sitemap asked only the first, so a hidden product stayed
+       in it — a URL Google was told to fetch and got a 404 for (audit
+       27.09.2026, G21). */
+    const shown = await createCustomProduct(BALM);
+    const hidden = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
+    await upsertOverride(hidden.id, { hidden: true });
+    // an override row that does NOT hide keeps the product listed
+    await upsertOverride(shown.id, { price: 15.9 });
+
+    const { GET } = await import("@/app/sitemap-custom.xml/route");
+    const xml = await (await GET()).text();
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    expect(locs).toEqual([`${LIVE}/shop2/p/${shown.id}/`, `${LIVE}/shop2/et/p/${shown.id}/`, `${LIVE}/shop2/en/p/${shown.id}/`]);
+    expect(xml).not.toContain(hidden.id);
+
+    // switched back on, it is back in the sitemap
+    await upsertOverride(hidden.id, { hidden: false });
+    expect(await (await GET()).text()).toContain(`/shop2/p/${hidden.id}/`);
+  });
+
   it("is an empty, valid urlset when there is nothing to list", async () => {
     const { GET } = await import("@/app/sitemap-custom.xml/route");
     const xml = await (await GET()).text();
