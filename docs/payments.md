@@ -956,8 +956,12 @@ POST https://stargate.montonio.com/api/refunds             (бой)
    партнёрской системе включены **«Bank payment refunds»**. Это самый частый
    способ оплаты в этом магазине, и включить его должен Ренат.
 2. **Деньги должны дойти до расчётного счёта магазина в Montonio** — «This
-   typically takes 1 business day». Возврат в тот же день, в который
-   заплатили, Montonio отклонит.
+   typically takes 1 business day». Отсюда думали, что возврат в тот же
+   день Montonio отклонит — **живой час 26.09.2026 это опроверг**: R-100095
+   (банковская ссылка) и R-100096 (карта) вернули через 13 минут после оплаты,
+   Montonio принял оба как `PENDING`. Открытый вопрос — наоборот, поздний
+   возврат: деньги уже ушли выплатой, баланс в Montonio меньше суммы
+   (readiness B3, `docs/audit-2026-09-27-readiness.md`).
 
 Пока не выполнено хотя бы одно, `GET /orders/:orderUuid` показывает
 `availableForRefund: 0` и `isRefundableType: false`, а `POST /refunds`
