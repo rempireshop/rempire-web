@@ -16,6 +16,31 @@ returns, international pricing per carrier). Quoted and matched to our
 questions in `docs/montonio-questions.md` § «Answers, 24.09.2026»; the rows
 it changed here are S5, S8, S9, S14 and D8.
 
+**Updated 27.09.2026** — readiness pass B1, B9, B10
+(`docs/audit-2026-09-27-readiness.md`), after the live hour left R-100095 (full
+€1) and R-100096 (partial €0.50) at PENDING:
+
+- **B1.** «Деньги возвращены» now goes when a refund moves from not-done to
+  done — the SUCCESSFUL webhook for a refund the order card recorded as
+  PENDING, or the nightly re-check below. Once: the entry is stamped
+  `doneAt`, a duplicate SUCCESSFUL finds the stamp, and a refund whose first
+  answer was already done (the order card's own letter) gets nothing more.
+  Portal refunds follow the same rule: first notice PENDING → «Возврат
+  отправлен», SUCCESSFUL → «Деньги возвращены». Until now the SUCCESSFUL
+  folded into the existing line, `applied` was false, and the letter the first
+  one promises never went.
+- **B10.** A finished refund (done / failed) is never moved back to pending by
+  a late notice; the journal row says `kept`.
+- **B9.** The morning cron asks `GET /orders/:uuid` about every refund still
+  pending after 24 h and records what Montonio's refund list says through the
+  webhook's own code (`src/lib/payments/refund-recheck.ts`). A lost SUCCESSFUL
+  is therefore at most a day late, with the same letter, stock, points and
+  journal. Day ten no longer claims Montonio cancelled it.
+- **Still unproven live:** the SUCCESSFUL webhook itself. R-100095/96 are the
+  proof when they arrive (or the first morning run after deploy finds them).
+  Note: if their SUCCESSFUL arrived **before** this deploy, the entry already
+  reads done with no second letter, and nothing re-sends it.
+
 ---
 
 ## Why this document exists
@@ -337,6 +362,11 @@ sandbox could not tell us.
 - [ ] A day later, check the refund actually landed. If it is still pending:
       `GET /api/admin/montonio/` lists it under `pending` with its age.
       **Montonio cancels a refund it cannot fund after 10 days.**
+- [ ] When it lands (27.09.2026): the order card drops «в обработке», a full
+      refund turns the order «возврат» and puts the stock back, and the
+      customer gets the second letter, «Деньги возвращены». If the webhook is
+      lost, the next morning's cron log line `[api/cron/flows] refunds: …`
+      says whether the re-check found it.
 
 ### 3.5 What to watch for the rest of the first day
 

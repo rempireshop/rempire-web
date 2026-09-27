@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
-import { readRefundStatusDescription } from "@/lib/montonio-problems";
-import { getOrder, getOrderByNumber, getOrderByPaymentRef, writeAuditSafe } from "@/lib/orders";
+import { getOrder, getOrderByNumber, getOrderByPaymentRef } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { canRefund, refundableAmount, refundsOf, type RefundNotification } from "@/lib/payments/refund";
-import { refundValue, settlePayment, settleRefund } from "@/lib/payments/settle";
+import { canRefund, refundableAmount, type RefundNotification } from "@/lib/payments/refund";
+import { recordProviderRefund, refundValue, settlePayment, settleRefund } from "@/lib/payments/settle";
 import { guardTokenChecks } from "@/lib/payments/token-guard";
 import { PaymentError, type PaymentProvider } from "@/lib/payments/types";
 
@@ -25,6 +23,12 @@ import { PaymentError, type PaymentProvider } from "@/lib/payments/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* A paid ticket may ask Montonio `GET /orders/:uuid` first (token-guard, a
+   15 s timeout) and then settle: the claim on the row, the stock, the points,
+   the gift cards, the letter and the owner's ping. On a 10 s default the
+   function could stop between «оплачен» and the rest (audit 27.09.2026, B17);
+   a refund webhook runs the same length of work through settleRefund(). */
+export const maxDuration = 60;
 
 /* Generous — Montonio retries for 48 hours and a busy day is a few dozen
    webhooks — but finite: the signed token is the security boundary, the
@@ -173,11 +177,13 @@ async function reread<T extends { id: string }>(order: T): Promise<T> {
  *
  * It names the order by the PROVIDER's id (`orderUuid`), not by our number, so
  * the lookup goes through `orders.payment.ref`. Everything else is
- * settleRefund()'s: the same refund id twice folds into one entry, the order
- * turns «возврат» only when the refunds cover it, and the customer's letter
- * goes out once. 200 for everything understood — including a repeat and an
- * order we cannot find — because a 4xx buys 48 hours of retries and fixes
- * nothing.
+ * settleRefund()'s: the same refund id twice folds into one entry, a finished
+ * refund never goes back to pending, the order turns «возврат» only when the
+ * refunds that are DONE cover it, and each of the customer's two letters goes
+ * out once — «Возврат отправлен» on a first PENDING, «Деньги возвращены» when
+ * the refund becomes SUCCESSFUL. 200 for everything understood — including a
+ * repeat and an order we cannot find — because a 4xx buys 48 hours of retries
+ * and fixes nothing.
  */
 async function refund(provider: PaymentProvider, req: Request) {
   if (!canRefund(provider)) {
@@ -204,97 +210,18 @@ async function refund(provider: PaymentProvider, req: Request) {
     return NextResponse.json({ ok: true, ignored: "unknown_order" });
   }
 
-  /* Montonio may report a refund larger than what is left to refund — a
-     second portal refund racing this one, or a figure we already recorded
-     under another id. Clamped so the ledger can never say more went back than
-     the order was worth; the audit row keeps what was actually reported.
-     Against what the customer GAVE — the money plus what a gift card paid
-     (refundValue), the same figure every other refund calculation uses — and
-     not against `orders.total` alone, which would shrink a 30 € bank refund to
-     10 € on an order a 20 € card had already had back, and then tell the
-     customer that 10 € in a letter.
-     What is already recorded under THIS refund's own id does not narrow it:
-     the admin route records the entry the moment Montonio answers and the
-     webhook for the same refund follows (PENDING → SUCCESSFUL), and folding
-     that in must leave the amount where it was rather than zero it. */
-  const others = refundsOf(order.payment).filter((r) => r.ref !== note.refundRef);
-  const amount = Math.min(note.amount, refundableAmount(await refundValue(order), { refunds: others }));
-
-  /* The reason a refund did not reach the customer, and the only place it is
-     ever said. `POST /refunds` answers 200 PENDING for a refund it cannot fund
-     and explains nothing; days later this webhook arrives carrying
-     `refundStatusDescription` — INSUFFICIENT_FUNDS, DECLINED,
-     EXPIRED_OR_CANCELLED_CARD … — and until 18.09.2026 the word went into the
-     ledger entry's `detail` and nowhere a human would look. Now it is a
-     journal row of its own, with a code the panel can translate.
-     Only when there IS something to explain: the guide prints `null` for a
-     refund that simply worked, and a SUCCESSFUL refund with a description is
-     still worth recording (a partial success has a story). */
-  if (note.statusDescription) {
-    const why = readRefundStatusDescription(note.statusDescription);
-    console.error(
-      `payments/notify: refund ${note.refundRef} on ${order.number} — ${note.status} · ${note.statusDescription}`,
-    );
-    /* Once per refund and reason, not once per delivery. This row is written
-       BEFORE the settle below on purpose — the settle can throw, this answers
-       503, and Montonio redelivers, and the one row that explains a stuck
-       refund must survive that rather than depend on it. The cost was that
-       every redelivery wrote it again (audit F19), so the owner opened a
-       journal with «Возврат не дошёл до покупателя» three times over for one
-       refund. Asked, then written; a read that fails writes anyway, because a
-       duplicated explanation is better than a missing one. */
-    let already = false;
-
-    try {
-
-      const [seen] = await query<{ n: number }>(
-
-        "select count(*)::int as n from admin_audit where action = 'order.refund_stuck'" +
-
-          " and payload->>'ref' = $1 and payload->>'code' = $2",
-
-        [note.refundRef, note.statusDescription],
-
-      );
-
-      already = Number(seen?.n) > 0;
-
-    } catch (err) {
-
-      console.error("payments/notify: could not check for an earlier refund_stuck row", err);
-
-    }
-
-    if (!already) {
-      await writeAuditSafe("system", "order.refund_stuck", {
-        orderId: order.id,
-        number: order.number,
-        amount,
-        ref: note.refundRef,
-        code: note.statusDescription,
-        reason: why.reason,
-        status: note.status,
-      });
-    }
-  }
-
+  /* Everything from here is recordProviderRefund()'s (src/lib/payments/
+     settle.ts): the clamp to what is left, the `order.refund_stuck` row that
+     explains a stuck refund, and settleRefund() — the same code the nightly
+     re-check of a pending refund runs (src/lib/payments/refund-recheck.ts),
+     so a SUCCESSFUL that arrives here and one found there the next morning
+     have exactly the same effects. `refund` in the answer is the status the
+     ledger now holds: a late PENDING after a DONE says `done` (B10). */
   try {
-    const out = await settleRefund(
-      order,
-      {
-        ref: note.refundRef,
-        amount,
-        status: note.status,
-        at: new Date().toISOString(),
-        by: "webhook",
-        detail: note.detail,
-      },
-      // nothing left to give back under this id means nothing to write about
-      { notify: amount > 0 },
-    );
+    const out = await recordProviderRefund(order, note, "webhook");
     return NextResponse.json({
       ok: true,
-      refund: note.status,
+      refund: out.refundStatus,
       applied: out.applied,
       refundedTotal: out.refundedTotal,
       status: out.status,

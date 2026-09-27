@@ -42,7 +42,12 @@ export interface PendingRefund {
   since: string;
   /** Whole hours since `since`, for the panel's «висит N дней». */
   hours: number;
-  /** Past Montonio's own ten days: it has given up, the money stayed here. */
+  /**
+   * Past Montonio's own ten days with no answer. By its rules it is cancelled
+   * by now, but nobody has told the shop — a lost SUCCESSFUL looks the same —
+   * so the outcome is UNKNOWN, and the nightly re-check keeps asking
+   * (src/lib/payments/refund-recheck.ts; audit 27.09.2026, B9).
+   */
   overdue: boolean;
   /** `giftcard` entries never reach Montonio and never pend — kept for shape. */
   to?: RefundEntry["to"];

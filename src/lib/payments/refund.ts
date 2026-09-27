@@ -117,7 +117,26 @@ export interface RefundEntry {
    * falls back to `at` the way it always did.
    */
   since?: string;
-  /** `admin` for the order card, `webhook` for one made in Montonio's portal. */
+  /**
+   * When this refund was first seen DONE — the moment the money reached the
+   * customer as far as this shop knows. Stamped by foldRefund() once and never
+   * moved, like `since`.
+   *
+   * It is what the «Деньги возвращены» letter hangs off (audit 27.09.2026,
+   * B1): the letter goes on the fold that stamps it, and on no other. A
+   * PENDING refund that later turns SUCCESSFUL stamps it on the webhook (or
+   * the nightly re-check), a duplicate SUCCESSFUL finds it already there, and
+   * a refund that went done → failed → done cannot stamp it twice. Absent on
+   * entries written before 27.09.2026; foldRefund() reads a `done` one of
+   * those as stamped at its `at`.
+   */
+  doneAt?: string;
+  /**
+   * `admin` for the order card, `webhook` for one made in Montonio's portal,
+   * `montonio` for one found in Montonio's own list after a lost answer. Who
+   * MADE the refund: a later notice about it does not change it (since
+   * 27.09.2026 — the journal row of each notice says who reported it).
+   */
   by?: string;
   detail?: string;
   /**
@@ -157,6 +176,7 @@ export function refundsOf(payment: unknown): RefundEntry[] {
       status: refundStatus(r.status),
       at: typeof r.at === "string" ? r.at : "",
       since: typeof r.since === "string" && r.since ? r.since : undefined,
+      doneAt: typeof r.doneAt === "string" && r.doneAt ? r.doneAt : undefined,
       by: typeof r.by === "string" ? r.by : undefined,
       detail: typeof r.detail === "string" ? r.detail : undefined,
       to: r.to === "giftcard" ? ("giftcard" as const) : undefined,
@@ -274,42 +294,110 @@ export function splitRefund(amount: number, giftLeft: number): { gift: number; m
   return { gift, money: money(total - gift) };
 }
 
+/** What foldRefund() made of one notice about one refund. */
+export interface FoldedRefund {
+  refunds: RefundEntry[];
+  refundedTotal: number;
+  /** True only the first time a `ref` is seen. */
+  applied: boolean;
+  /**
+   * True on the ONE fold that moves this refund to done for the first time —
+   * a first notice that is already done included. The «Деньги возвращены»
+   * letter hangs off this and nothing else (see RefundEntry.doneAt).
+   */
+  becameDone: boolean;
+  /**
+   * Set when the notice tried to move a finished refund back to pending and
+   * was refused: the status the entry kept. The ledger is then exactly what
+   * it was.
+   */
+  kept?: RefundStatus;
+  /** The entry for this `ref` as the ledger now holds it. */
+  entry: RefundEntry;
+}
+
 /**
  * The ledger after one refund is folded in — pure, so both doors and the tests
  * agree about what "the same refund twice" means.
  *
- * `applied` is true only the first time a `ref` is seen: that is what the
- * caller hangs the customer's letter off, exactly the way `alreadyPaid` gates
- * the confirmation letter in applyPaymentResult().
+ * `applied` is true only the first time a `ref` is seen, and `becameDone` only
+ * on the fold that first moves it to done. The caller hangs the customer's
+ * letters off those two, exactly the way `alreadyPaid` gates the confirmation
+ * letter in applyPaymentResult(): «Возврат отправлен» on a first sighting that
+ * is still pending, «Деньги возвращены» on becameDone. Until 27.09.2026 only
+ * `applied` existed, so a refund Montonio answered PENDING — recorded by the
+ * order card — was confirmed by a webhook that folded into the existing line,
+ * `applied` was false, and the second letter the first one promises never went
+ * (audit 27.09.2026, B1).
  *
- * Read-modify-write, deliberately: the whole array is written back, so an
- * admin refund and a refund webhook landing in the same instant could lose
- * one entry. `setOrderPayment()` merges top-level keys, not array elements,
- * and a jsonb array append in SQL would buy real concurrency at the cost of
- * this file being testable without a database. At three to five orders a
- * month, with a human pressing the button, the window is not the risk worth
- * paying for — the amount is checked against the remainder before the
- * provider is called either way, so the failure mode is a missing line in the
- * ledger, never money leaving twice.
+ * Status only moves forward (B10). Montonio's refund lifecycle is PENDING /
+ * PROCESSING → SUCCESSFUL | REJECTED | CANCELED; the last three are final. A
+ * PENDING notice that arrives after one of them — a retried delivery of an
+ * earlier notice, or the order card's own PENDING answer landing after the
+ * webhook's SUCCESSFUL — is recorded as nothing: the entry keeps its status,
+ * its amount and its stamps, and `kept` says so. It used to be spread over the
+ * entry, which turned a DONE refund back into money «on its way» and brought
+ * back the ten-day countdown for a refund that had long arrived. A move
+ * between two final states (done → failed, a rejection after the fact) is
+ * still recorded, as the header of this file has always promised: the order
+ * card shows it, and a human looks.
+ *
+ * `by` is who MADE the refund and is kept from the first notice; `since` and
+ * `doneAt` are set once and never moved.
+ *
+ * Pure and read-modify-write: the whole array is written back.
+ * settleRefund() (src/lib/payments/settle.ts) writes it conditionally on the
+ * array it was folded from, and folds again from a fresh read when somebody
+ * else wrote in between — so two doors landing at once can neither lose a line
+ * nor both believe they were the one that finished the refund.
  */
-export function foldRefund(
-  payment: unknown,
-  entry: RefundEntry,
-): { refunds: RefundEntry[]; refundedTotal: number; applied: boolean } {
+export function foldRefund(payment: unknown, entry: RefundEntry): FoldedRefund {
   const list = refundsOf(payment);
   const at = list.findIndex((r) => r.ref === entry.ref);
+  const prev = at < 0 ? undefined : list[at];
+
+  /* B10: a finished refund is never pending again. */
+  if (prev && prev.status !== "pending" && entry.status === "pending") {
+    return {
+      refunds: list,
+      refundedTotal: refundedTotal({ refunds: list }),
+      applied: false,
+      becameDone: false,
+      kept: prev.status,
+      entry: prev,
+    };
+  }
+
   /* `since` is set once and never moved again: it is the only stamp on the
      entry that a repeat notice cannot push forward, and the ten-day countdown
      has to run on it (see RefundEntry.since). Written last so that a caller
      passing `since: undefined` — every caller does, it is not theirs to set —
      cannot spread it over the one the first notice left. */
-  const since = at < 0 ? entry.since || entry.at : list[at].since || list[at].at || entry.since || entry.at;
-  const next =
-    at < 0
-      ? [...list, { ...entry, since }]
-      : list.map((r, i) => (i === at ? { ...r, ...entry, since } : r));
-  const folded = { refunds: next, refundedTotal: refundedTotal({ refunds: next }), applied: at < 0 };
-  return folded;
+  const since = !prev ? entry.since || entry.at : prev.since || prev.at || entry.since || entry.at;
+  /* `doneAt`, the same way. An entry written before the field existed that is
+     already `done` counts as stamped at its own `at`, so a duplicate SUCCESSFUL
+     for a refund confirmed last week is not «the money just arrived». */
+  const doneBefore = prev
+    ? prev.doneAt || (prev.status === "done" ? prev.at || entry.at || new Date().toISOString() : undefined)
+    : undefined;
+  const becameDone = entry.status === "done" && !doneBefore;
+  const doneAt = doneBefore || (becameDone ? entry.at || new Date().toISOString() : undefined);
+
+  const merged: RefundEntry = {
+    ...(prev ?? {}),
+    ...entry,
+    since,
+    by: prev?.by || entry.by,
+    doneAt,
+  };
+  const next = !prev ? [...list, merged] : list.map((r, i) => (i === at ? merged : r));
+  return {
+    refunds: next,
+    refundedTotal: refundedTotal({ refunds: next }),
+    applied: !prev,
+    becameDone,
+    entry: merged,
+  };
 }
 
 /**

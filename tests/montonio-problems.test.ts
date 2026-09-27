@@ -304,11 +304,20 @@ describe("refundPendingText — a refund that has only started", () => {
     expect(day3.RU).toContain("7");
   });
 
-  it("says the money is back with the shop once Montonio has given up", () => {
+  /* Until 27.09.2026 day ten said Montonio HAD cancelled it and told the owner
+     to refund again. Nobody had told the shop that — a lost SUCCESSFUL looks
+     the same — and «Вернуть деньги» refuses while the pending line counts
+     (audit 27.09.2026, B9). */
+  it("past ten days says the outcome is unknown, where to look, and what fixes itself", () => {
     const dead = refundPendingText(11 * 24);
     speaksAllThree(dead);
-    expect(dead.RU).toMatch(/отменён|остались в магазине/);
-    expect(dead.EN).toMatch(/cancelled/i);
+    expect(dead.RU).toContain("не знает");
+    expect(dead.RU).toContain("кабинете Montonio");
+    expect(dead.RU).toContain("каждую ночь");
+    expect(dead.RU).not.toMatch(/уже отменён|деньги остались в магазине|Оформите возврат заново/);
+    expect(dead.EN).toMatch(/does not know/i);
+    expect(dead.EN).not.toMatch(/already cancelled|stayed with the shop|Make the refund again/i);
+    expect(dead.ET).toContain("Tagasta raha");
   });
 });
 
@@ -617,7 +626,11 @@ describe("montonioReadinessRows — telling him before he needs it", () => {
     const dead = montonioReadinessRows({ ...base, pendingRefunds: 3, overdueRefunds: 1 })
       .find((r) => r.key === "pending_refunds")!;
     expect(dead.ok).toBe(false);
-    expect(dead.sub.EN).toMatch(/cancelled/i);
+    // red, and honest: no answer is not «Montonio cancelled them» (B9)
+    expect(dead.sub.EN).toMatch(/no answer from Montonio/i);
+    expect(dead.sub.EN).not.toMatch(/has cancelled|stayed with the shop|refund again/i);
+    expect(dead.sub.RU).not.toMatch(/уже отменил|остались в магазине|верните деньги заново/);
+    speaksAllThree(dead.sub);
   });
 
   it("says «нет ключей» and nothing else when there are none", () => {

@@ -4536,7 +4536,7 @@
         "В «Доставка и оплата» появилась строка «Возвращено X из Y».",
         "С настоящим банком там же написано «Возврат … в обработке у Montonio».",
         "Когда банк подтвердил возврат, у заказа стоит «возврат», товары вернулись на склад.",
-        "Письмо «Деньги возвращены» пришло; в нём блок «Баллы», если заказ тратил или давал баллы.",
+        "С банком: сначала «Возврат отправлен», а когда деньги дошли — «Деньги возвращены» с «Баллами».",
         "В баллах кабинета: «Вернули баллы, потраченные на заказ R-…» и «Сняли баллы, начисленные…».",
         "В «Мои заказы» под этим заказом: «Потраченные баллы вернули» и «Баллы за заказ сняли»."
       ],
@@ -4557,13 +4557,13 @@
           "A «Возвращено X из Y» line appears in «Доставка и оплата».",
           "With the real bank it also says «Возврат … в обработке у Montonio».",
           "Once the bank confirms, the order carries «возврат» and the goods are back in stock.",
-          "The «Деньги возвращены» letter came, with a «Баллы» block if the order spent or earned points.",
+          "With a bank: first «Возврат отправлен», then «Деньги возвращены» with «Баллы» once the money lands.",
           "In the account's points: «Вернули баллы, потраченные на заказ R-…» and «Сняли баллы, начисленные…».",
           "Under the order in «Мои заказы»: «Потраченные баллы вернули» and «Баллы за заказ сняли»."
         ],
         "why": "A mistake here costs exactly what is typed in the amount field."
       },
-      "markedAt": "2026-09-26T09:29:28.542Z"
+      "markedAt": "2026-09-27T10:07:41.015Z"
     },
     {
       "id": "order-refund-retry",
@@ -5527,14 +5527,14 @@
         "В «Письмах» оба шаблона на месте и оба можно отредактировать.",
         "Первое письмо говорит, что возврат отправлен, а не что деньги уже вернулись.",
         "В нём названа сумма и сказано, когда начинать беспокоиться.",
-        "Второе письмо приходит отдельно и говорит, что деньги у покупателя.",
+        "Второе письмо приходит само после подтверждения Montonio и говорит: деньги у покупателя.",
         "Возврат на подарочную карту шлёт только одно письмо — деньги на карте сразу."
       ],
       "why": "Montonio отвечает «принято» на возврат, которого ещё не произошло. Письмо «деньги возвращены» в этот момент — письменное обещание того, что может не случиться.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-19T06:45:00.000Z",
+      "mark": "redo",
+      "markedAt": "2026-09-27T10:07:41.015Z",
       "en": {
         "title": "Two letters for one refund",
         "steps": [
@@ -5547,7 +5547,7 @@
           "Both templates are in «Письма» and both can be edited.",
           "The first says the refund was sent, not that the money is back.",
           "It names the amount and says when to start worrying.",
-          "The second letter arrives separately and says the money has arrived.",
+          "The second letter comes by itself once Montonio confirms, and says: the money has arrived.",
           "A gift-card refund sends one letter only — that money is back at once."
         ],
         "why": "Montonio says «accepted» for a refund that has not happened yet. «Money returned» at that moment is a promise in writing that may not come true."
@@ -9312,7 +9312,7 @@
         "Сначала там же написано «Возврат … в обработке у Montonio».",
         "Когда Montonio подтвердил, заказ числится возвратом, а не продажей.",
         "Тогда же товары вернулись на склад.",
-        "Покупателю ушло письмо о возврате."
+        "Покупателю сначала пришло «Возврат отправлен», а когда Montonio подтвердил — «Деньги возвращены»."
       ],
       "why": "Без рабочего возврата легко вернуть одному человеку деньги дважды.",
       "risk": "high",
@@ -9333,11 +9333,11 @@
           "At first it also says «Возврат … в обработке у Montonio».",
           "Once Montonio confirms, the order counts as a refund, not a sale.",
           "The goods go back into stock at that point.",
-          "A refund letter went to the buyer."
+          "The buyer got «Возврат отправлен» first, then «Деньги возвращены» once Montonio confirmed."
         ],
         "why": "Without a working refund it is easy to pay someone twice."
       },
-      "markedAt": "2026-09-22T15:49:00.000Z"
+      "markedAt": "2026-09-27T10:07:41.015Z"
     },
     {
       "id": "order-refund-part",

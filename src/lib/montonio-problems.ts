@@ -567,8 +567,16 @@ export function readRefundStatusDescription(raw: unknown): RefundStatusReading {
  *
  * So a pending refund is neither a success nor a failure, and the panel used
  * to show it as a success. These two constants are what makes it visible: past
- * the first, the panel says «ещё не у покупателя»; past the second, Montonio
- * has given up and the money is still the shop's.
+ * the first, the panel says «ещё не у покупателя» and the nightly re-check
+ * starts asking Montonio about it (src/lib/payments/refund-recheck.ts); past
+ * the second, Montonio's own rule says it is cancelled by now — but nobody has
+ * TOLD the shop so, and that is all the panel may say.
+ *
+ * Until 27.09.2026 the day-ten sentence said Montonio HAD cancelled it and told
+ * the owner to refund again. Neither was known: a SUCCESSFUL webhook that was
+ * lost looks exactly the same from here, and «Вернуть деньги» refuses a second
+ * refund while the pending line still counts (audit 27.09.2026, B9). The
+ * sentence now says what is known, where to look, and what changes by itself.
  */
 export const REFUND_PENDING_WATCH_HOURS = 24;
 export const REFUND_PENDING_GIVEUP_DAYS = 10;
@@ -580,14 +588,17 @@ export function refundPendingText(hoursOld: number): Trilingual {
   if (overdue) {
     return {
       RU:
-        "Возврат висит в Montonio больше 10 дней — по их правилам он уже отменён, деньги остались в магазине. " +
-        "Оформите возврат заново или верните покупателю вручную.",
+        "Montonio больше 10 дней не подтверждает этот возврат, и магазин не знает, чем он кончился: по правилам Montonio такой возврат отменяют, но сообщения об этом не было. " +
+        "Магазин спрашивает Montonio каждую ночь. Посмотрите этот возврат в кабинете Montonio: если он прошёл — ничего делать не нужно; " +
+        "если отменён — после ночной проверки «Вернуть деньги» снова заработает.",
       ET:
-        "Tagasimakse on Montonios rippunud üle 10 päeva — nende reeglite järgi on see juba tühistatud, raha jäi poodi. " +
-        "Vormistage tagasimakse uuesti või tagastage kliendile käsitsi.",
+        "Montonio pole seda tagasimakset üle 10 päeva kinnitanud ja pood ei tea, kuidas see lõppes: Montonio reeglite järgi selline tagasimakse tühistatakse, aga sellest ei teatatud. " +
+        "Pood küsib Montoniolt igal ööl uuesti. Vaadake seda tagasimakset Montonio kontol: kui see läks läbi — pole midagi vaja teha; " +
+        "kui see on tühistatud — pärast öist kontrolli töötab «Tagasta raha» jälle.",
       EN:
-        "The refund has been sitting at Montonio for more than 10 days — by their rules it is already cancelled and the money stayed with the shop. " +
-        "Make the refund again, or pay the customer back by hand.",
+        "Montonio has not confirmed this refund for more than 10 days, and the shop does not know how it ended: by Montonio's rules such a refund is cancelled, but no word of that has arrived. " +
+        "The shop asks Montonio again every night. Look the refund up in your Montonio account: if it went through, there is nothing to do; " +
+        "if it was cancelled, «Refund» will work again after the nightly check.",
     };
   }
   const left = Math.max(0, REFUND_PENDING_GIVEUP_DAYS - days);
@@ -1146,9 +1157,11 @@ export function montonioReadinessRows(state: ReadinessState): ReadinessRow[] {
       name: { RU: "Возвраты в пути", ET: "Tagasimaksed teel", EN: "Refunds on the way" },
       sub: over
         ? {
-            RU: "Возвратов ждут: " + n + ", из них " + over + " висят больше 10 дней — Montonio их уже отменил, деньги остались в магазине. Откройте эти заказы и верните деньги заново.",
-            ET: "Ootel tagasimakseid: " + n + ", neist " + over + " on rippunud üle 10 päeva — Montonio on need juba tühistanud, raha jäi poodi. Avage need tellimused ja tehke tagasimakse uuesti.",
-            EN: "Refunds waiting: " + n + ", of which " + over + " have been sitting for more than 10 days — Montonio has cancelled them and the money stayed with the shop. Open those orders and refund again.",
+            /* Not «Montonio их уже отменил»: nobody told the shop that, and a
+               lost SUCCESSFUL looks the same from here (audit 27.09.2026, B9). */
+            RU: "Возвратов ждут: " + n + ", из них " + over + " без ответа от Montonio больше 10 дней. Обычно Montonio отменяет такие через 10 дней, но магазин этого не знает наверняка — он спрашивает каждую ночь. Откройте эти заказы и проверьте возврат в кабинете Montonio.",
+            ET: "Ootel tagasimakseid: " + n + ", neist " + over + " on Montoniolt vastuseta üle 10 päeva. Tavaliselt tühistab Montonio sellised 10 päeva pärast, aga pood ei tea seda kindlalt — ta küsib igal ööl. Avage need tellimused ja kontrollige tagasimakset Montonio kontol.",
+            EN: "Refunds waiting: " + n + ", of which " + over + " have had no answer from Montonio for more than 10 days. Montonio usually cancels such refunds after 10 days, but the shop does not know for sure — it asks every night. Open those orders and check the refund in your Montonio account.",
           }
         : {
             RU: "Возвратов ждут: " + n + ". Montonio их принял, но деньги ещё не у покупателей. Обычно это один рабочий день.",

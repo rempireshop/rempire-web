@@ -144,6 +144,13 @@ import { PaymentError } from "@/lib/payments/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* Two Montonio calls of up to 15 s each (REQUEST_TIMEOUT_MS in
+   src/lib/payments/montonio.ts): POST /refunds, and on a lost or refused
+   answer GET /orders/:uuid — then the ledger, the card, the letter. 30 s of
+   waiting plus the writes does not fit a 10 s default; the function stopping
+   after Montonio sent the money and before the line is written is exactly the
+   lost answer this route works so hard to recover from (audit 27.09.2026, B17). */
+export const maxDuration = 60;
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -575,11 +582,23 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
     let current: Order = order;
     let out = { refundedTotal: back, fully: false, status: order.status as string, voided: [] as string[] };
     const voided: string[] = [];
+    /* What the LEDGER says about the money half once it is recorded — not what
+       POST /refunds answered. The two differ in one case: Montonio finished
+       the refund and its SUCCESSFUL webhook was recorded while this answer
+       (PENDING) was still on its way back. foldRefund() keeps DONE (a finished
+       refund never goes back to pending — audit 27.09.2026, B10), and every
+       sentence below — the journal row, the letter, the panel — follows it, so
+       the customer is never sent «Возврат отправлен» after «Деньги
+       возвращены». */
+    let moneyStatus: RefundEntry["status"] | null = moneyResult ? moneyResult.status : null;
+    /* …and in that same case the webhook that recorded the refund first has
+       already written to the customer about it, through settleRefund(). */
+    let moneyRecordedElsewhere = false;
 
     /* 1. the money, through the provider — recorded before the card is
           touched, because this is the half that has already happened. */
     if (moneyResult) {
-      out = await settleRefund(
+      const recorded = await settleRefund(
         current,
         {
           ref: moneyResult.ref,
@@ -592,6 +611,9 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
         // the letter goes below, where the amount and the language are already in hand
         { notify: false },
       );
+      out = recorded;
+      moneyStatus = recorded.refundStatus;
+      moneyRecordedElsewhere = !recorded.applied;
       voided.push(...out.voided);
       current = (await getOrder(order.id)) ?? current;
 
@@ -609,7 +631,7 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
          below returns 409 from the middle of this block, and a pending money
          half that had already gone out then left no row and no sentence at all
          (F29). The row belongs to the money, not to the route finishing. */
-      if (moneyResult.status === "pending") {
+      if (moneyStatus === "pending") {
         await writeAuditSafe("admin", "order.refund_pending", {
           orderId: order.id,
           number: order.number,
@@ -648,7 +670,7 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
           /* The money half may already be on its way and merely accepted: the
              owner is being told the card refused, and must not read that as
              «ничего не ушло» (F29). */
-          ...(moneyResult && moneyResult.status === "pending"
+          ...(moneyStatus === "pending"
             ? { refundStatus: "pending" as const, pendingMessages: refundPendingText(0) }
             : {}),
         });
@@ -679,15 +701,18 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
     }
 
     const refundedNow = money((moneyResult ? money(moneyResult.amount || split.money) : 0) + giftBack);
-    if (!moneyResult || moneyResult.status !== "failed") {
+    if (moneyStatus !== "failed" && !(moneyRecordedElsewhere && giftBack === 0)) {
       /* «Отправлен», not «возвращён», while Montonio has only ACCEPTED the
          money half — the owner's decision of 19.09.2026, and the same rule
          settleRefund() applies. A gift card is money already on the card, so
          a card-only refund is never pending; a MIXED one takes the pending
          wording, because the half that has not moved is the half the customer
          will be looking for on a statement. The gift lines still name the
-         card and its amount inside that letter. */
-      const letterKind = moneyResult && moneyResult.status === "pending" ? "refund_sent" : "refunded";
+         card and its amount inside that letter.
+         «Деньги возвращены» for a PENDING money half is not this route's to
+         send: it goes from settleRefund() on the webhook (or the nightly
+         re-check) that moves the refund to done (audit 27.09.2026, B1). */
+      const letterKind = moneyStatus === "pending" ? "refund_sent" : "refunded";
       await notifyOrderClosed(
         { ...order, status: out.status },
         {
@@ -705,16 +730,14 @@ async function refundOnce(seenOrder: Order, body: { amount?: unknown }): Promise
       body: {
         ok: true,
         amount: refundedNow,
-        ...(moneyResult && moneyResult.status === "pending"
-          ? { pendingMessages: refundPendingText(0) }
-          : {}),
+        ...(moneyStatus === "pending" ? { pendingMessages: refundPendingText(0) } : {}),
         gift: giftBack,
         money: moneyResult ? money(moneyResult.amount || split.money) : 0,
         giftCode: giftBack > 0 && giftCard ? giftCard.code : undefined,
         voided,
         refundedTotal: out.refundedTotal,
         left: refundableAmount(value, fresh.payment),
-        refundStatus: moneyResult ? moneyResult.status : "done",
+        refundStatus: moneyStatus ?? "done",
         fully: out.fully,
         status: out.status,
         order: fresh,
