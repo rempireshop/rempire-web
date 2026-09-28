@@ -11326,16 +11326,25 @@
        newer choice (`saved`), never mixed into an address being typed. */
     var pa = p.method === "courier" && p.address && p.address.addr && p.address.zip && p.address.city ? p.address : null;
     var typing = !!(String(S.ship.addr || "").trim() || String(S.ship.zip || "").trim() || String(S.ship.city || "").trim());
+    var door = false;
     if (pa && (saved || !typing)) {
       S.ship.addr = pa.addr || ""; S.ship.zip = pa.zip || ""; S.ship.city = pa.city || "";
-      // step 2's boxes live outside the patched blocks below — set in place,
-      // except the one the shopper is in: a value written under a caret moves it
-      if (S.screen === "checkout") {
-        ["addr", "zip", "city"].forEach(function (k) {
-          var box = document.querySelector('[data-shipf="' + k + '"]');
-          if (box && document.activeElement !== box) box.value = S.ship[k];
-        });
-      }
+      door = true;
+    }
+    /* A door with NO method — a customer brought over from Shopify (Dim,
+       28.09.2026, option b: the import chooses nobody's delivery). The
+       method above is left alone, so the checkout opens on the country's
+       usual one, and the door waits for the shopper's own tap on «Курьер»
+       (fillSavedDoor, the data-dm click) — except where the courier is all
+       the country has, and the checkout already stands on it. */
+    else if (p.method === "" && fillSavedDoor()) door = true;
+    // step 2's boxes live outside the patched blocks below — set in place,
+    // except the one the shopper is in: a value written under a caret moves it
+    if (door && S.screen === "checkout") {
+      ["addr", "zip", "city"].forEach(function (k) {
+        var box = document.querySelector('[data-shipf="' + k + '"]');
+        if (box && document.activeElement !== box) box.value = S.ship[k];
+      });
     }
     if (isParcel()) loadPoints();
     /* The carrier's list is usually already here by now — the checkout asks
@@ -11353,6 +11362,23 @@
        preference landing while step 2 was open moved the carriers to Italy
        under a select that still said «Эстония» (patchCountry). */
     if (S.screen === "checkout") { patchCountry(); patchDelivery(); patchSummary(); }
+  }
+  /* The account's saved door into the checkout's three courier boxes, when
+     the checkout is on «Курьер», the boxes are all still empty, and the door
+     is in the country the order goes to. The courier tap calls it (the
+     data-dm click): a customer brought over from Shopify has an address and
+     no method (Dim, 28.09.2026, option b), so nothing fills his boxes on
+     arrival and his own «Курьер» is the moment the address is wanted. A
+     courier default the shopper saved himself fills them on arrival, as
+     before (applyAcctShipPref); this only ever writes into empty boxes, so
+     it never touches what is typed. True when it wrote. */
+  function fillSavedDoor() {
+    var p = S.cust && S.cust.shipPref, a = p && p.address;
+    if (!a || !a.addr || !a.zip || !a.city) return false;
+    if (shipMethod() !== "courier" || p.country !== orderCountry()) return false;
+    if (String(S.ship.addr || "").trim() || String(S.ship.zip || "").trim() || String(S.ship.city || "").trim()) return false;
+    S.ship.addr = a.addr; S.ship.zip = a.zip; S.ship.city = a.city;
+    return true;
   }
   /** The saved machine, once the carrier's real list has answered. */
   function matchAcctPoint() {
@@ -49216,6 +49242,9 @@
       S.ship.carrier = "";
       if (d.dm !== "parcel") S.ship.point = null;
       else loadPoints();
+      // «Курьер» by the shopper's own hand: the account's saved door fills
+      // the three boxes if they are still empty (fillSavedDoor)
+      if (d.dm === "courier") fillSavedDoor();
       render(); refocus('[data-dm="' + d.dm + '"]'); return;
     }
     if (d.carrier) {

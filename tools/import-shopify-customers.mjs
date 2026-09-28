@@ -40,9 +40,9 @@
  * Postgres quotes the offending value in its message, and that value would be
  * somebody's address.
  *
- * WHAT A ROW BECOMES — the shape the shop itself writes, so an imported
- * customer is indistinguishable from one who signed in and filled the account
- * form, except for `source`:
+ * WHAT A ROW BECOMES — the columns the shop itself writes, cleaned the way the
+ * account form cleans them; only `source` and the method-less default address
+ * are the import's own:
  *
  *   email      Email, trimmed and lower-cased (normalizeEmail)
  *   name       «First Last» — either alone is enough; control characters out,
@@ -53,15 +53,21 @@
  *              apostrophe Shopify puts in front of a «+» for Excel. Under seven
  *              digits it is not a phone (the checkout's phoneOk) and is left out.
  *   ship_pref  «Доставка по умолчанию» (051_customer_ship_pref.sql): the only
- *              place the shop keeps a customer's address. An address lives
- *              there only as a courier's door — {country, method: "courier",
- *              carrier: "", machine: "", address: {addr, zip, city}} — which
- *              is exactly what the checkout's applyAcctShipPref() puts into its
- *              three boxes and the account block shows. addr = Address1 and
- *              Address2 joined by «, ». Kept only WHOLE (street, postcode and
- *              city — normalizeShipAddress) and only in a country the shop
- *              delivers to; otherwise the address is left out and the customer
- *              still comes over.
+ *              place the shop keeps a customer's address. The country and the
+ *              door, and NO delivery method — {country, method: "", carrier:
+ *              "", machine: "", address: {addr, zip, city}} (Dim, 28.09.2026,
+ *              option b: the import chooses nobody's delivery). The checkout
+ *              opens on that country with its usual method and fills the
+ *              courier's three boxes with the address when the shopper picks
+ *              «Курьер» himself (app.js applyAcctShipPref / fillSavedDoor);
+ *              the account block shows the country with no row ticked, and its
+ *              «Курьер до двери» row comes up with the address in it.
+ *              normalizeShipPref() in src/lib/customers.ts keeps this shape
+ *              only with a whole address. addr = Address1 and Address2 joined
+ *              by «, ». Kept only WHOLE (street, postcode and city —
+ *              normalizeShipAddress) and only in a country the shop delivers
+ *              to; otherwise the address is left out and the customer still
+ *              comes over.
  *   marketing  false. Always. marketing_at / marketing_source stay null.
  *   source     'shopify' (221_customer_source.sql)
  *   lang       the column's default, RU — the export carries no language, and
@@ -247,7 +253,8 @@ function phoneOf(row) {
 }
 
 /**
- * The default address as «Доставка по умолчанию», or why there is none:
+ * The default address as «Доставка по умолчанию» — the country and the door,
+ * no method (see ship_pref at the top) — or why there is none:
  * { pref } | { none: true } | { dropped: "incomplete" | "no_country" | "not_served", country? }.
  */
 export function addressOf(row, served) {
@@ -261,7 +268,7 @@ export function addressOf(row, served) {
   const country = String(row.country ?? "").trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(country)) return { dropped: "no_country" };
   if (!served(country)) return { dropped: "not_served", country };
-  return { pref: { country, method: "courier", carrier: "", machine: "", address: { addr, zip, city } } };
+  return { pref: { country, method: "", carrier: "", machine: "", address: { addr, zip, city } } };
 }
 
 const said = (v) => /^(yes|true|1)$/i.test(String(v ?? "").trim());
@@ -531,7 +538,10 @@ export function formatReport(report, { csvName = "", csvArg = "<export.csv>", ur
     `  with a phone: ${t.withPhone} (from «Phone» ${t.phoneFrom.phone}, from «Default Address Phone» ${t.phoneFrom.address})` +
       (t.phoneUnusable ? ` · ${t.phoneUnusable} left without one: under ${PHONE_MIN_DIGITS} digits` : ""),
   );
-  L.push(`  with a default address: ${t.withAddress} — «Доставка по умолчанию», a courier to that door`);
+  L.push(
+    `  with a default address: ${t.withAddress} — kept with its country, no delivery method chosen for them; ` +
+      "the checkout fills it in when they pick «Курьер»",
+  );
   L.push(`    countries: ${list(t.countries)}`);
   const d = t.addressDropped;
   if (d.not_served || d.incomplete || d.no_country) {

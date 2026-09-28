@@ -10,7 +10,9 @@
  * code rather than a copy of it:
  *   · each Shopify column lands where the shop itself would have put it —
  *     the imported address is what getCustomer() and GET /api/account/me hand
- *     the checkout as «Доставка по умолчанию»;
+ *     the checkout as «Доставка по умолчанию»: the country and the door, no
+ *     delivery method (Dim, 28.09.2026, option b — the storefront half is
+ *     tests/acct-imported-door.test.ts);
  *   · every skip rule, the merge of a repeated e-mail, the phone and address
  *     rules, the countries the shop does not deliver to;
  *   · marketing = false for everyone, and no opt-out either;
@@ -169,7 +171,7 @@ const fingerprint = async () =>
   );
 
 const ANNA_PREF = {
-  country: "EE", method: "courier", carrier: "", machine: "",
+  country: "EE", method: "", carrier: "", machine: "",
   address: { addr: "Merekalda tee 5, korter 12", zip: "10111", city: "Tallinn" },
 };
 
@@ -209,7 +211,7 @@ describe("tools/import-shopify-customers.mjs", () => {
 
   /* ---------- the mapping ------------------------------------------------------ */
 
-  it("maps every Shopify field onto the shape the shop writes itself", async () => {
+  it("maps every Shopify field onto the columns the shop reads", async () => {
     const report = await run({ apply: true });
     expect(report.created).toBe(IMPORTED.length);
 
@@ -243,7 +245,7 @@ describe("tools/import-shopify-customers.mjs", () => {
     const kask = await rowOf("kask.invented@example.com");
     expect(kask.name).toBe("Kaskinvent");
     expect(kask.ship_pref).toEqual({
-      country: "LV", method: "courier", carrier: "", machine: "",
+      country: "LV", method: "", carrier: "", machine: "",
       address: { addr: "Brivibas iela 10, dz. 3", zip: "LV-1011", city: "Riga" },
     });
     // a tab in a name is folded like the account form folds it
@@ -278,7 +280,7 @@ describe("tools/import-shopify-customers.mjs", () => {
     expect(boris.name).toBe("Boris");
     expect(boris.phone).toBe("+37255500202");
     expect(boris.ship_pref).toEqual({
-      country: "EE", method: "courier", carrier: "", machine: "", address: { addr: "Narva mnt 1", zip: "51009", city: "Tartu" },
+      country: "EE", method: "", carrier: "", machine: "", address: { addr: "Narva mnt 1", zip: "51009", city: "Tartu" },
     });
   });
 
@@ -311,7 +313,7 @@ describe("tools/import-shopify-customers.mjs", () => {
     const report = await run({ apply: true });
     expect(report.countriesOff).toEqual(["LV"]);
     expect((await rowOf("gordon.invented@example.com")).ship_pref).toEqual({
-      country: "GB", method: "courier", carrier: "", machine: "",
+      country: "GB", method: "", carrier: "", machine: "",
       address: { addr: "10 Invented Row", zip: "SW1A 9ZZ", city: "London" },
     });
     expect((await rowOf("kask.invented@example.com")).ship_pref, "Latvia is off now").toBeNull();
@@ -399,8 +401,11 @@ describe("tools/import-shopify-customers.mjs", () => {
     expect(body.customer.name).toBe("Anna Tamm");
     expect(body.customer.phone).toBe("+372 5550 0101");
     expect(body.customer.marketing).toBe(false);
-    // exactly what applyAcctShipPref() in app.js needs: a courier with all three boxes
+    /* the country and the door with no method (Dim, 28.09.2026, option b):
+       what applyAcctShipPref() opens the checkout on and fillSavedDoor()
+       puts into the courier's boxes — tests/acct-imported-door.test.ts */
     expect(body.customer.shipPref).toEqual(ANNA_PREF);
+    expect((body.customer.shipPref as { method: string }).method, "no delivery chosen for them").toBe("");
   });
 
   it("signs an imported customer in by e-mail code on the ordinary path — into the imported row, not a second one", async () => {

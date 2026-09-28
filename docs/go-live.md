@@ -160,8 +160,11 @@ are only correct together. On `/golive/` each is its own numbered row.
 4b. **Customers from Shopify («Покупатели из Shopify») — right after step 4,
    still before DNS.** Decided 28.09.2026 (Dim, option B): only customers with
    a name (first or last); their e-mail, their phone if there is one, and their
-   default address if the shop delivers to its country — it becomes their
-   «Доставка по умолчанию», a courier to that door, so the checkout fills it in.
+   default address if the shop delivers to its country. The address is kept
+   with its country and **no delivery method** (Dim, 28.09, option b): the
+   checkout opens on their country with its usual method, and the address
+   fills the courier's three boxes only when they pick «Курьер» themselves; in
+   the account «Доставка по умолчанию» shows the country with no row ticked.
    **No marketing consent:** everyone arrives with `marketing = false`, whatever
    Shopify says (Dim, 18.09) — and nobody is opted out either. No orders, notes,
    tags or totals. The export: Shopify → Customers → Export → All customers →
