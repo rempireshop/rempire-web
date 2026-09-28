@@ -939,7 +939,7 @@ const CUSTOMER_JOIN = `
   from customers c
   left join (
     select lower(email) as email, count(*) as orders_count, sum(total) as revenue
-    from orders where email is not null and status in (${PURCHASE_SQL})
+    from orders where email is not null and status in (${PURCHASE_SQL}) and account_erased_at is null
     group by lower(email)
   ) agg on agg.email = c.email
   left join (
@@ -1094,8 +1094,11 @@ export async function customerOrdersAdmin(
   const empty = { orders: [], stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] } };
   if (!addr) return empty;
   const rows = await query<CustomerOrderDbRow>(
+    /* not the orders of an account that was deleted (223_account_erasure.sql):
+       they stay in «Заказы» for the bookkeeper, and a new account on the same
+       mailbox starts with none — here as in its own «Мои заказы» */
     `select id, number, status, total, created_at, items, shipping, invoice, channel
-       from orders where lower(email) = $1 order by created_at desc limit 200`,
+       from orders where lower(email) = $1 and account_erased_at is null order by created_at desc limit 200`,
     [addr],
   );
   if (!rows.length) return empty;

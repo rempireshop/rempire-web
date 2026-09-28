@@ -21,6 +21,7 @@
  * admin's copy — nothing is stored, and a file that is never cached cannot go
  * stale when the owner corrects his IBAN in «Настройки → О компании».
  */
+import { isOrderDetached } from "@/lib/account-privacy";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { normalizeEmail, sessionEmail } from "@/lib/customers";
 import { buildInvoicePdf, invoicePdfFilename } from "@/lib/invoice-pdf";
@@ -55,6 +56,8 @@ export async function GET(req: Request, ctx: Ctx) {
   let order;
   try {
     order = (await getOrder(id)) ?? (await getOrderByNumber(id));
+    // an order whose account was deleted is nobody's to download from an account (223)
+    if (order && (await isOrderDetached(order.id))) order = null;
   } catch (err) {
     console.error("[api/account/orders/:id/invoice] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });

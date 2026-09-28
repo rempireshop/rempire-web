@@ -1,0 +1,43 @@
+-- 223_account_erasure.sql — «Удалить аккаунт» in «Кабинет» (GDPR art. 17)
+--
+-- Dim, 28.09.2026: the customer's account gets «Скачать мои данные» and
+-- «Удалить аккаунт», the two rights a shopper could until now exercise only
+-- by writing to the shop. The deletion itself is src/lib/account-privacy.ts
+-- (eraseCustomerAccount); this file adds the one thing it cannot do without.
+--
+-- ORDERS ARE KEPT. The Estonian Accounting Act (raamatupidamise seadus §12)
+-- keeps source documents for seven years, so an order and its invoice stay
+-- exactly as they were written — buyer's name, e-mail, phone and address
+-- included. What the deletion takes away is the ACCOUNT's hold on them. That
+-- hold is not `customer_id` alone: «Мои заказы» matches orders by e-mail
+-- (listCustomerOrders in src/lib/customers.ts — a guest checkout placed before
+-- the account existed belongs to whoever owns the mailbox), so the same
+-- person signing in again next month would find every order of the account
+-- they deleted back on the screen. The stamp below is what stops that:
+--
+--   orders.account_erased_at   set when the account that owned this e-mail
+--                              was deleted. Every place that shows orders to
+--                              an ACCOUNT reads `account_erased_at is null`:
+--                              «Мои заказы» (and the gift cards and points
+--                              under it), the invoice PDF and the return tick
+--                              in the account, the export, and the owner's
+--                              customer card and its order totals. The
+--                              owner's «Заказы» and the reports read every
+--                              order, as the law needs them to.
+--
+-- Nothing else needs a column. The deletion time the shop keeps is the
+-- stop-list row it writes in the same transaction: mail_optouts (052) with
+-- kind = 'account_deleted', source = 'account'. That row is also the rule for
+-- anything that creates customers in bulk — tools/import-shopify-customers.mjs
+-- (the go-live import) must skip an address whose mail_optouts row has kind
+-- 'account_deleted', or a re-run after launch brings a deleted customer back.
+-- The go-live reset never clears mail_optouts (tools/go-live-reset.mjs).
+--
+-- No index: the account's queries already narrow by lower(email)
+-- (orders_email_idx) and a person has a handful of orders.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite.
+
+alter table orders add column if not exists account_erased_at timestamptz;

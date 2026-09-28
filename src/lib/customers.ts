@@ -277,6 +277,23 @@ export function sessionEmail(req: Request): string | null {
   return readCustomerToken(readCookie(req, CUSTOMER_COOKIE));
 }
 
+/**
+ * When a valid token was signed in — its expiry minus the session's length —
+ * or null. What tells a cookie from BEFORE an account was deleted from one
+ * signed in since (isErasedSession, src/lib/account-privacy.ts): the token
+ * itself is stateless and stays valid on the other device until it expires.
+ */
+export function customerTokenIssuedAt(token: string | null | undefined, now: number = Date.now()): number | null {
+  if (!readCustomerToken(token, now)) return null;
+  const expiry = Number(String(token).split(".")[1]);
+  return Number.isFinite(expiry) ? expiry - SESSION_MS : null;
+}
+
+/** customerTokenIssuedAt() of the request's own `rmp_cust` cookie. */
+export function sessionIssuedAt(req: Request): number | null {
+  return customerTokenIssuedAt(readCookie(req, CUSTOMER_COOKIE));
+}
+
 /* ---------- login codes --------------------------------------------------- */
 
 /** Six digits, uniformly random — `randomInt`, not `Math.random`. */
@@ -577,8 +594,12 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       shipping: unknown;
       invoice: unknown;
     }>(
+      /* `account_erased_at is null`: an order whose account was deleted is
+         kept for the bookkeeper but is nobody's «Мои заказы» any more — not
+         even a new account's on the same mailbox (223_account_erasure.sql).
+         The two readers below say the same, so all three agree on the list. */
       `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice
-         from orders where lower(email) = $1 order by created_at desc limit $2`,
+         from orders where lower(email) = $1 and account_erased_at is null order by created_at desc limit $2`,
       [addr, n],
     ),
     giftCardsForEmail(addr, n),
@@ -688,7 +709,8 @@ async function refundPointsForEmail(addr: string, limit: number): Promise<Map<st
       `select order_id, ${POINTS_LINES_SQL.back} as back, ${POINTS_LINES_SQL.revoked} as revoked
          from loyalty_ledger
         where reason = 'adjust'
-          and order_id in (select id from orders where lower(email) = $1 order by created_at desc limit $2)
+          and order_id in (select id from orders where lower(email) = $1 and account_erased_at is null
+                            order by created_at desc limit $2)
         group by order_id`,
       [addr, limit],
     );
@@ -762,7 +784,7 @@ async function giftCardsForEmail(
     const pending = query<{ code: string; amount: string | number; order_id: string }>(
       `select code, amount, order_id from gift_cards
         where voided_at is null
-          and order_id in (select id from orders where lower(email) = $1
+          and order_id in (select id from orders where lower(email) = $1 and account_erased_at is null
                             order by created_at desc limit $2)
         order by created_at asc`,
       [addr, limit],
