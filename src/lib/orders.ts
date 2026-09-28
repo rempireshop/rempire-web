@@ -878,7 +878,7 @@ export async function writeAudit(actor: string, action: string, payload?: unknow
  * response has gone (`after()`).
  */
 export const OWNER_ALERT_ACTION =
-  /^(order\.(refund|refund_stuck|refund_failed|payment_recovered|payment_held|payment_odd)|shipment\.(registration_failed|returned))$/;
+  /^(order\.(refund|refund_stuck|refund_failed|payment_recovered|payment_held|payment_odd)|shipment\.(registration_failed|returned|closed_moving))$/;
 
 async function alertOwnerFromJournal(actor: string, action: string, payload: unknown, id: number | undefined): Promise<void> {
   if (!OWNER_ALERT_ACTION.test(action)) return;
@@ -2099,12 +2099,17 @@ async function orderLedgerReader(
  * Off unless asked for: every other status move — the journal's undo of
  * «Отправлен» writes paid onto an order that is already paid — must stay
  * unconditional.
+ *
+ * `opts.audit` — more words for the `order.status` journal row, beside
+ * id/number/from/to. Since 28.09.2026 the carrier's scan ships an order
+ * (src/lib/ship-order.ts) and its row says so: `via: "carrier"`, which the
+ * panel reads as «Отправлен — по скану перевозчика».
  */
 export async function setOrderStatus(
   id: string,
   status: OrderStatus,
   actor = "system",
-  opts: { unless?: readonly OrderStatus[] } = {},
+  opts: { unless?: readonly OrderStatus[]; audit?: Record<string, unknown> } = {},
 ): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;
   if (!ORDER_STATUSES.includes(status)) throw new OrderError("bad_status", String(status));
@@ -2157,7 +2162,7 @@ export async function setOrderStatus(
   // somebody else made this move between the read above and the UPDATE
   if (!rows.length) return null;
   const after = mapOrder(rows[0]);
-  await writeAudit(actor, "order.status", { id, number: after.number, from: before.status, to: status });
+  await writeAudit(actor, "order.status", { ...(opts.audit ?? {}), id, number: after.number, from: before.status, to: status });
 
   /* inventory: a refund or a cancellation that follows a paid (or already-
      shipped) order is goods coming back — put the quantity back with a

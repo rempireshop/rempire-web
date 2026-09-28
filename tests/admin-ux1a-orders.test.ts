@@ -81,7 +81,10 @@ describe("«Заказ» — the ONE next step, in the Glossary's words", () => 
     expect(nx.body).toBe("<prep o1>");                                  // the box and the locker door (C2, C3)
     expect(nx.after).toContain('data-admshipnow="o1"');                 // C4: a text link, asks first
     expect(nx.after).toContain("Отправлен без этикетки");
-    expect(nx.help).toBe("Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.");
+    // …and since 28.09.2026 it says who does ship it: the carrier's scan
+    expect(nx.help).toBe(
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет: «Отправлен» заказ станет сам, когда перевозчик отсканирует посылку.",
+    );
   });
 
   it("a refused parcel: the carrier's refusal is the title and «Отправить заново» the button", () => {

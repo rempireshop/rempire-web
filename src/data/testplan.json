@@ -4086,46 +4086,46 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Отметить заказ отправленным",
+      "title": "«Отправлен» вручную — для посылки без скана",
       "steps": [
-        "В карточке того же заказа нажать тёмную кнопку «Отправлен».",
-        "До нажатия открыть «?» в «Следующий шаг» и прочитать подсказку.",
+        "В карточке оплаченного заказа с этикеткой открыть «?» в «Следующий шаг» и прочитать подсказку.",
+        "Нажать тёмную кнопку «Отправлен».",
         "Прочитать полоску, которая всплыла внизу.",
         "Открыть «Заказы» и найти заказ в «В пути».",
         "На другом заказе с этикеткой нажать «Отправлен» и сразу «Вернуть»."
       ],
       "expect": [
-        "В подсказке сказано отнести посылку в пакомат, курьер — из панели Montonio.",
+        "Подсказка: после скана перевозчика заказ сам станет «Отправлен», кнопка — если без скана.",
         "Внизу полоска: номер заказа и «письмо уйдёт через 10 с».",
         "Рядом кнопка «Вернуть», она живёт шесть секунд.",
         "Письмо «Заказ отправлен» приходит через десять секунд, а не сразу.",
         "После «Вернуть» заказ снова «Оплачен», и письмо не приходит.",
         "Заказ переехал в список «В пути»."
       ],
-      "why": "Молчание после отправки — самая частая причина вопросов о заказе.",
+      "why": "Кнопка нужна для посылки, которую перевозчик не сканировал: из рук в руки, курьер без этикетки.",
       "risk": "med",
       "writes": true,
       "en": {
-        "title": "Marking an order dispatched",
+        "title": "«Отправлен» by hand — for a parcel with no scan",
         "steps": [
-          "In the same order press the dark «Отправлен» (dispatched) button.",
-          "Before pressing, open «?» in «Следующий шаг» and read the hint.",
+          "On a paid order with a label, open «?» in «Следующий шаг» and read the hint.",
+          "Press the dark «Отправлен» (dispatched) button.",
           "Read the bar that pops up at the bottom.",
           "Open «Заказы» and find the order under «В пути».",
           "On another labelled order press «Отправлен» and at once «Вернуть»."
         ],
         "expect": [
-          "The hint says to take the parcel to a machine; couriers come from Montonio.",
+          "The hint: the carrier's scan makes it «Отправлен»; the button is for no scan.",
           "A bar at the bottom: the order number and «письмо уйдёт через 10 с».",
           "An «Вернуть» button sits there for six seconds.",
           "The «Заказ отправлен» letter arrives ten seconds later, not at once.",
           "After «Вернуть» the order is «Оплачен» again and no letter comes.",
           "The order has moved to the «В пути» list."
         ],
-        "why": "Silence after dispatch is the commonest reason buyers ask where their order is."
+        "why": "The button is for a parcel the carrier never scanned: handed over in person, a courier with no label."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:26:11.189Z"
+      "markedAt": "2026-09-28T10:48:02.136Z"
     },
     {
       "id": "order-shipped-nolabel",
@@ -9469,12 +9469,13 @@
       "title": "Настоящая этикетка и настоящая посылка",
       "steps": [
         "В боевом магазине создать этикетку для настоящего заказа.",
-        "Напечатать, наклеить и сдать посылку: отсканировать этикетку в пакомате.",
+        "Напечатать, наклеить и сдать посылку: отсканировать этикетку в пакомате. «Отправлен» не нажимать.",
         "Отследить по трек-номеру из письма покупателя.",
         "Дождаться, пока покупатель заберёт посылку."
       ],
       "expect": [
         "Пакомат принял посылку по этикетке, без кода сдачи.",
+        "После скана заказ сам стал «Отправлен», покупателю пришло письмо с трек-номером.",
         "Трек-номер настоящий: по нему видно, где посылка.",
         "Покупатель забрал заказ.",
         "После этого заказ сам перешёл в «Доставлен».",
@@ -9483,18 +9484,19 @@
       "why": "Примет ли автомат настоящую этикетку, покажет только настоящая посылка.",
       "risk": "high",
       "writes": true,
-      "mark": "reworded",
-      "markedAt": "2026-09-23T10:28:06.877Z",
+      "mark": "redo",
+      "markedAt": "2026-09-28T10:48:02.136Z",
       "en": {
         "title": "A real label and a real parcel",
         "steps": [
           "On the live shop, make a label for a real order.",
-          "Print it, stick it on, drop it off by scanning the label.",
+          "Print it, stick it on, drop it off by scanning the label. Do not press «Отправлен».",
           "Track it by the number from the buyer's letter.",
           "Wait until the buyer collects the parcel."
         ],
         "expect": [
           "The locker took the parcel off its label, no drop-off code.",
+          "After the scan the order turned «Отправлен» by itself; the buyer got the tracking letter.",
           "The tracking number is real and shows where the parcel is.",
           "The buyer collected the order.",
           "After that the order moved itself to «Доставлен».",
@@ -9601,44 +9603,89 @@
       "who": "renat",
       "device": "phone",
       "lang": "RU",
-      "title": "Посылка уже в пути, а «Отправлен» не нажат",
+      "title": "Сдали посылку — заказ сам стал «Отправлен»",
       "steps": [
         "Создать этикетку для настоящего заказа и сдать посылку в пакомат.",
         "«Отправлен» не нажимать.",
-        "На следующий день открыть «Обзор».",
-        "Нажать строку «посылка уже в пути — нажмите «Отправлен»».",
-        "В карточке нажать «Отправлен»."
+        "Через час открыть заказ; если он ещё «Оплачен» — открыть ещё раз на следующее утро.",
+        "Открыть «Ещё» → «Настройки» → «Журнал».",
+        "Открыть «Обзор» и посмотреть «Сделать сегодня»."
       ],
       "expect": [
-        "В «Сделать сегодня» рыжая строка с именем покупателя.",
-        "Нажатие на строку открывает карточку этого заказа.",
-        "В карточке: «Посылка уже в пути» и просьба нажать «Отправлен».",
-        "До нажатия заказ остаётся «Оплачен» — сам статус не меняется.",
-        "После «Отправлен» строка пропала, покупателю ушло письмо с трек-номером."
+        "Заказ сам стал «Отправлен», под шагом «Отправлен» написано «по скану».",
+        "Покупателю пришло одно письмо «Заказ отправлен» с трек-номером.",
+        "В журнале строка «Отправлен — по скану перевозчика» с номером заказа.",
+        "Рыжей строки «посылка уже в пути» нет.",
+        "Тёмная кнопка в карточке теперь «Доставлен», второе письмо не пришло."
       ],
-      "why": "Без «Отправлен» покупатель не получает трек-номер, а заказ вечно висит в «Отправить».",
+      "why": "С 28.09 нажимать «Отправлен» после пакомата не нужно: трек-номер покупателю отправляет скан перевозчика.",
       "risk": "med",
       "writes": true,
       "en": {
-        "title": "The parcel is on its way but «Отправлен» was not pressed",
+        "title": "Parcel dropped off — the order turned «Отправлен» by itself",
         "steps": [
           "Make a label for a real order and drop the parcel at a machine.",
           "Do not press «Отправлен».",
-          "Open «Обзор» the next day.",
-          "Tap the row «посылка уже в пути — нажмите «Отправлен»».",
-          "On the card press «Отправлен»."
+          "An hour later open the order; if it is still «Оплачен», open it again next morning.",
+          "Open «Ещё» → «Настройки» → «Журнал».",
+          "Open «Обзор» and look at «Сделать сегодня»."
         ],
         "expect": [
-          "A rust row in «Сделать сегодня» with the buyer's name.",
-          "Tapping the row opens that order's card.",
-          "The card says «Посылка уже в пути» and asks to press «Отправлен».",
-          "Until then the order stays «Оплачен» — nothing changes the status by itself.",
-          "After «Отправлен» the row is gone and the buyer got the tracking letter."
+          "The order turned «Отправлен» by itself; under that step it says «по скану».",
+          "The buyer got one «Заказ отправлен» letter with the tracking number.",
+          "The journal has «Отправлен — по скану перевозчика» with the order number.",
+          "There is no rust «посылка уже в пути» row.",
+          "The card's dark button is now «Доставлен»; no second letter came."
         ],
-        "why": "Without «Отправлен» the buyer never gets a tracking number, and the order sits in «Отправить» for ever."
+        "why": "Since 28.09 there is no need to press «Отправлен» after the machine: the carrier's scan sends the tracking number."
+      },
+      "mark": "redo",
+      "markedAt": "2026-09-28T10:48:02.136Z"
+    },
+    {
+      "id": "live-autoship-carriers",
+      "area": "live",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Заказ за 1 € за границу: «Отправлен» сам у Omniva, SmartPosti и Unisend",
+      "steps": [
+        "Оформить три тестовых заказа за 1 € в пакоматы за границей: Omniva, SmartPosti, Unisend.",
+        "Для каждого создать этикетку и сдать посылку в пакомат того же перевозчика.",
+        "«Отправлен» не нажимать.",
+        "На следующее утро открыть каждый заказ и «Журнал».",
+        "Если какой-то заказ остался «Оплачен» — нажать «Отправлен» и написать Диму, какой перевозчик."
+      ],
+      "expect": [
+        "Каждый заказ сам стал «Отправлен», под шагом написано «по скану».",
+        "На каждый заказ пришло одно письмо «Заказ отправлен» с трек-номером.",
+        "Трек-ссылка в письме открывает страницу того же перевозчика.",
+        "В журнале у каждого строка «Отправлен — по скану перевозчика».",
+        "Заказ, оставшийся «Оплачен», виден рыжей строкой в «Сделать сегодня»."
+      ],
+      "why": "Сам «Отправлен» проверен только на DPD; какое слово присылают другие перевозчики, покажут только настоящие посылки.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "A €1 order abroad: «Отправлен» by itself with Omniva, SmartPosti and Unisend",
+        "steps": [
+          "Place three €1 test orders to machines abroad: Omniva, SmartPosti, Unisend.",
+          "For each, make a label and drop the parcel at that carrier's machine.",
+          "Do not press «Отправлен».",
+          "Next morning open each order and «Журнал».",
+          "If an order is still «Оплачен», press «Отправлен» and tell Dim which carrier."
+        ],
+        "expect": [
+          "Each order turned «Отправлен» by itself; under that step it says «по скану».",
+          "Each order sent one «Заказ отправлен» letter with the tracking number.",
+          "The letter's tracking link opens that same carrier's page.",
+          "Each has the journal line «Отправлен — по скану перевозчика».",
+          "An order left «Оплачен» shows as a rust row in «Сделать сегодня»."
+        ],
+        "why": "The automatic «Отправлен» is proven on DPD only; what word the other carriers send, only real parcels will show."
       },
       "mark": "new",
-      "markedAt": "2026-09-27T10:14:58.628Z"
+      "markedAt": "2026-09-28T10:48:02.136Z"
     },
     {
       "id": "live-parcel-returned",

@@ -76,7 +76,7 @@ function flowsLogLine(
   /* The parcel backup poll (src/lib/shipping/shipment-sync.ts) on the same
      line: a lost webhook it found is otherwise visible nowhere. */
   const parcels = s
-    ? ` · shipments: checked ${s.checked}, changed ${s.changed}, refused ${s.refused}, returned ${s.returned ?? 0}, ` +
+    ? ` · shipments: checked ${s.checked}, changed ${s.changed}, shipped ${s.shipped ?? 0}, refused ${s.refused}, returned ${s.returned ?? 0}, ` +
       `closed ${s.closed}, errors ${s.errors}${s.notFound ? ` (404: ${s.notFound})` : ""}, left ${s.left}${s.reason ? ` (${s.reason})` : ""}`
     : "";
   /* …the nightly close (src/lib/delivery.ts): what it closed, and the parcels

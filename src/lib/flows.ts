@@ -1901,6 +1901,8 @@ export interface FlowsReport {
     tracking: number;
     refused: number;
     closed: number;
+    /** Paid orders the carrier's scan made «Отправлен» this run (28.09.2026). */
+    shipped?: number;
     /** Parcels the carrier is sending back, journalled this run (B14). */
     returned?: number;
     errors: number;

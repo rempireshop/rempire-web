@@ -27,9 +27,16 @@
  *      hears it from the shop and not from the customer;
  *   4. «delivered» closes a `shipped` order, as the white list decides;
  *   5. (since 27.09.2026, B14) a parcel coming back (`returned`) goes into
- *      the journal once, and never moves the order.
- * The journal rows of 3 and 5 reach the owner's phone by themselves
- * (writeAudit → src/lib/owner-alerts.ts).
+ *      the journal once, and never moves the order;
+ *   6. (since 28.09.2026, the owner's decision) the carrier HAS the parcel —
+ *      `inTransit`, `awaitingCollection` or `delivered`, Montonio's documented
+ *      words only — on a `paid` order: the order becomes «Отправлен» through
+ *      the owner's own door (shipOrder, src/lib/ship-order.ts) and the
+ *      customer's tracking letter goes. On a cancelled or refunded order the
+ *      same news moves nothing and is journalled once (`shipment.
+ *      closed_moving`).
+ * The journal rows of 3, 5 and 6's cancelled case reach the owner's phone by
+ * themselves (writeAudit → src/lib/owner-alerts.ts).
  *
  * And, from the webhook only (26.09.2026, R-100098): news about a parcel on an
  * order that holds NO shipment id records that parcel on the order — the
@@ -37,11 +44,13 @@
  * event is the only place its id exists. Journalled as `shipment.adopt`.
  *
  * Nothing here is written twice: every step either checks what is stored or
- * is idempotent (setOrderStatus only moves `shipped` → `delivered` once).
+ * is idempotent (setOrderStatus only moves `shipped` → `delivered` once, and
+ * the carrier's «Отправлен» is a claim that only a `paid` order can answer).
  */
 import { query } from "@/lib/db";
 import { shipmentRegistrationFailed } from "@/lib/montonio-problems";
 import { getOrder, setOrderStatus, writeAuditSafe, type Order } from "@/lib/orders";
+import { carrierHasParcel, shipOrder, shippedBefore } from "@/lib/ship-order";
 import {
   adoptShipmentOnOrder,
   getMontonioShipment,
@@ -89,6 +98,10 @@ export interface ShipmentApplied {
   adopted: boolean;
   /** The carrier is sending the parcel back — journalled, once per parcel. */
   returned: boolean;
+  /** This news made a `paid` order «Отправлен» (28.09.2026) — the letter went with it. */
+  shipped: boolean;
+  /** The carrier has a parcel of a cancelled or refunded order — journalled, once per parcel. */
+  closedMoving: boolean;
 }
 
 /**
@@ -151,6 +164,8 @@ export async function applyShipmentUpdate(
     meaning,
     adopted: false,
     returned: false,
+    shipped: false,
+    closedMoving: false,
   };
 
   const stored = shipmentOnOrder(order);
@@ -329,17 +344,110 @@ export async function applyShipmentUpdate(
     out.returned = true;
   }
 
+  /* «Отправлен» by the carrier's scan — the owner's decision of 28.09.2026
+     (Renat via Dim): he drops the parcel into the machine, and the carrier's
+     scan is the hand-over. src/lib/ship-order.ts says why and how; here is
+     WHEN, and it is a question about the state, not about this one event:
+       · the carrier has the parcel — the word the order now holds for it
+         (`heard`: this news, or the stored word when this news was an older
+         one that arrived late), one of Montonio's three documented words
+         (carrierHasParcel);
+       · the parcel is this order's own Montonio shipment (stored, or adopted
+         a moment ago above) and not a label the journal set aside;
+       · the order is `paid` and has never been «Отправлен» before — an order
+         the owner shipped and then took back by hand stays where he put it.
+     So a repeat of the same event, the nightly re-ask of a paid order whose
+     `inTransit` arrived before this rule existed (R-100098), and a late older
+     word about a parcel already in transit all ship it — and only the first
+     of them, because shipOrder() CLAIMS the move (only a `paid` row can
+     answer), and every later one finds it `shipped`. The owner's press before
+     or after is the same claim, from the other side.
+     A failure to move the order throws, like the close below: the webhook
+     answers 503 and Montonio sends the event again; the poll counts it and
+     asks tomorrow. */
+  const heard = out.stale ? String(stored?.status ?? "") : word || String(stored?.status ?? "");
+  const ours = out.adopted || (!!stored && stored.dismissed !== true);
+  let orderStatus: string = order.status;
+  if (ours && carrierHasParcel(heard)) {
+    if (order.status === "paid" && !shippedBefore(order)) {
+      const shipped = await shipOrder(order, {
+        actor: "system",
+        hold: false,
+        carrier: { shipmentId: id || stored?.shipmentId, carrierStatus: heard, source: opts.source },
+      });
+      if (shipped.order) {
+        out.shipped = true;
+        orderStatus = "shipped";
+        console.info(`[shipment sync] ${order.number} is «Отправлен» by the carrier's scan (${heard}, ${opts.source})`);
+        /* The card's progress line says «по скану» under «Отправлен» from
+           this. Best effort: the journal row already says it. */
+        try {
+          await saveShipmentOnOrder(order.id, { autoShippedAt: now });
+        } catch (err) {
+          console.error(`[shipment sync] could not stamp the automatic «Отправлен» on ${order.number}`, err);
+        }
+      }
+    } else if ((order.status === "cancelled" || order.status === "refunded") && (await claimClosedMoving(order.id, now))) {
+      /* The carrier has a parcel of an order that is closed — cancelled after
+         the label was made, or the money already sent back. Nothing moves:
+         whether the parcel should go on is the owner's call, not the shop's.
+         But he must hear it now, not from the customer: a journal row, and
+         through it a ping (src/lib/owner-alerts.ts). Once per parcel — the
+         stamp is claimed in the same statement that checks it. */
+      console.error(`[shipment sync] the carrier has the parcel of ${order.status} order ${order.number} (${opts.source})`);
+      await writeAuditSafe("system", "shipment.closed_moving", {
+        orderId: order.id,
+        number: order.number,
+        provider: "montonio",
+        shipmentId: id || stored?.shipmentId || undefined,
+        carrier: String(stored?.carrier ?? update.carrier ?? "").trim() || undefined,
+        code: heard,
+        orderStatus: order.status,
+        source: opts.source === "poll" ? "poll" : undefined,
+      });
+      out.closedMoving = true;
+    }
+  }
+
   /* The white-list fallback, doing the one thing it is trusted with — and
      only from `shipped`, so an order closed by hand is not touched, a repeat
      finds nothing to do, and a parcel that came back (`returned`) is left
      open: it is on its way to Renat, not to the customer. `system` is the
-     actor the nightly close uses for the same transition. */
-  if (meaning === "delivered" && !out.stale && order.status === "shipped") {
+     actor the nightly close uses for the same transition. An order this very
+     news has just shipped is closed by the same word it was shipped by —
+     `delivered` as the first word the shop hears is two steps, in order,
+     with the one letter the first of them sent. */
+  const delivered = out.shipped ? statusMeaning(heard) === "delivered" : meaning === "delivered" && !out.stale;
+  if (delivered && orderStatus === "shipped") {
     await setOrderStatus(order.id, "delivered", "system");
     out.applied = "delivered";
   }
 
   return out;
+}
+
+/**
+ * The once-only stamp for `shipment.closed_moving`: set on the order's
+ * shipment in the same UPDATE that checks it was not set, so two copies of the
+ * same event cannot both journal it. False when it was already there, or when
+ * the order holds no shipment to stamp.
+ */
+async function claimClosedMoving(orderId: string, now: string): Promise<boolean> {
+  try {
+    const rows = await query<{ id: string }>(
+      `update orders
+          set shipping = jsonb_set(shipping, '{montonio,closedMovingAt}', to_jsonb($2::text))
+        where id = $1
+          and jsonb_typeof(shipping -> 'montonio') = 'object'
+          and (shipping -> 'montonio' ->> 'closedMovingAt') is null
+        returning id`,
+      [orderId, now],
+    );
+    return rows.length > 0;
+  } catch (err) {
+    console.error(`[shipment sync] could not stamp the closed-order parcel on ${orderId}`, err);
+    return false;
+  }
 }
 
 /**
@@ -393,6 +501,8 @@ export interface ShipmentSyncRun {
   refused: number;
   /** …whose order was closed as delivered. */
   closed: number;
+  /** …whose paid order became «Отправлен» by the carrier's scan (28.09.2026). */
+  shipped: number;
   /** …that the carrier is sending back (B14) — journalled. */
   returned: number;
   /** GETs Montonio did not answer, or updates that could not be written. */
@@ -416,7 +526,9 @@ function when(v: unknown): number {
  * exactly as the webhook would have (`applyShipmentUpdate`, source "poll").
  *
  * Which shipments: on an order that is still `paid` or `shipped`, not set
- * aside (`dismissed`), not in a final state (`delivered`, `returned`), and
+ * aside (`dismissed`), not in a final state (`delivered`, `returned`) — unless
+ * the order is still `paid` with a `delivered` the carrier's scan has not
+ * shipped yet (28.09.2026) — and
  * with no news for SHIPMENT_QUIET_HOURS — «news» being the last webhook
  * (`statusAt`), the last poll (`polledAt`) or, for one never heard of, its
  * booking (`createdAt`). The least recently polled go first, so a long queue
@@ -438,7 +550,7 @@ export async function syncStaleShipments(
   } = {},
 ): Promise<ShipmentSyncRun> {
   const run: ShipmentSyncRun = {
-    checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, returned: 0, errors: 0, notFound: 0, left: 0,
+    checked: 0, changed: 0, tracking: 0, refused: 0, closed: 0, shipped: 0, returned: 0, errors: 0, notFound: 0, left: 0,
   };
   const configured = opts.configured ?? (() => isMontonioShippingConfigured());
   if (!configured()) return { ...run, reason: "not_configured" };
@@ -477,9 +589,20 @@ export async function syncStaleShipments(
         when(m.polledAt) || 0,
         when(m.createdAt) || when(row.created_at) || 0,
       );
-      return { id: row.id, m, heard, polled: when(m.polledAt) || 0 };
+      /* A final word is normally the end of asking — except on a paid order
+         the carrier's scan has not shipped yet (28.09.2026): a `delivered`
+         that arrived before the rule existed, or one whose ship failed, would
+         otherwise leave the order «оплачен» for ever. Asked again until it is
+         shipped; an order the owner took back by hand (`shippedAt`) is his,
+         and is not. */
+      const unshipped =
+        row.status === "paid" && carrierHasParcel(m.status) && !shippedBefore({ shipping: s } as unknown as Order);
+      return { id: row.id, m, heard, polled: when(m.polledAt) || 0, unshipped };
     })
-    .filter(({ m, heard }) => m.dismissed !== true && !isFinalShipmentStatus(m.status) && now - heard >= quietMs)
+    .filter(
+      ({ m, heard, unshipped }) =>
+        m.dismissed !== true && (!isFinalShipmentStatus(m.status) || unshipped) && now - heard >= quietMs,
+    )
     .sort((a, b) => a.polled - b.polled || a.heard - b.heard);
 
   for (let i = 0; i < quiet.length; i++) {
@@ -509,6 +632,7 @@ export async function syncStaleShipments(
       if (result.tracking) run.tracking += 1;
       if (result.refused) run.refused += 1;
       if (result.returned) run.returned += 1;
+      if (result.shipped) run.shipped += 1;
       if (result.applied === "delivered") run.closed += 1;
     } catch (err) {
       /* not configured after all, a 404, a timeout, a close that failed —

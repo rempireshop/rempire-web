@@ -14,7 +14,11 @@
  * status moves and the customer's «Заказ отправлен» letter, tracking link
  * included, goes out). This route used to flip the order to `shipped` and
  * send the letter by itself, and the owner's complaint was exactly that:
- * «нажимаю „этикетка“ — меняется весь статус».
+ * «нажимаю „этикетка“ — меняется весь статус». Since 28.09.2026 the step
+ * after the label happens by itself — the CARRIER'S scan, reported by
+ * Montonio, makes the paid order «Отправлен» (src/lib/ship-order.ts, from the
+ * webhook and the nightly re-ask) — and still never from here: even a booking
+ * reply that says `inTransit` is a label (tests/shipping-montonio.test.ts).
  *
  * Order of work, deliberately:
  *   1. Montonio first — nothing is written until the carrier accepted the parcel.

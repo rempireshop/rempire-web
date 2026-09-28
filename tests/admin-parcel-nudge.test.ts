@@ -2,11 +2,14 @@
  * The panel's half of the readiness pass of 27.09.2026 — what Renat SEES:
  *
  *   B13  the carrier already has the parcel (in transit, in the machine, even
- *        delivered) and the order still says «оплачен» — «Отправлен» was never
- *        pressed, so the customer never got the letter with the tracking
- *        number. «Обзор» says so in «Сделать сегодня», and the order card's
- *        next step says the parcel is already on its way. Nothing changes the
- *        status by itself: the press is what sends the letter.
+ *        delivered) and the order still says «оплачен», so the customer never
+ *        got the letter with the tracking number. «Обзор» says so in «Сделать
+ *        сегодня», and the order card's next step says the parcel is already
+ *        on its way. Since 28.09.2026 (the owner's decision) the carrier's
+ *        scan ships such an order by itself (src/lib/ship-order.ts,
+ *        tests/carrier-autoship.test.ts), so the nudge is left for what the
+ *        scan cannot close: a word outside Montonio's documented three, or an
+ *        order shipped and taken back by hand.
  *   B14  a parcel nobody collected is coming back: a chip on the row, a tag
  *        and a sentence in «Посылка», the card's next step, a journal word.
  *   B11  the nightly job has stopped: a red row at the top of «Сделать
@@ -60,10 +63,10 @@ const vm = new Function(`
   return admOrderVM;
 `)() as (o: V) => V;
 
-function order(status: string, montonio: V | null, method = "parcel"): V {
+function order(status: string, montonio: V | null, method = "parcel", shipping: V = {}): V {
   return {
     id: "o1", number: "R-100001", who: "Мария Тамм", date: "", items: 1, sum: 50, ship: "", state: ["new"],
-    srv: { id: "o1", status, channel: "web", shipping: { method, country: "EE", ...(montonio ? { montonio } : {}) } },
+    srv: { id: "o1", status, channel: "web", shipping: { method, country: "EE", ...shipping, ...(montonio ? { montonio } : {}) } },
   };
 }
 const mont = (status: string, extra: V = {}) => ({ provider: "montonio", shipmentId: "shp-1", status, ...extra });
@@ -102,6 +105,44 @@ describe("the carrier's word, read once in the order's view model", () => {
     expect(v.status).toBe("paid");
     expect(v.toShip).toBe(true);
   });
+
+  /* 28.09.2026: the server ships these by itself — the same rule as
+     carrierHasParcel() + shippedBefore() in src/lib/ship-order.ts. */
+  it("`scanShips` — Montonio's three words exactly, on a label in use, never shipped before", () => {
+    for (const word of ["inTransit", "awaitingCollection", "delivered", "INTRANSIT"]) {
+      expect(vm(order("paid", mont(word))).scanShips, word).toBe(true);
+    }
+    // the looser reading still counts as «the carrier has it», but the scan rule does not take it
+    for (const word of ["in_transit", "picked_up", "completed", "handed-over", "delivered_to_locker"]) {
+      const v = vm(order("paid", mont(word)));
+      expect(v.carrierHas, word).toBe(true);
+      expect(v.scanShips, word).toBe(false);
+    }
+    for (const word of ["registered", "labelsCreated", "returned", ""]) expect(vm(order("paid", mont(word))).scanShips, word).toBe(false);
+    // pressed and taken back by hand: the owner's, not the scan's
+    expect(vm(order("paid", mont("inTransit"), "parcel", { shippedAt: "2026-09-27T10:00:00.000Z" })).scanShips).toBe(false);
+    expect(vm(order("paid", mont("inTransit", { dismissed: true }))).scanShips).toBe(false);
+  });
+
+  it("`byScan` — «Отправлен» set by the carrier's scan", () => {
+    expect(vm(order("shipped", mont("inTransit", { autoShippedAt: "2026-09-28T07:00:00.000Z" }))).byScan).toBe(true);
+    expect(vm(order("shipped", mont("inTransit"))).byScan).toBe(false);
+    expect(vm(order("shipped", null)).byScan).toBe(false);
+  });
+});
+
+describe("the progress line", () => {
+  // This repository's own source plus fixed stub text.
+  const steps = new Function(`${fn("admOrderSteps")} return admOrderSteps;`)() as (v: V) => string;
+  const sv = (over: V) => ({ paid: false, shipped: true, delivered: false, pickup: false, labeled: true, byScan: false, ...over });
+
+  it("says «по скану» under «Отправлен» when the carrier's scan set it — and nothing when a press did", () => {
+    expect(steps(sv({ byScan: true }))).toContain('<span class="adm-prog__l">Отправлен</span><span class="adm-prog__c">по скану</span>');
+    expect(steps(sv({ byScan: true, shipped: false, delivered: true }))).toContain("по скану");
+    expect(steps(sv({}))).not.toContain("по скану");
+    // not before it happened
+    expect(steps(sv({ byScan: true, shipped: false, paid: true }))).not.toContain("по скану");
+  });
 });
 
 /* ---------- the card: its next step, its parcel ---------------------------- */
@@ -125,7 +166,7 @@ const base = { id: "o1", number: "R-100001", who: "Maria", status: "paid", paid:
 const v = (over: V = {}) => ({ ...base, ...over });
 
 describe("«Следующий шаг» on the card", () => {
-  it("B13: the carrier has it, «Отправлен» never pressed — the same button, and why it is overdue", () => {
+  it("B13: the carrier has it with a word the scan rule does not take — the same button, and why it is overdue", () => {
     const nx = card(v({ carrierHas: true }));
     expect(nx.key).toBe("ship");                                   // the «?» hint keeps its key
     expect(nx.title).toBe("Посылка уже в пути");
@@ -134,10 +175,22 @@ describe("«Следующий шаг» on the card", () => {
     expect(nx.btn).toContain(">Отправлен<");
   });
 
-  it("…and before the carrier has it, the words are the ones they always were", () => {
+  it("28.09.2026: the carrier has it and the scan rule takes it — the shop does it; the button stays as the fallback", () => {
+    const nx = card(v({ carrierHas: true, scanShips: true }));
+    expect(nx.title).toBe("Посылка уже в пути");
+    expect(nx.sub).toBe("Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.");
+    expect(nx.btn).toContain('data-admshipnow="o1"');
+  });
+
+  it("…and before the carrier has it: drop it off, the scan does the rest", () => {
     const nx = card(v());
     expect(nx.title).toBe("Отнести посылку");
-    expect(nx.sub).toBe("Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.");
+    expect(nx.sub).toBe("Сдайте посылку — после скана перевозчика заказ сам станет «Отправлен».");
+    expect(nx.help).toBe(
+      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Когда перевозчик отсканирует посылку, заказ сам станет «Отправлен» и клиенту уйдёт письмо «Заказ отправлен» с трек-номером. Нажимать «Отправлен» нужно, только если посылка ушла без скана.",
+    );
+    // the press is still there, for a parcel that left without a scan
+    expect(nx.btn).toContain(">Отправлен<");
   });
 
   it("B14: a shipped parcel coming back — what is going on and what is his to do; «Доставлен» stays", () => {
@@ -194,6 +247,23 @@ describe("«Посылка» and the row's chips", () => {
   it("B14: the journal names the row in words", () => {
     const words = new Function(`return (${block("var AUDIT_WORDS = {").replace(/^var AUDIT_WORDS = /, "")});`)() as Record<string, string>;
     expect(words["shipment.returned"]).toBe("Посылка возвращается — покупатель не забрал");
+    expect(words["shipment.closed_moving"]).toBe("Посылка едет, а заказ отменён или деньги возвращены");
+  });
+
+  it("28.09.2026: the journal says «Отправлен — по скану перевозчика» for the scan's move, and nothing new for a press", () => {
+    // This repository's own source plus fixed stub text.
+    const text = new Function(`
+      function esc(s) { return String(s == null ? "" : s); }
+      function admPiecesHTML(s) { return "<p>" + s + "</p>"; }
+      var ${block("var AUDIT_WORDS = {").replace(/^var /, "")};
+      var AUDIT_SETTING_WORDS = {};
+      ${fn("auditTextHTML")}
+      return auditTextHTML;
+    `)() as (row: V) => string;
+    const row = (payload: V) => ({ action: "order.status", payload: { id: "o1", number: "R-100098", from: "paid", to: "shipped", ...payload } });
+    expect(text(row({ via: "carrier", carrierStatus: "inTransit" }))).toBe("<span>Отправлен — по скану перевозчика</span>: R-100098");
+    expect(text(row({}))).toBe("<span>Статус заказа</span>: R-100098");
+    expect(text(row({ via: "carrier", to: "delivered" }))).toBe("<span>Статус заказа</span>: R-100098");
   });
 });
 
@@ -280,6 +350,14 @@ describe("«Сделать сегодня»", () => {
     expect(overview(SUMMARY, [vmOf("o-1", "A", { toShip: false, carrierHas: true })])).not.toContain("уже в пути");
   });
 
+  it("28.09.2026: nothing for a parcel the carrier's scan will ship by itself — only for what it cannot", () => {
+    expect(overview(SUMMARY, [vmOf("o-1", "A", { carrierHas: true, scanShips: true })])).not.toContain("уже в пути");
+    const rows = todo(overview(SUMMARY, [
+      vmOf("o-1", "A", { carrierHas: true, scanShips: true }), vmOf("o-2", "B", { carrierHas: true }),
+    ]));
+    expect(rows.find((r) => r.words.includes("уже в пути"))).toMatchObject({ big: "1", sub: "B", attrs: 'data-admorder="o-2"' });
+  });
+
   it("B11: the nightly job stopped — red, first, and it opens «Письма»", () => {
     const stale = { ...SUMMARY, cron: { lastRunAt: "2026-09-25T07:00:00.000Z", stale: true } };
     const rows = todo(overview(stale, [vmOf("o-1", "A", {})]));
@@ -323,6 +401,15 @@ describe("every new word has an Estonian and an English line", () => {
     "Покупатель не забрал посылку — перевозчик везёт её обратно в магазин. Свяжитесь с покупателем.",
     "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги.",
     "Посылка возвращается — покупатель не забрал",
+    // 28.09.2026: the carrier's scan ships the order
+    "Сдайте посылку — после скана перевозчика заказ сам станет «Отправлен».",
+    "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.",
+    "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Когда перевозчик отсканирует посылку, заказ сам станет «Отправлен» и клиенту уйдёт письмо «Заказ отправлен» с трек-номером. Нажимать «Отправлен» нужно, только если посылка ушла без скана.",
+    "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет: «Отправлен» заказ станет сам, когда перевозчик отсканирует посылку.",
+    "когда перевозчик примет посылку или вы нажмёте «Отправлен»",
+    "по скану",
+    "Отправлен — по скану перевозчика",
+    "Посылка едет, а заказ отменён или деньги возвращены",
   ])("%s", (ru) => {
     expect(UI.ET[ru], "ET").toMatch(/^[^А-Яа-яЁё]+$/);
     expect(UI.EN[ru], "EN").toMatch(/^[^А-Яа-яЁё]+$/);

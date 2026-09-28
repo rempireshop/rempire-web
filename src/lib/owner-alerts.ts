@@ -71,7 +71,8 @@ export type OwnerAlertKind =
   | "payment_held"
   | "payment_odd"
   | "shipment_refused"
-  | "shipment_returned";
+  | "shipment_returned"
+  | "shipment_closed_moving";
 
 /** A journal row as writeAudit() has it. `id` is missing when the insert failed. */
 export interface JournalRow {
@@ -95,6 +96,7 @@ export const OWNER_ALERT_ACTIONS = [
   "order.payment_odd",
   "shipment.registration_failed",
   "shipment.returned",
+  "shipment.closed_moving",
 ] as const;
 
 /** Sends in a rolling hour before the rest are recorded and not sent. */
@@ -302,6 +304,24 @@ export function alertForJournal(row: JournalRow): OwnerAlert | null {
         number,
         title: `📦 Посылка возвращается: ${number}`,
         body: `${who ? `${who}: п` : "П"}окупатель не забрал посылку, она едет обратно в магазин. Свяжитесь с покупателем — отправить заново или вернуть деньги.`,
+      };
+    }
+    /* The carrier has the parcel of an order that is cancelled or refunded
+       (28.09.2026, src/lib/shipping/shipment-sync.ts): the scan that ships a
+       paid order by itself moves nothing here, and only Renat can decide what
+       happens to the parcel. Once per parcel. */
+    case "shipment.closed_moving": {
+      const sid = str(p.shipmentId);
+      const who = CARRIER[str(p.carrier).toLowerCase()] || "";
+      const refunded = str(p.orderStatus) === "refunded";
+      return {
+        key: `shipment_closed_moving:${sid || number}`,
+        kind: "shipment_closed_moving",
+        number,
+        title: refunded
+          ? `📦 Посылка едет по заказу с возвратом денег: ${number}`
+          : `📦 Посылка едет по отменённому заказу: ${number}`,
+        body: `${who || "Перевозчик"} принял посылку, а заказ ${refunded ? "уже с возвратом денег" : "отменён"}. Статус магазин не менял. Свяжитесь с покупателем и решите, что делать с посылкой.`,
       };
     }
     default:

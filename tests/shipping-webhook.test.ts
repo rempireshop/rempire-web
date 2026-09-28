@@ -239,15 +239,34 @@ describe("the shipment webhook", () => {
     expect((await readStatusBook()).delivered).toMatchObject({ count: 1 });
   });
 
-  it("does not close an order that was never shipped", async () => {
+  it("does not close an order that was never paid", async () => {
+    const rows = await query<{ id: string }>(
+      "insert into orders (number, email, status) values ($1, $2, 'new') returning id",
+      ["R-100077", "buyer@example.com"],
+    );
+    const res = await POST(hook({ payload: token({ merchantReference: "R-100077" }) }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.applied).toBeUndefined();
+    expect(body.shipped).toBeUndefined();
+    expect(await statusOf(rows[0].id)).toBe("new");
+  });
+
+  /* Until 28.09.2026 this was «does not close an order that was never
+     shipped»: a paid order stayed «оплачен» when its parcel was delivered,
+     and waited for a press. The owner's decision of that day makes the
+     carrier's scan the hand-over — `delivered` as the first word the shop
+     hears ships the order and then closes it (tests/carrier-autoship.test.ts
+     has the rest). */
+  it("ships and then closes a paid order whose parcel is reported delivered", async () => {
     const rows = await query<{ id: string }>(
       "insert into orders (number, email, status) values ($1, $2, 'paid') returning id",
       ["R-100077", "buyer@example.com"],
     );
     const res = await POST(hook({ payload: token({ merchantReference: "R-100077" }) }));
     expect(res.status).toBe(200);
-    expect((await res.json()).applied).toBeUndefined();
-    expect(await statusOf(rows[0].id)).toBe("paid");
+    expect(await res.json()).toMatchObject({ adopted: true, shipped: true, applied: "delivered" });
+    expect(await statusOf(rows[0].id)).toBe("delivered");
   });
 
   it("refuses a token that names neither a shipment nor an order", async () => {

@@ -62,6 +62,10 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/* Since 28.09.2026 a scan can ship an order from here, and the customer's
+   «Заказ отправлен» goes inside this request (src/lib/ship-order.ts); the
+   owner's alerts ride after() in the same budget. The cron's own ceiling. */
+export const maxDuration = 60;
 
 /* Same generous-but-finite limit as the payment webhook: the token is what
    makes this safe, the limiter is what stops a replay loop from becoming a
@@ -145,9 +149,12 @@ export async function POST(req: Request) {
      src/lib/shipping/shipment-sync.ts, one update whoever brings the news:
      the word onto the order (never backwards: a retried event can be two days
      late), a tracking code the order lacks (a parcel registered after the
-     button press — a repaired refusal), the journal row for a refusal, and
-     «delivered» closing a `shipped` order. On an order that already holds a
-     parcel, only the status and a missing tracking code are ever written.
+     button press — a repaired refusal), the journal row for a refusal,
+     «delivered» closing a `shipped` order, and — since 28.09.2026, the
+     owner's decision — the carrier's scan (`inTransit`, `awaitingCollection`,
+     `delivered`) making a `paid` order «Отправлен», with the customer's
+     tracking letter sent from here (src/lib/ship-order.ts). On an order that
+     already holds a parcel, nothing else about the parcel is ever written.
 
      On an order that holds NO parcel id, the event's parcel is recorded whole
      (since 26.09.2026). This used to say a webhook «is not the place to
@@ -183,7 +190,7 @@ export async function POST(req: Request) {
       { source: "webhook" },
     );
   } catch (err) {
-    console.error(`shipping/notify: could not close ${order.number}`, err);
+    console.error(`shipping/notify: could not ship or close ${order.number}`, err);
     return NextResponse.json({ ok: false, error: "apply_failed" }, { status: 503 });
   }
 
@@ -192,6 +199,7 @@ export async function POST(req: Request) {
     status: seen.word,
     meaning: seen.meaning || "unknown",
     number: order.number,
+    shipped: result.shipped || undefined,
     applied: result.applied || undefined,
     stale: result.stale || undefined,
     adopted: result.adopted || undefined,

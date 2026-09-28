@@ -2368,7 +2368,8 @@
       "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
-      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет: «Отправлен» заказ станет сам, когда перевозчик отсканирует посылку.":
+        "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda: «Teele saadetud» saab tellimus ise, kui vedaja paki skannib.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "Arvega", "тестовый банк": "testpank", "отмечено вручную": "märgitud käsitsi",
       "продажа в салоне": "müük salongis",
@@ -2390,7 +2391,12 @@
       "Отправлен без этикетки": "Teele saadetud ilma sildita",
       "Отправлен без этикетки?": "Teele saadetud ilma sildita?",
       "Отнести посылку": "Vii pakk ära",
-      "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.": "Vajutage «Teele saadetud» — klient saab kirja jälgimiskoodiga.",
+      /* 28.09.2026: the carrier's scan ships the order by itself (src/lib/ship-order.ts) */
+      "Сдайте посылку — после скана перевозчика заказ сам станет «Отправлен».": "Andke pakk ära — pärast vedaja skannimist muutub tellimus ise «Teele saadetud».",
+      "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.": "Vedaja on paki vastu võtnud — «Teele saadetud» ja jälgimisnumbriga kirja teeb pood ise.",
+      "по скану": "skanniga",
+      "Отправлен — по скану перевозчика": "Teele saadetud — vedaja skannimise järgi",
+      "Посылка едет, а заказ отменён или деньги возвращены": "Pakk liigub, kuid tellimus on tühistatud või raha tagastatud",
       "Ждём доставки": "Ootame kättetoimetamist",
       "Последний шаг, без письма.": "Viimane samm, ilma kirjata.",
       "Отметить оплаченным вручную": "Märgi käsitsi makstuks",
@@ -2471,7 +2477,8 @@
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
         "⚠ Tellimusele tuli teine makse — võimalik, et klient maksis kaks korda, kontrolli Montonios",
       "Баллы за заказ возвращены": "Punktid tellimuse eest tagastatud",
-      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Kleepige silt pakile ja viige pakk pakiautomaati — kullerit tellitakse Montonio paneelist. Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Когда перевозчик отсканирует посылку, заказ сам станет «Отправлен» и клиенту уйдёт письмо «Заказ отправлен» с трек-номером. Нажимать «Отправлен» нужно, только если посылка ушла без скана.":
+        "Kleepige silt pakile ja viige pakk pakiautomaati — kullerit tellitakse Montonio paneelist. Kui vedaja paki skannib, muutub tellimus ise «Teele saadetud» ja kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga. «Teele saadetud» tuleb vajutada ainult siis, kui pakk läks teele ilma skannimiseta.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
       "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
       "Не удалось создать этикетку": "Silti ei õnnestunud luua", "Не удалось вернуть шаг": "Sammu ei õnnestunud tagasi võtta",
@@ -2747,7 +2754,7 @@
       "покупателю": "ostjale",
       "Список карт не загрузился.": "Kaartide nimekiri ei laadinud.",
       "сразу после оплаты": "kohe pärast tasumist",
-      "когда вы нажмёте «Отправлен»": "kui vajutad «Teele pandud»",
+      "когда перевозчик примет посылку или вы нажмёте «Отправлен»": "kui vedaja paki vastu võtab või vajutate «Teele saadetud»",
       "Ищем по всем заказам — фильтр сейчас не действует.":
         "Otsime kõigist tellimustest — filter praegu ei kehti.",
       "тем, кто оставил почту": "neile, kes jätsid e-posti",
@@ -5900,7 +5907,8 @@
       "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
       "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
-      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет: «Отправлен» заказ станет сам, когда перевозчик отсканирует посылку.":
+        "The label is Montonio's sticker with the tracking number. It does not change the order's status: the order becomes «Shipped» by itself once the carrier scans the parcel.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "By invoice", "тестовый банк": "test bank", "отмечено вручную": "marked by hand",
       "продажа в салоне": "salon sale",
@@ -5921,7 +5929,12 @@
       "Отправлен без этикетки": "Shipped without a label",
       "Отправлен без этикетки?": "Shipped without a label?",
       "Отнести посылку": "Take the parcel in",
-      "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.": "Press «Shipped» — the customer gets a letter with the tracking number.",
+      /* 28.09.2026: the carrier's scan ships the order by itself (src/lib/ship-order.ts) */
+      "Сдайте посылку — после скана перевозчика заказ сам станет «Отправлен».": "Drop the parcel off — once the carrier scans it, the order becomes «Shipped» by itself.",
+      "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.": "The carrier has it — the shop sets «Shipped» and sends the tracking letter by itself.",
+      "по скану": "by scan",
+      "Отправлен — по скану перевозчика": "Shipped — by the carrier's scan",
+      "Посылка едет, а заказ отменён или деньги возвращены": "The parcel is moving, but the order is cancelled or refunded",
       "Ждём доставки": "Waiting for delivery",
       "Последний шаг, без письма.": "The last step, no letter.",
       "Отметить оплаченным вручную": "Mark as paid by hand",
@@ -6000,7 +6013,8 @@
       "⚠ По заказу пришёл второй платёж — возможно, клиент заплатил дважды, проверьте в Montonio":
         "⚠ A second payment arrived for this order — the customer may have paid twice, check in Montonio",
       "Баллы за заказ возвращены": "The order's points were given back",
-      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Stick the label on and take the parcel to a parcel machine — a courier is booked in the Montonio panel. Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
+      "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Когда перевозчик отсканирует посылку, заказ сам станет «Отправлен» и клиенту уйдёт письмо «Заказ отправлен» с трек-номером. Нажимать «Отправлен» нужно, только если посылка ушла без скана.":
+        "Stick the label on and take the parcel to a parcel machine — a courier is booked in the Montonio panel. Once the carrier scans the parcel, the order becomes «Shipped» by itself and the customer gets the “Order shipped” letter with the tracking number. Press «Shipped» only if the parcel left without a scan.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
       "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
       "Не удалось создать этикетку": "Could not create the label", "Не удалось вернуть шаг": "Could not take the step back",
@@ -6276,7 +6290,7 @@
       "покупателю": "to the buyer",
       "Список карт не загрузился.": "The card list did not load.",
       "сразу после оплаты": "right after payment",
-      "когда вы нажмёте «Отправлен»": "when you press “Shipped”",
+      "когда перевозчик примет посылку или вы нажмёте «Отправлен»": "when the carrier takes the parcel or you press “Shipped”",
       "Ищем по всем заказам — фильтр сейчас не действует.":
         "Searching every order — the filter is off right now.",
       "тем, кто оставил почту": "to everyone who left an e-mail",
@@ -21183,14 +21197,28 @@
        neither moves a status (readiness pass 27.09.2026):
          · `parcelBack` — nobody collected it and it is coming back (B14);
          · `carrierHas` — handed over: in transit, waiting in the machine, or
-           delivered. On an order still «оплачен» that means «Отправлен» was
-           never pressed, so the customer has no tracking letter (B13). */
+           delivered. On an order still «оплачен» that means the order has not
+           been «Отправлен» yet, so the customer has no tracking letter (B13)
+           — see `scanShips` below for which of those the shop closes itself. */
     var cword = hasShipment && !mont.dismissed ? String(mont.status == null ? "" : mont.status).trim().toLowerCase().replace(/[\s_-]+/g, "") : "";
     var parcelBack = cword === "returned" || cword === "return" || cword === "returning" ||
       cword.indexOf("returned") === 0 || cword.indexOf("returnto") === 0;
     var carrierHas = !parcelBack && (cword === "intransit" || cword === "awaitingcollection" ||
       cword.indexOf("delivered") === 0 || cword === "completed" || cword === "finished" ||
       cword === "pickedup" || cword === "collected" || cword === "handedover");
+    /* Since 28.09.2026 (the owner's decision) the carrier's scan makes a paid
+       order «Отправлен» by itself and sends the tracking letter — the webhook,
+       or the nightly re-ask (src/lib/ship-order.ts). It does so for exactly
+       these orders: a label in use, Montonio's own word — one of the three,
+       spelled as Montonio spells it, not the looser reading above — and an
+       order never «Отправлен» before (`shippedAt`: pressed and taken back by
+       hand stays the owner's). `scanShips` is «the shop will close this
+       itself»; the rest of `carrierHas` — a word the shop does not know, an
+       undone press — is what still needs his thumb (B13). */
+    var rawWord = hasShipment && !mont.dismissed ? String(mont.status == null ? "" : mont.status).trim().toLowerCase() : "";
+    var scanShips = labeled && !parcelBack &&
+      (rawWord === "intransit" || rawWord === "awaitingcollection" || rawWord === "delivered") &&
+      !(srv && srv.shipping && srv.shipping.shippedAt);
     /* «По счёту — для компаний»: the invoice record the server put on the
        order (src/lib/invoices.ts) and the company it is made out to. An
        unpaid order with an invoice is waiting for a bank transfer, not for
@@ -21254,6 +21282,11 @@
       shipRefused: shipRefused,
       parcelBack: parcelBack,
       carrierHas: carrierHas,
+      scanShips: scanShips,
+      /* «Отправлен» was set by the carrier's scan, not by a press — the
+         shipment's own stamp (`autoShippedAt`, src/lib/shipping/shipment-
+         sync.ts); the progress line says «по скану» under the step. */
+      byScan: !!(hasShipment && mont.autoShippedAt),
       shipment: labeled ? mont : null,
       tracking: (labeled && mont.trackingCode) || ""
     };
@@ -21590,13 +21623,16 @@
       names(toShip, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="new"');
     /* B13 (27.09.2026): the carrier already has the parcel — in transit, in
-       the machine, even delivered — and the order still says «оплачен»:
-       «Отправлен» was never pressed, so the customer never got the letter
-       with the tracking number, and the order sits in «Отправить» for ever.
-       Nothing changes the status by itself (the press is what sends the
-       letter); this row says which ones, and one order opens its own card. */
+       the machine, even delivered — and the order still says «оплачен», so
+       the customer never got the letter with the tracking number, and the
+       order sits in «Отправить» for ever. Since 28.09.2026 the carrier's
+       scan ships such an order by itself (src/lib/ship-order.ts) — so this
+       row now counts only the ones it CANNOT close (`!scanShips`): a word
+       Montonio's documented three do not include, or an order the owner
+       shipped and took back by hand. Those still need «Отправлен»; one order
+       opens its own card. */
     var moving = (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
-      .filter(function (v) { return v.toShip && v.labeled && v.carrierHas; });
+      .filter(function (v) { return v.toShip && v.labeled && v.carrierHas && !v.scanShips; });
     var movingN = moving.length;
     if (movingN) tasks += admTaskRow(movingN,
       ["посылка уже в пути — нажмите «Отправлен»", "посылки уже в пути — нажмите «Отправлен»", "посылок уже в пути — нажмите «Отправлен»"],
@@ -22488,7 +22524,8 @@
         ["Этикетка",
           v.labeled ? "done" : left ? "skip" : v.paid ? "now" : "todo",
           v.labeled ? "готова" : left ? "без этикетки" : ""],
-        ["Отправлен", left ? "done" : v.paid && v.labeled ? "now" : "todo", ""],
+        /* «по скану» — the carrier's scan set it, nobody pressed (28.09.2026) */
+        ["Отправлен", left ? "done" : v.paid && v.labeled ? "now" : "todo", left && v.byScan ? "по скану" : ""],
         ["Доставлен", v.delivered ? "done" : v.shipped ? "now" : "todo", ""]
       ];
     }
@@ -22676,7 +22713,7 @@
         key: v.shipRefused ? "refused" : "label",
         title: v.shipRefused ? "Перевозчик не принял посылку" : "Создать этикетку",
         sub: v.shipRefused ? "«Отправить заново» — Montonio повторит это же отправление." : "",
-        help: v.shipRefused ? "" : "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.",
+        help: v.shipRefused ? "" : "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет: «Отправлен» заказ станет сам, когда перевозчик отсканирует посылку.",
         body: admShipPrepHTML(v),
         /* «Отправлен» with no label — a courier collecting, a hand-over. It
            asks first: the letter goes with no tracking number (C4). */
@@ -22692,15 +22729,26 @@
         sub: "Покупатель её не забрал. Свяжитесь с ним: отправить заново или вернуть деньги." };
     }
     if (v.paid) {
-      /* B13 (27.09.2026): the carrier says it already has the parcel, and
-         «Отправлен» was never pressed — the customer has no tracking letter.
-         Same step, same button; the words say it is overdue, not ahead. */
+      /* Since 28.09.2026 (the owner's decision) the carrier's scan is the
+         hand-over: when it reaches the shop, the order becomes «Отправлен»
+         and the tracking letter goes by itself (src/lib/ship-order.ts). So
+         the step says «drop it off», not «press»; the dark button stays — a
+         parcel that left without a scan, and the fallback for everything
+         below.
+         B13 (27.09.2026): the carrier says it already has the parcel and the
+         order is still «оплачен». With a word the scan rule takes
+         (`scanShips`) the shop is about to close it itself — the next event,
+         or the nightly re-ask; with any other word, or on an order shipped
+         and taken back by hand, the press is still his and the words say it
+         is overdue. */
       return { key: "ship",
         title: v.carrierHas ? "Посылка уже в пути" : "Отнести посылку",
-        sub: v.carrierHas
+        sub: v.scanShips
+          ? "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам."
+          : v.carrierHas
           ? "Нажмите «Отправлен», чтобы покупатель получил трек-номер."
-          : "Нажмёте «Отправлен» — клиенту уйдёт письмо с трек-номером.",
-        help: "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.",
+          : "Сдайте посылку — после скана перевозчика заказ сам станет «Отправлен».",
+        help: "Наклейте этикетку и отнесите посылку в пакомат — курьера вызывают в панели Montonio. Когда перевозчик отсканирует посылку, заказ сам станет «Отправлен» и клиенту уйдёт письмо «Заказ отправлен» с трек-номером. Нажимать «Отправлен» нужно, только если посылка ушла без скана.",
         btn: admOrderStepBtn(v, false) };
     }
     if (v.shipped) {
@@ -25584,7 +25632,9 @@
      rather than in hours. */
   var ADM_MAIL_ROWS = [
     ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
-    ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
+    /* since 28.09.2026 the carrier's scan sends it by itself (src/lib/ship-order.ts);
+       the press is the fallback for a parcel that left without one */
+    ["order-shipped", "Заказ отправлен", "когда перевозчик примет посылку или вы нажмёте «Отправлен»", ""],
     /* The three letters an order gets when it never becomes a parcel. The
        reminder and the cancellation share one switch: reminding without ever
        letting the order go, or letting it go with no warning, is neither of
@@ -31550,6 +31600,9 @@
     /* 27.09.2026 (B14): the carrier is sending back a parcel nobody collected
        — written once per parcel, and it is also a ping on the owner's phone */
     "shipment.returned": "Посылка возвращается — покупатель не забрал",
+    /* 28.09.2026: the carrier has the parcel of a cancelled or refunded order
+       — nothing moved, and it is also a ping on the owner's phone */
+    "shipment.closed_moving": "Посылка едет, а заказ отменён или деньги возвращены",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
     /* Seven actions the server writes and this table did not name, so the
@@ -31600,6 +31653,9 @@
     // goes through the same door — admPiecesHTML(), see the rule above
     if (typeof p.line === "string" && p.line) return admPiecesHTML(p.line);
     var word = AUDIT_WORDS[row.action] || row.action;
+    /* «Отправлен» set by the carrier's scan, not by a press (28.09.2026,
+       src/lib/ship-order.ts): the status row carries `via: "carrier"`. */
+    if (row.action === "order.status" && p.via === "carrier" && p.to === "shipped") word = "Отправлен — по скану перевозчика";
     // a settings row names the page's own word for its key, as a node of its own
     if (row.action === "setting.set" && typeof p.key === "string" && AUDIT_SETTING_WORDS[p.key]) {
       return "<span>" + esc(word) + "</span>: <span>" + esc(AUDIT_SETTING_WORDS[p.key]) + "</span>";

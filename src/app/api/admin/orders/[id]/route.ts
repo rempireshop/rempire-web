@@ -8,10 +8,15 @@
  * The order card's fulfilment steps all come through here (docs/shipping.md
  * § «Что видит Ренат в админке»):
  *
- *   status: "shipped"   «Отправлен» — the parcel left. This is the ONE place
- *                       the customer's «Заказ отправлен» letter goes out from,
- *                       with the tracking link when a Montonio shipment is on
- *                       the order; the label route itself never sends it.
+ *   status: "shipped"   «Отправлен» — the parcel left. The customer's «Заказ
+ *                       отправлен» letter goes with it, with the tracking link
+ *                       when a Montonio shipment is on the order; the label
+ *                       route itself never sends it. Since 28.09.2026 the
+ *                       carrier's scan makes the same move by itself through
+ *                       the same door (shipOrder, src/lib/ship-order.ts), so
+ *                       this press is the fallback — a parcel handed over
+ *                       without a scan, a word the shop does not know — and
+ *                       it finds an order the scan already shipped unmoved.
  *   status: "delivered" «Доставлен» — the owner's last step. No letter.
  *   status: "paid"      on an order already shipped or delivered: the
  *                       journal's undo of one of those two — the step goes
@@ -58,6 +63,7 @@ import { notifyOrderClosed, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { refundedTotal } from "@/lib/payments/refund";
 import { refundValue } from "@/lib/payments/settle";
 import { setReturnHandled } from "@/lib/returns";
+import { handedOver, shipOrder } from "@/lib/ship-order";
 import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
 
 export const runtime = "nodejs";
@@ -70,11 +76,6 @@ type Ctx = { params: Promise<{ id: string }> };
 
 async function find(id: string) {
   return (await getOrder(id)) ?? (await getOrderByNumber(id));
-}
-
-/** The two statuses after «Отправлен» — a step back from either is not a payment. */
-function handedOver(status: string): boolean {
-  return status === "shipped" || status === "delivered";
 }
 
 /** The provider's own id for this payment, when the order has one. */
@@ -106,29 +107,6 @@ async function worthOf(order: Order): Promise<number> {
   } catch (err) {
     console.error("[api/admin/orders/:id] order value unreadable for the cancel letter:", err);
     return Number(order.total) || 0;
-  }
-}
-
-/**
- * «Заказ отправлен», with the carrier's tracking code and link when the order
- * carries a Montonio shipment (src/lib/shipping/montonio.ts) — without one the
- * letter still goes, saying the number will follow. Loaded lazily by a
- * literal specifier (so the bundler traces it into the function) and never
- * allowed to throw: a status that already moved must not fail because Resend
- * had a bad day.
- */
-async function sendShippedLetter(order: Order): Promise<void> {
-  try {
-    const { onOrderShipped } = await import("@/lib/mail-hooks");
-    const shipment = shipmentOnOrder(order);
-    await onOrderShipped(
-      order,
-      shipment && !shipment.dismissed
-        ? { carrier: shipment.carrier, code: shipment.trackingCode, url: shipment.trackingUrl }
-        : undefined,
-    );
-  } catch (err) {
-    console.error("[api/admin/orders/:id] onOrderShipped failed:", err);
   }
 }
 
@@ -268,10 +246,20 @@ export async function PATCH(req: Request, ctx: Ctx) {
          they do below (a cancel of an unpaid order taken back is this door) */
       await dropStatusLetters(found.id, "paid");
       order = (await getOrder(found.id)) ?? order;
+    } else if (status === "shipped" && status !== found.status) {
+      /* «Отправлен» — the owner's press, through the one door the carrier's
+         scan uses too (src/lib/ship-order.ts, 28.09.2026): the status, the
+         journal row, the «Заказ отправлен» letter held ten seconds for the
+         toast's «Вернуть». The move is a claim: when the scan got there
+         between the card being drawn and this press, nothing moves and no
+         second letter goes — the answer is the order as it now is. */
+      const shipped = await shipOrder(found, { actor: "admin", hold: true });
+      order = shipped.order ?? (await getOrder(found.id)) ?? order;
+      letter = shipped.letter;
     } else if (status && status !== found.status) {
-      /* A step forward or back on the card: shipped, delivered, back to paid
-         from either, cancelled, refunded. The money was settled on the way
-         into paid and is not looked at again here; applyPaymentResult()
+      /* A step forward or back on the card: delivered, back to paid from
+         shipped or delivered, cancelled, refunded. The money was settled on
+         the way into paid and is not looked at again here; applyPaymentResult()
          would in any case refuse to move an already-paid order, which is
          exactly why the undo of «Отправлен» must not go through it. */
       order = (await setOrderStatus(found.id, status as OrderStatus, "admin")) ?? order;
@@ -280,10 +268,6 @@ export async function PATCH(req: Request, ctx: Ctx) {
          what it was) stops the letter that was waiting. A move forward —
          «Доставлен» right after «Отправлен» — keeps «Заказ отправлен». */
       await dropStatusLetters(found.id, status);
-      // the letter goes with the first hand-over only — not when «Доставлен» is undone back to shipped
-      if (status === "shipped" && !handedOver(found.status)) {
-        letter = await holdAndSend(found.id, "shipped", sendShippedLetter);
-      }
       /* «Отменить заказ» says something to the customer now (Dim, 07.09.2026 —
          before this the card had to admit «Письмо не уходит») — ten seconds
          later, so the toast's «Вернуть» can still stop it. Never fatal: a
