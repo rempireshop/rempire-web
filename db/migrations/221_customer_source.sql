@@ -1,0 +1,24 @@
+-- 221_customer_source.sql — where a customer row came from.
+--
+-- Dim, 28.09.2026: the Shopify store's customers come over on the night of the
+-- launch (tools/import-shopify-customers.mjs), option B — only those with a
+-- name: the e-mail, the phone and the default address, never the marketing
+-- consent. Until then every row in `customers` was made by the shop itself
+-- (recordLogin in src/lib/customers.ts, on the first sign-in by e-mail code),
+-- so nothing had to say where a row came from. Now something does.
+--
+--   source   'shopify' — created by the import;
+--            null      — created by the shop itself, which is every row before
+--                        this migration and every row after it but the import's.
+--
+-- Nullable, no default, no check: one tool writes it and nothing decides
+-- anything by it. It is there so an imported account can be told apart later —
+-- a question about consent, a clean-up, a count — without guessing from
+-- created_at. Signing in does not touch it: recordLogin's upsert updates only
+-- last_login_at and lang, so an imported customer who signs in stays 'shopify'.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite.
+
+alter table customers add column if not exists source text;

@@ -418,14 +418,14 @@
       "who": [
         "renat"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": false,
       "optional": true,
-      "title": "Решить, давать ли доступ к Shopify, чтобы перенести товары и покупателей",
-      "detail": "Не обязательно, запуск этого не ждёт. Если давать: перенесённые покупатели приходят без согласия на рассылку (Дима, 18.09) — и это не то же самое, что отказ. Они просто ни разу не соглашались.",
+      "title": "Доступ к Shopify не нужен — решено 28.09",
+      "detail": "Решено 28.09.2026 (Дима): товары — из каталога, он уже собран из магазина Shopify; остатки — из выгрузки склада (вариант 1b, шаг 4 дня); покупатели — из выгрузки покупателей, вариант B (шаг 4b дня). Обе выгрузки Дима делает сам в админке Shopify, доступ соавтора не нужен. Перенесённые покупатели приходят без согласия на рассылку (Дима, 18.09) — и это не то же самое, что отказ. Они просто ни разу здесь не соглашались.",
       "en": {
-        "title": "Whether to give Shopify collaborator access to import existing products and customers",
-        "detail": "Optional; the launch does not wait for it. If it happens: imported customers arrive with no marketing consent (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in."
+        "title": "Shopify collaborator access is not needed — decided 28.09",
+        "detail": "Decided 28.09.2026 (Dim): products come from the catalogue, already built from the Shopify store; stock from the inventory export (option 1b, step 4 of the day); customers from the customer export, option B (step 4b of the day). Dim makes both exports in the Shopify admin himself, so no collaborator access is needed. Imported customers arrive with no marketing consent (Dim, 18.09) — and that is not the same as opting them out. They have simply never opted in here."
       }
     },
     {
@@ -974,6 +974,24 @@
       "en": {
         "title": "4. Stock from Shopify — the last thing before DNS",
         "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. A fresh export: Shopify → Products → Inventory → Export. A dry run against staging — node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu with RMP_ADMIN_COOKIE — read the before → after; then the same with --apply --confirm ИМПОРТ. The step-2 reset runs with --stock (decided 28.09.2026: the hand-set counts and the barcodes are tests): «Склад» is empty, every dry-run row reads «не считали → N», nothing is overwritten. Until the import the storefront shows the manual stock marks, so it runs straight after the reset and the letters. After the reset because it deleted the test «Сообщить, когда появится» requests, so a size going from 0 to a count writes to no test mailbox. Shopify keeps selling until DNS: a Shopify order after the export is written off in «Склад» by hand (step 13)."
+      },
+      "outside": "Shopify"
+    },
+    {
+      "id": "customers-import",
+      "area": "switches",
+      "who": [
+        "claude"
+      ],
+      "status": "todo",
+      "needs": [
+        "run-reset"
+      ],
+      "title": "4b. Покупатели из Shopify — без согласия на рассылку",
+      "detail": "Решено 28.09.2026 (Дима, вариант B): переносятся только покупатели с именем — e-mail, телефон, если есть, и адрес по умолчанию, если магазин возит в его страну. Адрес хранится со страной, но без способа доставки (Дима, 28.09, вариант b): оформление открывается на их стране с обычным способом, а адрес встаёт в три поля курьера, только когда покупатель сам выберет «Курьер». Без согласия на рассылку: у всех marketing = false, что бы ни стояло в Shopify, — и это не отказ, они просто здесь не соглашались. Ни заказов, ни заметок, ни тегов, ни сумм. Выгрузка: Shopify → Customers → Export → All customers → Plain CSV, файл приходит на почту. Сухой прогон — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <файл> — печатает только числа и коды стран; потом то же с --apply --confirm ИМПОРТ-КЛИЕНТОВ, всё одной транзакцией. После чистки (она удаляет всех клиентов) и до DNS. E-mail, у которого уже есть кабинет, не трогается, поэтому второй запуск ничего не создаёт; ни кодов, ни писем никому. Нужна миграция 221 (customers.source = 'shopify') — она приезжает с деплоем. На выгрузке 28.09: 428 строк → 391 покупатель, 307 с телефоном, 316 с адресом; без имени — 33 строки, без e-mail — 4.",
+      "en": {
+        "title": "4b. Customers from Shopify — without marketing consent",
+        "detail": "Decided 28.09.2026 (Dim, option B): only customers with a name come over — the e-mail, the phone if there is one, and the default address if the shop delivers to its country. The address is kept with its country but no delivery method (Dim, 28.09, option b): the checkout opens on their country with its usual method, and the address fills the courier's three boxes only when the shopper picks «Курьер» himself. No marketing consent: everyone gets marketing = false whatever Shopify says — and that is not an opt-out, they have simply never opted in here. No orders, notes, tags or totals. The export: Shopify → Customers → Export → All customers → Plain CSV; the file arrives by e-mail. Dry run — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <file> — prints only counts and country codes; then the same with --apply --confirm ИМПОРТ-КЛИЕНТОВ, all in one transaction. After the reset (it deletes every customer) and before DNS. An e-mail that already has an account is not touched, so a second run creates nothing; nobody gets a code or a letter. Needs migration 221 (customers.source = 'shopify'), which arrives with the deploy. On the 28.09 export: 428 rows → 391 customers, 307 with a phone, 316 with an address; 33 rows without a name and 4 without an e-mail skipped."
       },
       "outside": "Shopify"
     },

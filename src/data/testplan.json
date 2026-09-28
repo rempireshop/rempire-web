@@ -5124,6 +5124,55 @@
       "markedAt": "2026-09-24T15:18:05.686Z"
     },
     {
+      "id": "acct-imported-door",
+      "area": "account",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Покупатель из Shopify: адрес без способа доставки",
+      "steps": [
+        "Сделать CSV из заголовка выгрузки покупателей Shopify и одной строки: имя, свой второй e-mail без кабинета, адрес в Эстонии.",
+        "node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <файл> — прочитать, потом то же с --apply --confirm ИМПОРТ-КЛИЕНТОВ.",
+        "Войти в магазин с этим e-mail по коду, набрать корзину и дойти до шага доставки.",
+        "Нажать «Курьер до двери».",
+        "Открыть кабинет → «Доставка по умолчанию», потом выбрать строку «Курьер до двери».",
+        "Запустить тот же --apply ещё раз."
+      ],
+      "expect": [
+        "Прогон печатает только числа и коды стран — ни e-mail, ни имени, ни адреса.",
+        "Оформление открывается на Эстонии с обычным способом, поля курьера пустые.",
+        "После «Курьер до двери» улица, индекс и город уже вписаны.",
+        "В кабинете выбрана Эстония, но ни одна строка не отмечена.",
+        "Строка «Курьер до двери» в кабинете открывается с тем же адресом.",
+        "Второй запуск: «Nothing to create», ничего не записано."
+      ],
+      "why": "Импорт не выбирает доставку за покупателя (Дима, 28.09): адрес ждёт его собственного «Курьер».",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "A customer from Shopify: an address with no delivery method",
+        "steps": [
+          "Make a CSV from the Shopify customer export's header and one row: a name, a second e-mail of yours with no account, an address in Estonia.",
+          "node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <file> — read it, then the same with --apply --confirm ИМПОРТ-КЛИЕНТОВ.",
+          "Sign in to the shop with that e-mail by code, fill a cart and get to the delivery step.",
+          "Press «Курьер до двери» (courier).",
+          "Open the account → «Доставка по умолчанию», then pick the «Курьер до двери» row.",
+          "Run the same --apply once more."
+        ],
+        "expect": [
+          "The run prints only counts and country codes — no e-mail, name or address.",
+          "The checkout opens on Estonia with its usual method; the courier boxes are empty.",
+          "After «Курьер до двери» the street, postcode and city are already filled in.",
+          "In the account Estonia is chosen, but no row is ticked.",
+          "The account's «Курьер до двери» row opens with the same address.",
+          "The second run: «Nothing to create», nothing written."
+        ],
+        "why": "The import does not choose anybody's delivery (Dim, 28.09): the address waits for their own «Курьер»."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-28T17:17:56.631Z"
+    },
+    {
       "id": "acct-refund-sent",
       "area": "account",
       "who": "dim",

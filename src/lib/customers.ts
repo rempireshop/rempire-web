@@ -138,6 +138,17 @@ export function birthdayProblem(v: unknown, now: Date = new Date()): "bad_birthd
  * checkout will not take a courier order short of any of the three, so half
  * an address is not something to fill in. Absent — not empty — otherwise, so
  * every preference stored before it reads exactly as it did.
+ *
+ * ONE SHAPE WITHOUT A METHOD — the customers brought over from Shopify
+ * (tools/import-shopify-customers.mjs; Dim, 28.09.2026, option b). Their
+ * default address is known, the way they like it delivered is not, and the
+ * import must not choose one for them: `method` is "" and `address` is whole
+ * — {country, method: "", carrier: "", machine: "", address}. The checkout
+ * then opens on that country with its usual method and puts the address into
+ * the courier's boxes only when the shopper picks «Курьер» (app.js
+ * applyAcctShipPref / fillSavedDoor); the account block shows the country with
+ * no row ticked. Without a whole address a method-less preference is nothing,
+ * and is not stored. The first row the customer picks himself replaces it.
  */
 export interface ShipAddress {
   /** Street and house (and flat) — the checkout's «Адрес». */
@@ -148,13 +159,16 @@ export interface ShipAddress {
 export interface ShipPref {
   /** The storefront's zone code — EE, LV, LT, FI, or EU for «другая страна». */
   country: string;
-  method: "pickup" | "parcel" | "courier";
+  /** "" only on an address with no chosen delivery — an imported customer's (see above). */
+  method: "pickup" | "parcel" | "courier" | "";
   carrier: string;
   machine: string;
   address?: ShipAddress;
 }
 
 const SHIP_METHODS: ReadonlyArray<ShipPref["method"]> = ["pickup", "parcel", "courier"];
+/** The methods that carry the courier's door: the courier's own, and the method-less address. */
+const DOOR_METHODS: ReadonlyArray<ShipPref["method"]> = ["courier", ""];
 
 /** A courier address the checkout would take — all three fields — or null. */
 export function normalizeShipAddress(v: unknown): ShipAddress | null {
@@ -179,14 +193,16 @@ export function normalizeShipPref(v: unknown): ShipPref | null {
   if (!v || typeof v !== "object" || Array.isArray(v)) return null;
   const o = v as Record<string, unknown>;
   const method = String(o.method ?? "").trim().toLowerCase() as ShipPref["method"];
-  if (!SHIP_METHODS.includes(method)) return null;
+  if (method !== "" && !SHIP_METHODS.includes(method)) return null;
   const country = String(o.country ?? "").trim().toUpperCase().slice(0, 2);
   if (!/^[A-Z]{2}$/.test(country)) return null;
   const parcel = method === "parcel";
   const carrier = parcel ? String(o.carrier ?? "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40) : "";
   const machine = parcel ? text(o.machine, 120) ?? "" : "";
   const pref: ShipPref = { country, method, carrier, machine };
-  const address = method === "courier" ? normalizeShipAddress(o.address) : null;
+  const address = DOOR_METHODS.includes(method) ? normalizeShipAddress(o.address) : null;
+  // no method and no whole address: nothing the checkout could use
+  if (method === "" && !address) return null;
   if (address) pref.address = address;
   return pref;
 }
