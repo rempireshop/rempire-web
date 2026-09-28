@@ -243,6 +243,36 @@
         "Külastusstatistika on teie valik: juhuslik külastusnumber, ilma nimeta, kaob koos vahekaardiga.",
       "Принять всё": "Nõustun kõigega",
       "Только необходимое": "Ainult vajalik",
+      /* «Данные и аккаунт» at the foot of «Кабинет» and the «Удалить аккаунт»
+         dialog (acctPrivacyHTML / acctDelHTML) — Dim, 28.09.2026 */
+      "Данные и аккаунт": "Andmed ja konto",
+      "Всё, что магазин хранит о вас, — одним файлом.": "Kõik, mida pood sinu kohta hoiab, ühes failis.",
+      "Скачать мои данные": "Laadi oma andmed alla",
+      "Удалить аккаунт можно в любой момент. Заказы останутся у магазина — так требует закон.":
+        "Konto saad kustutada igal ajal. Tellimused jäävad poele alles — nii nõuab seadus.",
+      "Удалить аккаунт": "Kustuta konto",
+      "Удалить аккаунт?": "Kustutada konto?",
+      "Это нельзя отменить. Мы удалим ваш профиль: имя, телефон, день рождения, адрес доставки по умолчанию, подписки «Сообщить о наличии» и сохранённую корзину.":
+        "Seda ei saa tagasi võtta. Kustutame sinu profiili: nime, telefoni, sünnipäeva, vaikimisi tarneaadressi, «Anna teada, kui on laos» tellimused ja salvestatud ostukorvi.",
+      "Ваши баллы сгорят:": "Sinu lojaalsuspunktid kaovad:",
+      "Заказы останутся у магазина: закон о бухгалтерии требует хранить их 7 лет. Ни в каком аккаунте они больше не появятся.":
+        "Tellimused jäävad poele alles: raamatupidamise seadus nõuab nende hoidmist 7 aastat. Üheski kontos neid enam ei näidata.",
+      "Ваши отзывы останутся на сайте, но без имени — подпись будет «Покупатель».":
+        "Sinu arvustused jäävad lehele, kuid ilma nimeta — allkirjaks on «Ostja».",
+      "Писем с предложениями и напоминаниями больше не будет. Войти с этой почтой можно и позже — это будет новый, пустой аккаунт.":
+        "Pakkumiste ja meeldetuletustega kirju enam ei tule. Selle e-postiga saad hiljem uuesti sisse logida — see on uus, tühi konto.",
+      "Чтобы подтвердить, введите свой e-mail": "Kinnitamiseks sisesta oma e-posti aadress",
+      "Удаляем…": "Kustutame…",
+      "Пока заказ не доставлен, удалить аккаунт нельзя — в «Мои заказы» вы следите за ним и скачиваете документы.":
+        "Kuni tellimus pole kohale jõudnud, ei saa kontot kustutada — «Minu tellimused» all jälgid seda ja laadid alla selle dokumendid.",
+      "Когда заказ доставят, удалить аккаунт можно будет здесь же.": "Kui tellimus on kohale toimetatud, saad konto siinsamas kustutada.",
+      "Понятно": "Selge",
+      "E-mail не совпадает с адресом этого аккаунта": "E-posti aadress ei ühti selle konto aadressiga",
+      "Не получилось удалить — попробуйте ещё раз": "Kustutamine ei õnnestunud — proovi uuesti",
+      "Аккаунт удалён": "Konto kustutatud",
+      /* …and the owner's journal line for it (AUDIT_WORDS, auditWhoHTML) */
+      "Покупатель удалил аккаунт": "Ostja kustutas oma konto",
+      "покупатель": "ostja",
       "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
         "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga.",
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
@@ -3820,6 +3850,36 @@
         "Visit statistics are up to you: a random visit number, no name attached, gone when the tab closes.",
       "Принять всё": "Accept all",
       "Только необходимое": "Only what is needed",
+      /* «Данные и аккаунт» at the foot of «Кабинет» and the «Удалить аккаунт»
+         dialog (acctPrivacyHTML / acctDelHTML) — Dim, 28.09.2026 */
+      "Данные и аккаунт": "Your data and account",
+      "Всё, что магазин хранит о вас, — одним файлом.": "Everything the shop keeps about you, in one file.",
+      "Скачать мои данные": "Download my data",
+      "Удалить аккаунт можно в любой момент. Заказы останутся у магазина — так требует закон.":
+        "You can delete your account at any time. Your orders stay with the shop — the law requires it.",
+      "Удалить аккаунт": "Delete account",
+      "Удалить аккаунт?": "Delete your account?",
+      "Это нельзя отменить. Мы удалим ваш профиль: имя, телефон, день рождения, адрес доставки по умолчанию, подписки «Сообщить о наличии» и сохранённую корзину.":
+        "This cannot be undone. We will delete your profile: name, phone, birthday, default delivery address, «Tell me when it's back» requests and the saved cart.",
+      "Ваши баллы сгорят:": "Your loyalty points will be lost:",
+      "Заказы останутся у магазина: закон о бухгалтерии требует хранить их 7 лет. Ни в каком аккаунте они больше не появятся.":
+        "Your orders stay with the shop: the Accounting Act requires keeping them for 7 years. They will not appear in any account again.",
+      "Ваши отзывы останутся на сайте, но без имени — подпись будет «Покупатель».":
+        "Your reviews stay on the site without your name — they will be signed «Customer».",
+      "Писем с предложениями и напоминаниями больше не будет. Войти с этой почтой можно и позже — это будет новый, пустой аккаунт.":
+        "No more offers or reminders by e-mail. You can sign in with this e-mail later — it will be a new, empty account.",
+      "Чтобы подтвердить, введите свой e-mail": "To confirm, type your e-mail address",
+      "Удаляем…": "Deleting…",
+      "Пока заказ не доставлен, удалить аккаунт нельзя — в «Мои заказы» вы следите за ним и скачиваете документы.":
+        "The account cannot be deleted while an order is not yet delivered — «My orders» is where you follow it and download its documents.",
+      "Когда заказ доставят, удалить аккаунт можно будет здесь же.": "Once the order is delivered, you can delete the account right here.",
+      "Понятно": "Got it",
+      "E-mail не совпадает с адресом этого аккаунта": "That e-mail is not this account's address",
+      "Не получилось удалить — попробуйте ещё раз": "Could not delete — please try again",
+      "Аккаунт удалён": "Account deleted",
+      /* …and the owner's journal line for it (AUDIT_WORDS, auditWhoHTML) */
+      "Покупатель удалил аккаунт": "A customer deleted their account",
+      "покупатель": "a customer",
       "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
         "There is no such page — the link may be out of date, or the address has a typo.",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
@@ -18148,6 +18208,9 @@
       // …and under «Курьер до двери», the door the courier rings (acctAddrHTML)
       (S.acctForm.ship && S.acctForm.ship.method === "courier" ? acctAddrHTML() : "") +
 
+      // last, and quiet: «Скачать мои данные» and «Удалить аккаунт» (acctPrivacyHTML)
+      acctPrivacyHTML() +
+
       "</section></div>";
   }
   /* The courier's address under «Курьер до двери» — the checkout's courier
@@ -18862,6 +18925,219 @@
       acctForget(); render(); toast("Вы вышли ✓");
     }).catch(function () { acctLogout._busy = false; toast("Не получилось выйти"); render(); });
   }
+
+  /* ---------- «Данные и аккаунт»: my data, and deleting the account ----------
+     Dim, 28.09.2026: the two GDPR rights a shopper could until now only ask
+     for by e-mail — a copy of their data (art. 15/20) and erasure (art. 17) —
+     at the foot of «Кабинет», after everything else, quiet. What the server
+     does is src/lib/account-privacy.ts: GET /api/account/export/ is a plain
+     link (the browser downloads the file with the cookie it already sends);
+     GET /api/account/delete/ says which orders block the deletion, POST
+     does it.
+
+     The dialog is the parcel sheet's frame — a bottom sheet on a phone, a
+     centred panel on a desktop (.psheet) — holding the drawers' body and
+     foot, in a slot of its own beside #pointslot: a background render() never
+     rebuilds it under the finger (the lesson of 23.09.2026, paintPointSheet),
+     it is mounted again only when what it shows changes (the confirmation or
+     the «order still on its way» answer, or the language). role=dialog
+     aria-modal, so the Tab trap, the focus in and the focus back are the
+     shop's own (topModal / settleModalFocus); Escape, ✕, «Отмена» and the
+     scrim close it.
+
+     The confirmation is the account's own e-mail, typed. Deliberate — a
+     stray tap cannot type it — the same in all three languages, where a
+     typed word («УДАЛИТЬ») would be a different word for every reader, and it
+     names the account that is going, which on a shared computer is the one
+     question that matters. The red «Удалить» stays disabled until it matches,
+     and the server checks it again. Enter in the box does NOT delete: it only
+     puts the phone's keyboard away, so the last act is always the button. */
+  function acctPrivacyHTML() {
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Данные и аккаунт</h2></div>' +
+      '<p class="muted acct__privtxt">Всё, что магазин хранит о вас, — одним файлом.</p>' +
+      '<a class="btn btn--ghost btn--sm" href="/api/account/export/" data-acctexport>Скачать мои данные</a>' +
+      '<p class="muted acct__privtxt acct__privdel">Удалить аккаунт можно в любой момент. Заказы останутся у магазина — так требует закон.</p>' +
+      '<button class="link acct__delbtn" data-acctdel aria-haspopup="dialog">Удалить аккаунт</button>';
+  }
+  /** Is what was typed the account's own address? Case and spaces do not count — the shop keys e-mails lower-cased. */
+  function acctDelMatch(typed, email) {
+    var a = String(typed == null ? "" : typed).trim().toLowerCase();
+    return !!a && a === String(email == null ? "" : email).trim().toLowerCase();
+  }
+  var ACCT_DEL_ERRS = {
+    confirm_mismatch: "E-mail не совпадает с адресом этого аккаунта",
+    rate_limited: "Слишком много попыток — подождите минуту",
+    error: "Не получилось удалить — попробуйте ещё раз"
+  };
+  function acctDelErrText(key) { return key ? ACCT_DEL_ERRS[key] || ACCT_DEL_ERRS.error : ""; }
+  /**
+   * The dialog. `st` is S.acctDel — {typed, busy, err, open} where `open` is
+   * the orders that block the deletion (null until the server has said).
+   * Every sentence is its own text node, so translateTree() finds each one
+   * whole; the points and the order numbers are nodes of their own beside
+   * them.
+   */
+  function acctDelHTML(st, email, points) {
+    var blocked = !!(st.open && st.open.length);
+    var body = blocked
+      ? '<p id="acctdel-d">Пока заказ не доставлен, удалить аккаунт нельзя — в «Мои заказы» вы следите за ним и скачиваете документы.</p>' +
+        '<p class="num acctdel__orders">' + st.open.map(function (n) { return esc(n); }).join(", ") + "</p>" +
+        '<p class="muted">Когда заказ доставят, удалить аккаунт можно будет здесь же.</p>'
+      : '<p id="acctdel-d">Это нельзя отменить. Мы удалим ваш профиль: имя, телефон, день рождения, адрес доставки по умолчанию, подписки «Сообщить о наличии» и сохранённую корзину.</p>' +
+        (points > 0 ? '<p><span>Ваши баллы сгорят:</span> <span class="num">' + points + "</span></p>" : "") +
+        "<p>Заказы останутся у магазина: закон о бухгалтерии требует хранить их 7 лет. Ни в каком аккаунте они больше не появятся.</p>" +
+        "<p>Ваши отзывы останутся на сайте, но без имени — подпись будет «Покупатель».</p>" +
+        "<p>Писем с предложениями и напоминаниями больше не будет. Войти с этой почтой можно и позже — это будет новый, пустой аккаунт.</p>" +
+        '<label class="field"><span class="field__label">Чтобы подтвердить, введите свой e-mail</span>' +
+          '<input class="input" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" data-acctdelmail value="' +
+          esc(st.typed || "") + '" aria-describedby="acctdel-e"' + (st.err === "confirm_mismatch" ? ' aria-invalid="true"' : "") + "></label>" +
+        '<div class="err acctdel__err" id="acctdel-e" role="alert">' + acctDelErrText(st.err) + "</div>";
+    var foot = blocked
+      ? '<button class="btn btn--wide" data-acctdelclose>Понятно</button>'
+      : '<button class="btn btn--wide btn--danger" data-acctdelgo' + (acctDelMatch(st.typed, email) ? "" : " disabled") +
+          (st.busy ? ' aria-disabled="true"' : "") + ">" + (st.busy ? "Удаляем…" : "Удалить") + "</button>" +
+        '<button class="link drawer__cont" data-acctdelclose>Отмена</button>';
+    return '<div class="scrim" data-acctdelclose></div>' +
+      '<div class="psheet psheet--confirm" role="dialog" aria-modal="true" aria-labelledby="acctdel-t" aria-describedby="acctdel-d">' +
+        '<div class="psheet__head"><h2 class="display drawer__t" id="acctdel-t">Удалить аккаунт?</h2>' +
+          '<button class="iconbtn" data-acctdelclose aria-label="Закрыть">✕</button></div>' +
+        '<div class="drawer__body">' + body + "</div>" +
+        '<div class="drawer__foot">' + foot + "</div>" +
+      "</div>";
+  }
+  /* the address the account screen shows in its read-only box — the row's,
+     or the one signed in with while the row is still loading */
+  function acctDelEmail() { return S.cust && S.cust.email ? S.cust.email : S.email || ""; }
+  /** The balance the deletion takes with it — said in the dialog only when there is one. */
+  function acctDelPoints() { return S.loyalty ? Math.max(0, Math.trunc(Number(S.loyalty.balance) || 0)) : 0; }
+  /* What the slot shows now: "" (nothing), or the state letter and the language. */
+  var acctDelOn = "";
+  /** Mount, unmount or patch the dialog — called by render() and by its own handlers. */
+  function paintAcctDel() {
+    var st = S.acctDel;
+    var want = st && S.screen === "account" && S.loggedIn ? (st.open && st.open.length ? "b" : "c") + S.lang : "";
+    // the dialog belongs to the account screen: a navigation or a sign-out closes it
+    if (!want && st) S.acctDel = null;
+    var slot = document.getElementById("acctdelslot");
+    if (!slot) {
+      if (!want) return;
+      slot = document.createElement("div");
+      slot.id = "acctdelslot";
+      app.appendChild(slot);
+    }
+    if (want !== acctDelOn) {
+      acctDelOn = want;
+      slot.innerHTML = want ? acctDelHTML(S.acctDel, acctDelEmail(), acctDelPoints()) : "";
+      if (want) translateTree(slot);
+    } else if (want) patchAcctDel();
+    if (want) document.body.classList.add("is-locked");
+    else if (!S.cartOpen && !S.filterOpen) document.body.classList.remove("is-locked");
+  }
+  /* In place, never a remount: the box keeps its caret and the keyboard stays up. */
+  function patchAcctDel() {
+    var st = S.acctDel, slot = document.getElementById("acctdelslot");
+    if (!st || !slot) return;
+    var btn = slot.querySelector("[data-acctdelgo]");
+    if (btn) {
+      btn.disabled = !acctDelMatch(st.typed, acctDelEmail());
+      if (st.busy) btn.setAttribute("aria-disabled", "true"); else btn.removeAttribute("aria-disabled");
+      btn.textContent = trText(st.busy ? "Удаляем…" : "Удалить", S.lang);
+    }
+    var err = slot.querySelector("#acctdel-e");
+    if (err) err.textContent = trText(acctDelErrText(st.err), S.lang);
+    var box = slot.querySelector("[data-acctdelmail]");
+    if (box) {
+      if (st.err === "confirm_mismatch") box.setAttribute("aria-invalid", "true"); else box.removeAttribute("aria-invalid");
+      box.readOnly = !!st.busy;
+    }
+  }
+  function acctDelOpen() {
+    if (!S.loggedIn || S.acctDel) return;
+    var st = { typed: "", busy: false, err: "", open: null };
+    S.acctDel = st;
+    paintAcctDel();
+    settleModalFocus();
+    /* Which orders stop it, asked the moment it opens, so a customer with a
+       parcel on its way reads why before typing anything. The answer only
+       ever REPLACES the confirmation with that reason; the POST checks again. */
+    apiJson("/api/account/delete/").then(function (r) {
+      if (S.acctDel !== st) return;
+      if (r.status === 401) { acctDelGone(); return; }
+      if (r.status === 200 && r.body.ok && Array.isArray(r.body.open) && r.body.open.length) {
+        st.open = r.body.open; paintAcctDel(); settleModalFocus();
+      } else if (r.status === 200) st.open = [];
+    }).catch(noop);
+  }
+  function acctDelClose() {
+    if (!S.acctDel || S.acctDel.busy) return;
+    S.acctDel = null;
+    paintAcctDel();
+    settleModalFocus();
+    refocus("[data-acctdel]");
+  }
+  /** The session is gone (401): what «Выйти» leaves behind, and the sign-in box. */
+  function acctDelGone() {
+    S.acctDel = null;
+    acctForget();
+    render();
+    toast("Войдите ещё раз");
+  }
+  function acctDelSend() {
+    var st = S.acctDel;
+    if (!st || st.busy || (st.open && st.open.length)) return;
+    if (!acctDelMatch(st.typed, acctDelEmail())) { st.err = "confirm_mismatch"; patchAcctDel(); return; }
+    st.busy = true; st.err = ""; patchAcctDel();
+    postJSON("/api/account/delete/", { confirm: String(st.typed).trim() }).then(function (res) {
+      if (S.acctDel !== st) return;
+      st.busy = false;
+      var b = (res && res.body) || {};
+      /* Deleted (or deleted already — a second tap, a retry): the cookie went
+         with the answer. What «Выйти» forgets goes too, and the shop opens on
+         its home page with the one word that says it happened. */
+      if (res.status === 200 && b.ok) {
+        S.acctDel = null;
+        acctForget();
+        go("home");
+        toast("Аккаунт удалён");
+        return;
+      }
+      if (res.status === 409 && b.error === "open_orders") {
+        st.open = Array.isArray(b.orders) && b.orders.length ? b.orders : ["—"];
+        paintAcctDel(); settleModalFocus();
+        return;
+      }
+      if (res.status === 401) { acctDelGone(); return; }
+      st.err = ACCT_DEL_ERRS[b.error] ? b.error : "error";
+      patchAcctDel();
+    }).catch(function () {
+      if (S.acctDel !== st) return;
+      st.busy = false; st.err = "error"; patchAcctDel();
+    });
+  }
+  /* Its own listeners rather than more names in the panel's one click
+     delegate: nothing else on the page answers these, and the dialog is not
+     in the body the delegate was written for. */
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-acctdel],[data-acctdelclose],[data-acctdelgo]") : null;
+    if (!t) return;
+    if (t.hasAttribute("data-acctdel")) acctDelOpen();
+    else if (t.hasAttribute("data-acctdelclose")) acctDelClose();
+    else acctDelSend();
+  });
+  document.addEventListener("input", function (e) {
+    if (!S.acctDel || !e.target || !e.target.matches || !e.target.matches("[data-acctdelmail]")) return;
+    S.acctDel.typed = e.target.value;
+    if (S.acctDel.err) S.acctDel.err = "";
+    patchAcctDel();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!S.acctDel) return;
+    if (e.key === "Escape") acctDelClose();
+    else if (e.key === "Enter" && e.target && e.target.matches && e.target.matches("[data-acctdelmail]")) {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
 
   /* ---------- wholesale/loyalty: account-screen history + pro request ---- */
   var LOYALTY_REASON = { earn: "Начислено", redeem: "Списано", adjust: "Корректировка", expire: "Сгорело" };
@@ -31671,6 +31947,8 @@
     var a = String(actor || "");
     if (a === "admin") return "владелец";
     if (a === "system") return "магазин сам";
+    // «Удалить аккаунт»: the one row a customer writes without their address on it
+    if (a === "customer") return "покупатель";
     if (a.indexOf("ip:") === 0) return "<span>вход с адреса</span> " + esc(a.slice(3));
     return esc(a) || "—";
   }
@@ -31687,6 +31965,9 @@
     /* the one row in this journal nobody in the panel wrote: the customer's
        own tick in «Кабинет → Мои заказы», actor = their address */
     "order.return_request": "Покупатель просит вернуть заказ",
+    /* «Удалить аккаунт» in «Кабинет» (src/lib/account-privacy.ts): actor
+       «customer», never the address; the line names the orders it kept */
+    "customer.account_deleted": "Покупатель удалил аккаунт",
     "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
     /* Written once per status word, not once per webhook — the news is that a
        word nobody had seen before arrived from the carrier, and the word
@@ -47907,6 +48188,8 @@
        render, and #pointmap is new only when the sheet itself is: that is
        the one time Leaflet has to be bound to it again (UX fix 8). */
     if (paintPointSheet() && S.pointOpen && POINTS.view === "map") openPointMap();
+    // «Удалить аккаунт» lives in a slot of its own the same way (paintAcctDel)
+    paintAcctDel();
     // a modal that this paint opened takes the focus; one it closed gives it back
     settleModalFocus();
   }
