@@ -55,8 +55,16 @@ const shop = new Function(
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
   function shortDate(iso) { return String(iso).slice(8, 10) + "." + String(iso).slice(5, 7); }
   function eur(n) { return n + " €"; }
-  var S = { acctReturnBusy: "" };
+  var S = { acctReturnBusy: "", lang: "RU" };
   var ACCT_ORDER_STATE = { refunded: ["возврат", "chip--low"], paid: ["оплачен", "chip--ok"] };
+  // the row's parcel line and «Подробнее о заказе» (28.09.2026) — tests/account-order-row.test.ts pins them
+  var acctOrderOpen = {};
+  function bankNameOf(code) { return code; }
+  ${slice("acctOrderDomId")}
+  ${slice("acctParcelHTML")}
+  ${slice("acctPayHTML")}
+  ${slice("acctOrderDetailsHTML")}
+  ${slice("acctOrderMoreHTML")}
   ${slice("loyaltyLabel")}
   ${slice("loyaltySub")}
   ${slice("loyaltyRowHTML")}

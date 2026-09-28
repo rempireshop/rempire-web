@@ -828,6 +828,13 @@
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
         "Tellimusi veel ei ole. Kõik, mis selle e-posti aadressiga tellid, ilmub siia.",
       "Отследить": "Jälgi pakki",
+      /* «Мои заказы», 28.09.2026: the parcel in words, the order's details, the receipt (acctParcelHTML, acctOrderDetailsHTML) */
+      "в пути": "teel", "ждёт в пакомате": "ootab pakiautomaadis", "ждёт в пункте выдачи": "ootab pakipunktis",
+      "получена": "kätte saadud", "возвращается в магазин": "liigub poodi tagasi",
+      "Код для получения пришёл от перевозчика по SMS или e-mail.": "Kättesaamise koodi saatis vedaja SMS-i või e-kirjaga.",
+      "Подробнее о заказе": "Tellimuse üksikasjad",
+      "Скачать чек (PDF)": "Laadi kviitung alla (PDF)",
+      "Возвращено на подарочную карту": "Tagastatud kinkekaardile",
       /* returns: the tick on a delivered order, and what it says afterwards */
       "Хочу вернуть заказ": "Soovin tellimuse tagastada",
       "Возврат запрошен": "Tagastus taotletud",
@@ -4395,6 +4402,13 @@
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
         "No orders yet. Everything you order with this e-mail will show up here.",
       "Отследить": "Track",
+      /* «Мои заказы», 28.09.2026: the parcel in words, the order's details, the receipt (acctParcelHTML, acctOrderDetailsHTML) */
+      "в пути": "on its way", "ждёт в пакомате": "waiting in the parcel locker", "ждёт в пункте выдачи": "waiting at the pickup point",
+      "получена": "received", "возвращается в магазин": "on its way back to the shop",
+      "Код для получения пришёл от перевозчика по SMS или e-mail.": "The carrier sent the pick-up code by SMS or e-mail.",
+      "Подробнее о заказе": "Order details",
+      "Скачать чек (PDF)": "Download the receipt (PDF)",
+      "Возвращено на подарочную карту": "Refunded to the gift card",
       /* returns: the tick on a delivered order, and what it says afterwards */
       "Хочу вернуть заказ": "I want to return this order",
       "Возврат запрошен": "Return requested",
@@ -17987,6 +18001,16 @@
       docs.push('<a class="link" href="' + esc(o.invoice.pdfUrl) + '" target="_blank" rel="noopener" data-invpdf="' + esc(o.invoice.number) + '">' +
         "<span>Скачать счёт (PDF)</span>" + ' <span class="num">' + esc(o.invoice.number) + "</span></a>");
     }
+    /* «Скачать чек (PDF)» on every paid order (Dim, 28.09.2026) — the server
+       draws the link only where the route will hand over the file
+       (receiptAllowed: paid, shipped, delivered, refunded; never an order paid
+       «По счёту», whose document is the invoice above). The receipt is printed
+       in the page's language, so the language rides along; like the invoice's
+       link, the cookie is the credential and the link carries no token. */
+    if (o.receipt && o.receipt.pdfUrl) {
+      docs.push('<a class="link" href="' + esc(o.receipt.pdfUrl + "?lang=" + String(S.lang || "RU").toLowerCase()) +
+        '" target="_blank" rel="noopener" data-receiptpdf="' + esc(o.number) + '"><span>Скачать чек (PDF)</span></a>');
+    }
     var pdfs = docs.length ? '<span class="rowcard__gifts">' + docs.join("") + "</span>" : "";
     /* loyalty: what the refund (or a cancel with no money in it) did to this
        order's points, under the order itself — pointsBack / pointsRevoked from
@@ -18018,12 +18042,155 @@
       ret = '<label class="opt opt--plain rowcard__ret"><input type="checkbox" data-acctreturn="' + esc(o.number) + '"' +
         (S.acctReturnBusy === o.number ? " disabled" : "") + "><span>Хочу вернуть заказ</span></label>";
     }
-    return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
+    /* The parcel in words beside «Отследить», and «Подробнее о заказе» at the
+       foot of the row (acctParcelHTML / acctOrderMoreHTML below). The number
+       carries an id so the button can say which order it opens. */
+    return '<div class="rowcard" data-acctrow="' + esc(o.number) + '"><span class="num rowcard__id" id="' + acctOrderDomId("acctno-", o.number) + '">' + esc(o.number) + "</span>" +
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + refundChip +
-      track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pts + pdfs + ret + "</div>";
+      track + acctParcelHTML(o) +
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pts + pdfs + ret + acctOrderMoreHTML(o) + "</div>";
   }
+
+  /* ---------- «Мои заказы»: the parcel in words, the order behind a tap -----
+     Dim, 28.09.2026 — three things on the customer's own order row:
+
+     1. Beside «Отследить», the parcel in words: the carrier, the machine (or
+        «Курьер» and the city) and where Montonio says it is. The server picks
+        the four states it can name (src/lib/account-orders.ts parcelOf) and
+        sends nothing for a word it does not know — no state then, just the
+        carrier and the place.
+     2. «Подробнее о заказе» opens the row in place: the items at the prices
+        paid, the code, the gift card, the points, the delivery, the total, how
+        it was paid and the refunds — the checkout summary's own rows, so an
+        order reads the way its basket did. A real <button> with aria-expanded
+        (the accordions' «+»/«−»), and a tap anywhere on the row's own blank
+        does the same. Closed, the details are not in the page at all: an
+        empty [hidden] box the button names, nothing a search by text could
+        find twice.
+     3. «Скачать чек (PDF)» — on the documents line, in acctOrderRow above.
+
+     Every sentence is a text node of its own and every name the customer or
+     a carrier wrote is [data-notr], for translateTree(). */
+  var acctOrderOpen = {};   // order number → true while its details are open
+  function acctOrderDomId(prefix, number) {
+    return prefix + String(number || "").replace(/[^A-Za-z0-9_-]/g, "");
+  }
+  function acctParcelHTML(o) {
+    var p = o && o.parcel;
+    if (!p || typeof p !== "object") return "";
+    var bits = [];
+    if (p.carrier) bits.push("<span data-notr>" + esc(p.carrier) + "</span>");
+    if (p.place === "courier") {
+      bits.push("<span>Курьер</span>");
+      if (p.city) bits.push("<span data-notr>" + esc(p.city) + "</span>");
+    } else if (p.point) bits.push("<span data-notr>" + esc(p.point) + "</span>");
+    var word = p.state === "inTransit" ? "в пути"
+      : p.state === "awaitingCollection" ? (p.place === "locker" ? "ждёт в пакомате" : "ждёт в пункте выдачи")
+      : p.state === "delivered" ? "получена"
+      : p.state === "returned" ? "возвращается в магазин" : "";
+    if (word) bits.push('<span class="rowcard__pstate">' + word + "</span>");
+    if (!bits.length) return "";
+    /* waiting at the machine is the one state that asks something of the
+       customer — and the code is not the shop's to give: the carrier sends it */
+    return '<span class="rowcard__parcel"><span class="muted">' + bits.join(" · ") + "</span>" +
+      (p.state === "awaitingCollection" ? '<span class="muted rowcard__phint">Код для получения пришёл от перевозчика по SMS или e-mail.</span>' : "") +
+      "</span>";
+  }
+  /* How it was paid — the words the checkout's own options and the order card
+     use (PAY_METHOD_NAMES), in the customer's register; the bank is a proper
+     noun beside the method, never inside it. A BIC is named from the shop's
+     bank list (bankNameOf), a name Montonio gave the payment is shown as is. */
+  function acctPayHTML(p) {
+    var w = {
+      bank: "Банковская ссылка", card: "Банковская карта", wallet: "Apple Pay / Google Pay", invoice: "По счёту",
+      giftcard: "Подарочная карта", points: "Баллы", promo: "Промокод", cash: "Наличные", terminal: "Терминал"
+    };
+    if (!p || typeof p !== "object" || !Object.prototype.hasOwnProperty.call(w, p.method)) return "";
+    var bank = p.bank ? String(p.bank) : "";
+    if (/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(bank)) bank = bankNameOf(bank, "");
+    return "<span>" + w[p.method] + "</span>" + (bank ? " · <span data-notr>" + esc(bank) + "</span>" : "");
+  }
+  function acctOrderDetailsHTML(o) {
+    var d = o && o.details && typeof o.details === "object" ? o.details : {};
+    var out = (o.items || []).map(function (i) {
+      return '<div class="cosum__line"><span class="cosum__nm"><span>' + esc(i.title) + "</span>" +
+        (i.variant ? " · <span>" + esc(i.variant) + "</span>" : "") +
+        '<span class="rowcard__sub num">' + (Number(i.qty) || 1) + " × " + eur(Number(i.price) || 0) + "</span></span>" +
+        '<span class="num cosum__pr">' + eur(Number(i.sum) || 0) + "</span></div>";
+    }).join("");
+    // the first row under the items carries the summary's hairline, as the promo box does at the checkout
+    var first = true;
+    function line(label, value, cls) {
+      var c = "cosum__row" + (first ? " cosum__row--rule" : "") + (cls ? " " + cls : "");
+      first = false;
+      return '<div class="' + c + '"><span>' + label + "</span>" + value + "</div>";
+    }
+    function minus(n) { return '<span class="num">−' + eur(Number(n) || 0) + "</span>"; }
+    if (d.promo && d.promo.amount > 0) {
+      out += line(d.promo.code ? '<span>Промокод</span> <span class="num" data-notr>' + esc(d.promo.code) + "</span>" : "<span>Скидка</span>", minus(d.promo.amount));
+    }
+    if (d.giftCard && d.giftCard.amount > 0) {
+      out += line('<span>Подарочная карта</span> <span class="num" data-notr>' + esc(d.giftCard.code) + "</span>", minus(d.giftCard.amount));
+    }
+    if (Number(d.points) > 0) out += line("<span>Баллы</span>", minus(d.points));
+    var dv = d.delivery && typeof d.delivery === "object" ? d.delivery : {};
+    var where = [];
+    if (dv.method === "parcel") where.push("<span>" + (dv.place === "counter" ? "Пункт выдачи" : dv.place === "post_office" ? "Почта" : "Пакомат") + "</span>");
+    else if (dv.method === "courier") where.push("<span>Курьер</span>");
+    else if (dv.method === "pickup") where.push("<span>Самовывоз</span>");
+    else if (dv.method === "digital") where.push("<span>Электронная доставка</span>");
+    if (dv.carrier) where.push("<span data-notr>" + esc(dv.carrier) + "</span>");
+    if (dv.point) where.push("<span data-notr>" + esc(dv.point) + "</span>");
+    if (dv.address) where.push("<span data-notr>" + esc(dv.address) + "</span>");
+    out += line("Доставка", Number(dv.price) > 0 ? '<span class="num">' + eur(Number(dv.price)) + "</span>" : "<span>Бесплатно</span>") +
+      (where.length ? '<p class="muted rowcard__dnote">' + where.join(" · ") + "</p>" : "");
+    out += line("Итого", '<span class="num">' + eur(Number(o.total) || 0) + "</span>", "cosum__row--tot");
+    var pay = acctPayHTML(d.payment);
+    if (pay) out += line("Оплата", '<span class="rowcard__pay">' + pay + "</span>");
+    (Array.isArray(d.refunds) ? d.refunds : []).forEach(function (f) {
+      var word = f.status === "pending" ? "Возврат отправлен" : f.toGiftCard ? "Возвращено на подарочную карту" : "Возвращено";
+      out += line("<span>" + word + "</span>" + (f.at ? ' <span class="muted num">' + esc(shortDate(f.at)) + "</span>" : ""), minus(f.amount));
+    });
+    return out;
+  }
+  function acctOrderMoreHTML(o) {
+    var open = Object.prototype.hasOwnProperty.call(acctOrderOpen, o.number);
+    var det = acctOrderDomId("acctod-", o.number);
+    return '<button type="button" class="rowcard__more" data-acctorder="' + esc(o.number) + '" aria-expanded="' + open +
+        '" aria-controls="' + det + '" aria-describedby="' + acctOrderDomId("acctno-", o.number) + '"><span>Подробнее о заказе</span></button>' +
+      '<div class="rowcard__det" id="' + det + '"' + (open ? ">" + acctOrderDetailsHTML(o) : " hidden>") + "</div>";
+  }
+  function acctOrderToggle(number) {
+    var n = String(number || "");
+    if (!n) return;
+    if (Object.prototype.hasOwnProperty.call(acctOrderOpen, n)) delete acctOrderOpen[n];
+    else acctOrderOpen[n] = true;
+    render();
+    // render() rebuilt the row: the focus goes back to the button that was pressed
+    refocus('[data-acctorder="' + n.replace(/["\\]/g, "") + '"]');
+  }
+  /* Its own listener beside the delegate's, like «Рассылка»'s two buttons —
+     not another name in the delegate's selector. The button answers a click
+     and the keyboard (Enter/Space are clicks on a <button>); a tap on the
+     row's own blank — the chips, the sum, the summary of items — opens it as
+     well, but never a link, the return tick, anything inside the opened
+     details, or a tap that was selecting text. */
+  document.addEventListener("click", function (e) {
+    var el = e.target;
+    if (!el || !el.closest) return;
+    var btn = el.closest("[data-acctorder]");
+    if (!btn) {
+      var row = el.closest("[data-acctrow]");
+      if (!row || el.closest("a,button,input,label,select,textarea,.rowcard__det")) return;
+      var sel = window.getSelection ? String(window.getSelection() || "") : "";
+      if (sel) return;
+      btn = row.querySelector("[data-acctorder]");
+      if (!btn) return;
+    }
+    e.preventDefault();
+    acctOrderToggle(btn.getAttribute("data-acctorder"));
+  });
   function screenAccount() {
     acctLoad();
     if (!S.loggedIn) {

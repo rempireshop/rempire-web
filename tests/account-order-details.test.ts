@@ -202,7 +202,6 @@ describe("the order's details", () => {
       // a row written before `sum` existed: price × qty
       { title: "Proraso Wood & Spice масло", variant: null, qty: 1, price: 17, sum: 17 },
     ]);
-    expect(o.details.subtotal).toBe(71);
   });
 
   it("describes a parcel-machine delivery with its carrier, machine and price", async () => {
@@ -296,7 +295,7 @@ describe("the order's details", () => {
     expect(json).not.toContain(id);
     // the exact shapes — a field added here is a field somebody has to decide may leave the server
     expect(Object.keys(o.parcel!).sort()).toEqual(["carrier", "city", "place", "point", "state"]);
-    expect(Object.keys(o.details).sort()).toEqual(["delivery", "giftCard", "payment", "points", "promo", "refunds", "subtotal"]);
+    expect(Object.keys(o.details).sort()).toEqual(["delivery", "giftCard", "payment", "points", "promo", "refunds"]);
     expect(Object.keys(o.details.delivery).sort()).toEqual(["address", "carrier", "method", "place", "point", "price"]);
     for (const it of o.items) expect(Object.keys(it).sort()).toEqual(["price", "qty", "sum", "title", "variant"]);
   });

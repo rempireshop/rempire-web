@@ -603,14 +603,13 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       payment: unknown;
       shipping: unknown;
       invoice: unknown;
-      subtotal: string | number | null;
       shipping_price: string | number | null;
       discount: string | number | null;
       discount_code: string | null;
       loyalty_discount: string | number | null;
     }>(
       `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice,
-              subtotal, shipping_price, discount, discount_code, loyalty_discount
+              shipping_price, discount, discount_code, loyalty_discount
          from orders where lower(email) = $1 order by created_at desc limit $2`,
       [addr, n],
     ),

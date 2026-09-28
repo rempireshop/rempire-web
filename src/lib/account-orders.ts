@@ -300,8 +300,6 @@ export function refundsOf(payment: unknown): CustomerRefund[] {
 }
 
 export interface CustomerOrderDetails {
-  /** The goods before delivery and codes (`orders.subtotal`). */
-  subtotal: number;
   delivery: CustomerDelivery;
   /** A promo code (or the till's percent, which has no code) and what it took off. */
   promo: { code: string | null; amount: number } | null;
@@ -315,7 +313,6 @@ export interface CustomerOrderDetails {
 
 export interface OrderDetailsRow {
   status: string;
-  subtotal: unknown;
   shipping_price: unknown;
   discount: unknown;
   discount_code: unknown;
@@ -333,7 +330,6 @@ export function orderDetailsOf(r: OrderDetailsRow, shipping: unknown, payment: u
   const code = clip(r.discount_code, 40);
   const gift = discount > 0 && !!code && looksLikeGiftCode(code);
   return {
-    subtotal: money(r.subtotal),
     delivery: deliveryOf(shipping, r.shipping_price),
     promo: discount > 0 && !gift ? { code, amount: discount } : null,
     giftCard: gift ? { code: maskGiftCode(code!), amount: discount } : null,
