@@ -440,9 +440,10 @@ test.describe("admin — наборы", () => {
 
       const shop = await freshShop(browser);
       try {
+        // no set left on sale → «Страница не найдена» (28.09.2026); with others on sale, «Набор не найден»
         await shop.page.goto(shopUrl("", `/set/${ASSIST_ID}/`));
-        await waitForScreen(shop.page, "bundle");
-        await expect(shop.page.locator("h1")).toContainText("Набор не найден");
+        await expect(shop.page.locator('body[data-screen="bundle"], body[data-screen="notfound"]')).toBeAttached();
+        await expect(shop.page.locator("h1")).toContainText("не найден");
       } finally {
         await shop.close();
       }
