@@ -126,11 +126,14 @@ export interface InvoicePdfData {
 export const A4_WIDTH = 595.28;
 export const A4_HEIGHT = 841.89;
 
-const MARGIN = 44;
-const INK = rgb(0x1c / 255, 0x1a / 255, 0x00 / 255);
-const PAPER = rgb(1, 1, 1);
-const MUTED = rgb(0.42, 0.41, 0.35);
-const RULE = rgb(0.82, 0.81, 0.76);
+/* The margin, the three inks and the drawing helpers below are shared with
+   the receipt (src/lib/receipt-pdf.ts), so the two documents a customer can
+   download from «Мои заказы» are one design, not two that drift apart. */
+export const MARGIN = 44;
+export const INK = rgb(0x1c / 255, 0x1a / 255, 0x00 / 255);
+export const PAPER = rgb(1, 1, 1);
+export const MUTED = rgb(0.42, 0.41, 0.35);
+export const RULE = rgb(0.82, 0.81, 0.76);
 
 /* the table's columns — the right edge of every numeric column */
 const COL = {
@@ -143,7 +146,7 @@ const COL = {
   total: A4_WIDTH - MARGIN, // 551.28
 } as const;
 
-function clean(s: unknown, max: number): string {
+export function clean(s: unknown, max: number): string {
   return String(s ?? "")
     .replace(/\p{Cc}+/gu, " ")
     .replace(/\s+/g, " ")
@@ -157,11 +160,11 @@ export function amount(n: number): string {
   return v.toFixed(2).replace(".", ",");
 }
 
-function euro(n: number): string {
+export function euro(n: number): string {
   return `${amount(n)} €`;
 }
 
-function qtyText(n: number): string {
+export function qtyText(n: number): string {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100).replace(".", ",");
 }
 
@@ -171,11 +174,11 @@ interface Faces {
   mono: PDFFont;
 }
 
-function drawRight(page: PDFPage, text: string, right: number, y: number, font: PDFFont, size: number, color = INK): void {
+export function drawRight(page: PDFPage, text: string, right: number, y: number, font: PDFFont, size: number, color = INK): void {
   page.drawText(text, { x: right - font.widthOfTextAtSize(text, size), y, size, font, color });
 }
 
-function drawTower(page: PDFPage, left: number, top: number, height: number): void {
+export function drawTower(page: PDFPage, left: number, top: number, height: number): void {
   const tower = towerPath();
   if (!tower) return;
   const [minX, minY, , boxH] = tower.box;
@@ -183,7 +186,7 @@ function drawTower(page: PDFPage, left: number, top: number, height: number): vo
   page.drawSvgPath(tower.d, { x: left - minX * scale, y: top + minY * scale, scale, color: INK, borderWidth: 0 });
 }
 
-function drawWordmark(page: PDFPage, text: string, x: number, y: number, font: PDFFont, size: number, tracking = 2.4): void {
+export function drawWordmark(page: PDFPage, text: string, x: number, y: number, font: PDFFont, size: number, tracking = 2.4): void {
   let cursor = x;
   for (const ch of text) {
     page.drawText(ch, { x: cursor, y, size, font, color: INK });

@@ -864,6 +864,9 @@ unsubscribe token). Routes
 login/`, `GET|PATCH /api/account/me/`, `POST /api/account/logout/`, `GET
 /api/account/orders/<id>/invoice/` (the customer's own invoice PDF — the
 cookie's address must be the order's, a stranger's order is `not_found`),
+`GET /api/account/orders/<id>/receipt/` (the receipt PDF of a paid order,
+`?lang=` = the page's language — the same door and the same refusals;
+`src/lib/receipt-pdf.ts`, `src/lib/account-orders.ts`),
 `POST /api/carts/` (abandoned-cart snapshot, no prices), `POST
 /api/stock-alerts/`.
 Shop `screenAccount` :8491 («Получить код» → «Войти» → «Мои заказы», «Мои

@@ -4949,6 +4949,141 @@
       }
     },
     {
+      "id": "acct-order-parcel",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Посылка словами в «Мои заказы»",
+      "steps": [
+        "Оформить и оплатить заказ в пакомат на свою почту.",
+        "В панели создать этикетку и сдать посылку — заказ станет «Отправлен».",
+        "Войти в «Мой кабинет» и открыть «Мои заказы».",
+        "Открыть кабинет ещё раз, когда посылка приедет в пакомат и когда её заберут."
+      ],
+      "expect": [
+        "Рядом с «Отследить»: перевозчик, название пакомата и «в пути».",
+        "Посылка в пакомате: написано «ждёт в пакомате».",
+        "Под этим подсказка: код для получения прислал перевозчик по SMS или e-mail.",
+        "После получения написано «получена».",
+        "У заказа курьером вместо пакомата — «Курьер» и город.",
+        "Пока заказ не отправлен, строки о посылке нет."
+      ],
+      "why": "Покупатель видит, где посылка и что делать, не открывая сайт перевозчика и не спрашивая вас.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:49:58.238Z",
+      "en": {
+        "title": "The parcel in words in «Мои заказы»",
+        "steps": [
+          "Place and pay an order to a parcel locker, to your own e-mail.",
+          "In the panel create the label and hand the parcel over — the order becomes «Отправлен».",
+          "Sign in to the account and open «Мои заказы» (my orders).",
+          "Open the account again once the parcel reaches the locker, and once it is collected."
+        ],
+        "expect": [
+          "Beside «Отследить»: the carrier, the locker's name and «в пути» (on its way).",
+          "Parcel in the locker: it says «ждёт в пакомате» (waiting in the locker).",
+          "Under it a hint: the carrier sent the pick-up code by SMS or e-mail.",
+          "After collection it says «получена» (received).",
+          "A courier order shows «Курьер» and the city instead of a locker.",
+          "Until the order is shipped, there is no parcel line."
+        ],
+        "why": "The buyer sees where the parcel is and what to do, without the carrier's site and without asking you."
+      }
+    },
+    {
+      "id": "acct-order-details",
+      "area": "account",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Подробности заказа по нажатию",
+      "steps": [
+        "В «Мои заказы» нажать «Подробнее о заказе» у оплаченного заказа.",
+        "Нажать ещё раз.",
+        "Нажать на пустое место строки заказа.",
+        "Повторить на телефоне и на компьютере."
+      ],
+      "expect": [
+        "Строка раскрывается на месте, «+» справа становится «−».",
+        "Видны товары: размер, количество, цена за штуку и сумма строки.",
+        "Видна доставка с ценой — пакомат или адрес курьера.",
+        "Видны промокод, подарочная карта и баллы, если были.",
+        "Внизу «Итого», способ оплаты словами и возвраты, если были.",
+        "Второе нажатие сворачивает; свёрнутая строка такая же, как раньше."
+      ],
+      "why": "Покупатель проверяет, что и за сколько купил, не ища письмо.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:49:58.238Z",
+      "en": {
+        "title": "The order's details on a tap",
+        "steps": [
+          "In «Мои заказы» tap «Подробнее о заказе» (order details) on a paid order.",
+          "Tap it again.",
+          "Tap an empty spot of the order's row.",
+          "Repeat on a phone and on a computer."
+        ],
+        "expect": [
+          "The row opens in place; the «+» on the right turns into «−».",
+          "The items show: size, quantity, unit price and line total.",
+          "The delivery shows with its price — the locker or the courier address.",
+          "The promo code, gift card and points show, if any were used.",
+          "At the bottom «Итого», the payment method in words, and refunds if any.",
+          "A second tap closes it; the closed row looks as before."
+        ],
+        "why": "The buyer checks what they bought and for how much without hunting for the letter."
+      }
+    },
+    {
+      "id": "acct-order-receipt",
+      "area": "account",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Чек PDF в «Мои заказы»",
+      "steps": [
+        "В «Мои заказы» найти оплаченный заказ.",
+        "Нажать «Скачать чек (PDF)».",
+        "Переключить сайт на ET и скачать чек ещё раз.",
+        "Найти заказ по счёту и заказ с возвратом, если такие есть."
+      ],
+      "expect": [
+        "Чек открывается: продавец, рег. код и KMKR, номер заказа, дата.",
+        "Товары, доставка и скидка с ценами; внизу «Итого».",
+        "Под итогом НДС 24 % и его сумма.",
+        "Способ оплаты написан словами, например «Банковская ссылка · Swedbank».",
+        "На ET чек эстонский — «Kviitung».",
+        "У заказа по счёту чека нет, есть счёт; у возврата возвраты под покупкой."
+      ],
+      "why": "Чек нужен покупателю для отчёта или гарантии; без него он пишет вам.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:49:58.238Z",
+      "en": {
+        "title": "Receipt PDF in «Мои заказы»",
+        "steps": [
+          "In «Мои заказы» find a paid order.",
+          "Tap «Скачать чек (PDF)» (download the receipt).",
+          "Switch the site to ET and download the receipt again.",
+          "Find an invoice order and a refunded order, if there are any."
+        ],
+        "expect": [
+          "The receipt opens: seller, reg. code and KMKR, order number, date.",
+          "Items, delivery and discount with prices; «Итого» at the bottom.",
+          "Under the total, VAT 24 % and its amount.",
+          "The payment method is in words, e.g. «Банковская ссылка · Swedbank».",
+          "On ET the receipt is in Estonian — «Kviitung».",
+          "An invoice order has no receipt, only its invoice; a refund lists refunds under the sale."
+        ],
+        "why": "A buyer needs the receipt for expenses or a warranty; without it they write to you."
+      }
+    },
+    {
       "id": "acct-return-request",
       "area": "account",
       "who": "dim",

@@ -30,6 +30,18 @@ import { addShopDays, shopDay } from "@/lib/day";
 // the database, which is what keeps this module the leaf it has always been.
 import { canRequestReturn, returnRequestedAt } from "@/lib/returns";
 import { POINTS_LINES_SQL } from "@/lib/loyalty-lines";
+// «Мои заказы»: the parcel in words, the details behind a tap, and which
+// orders get a receipt — whitelisted shapes read off the row fetched below.
+// src/lib/account-orders.ts imports only promos.ts (itself only the database).
+import {
+  orderDetailsOf,
+  orderItemOf,
+  parcelOf,
+  receiptAllowed,
+  type CustomerOrderDetails,
+  type CustomerOrderItem,
+  type CustomerParcel,
+} from "@/lib/account-orders";
 
 export const CUSTOMER_COOKIE = "rmp_cust";
 export const CUSTOMER_SESSION_DAYS = 90;
@@ -511,9 +523,24 @@ export interface CustomerOrder {
   total: number;
   currency: string;
   createdAt: string | null;
-  items: Array<{ title: string; variant: string | null; qty: number }>;
+  /* Each line with the price and the line total it was sold at — read off
+     the stored order line, never off today's catalogue (Dim, 28.09.2026:
+     the opened row shows what the customer actually paid). */
+  items: CustomerOrderItem[];
   tracking: string | null;
   trackingUrl: string | null;
+  /* The parcel in words beside «Отследить» — carrier, machine or courier
+     city, and where Montonio says it is (src/lib/account-orders.ts
+     parcelOf). Null unless the order is «Отправлен» or «Доставлен». */
+  parcel: CustomerParcel | null;
+  /* What the row shows when it is opened: delivery, codes, points, how it
+     was paid, the refunds (src/lib/account-orders.ts orderDetailsOf). */
+  details: CustomerOrderDetails;
+  /* «Скачать чек (PDF)» — GET /api/account/orders/<number>/receipt/, the
+     same cookie-for-credential rule as the invoice link below. Null on an
+     order that was never paid and on one paid «По счёту», whose document is
+     the invoice (receiptAllowed). */
+  receipt: { pdfUrl: string } | null;
   /* A refund's two halves, because the shop's own screen has to tell them
      apart. Montonio answers `200 PENDING` to a refund it has merely accepted
      and confirms on a webhook up to ten days later, so between the two the
@@ -592,8 +619,13 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       payment: unknown;
       shipping: unknown;
       invoice: unknown;
+      shipping_price: string | number | null;
+      discount: string | number | null;
+      discount_code: string | null;
+      loyalty_discount: string | number | null;
     }>(
-      `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice
+      `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice,
+              shipping_price, discount, discount_code, loyalty_discount
          from orders where lower(email) = $1 order by created_at desc limit $2`,
       [addr, n],
     ),
@@ -648,13 +680,16 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       }
     }
     /* The shipping jsonb carries the two fulfilment stamps returns are read
-       from — `deliveredAt` and `returnRequest` — and nothing else on this
-       screen needs it, so it is unpacked here and not carried any further. */
+       from — `deliveredAt` and `returnRequest` — and what the parcel line and
+       the opened row name (carrier, machine, courier address, Montonio's
+       status). It is unpacked here and never carried further as it is:
+       parcelOf() and orderDetailsOf() pick the few fields that may leave. */
+    const shipping = parseJson<Record<string, unknown>>(r.shipping, {});
     const ret = {
       id: r.id,
       number: r.number,
       status: r.status,
-      shipping: parseJson<Record<string, unknown>>(r.shipping, {}),
+      shipping,
       updatedAt: iso(r.updated_at) ?? "",
     };
     return {
@@ -663,13 +698,12 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       total: Math.round(Number(r.total) * 100) / 100 || 0,
       currency: r.currency || "EUR",
       createdAt: iso(r.created_at),
-      items: (Array.isArray(items) ? items : []).slice(0, 20).map((it) => ({
-        title: [it.brand, it.title ?? it.name].filter(Boolean).join(" ").trim() || "—",
-        variant: it.variant == null ? null : String(it.variant),
-        qty: Math.max(1, Math.round(Number(it.qty) || 1)),
-      })),
+      items: (Array.isArray(items) ? items : []).slice(0, 20).map(orderItemOf),
       tracking: code || null,
       trackingUrl: url || null,
+      parcel: parcelOf(r.status, shipping),
+      details: orderDetailsOf(r, shipping, payment),
+      receipt: receiptAllowed(r) ? { pdfUrl: accountReceiptPath(r.number) } : null,
       /* What has gone back, and what has been sent and not yet confirmed.
          Montonio answers `200 PENDING` for a refund it has merely accepted and
          the real answer arrives on a webhook up to ten days later, so between
@@ -727,6 +761,16 @@ async function refundPointsForEmail(addr: string, limit: number): Promise<Map<st
  */
 export function accountInvoicePath(orderNumber: string): string {
   return `/api/account/orders/${encodeURIComponent(String(orderNumber || ""))}/invoice/`;
+}
+
+/**
+ * Where «Скачать чек (PDF)» points: GET /api/account/orders/<number>/receipt/.
+ * The storefront adds `?lang=` — the receipt is printed in the page's
+ * language. Like the invoice's link it carries no token: the route reads the
+ * same signed cookie /api/account/me does.
+ */
+export function accountReceiptPath(orderNumber: string): string {
+  return `/api/account/orders/${encodeURIComponent(String(orderNumber || ""))}/receipt/`;
 }
 
 /**

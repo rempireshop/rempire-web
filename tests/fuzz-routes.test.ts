@@ -186,6 +186,11 @@ function routes(): RouteCase[] {
        but was never paid «По счёту», so every case here is a 404; the 200,
        and the stranger's 404, live in tests/account-invoice.test.ts. */
     { name: "GET /api/account/orders/[id]/invoice/", path: "/api/account/orders/x/invoice/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/orders/[id]/invoice/route"), auth: "customer", req: cust, params: { id: "" }, jsonBody: false },
+    /* …and its receipt, the same door (28.09.2026). The fixture order is the
+       customer's own; whatever its status, a fuzzed id is a 404 and a hit is
+       application/pdf. The 200s, the stranger's 404 and the unpaid order's
+       «no_receipt» live in tests/account-receipt.test.ts. */
+    { name: "GET /api/account/orders/[id]/receipt/", path: "/api/account/orders/x/receipt/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/orders/[id]/receipt/route"), auth: "customer", req: cust, params: { id: "" }, jsonBody: false, queries: ["", "?lang=et", "?lang=' or 1=1--", "?lang=" + "x".repeat(5000)] },
 
     /* ---- admin ----------------------------------------------------------- */
     { name: "POST /api/admin/login/", path: "/api/admin/login/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/login/route"), body: { password: "wrong password" } },
