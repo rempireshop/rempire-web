@@ -638,10 +638,54 @@ export async function applyPlan({ rows, base, cookie, ref, run, fetchImpl = fetc
   return { done, failed, replayed, stopped, log };
 }
 
+/**
+ * The same write as applyPlan(), as one script for the browser tab where the
+ * panel is already signed in — so on the night nobody copies the rmp_admin
+ * cookie out of a browser into a terminal. It carries the plan and the same
+ * idempotency keys (a re-run replays instead of writing twice), reads the live
+ * «Склад» first and skips a row the shelf does not have (the rule of
+ * applyPlan), posts one row at a time with the same pause, stops at a 401,
+ * and returns the counts. Same-origin fetch: the session cookie goes by
+ * itself and is never seen by whoever runs it.
+ *
+ * @param {{ rows: any[], ref: string, run: string, pause?: number }} opts
+ */
+export function browserApplyScript({ rows, ref, run, pause = 60 }) {
+  const plan = rows.map((r) => ({ productId: r.productId, variant: r.variant, qty: r.qty, key: idemKey(run, r) }));
+  return `/* import-shopify-stock — run ${run}, ${plan.length} row(s). Paste into the signed-in panel tab's console. */
+(async () => {
+  const plan = ${JSON.stringify(plan)};
+  const ref = ${JSON.stringify(ref)};
+  const shelf = await fetch("/api/admin/inventory/?filter=all&limit=1000", { headers: { accept: "application/json" } });
+  if (shelf.status === 401) return { error: "401 — the panel is not signed in in this tab" };
+  const sj = await shelf.json();
+  if (!sj || !sj.ok || !Array.isArray(sj.levels)) return { error: "could not read «Склад»: HTTP " + shelf.status };
+  const has = new Set(sj.levels.map((l) => l.productId + "\\u0001" + (l.variant || "")));
+  let done = 0, replayed = 0, failed = 0, skipped = 0, stopped = false;
+  const errors = [];
+  for (const r of plan) {
+    if (!has.has(r.productId + "\\u0001" + (r.variant || ""))) { skipped++; continue; }
+    const res = await fetch("/api/admin/inventory/moves/", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json", "idempotency-key": r.key },
+      body: JSON.stringify({ productId: r.productId, variant: r.variant, qty: r.qty, reason: "adjust", ref }),
+    });
+    let j = null;
+    try { j = await res.json(); } catch (e) { /* not json */ }
+    if (res.status === 401) { stopped = true; break; }
+    if (j && j.ok) { done++; if (j.replayed) replayed++; }
+    else { failed++; if (errors.length < 20) errors.push(r.productId + " · " + (r.variant || "—") + ": HTTP " + res.status + " " + ((j && j.error) || "")); }
+    await new Promise((ok) => setTimeout(ok, ${Number(pause) || 0}));
+  }
+  return { run: ${JSON.stringify(run)}, rows: plan.length, done, replayed, failed, skipped, stopped, errors };
+})();
+`;
+}
+
 /* ---------- CLI ------------------------------------------------------------------------ */
 
 export function parseArgs(argv) {
-  const out = { csv: "", base: "", apply: false, confirm: "", use: "available", location: "", ownerRows: DEFAULT_OWNER_ROWS, ref: DEFAULT_REF, only: null, skipZero: false, log: "", help: false, unknown: "" };
+  const out = { csv: "", base: "", apply: false, confirm: "", use: "available", location: "", ownerRows: DEFAULT_OWNER_ROWS, ref: DEFAULT_REF, only: null, skipZero: false, log: "", browserScript: "", help: false, unknown: "" };
   const need = (i, name) => {
     const v = argv[i + 1];
     if (v === undefined || v.startsWith("--")) throw new ImportError(`${name} needs a value`);
@@ -660,6 +704,7 @@ export function parseArgs(argv) {
     else if (a === "--only") out.only = new Set(need(i++, a).split(",").map((s) => s.trim()).filter(Boolean));
     else if (a === "--skip-zero") out.skipZero = true;
     else if (a === "--log") out.log = need(i++, a);
+    else if (a === "--emit-browser-script") out.browserScript = need(i++, a);
     else if (a === "--help" || a === "-h") out.help = true;
     else out.unknown = a;
   }
@@ -684,9 +729,11 @@ const USAGE = `import-shopify-stock — Shopify's inventory export → counted s
 
   --use available|onHand   --location <name>   --owner-rows <file|none>   --ref <text>
   --only <id,id>           --skip-zero         --log <file>
+  --emit-browser-script <file>   write the same import as a script for the signed-in panel tab
+                                 (no cookie leaves the browser; same idempotency keys)
 
-The export: Shopify admin → Products → Inventory → Export. Run AFTER the go-live reset
-(without --stock) and as the last step before DNS — docs/go-live.md, the day, step 4.`;
+The export: Shopify admin → Products → Inventory → Export. Run right AFTER the go-live reset
+and as the last step before DNS — docs/go-live.md.`;
 
 async function main() {
   let args;
@@ -742,6 +789,11 @@ async function main() {
     }),
   );
 
+  if (args.browserScript) {
+    const rows = compared.rows.filter((r) => r.onShelf !== false);
+    fs.writeFileSync(args.browserScript, browserApplyScript({ rows, ref: args.ref, run }));
+    console.log(`\nBrowser script for ${rows.length} row(s): ${args.browserScript} — run it in the signed-in panel tab; it writes.`);
+  }
   if (!args.apply) {
     console.log(`\nDRY RUN — nothing was written. Add --base <shop> --apply --confirm ${CONFIRM_WORD} (with RMP_ADMIN_COOKIE) to write.`);
     return;

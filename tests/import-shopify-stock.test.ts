@@ -19,6 +19,7 @@ import {
   ImportError,
   applyPlan,
   applyRefusal,
+  browserApplyScript,
   buildPlan,
   compareWithShelf,
   formatDryRun,
@@ -400,6 +401,41 @@ describe("--apply", () => {
     expect(out).toMatchObject({ done: 0, failed: 1, stopped: true });
     expect(said.join("\n")).toContain("bad_qty");
     expect(said.join("\n")).toContain("401");
+  });
+
+  it("the browser script writes the same rows with the same keys, from the signed-in tab, and skips what the shelf lacks", async () => {
+    const c = compareWithShelf(built.plan, levels);
+    const rows = c.rows.filter((r: { onShelf?: boolean }) => r.onShelf !== false);
+    const script = browserApplyScript({ rows: c.rows, ref: "Импорт из Shopify", run: "0123456789abcdef", pause: 0 });
+    const posts: Array<{ url: string; key: string; body: Record<string, unknown> }> = [];
+    const fetchImpl = async (url: string, init?: { method?: string; headers?: Record<string, string>; body?: string }) => {
+      if (!init || init.method !== "POST") return new Response(JSON.stringify({ ok: true, levels }), { status: 200 });
+      posts.push({ url, key: init.headers!["idempotency-key"], body: JSON.parse(init.body!) });
+      return new Response(JSON.stringify({ ok: true, replayed: posts.length === 1 }), { status: 200 });
+    };
+    // the file starts with a comment line; the rest is one expression
+    const run = new Function("fetch", script.replace(/^\/\*[\s\S]*?\*\/\s*/, "return "));
+    const out = await run(fetchImpl);
+    expect(out).toMatchObject({ rows: c.rows.length, done: rows.length, replayed: 1, failed: 0, skipped: c.rows.length - rows.length, stopped: false });
+    expect(posts[0].url).toBe("/api/admin/inventory/moves/");
+    expect(posts[0].body).toEqual({ productId: rows[0].productId, variant: rows[0].variant, qty: rows[0].qty, reason: "adjust", ref: "Импорт из Shopify" });
+    expect(posts.map((p) => p.key)).toEqual(rows.map((r: { productId: string; variant: string }) => idemKey("0123456789abcdef", r)));
+    // no cookie in it: the tab's own session is what signs the request
+    expect(script).not.toMatch(/rmp_admin|cookie/i);
+  });
+
+  it("the browser script stops at a 401", async () => {
+    const c = compareWithShelf(built.plan, levels);
+    const script = browserApplyScript({ rows: c.rows, ref: "r", run: "0123456789abcdef", pause: 0 });
+    let n = 0;
+    const fetchImpl = async (_url: string, init?: { method?: string }) => {
+      if (!init || init.method !== "POST") return new Response(JSON.stringify({ ok: true, levels }), { status: 200 });
+      n++;
+      return new Response(JSON.stringify({ ok: false }), { status: n === 2 ? 401 : 200 });
+    };
+    const out = await new Function("fetch", script.replace(/^\/\*[\s\S]*?\*\/\s*/, "return "))(fetchImpl);
+    expect(n).toBe(2);
+    expect(out.stopped).toBe(true);
   });
 
   it("a different export is a different run — its keys never replay an older import", () => {
