@@ -337,10 +337,16 @@ describe("a product's name on the request-time page is the prerendered page's na
 });
 
 describe("the listing at request time", () => {
-  it("lists the published posts with the head, the ItemList and the #blogdata snapshot; says so when there are none", async () => {
-    const empty = await (await listPage("et")).text();
-    expect(title(empty)).toBe("Blogi — REMPIRE");
-    expect(empty).toContain('<p class="muted">Artikleid veel pole — vaata varsti uuesti.</p>');
+  it("lists the published posts with the head, the ItemList and the #blogdata snapshot; is the 404 page when there are none", async () => {
+    /* Dim, 28.09.2026: «Blog and Sets will be off initially». No published
+       article is no blog: the ordinary 404 page, noindex, asked again on
+       every request — not a «Blogi» page with nothing on it
+       (tests/empty-shelves.test.ts has the rest). */
+    const emptyRes = await listPage("et");
+    expect(emptyRes.status).toBe(404);
+    const empty = await emptyRes.text();
+    expect(title(empty)).toBe("Lehte ei leitud — REMPIRE");
+    expect(empty).not.toContain("Artikleid veel pole");
     expect(empty).not.toContain('id="blogdata"');
 
     const post = await upsertPost(POST);

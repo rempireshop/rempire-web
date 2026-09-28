@@ -1033,13 +1033,21 @@ type BundleDef = {
  * no database, or one whose migration has not run yet: without it a shop that
  * lost its database would reject every set line as `bundle_unknown` instead
  * of simply pricing it from the file it shipped with.
+ *
+ * An EMPTY table is an answer, not a missing one. Until 28.09.2026 zero rows
+ * fell through to the file — harmless while the table was seeded from it, and
+ * wrong the moment the go-live reset deleted every set (tools/go-live-reset.mjs
+ * --test-content, the owner's decision that all of them were made up): the
+ * file's eight sets would have become orderable again, at the file's prices,
+ * through any cart or permalink still naming one. Only a table that could not
+ * be READ falls back now.
  */
 async function bundleDefs(): Promise<Record<string, BundleDef>> {
   const fromDb = fn(await optionalLib("bundles"), "bundleDefsForOrders");
   if (fromDb) {
     try {
       const rows = (await fromDb()) as Record<string, BundleDef>;
-      if (rows && Object.keys(rows).length) return rows;
+      if (rows && typeof rows === "object") return rows;
     } catch (err) {
       console.error("[orders] bundles table unavailable, falling back to bundles.json:", err);
     }

@@ -221,6 +221,18 @@ async function discoverOnce(request: APIRequestContext): Promise<Discovered> {
     expect(found.length, `the deployment's sitemaps name no ${what} (${re})`).toBeGreaterThan(0);
     return pickOne(rng, found);
   };
+  /* Sets and blog posts are the two kinds a shop may legitimately have NONE
+     of: the go-live reset deletes every one (Dim, 28.09.2026), and the shop
+     then has no «Наборы» and no «Блог» at all until Renat makes the first —
+     the prerender writes no such pages and names none. Those kinds are
+     walked when the sitemap names one, and «the empty shelf is invisible»
+     test below holds the shop to the other half. */
+  const maybeOneOf = (re: RegExp): string | null => {
+    const found = paths.filter((p) => re.test(p));
+    return found.length ? pickOne(rng, found) : null;
+  };
+  const setPath = maybeOneOf(/^\/shop2\/set\/[^/]+\/$/);
+  const postPath = maybeOneOf(/^\/shop2\/blog\/[^/]+\/$/);
 
   /* `screen` is what app.js writes into body[data-screen] once it has taken
      over — the same names e2e/sweep-storefront.spec.ts asserts on. */
@@ -230,11 +242,19 @@ async function discoverOnce(request: APIRequestContext): Promise<Discovered> {
     { kind: "category", path: oneOf(/^\/shop2\/c\/[^/]+\/$/, "category page"), screen: "catalog" },
     { kind: "brand", path: oneOf(/^\/shop2\/b\/[^/]+\/$/, "brand page"), screen: "catalog" },
     { kind: "brands", path: "/shop2/brands/", screen: "brands" },
-    { kind: "sets", path: "/shop2/sets/", screen: "bundles" },
-    { kind: "set", path: oneOf(/^\/shop2\/set\/[^/]+\/$/, "set page"), screen: "bundle" },
+    ...(setPath
+      ? [
+          { kind: "sets", path: "/shop2/sets/", screen: "bundles" },
+          { kind: "set", path: setPath, screen: "bundle" },
+        ]
+      : []),
     { kind: "gift", path: "/shop2/gift/", screen: "gift" },
-    { kind: "blog", path: "/shop2/blog/", screen: "blog" },
-    { kind: "blogpost", path: oneOf(/^\/shop2\/blog\/[^/]+\/$/, "blog post"), screen: "blogpost" },
+    ...(postPath
+      ? [
+          { kind: "blog", path: "/shop2/blog/", screen: "blog" },
+          { kind: "blogpost", path: postPath, screen: "blogpost" },
+        ]
+      : []),
   ];
   /* Every policy page, not a sample: there are five of them, they are the
      pages a shopper reads before deciding to trust the shop, and «Контакты»
@@ -678,6 +698,58 @@ test.describe(`deployed shop — ${BASE}`, () => {
     expect((await get(request, abs(`/${NOPE}/`))).status(), "a 404 outside /shop2/").toBe(404);
 
     await visit(page, await guardPage(page), abs(`/shop2/${NOPE}/`), "notfound", "the 404 screen", 404);
+  });
+
+  /* --------------------------------------------------------- empty shelves */
+
+  test("an empty «Наборы» and an empty blog are nowhere on the shop", async ({ page, request }) => {
+    /* Dim, 28.09.2026: «Blog and Sets will be off initially, before any blog
+       post is written and any set by Renat done». The go-live reset deletes
+       every set and every post (tools/go-live-reset.mjs --test-content), and
+       from then on the shop must show neither — no header entry, no home row,
+       no crumb, no sitemap row, and the two addresses are the ordinary 404 —
+       until the first one comes back by itself. The live answers decide which
+       half applies: a set switched on or an article published since the build
+       is on /api/ before it is in any file. */
+    const setsRes = await get(request, abs("/api/bundles/"));
+    expect(setsRes.status(), "GET /api/bundles/").toBe(200);
+    const noSets = (((await setsRes.json()).bundles || []) as unknown[]).length === 0;
+    const blogRes = await get(request, abs("/api/blog/?lang=RU&page=1"));
+    expect(blogRes.status(), "GET /api/blog/").toBe(200);
+    const noPosts = !(Number((await blogRes.json()).total) > 0);
+    test.skip(!noSets && !noPosts, "the shop has sets and articles — the page walk above covers both");
+
+    for (const { lang, seg } of LANGS) {
+      if (noSets) {
+        const url = abs(`/shop2${seg}/sets/`);
+        expect((await get(request, url)).status(), `${lang} · ${url} with no set on sale`).toBe(404);
+      }
+      if (noPosts) {
+        const url = abs(`/shop2${seg}/blog/`);
+        const res = await get(request, url);
+        expect(res.status(), `${lang} · ${url} with no published article`).toBe(404);
+        expect(robotsMetaOf(await res.text()), `${lang} · ${url}: a 404 must be noindex`).toMatch(/^noindex/);
+      }
+    }
+    const staticXml = await getText(request, abs("/sitemap-1.xml"), "the static sitemap");
+    if (noSets) expect(staticXml, "the sitemap names a set page with no set on sale").not.toMatch(/\/shop2\/(?:(?:et|en)\/)?sets?\//);
+    if (noPosts) expect(staticXml, "the sitemap names a blog page with no article").not.toMatch(/\/shop2\/(?:(?:et|en)\/)?blog\//);
+
+    /* …and in a browser, once app.js has taken over and the boot probes have
+       answered (visit() waits for the network to go quiet). */
+    const g = await guardPage(page);
+    await visit(page, g, abs("/shop2/"), "home", "home with an empty shelf");
+    if (noSets) {
+      await expect(page.locator("[data-nav-bundles]"), "«Наборы» in the header with no set on sale").toHaveCount(0);
+      await expect(page.locator(".sec--bundles"), "a sets row on the home page with no set on sale").toHaveCount(0);
+    }
+    if (noPosts) await expect(page.locator("[data-nav-blog]"), "«Блог» in the header with no article").toHaveCount(0);
+    if (noSets) {
+      await visit(page, g, abs("/shop2/gift/"), "gift", "the gift card with no set on sale");
+      await expect(page.locator('.crumbs [data-go="bundles"]'), "a «Наборы» crumb over the gift card").toHaveCount(0);
+      await visit(page, g, abs("/shop2/sets/"), "notfound", "«Наборы» with no set on sale", 404);
+    }
+    if (noPosts) await visit(page, g, abs("/shop2/blog/"), "notfound", "«Блог» with no article", 404);
   });
 
   /* ------------------------------------------------------------- redirects */

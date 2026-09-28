@@ -9,7 +9,7 @@
    token that no longer matches the files it versions. */
 
 import { readFile, readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assetToken, currentToken } from "./lib/asset-token.mjs";
@@ -42,7 +42,23 @@ const loadObj = async (file, name) => {
 };
 const LEGAL = (await loadObj("legal.js", "LEGAL")) || {};
 const LEGAL_SLUGS = Object.keys(LEGAL);
-const BUNDLES = (await loadObj("bundles.js", "BUNDLES")) || [];
+const BUNDLES_FILE = (await loadObj("bundles.js", "BUNDLES")) || [];
+/* Which of the file's sets the prerender wrote pages for. Since 28.09.2026 it
+   is the ones the database still sells (liveBundles() in
+   tools/lib/bundles-export.mjs) — none at all after the go-live reset — and
+   the run says which in the #setsdata block it puts on every page, the shell
+   included. The shell is read for it here: a check that assumed the whole
+   file would fail every build of a shop whose sets were deleted. A shell with
+   no such block was written before the list existed, and means the file. */
+const SETS_WRITTEN = (() => {
+  try {
+    const src = readFileSync(path.join(SHOP2, "index.html"), "utf8");
+    const m = /<script type="application\/json" id="setsdata">([\s\S]*?)<\/script>/.exec(src);
+    const ids = m ? JSON.parse(m[1]) : null;
+    return Array.isArray(ids) ? new Set(ids.map(String)) : null;
+  } catch { return null; }
+})();
+const BUNDLES = SETS_WRITTEN ? BUNDLES_FILE.filter((b) => SETS_WRITTEN.has(b.id)) : BUNDLES_FILE;
 
 /* Every og:image the tool writes is meant to be a 1 200×630 file that is
    actually on disk — that is the whole promise behind declaring
@@ -361,7 +377,11 @@ const stale = [
 ];
 for (const [, seg] of LANGS) {
   for (const [kind, keep, what] of stale) {
-    for (const d of await readdir(path.join(SHOP2, seg, kind)).catch(() => [])) {
+    /* Directories only: /blog/ is the one kind whose folder also holds its own
+       listing (blog/index.html), and a file is not a page for a post. Until
+       28.09.2026 that file failed every build that had a published post. */
+    const dirs = await readdir(path.join(SHOP2, seg, kind), { withFileTypes: true }).catch(() => []);
+    for (const d of dirs.filter((e) => e.isDirectory()).map((e) => e.name)) {
       if (!keep.has(d)) {
         failed++;
         console.error(`FAIL stale page for a ${what} that no longer exists: ${seg || "ru"}/${kind}/${d}/`);

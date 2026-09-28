@@ -689,7 +689,8 @@ const USAGE = `import-shopify-stock — Shopify's inventory export → counted s
   --only <id,id>           --skip-zero         --log <file>
 
 The export: Shopify admin → Products → Inventory → Export. Run AFTER the go-live reset
-(without --stock) and as the last step before DNS — docs/go-live.md, the day, step 4.`;
+(which runs WITH --stock since 28.09.2026: «Склад» is empty, every row reads «не считали → N»)
+and as the last step before DNS — docs/go-live.md, the day, step 4.`;
 
 async function main() {
   let args;

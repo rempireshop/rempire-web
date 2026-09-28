@@ -133,8 +133,14 @@ function decodeSafe(s: string): string {
 const CLIENT_SCREENS = new Set(["search", "brands", "account", "checkout", "done", "admin", "scan"]);
 /* The single pages the prerender writes. Listed so a tree that has not been
    prerendered still serves them — the same reason next.config.ts lists them
-   off disk rather than assuming. */
-const SINGLE_PAGES = new Set(["sets", "gift", "blog"]);
+   off disk rather than assuming. `sets` is no longer one of them: since
+   28.09.2026 the shop has no «Наборы» page while it has no set on sale (Dim:
+   «Blog and Sets will be off initially»), so /shop2/sets/ is asked of the
+   `bundles` table in notFoundPageResponse(), exactly as a set's own page is.
+   `blog` stays: it has a request-time route of its own that answers 404 for
+   an empty blog (src/lib/blog-page.ts), and this list is never reached for
+   it. */
+const SINGLE_PAGES = new Set(["gift", "blog"]);
 
 /**
  * Does the shop have a page at this address? The shapes are app.js's
@@ -347,6 +353,25 @@ async function isPublishedSet(id: string): Promise<boolean> {
 }
 
 /**
+ * Does the shop sell any set at all? The «Наборы» page exists only while it
+ * does (Dim, 28.09.2026 — the go-live reset deletes every set, and the page
+ * comes back with the first one Renat switches on; no switch to remember).
+ * A build that saw sets on sale wrote /shop2/sets/ as a file and the static
+ * layer serves it before this is reached; so this answers the address when
+ * the build saw none. Same «maybe» on a database that is down, for the same
+ * reason as the two checks above.
+ */
+async function hasPublishedSets(): Promise<boolean> {
+  try {
+    const { listBundles } = await import("@/lib/bundles");
+    return (await listBundles({ activeOnly: true })).length > 0;
+  } catch (err) {
+    console.error("[notfound] sets unavailable:", err);
+    return true;
+  }
+}
+
+/**
  * `req` is optional so the call sites that only have a path — the unit tests
  * in tests/storefront-decisions.test.ts — keep compiling and keep meaning the
  * same thing. Without it the shell is the shell, identical for everybody; with
@@ -371,6 +396,10 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
     const [kind, id] = parsed.segs;
     if (kind === "b" && (await isCustomBrand(id))) return html(shell, 200);
     if (kind === "set" && (await isPublishedSet(id))) return html(shell, 200);
+  }
+  // «Наборы» while there is a set on sale — see hasPublishedSets()
+  if (parsed.segs.length === 1 && parsed.segs[0] === "sets" && (await hasPublishedSets())) {
+    return html(withSessionIdentity(shell, req), 200);
   }
 
   /* The canonical is the address that was asked for, normalised the way the
