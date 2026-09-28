@@ -51,6 +51,33 @@ live hour did not prove is the «after the switch» list in `docs/go-live.md`.
   Note: if their SUCCESSFUL arrived **before** this deploy, the entry already
   reads done with no second letter, and nothing re-sends it.
 
+**Updated 28.09.2026** — «Отправлен» by the carrier's scan (the owner's
+decision, Renat via Dim). Evidence: R-100098 (DPD parcel machine, shipment
+`3888e013-c3a6-4ead-9609-292447179f52`) got `shipment.statusUpdated` →
+`inTransit` on 27.09.2026 17:24 UTC by itself while the order stayed
+«оплачен» and the customer got no tracking letter. Now, in
+`applyShipmentUpdate()` (`src/lib/shipping/shipment-sync.ts` — the webhook and
+the nightly re-ask both), a shipment whose word is one of Montonio's three
+documented «the carrier has it» words — `inTransit`, `awaitingCollection`,
+`delivered`, nothing else — on a `paid` order never shipped before becomes
+«Отправлен» through the owner's own door (`shipOrder()`,
+`src/lib/ship-order.ts`): status, journal row «Отправлен — по скану
+перевозчика», one «Заказ отправлен» letter with the tracking link, sent at
+once. It is a claim (`unless` inside the UPDATE), so a retry, the poll racing
+the webhook, or a press before/after never doubles it. `delivered` as the
+first word ships then delivers. A cancelled/refunded order whose parcel moves
+is not touched; it is journalled once (`shipment.closed_moving`) and pings
+Renat. The label still never ships. **Proven live so far: only that DPD sends
+`inTransit` on its own. Unproven: that Omniva, SmartPosti and Unisend send one
+of the three words at the drop-off scan** — the €1 orders abroad are the test
+(/test `live-autoship-carriers`); `settings.shipping_statuses` shows which
+words arrived. A carrier that sends some other word leaves the order
+«оплачен» with the rust «посылка уже в пути — нажмите «Отправлен»» row, which
+is still the fallback. R-100098 itself: the next event about its parcel, or
+the first nightly re-ask after deploy, ships it (and, if it is delivered by
+then, delivers it) — see `docs/shipping.md` § «Отправлен по скану
+перевозчика».
+
 ---
 
 ## Why this document exists
@@ -353,14 +380,20 @@ sandbox could not tell us.
       direct contract with the carrier and is aimed at marketplaces, and Omniva
       has no such option at all (S7). **Scan the label at the parcel machine**
       like any other merchant.
-- [ ] Hand the parcel over and **press «Отправлен» on the order the same
-      day.** That press is what sends the customer the tracking letter, and it
-      is also the precondition for everything below: a delivered event closes
-      an order **only from «Отправлен»** (`applyShipmentUpdate()` in
-      `src/lib/shipping/shipment-sync.ts`, called by both the webhook and the
-      nightly re-ask — `order.status === "shipped"`). An order left at
-      «Оплачен» stays there when the parcel is delivered, and no letter ever
-      tells the customer it went (readiness B13).
+- [ ] Hand the parcel over (scan the label at the machine) and **do not press
+      «Отправлен»** — since 28.09.2026 the carrier's scan does it: when
+      Montonio reports `inTransit` / `awaitingCollection` / `delivered`, the
+      paid order becomes «Отправлен» by itself and the customer gets the
+      tracking letter (`applyShipmentUpdate()` → `shipOrder()`). Check within
+      minutes (or the next morning, via the nightly re-ask): the order is
+      «Отправлен», the card's progress line says «по скану», the journal says
+      «Отправлен — по скану перевозчика», one «Заказ отправлен» in the
+      customer's inbox. If it stays «Оплачен» with the rust «посылка уже в
+      пути — нажмите «Отправлен»» row, the carrier sent a word outside the
+      three — `settings.shipping_statuses` shows which — and the press is the
+      fallback. (Until 28.09.2026 this item said to press «Отправлен» the same
+      day; a delivered event still closes an order only from «Отправлен», and
+      the scan is now what gets it there.)
 - [ ] Then watch the order: within a day or two the `shipment.statusUpdated`
       webhook should move it from «Отправлен» to «Доставлен» by itself.
       If it never does, S9 (the webhook) or S5 (an unknown status word) is why;

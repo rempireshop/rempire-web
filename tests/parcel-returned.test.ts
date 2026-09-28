@@ -160,7 +160,8 @@ describe("the morning's log line carries what the night did", () => {
     expect(res.status).toBe(200);
     const line = info.mock.calls.map((c) => c.join(" ")).find((l) => l.includes("[api/cron/flows]")) ?? "";
     expect(line, "the cron wrote no summary line").not.toBe("");
-    expect(line).toMatch(/shipments: checked 0, changed 0, refused 0, returned 0, closed 0, errors 0, left 0 \(not_configured\)/);
+    // `shipped` since 28.09.2026: paid orders the carrier's scan made «Отправлен» (src/lib/ship-order.ts)
+    expect(line).toMatch(/shipments: checked 0, changed 0, shipped 0, refused 0, returned 0, closed 0, errors 0, left 0 \(not_configured\)/);
     expect(line).toMatch(/delivered: closed 0, checked 1, returned 1/);
     expect(line).toMatch(/payments: (skipped \(\w+\)|checked \d+, found paid \d+, odd \d+, no answer \d+)/);
     // counts and codes only — never an order number or an address

@@ -182,6 +182,20 @@ describe("what each alert says", () => {
     expect(a.key).toBe("shipment_returned:shp-9");
   });
 
+  /* 28.09.2026: the carrier's scan ships a paid order by itself — and on a
+     cancelled or refunded one moves nothing and says so, once per parcel. */
+  it("a parcel moving on a closed order: which kind of closed, and that the status was left alone", () => {
+    const c = read("shipment.closed_moving", { shipmentId: "shp-9", carrier: "dpd", code: "inTransit", orderStatus: "cancelled" })!;
+    expect(c.title).toBe("📦 Посылка едет по отменённому заказу: R-100050");
+    expect(c.body).toBe("DPD принял посылку, а заказ отменён. Статус магазин не менял. Свяжитесь с покупателем и решите, что делать с посылкой.");
+    expect(c.key).toBe("shipment_closed_moving:shp-9");
+    const r = read("shipment.closed_moving", { shipmentId: "shp-9", orderStatus: "refunded" })!;
+    expect(r.title).toBe("📦 Посылка едет по заказу с возвратом денег: R-100050");
+    expect(r.body.startsWith("Перевозчик принял посылку, а заказ уже с возвратом денег.")).toBe(true);
+    // the same parcel, told twice (the webhook, then the next word): one key
+    expect(r.key).toBe(c.key);
+  });
+
   it("everything fits a lock screen: the push service's 100 and 300 characters", () => {
     const rows: Array<[string, Record<string, unknown>, string?]> = [
       ["order.refund_stuck", { amount: 1234.56, ref: "r", code: "SOMETHING_MONTONIO_NEVER_DOCUMENTED", status: "pending" }],
@@ -193,6 +207,7 @@ describe("what each alert says", () => {
       ["order.payment_odd", { montonioStatus: "PARTIALLY_REFUNDED" }],
       ["shipment.registration_failed", { shipmentId: "x" }],
       ["shipment.returned", { shipmentId: "x", carrier: "smartpost" }],
+      ["shipment.closed_moving", { shipmentId: "x", carrier: "smartpost", orderStatus: "refunded" }],
     ];
     for (const [action, payload, actor] of rows) {
       const a = read(action, payload, actor)!;

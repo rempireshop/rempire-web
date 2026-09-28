@@ -114,8 +114,11 @@ export function isLabelFileEvent(event: string): boolean {
  * `registered` is Montonio's own documented word for «the carrier accepted the
  * parcel», named since 26.09.2026: the first live one was journalled as
  * `meaning: "unknown"`, which read as a word nobody understood, on the one
- * event every label produces. It moves nothing — registering is not shipping,
- * and «Отправлен» stays the owner's own step.
+ * event every label produces. It moves nothing — registering is not shipping.
+ * «Отправлен» is set by the carrier's SCAN since 28.09.2026 (`inTransit`,
+ * `awaitingCollection`, `delivered` on a paid order — carrierHasParcel() in
+ * src/lib/ship-order.ts, a separate and stricter reading than this one), or
+ * by the owner's press.
  */
 export type ShipmentMeaning = "delivered" | "returned" | "registered" | "";
 

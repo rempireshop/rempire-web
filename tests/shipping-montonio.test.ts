@@ -1126,6 +1126,25 @@ describe("the shipping routes", () => {
     expect((await getOrder(order.id))!.status).toBe("paid");
   });
 
+  /* 28.09.2026: the carrier's SCAN now ships a paid order by itself
+     (src/lib/ship-order.ts) — through the webhook and the nightly re-ask,
+     never through this button. Even a booking reply that already said the
+     carrier has the parcel is a label here, and the order stays «оплачен». */
+  it("still never ships — not even when Montonio's booking reply says the parcel is in transit", async () => {
+    withKeys();
+    stubFetch([[/\/shipments$/, () => json({ ...SHIPMENT_BODY, status: "inTransit" })]]);
+    const order = await paidOrder({ method: "parcel", country: "EE", pointId: POINT_UUID, pointName: "Laagri" });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const res = await POST(
+      req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin),
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).order.status).toBe("paid");
+    expect((await getOrder(order.id))!.status).toBe("paid");
+    const audit = await listAudit(10);
+    expect(audit.some((a) => a.action === "order.status" && (a.payload as { to: string }).to === "shipped")).toBe(false);
+  });
+
   /* The «second press» above is the easy half: by then the shipment is on the
      order row. The hard half is the press that arrives while the FIRST one is
      still inside Montonio — the owner's phone timed the request out and he
