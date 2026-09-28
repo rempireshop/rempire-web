@@ -174,9 +174,18 @@ export async function optOut(email: string, kind: OptOutKind, source: OptOutSour
   if (!addr || !isEmail(addr)) return false;
   const k: OptOutKind = KINDS.includes(kind) ? kind : "marketing";
   await withTx(async (q) => {
+    /* A row left by «Удалить аккаунт» (kind 'account_deleted', src/lib/
+       account-privacy.ts) keeps its kind and its date through a click on an
+       old letter's link: the date is when the account was deleted — what
+       tells a leftover session from a new one — and the kind is what the
+       go-live customer import has to skip. The address is on the stop list
+       either way, which is all this click asks for. */
     await q(
       `insert into mail_optouts (email, at, kind, source) values ($1, now(), $2, $3)
-       on conflict (email) do update set at = now(), kind = $2, source = $3`,
+       on conflict (email) do update set
+         at = case when mail_optouts.kind = 'account_deleted' then mail_optouts.at else now() end,
+         source = case when mail_optouts.kind = 'account_deleted' then mail_optouts.source else $3 end,
+         kind = case when mail_optouts.kind = 'account_deleted' then mail_optouts.kind else $2 end`,
       [addr, k, source === "one-click" ? "one-click" : "link"],
     );
     await q(

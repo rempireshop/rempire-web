@@ -14,6 +14,7 @@
  * in «Сделать сегодня» on «Обзор», the same queue a new review and a partner
  * request arrive in, and on the order's own card; then a person writes back.
  */
+import { isOrderDetached } from "@/lib/account-privacy";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { normalizeEmail, sessionEmail } from "@/lib/customers";
 import { getOrderByNumber, writeAuditSafe } from "@/lib/orders";
@@ -61,7 +62,8 @@ export async function POST(req: Request) {
 
   try {
     const order = await getOrderByNumber(number);
-    if (!order || normalizeEmail(order.email) !== normalizeEmail(email)) {
+    // …and an order whose account was deleted answers the same (223_account_erasure.sql)
+    if (!order || normalizeEmail(order.email) !== normalizeEmail(email) || (await isOrderDetached(order.id))) {
       return Response.json({ ok: false, error: "not_found" }, { status: 404, headers: NO_STORE });
     }
 

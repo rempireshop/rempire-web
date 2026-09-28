@@ -6,14 +6,17 @@
  * The e-mail is never in the body: it comes out of the signed cookie, so a
  * shopper can only ever read and edit their own row.
  */
+import { isErasedSession } from "@/lib/account-privacy";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import {
   birthdayProblem,
+  clearCustomerCookie,
   getCustomer,
   listCustomerOrders,
   recordLogin,
   sessionEmail,
+  sessionIssuedAt,
   updateCustomer,
 } from "@/lib/customers";
 import { accountLoyaltyByEmail } from "@/lib/loyalty";
@@ -50,6 +53,16 @@ export async function GET(req: Request) {
       listCustomerOrders(email),
       accountLoyaltyByEmail(email),
     ]);
+    /* No row: a leftover cookie from before «Удалить аккаунт» (another
+       device) is signed out here, not shown an empty account it could
+       re-create by saving a field. Asked only when the row is missing, so
+       the signed-in path the checkout waits on costs nothing more. */
+    if (!customer && (await isErasedSession(email, sessionIssuedAt(req)))) {
+      return Response.json(
+        { ok: false, error: "unauthorized" },
+        { status: 401, headers: { ...NO_STORE, "set-cookie": clearCustomerCookie(req) } },
+      );
+    }
     return Response.json(
       {
         ok: true,
@@ -132,6 +145,13 @@ export async function PATCH(req: Request) {
     // possible if the row was deleted) still gets a row rather than a 404.
     let customer = await updateCustomer(email, patch);
     if (!customer) {
+      // …but not a cookie from before «Удалить аккаунт»: that account is gone (see GET)
+      if (await isErasedSession(email, sessionIssuedAt(req))) {
+        return Response.json(
+          { ok: false, error: "unauthorized" },
+          { status: 401, headers: { ...NO_STORE, "set-cookie": clearCustomerCookie(req) } },
+        );
+      }
       await recordLogin(email, patch.lang);
       customer = await updateCustomer(email, patch);
     }

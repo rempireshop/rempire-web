@@ -5398,6 +5398,139 @@
       }
     },
     {
+      "id": "acct-data-export",
+      "area": "account",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Скачать мои данные",
+      "steps": [
+        "Войти в «Мой кабинет» почтой, с которой уже был заказ.",
+        "Долистать до самого низа, до «Данные и аккаунт».",
+        "Нажать «Скачать мои данные».",
+        "Открыть скачанный файл."
+      ],
+      "expect": [
+        "Скачался файл rempire-mydata-<дата>.json, страница осталась на месте.",
+        "Профиль: имя, телефон, день рождения, согласие на рассылку и когда дано.",
+        "Заказы: номер, дата, статус, товары, суммы, доставка, способ оплаты словами.",
+        "Ещё в файле: баллы, подписки «Сообщить о наличии», отзывы, заявки на возврат.",
+        "Чужих заказов, служебных номеров и ключей в файле нет."
+      ],
+      "why": "Право получить копию своих данных (GDPR). Раньше — только письмом в магазин.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:46:47.601Z",
+      "en": {
+        "title": "Download my data",
+        "steps": [
+          "Sign in to the account with an e-mail that already has an order.",
+          "Scroll to the very bottom, to «Данные и аккаунт» (your data and account).",
+          "Press «Скачать мои данные» (download my data).",
+          "Open the downloaded file."
+        ],
+        "expect": [
+          "A file rempire-mydata-<date>.json downloads; the page stays where it was.",
+          "Profile: name, phone, birthday, the newsletter consent and when it was given.",
+          "Orders: number, date, status, items, sums, delivery, payment method in words.",
+          "Also in the file: points, back-in-stock requests, reviews, return requests.",
+          "No other customer's orders, no internal ids or keys in the file."
+        ],
+        "why": "The right to a copy of one's own data (GDPR). Until now only by writing to the shop."
+      }
+    },
+    {
+      "id": "acct-delete",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Удалить аккаунт",
+      "steps": [
+        "Войти в кабинет тестовой почтой, у которой нет заказа в пути.",
+        "Внизу нажать «Удалить аккаунт» и прочитать окно.",
+        "Вписать чужую почту, потом свою.",
+        "Нажать красную «Удалить».",
+        "В панели открыть «Журнал», потом «Клиенты» и «Заказы»."
+      ],
+      "expect": [
+        "Окно выезжает снизу и говорит, что удалится и что останется.",
+        "Красная «Удалить» не нажимается, пока не вписана своя почта.",
+        "После удаления открылась главная страница и надпись «Аккаунт удалён».",
+        "Кабинет снова просит почту; новый вход — пустой аккаунт без заказов.",
+        "В журнале «Покупатель удалил аккаунт» с номерами заказов и без почты.",
+        "В «Клиентах» этой почты нет, а её заказы в «Заказах» на месте."
+      ],
+      "why": "Право на удаление (GDPR). Заказы закон велит хранить 7 лет — они остаются, но ни к какому аккаунту не привязаны.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:46:47.601Z",
+      "en": {
+        "title": "Delete the account",
+        "steps": [
+          "Sign in to the account with a test e-mail that has no order on its way.",
+          "At the bottom press «Удалить аккаунт» (delete account) and read the sheet.",
+          "Type somebody else's e-mail, then your own.",
+          "Press the red «Удалить» (delete).",
+          "In the panel open the journal, then «Клиенты» (customers) and «Заказы» (orders)."
+        ],
+        "expect": [
+          "The sheet slides up and says what is deleted and what stays.",
+          "The red «Удалить» cannot be pressed until your own e-mail is typed.",
+          "After deleting, the shop's home page opens with «Аккаунт удалён» (account deleted).",
+          "The account asks for an e-mail again; signing in gives an empty account.",
+          "The journal says «Покупатель удалил аккаунт» with order numbers, without the e-mail.",
+          "The e-mail is gone from «Клиенты»; its orders are still in «Заказы»."
+        ],
+        "why": "The right to erasure (GDPR). The law keeps orders for 7 years — they stay, but no account is linked to them."
+      }
+    },
+    {
+      "id": "acct-delete-open-order",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Удалить аккаунт, пока заказ в пути",
+      "steps": [
+        "Оплатить заказ на тестовую почту и не отправлять его.",
+        "Войти в кабинет этой почтой.",
+        "Нажать «Удалить аккаунт».",
+        "В панели отметить этот заказ «Доставлен».",
+        "В кабинете снова нажать «Удалить аккаунт»."
+      ],
+      "expect": [
+        "Окно говорит: пока заказ не доставлен, удалить нельзя — и называет номер.",
+        "Поля для почты и красной кнопки нет — только «Понятно».",
+        "Аккаунт на месте, в кабинете ничего не пропало.",
+        "После «Доставлен» окно просит вписать почту — удалить уже можно."
+      ],
+      "why": "Пока заказ в пути, в кабинете его статус, трек и счёт — без аккаунта покупатель их потеряет.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-09-28T17:46:47.601Z",
+      "en": {
+        "title": "Delete the account while an order is on its way",
+        "steps": [
+          "Pay for an order to a test e-mail and do not ship it.",
+          "Sign in to the account with that e-mail.",
+          "Press «Удалить аккаунт» (delete account).",
+          "In the panel mark that order «Доставлен» (delivered).",
+          "In the account press «Удалить аккаунт» again."
+        ],
+        "expect": [
+          "The sheet says: not while the order is undelivered — and names its number.",
+          "No e-mail box and no red button — only «Понятно» (got it).",
+          "The account is still there; nothing has gone from it.",
+          "After «Доставлен» the sheet asks for the e-mail — deleting now works."
+        ],
+        "why": "While an order is on its way, its status, tracking and invoice live in the account — without it the customer loses them."
+      }
+    },
+    {
       "id": "mail-test-send",
       "area": "mail",
       "who": "renat",

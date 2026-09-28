@@ -191,6 +191,17 @@ function routes(): RouteCase[] {
        application/pdf. The 200s, the stranger's 404 and the unpaid order's
        «no_receipt» live in tests/account-receipt.test.ts. */
     { name: "GET /api/account/orders/[id]/receipt/", path: "/api/account/orders/x/receipt/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/orders/[id]/receipt/route"), auth: "customer", req: cust, params: { id: "" }, jsonBody: false, queries: ["", "?lang=et", "?lang=' or 1=1--", "?lang=" + "x".repeat(5000)] },
+    /* «Скачать мои данные» — the file itself on a hit, a document with no
+       {ok,error} shape, hence jsonBody:false; the content and the refusals
+       live in tests/account-privacy.test.ts. */
+    { name: "GET /api/account/export/", path: "/api/account/export/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/export/route"), auth: "customer", req: cust, jsonBody: false },
+    /* «Удалить аккаунт». The body's confirmation is deliberately NOT the
+       fixture customer's address: a fuzz case that really deleted the account
+       would pull the ground from under every route after it. Every case is a
+       refusal with a code — which is the property here; the deletion itself
+       lives in tests/account-privacy.test.ts. */
+    { name: "GET /api/account/delete/", path: "/api/account/delete/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/account/delete/route"), auth: "customer", req: cust },
+    { name: "POST /api/account/delete/", path: "/api/account/delete/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/account/delete/route"), auth: "customer", req: cust, body: { confirm: "not-this-account@example.com" } },
 
     /* ---- admin ----------------------------------------------------------- */
     { name: "POST /api/admin/login/", path: "/api/admin/login/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/login/route"), body: { password: "wrong password" } },

@@ -2030,6 +2030,32 @@ button, a, summary, label { touch-action: manipulation; }
    and search row and the map has no box to fill — an explicit height, not
    just a cap, is what flex:1 needs to have anything to grow into. */
 @media (min-width: 768px) { .psheet--map { height: 76vh; } }
+
+/* «Удалить аккаунт» (acctDelHTML, app.js): the parcel sheet's frame around
+   the drawers' own body and foot — a few sentences, one field, a red button
+   and «Отмена». No list, so the sheet is as tall as its words; the body
+   scrolls when a phone's keyboard leaves it less room than that. The motion
+   is the sheet's (sheetUp / psheetIn), and reduced motion stills it with the
+   rest of the shop (the block at the end of this file). */
+.psheet--confirm .drawer__body p { margin: 0 0 10px; font-size: 14px; }
+.psheet--confirm .drawer__body .field { margin: 16px 0 0; }
+.psheet--confirm .acctdel__orders { font-size: 15px; }
+/* the refusal line is there from the start (role="alert" is announced when
+   its text arrives) and takes no room while it is empty */
+.acctdel__err:empty { margin: 0; }
+/* The one red button in the shop: an act that cannot be undone. --error is
+   functional-only (docs/design/REMPIRE_DESIGN_SYSTEM.md), and this is its
+   function; disabled, it fades like every other .btn until the e-mail matches. */
+.btn--danger { background: var(--error); border-color: var(--error); color: var(--paper); }
+
+/* «Данные и аккаунт» — the last block of «Кабинет», quiet: a hint, the
+   export as the shop's ghost button, and the deletion as a plain .link like
+   «Выйти» — secondary, but saying exactly what it does. */
+.acct__privtxt { margin: 0 0 12px; }
+.acct__privdel { margin-top: 24px; margin-bottom: 8px; }
+/* 44 px to tap without 44 px of underline: the hit area grows past the text */
+.acct__delbtn { position: relative; }
+.acct__delbtn::after { content: ""; position: absolute; inset: -14px -10px; }
 .prow {
   display: block; width: 100%; min-height: 56px;
   padding: 10px 18px; border: none; border-bottom: 1px solid var(--rule-soft);
