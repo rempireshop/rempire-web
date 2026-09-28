@@ -65,7 +65,7 @@ from a phone, and it is where Claude ticks an item off as the work lands
 |---|---|---|
 | ~~R~~ | ~~Weigh the products.~~ **Cancelled 18.09** — every label declares one weight, 0.9 kg; Montonio prices by the real weight (24.09). `MONTONIO_PRICES_VOLUMETRIC` in `src/lib/shipping/parcel.ts` is the switch if that changes. | cancelled |
 | R | ~~Which Kevin.Murphy sprays are pressurised aerosols.~~ **Closed by Dim, 19.09.2026.** | closed |
-| R | Whether to give **Shopify collaborator access** to import existing products and customers. Optional. **Imported customers arrive with no marketing consent** (Dim, 18.09) — which is not the same as opting them out. | undecided |
+| R | ~~Whether to give Shopify collaborator access to import existing products and customers.~~ **Not needed — decided by Dim, 28.09.2026:** products come from the catalogue (already built from the Shopify store), stock from the inventory export (option 1b, the day, step 4), customers from the customer export (option B, the day, step 4b) — Dim exports both from the Shopify admin himself. **Imported customers arrive with no marketing consent** (Dim, 18.09) — which is not the same as opting them out. | decided 28.09 |
 
 ---
 
@@ -156,6 +156,32 @@ are only correct together. On `/golive/` each is its own numbered row.
    (threshold 1, migration 215). After the reset because the reset empties the
    test «Сообщить, когда появится» requests. Shopify keeps selling until DNS:
    an order there after the export is written off by hand (step 13).
+
+4b. **Customers from Shopify («Покупатели из Shopify») — right after step 4,
+   still before DNS.** Decided 28.09.2026 (Dim, option B): only customers with
+   a name (first or last); their e-mail, their phone if there is one, and their
+   default address if the shop delivers to its country — it becomes their
+   «Доставка по умолчанию», a courier to that door, so the checkout fills it in.
+   **No marketing consent:** everyone arrives with `marketing = false`, whatever
+   Shopify says (Dim, 18.09) — and nobody is opted out either. No orders, notes,
+   tags or totals. The export: Shopify → Customers → Export → All customers →
+   Plain CSV; Shopify e-mails the file. Then:
+
+   ```
+   node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <customers_export.csv>
+   … the same --apply --confirm ИМПОРТ-КЛИЕНТОВ
+   ```
+
+   The dry run prints counts and country codes only — never an e-mail, a name,
+   a phone or an address. `--apply` writes everyone in one transaction, marked
+   `customers.source = 'shopify'` (migration 221, which the deploy runs). An
+   e-mail that already has an account is never touched, so a second run creates
+   nothing, and nobody gets a code or a letter. After the reset, because the
+   reset deletes every customer row; before DNS, so nobody signs in to an empty
+   account first. On the 28.09 export: 428 rows → 391 customers, 307 with a
+   phone, 316 with an address (3 more in the US/UK and 3 incomplete left out,
+   the customers kept); 33 rows without a name and 4 without an e-mail skipped.
+
 5. **`PUBLIC_BASE_URL=https://rempireshop.com` → Redeploy → READY.** That
    redeploy is the «regenerate»: canonicals, robots and sitemap for the live
    domain. **No orders on staging from here** — Montonio's notice and return
