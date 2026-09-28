@@ -314,13 +314,18 @@ test.describe("admin — наборы", () => {
 
       const shop = await freshShop(browser);
       try {
+        /* Since 28.09.2026 (Dim: «Blog and Sets will be off initially») a shelf
+           with no set on sale is not there at all: «Наборы» answers with the
+           shop's «Страница не найдена». This set was the only one on sale here,
+           so either page is right — the list without it, or not-found. */
         await shop.page.goto(shopUrl("", "/sets/"));
-        await waitForScreen(shop.page, "bundles");
+        await expect(shop.page.locator('body[data-screen="bundles"], body[data-screen="notfound"]')).toBeAttached();
         await expect(shop.page.locator(`[data-go-bundle="${SET_ID}"]`)).toHaveCount(0);
 
+        // the address still answers — «не найден(а)», never a way to buy it
         await shop.page.goto(shopUrl("", `/set/${SET_ID}/`));
-        await waitForScreen(shop.page, "bundle");
-        await expect(shop.page.locator("h1")).toContainText("Набор не найден");
+        await expect(shop.page.locator('body[data-screen="bundle"], body[data-screen="notfound"]')).toBeAttached();
+        await expect(shop.page.locator("h1")).toContainText("не найден");
         await expect(shop.page.locator(`[data-addbundle="${SET_ID}"]`)).toHaveCount(0);
       } finally {
         await shop.close();
