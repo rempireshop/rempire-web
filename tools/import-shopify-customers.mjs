@@ -384,7 +384,13 @@ async function readSchema(db) {
       )
     ).map((r) => String(r.column_name)),
   );
-  return { customers: cols.has("email"), source: cols.has("source"), shipPref: cols.has("ship_pref") };
+  const optouts = (
+    await rows(
+      db,
+      `select 1 from information_schema.tables where table_schema = current_schema() and table_name = 'mail_optouts'`,
+    )
+  ).length > 0;
+  return { customers: cols.has("email"), source: cols.has("source"), shipPref: cols.has("ship_pref"), optouts };
 }
 
 /** countriesOff as the shop reads it today: settings.shipping_rules, else the default. */
@@ -407,6 +413,26 @@ async function existingEmails(db, emails) {
 }
 
 /**
+ * The e-mails of `emails` whose owner deleted their account in «Мой кабинет»
+ * (mail_optouts kind 'account_deleted', 223_account_erasure.sql). Their row is
+ * gone from customers, so existingEmails() cannot see them — without this a
+ * re-run after launch would bring back a person who asked to be erased. The
+ * reset never clears mail_optouts, so the rule outlives it too.
+ */
+async function erasedEmails(db, emails) {
+  if (!emails.length) return new Set();
+  const found = await rows(
+    db,
+    `select lower(o.email) as email
+       from mail_optouts o
+       join jsonb_array_elements_text($1::jsonb) as e(v) on e.v = lower(o.email)
+      where o.kind = 'account_deleted'`,
+    [JSON.stringify(emails)],
+  );
+  return new Set(found.map((r) => String(r.email)));
+}
+
+/**
  * Read the file and the database; with `apply`, write — in one transaction.
  * Returns a report of counts (no personal data in it). Throws ImportError when
  * it will not write; by then nothing has been written or it was rolled back.
@@ -423,7 +449,8 @@ export async function importCustomers(db, { csvText, apply = false, defaultOff =
   const off = await readCountriesOff(db, defaultOff);
   const built = buildImport(csv.rows, { served: (cc) => servedCountry(cc, off) });
   const existing = await existingEmails(db, built.customers.map((c) => c.email));
-  const toCreate = built.customers.filter((c) => !existing.has(c.email));
+  const erased = schema.optouts ? await erasedEmails(db, built.customers.map((c) => c.email)) : new Set();
+  const toCreate = built.customers.filter((c) => !existing.has(c.email) && !erased.has(c.email));
 
   const report = {
     mode: apply ? "apply" : "dry",
@@ -432,6 +459,7 @@ export async function importCustomers(db, { csvText, apply = false, defaultOff =
     skipped: built.skipped,
     inFile: built.customers.length,
     existing: existing.size,
+    erased: erased.size,
     toCreate: statsOf(toCreate),
     countriesOff: off,
     sourceColumn: schema.source,
@@ -533,6 +561,7 @@ export function formatReport(report, { csvName = "", csvArg = "<export.csv>", ur
   L.push(`  ${sk.duplicate} row(s) repeating an e-mail — merged into the first (the first non-empty value wins)`);
   L.push("");
   L.push(`${report.inFile} customer(s) in the file; ${report.existing} already in the database — left exactly as they are.`);
+  if (report.erased) L.push(`${report.erased} deleted their account in «Мой кабинет» — never imported again.`);
   L.push(`${report.mode === "apply" ? "Created" : "To create"}: ${report.mode === "apply" ? report.created : t.total}`);
   L.push(
     `  with a phone: ${t.withPhone} (from «Phone» ${t.phoneFrom.phone}, from «Default Address Phone» ${t.phoneFrom.address})` +

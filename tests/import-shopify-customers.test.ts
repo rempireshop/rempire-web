@@ -154,7 +154,7 @@ type Stats = {
 type Report = {
   mode: string; fileRows: number; absentColumns: string[];
   skipped: { noName: number; noEmail: number; badEmail: number; duplicate: number };
-  inFile: number; existing: number; toCreate: Stats; countriesOff: string[]; sourceColumn: boolean; created: number; raced: number;
+  inFile: number; existing: number; erased: number; toCreate: Stats; countriesOff: string[]; sourceColumn: boolean; created: number; raced: number;
 };
 
 const run = async (opts: { apply?: boolean; csvText?: string; via?: Db } = {}) =>
@@ -383,6 +383,19 @@ describe("tools/import-shopify-customers.mjs", () => {
     expect(report.created).toBe(IMPORTED.length - 1);
     expect(await rowOf("boris.invented@example.com"), "his own row, to the byte").toEqual(mine);
     expect((await rowOf("boris.invented@example.com")).source, "and not marked as imported").toBeNull();
+  });
+
+  it("never brings back a customer who deleted their account in «Мой кабинет»", async () => {
+    // «Удалить аккаунт» left the address on the stop list with kind 'account_deleted' (223_account_erasure.sql)
+    await query("insert into mail_optouts (email, kind, source) values ($1, 'account_deleted', 'account')", ["anna.tamm@example.com"]);
+    // an ordinary newsletter opt-out is NOT an erasure — that customer is still imported
+    await query("insert into mail_optouts (email, kind) values ($1, 'marketing')", ["boris.invented@example.com"]);
+    const report = await run({ apply: true });
+    expect(report.erased).toBe(1);
+    expect(report.created).toBe(IMPORTED.length - 1);
+    expect(await count("customers")).toBe(IMPORTED.length - 1);
+    expect((await query("select 1 from customers where email = 'anna.tamm@example.com'")).length).toBe(0);
+    expect((await query("select 1 from customers where email = 'boris.invented@example.com'")).length).toBe(1);
   });
 
   /* ---------- the checkout and the sign-in -------------------------------------------- */
