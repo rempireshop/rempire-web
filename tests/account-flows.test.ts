@@ -365,6 +365,24 @@ describe("customer profile", () => {
     );
     expect(orders.every((o) => o.total === 42)).toBe(true);
   });
+
+  it("shows a Montonio parcel's tracking link once the order is «Отправлен» — not for a label on the shelf", async () => {
+    const who = "tracking.buyer@example.com";
+    const mont = { shipmentId: "s-1", carrier: "dpd", trackingCode: "05605583929432", trackingUrl: "https://tracking.dpd.ee/05605583929432", status: "inTransit" };
+    const put = async (status: string, m: Record<string, unknown>, at: Date) =>
+      query(
+        `insert into orders (lang, email, name, status, items, total, shipping, created_at)
+         values ('RU', $1, 'Тест', $2, '[]'::jsonb, 42, $3::jsonb, $4)`,
+        [who, status, JSON.stringify({ method: "parcel", montonio: m }), at.toISOString()],
+      );
+    await put("shipped", mont, new Date(Date.now() - 3 * DAY)); // R-100098's case
+    await put("paid", mont, new Date(Date.now() - 2 * DAY)); // label printed, parcel still in the salon
+    await put("delivered", { ...mont, dismissed: true }, new Date(Date.now() - 1 * DAY)); // label set aside by the undo
+    const [dismissed, labelled, shipped] = await listCustomerOrders(who);
+    expect(shipped).toMatchObject({ status: "shipped", tracking: "05605583929432", trackingUrl: "https://tracking.dpd.ee/05605583929432" });
+    expect(labelled).toMatchObject({ status: "paid", tracking: null, trackingUrl: null });
+    expect(dismissed).toMatchObject({ tracking: null, trackingUrl: null });
+  });
 });
 
 /* ---------- carts ---------------------------------------------------------- */

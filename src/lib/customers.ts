@@ -614,8 +614,23 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
     const payment = parseJson<Record<string, unknown>>(r.payment, {});
     const inv = invoiceOf ? invoiceOf({ invoice: r.invoice }) : null;
     const tr = payment && typeof payment === "object" ? (payment.tracking as unknown) : null;
-    const code = typeof tr === "string" ? tr : tr && typeof tr === "object" ? String((tr as Record<string, unknown>).code ?? "") : "";
-    const url = tr && typeof tr === "object" ? String((tr as Record<string, unknown>).url ?? "") : "";
+    let code = typeof tr === "string" ? tr : tr && typeof tr === "object" ? String((tr as Record<string, unknown>).code ?? "") : "";
+    let url = tr && typeof tr === "object" ? String((tr as Record<string, unknown>).url ?? "") : "";
+    /* A Montonio parcel keeps its number in shipping.montonio — the field
+       «Заказ отправлен» reads (sendShippedLetter, src/lib/ship-order.ts) —
+       and payment.tracking is only ever the old hand-typed one. So «Мои
+       заказы» showed no «Отследить» for any Montonio parcel while the letter
+       carried the link (Dim, 28.09.2026, R-100098). Shown from «Отправлен»
+       on, like the letter: a label on the shelf is not a parcel on its way,
+       and a label set aside by the journal's undo is no parcel at all. */
+    if (!code && (r.status === "shipped" || r.status === "delivered")) {
+      const mont = parseJson<Record<string, unknown>>(r.shipping, {}).montonio as Record<string, unknown> | undefined;
+      if (mont && typeof mont === "object" && !mont.dismissed) {
+        code = String(mont.trackingCode ?? "").trim();
+        const u = String(mont.trackingUrl ?? "").trim();
+        url = code && /^https?:\/\//i.test(u) ? u : "";
+      }
+    }
     /* The shipping jsonb carries the two fulfilment stamps returns are read
        from — `deliveredAt` and `returnRequest` — and nothing else on this
        screen needs it, so it is unpacked here and not carried any further. */
