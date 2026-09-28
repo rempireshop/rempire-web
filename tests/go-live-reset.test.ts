@@ -20,10 +20,14 @@ import { exec, query } from "@/lib/db";
 import {
   CONFIRM_PHRASE,
   DELETE_ORDER,
+  OWN_PRODUCT_KEYS,
   PLAN,
   ResetRefused,
   STOCK_ORDER,
+  TEST_CONTENT_TABLES,
   byVerdict,
+  catalogueIds,
+  flagsLine,
   formatReport,
   goLiveReset,
   launcherFrom,
@@ -42,10 +46,27 @@ type Snapshot = {
   promoCodesKept: Stats;
   newslettersKept: Stats;
   settingsKept: Stats;
+  own?: Record<string, { kept: Stats; going: Stats }>;
 };
 type Money = { n: number; total: number };
+type OwnProduct = { id: string; brand: string; name: string; active: boolean; orphan: boolean };
+type Content = {
+  promos: Array<{ code: string; kind: string; value: string; used: number; active: boolean; note: string }>;
+  sets: Array<{ id: string; name: string; active: boolean }>;
+  posts: Array<{ slug: string; title: string; status: string; deleted: boolean }>;
+  letters: Array<{ title: string; subject: string; status: string }>;
+  products: OwnProduct[];
+  kept: OwnProduct[];
+  going: string[];
+  rows: { product_overrides: number; stock_levels: number; stock_moves: number };
+  eans: number;
+  problems: string[];
+};
 type Report = {
   mode: "dry" | "clear";
+  testContent: boolean;
+  keepProducts: string[];
+  content: Content | null;
   schemaIssues: string[];
   before: Snapshot;
   after: Snapshot | null;
@@ -616,6 +637,240 @@ describe("gift cards", () => {
   });
 });
 
+/* ---------- --test-content (the owner's decision, 28.09.2026) ------------- */
+
+/**
+ * The staging content Dim called test data: codes, sets, posts, letters, and
+ * own products (`c-…`) with their price edits and stock — next to an imported
+ * product (`touchable`, in src/data/catalogue.min.json) whose edit, count,
+ * barcode and history must come out byte-identical.
+ */
+async function seedTestContent(): Promise<void> {
+  await query(
+    `insert into custom_products (id, brand, name, cat, active) values
+       ('c-rempire-hoodie', 'Rempire', 'Худи', 'merch', true),
+       ('c-davines-cheap-price', 'Davines', 'Cheap price', 'hair', false),
+       ('c-real-thing', 'Rempire', 'Настоящий товар', 'merch', true)`,
+  );
+  await query(
+    `insert into product_overrides (product_id, price) values
+       ('c-rempire-hoodie', 1), ('c-real-thing', 25), ('c-gone-long-ago', 9)`,
+  );
+  await query(
+    `insert into stock_levels (product_id, variant, qty, ean) values
+       ('c-rempire-hoodie', 'XXS', 3, '2000000000011'), ('c-real-thing', 'one', 5, null)`,
+  );
+  await query(
+    `insert into stock_moves (product_id, variant, delta, reason, ref, actor) values
+       ('c-rempire-hoodie', 'XXS', 3, 'goods_in', 'проба', 'admin'),
+       ('c-real-thing', 'one', 5, 'goods_in', 'приход', 'admin')`,
+  );
+  await query("insert into bundles (id, cat, name_ru, items, active) values ('made-up-set', 'hair', 'Придуманный набор', '[]'::jsonb, false)");
+  await query("insert into posts (slug, status, title, body, deleted_at) values ('chernovik', 'draft', $1::jsonb, '{}'::jsonb, now())", [
+    JSON.stringify({ EN: "A draft in the bin" }),
+  ]);
+  await query("insert into newsletters (status, title, subject, body) values ('draft', 'Черновик', $1::jsonb, '{}'::jsonb)", [
+    JSON.stringify({ RU: "Проба рассылки" }),
+  ]);
+}
+
+/** Every row of the imported product, in all four product-keyed tables. */
+async function importedRows(): Promise<unknown[]> {
+  return [
+    await query("select * from product_overrides where product_id = 'touchable'"),
+    await query("select * from stock_levels where product_id = 'touchable'"),
+    await query("select * from stock_moves where product_id = 'touchable' order by id"),
+  ];
+}
+
+const WITH_CONTENT = { ...CLEAR_OK, testContent: true };
+
+describe("--test-content", () => {
+  beforeEach(seedTestContent);
+
+  it("deletes every code, set, post, letter and own product — exactly those", async () => {
+    const report = await run(WITH_CONTENT);
+    for (const t of ["promo_codes", "promo_code_uses", "bundles", "posts", "newsletters", "newsletter_sends", "custom_products"]) {
+      expect(await count(t), t).toBe(0);
+    }
+    // only the imported product's rows are left in the product-keyed tables
+    const left = async (table: string) =>
+      (await query<{ product_id: string }>(`select distinct product_id from ${table} order by product_id`)).map((r) => r.product_id);
+    expect(await left("product_overrides")).toEqual(["touchable"]);
+    expect(await left("stock_levels")).toEqual(["touchable"]);
+    expect(await left("stock_moves")).toEqual(["touchable"]);
+    // and the rest of the shop is what it always was
+    expect(await count("settings")).toBe(7);
+    expect(await count("mail_optouts")).toBe(2);
+    expect(await count("admin_audit")).toBe(4);
+    expect(report.content!.going).toEqual([
+      "c-davines-cheap-price",
+      "c-gone-long-ago",
+      "c-real-thing",
+      "c-rempire-hoodie",
+      "salon-towel",
+    ]);
+  });
+
+  it("leaves every imported product's edit, count, barcode and history byte-identical", async () => {
+    const before = await importedRows();
+    await run(WITH_CONTENT);
+    expect(await importedRows()).toEqual(before);
+    const lvl = await query<{ qty: number; ean: string }>("select qty::int as qty, ean from stock_levels");
+    expect(lvl).toEqual([{ qty: 11, ean: "4601234567890" }]);
+  });
+
+  it("keeps the own product --keep-product names, with its edits and stock", async () => {
+    const report = await run({ ...WITH_CONTENT, keepProducts: ["c-real-thing"] });
+    expect((await query<{ id: string }>("select id from custom_products")).map((r) => r.id)).toEqual(["c-real-thing"]);
+    const ov = await query<{ product_id: string; price: string }>(
+      "select product_id, price::text as price from product_overrides order by product_id",
+    );
+    expect(ov).toEqual([
+      { product_id: "c-real-thing", price: "25.00" },
+      { product_id: "touchable", price: "21.50" },
+    ]);
+    expect(await count("stock_levels")).toBe(2);
+    expect(await count("stock_moves")).toBe(3);
+    expect(report.content!.kept.map((p) => p.id)).toEqual(["c-real-thing"]);
+    expect(report.content!.going).not.toContain("c-real-thing");
+  });
+
+  it("refuses a --keep-product that names no own product, and changes nothing", async () => {
+    const said = await refusal({ ...WITH_CONTENT, keepProducts: ["c-real-thnig"] });
+    expect(said).toContain("--keep-product c-real-thnig: there is no own product with that id");
+    expect(await count("custom_products")).toBe(4);
+    expect(await count("orders")).toBe(3);
+    // an orphan's left-over rows are not a product either
+    expect(await refusal({ ...WITH_CONTENT, keepProducts: ["c-gone-long-ago"] })).toContain("no own product");
+  });
+
+  it("refuses --keep-product without --test-content, and an id a shell would read", async () => {
+    expect(await refusal({ ...CLEAR_OK, keepProducts: ["c-real-thing"] })).toContain("only means something together with --test-content");
+    expect(await refusal({ ...WITH_CONTENT, keepProducts: ["c-x; rm -rf"] })).toContain("is not a product id");
+    expect(await count("custom_products")).toBe(4);
+  });
+
+  it("refuses to delete an own product that is also an imported one", async () => {
+    // cannot happen through the app (every own id starts with c-); typed into the database, it could
+    expect(catalogueIds().has("touchable")).toBe(true);
+    await query("insert into custom_products (id, brand, name, cat) values ('touchable', 'Kevin.Murphy', 'Touchable', 'hair')");
+    const dry = await run({ testContent: true });
+    expect(formatReport(dry, {})).toContain("! touchable is an own product AND an imported one");
+    expect(await refusal(WITH_CONTENT)).toContain("touchable is an own product AND an imported one");
+    expect(await count("product_overrides")).toBe(4);
+  });
+
+  it("lists every one of them by name in the dry run, and changes nothing", async () => {
+    const counts: Record<string, number> = {};
+    for (const t of ALL_TABLES) counts[t] = await count(t);
+
+    const report = await run({ testContent: true, keepProducts: ["c-real-thing"] });
+    const text = formatReport(report, { launcher: "node --env-file=.env.railway.txt" });
+    for (const t of ALL_TABLES) expect(await count(t), t).toBe(counts[t]);
+
+    expect(text).toContain("TEST CONTENT — deleted too, because --test-content was given");
+    // every promo code, every set name, every post title, every letter subject, every own product id + name
+    for (const s of [
+      "promo codes · 2",
+      "TEST5",
+      "WELCOME10",
+      "sets · 2",
+      "«Дуэт ухода»",
+      "«Придуманный набор»  (off)",
+      "blog posts · 2",
+      "«Как мыть голову»  (published)",
+      "«A draft in the bin»  (in the bin)",
+      "newsletters · 2",
+      "«Скидки осени»  (sent; in the panel: Осенняя рассылка)",
+      "«Проба рассылки»  (draft",
+      "own products · 3",
+      "c-rempire-hoodie",
+      "Rempire — Худи",
+      "Davines — Cheap price  (off sale)",
+      "salon-towel",
+      "Rempire — Полотенце",
+      "left-over rows of own products that no longer exist · 1",
+      "c-gone-long-ago",
+      "KEPT by --keep-product · 1",
+      "c-real-thing",
+    ]) {
+      expect(text).toContain(s);
+    }
+    expect(text).toContain("with their 2 product edit row(s), 1 stock row(s) (1 with a barcode), 1 stock move(s)");
+    // the → column says what is left of each table
+    expect(text).toMatch(/posts\s+2 → 0\s+all of them, --test-content/);
+    expect(text).toMatch(/custom_products\s+4 → 1\s+the own products, --test-content — 1 kept by --keep-product/);
+    expect(text).toMatch(/product_overrides\s+4 → 2\s+only the own products' rows/);
+    expect(text).toMatch(/stock_levels\s+3 → 2\s+only the own products' rows/);
+    // the pasteable line carries the flag and the keep, in that order
+    expect(text).toContain(
+      `  node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}" --test-content --keep-product c-real-thing --gift-cards-are-test-cards`,
+    );
+    expect(text).toContain("only after the owner has read every name under TEST CONTENT");
+  });
+
+  it("reports what it deleted after the clear, by name", async () => {
+    const text = formatReport(await run(WITH_CONTENT), {});
+    expect(text).toContain("TEST CONTENT — deleted, because --test-content was given");
+    expect(text).toContain("«Придуманный набор»");
+    expect(text).toMatch(/custom_products\s+4 → 0/);
+    expect(text).toMatch(/product_overrides\s+4 → 1/);
+    expect(text).toContain("promo_codes, newsletters  deleted whole by --test-content");
+    expect(text).toContain("imported products' edits and stock row by row");
+  });
+
+  it("takes the own products' stock rows even when --stock takes the rest", async () => {
+    /* The launch-day line (Dim, 28.09.2026): --stock --test-content together. */
+    const dry = formatReport(await run({ stock: true, testContent: true }), {});
+    expect(dry).toContain(`--confirm "${CONFIRM_PHRASE}" --stock --test-content --gift-cards-are-test-cards`);
+    expect(dry).toMatch(/stock_levels\s+3 → 0\n/);
+    expect(dry).toContain("(The whole stock goes too, but that is --stock — see STOCK above.)");
+    await run({ ...WITH_CONTENT, stock: true });
+    expect(await count("stock_levels")).toBe(0);
+    expect(await count("stock_moves")).toBe(0);
+    expect(await count("product_overrides")).toBe(1);
+  });
+
+  it("without the flag: nothing of it moves, and the dry run only counts it", async () => {
+    const dry = formatReport(await run({}), {});
+    expect(dry).toContain(
+      "TEST CONTENT — not touched without --test-content · 2 promo code(s), 2 set(s), 2 blog post(s), 2 newsletter(s), 4 own product(s)",
+    );
+    expect(dry).not.toContain("«Придуманный набор»");
+    expect(dry).not.toContain("--test-content --");
+    expect(dry).toContain(`--confirm "${CONFIRM_PHRASE}" --gift-cards-are-test-cards`);
+
+    await run(CLEAR_OK);
+    expect(await count("custom_products")).toBe(4);
+    expect(await count("product_overrides")).toBe(4);
+    expect(await count("stock_levels")).toBe(3);
+    expect(await count("stock_moves")).toBe(4);
+    expect(await count("bundles")).toBe(2);
+    expect(await count("posts")).toBe(2);
+    expect(await count("promo_codes")).toBe(2);
+    expect(await count("newsletters")).toBe(2);
+  });
+
+  it("puts the flags in one fixed order wherever a line is printed", () => {
+    expect(flagsLine({ testContent: true, keepProducts: ["c-a", "c-b"], giftCardsAreTest: true, stock: true })).toBe(
+      " --stock --test-content --keep-product c-a --keep-product c-b --gift-cards-are-test-cards",
+    );
+    expect(flagsLine({})).toBe("");
+  });
+
+  it("deletes its tables after their children and by row where a product owns the row", () => {
+    const tc = TEST_CONTENT_TABLES as unknown as string[];
+    expect([...tc].sort()).toEqual(["bundles", "newsletters", "posts", "promo_codes"]);
+    // promo_code_uses and newsletter_sends are on the always-clear list, which runs first
+    expect(deleteOrder).toContain("promo_code_uses");
+    expect(deleteOrder).toContain("newsletter_sends");
+    const keys = (OWN_PRODUCT_KEYS as unknown as Array<[string, string]>).map(([t]) => t);
+    expect(keys).toEqual(["stock_moves", "stock_levels", "product_overrides", "custom_products"]);
+    for (const t of [...tc, ...keys]) expect(plan.find((p) => p.table === t)?.verdict).not.toBe("clear");
+  });
+});
+
 /* ---------- the proof ---------------------------------------------------- */
 
 describe("verification", () => {
@@ -687,7 +942,64 @@ describe("verification", () => {
     after.tables.settings = { n: 7, fp: "fp:settings-after" };
     expect(verify(fixture(), after, {})).toEqual([]);
   });
+
+  it("knows --test-content: quiet when only the named rows went", () => {
+    expect(verify(contentFixture(false), contentFixture(true), { testContent: true })).toEqual([]);
+    // the same after-picture without the flag is four KEEP tables that emptied
+    const said = verify(contentFixture(false), contentFixture(true), {}).join(" | ");
+    expect(said).toContain("posts: 1 row(s) before, 0 after");
+    expect(said).toContain("custom_products: 2 row(s) before, 1 after");
+  });
+
+  it("knows --test-content: an imported product's row that moved is a rollback", () => {
+    const after = contentFixture(true);
+    after.own!.product_overrides.kept = { n: 1, fp: "moved" };
+    expect(verify(contentFixture(false), after, { testContent: true }).join(" | ")).toContain(
+      "product_overrides: a row that belongs to no deleted own product changed",
+    );
+  });
+
+  it("knows --test-content: an own product's row left behind, or a content table not empty, is a rollback", () => {
+    const left = contentFixture(true);
+    left.own!.stock_levels.going = { n: 1, fp: "(count only)" };
+    expect(verify(contentFixture(false), left, { testContent: true }).join(" | ")).toContain(
+      "stock_levels: 1 row(s) of the deleted own products are still there",
+    );
+    const notEmpty = contentFixture(true);
+    notEmpty.tables.posts = { n: 1, fp: "x" };
+    expect(verify(contentFixture(false), notEmpty, { testContent: true }).join(" | ")).toContain(
+      "posts: should be empty, still has 1 row(s)",
+    );
+  });
+
+  it("will not call --test-content verified without the row-by-row picture", () => {
+    const after = contentFixture(true);
+    delete after.own;
+    expect(verify(contentFixture(false), after, { testContent: true }).join(" | ")).toContain("no row-by-row picture");
+  });
 });
+
+/**
+ * fixture() for --test-content: before, every product-keyed table has one
+ * imported row and one own row; after, the own rows and the four content
+ * tables are gone and everything else is the same.
+ */
+function contentFixture(after: boolean): Snapshot {
+  const s = fixture();
+  s.own = {};
+  for (const [t] of OWN_PRODUCT_KEYS as unknown as Array<[string, string]>) {
+    s.tables[t] = { n: after ? 1 : 2, fp: `fp:${t}:${after ? "after" : "before"}` };
+    s.own[t] = { kept: { n: 1, fp: `kept:${t}` }, going: { n: after ? 0 : 1, fp: "(count only)" } };
+  }
+  if (after) {
+    for (const t of clearList) s.tables[t] = { n: 0, fp: "-" };
+    for (const t of TEST_CONTENT_TABLES as unknown as string[]) s.tables[t] = { n: 0, fp: "-" };
+    s.tables.settings = { n: 7, fp: "fp:settings-after" };
+    s.promoCodesKept = { n: 0, fp: "-" };
+    s.newslettersKept = { n: 0, fp: "-" };
+  }
+  return s;
+}
 
 /**
  * A hand-made snapshot, the shape snapshot() returns, with the clear tables

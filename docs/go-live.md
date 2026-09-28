@@ -91,7 +91,7 @@ this is a go-live dependency, not a later job.
 | C | The eight answered go-live decisions (four shipping, four payment). Built 18–19.09; carton 25 × 18 × 8, default locker S (migration 203). | done 19.09 |
 | C | Harden every path the sandbox cannot exercise, and `docs/montonio-untested.md`. | done |
 | C | The 13 end-to-end failures — merge `0fbd940`. | done 18.09 |
-| C | The go-live reset tool and `docs/go-live-reset.md`. **27.09:** order numbers continue after the highest one instead of restarting at R-100001 (the live hour's numbers are already in the live Montonio account); the command carries `--env-file=.env.railway.txt` and says which line is missing when Railway's certificate cannot be verified. | done |
+| C | The go-live reset tool and `docs/go-live-reset.md`. **27.09:** order numbers continue after the highest one instead of restarting at R-100001 (the live hour's numbers are already in the live Montonio account); the command carries `--env-file=.env.railway.txt` and says which line is missing when Railway's certificate cannot be verified. **28.09:** `--test-content` (every promo code, set, post, newsletter and own product with its edits and stock rows, listed by name in the dry run, `--keep-product <id>` to spare one) and the storefront hiding the blog and «Наборы» while they are empty. | done |
 | C | **`public/shop/legal.js`** — it held the old Shopify store's policies, naming Shopify as the data processor 22 times, on every page. It is not dead weight (the router's list of policy pages, the Russian titles ET/EN translate, the last-resort text), so it was replaced: now the shop's own Russian pages word for word, written from `legal.ru.js` by `tools/sync-legal-fallback.mjs`, a test keeps the two identical. | done 27.09 |
 | C | **The Shopify stock import tool** — `tools/import-shopify-stock.mjs`, reading Shopify's own inventory export; the two merch decisions of 26.09 in `tools/shopify-stock-owner-rows.json`. On the 26.09 capture: 322 rows, the same as the draft. | done 27.09 |
 | C | ~~«Проверьте баланс в его панели»~~ — removed 18.09; each documented refusal has its own sentences (`src/lib/montonio-problems.ts`). | done |
@@ -107,10 +107,10 @@ why it is phase A on `/golive/`.
 | | | status |
 |---|---|---|
 | C | **Final pass, one push**: the whole unit suite and the e2e suite; a local production prerender check — `PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check` (not committed; put the generated files back); `index.html` has no `localhost:` and exactly two `boot.js` references. **The same push removes the footer «Админка» link** (`.ftr__admin` in `public/shop2/app.js`) — Renat is told first and uses `/admin`. | to do |
-| D R | **Delete everything made during the checks.** The reset keeps own products, product edits, promo codes, sets, blog posts, newsletters and settings, so by hand: the test products (`c-davienness-nelya-shampun` «50 кг» €500, `c-davines-cheap-price`, `c-davines-ochen-klassnyj-shampun` «Очень классный» €10, «Claude test товар», the €1 product `c-rempire-testovyj-platezh-ne-prodaetsya`); the hoodie's test prices (`c-rempire-hoodie` XXS €1, XXL €100); test promo codes (CLAUDE10 / CLAUDETEST10-style) and any 100 % code; test sets, blog posts and newsletter drafts. Gift cards go only with `--gift-cards-are-test-cards` — check them in the dry run. Then `/feed/google-en.xml` on staging shows none of it. | to do |
+| D R | **Delete everything made during the checks — the reset does it.** Decided 28.09.2026 (Dim): every promo code, set, blog post and newsletter, and all eight own products (`c-…`, none of them in Shopify) with their price edits and stock rows, are test data; so are every stock count, stock move and barcode on staging, and all seven gift cards. The reset takes them with `--test-content --stock --gift-cards-are-test-cards`; the dry run with `--stock --test-content` lists every code, set, post title, newsletter subject and own product by name — Dim and Renat read the list and approve it (a real own product Renat adds before the day is kept with `--keep-product <id>`). **Stays:** imported products and their prices and edits, settings, letter texts, delivery prices, the bank list; the stock comes back from Shopify right after (step 4 of the day). Blog and «Наборы» hide themselves while there is no published post / active set and come back by themselves with the first one. Nothing by hand. After the reset, `/feed/google-en.xml` shows no own product. | to do |
 | D R | **The last meeting with Renat.** 1) Which automatic letters go on right after the reset: unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. 2) How courier parcels leave — Montonio cannot order a pickup by API: a recurring pickup per carrier in the Montonio account, or a drop-off. 3) How a refund is paid after the payout (Stage 1, last row). 4) What Renat must know: a full refund returns every line to stock (write off the unsellable by hand), a partial one moves neither stock nor points; the footer link goes, sign in at `rempireshop.com/admin`. | to do |
 | D | **Close out the live-hour orders** (R-100095…R-100098 are real money; the reset deletes them and later refund notices for them are ignored): the refunds completed in Montonio; Montonio's report kept for the accountant; the DPD parcel 3888e013 cancelled if never handed over. Renat presses nothing on old orders — «Создать этикетку» on a sandbox-paid order books a real parcel. The sandbox refunds turning «overdue» ~29.09 are expected until the reset. | to do |
-| D | **Rehearse the reset**: `.env.railway.txt` (two lines), one `db-backup`, a dry run — `node --env-file=.env.railway.txt tools/go-live-reset.mjs`. | to do |
+| D | **Rehearse the reset**: `.env.railway.txt` (two lines), one `db-backup`, a dry run — `node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content`; read the TEST CONTENT list with Renat. | to do |
 | D C | **Rehearse the stock import**: Shopify → Products → Inventory → Export (all variants, CSV); `node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu` with `RMP_ADMIN_COOKIE`. Writes nothing. «NEED A DECISION» should be empty. | to do |
 | D | **Vercel environment**: `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_TO`, `SESSION_SECRET` (never rotate), `DATABASE_SSL_*`, `MONTONIO_ENV=live` + the live pair; `PAYMENT_PROVIDER` unset. `PUBLIC_BASE_URL` is the staging host today and changes only on the day. Crons (`vercel.json`): flows `0 7 * * *` UTC = 10:00 Tallinn (09:00 after 25.10), events retention `30 3 * * *`. Region `fra1`. | to do |
 | D | **Add `rempireshop.com` and `www.rempireshop.com` in Vercel** (Settings → Domains): www → 308 → apex; apex is the address `PUBLIC_BASE_URL` will name, so Montonio's notices arrive with no redirect. `rempireshop.diipsolutions.eu` stays attached with **no** redirect. Write down the A and CNAME values Vercel asks for. «Invalid configuration» until DNS moves is normal. | to do |
@@ -127,10 +127,14 @@ are only correct together. On `/golive/` each is its own numbered row.
 1. **Backup.** `node --env-file=.env.railway.txt tools/db-backup.mjs` — a ✓ line
    and dozens of tables. No ✓ — stop.
 2. **Reset — before 10:00 or after 11:00 Tallinn** (the flows cron fires in the
-   10:00 hour; the 09:00 hour after 25.10). Dry run, read it, paste the printed
-   `--clear --confirm "…"` line — **without `--stock`** (the 153 bound barcodes
-   stay; step 4 sets the counts). Dry run again: `0` everywhere under CLEAR.
-   Open «Подключения». Order numbers continue after the highest one.
+   10:00 hour; the 09:00 hour after 25.10). Dry run **with `--stock
+   --test-content`**, read it (the TEST CONTENT list by name), paste the
+   printed line — `--clear --confirm "…" --stock --test-content
+   --gift-cards-are-test-cards` (decided 28.09.2026: the stock counts, moves
+   and the 10 barcodes are test data too; step 4 writes the real counts into
+   the empty «Склад»). Dry run again: `0` everywhere under CLEAR, STOCK and
+   TEST CONTENT. No «Блог» and no «Наборы» on the storefront. Open
+   «Подключения». Order numbers continue after the highest one.
    `docs/go-live-reset.md`.
 3. **Automatic letters on** — exactly what the meeting with Renat agreed
    («Маркетинг → Письма»), never before the reset.
@@ -153,7 +157,10 @@ are only correct together. On `/golive/` each is its own numbered row.
    «(current)»; «On hand (new)» ignored) or the older one with a column per
    location (available only). Hand decisions: `tools/shopify-stock-owner-rows.json`
    (`--owner-rows <file>` for another). «мало» only on the last unit
-   (threshold 1, migration 215). After the reset because the reset empties the
+   (threshold 1, migration 215). Right after the reset, which ran with
+   `--stock`: «Склад» is empty, every size reads «не считали → N» and nothing
+   is overwritten; until this runs the storefront shows the manual in/low/out
+   marks. After the reset also because the reset empties the
    test «Сообщить, когда появится» requests. Shopify keeps selling until DNS:
    an order there after the export is written off by hand (step 13).
 5. **`PUBLIC_BASE_URL=https://rempireshop.com` → Redeploy → READY.** That

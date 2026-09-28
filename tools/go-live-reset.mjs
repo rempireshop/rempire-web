@@ -14,6 +14,12 @@
  *   node --env-file=.env.railway.txt tools/go-live-reset.mjs                 # DRY RUN — prints, changes nothing
  *   node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "…"   # the real thing
  *
+ * On launch day both carry `--stock --test-content` as well (the owner's
+ * decisions of 28.09.2026): every promo code, set, blog post and newsletter,
+ * every own product with its edits, and every stock count and barcode on
+ * staging is test data too — the real counts come from Shopify right after
+ * (tools/import-shopify-stock.mjs). See TEST CONTENT below.
+ *
  * Read docs/go-live-reset.md before running it. Its first instruction is to
  * take a copy of the database (tools/db-backup.mjs) and check that it reads
  * back, because nothing here is undoable and a rollback is a restore.
@@ -43,7 +49,10 @@
  *    morning, not be discovered on Monday.
  *
  * 4. WHERE THE SCHEMA CANNOT DECIDE, THE TOOL DOES NOT EITHER. It prints what
- *    it found, and asks for a flag. `--stock` is the whole of that today.
+ *    it found, and asks for a flag. `--stock` is one; `--test-content` is the
+ *    other — the database cannot tell a made-up set or a «Claude test товар»
+ *    from the real thing, the owner can, and on 28.09.2026 he did: all of it
+ *    is test data. The dry run prints every one by name before he agrees.
  *
  * ---------------------------------------------------------------------------
  * THE TWO THAT MATTER MOST
@@ -67,6 +76,7 @@
  * 09:00 on the day the shop first appears in public. At 3–5 orders a month the
  * table is a few thousand rows; there is nothing to save by deleting it.
  */
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { migrate, sslFor } from "./migrate.mjs";
 
@@ -100,47 +110,63 @@ export const PLAN = [
     why:
       "Per-product edits the owner made in the admin: price, the manual in/low/out badge, SEO title and " +
       "description, subcategory, variant photos, video. The catalogue in src/data is the base; this table " +
-      "is what he changed about it. Deleting it silently reverts every price edit he has made.",
+      "is what he changed about it. Deleting it silently reverts every price edit he has made. The one " +
+      "exception is --test-content, and it is by row, never by table: the rows keyed to an own product that " +
+      "flag deletes go with that product; every imported product's row is fingerprinted and must not move.",
   },
   {
     table: "custom_products",
     verdict: "keep",
-    why: "Products that exist only here, not in the Shopify-derived catalogue. He typed them; they are stock, not tests.",
+    content: true,
+    why:
+      "Products that exist only here, not in the Shopify-derived catalogue (ids `c-…`). Kept by default. On " +
+      "28.09.2026 the owner said all eight on staging are test products — none exists in Shopify — so " +
+      "--test-content deletes every row, with its product_overrides and stock rows, except the ids named by " +
+      "--keep-product (for a real own product Renat adds before the night).",
   },
   {
     table: "bundles",
     verdict: "keep",
+    content: true,
     why:
       "Set definitions (name and description in three languages, contents, price or discount). Seeded by " +
-      "120_bundles.sql and edited in the admin since. Catalogue, not orders.",
+      "120_bundles.sql and edited in the admin since. Catalogue, not orders — kept by default. --test-content " +
+      "deletes them all: the owner's decision of 28.09.2026 is that every set on staging is made up, and the " +
+      "storefront hides «Наборы» by itself while there is no active set.",
   },
   {
     table: "posts",
     verdict: "keep",
+    content: true,
     why:
       "Blog articles, drafts and published alike, in three languages with covers and SEO. 071_blog_samples.sql " +
       "seeded some and he has been rewriting them since; nothing here distinguishes a seeded post from one he " +
-      "wrote, and it must not — both are the shop's content.",
+      "wrote, and it must not — both are the shop's content. Kept by default; --test-content deletes every " +
+      "row (the owner's decision of 28.09.2026: all of them are test texts), and the storefront hides the blog " +
+      "by itself until the first post is published. Tags and product cards are columns, not child tables.",
   },
   {
     table: "promo_codes",
     verdict: "keep",
+    content: true,
     why:
       "Promo code DEFINITIONS — the code, the percent, the floor, the dates, the cap. These are marketing he " +
       "set up, not something a test order created. The `used` counter on them is a different matter: it counts " +
       "rows in promo_code_uses, which this tool empties, so it is reset to 0 in the same transaction. A code " +
-      "with max_uses = 10 that was tested ten times would otherwise be dead on launch morning.",
+      "with max_uses = 10 that was tested ten times would otherwise be dead on launch morning. --test-content " +
+      "deletes the definitions too (28.09.2026: every code on staging is a test code).",
   },
   {
     table: "newsletters",
     verdict: "keep",
+    content: true,
     why:
       "The letters themselves — his title, subject and body in three languages and the product cards under " +
       "them. Kept, because he wrote them. But the SEND STATE on them is cleared in the same transaction: a " +
       "letter with status='sent' is frozen for good (src/lib/newsletters.ts refuses to edit, delete or re-send " +
       "one — 'already_sent'), so a test blast would leave his text permanently unusable, and sent_count would " +
       "go on reporting deliveries to addresses that no longer exist. Status back to 'draft', counters to 0, " +
-      "text untouched.",
+      "text untouched. --test-content deletes the letters themselves (28.09.2026: all seven are test texts).",
   },
   {
     table: "mail_optouts",
@@ -351,7 +377,11 @@ export const PLAN = [
       "stock_moves. One thing the owner must be told before he reaches for that flag, and the dry run prints it: " +
       "this table also holds the BARCODES. tools/seed-stock.mjs found a real EAN on none of the 153 harvested " +
       "Shopify variants (they all say \"NA\"), so every barcode in here was scanned or typed by a person in the " +
-      "admin and there is nowhere to fetch it back from.",
+      "admin and there is nowhere to fetch it back from. (On 28.09.2026 the owner answered for staging: every " +
+      "count and every barcode there is a test, the launch-day reset runs WITH --stock, and the Shopify import " +
+      "writes the real counts straight after.) --test-content is not --stock: it deletes only the " +
+      "rows of the own products it deletes (in both stock tables, as a pair), and every imported product's " +
+      "count, barcode and history is fingerprinted and must come out identical.",
   },
   {
     table: "stock_moves",
@@ -413,6 +443,34 @@ export const DELETE_ORDER = [
 /** Both, in this order, and only when --stock. */
 export const STOCK_ORDER = ["stock_moves", "stock_levels"];
 
+/**
+ * --test-content (the owner's decision of 28.09.2026). Four KEEP tables that
+ * are emptied whole — their only children, promo_code_uses and
+ * newsletter_sends, are on DELETE_ORDER and are gone before these run. Posts
+ * and bundles have no child tables: a post's tags and product cards and a
+ * set's contents are columns on the row itself.
+ */
+export const TEST_CONTENT_TABLES = ["promo_codes", "bundles", "posts", "newsletters"];
+
+/**
+ * …and the own products, deleted BY ROW from the four tables keyed to a
+ * product id, children first (none of them has a foreign key; the order is
+ * the one a person would reason in). Every other row of these tables belongs
+ * to an imported product and is fingerprinted before and after.
+ */
+export const OWN_PRODUCT_KEYS = [
+  ["stock_moves", "product_id"],
+  ["stock_levels", "product_id"],
+  ["product_overrides", "product_id"],
+  ["custom_products", "id"],
+];
+
+/** src/lib/custom-products.ts CUSTOM_PREFIX — how every own product id starts. */
+export const OWN_PREFIX = "c-";
+
+/** What an id given to --keep-product may look like: the shape isCustomId() allows, and never anything a shell would read. */
+const KEEP_ID = /^[a-z0-9][a-z0-9-]{0,79}$/;
+
 /** Long, ASCII, and impossible to type by accident or to half-mean. */
 export const CONFIRM_PHRASE = "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA";
 
@@ -437,8 +495,10 @@ async function rows(db, sql, params) {
  *
  * Identifiers are checked against IDENT and every one of them is a constant in
  * this file — nothing here ever sees a value from the database or the CLI.
+ * Values (the own product ids of --test-content) travel as `params`, never
+ * inside the SQL text.
  */
-async function stats(db, table, { cols, where, countOnly } = {}) {
+async function stats(db, table, { cols, where, params, countOnly } = {}) {
   if (!IDENT.test(table)) throw new Error(`go-live-reset: refusing to touch «${table}»`);
   if (cols) for (const c of cols) if (!IDENT.test(c)) throw new Error(`go-live-reset: bad column «${c}»`);
   /* A table on the clear list is proved by its count alone — «0 rows» needs no
@@ -448,7 +508,7 @@ async function stats(db, table, { cols, where, countOnly } = {}) {
   const fp = countOnly
     ? "'(count only)' as fp"
     : `coalesce(md5(string_agg(${row}, chr(1) order by ${row})), '-') as fp`;
-  const r = await rows(db, `select count(*)::int as n, ${fp} from ${table} t${where ? ` where ${where}` : ""}`);
+  const r = await rows(db, `select count(*)::int as n, ${fp} from ${table} t${where ? ` where ${where}` : ""}`, params);
   return { n: Number(r[0]?.n ?? 0), fp: String(r[0]?.fp ?? "-") };
 }
 
@@ -486,11 +546,30 @@ function settingsWhere(keys) {
   return `t.key not in (${keys.map((k) => `'${k}'`).join(", ")})`;
 }
 
-/** Every number the verification compares, before and after. */
-async function snapshot(db, settingsKeysGoing) {
+/**
+ * With --test-content, the four product-keyed tables lose exactly the own
+ * products' rows. Two pictures per table: the rows that must NOT move (every
+ * imported product's edits, counts, barcodes and history, and the own products
+ * --keep-product spared) with a fingerprint, and the rows that must be gone,
+ * by count. `going` is a list of ids read from the database — a parameter,
+ * never text in the SQL.
+ */
+async function ownProductStats(db, going) {
+  const out = {};
+  for (const [table, col] of OWN_PRODUCT_KEYS) {
+    out[table] = {
+      kept: await stats(db, table, { where: `not (t.${col} = any($1::text[]))`, params: [going] }),
+      going: await stats(db, table, { where: `t.${col} = any($1::text[])`, params: [going], countOnly: true }),
+    };
+  }
+  return out;
+}
+
+/** Every number the verification compares, before and after. `going` only with --test-content. */
+async function snapshot(db, settingsKeysGoing, going = null) {
   const tables = {};
   for (const p of PLAN) tables[p.table] = await stats(db, p.table, { countOnly: p.verdict === "clear" });
-  return {
+  const snap = {
     tables,
     /* the two we edit a counter on, fingerprinted without the columns that move */
     promoCodesKept: await stats(db, "promo_codes", { cols: await columnsExcept(db, "promo_codes", PROMO_MUTABLE) }),
@@ -500,6 +579,145 @@ async function snapshot(db, settingsKeysGoing) {
     /* settings minus the rows we are deliberately deleting by key */
     settingsKept: await stats(db, "settings", { where: settingsWhere(settingsKeysGoing) }),
   };
+  if (going) snap.own = await ownProductStats(db, going);
+  return snap;
+}
+
+/* ---------- --test-content: what it would delete, by name ---------------- */
+
+/** A {RU, ET, EN} jsonb value as one readable string — Russian first, as the owner reads it. */
+function pickLang(v) {
+  if (v == null) return "";
+  if (typeof v === "string") {
+    try {
+      return pickLang(JSON.parse(v));
+    } catch {
+      return v;
+    }
+  }
+  if (typeof v !== "object") return String(v);
+  for (const k of ["RU", "ET", "EN"]) if (typeof v[k] === "string" && v[k].trim()) return v[k].trim();
+  return "";
+}
+
+let catalogueIdsMemo = null;
+/**
+ * The imported catalogue's ids (src/data/catalogue.min.json — the file the
+ * shop is built from). An own product is recognised by its row in
+ * custom_products or by the `c-` prefix; this list is the belt to that brace:
+ * an id that is ALSO an imported product is a refusal, because deleting its
+ * product_overrides row would silently revert a real price.
+ */
+export function catalogueIds() {
+  if (catalogueIdsMemo) return catalogueIdsMemo;
+  const file = new URL("../src/data/catalogue.min.json", import.meta.url);
+  const list = JSON.parse(readFileSync(file, "utf8"));
+  catalogueIdsMemo = new Set(list.map((p) => String(p.id)));
+  return catalogueIdsMemo;
+}
+
+/**
+ * Everything --test-content deletes, each by the name the owner knows it by —
+ * so on the night he approves a list, not a number.
+ *
+ * Own products are every custom_products row (the admin cannot hard-delete
+ * one — «Снять с продажи» only hides it) plus any `c-…` id that has
+ * product_overrides or stock rows with no product row behind it any more
+ * (left-overs; nothing can show them, and nothing but this tool would ever
+ * delete them). Minus the ids --keep-product names.
+ */
+export async function testContentLook(db, keep = []) {
+  const keepSet = new Set(keep);
+  const promos = (
+    await rows(
+      db,
+      `select code, kind, value::text as value, used::int as used, active, note from promo_codes order by code`,
+    )
+  ).map((r) => ({
+    code: String(r.code),
+    kind: String(r.kind),
+    value: String(r.value),
+    used: Number(r.used || 0),
+    active: r.active === true || r.active === "t",
+    note: r.note == null ? "" : String(r.note),
+  }));
+  const sets = (await rows(db, "select id, name_ru, active from bundles order by sort, id")).map((r) => ({
+    id: String(r.id),
+    name: r.name_ru == null ? "" : String(r.name_ru),
+    active: r.active === true || r.active === "t",
+  }));
+  const posts = (
+    await rows(
+      db,
+      `select slug, title, status, (deleted_at is not null) as deleted
+         from posts order by coalesce(published_at, created_at), slug`,
+    )
+  ).map((r) => ({
+    slug: String(r.slug),
+    title: pickLang(r.title),
+    status: String(r.status),
+    deleted: r.deleted === true || r.deleted === "t",
+  }));
+  const letters = (await rows(db, "select title, subject, status from newsletters order by created_at, id")).map((r) => ({
+    title: r.title == null ? "" : String(r.title),
+    subject: pickLang(r.subject),
+    status: String(r.status),
+  }));
+  const candidates = (
+    await rows(
+      db,
+      `select p.id, c.brand, c.name, c.active, (c.id is null) as orphan
+         from (select id from custom_products
+               union select product_id from product_overrides where product_id like 'c-%'
+               union select product_id from stock_levels where product_id like 'c-%'
+               union select product_id from stock_moves where product_id like 'c-%') as p
+         left join custom_products c on c.id = p.id
+        order by p.id`,
+    )
+  ).map((r) => ({
+    id: String(r.id),
+    brand: r.brand == null ? "" : String(r.brand),
+    name: r.name == null ? "" : String(r.name),
+    active: r.active === true || r.active === "t",
+    orphan: r.orphan === true || r.orphan === "t",
+  }));
+  const products = candidates.filter((p) => !keepSet.has(p.id));
+  const kept = candidates.filter((p) => keepSet.has(p.id));
+  const going = products.map((p) => p.id);
+  const n = async (sql) => Number((await one(db, sql, [going])).n || 0);
+  const rowsGoing = {
+    product_overrides: await n("select count(*)::int as n from product_overrides where product_id = any($1::text[])"),
+    stock_levels: await n("select count(*)::int as n from stock_levels where product_id = any($1::text[])"),
+    stock_moves: await n("select count(*)::int as n from stock_moves where product_id = any($1::text[])"),
+  };
+  const eans = await n("select count(*)::int as n from stock_levels where product_id = any($1::text[]) and ean is not null");
+
+  const problems = [];
+  for (const k of keep) {
+    if (!candidates.some((p) => p.id === k && !p.orphan)) {
+      problems.push(
+        `--keep-product ${k}: there is no own product with that id. Check the spelling against the list the dry ` +
+          "run prints; imported products are never deleted and need no flag.",
+      );
+    }
+  }
+  let catalogue = null;
+  try {
+    catalogue = catalogueIds();
+  } catch (err) {
+    problems.push(`cannot read src/data/catalogue.min.json to prove no imported product is on the list (${err.message}).`);
+  }
+  if (catalogue) {
+    for (const id of going) {
+      if (catalogue.has(id)) {
+        problems.push(
+          `${id} is an own product AND an imported one. Deleting it would take an imported product's edits and stock ` +
+            "with it; this tool will not. Look at it in the admin, or name it with --keep-product.",
+        );
+      }
+    }
+  }
+  return { promos, sets, posts, letters, products, kept, going, rows: rowsGoing, eans, problems };
 }
 
 /* ---------- what the database can tell us before anything happens -------- */
@@ -698,8 +916,11 @@ export class ResetRefused extends Error {
  */
 export function verify(before, after, opts) {
   const problems = [];
+  const content = Boolean(opts.testContent);
   const clearing = new Set(byVerdict("clear"));
   if (opts.stock) for (const t of STOCK_ORDER) clearing.add(t);
+  if (content) for (const t of TEST_CONTENT_TABLES) clearing.add(t);
+  const byRow = new Set(content ? OWN_PRODUCT_KEYS.map(([t]) => t).filter((t) => !clearing.has(t)) : []);
 
   for (const p of PLAN) {
     const b = before.tables[p.table];
@@ -713,9 +934,28 @@ export function verify(before, after, opts) {
        move. `settings` also legitimately loses rows — the keys named in
        SETTINGS_CLEAR_KEYS — so its size is not compared here. */
     if (p.table === "settings") continue;
+    /* --test-content: the product-keyed tables lose the own products' rows
+       and are checked row by row below, not by size. */
+    if (byRow.has(p.table)) continue;
     if (a.n !== b.n) problems.push(`${p.table}: ${b.n} row(s) before, ${a.n} after — a KEEP table must not change size`);
     if (p.table === "promo_codes" || p.table === "newsletters") continue;
     if (a.fp !== b.fp) problems.push(`${p.table}: contents changed (${b.n} rows both sides, different fingerprint)`);
+  }
+
+  for (const t of byRow) {
+    const b = before.own && before.own[t];
+    const a = after.own && after.own[t];
+    if (!a || !b) {
+      problems.push(`${t}: no row-by-row picture of the own products — --test-content cannot be verified`);
+      continue;
+    }
+    if (a.going.n !== 0) problems.push(`${t}: ${a.going.n} row(s) of the deleted own products are still there`);
+    if (a.kept.n !== b.kept.n || a.kept.fp !== b.kept.fp) {
+      problems.push(
+        `${t}: a row that belongs to no deleted own product changed (${b.kept.n} → ${a.kept.n}) — ` +
+          "imported products' edits and stock must come out identical",
+      );
+    }
   }
 
   /* settings: every row that is not one of the keys removed by name must be
@@ -729,10 +969,11 @@ export function verify(before, after, opts) {
   if (after.tables.settings.n !== after.settingsKept.n) {
     problems.push("settings: the keys this tool was asked to remove are still there");
   }
-  if (after.promoCodesKept.fp !== before.promoCodesKept.fp) {
+  /* With --test-content both tables are on the clearing list and proved empty above. */
+  if (!content && after.promoCodesKept.fp !== before.promoCodesKept.fp) {
     problems.push("promo_codes: something other than the `used` counter changed");
   }
-  if (after.newslettersKept.fp !== before.newslettersKept.fp) {
+  if (!content && after.newslettersKept.fp !== before.newslettersKept.fp) {
     problems.push("newsletters: the letters themselves changed — only the send state may be reset");
   }
   /* Said by name because it is the one that matters most, and because a
@@ -758,6 +999,20 @@ export async function goLiveReset(db, opts = {}) {
   const stock = Boolean(opts.stock);
   const testplan = Boolean(opts.testplan);
   const giftCardsAreTest = Boolean(opts.giftCardsAreTest);
+  const testContent = Boolean(opts.testContent);
+  const keepProducts = [...new Set((opts.keepProducts || []).map((k) => String(k)))];
+
+  /* Before the database is even read: an id that is not the shape of one
+     goes into a pasteable shell line below, and a --keep-product without
+     --test-content means the operator thinks something is being deleted that
+     is not. Both are a question to ask, not a guess to make. */
+  const bad = keepProducts.filter((k) => !KEEP_ID.test(k));
+  if (bad.length) throw new ResetRefused(bad.map((k) => `--keep-product «${k}» is not a product id (a-z, 0-9 and «-»).`));
+  if (keepProducts.length && !testContent) {
+    throw new ResetRefused([
+      "--keep-product only means something together with --test-content — without it no own product is deleted at all.",
+    ]);
+  }
 
   const schema = await readSchema(db);
   const missing = schemaMissing(schema);
@@ -766,7 +1021,8 @@ export async function goLiveReset(db, opts = {}) {
   if (schemaIssues.length && clear) throw new ResetRefused(schemaIssues);
 
   const settingsKeysGoing = [...SETTINGS_CLEAR_KEYS, ...(testplan ? [SETTINGS_ASK_KEYS.testplan] : [])];
-  const before = await snapshot(db, settingsKeysGoing);
+  const content = testContent ? await testContentLook(db, keepProducts) : null;
+  const before = await snapshot(db, settingsKeysGoing, content ? content.going : null);
   const guard = await giftCardGuard(db);
   const look = await eyeballs(db);
   for (const k of settingsKeysGoing) if (!IDENT.test(k)) throw new Error(`go-live-reset: bad settings key «${k}»`);
@@ -780,6 +1036,11 @@ export async function goLiveReset(db, opts = {}) {
     mode: clear ? "clear" : "dry",
     stock,
     testplan,
+    testContent,
+    keepProducts,
+    /* --test-content's list, by name. Null without the flag. A clear reads it
+       again inside its transaction and reports THAT list — what was deleted. */
+    content,
     schemaIssues,
     before,
     after: null,
@@ -793,6 +1054,8 @@ export async function goLiveReset(db, opts = {}) {
   };
 
   if (!clear) return report;
+
+  if (content && content.problems.length) throw new ResetRefused(content.problems);
 
   if (guard.blocked && !giftCardsAreTest) {
     throw new ResetRefused([
@@ -819,13 +1082,37 @@ export async function goLiveReset(db, opts = {}) {
      comparison means what it says. */
   await db.query("begin isolation level repeatable read");
   try {
-    const beforeTx = await snapshot(db, settingsKeysGoing);
+    /* The list again, in the transaction's own snapshot: what is deleted is
+       what this read says, and the report after the clear names exactly that.
+       A product created between the dry run and this line is on it — the
+       dry run immediately before the clear is the one to read. */
+    let going = null;
+    if (testContent) {
+      const inTx = await testContentLook(db, keepProducts);
+      if (inTx.problems.length) {
+        await db.query("rollback");
+        throw new ResetRefused(["NOTHING WAS CHANGED — the transaction was rolled back.", ...inTx.problems]);
+      }
+      report.content = inTx;
+      going = inTx.going;
+    }
+    const beforeTx = await snapshot(db, settingsKeysGoing, going);
     /* Before the deletes, in the same snapshot — see nextOrderNumber(). */
     const numbers = await nextOrderNumber(db);
     report.orderNumbers = numbers;
 
     for (const t of DELETE_ORDER) await db.query(`delete from ${t}`);
     if (stock) for (const t of STOCK_ORDER) await db.query(`delete from ${t}`);
+
+    /* --test-content. After DELETE_ORDER, so promo_code_uses and
+       newsletter_sends — the only rows pointing at these — are already gone
+       and no `on delete cascade` has anything to follow. The own products go
+       by id, as a parameter: every other row of those tables is an imported
+       product's and is verified untouched below. */
+    if (testContent) {
+      for (const t of TEST_CONTENT_TABLES) await db.query(`delete from ${t}`);
+      for (const [t, col] of OWN_PRODUCT_KEYS) await db.query(`delete from ${t} where ${col} = any($1::text[])`, [going]);
+    }
 
     /* promo_codes.used counts promo_code_uses rows, which are now gone.
        `returning` rather than rowCount: node-postgres calls it rowCount,
@@ -859,9 +1146,9 @@ export async function goLiveReset(db, opts = {}) {
       report.changed.sequence = true;
     }
 
-    const after = await snapshot(db, settingsKeysGoing);
+    const after = await snapshot(db, settingsKeysGoing, going);
     report.after = after;
-    const problems = verify(beforeTx, after, { stock });
+    const problems = verify(beforeTx, after, { stock, testContent });
     if (problems.length) {
       await db.query("rollback");
       report.after = null;
@@ -934,9 +1221,29 @@ export function formatReport(report, { url, launcher = "node" } = {}) {
   }
   L.push("");
 
+  /* With --test-content the rows of these go too; how many, per table, for the → column. */
+  const content = report.testContent ? report.content : null;
+  const goingRows = (t) => {
+    if (!content) return 0;
+    if (TEST_CONTENT_TABLES.includes(t)) return report.before.tables[t].n;
+    if (t === "custom_products") return content.products.filter((p) => !p.orphan).length;
+    return content.rows[t] || 0;
+  };
+
   L.push(`KEEP — the shop, and the records · ${rowsOf("keep").length} tables, ${total("keep")} rows`);
   for (const p of rowsOf("keep")) {
     const b = report.before.tables[p.table].n;
+    const g = goingRows(p.table);
+    if (content && (p.content || p.table === "product_overrides")) {
+      const a = report.after ? report.after.tables[p.table].n : b - g;
+      const note = TEST_CONTENT_TABLES.includes(p.table)
+        ? "all of them, --test-content — see TEST CONTENT"
+        : p.table === "custom_products"
+          ? `the own products, --test-content${content.kept.length ? ` — ${content.kept.length} kept by --keep-product` : ""}`
+          : "only the own products' rows, --test-content — imported products' edits untouched";
+      L.push(`  ${pad(p.table, w)}${padL(b, 7)} → ${a}   ${note}`);
+      continue;
+    }
     const note = p.never
       ? "  never cleared, by any flag"
       : p.table === "settings" && report.settingsKeysPresent.length
@@ -950,8 +1257,9 @@ export function formatReport(report, { url, launcher = "node" } = {}) {
   L.push(`${report.stock ? "STOCK — clearing, because --stock was given" : "ASK — not touched without --stock"} · ${ask.length} tables`);
   for (const p of ask) {
     const b = report.before.tables[p.table].n;
-    const a = report.after ? report.after.tables[p.table].n : report.stock ? 0 : b;
-    L.push(`  ${pad(p.table, w)}${padL(b, 7)} → ${a}`);
+    const a = report.after ? report.after.tables[p.table].n : report.stock ? 0 : b - goingRows(p.table);
+    const note = content && !report.stock && goingRows(p.table) ? "   only the own products' rows, --test-content" : "";
+    L.push(`  ${pad(p.table, w)}${padL(b, 7)} → ${a}${note}`);
   }
   if (report.look.stockMoves.length) {
     L.push(`  moves by reason: ${report.look.stockMoves.map((s) => `${s.reason} ${s.n}`).join(", ")}`);
@@ -965,13 +1273,19 @@ export function formatReport(report, { url, launcher = "node" } = {}) {
   }
   L.push("");
 
+  L.push(...formatTestContent(report));
+
   L.push("ALSO, in the same transaction");
-  L.push(
-    `  promo_codes.used      reset to 0 on ${report.after ? `${report.changed.promoCodes} code(s)` : "the codes that have one"} — definitions kept`,
-  );
-  L.push(
-    `  newsletters           ${report.after ? `${report.changed.newsletters} letter(s)` : "any that were sent or sending"} put back to draft — text kept`,
-  );
+  if (content) {
+    L.push("  promo_codes, newsletters  deleted whole by --test-content — see TEST CONTENT");
+  } else {
+    L.push(
+      `  promo_codes.used      reset to 0 on ${report.after ? `${report.changed.promoCodes} code(s)` : "the codes that have one"} — definitions kept`,
+    );
+    L.push(
+      `  newsletters           ${report.after ? `${report.changed.newsletters} letter(s)` : "any that were sent or sending"} put back to draft — text kept`,
+    );
+  }
   L.push(`  settings keys removed  ${report.settingsKeysPresent.length ? report.settingsKeysPresent.join(", ") : "(none of them are set)"}`);
   if (!report.testplan) L.push("  settings.testplan_answers  KEPT — the acceptance record. --testplan clears it.");
   const on = report.orderNumbers;
@@ -1019,29 +1333,135 @@ export function formatReport(report, { url, launcher = "node" } = {}) {
     /* Carries back whatever was already asked for, so this line can be pasted
        as it stands — the flags are the awkward part to remember, not the
        confirmation, which is right here. */
-    const flags =
-      (report.stock ? " --stock" : "") +
-      (report.testplan ? " --testplan" : "") +
-      (report.guard.blocked ? " --gift-cards-are-test-cards" : "");
+    const flags = flagsLine({ ...report, giftCardsAreTest: report.guard.blocked });
     L.push("Nothing was changed. To do it for real:");
     L.push(`  ${launcher} tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"${flags}`);
     if (report.guard.blocked) L.push("  — and only after you have looked at the gift cards above.");
+    if (content) L.push("  — and only after the owner has read every name under TEST CONTENT.");
   } else {
-    L.push("Done, in one transaction, with every KEEP table verified unchanged before the commit.");
+    L.push(
+      content
+        ? "Done, in one transaction. Everything the flags did not name was verified unchanged before the commit — " +
+            "imported products' edits and stock row by row."
+        : "Done, in one transaction, with every KEEP table verified unchanged before the commit.",
+    );
   }
   return L.join("\n");
+}
+
+/**
+ * The flags a pasteable line carries, in one fixed order. `opts` is the
+ * parsed arguments or a report — both spell them the same way. Keep ids were
+ * checked against KEEP_ID before they got here: nothing a shell would read.
+ */
+export function flagsLine(opts) {
+  return (
+    (opts.stock ? " --stock" : "") +
+    (opts.testplan ? " --testplan" : "") +
+    (opts.testContent ? " --test-content" : "") +
+    (opts.keepProducts || []).map((k) => ` --keep-product ${k}`).join("") +
+    (opts.giftCardsAreTest ? " --gift-cards-are-test-cards" : "")
+  );
+}
+
+/**
+ * The TEST CONTENT block. With the flag: every promo code, set, post,
+ * newsletter and own product by name — the list the owner approves on the
+ * night. Without it: one line of counts, and how to see the names.
+ */
+export function formatTestContent(report) {
+  const L = [];
+  const t = report.before.tables;
+  if (!report.testContent || !report.content) {
+    L.push(
+      `TEST CONTENT — not touched without --test-content · ${t.promo_codes.n} promo code(s), ${t.bundles.n} set(s), ` +
+        `${t.posts.n} blog post(s), ${t.newsletters.n} newsletter(s), ${t.custom_products.n} own product(s)`,
+    );
+    L.push("  Run the dry run with --test-content to see every one of them by name.");
+    L.push("");
+    return L;
+  }
+  const c = report.content;
+  const dry = report.mode === "dry";
+  const q = (s) => (s ? `«${s}»` : "(no name)");
+  /* One column per list, as wide as its longest id plus two — a 44-letter
+     product id must not run into its own name. */
+  const col = (xs) => Math.max(0, ...xs.map((x) => x.length)) + 2;
+  L.push(
+    dry
+      ? "TEST CONTENT — deleted too, because --test-content was given (the owner's decision, 28.09.2026)"
+      : "TEST CONTENT — deleted, because --test-content was given",
+  );
+  L.push(`  promo codes · ${c.promos.length}`);
+  const wc = col(c.promos.map((p) => p.code));
+  for (const p of c.promos) {
+    const v = p.kind === "percent" ? `${Number(p.value)} %` : `${p.value} EUR`;
+    L.push(`      ${pad(p.code, wc)}${v}, used ${p.used}${p.active ? "" : ", off"}${p.note ? `  — ${p.note}` : ""}`);
+  }
+  L.push(`  sets · ${c.sets.length}`);
+  const ws = col(c.sets.map((s) => s.id));
+  for (const s of c.sets) L.push(`      ${pad(s.id, ws)}${q(s.name)}${s.active ? "" : "  (off)"}`);
+  L.push(`  blog posts · ${c.posts.length}`);
+  const wp = col(c.posts.map((p) => p.slug));
+  for (const p of c.posts) {
+    const state = p.deleted ? "in the bin" : p.status === "published" ? "published" : p.status;
+    L.push(`      ${pad(p.slug, wp)}${q(p.title)}  (${state})`);
+  }
+  L.push(`  newsletters · ${c.letters.length}`);
+  for (const n of c.letters) L.push(`      ${q(n.subject)}  (${n.status}${n.title ? `; in the panel: ${n.title}` : ""})`);
+  const own = c.products.filter((p) => !p.orphan);
+  const orphans = c.products.filter((p) => p.orphan);
+  L.push(
+    `  own products · ${own.length} — with their ${c.rows.product_overrides} product edit row(s), ` +
+      `${c.rows.stock_levels} stock row(s)${c.eans ? ` (${c.eans} with a barcode)` : ""}, ${c.rows.stock_moves} stock move(s)`,
+  );
+  const wo = col([...own, ...c.kept].map((p) => p.id));
+  for (const p of own) {
+    const name = [p.brand, p.name].filter(Boolean).join(" — ");
+    L.push(`      ${pad(p.id, wo)}${name}${p.active ? "" : "  (off sale)"}`);
+  }
+  if (orphans.length) {
+    L.push(`  left-over rows of own products that no longer exist · ${orphans.length}`);
+    for (const p of orphans) L.push(`      ${p.id}`);
+  }
+  if (c.kept.length) {
+    L.push(`  KEPT by --keep-product · ${c.kept.length}`);
+    for (const p of c.kept) L.push(`      ${pad(p.id, wo)}${[p.brand, p.name].filter(Boolean).join(" — ")}`);
+  } else {
+    L.push("  kept by --keep-product: none. A real own product Renat made is kept with --keep-product <id>.");
+  }
+  for (const p of c.problems) L.push(`  ! ${p}`);
+  L.push("  Stays: every imported product with its prices and edits, settings, letter texts, delivery prices,");
+  L.push(
+    report.stock
+      ? "  the bank list. (The whole stock goes too, but that is --stock — see STOCK above.)"
+      : "  the bank list, and the stock and barcodes of imported products.",
+  );
+  L.push("");
+  return L;
 }
 
 /* ---------- CLI ---------------------------------------------------------- */
 
 function parseArgs(argv) {
-  const out = { clear: false, stock: false, testplan: false, giftCardsAreTest: false, confirm: "" };
+  const out = {
+    clear: false,
+    stock: false,
+    testplan: false,
+    giftCardsAreTest: false,
+    testContent: false,
+    keepProducts: [],
+    confirm: "",
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--clear") out.clear = true;
     else if (a === "--stock") out.stock = true;
     else if (a === "--testplan") out.testplan = true;
     else if (a === "--gift-cards-are-test-cards") out.giftCardsAreTest = true;
+    else if (a === "--test-content") out.testContent = true;
+    else if (a === "--keep-product") out.keepProducts.push(argv[++i] ?? "");
+    else if (a.startsWith("--keep-product=")) out.keepProducts.push(a.slice("--keep-product=".length));
     else if (a === "--confirm") out.confirm = argv[++i] ?? "";
     else if (a.startsWith("--confirm=")) out.confirm = a.slice("--confirm=".length);
     else if (a === "--help" || a === "-h") out.help = true;
@@ -1059,7 +1479,13 @@ const USAGE = `go-live-reset — remove the staging test data before the shop op
   second line, DATABASE_SSL_NO_VERIFY=1 (Railway signs its certificate with a
   private CA) — or DATABASE_SSL_CA with that CA. docs/go-live-reset.md, step 1.
 
-  --stock                        also clear stock_levels AND stock_moves (never one alone) — NOT on launch day
+  --test-content                 also delete every promo code, set, blog post and newsletter, and every own
+                                 product (c-…) with its edits and stock rows — ON launch day (28.09.2026).
+                                 The dry run with it lists every one by name.
+  --keep-product <id>            with --test-content: keep this own product (repeat for more than one)
+  --stock                        also clear stock_levels AND stock_moves (never one alone), barcodes included —
+                                 ON launch day (28.09.2026: every count and barcode on staging is a test;
+                                 tools/import-shopify-stock.mjs writes the real counts right after)
   --testplan                     also clear settings.testplan_answers
   --gift-cards-are-test-cards    proceed past the gift-card liability check
   DB_DRIVER=pglite               run against an empty in-memory Postgres instead
@@ -1135,14 +1561,16 @@ async function main() {
     console.error(`Unknown argument: ${args.unknown}\n\n${USAGE}`);
     process.exit(2);
   }
+  if (args.keepProducts.some((k) => !KEEP_ID.test(k))) {
+    console.error("--keep-product needs an own product's id after it (a-z, 0-9 and «-»), e.g. --keep-product c-rempire-hoodie");
+    process.exit(2);
+  }
   const launcher = launcherFrom(process.execArgv);
   if (args.clear && args.confirm !== CONFIRM_PHRASE) {
     console.error(
       "--clear needs the confirmation, spelled exactly. Paste this line:\n\n" +
         `  ${launcher} tools/go-live-reset.mjs --clear --confirm "${CONFIRM_PHRASE}"` +
-        (args.stock ? " --stock" : "") +
-        (args.testplan ? " --testplan" : "") +
-        (args.giftCardsAreTest ? " --gift-cards-are-test-cards" : "") +
+        flagsLine(args) +
         "\n\nAnd take the database copy first — docs/go-live-reset.md, step 1.",
     );
     process.exit(2);
