@@ -8449,8 +8449,9 @@
     if (g.indexOf("product:") === 0 && g.length > 8) return 'data-go-product="' + esc(g.slice(8)) + '"';
     if (g.indexOf("page:") === 0) return 'data-page="' + esc(g.slice(5)) + '"';
     // a banner (or an assistant answer) pointing at sets while sets are off
-    // would be a link to «Наборы сейчас недоступны» — send it to the catalogue
-    if (g === "bundles") return setsOn() ? 'data-go="bundles"' : 'data-go-cat="all"';
+    // would be a link to «Наборы сейчас недоступны» — and with no set on sale
+    // at all (28.09.2026), to a 404 — so it goes to the catalogue instead
+    if (g === "bundles") return allBundles().length ? 'data-go="bundles"' : 'data-go-cat="all"';
     if (g === "gift" || g === "brands") return 'data-go="' + g + '"';
     return 'data-go-cat="all"';
   }
@@ -10532,6 +10533,11 @@
        if there is no server), which is what makes public/shop/bundles.js the
        fallback rather than a second source. See allBundlesRaw(). */
     bundles: null,
+    /* …and whether that one ask has come back WITHOUT an answer (a 503, a
+       404, no network). Together with `bundles` it says whether the shop
+       knows its sets yet — setsKnown(): an empty shelf is only an empty shelf
+       once it has been asked, never in the tenth of a second before. */
+    bundlesFailed: false,
     goodsTab: "goods",  // admin «Товары»: "goods" | "bundles"
     admBundles: null,   // admin «Товары → Наборы»: [bundle] incl. hidden ones
     admBundleErr: "",
@@ -12643,9 +12649,10 @@
           admin («Товары → Наборы»). Fetched at boot next to /api/overrides/;
           S.bundles holds the answer.
        2. public/shop/bundles.js — the generated static list, loaded by the
-          page itself. It is the offline fallback (a static export, a shop
-          with no database, the seconds before the fetch lands) and it is what
-          the table was seeded from, so the two agree until the first edit.
+          page itself. It is what the table was seeded from, and what a cart
+          line is priced from until the fetch lands. What it may SHOW before
+          then is only what the build saw on sale (SETS_AT_BUILD, below) —
+          since 28.09.2026 every set in it is one the owner called made up.
      The file is optional either way: if neither is there the shop simply has
      no sets, rather than a blank page.
 
@@ -12671,9 +12678,53 @@
     if (S.bundles) return S.bundles;                       // the API answered
     return typeof BUNDLES === "undefined" ? [] : BUNDLES;  // the file it shipped with
   }
+  /* ---- «Наборы» are on the shop only while there is a set to show ----------
+     Dim, 28.09.2026: «Blog and Sets will be off initially, before any blog
+     post is written and any set by Renat done». The go-live reset deletes
+     every set (tools/go-live-reset.mjs --test-content), and from then on an
+     empty shelf must leave no trace: no «Наборы» in the header, no row on
+     the home page or under a category, no «Наборы» crumb over the gift card,
+     and /shop2/sets/ is the shop's ordinary «Страница не найдена» — until
+     Renat switches on his first set, when all of it comes back by itself.
+     There is no switch to remember; the list IS the switch.
+
+     The one hard part is the tenth of a second before /api/bundles/ answers.
+     public/shop/bundles.js — the file the table was once seeded from — is
+     still loaded by every page, and after the reset every set in it is one
+     the owner called made up. Drawn from it, each page load would flash
+     eight sets that do not exist, clickable. So the file is only shown
+     through what the BUILD saw in the database: tools/prerender-shop2.mjs
+     writes the ids of the sets that were on sale into every page it builds
+     (<script id="setsdata">, beside #blogdata), and before the answer lands
+     the shop shows the file's sets that are on that list and no others. A
+     page with no such list — one built at request time, or a build with no
+     database, which writes the file's own ids — falls back to nothing, and
+     the answer fills it in a moment later. bundleById() is not touched: a
+     set already sitting in a cart must stay priceable whatever this says. */
+  var SETS_AT_BUILD = (function () {
+    try {
+      var el = document.getElementById("setsdata");
+      if (!el) return null;
+      var ids = JSON.parse(el.textContent || "null");
+      return Array.isArray(ids) ? ids.map(String) : null;
+    } catch (e) { return null; }
+  })();
+  function bundlesBeforeAnswer() {
+    if (!SETS_AT_BUILD) return [];
+    var file = typeof BUNDLES === "undefined" ? [] : BUNDLES;
+    return file.filter(function (b) { return SETS_AT_BUILD.indexOf(b.id) >= 0; });
+  }
+  /** Has the shop heard back about its sets — an answer, or a failure to get one? */
+  function setsKnown() { return !!S.bundles || !!S.bundlesFailed; }
+  /** The sets on sale, switch or no switch. No answer (yet, or at all): what
+      the build saw, never the whole file — see the note above. */
+  function setsShelf() {
+    var list = S.bundles ? S.bundles : bundlesBeforeAnswer();
+    return list.filter(function (b) { return b.active !== false; });
+  }
   function allBundles() {
     if (!setsOn()) return [];   // owner switched sets off (admin → Настройки → Магазин)
-    return allBundlesRaw().filter(function (b) { return b.active !== false; });
+    return setsShelf();
   }
   /* Deliberately NOT filtered: see the note above. bundleById() answers for a
      cart line whose set is hidden, switched off, or both. */
@@ -12683,10 +12734,14 @@
     for (var i = 0; i < list.length; i++) if (list[i].id === key) return list[i];
     return null;
   }
-  /** The one a shopper is allowed to open — used by the set page and the cards. */
+  /** The one a shopper is allowed to open — used by the set page and the cards.
+      Asked of allBundles() itself, so a set page follows the same rule as the
+      shelf: nothing the build did not see is shown before the answer lands. */
   function shownBundleById(id) {
-    var b = bundleById(id);
-    return b && setsOn() && b.active !== false ? b : null;
+    var key = String(id || "").replace(/^bundle:/, "");
+    var list = allBundles();
+    for (var i = 0; i < list.length; i++) if (list[i].id === key) return list[i];
+    return null;
   }
   /* ---- what a set's parts are worth right now -----------------------------
      `it.stock` and `b.stock` are a SNAPSHOT: the server computes them when
@@ -12781,10 +12836,16 @@
   }
   /* Read at boot beside /api/overrides/, so an edit in the admin reaches the
      shop on the shopper's next load. A 503/404/offline answer leaves S.bundles
-     null and the static file in charge — never an empty «Наборы». */
+     null and what the build saw in charge (allBundles()); it also marks the
+     sets as known, so a page waiting on the answer stops waiting. */
+  function bundlesUnanswered() {
+    if (S.bundles || S.bundlesFailed) return;
+    S.bundlesFailed = true;
+    if (S.screen === "bundles" || S.screen === "bundle") render();
+  }
   function loadBundles() {
     return apiJson("/api/bundles/", FEED_FETCH).then(function (r) {
-      if (r.status !== 200 || r.body.ok !== true || !Array.isArray(r.body.bundles)) return;
+      if (r.status !== 200 || r.body.ok !== true || !Array.isArray(r.body.bundles)) { bundlesUnanswered(); return; }
       var fresh = hydrateBundles(r.body.bundles);
       /* The route answers with the sets ON SALE. A set missing from it — the
          owner switched it off, or deleted it — can still be sitting in
@@ -12816,7 +12877,7 @@
       if (S.cart.length !== before) persist();
       if (S.screen === "checkout") { patchSummary(); return; }
       render();
-    }).catch(noop);
+    }).catch(bundlesUnanswered);
   }
   function bundleTitle(b) { return (b.title && (b.title[S.lang] || b.title.RU)) || b.id; }
   function bundleDesc(b) { return (b.desc && (b.desc[S.lang] || b.desc.RU)) || ""; }
@@ -12903,15 +12964,19 @@
   function screenBundles() {
     if (!setsOn()) return setsOffHTML();
     var list = allBundles();
+    /* An empty list here only ever means «not answered yet»: once the shop
+       knows it has no set, settleEmptyScreens() has already made this page
+       the ordinary 404 (Dim, 28.09.2026). So nothing is promised under the
+       heading — «Наборы скоро появятся» on an address that is about to
+       become «Страница не найдена» would be a promise for a tenth of a
+       second. */
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / Наборы</div>' +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Наборы</h1>' +
         '<p class="sec__intro">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p>' +
         giftTileHTML() +
-        (list.length
-          ? '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div>"
-          : '<p class="muted">Наборы скоро появятся.</p>') +
+        (list.length ? '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div>" : "") +
       "</section></div>";
   }
 
@@ -13045,12 +13110,12 @@
   function screenGift() {
     return '<div class="wrap wrap--mid">' +
       /* The gift card is NOT a set — it only lives under «Наборы» in the
-         breadcrumb. With sets switched off that crumb is the last visible
-         trace of them anywhere in the shop, so it drops out and the card
-         hangs straight off the home page. Nothing else about this screen
-         changes. */
+         breadcrumb. With sets switched off — or with no set on sale at all
+         (Dim, 28.09.2026) — that crumb is the last visible trace of them
+         anywhere in the shop, so it drops out and the card hangs straight off
+         the home page. Nothing else about this screen changes. */
       '<div class="crumbs"><button data-go="home">Главная</button>' +
-        (setsOn()
+        (allBundles().length
           ? ' / <button data-go="bundles">Наборы</button> / Подарочная карта</div>'
           : " / Подарочная карта</div>") +
       '<section class="sec" style="padding-top:14px">' +
@@ -13106,6 +13171,39 @@
   var BLOG_INFLIGHT = {};         // "list:LANG" / "LANG:slug" -> Promise, so nothing is asked for twice at once
   function blogKey(slug, lang) { return (lang || S.lang) + ":" + slug; }
   function blogList(lang) { return S.blogLists[lang || S.lang] || null; }
+  /* ---- «Блог» is on the shop only while it has an article to show ---------
+     Dim, 28.09.2026: «Blog and Sets will be off initially, before any blog
+     post is written». The go-live reset deletes every post, and an empty
+     blog must leave no trace: no «Блог» in the header, and /shop2/blog/ is
+     the shop's ordinary «Страница не найдена» (the server answers 404 there
+     too — src/lib/blog-page.ts). The first article Renat publishes brings it
+     all back by itself; there is no switch.
+
+     What the shop knows, in order: the list it holds for this language (from
+     the page, from this tab's store, or from /api/blog/, which every page
+     load asks on idle — blogPrefetchSoon); before any of those, whether the
+     BUILD had articles — #blogdata rides on every page the prerender writes
+     only when there was at least one (blogDataScript() in
+     tools/prerender-shop2.mjs), whatever its language. A page with neither
+     shows no «Блог» until the list lands; blogSyncList() then patches the
+     header. */
+  var BLOG_AT_BUILD = (function () {
+    try {
+      var el = document.getElementById("blogdata");
+      var j = el ? JSON.parse(el.textContent || "null") : null;
+      return j && (Number(j.total) > 0 || (Array.isArray(j.posts) && j.posts.length > 0));
+    } catch (e) { return false; }
+  })();
+  function blogShown() {
+    var l = blogList();
+    if (l && !l.failed) return l.posts.length > 0 || Number(l.total) > 0;
+    return !!BLOG_AT_BUILD;   // not asked yet, or the API is down: what the build saw
+  }
+  /** Asked and answered, and there is nothing — the one state that makes /blog/ a 404. */
+  function blogKnownEmpty() {
+    var l = blogList();
+    return !!(l && !l.failed && !l.posts.length && !(Number(l.total) > 0));
+  }
   function blogEntry(slug, lang) { return S.blogPosts[blogKey(slug, lang)]; }
   function blogFresh(x) { return !!(x && x.at && Date.now() - x.at < BLOG_TTL); }
   function blogListItem(slug, lang) {
@@ -13250,9 +13348,15 @@
           next = { posts: j.posts.concat(was.posts.slice(next.perPage)), total: j.total, page: was.page, perPage: next.perPage, at: next.at };
         }
         var changed = !was || was.failed || was.total !== next.total || blogSig(was.posts) !== blogSig(next.posts);
+        var navBefore = S.lang === lang && blogShown();
         S.blogLists[lang] = next;
         blogStoreWrite(lang);
         if (changed && S.lang === lang && (S.screen === "blog" || S.screen === "blogpost")) render();
+        /* «Блог» in the header follows the answer on every other screen too:
+           the first article published since the build puts it there, the last
+           one unpublished takes it away (Dim, 28.09.2026). The header is
+           patched, not the page re-rendered — nothing else on it changed. */
+        else if (S.lang === lang && navBefore !== blogShown() && hdrSlot && hdrSlot.firstChild) patchHeader();
         blogPrefetchPosts(lang);
         return next;
       })
@@ -13616,7 +13720,8 @@
           (en.failed
             ? '<p class="muted" style="margin:16px 0">Блог временно недоступен — попробуйте позже.</p>'
             : '<h1 class="display h1">Статья не найдена.</h1>') +
-          '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' +
+          // no way «back» into a blog that has nothing in it (28.09.2026)
+          (blogShown() ? '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' : "") +
         "</section></div>";
     }
     var featured = productsById(post.products).slice(0, 8);
@@ -14170,7 +14275,8 @@
            stays on sale with sets switched off (docs/features.md). */
         '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
-        '<button data-go="blog" data-nav-blog>Блог</button>' +
+        // only while there is an article to read — blogShown(), 28.09.2026
+        (blogShown() ? '<button data-go="blog" data-nav-blog>Блог</button>' : "") +
       "</nav></header>";
   }
 
@@ -14221,6 +14327,21 @@
       nav.insertBefore(btn, before || null);
     } else if (navSets && !wantSets) {
       navSets.remove();
+    }
+    /* «Блог» the same way, and for the same reason: it is on the shop only
+       while there is an article to read (blogShown(), Dim 28.09.2026), and
+       that can change under a header that is never rebuilt. It is always the
+       last entry, where headerHTML() puts it. */
+    var navBlog = nav && nav.querySelector("[data-nav-blog]");
+    var wantBlog = blogShown();
+    if (nav && wantBlog && !navBlog) {
+      var bb = document.createElement("button");
+      bb.setAttribute("data-go", "blog");
+      bb.setAttribute("data-nav-blog", "");
+      bb.textContent = "Блог";
+      nav.appendChild(bb);
+    } else if (navBlog && !wantBlog) {
+      navBlog.remove();
     }
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
@@ -47527,8 +47648,30 @@
       S.admSetPage || "", S.adminBlogEdit ? 1 : 0, S.newsEdit ? 1 : 0, S.stockMovesOpen ? 1 : 0,
       S.bundleForm ? S.bundleForm.uid || "" : ""].join("|");
   }
+  /* Dim, 28.09.2026: «Blog and Sets will be off initially». An address of a
+     shelf that is known to be empty is the shop's ordinary 404 — the same
+     page, title and noindex as any other address the shop has no page for,
+     and the same status the server gave it (src/lib/blog-page.ts,
+     src/lib/notfound-page.ts). «Known» is the whole condition: before the
+     answer lands the page waits as it always has, because an empty list at
+     that moment means nothing. The address stays what the shopper asked for
+     (pathFor() keeps it for "notfound"). Nothing turns it back: a set or an
+     article published while this page is open is found on the next visit,
+     like any page that did not exist when it was opened. */
+  function settleEmptyScreens() {
+    if ((S.screen === "bundles" || S.screen === "bundle") && setsKnown() && !setsShelf().length) S.screen = "notfound";
+    else if (S.screen === "blog" && blogKnownEmpty()) S.screen = "notfound";
+    /* An article page only once the article itself has been asked for and is
+       not there: the list is cached for a minute, and an article published in
+       that minute must open, not 404 on a list that is a minute old. */
+    else if (S.screen === "blogpost" && blogKnownEmpty()) {
+      var en = blogEntry(S.blogSlug);
+      if (en && !en.post && !en.failed) S.screen = "notfound";
+    }
+  }
   function renderImpl() {
     var body;
+    settleEmptyScreens();
     var asView = admAsViewKey();
     if (asView !== admAsView) { admAsView = asView; admAutosaveFlush(); }
     syncAppManifest();
@@ -53208,6 +53351,16 @@
      browser has is routeHome(), which wipes the letter's address unread. */
   var resumed = resumeCart();
   routeFromPath();
+  /* The server has already answered this address with its 404 page (the
+     `.nf` block renderNotFoundPage() writes) — for /shop2/blog/ and
+     /shop2/sets/ that happens only when the shelf is empty (28.09.2026), and
+     for a set page only when no set is on sale at all. Taking its word here
+     paints the 404 at once, instead of the waiting page for the moment
+     /api/blog/ or /api/bundles/ takes to say the same (settleEmptyScreens). */
+  if (preRendered && preRendered.querySelector(".nf") &&
+      (S.screen === "blog" || S.screen === "bundles" || (S.screen === "bundle" && !setsShelf().length))) {
+    S.screen = "notfound";
+  }
   /* A page that opens ON one of the panel's parked entries — a reload, or the
      phone bringing back a panel it had put to sleep — has lost the trail and
      the cards those entries were parked for, and the page it opens is

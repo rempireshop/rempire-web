@@ -41,7 +41,12 @@ describe("404 — the address the shop has no page for", () => {
       expect(isKnownShopPath([s]), s).toBe(true);
     }
     // the single prerendered pages
-    for (const s of ["sets", "gift", "blog"]) expect(isKnownShopPath([s]), s).toBe(true);
+    for (const s of ["gift", "blog"]) expect(isKnownShopPath([s]), s).toBe(true);
+    /* …and «Наборы», which since 28.09.2026 exists only while a set is on
+       sale (Dim: «Blog and Sets will be off initially») — asked of `bundles`
+       by notFoundPageResponse(), like a set's own page; see the DB half
+       below and tests/empty-shelves.test.ts. */
+    expect(isKnownShopPath(["sets"])).toBe(false);
     // shapes whose id lives in the database and that have a request-time route
     // of their own to 404 it — accepted here (a post published an hour ago
     // must not 404 on this line)
@@ -114,6 +119,12 @@ describe("404 — a set is asked of the `bundles` table", () => {
 
   it("hands the shell, at 200, to a set the shop really sells", async () => {
     const res = await notFoundPageResponse("/shop2/set/beard-start/");
+    expect(res.status).toBe(200);
+    expect(await res.text()).not.toContain("Страница не найдена");
+  });
+
+  it("hands the shell, at 200, to «Наборы» while a set is on sale", async () => {
+    const res = await notFoundPageResponse("/shop2/sets/");
     expect(res.status).toBe(200);
     expect(await res.text()).not.toContain("Страница не найдена");
   });

@@ -168,17 +168,17 @@
       "title": "Ссылки вверху и внизу",
       "steps": [
         "Пролистать вбок ряд ссылок вверху страницы.",
-        "Зайти по очереди в «Наборы», «Подарочная карта», «Блог».",
+        "Зайти по очереди в «Наборы», «Подарочная карта», «Блог» — в те, что есть.",
         "Пролистать до низа страницы и открыть там каждую ссылку.",
         "На планшете долистать до самого низа и посмотреть на «Админку»."
       ],
       "expect": [
-        "«Подарочная карта» стоит сразу за «Наборами».",
-        "Каждая ссылка вверху открывает свою страницу.",
+        "«Подарочная карта» стоит сразу за «Наборами», когда «Наборы» есть.",
+        "«Наборы» и «Блог» в ряду, только пока есть набор и статья.",
+        "Каждая ссылка вверху открывает свою страницу, пустых нет.",
         "Внизу открываются «Доставка и оплата» и «Контакты».",
         "Внизу открываются «Возврат товара», «Правовая информация», «Данные и cookie».",
-        "Круглая кнопка помощника не закрывает «Админку» и строку ©.",
-        "Ни одна ссылка не открывает пустую страницу."
+        "Круглая кнопка помощника не закрывает «Админку» и строку ©."
       ],
       "why": "Ссылка в никуда — это покупатель, ушедший искать ответ в другом месте.",
       "risk": "low",
@@ -187,22 +187,22 @@
         "title": "The links at the top and bottom",
         "steps": [
           "Scroll the row of links at the top sideways.",
-          "Go into «Наборы» (sets), «Подарочная карта» (gift card) and «Блог» in turn.",
+          "Go into «Наборы» (sets), «Подарочная карта» (gift card) and «Блог» in turn — the ones that are there.",
           "Scroll to the bottom of the page and open every link there.",
           "On a tablet scroll right to the bottom and look at «Админка»."
         ],
         "expect": [
-          "«Подарочная карта» sits right after «Наборы».",
-          "Every link at the top opens its page.",
+          "«Подарочная карта» sits right after «Наборы», when «Наборы» is there.",
+          "«Наборы» and «Блог» are in the row only while a set and an article exist.",
+          "Every link at the top opens its page, none of them empty.",
           "At the bottom, «Доставка и оплата» and «Контакты» open.",
           "At the bottom, «Возврат товара», «Правовая информация» and «Данные и cookie» open.",
-          "The round assistant button covers neither «Админка» nor the © line.",
-          "No link opens an empty page."
+          "The round assistant button covers neither «Админка» nor the © line."
         ],
         "why": "A link that goes nowhere is a buyer who left to ask elsewhere."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T09:56:00.000Z"
+      "markedAt": "2026-09-28T15:27:20.649Z"
     },
     {
       "id": "shop-langs",
@@ -890,6 +890,51 @@
         ],
         "why": "Articles bring people from Google for free; a broken one brings nobody."
       }
+    },
+    {
+      "id": "shop-empty-after-reset",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "После чистки: ни «Наборов», ни «Блога»",
+      "steps": [
+        "После чистки перед запуском (с --test-content) открыть магазин на телефоне.",
+        "Посмотреть ряд ссылок вверху и главную страницу.",
+        "Открыть «Подарочная карта» и посмотреть строку над заголовком.",
+        "Открыть адреса /shop2/blog/ и /shop2/sets/.",
+        "Открыть «Все товары» и поискать «Claude» и «hoodie»."
+      ],
+      "expect": [
+        "Вверху нет ни «Наборов», ни «Блога»; «Подарочная карта» на месте.",
+        "На главной нет ряда наборов.",
+        "Над «Подарочной картой» только «Главная», без «Наборов».",
+        "/shop2/blog/ и /shop2/sets/ показывают «Страница не найдена».",
+        "Своих товаров-проб нет, импортированные товары и их цены на месте."
+      ],
+      "why": "Решение Димы 28.09.2026: блог и наборы выключены, пока Ренат не напишет первую статью и не соберёт первый набор. Пустая страница «Блог» или «Наборы» — обещание, которого магазин не держит. Возвращаются сами, с первой статьёй и первым включённым набором — переключателя нет.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "After the reset: no «Наборы», no «Блог»",
+        "steps": [
+          "After the go-live reset (with --test-content) open the shop on a phone.",
+          "Look at the row of links at the top and at the home page.",
+          "Open «Подарочная карта» (gift card) and look at the line above the heading.",
+          "Open the addresses /shop2/blog/ and /shop2/sets/.",
+          "Open «Все товары» and search for «Claude» and «hoodie»."
+        ],
+        "expect": [
+          "No «Наборы» and no «Блог» at the top; «Подарочная карта» still there.",
+          "No row of sets on the home page.",
+          "Above the gift card only «Главная», no «Наборы».",
+          "/shop2/blog/ and /shop2/sets/ show «Страница не найдена».",
+          "No own test products; the imported products and their prices are there."
+        ],
+        "why": "Dim's decision of 28.09.2026: the blog and sets stay off until Renat writes the first article and makes the first set. An empty «Блог» or «Наборы» page is a promise the shop does not keep. They come back by themselves with the first article and the first set switched on — there is no switch."
+      },
+      "mark": "new",
+      "markedAt": "2026-09-28T15:27:20.649Z"
     },
     {
       "id": "shop-info-pages",
@@ -7386,6 +7431,8 @@
         "Выключить переключатель у одного набора и открыть магазин.",
         "Нажать «Вернуть» в сообщении внизу.",
         "Открыть набор, нажать «Удалить набор» → «Удалить» и сразу «Вернуть».",
+        "Выключить переключатели у всех наборов, открыть магазин и адрес /shop2/sets/.",
+        "Включить один набор обратно и открыть магазин снова.",
         "Выключить «Наборы» в «Ещё» → «Настройки» → «Главная страница».",
         "Открыть магазин и посмотреть меню и главную.",
         "Вернуть всё обратно."
@@ -7393,10 +7440,12 @@
       "expect": [
         "Скрытый набор пропал из магазина, «Вернуть» показывает его снова.",
         "Удаление сначала спрашивает, а «Вернуть» возвращает набор на место.",
+        "Без включённых наборов нет «Наборов» в меню, на главной и над «Подарочной картой».",
+        "/shop2/sets/ тогда показывает «Страница не найдена»; один включённый набор возвращает всё сам.",
         "С выключенными наборами пункт «Наборы» исчез из меню.",
         "«Подарочная карта» осталась на месте."
       ],
-      "why": "Снятый, но всё ещё продающийся набор принесёт заказ, который вы не соберёте.",
+      "why": "Снятый, но всё ещё продающийся набор принесёт заказ, который вы не соберёте. А пустая страница «Наборы» — обещание, которого магазин не держит: после чистки перед запуском наборов не будет ни одного (решение Димы 28.09.2026).",
       "risk": "low",
       "writes": true,
       "en": {
@@ -7405,6 +7454,8 @@
           "Switch one set off with its switch and open the shop.",
           "Press «Вернуть» (undo) in the message at the bottom.",
           "Open a set, press «Удалить набор» → «Удалить» (delete) and «Вернуть» at once.",
+          "Switch every set off, then open the shop and the address /shop2/sets/.",
+          "Switch one set back on and open the shop again.",
           "Switch «Наборы» off in «Ещё» → «Настройки» → «Главная страница».",
           "Open the shop and look at the menu and the home page.",
           "Put everything back."
@@ -7412,13 +7463,15 @@
         "expect": [
           "The hidden set has gone from the shop; «Вернуть» shows it again.",
           "Deleting asks first, and «Вернуть» puts the set back in its place.",
+          "With every set off, «Наборы» is gone from menu, home page and gift card.",
+          "/shop2/sets/ then shows «Страница не найдена»; one set switched on brings it all back.",
           "With sets switched off the «Наборы» menu item is gone.",
           "«Подарочная карта» is still where it was."
         ],
-        "why": "A withdrawn set still on sale brings an order you cannot fill."
+        "why": "A withdrawn set still on sale brings an order you cannot fill. And an empty «Наборы» page is a promise the shop does not keep: after the go-live reset there is not one set (Dim, 28.09.2026)."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-09-28T15:27:20.649Z"
     },
     {
       "id": "blog-new-post",

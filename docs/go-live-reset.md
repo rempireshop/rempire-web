@@ -14,12 +14,35 @@
 Чтобы он действительно стёр, нужно длинное подтверждение, которое случайно не
 наберёшь.
 
+**Решения владельца от 28.09.2026 — в день запуска два флага обязательны**
+(третий, `--gift-cards-are-test-cards`, — потому что все семь подарочных карт
+на стенде тестовые, шаг 5):
+
+* **`--test-content`** — всё, что делалось на стенде руками, тоже тестовое:
+  **все** промокоды, **все** наборы, **все** статьи блога, **все** рассылки и
+  **все** свои товары (`c-…`, восемь штук, ни одного из них нет в Shopify) —
+  вместе с их правками цен и строками склада. Импортированные из Shopify
+  товары, их цены и правки **остаются**. Сухой прогон с этим флагом печатает
+  каждый код, набор, статью, письмо и товар поимённо — список читается и
+  одобряется до того, как стирать. Если Ренат успеет завести настоящий свой
+  товар — `--keep-product <id>` его оставит.
+* **`--stock`** — все остатки, история склада и привязанные штрихкоды на
+  стенде тоже тестовые. «Склад» стирается целиком, и сразу после чистки
+  перенос остатков из Shopify пишет настоящие числа (шаг 6).
+
+Блог и «Наборы» после чистки на витрине не видны сами: пока нет ни одной
+опубликованной статьи и ни одного включённого набора, ссылок на них нет
+нигде, а их адреса — обычная «Страница не найдена» (до Redeploy шага 5 дня —
+с оговоркой, шаг 8). Первая опубликованная статья и первый включённый набор
+возвращают их сами — никакого переключателя.
+
 **Сколько времени:** шаги 1–8 — минут пятнадцать, из них десять на бэкап.
 
 **Накануне — репетиция.** Файл `.env.railway.txt` из шага 1 (обе строки),
 одна копия `tools/db-backup.mjs` и **сухой прогон** (шаг 3). Если сухой прогон
 накануне не подключился к базе, утром он не подключится тоже — а утром на это
-нет времени.
+нет времени. Список `TEST CONTENT` из сухого прогона накануне — это то, что
+Дима с Ренатом читают и одобряют заранее; утром его сверяют с новым прогоном.
 
 **Когда делать:** до того, как ссылку кому-то дали, и **до 10:00 или после
 11:00 по Таллинну.** Ночное задание писем (`/api/cron/flows/`, в `vercel.json`
@@ -114,85 +137,113 @@ node --env-file=.env.railway.txt tools/go-live-reset.mjs --help
 ## Шаг 3. Сухой прогон
 
 ```bash
-node --env-file=.env.railway.txt tools/go-live-reset.mjs
+node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content
 ```
 
-**База не меняется.** Это главное свойство команды без аргументов.
+**База не меняется.** Это главное свойство команды без `--clear` — с любыми
+другими флагами тоже. `--stock --test-content` здесь нужны, чтобы прогон
+показал ровно то, что будет стёрто на шаге 7, и чтобы строка для вставки
+пришла уже с ними.
 
-**Что должно напечататься** (цифры будут свои):
+**Что должно напечататься** (цифры будут свои; длинные списки здесь
+сокращены до «…», инструмент печатает всё):
 
 ```
 go-live-reset — DRY RUN. Nothing below has happened.
 database: maglev.proxy.rlwy.net:41155/railway
 
-CLEAR — test data · 16 tables, 20663 rows
-  orders                  47 → 0
-  order_messages          12 → 0
-  customers               19 → 0
-  loyalty_ledger          31 → 0
-  carts                    6 → 0
-  cart_writes              6 → 0
-  login_codes              4 → 0
-  stock_alerts             3 → 0
-  reviews                 11 → 0
-  events               20416 → 0
-  idempotency_keys        88 → 0
-  invoice_counters         1 → 0
-  gift_cards               3 → 0
-  gift_card_uses           2 → 0
-  promo_code_uses         12 → 0
-  newsletter_sends         2 → 0
+CLEAR — test data · 18 tables, 21406 rows
+  orders                  100 → 0
+  order_messages           14 → 0
+  customers                 8 → 0
+  …
+  gift_cards                7 → 0
+  …
+  owner_alerts              3 → 0
 
-KEEP — the shop, and the records · 10 tables, 1314 rows
-  settings                12   untouched, minus 1 key(s) removed by name — see ALSO
-  product_overrides       34   untouched
-  custom_products          1   untouched
-  bundles                  9   untouched
-  posts                   12   untouched
-  promo_codes              4   untouched
-  newsletters              2   untouched
-  mail_optouts             3   untouched  never cleared, by any flag
-  admin_audit           1192   untouched  never cleared, by any flag
-  _migrations             45   untouched  never cleared, by any flag
+KEEP — the shop, and the records · 12 tables, 2343 rows
+  settings                 18   untouched, minus 1 key(s) removed by name — see ALSO
+  product_overrides        17 → 12   only the own products' rows, --test-content — imported products' edits untouched
+  custom_products           8 → 0   the own products, --test-content
+  bundles                  13 → 0   all of them, --test-content — see TEST CONTENT
+  posts                    24 → 0   all of them, --test-content — see TEST CONTENT
+  promo_codes               8 → 0   all of them, --test-content — see TEST CONTENT
+  newsletters               7 → 0   all of them, --test-content — see TEST CONTENT
+  mail_optouts              3   untouched  never cleared, by any flag
+  push_subscriptions        1   untouched
+  mail_sends_daily         13   untouched
+  admin_audit            2169   untouched  never cleared, by any flag
+  _migrations              62   untouched  never cleared, by any flag
 
-ASK — not touched without --stock · 2 tables
-  stock_levels           153 → 153
-  stock_moves            102 → 102
-  moves by reason: adjust 7, goods_in 61, sale_web 34
+STOCK — clearing, because --stock was given · 2 tables
+  stock_levels            241 → 0
+  stock_moves             385 → 0
+  moves by reason: adjust 40, goods_in 290, sale_web 55
   goods_in / adjust / return are somebody counting a real shelf; sale_web / sale_pos are test orders.
-  153 barcode(s) are bound to a stock row. Every one was scanned or typed by hand — the Shopify harvest has none, so --stock loses them for good.
+  10 barcode(s) are bound to a stock row. Every one was scanned or typed by hand — the Shopify harvest has none, so --stock loses them for good.
+
+TEST CONTENT — deleted too, because --test-content was given (the owner's decision, 28.09.2026)
+  promo codes · 8
+      CLAUDE10      10 %, used 3  — тест
+      CLAUDETEST10  10 %, used 1
+      …
+  sets · 13
+      beard-start       «Борода — стартовый набор»
+      shave-smooth      «Гладкое бритьё»
+      …
+  blog posts · 24
+      uhod-za-borodoy-zimoy   «Борода зимой: как не дать ей пересохнуть»  (published)
+      …
+  newsletters · 7
+      «Осенние скидки»  (sent; in the panel: Осень)
+      …
+  own products · 8 — with their 5 product edit row(s), 6 stock row(s), 9 stock move(s)
+      c-davienness-nelya-shampun                    Davienness — …  (off sale)
+      c-davines-cheap-price                         Davines — …
+      c-davines-claude-test-tovar-shampun           Davines — Claude test товар …
+      c-davines-ochen-klassnyj-shampun              Davines — Очень классный …
+      c-kevin-murphy-beard-balm-balzam-dlya-borody  Kevin.Murphy — Beard Balm …
+      c-rempire-hoodie                              Rempire — …
+      c-rempire-t-shirt                             Rempire — …
+      c-rempire-testovyj-platezh-ne-prodaetsya      Rempire — …
+  kept by --keep-product: none. A real own product Renat made is kept with --keep-product <id>.
+  Stays: every imported product with its prices and edits, settings, letter texts, delivery prices,
+  the bank list. (The whole stock goes too, but that is --stock — see STOCK above.)
 
 ALSO, in the same transaction
-  promo_codes.used      reset to 0 on the codes that have one — definitions kept
-  newsletters           any that were sent or sending put back to draft — text kept
+  promo_codes, newsletters  deleted whole by --test-content — see TEST CONTENT
   settings keys removed  flow_runs
   settings.testplan_answers  KEPT — the acceptance record. --testplan clears it.
-  order_number_seq      will continue at R-100099 — after R-100098, the highest number handed out so far; never restarted lower, Montonio keeps the old numbers
+  order_number_seq      will continue at R-100201 — after R-100200, the highest number handed out so far; never restarted lower, Montonio keeps the old numbers
   invoice_counters      1 year row(s) — the numbering starts again at 1
 
 GIFT CARDS — a card is money the shop owes
-  live (balance > 0, not voided): 2, 45.00 EUR
-  of those, bought by a paid/shipped/delivered order: 1, 20.00 EUR
+  live (balance > 0, not voided): 5, 150.00 EUR
+  of those, bought by a paid/shipped/delivered order: 3, 90.00 EUR
   of those, with no order behind them at all: 0, 0.00 EUR
   ! A clear will REFUSE until you look at these and pass --gift-cards-are-test-cards.
 
 LOOK AT THESE BEFORE YOU AGREE
-  reviews visible on the storefront right now: 8
-  orders carrying an invoice number: 5
-  customers with marketing = true: 2
-      test1@example.com  (checkout, 2026-09-18)
-      test2@example.com  (checkout, 2026-09-18)
-  Their consent is deleted with them. If one of these is a real person, they must tick the box again.
-  mail_optouts is NOT touched: a refusal outlives the account it was given from.
+  …
 
 Nothing was changed. To do it for real:
-  node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --gift-cards-are-test-cards
+  node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --stock --test-content --gift-cards-are-test-cards
   — and only after you have looked at the gift cards above.
+  — and only after the owner has read every name under TEST CONTENT.
 ```
 
-Предпоследняя строка — это буквально то, что надо будет вставить на шаге 7.
-Инструмент сам дописывает в неё флаги, которые в этом прогоне уже понадобились,
-и тот же `--env-file`, с которым его запустили.
+Строка после «To do it for real» — это буквально то, что надо будет вставить
+на шаге 7. Инструмент сам дописывает в неё флаги, которые в этом прогоне уже
+были или понадобились, и тот же `--env-file`, с которым его запустили.
+
+Без `--test-content` вместо списка печатается одна строка
+`TEST CONTENT — not touched without --test-content · 8 promo code(s), 13 set(s), …`
+— и в команде для вставки этого флага нет. **В день запуска прогон запускается
+с флагом.**
+
+Сам `--test-content` склад импортированных товаров не трогает — только строки
+своих товаров. Весь склад в день запуска стирает `--stock`: это отдельный флаг
+и отдельное решение (шаг 6).
 
 **Строка `order_number_seq`** — где продолжится нумерация заказов. С 27.09.2026
 она **не начинается заново с R-100001**: в живой час 26.09 номера
@@ -211,9 +262,29 @@ R-100095…R-100098 ушли в боевой кабинет Montonio, где п�
 
 ---
 
-## Шаг 4. Посмотреть глазами на четыре числа
+## Шаг 4. Посмотреть глазами: список TEST CONTENT и четыре числа
 
-Блок `LOOK AT THESE BEFORE YOU AGREE` — то, что база сама решить не может.
+**Сначала блок `TEST CONTENT`** — всё, что `--test-content` сотрёт, поимённо:
+каждый промокод, каждый набор, каждая статья (с отметкой «published»,
+«draft» или «in the bin»), тема каждой рассылки и каждый свой товар — id и
+название. Решение 28.09.2026: всё это — тестовое. Прочитать список целиком и
+убедиться, что так и есть:
+
+* **Свой товар, который Ренат завёл по-настоящему** (не из восьми тестовых) —
+  не стирать: добавить `--keep-product <id>` (id — из списка, слева), по одному
+  флагу на товар. Прогнать сухой прогон ещё раз: товар переедет в строку
+  `KEPT by --keep-product`, а строка для вставки придёт уже с этим флагом.
+  Опечатка в id — чистка откажется («there is no own product with that id»),
+  а не сотрёт товар молча.
+* **Настоящий промокод, набор, статья или рассылка** — у них такого флага нет:
+  по решению владельца всё это на стенде тестовое, а блог и наборы до первой
+  статьи Рената и первого его набора выключены. Если такое всё-таки нашлось —
+  **стоп**, не стирать, разбираться отдельно.
+* Строка `left-over rows of own products that no longer exist` — правки или
+  склад под id товара, которого уже нет. Показать их некому; стираются вместе
+  со всеми.
+
+Потом блок `LOOK AT THESE BEFORE YOU AGREE` — то, что база сама решить не может.
 
 1. **`reviews visible on the storefront right now`** — сколько отзывов сейчас
    видно покупателю. Открыть админку → «Клиенты → Отзывы» и убедиться, что там
@@ -245,7 +316,8 @@ R-100095…R-100098 ушли в боевой кабинет Montonio, где п�
   руками или появилась новая функция.
 
 Открыть админку → «Маркетинг → Подарочные карты» и найти эти карты. Если это
-наши тестовые карты (а сейчас это так), на шаге 7 добавить
+наши тестовые карты (а сейчас это так: 28.09.2026 владелец сказал, что все
+семь карт на стенде — тестовые), на шаге 7 добавить
 `--gift-cards-are-test-cards`.
 
 **Если хоть одна карта настоящая — не стирать.** Записать код и остаток, и
@@ -253,38 +325,34 @@ R-100095…R-100098 ушли в боевой кабинет Montonio, где п�
 
 ---
 
-## Шаг 6. Остатки на складе: в день запуска — БЕЗ `--stock`
+## Шаг 6. Остатки на складе: в день запуска — С `--stock`
 
 По умолчанию `stock_levels` и `stock_moves` **не трогаются**. **В день запуска
-`--stock` не добавлять никогда** (решено 26–27.09.2026):
+`--stock` добавляется** (решение Димы 28.09.2026, вместо «без `--stock`» от
+26–27.09): «Остатки, которые правили руками, можно стереть — если есть
+остатки из Shopify, берём их. Штрихкоды тоже можно стереть, это всё наши
+тесты.» То есть:
 
-* числа на полке в тот же день ставит перенос остатков из Shopify
-  (`tools/import-shopify-stock.mjs`, `docs/go-live.md`, шаг 4 дня). Он пишет
-  каждое число **абсолютно** («останется N»), поэтому тестовые продажи,
-  оставшиеся в истории склада, на результат не влияют;
-* а `--stock` унёс бы **153 привязанных штрихкода** — см. ниже.
+* уходят **все** строки склада (на 28.09 — 241), **вся** история движений
+  (385) и **все** привязанные штрихкоды (10) — это тестовые данные;
+* сразу после чистки перенос остатков из Shopify
+  (`tools/import-shopify-stock.mjs`, `docs/go-live.md`, шаг 4 дня) пишет
+  настоящие числа в пустой «Склад». Пустой склад ему не мешает: в «Складе»
+  по-прежнему видны все размеры каталога («не считали»), а запись сама
+  создаёт строку. В его сухом прогоне каждая строка будет «не считали → N», и
+  список «will be OVERWRITTEN» — пустой;
+* между чисткой и переносом наличие на витрине берётся из ручной отметки
+  «в наличии / мало / нет» (так магазин ведёт себя с любым не посчитанным
+  размером). Витрина до DNS никому не видна, поэтому перенос идёт в тот же
+  час, без перерыва;
+* штрихкоды после запуска сканируются заново, по мере того как товар
+  проходит через руки (в выгрузке из Shopify штрихкодов нет — все варианты
+  помечены `"NA"`, `tools/seed-stock.mjs`). `npm run seed:stock` после чистки
+  **не нужен**: строки создаёт сам перенос.
 
-Перенос идёт **после** чистки не из-за склада, а из-за писем: чистка стирает
-тестовые заявки «Сообщить, когда появится», и размер, у которого остаток
-станет больше нуля, никому из тестовых ящиков письма не пошлёт.
-
-Для истории — когда `--stock` вообще имеет смысл (не в день запуска):
-
-* Если числа на экране совпадают с бутылками на полке — **ничего не делать**,
-  просто пропустить `--stock`. Тестовые продажи списали единицы-другие;
-  поправить это проще руками в админке, чем пересчитывать весь склад.
-* Если числа безнадёжно разъехались — тогда `--stock`. **Но:** вместе с
-  остатками уйдут и **привязанные штрихкоды**. В выгрузке из Shopify реальных
-  штрихкодов нет ни одного (все 153 варианта помечены `"NA"` —
-  `tools/seed-stock.mjs`), то есть каждый код в базе кто-то отсканировал или
-  набрал руками, и взять их обратно неоткуда. После `--stock` надо будет:
-
-  ```bash
-  npm run seed:stock
-  ```
-
-  — это заново создаст строки на весь каталог с нулями и без кодов, и всё
-  придётся сканировать заново.
+Перенос идёт **после** чистки ещё и из-за писем: чистка стирает тестовые
+заявки «Сообщить, когда появится», и размер, у которого остаток станет больше
+нуля, никому из тестовых ящиков письма не пошлёт.
 
 Две таблицы уходят **только вместе**. Инструмент не даст стереть одну: если
 убрать историю движений и оставить остатки, товары молча перестанут считаться
@@ -295,16 +363,17 @@ R-100095…R-100098 ушли в боевой кабинет Montonio, где п�
 
 ## Шаг 7. Стереть
 
-Вставить строку, которую напечатал сухой прогон. Плюс флаг по шагу 5, если он
-нужен:
+Вставить строку, которую напечатал сухой прогон шага 3. В день запуска она
+такая (подарочные карты на стенде — все семь тестовые, шаг 5):
 
 ```bash
-node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --gift-cards-are-test-cards
+node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --stock --test-content --gift-cards-are-test-cards
 ```
 
-**`--stock` не добавлять** (шаг 6). Добавить `--testplan`, если хочется
-стереть ещё и ответы приёмочного чек-листа (по умолчанию они остаются — это
-запись о том, что магазин проверяли).
+Плюс `--keep-product <id>` на каждый настоящий свой товар, если он нашёлся на
+шаге 4 (сухой прогон с ним сам допишет его в строку). Добавить `--testplan`,
+если хочется стереть ещё и ответы приёмочного чек-листа (по умолчанию они
+остаются — это запись о том, что магазин проверяли).
 
 **Что должно напечататься:** тот же отчёт, но первой строкой
 
@@ -312,16 +381,29 @@ node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HA
 go-live-reset — CLEARED.
 ```
 
-в колонке `CLEAR` везде `→ 0`, и последней строкой:
+в колонке `CLEAR` везде `→ 0`, блок `TEST CONTENT — deleted, because
+--test-content was given` с тем же списком, что одобрили на шаге 4, и
+последней строкой (с `--test-content`):
 
 ```
-Done, in one transaction, with every KEEP table verified unchanged before the commit.
+Done, in one transaction. Everything the flags did not name was verified unchanged before the commit — imported products' edits and stock row by row.
 ```
+
+(Без `--test-content` последняя строка короче: «Done, in one transaction,
+with every KEEP table verified unchanged before the commit.»)
 
 Всё стирание идёт **одной транзакцией**. Перед тем как её зафиксировать,
 инструмент пересчитывает все таблицы из списка KEEP и сверяет их с тем, что
-было. Если хоть одна строка настроек, статей или список отписок изменились —
-транзакция откатывается целиком.
+было. С `--test-content` правки импортированных товаров сверяются построчно:
+стёрты должны быть ровно строки своих товаров, а каждая строка
+импортированного — остаться байт в байт. Если хоть одна строка настроек,
+правка импортированного товара или список отписок изменились — транзакция
+откатывается целиком.
+
+Список `TEST CONTENT` инструмент читает ещё раз **внутри** транзакции, и
+стирает ровно то, что прочитал там. Если между сухим прогоном и этой командой
+Ренат успел завести новый свой товар, он тоже в этом списке — поэтому сухой
+прогон делается прямо перед чисткой, а панель в эти минуты не трогают.
 
 ### Если вместо этого напечаталось `REFUSED`
 
@@ -347,26 +429,42 @@ mail_optouts: THE STOP LIST CHANGED (3 → 0). Nothing may ever do this.
 ## Шаг 8. Проверить
 
 ```bash
-node --env-file=.env.railway.txt tools/go-live-reset.mjs
+node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content
 ```
 
-**Что должно быть видно:** в блоке `CLEAR` все строки `0 → 0`, в блоке `KEEP`
-те же числа, что были до чистки (кроме `settings`, где на одну строку меньше),
-в блоке `ASK` — те же остатки, что были (склад не тронут).
+**Что должно быть видно:** в блоке `CLEAR` все строки `0 → 0`; в блоке `KEEP`
+`custom_products`, `bundles`, `posts`, `promo_codes`, `newsletters` — `0 → 0`
+(или столько, сколько оставил `--keep-product`), `product_overrides` — только
+правки импортированных товаров, остальное — те же числа, что были до чистки
+(кроме `settings`, где на одну строку меньше); в блоке `STOCK` — `0 → 0`
+(перенос из Shopify ещё впереди); в `TEST CONTENT` все списки пустые.
 
 Дальше — глазами, минута:
 
 * открыть магазин: каталог, цены, «Доставка и оплата» — тарифы на месте;
-* открыть блог: статьи на месте;
+  **ни «Блога», ни «Наборов» нигде нет** — ни в меню, ни на главной, ни над
+  «Подарочной картой»; адреса `/shop2/blog/` и `/shop2/sets/` показывают
+  обычную «Страница не найдена». Одна оговорка: страницы, которые сборка
+  написала файлами ДО чистки (`/shop2/sets/`, `/shop2/set/…/`,
+  `/shop2/blog/…`), остаются файлами до следующей сборки — это шаг 5 дня,
+  Redeploy. До него такой адрес ещё отвечает 200, и в меню на долю секунды
+  мелькают «Наборы» и «Блог» — магазин спрашивает базу, тут же прячет их и
+  показывает «Страница не найдена». После Redeploy этих файлов нет, и сервер
+  сам отвечает 404;
+* своих товаров-проб (`c-…`) в каталоге и в поиске нет;
 * админка → «Настройки → Доставка и оплата»: тарифы на месте;
 * админка → «Маркетинг → Письма»: тексты писем на месте;
 * админка → «Маркетинг → Подарочные карты»: номиналы на месте, карт нет;
 * админка → «Заказы»: пусто;
 * админка → «Клиенты → Все клиенты»: пусто;
 * админка → «Клиенты → Отзывы»: пусто;
-* админка → «Маркетинг → Промокоды»: коды на месте, «использовано» у всех 0;
-* админка → «Маркетинг → Рассылка»: письмо снова «черновик», текст на месте;
-* админка → «Товары → Каталог» и «Товары → Наборы»: всё на месте;
+* админка → «Маркетинг → Промокоды»: пусто;
+* админка → «Маркетинг → Рассылка»: пусто;
+* админка → «Товары → Каталог»: импортированные товары и их цены на месте;
+  «Товары → Наборы» и «Блог»: пусто, кнопки «новый набор» / «новая статья»
+  работают;
+* админка → «Склад»: все размеры «не считали» — до переноса из Shopify
+  (`docs/go-live.md`, шаг 4 дня);
 * админка → **«Подключения»**: открыть один раз. Старые песочные возвраты и
   посылки ушли вместе с заказами, и строки, которые до чистки были красными
   из-за них, должны стать спокойными (`docs/go-live.md`, шаг 2 дня).
@@ -407,11 +505,12 @@ docker run --rm -i -e PGURL postgres:17-alpine sh -c 'pg_restore --clean --if-ex
 | Таблица | Что с ней | Почему |
 | --- | --- | --- |
 | `settings` | **остаётся** (минус `flow_runs`) | тарифы, цены, тексты писем, контент, банки, номиналы — недели работы Рената |
-| `product_overrides` | остаётся | правки цен, SEO, фото вариантов |
-| `custom_products`, `bundles` | остаются | каталог, а не заказы |
-| `posts` | остаются | статьи блога |
-| `promo_codes` | остаются, счётчик `used` → 0 | сами коды — это маркетинг; счётчик считал тестовые применения и без сброса код с лимитом окажется исчерпан |
-| `newsletters` | остаются, статус → «черновик» | текст писал он; но письмо со статусом «отправлено» больше нельзя ни править, ни отправить — тестовая рассылка навсегда заморозила бы его текст |
+| `product_overrides` | остаётся; с `--test-content` уходят только строки своих товаров | правки цен, SEO, фото вариантов. Правки импортированных товаров не трогаются никаким флагом и сверяются построчно |
+| `custom_products` | остаются; с `--test-content` стираются все, кроме `--keep-product` | свои товары (`c-…`). Решение 28.09.2026: все восемь на стенде — пробы, в Shopify их нет |
+| `bundles` | остаются; с `--test-content` стираются все | наборы. Решение 28.09.2026: все тринадцать придуманы; «Наборы» на витрине прячутся сами, пока нет ни одного включённого |
+| `posts` | остаются; с `--test-content` стираются все (и из корзины тоже) | статьи блога. Решение 28.09.2026: все 24 — тестовые тексты; блог на витрине прячется сам до первой опубликованной статьи |
+| `promo_codes` | остаются, счётчик `used` → 0; с `--test-content` стираются все | сами коды — это маркетинг; счётчик считал тестовые применения и без сброса код с лимитом окажется исчерпан. Решение 28.09.2026: все коды на стенде тестовые |
+| `newsletters` | остаются, статус → «черновик»; с `--test-content` стираются все | текст писал он; но письмо со статусом «отправлено» больше нельзя ни править, ни отправить — тестовая рассылка навсегда заморозила бы его текст. Решение 28.09.2026: все семь — тестовые тексты |
 | `mail_optouts` | **никогда не стирается** | это список отписок. Удалить строку — значит молча подписать человека обратно. Гостю, у которого нет карточки клиента, отписаться больше негде |
 | `admin_audit` | **никогда не стирается** | журнал «кто что сделал» — и одновременно счётчик неудачных входов, на котором держится задержка при подборе пароля (`192_login_ladder_index.sql`). «Чисто» здесь не значит «пусто» |
 | `_migrations` | **никогда не стирается** | список применённых миграций |
@@ -428,7 +527,7 @@ docker run --rm -i -e PGURL postgres:17-alpine sh -c 'pg_restore --clean --if-ex
 | `promo_code_uses` | стираются | лог применений |
 | `newsletter_sends` | стираются | лог доставки тестовой рассылки |
 | `owner_alerts` | стираются | оповещения владельцу о сбоях по тестовым заказам (миграция 217). Каждая строка — ключ «уже сообщили» с номером тестового заказа; после чистки им не о чем молчать (нумерация продолжается, номера не повторяются — но ключ по номеру не должен пережить свой заказ) |
-| `stock_levels`, `stock_moves` | **только по флагу `--stock`, и только вдвоём** — в день запуска флаг НЕ ставится | см. шаг 6 |
+| `stock_levels`, `stock_moves` | **только по флагу `--stock`, и только вдвоём** — в день запуска флаг ставится (28.09.2026); `--test-content` сам по себе берёт только строки своих товаров | см. шаг 6 |
 
 Две строки в `settings` живут по своим правилам:
 
@@ -441,7 +540,14 @@ docker run --rm -i -e PGURL postgres:17-alpine sh -c 'pg_restore --clean --if-ex
 
 ## Чего инструмент НЕ делает
 
-* Не трогает файлы, картинки и блобы. Только базу.
+* Не трогает файлы, картинки и блобы. Только базу. Фото стёртых своих
+  товаров, обложки статей и картинки наборов остаются в хранилище файлами, на
+  которые больше ничто не ссылается; покупатель их не видит.
+* Не убирает из `settings` упоминания стёртого: настройки сверяются байт в
+  байт и не меняются. Если слайд баннера на главной («Настройки → Главная»)
+  ведёт на стёртый свой товар или на «Наборы» — баннер про наборы сам
+  поведёт в каталог, пока наборов нет, а слайд на стёртый товар надо
+  поправить руками.
 * Не трогает переменные окружения, ключи Montonio и Resend, пароль админки.
 * Не выключает и не включает автописьма («Маркетинг → Письма»). Проверить их
   состояние отдельно: после чистки писать некому, но с первым настоящим

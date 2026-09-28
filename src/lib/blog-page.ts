@@ -34,6 +34,7 @@ import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 import { coverImgStyle } from "@/lib/blog-cover.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
+import { renderNotFoundPage } from "@/lib/notfound-page";
 import { getOverrides } from "@/lib/orders";
 import { translateProductName } from "@/lib/product-name";
 import { readShell } from "@/lib/product-page";
@@ -526,6 +527,18 @@ export async function blogListPageResponse(seg: string): Promise<Response> {
     return html(shell, 200, NO_STORE);
   }
   const base = baseFrom(process.env.PUBLIC_BASE_URL);
+  /* No published article: there is no blog. Dim, 28.09.2026 — «Blog and Sets
+     will be off initially, before any blog post is written». The go-live
+     reset deletes every post (tools/go-live-reset.mjs --test-content), and
+     an empty «Блог» page at 200 would be a page Google indexes with nothing
+     on it. So the address is the shop's ordinary 404 page, noindex, the one
+     every other unknown address gets — and it is asked again on every
+     request (no-store), so the first article Renat publishes turns it back
+     into the listing by itself. app.js says the same once it has asked
+     /api/blog/ (settleEmptyScreens), and shows no «Блог» in the header. */
+  if (!list.posts.length && !(list.total > 0)) {
+    return html(renderNotFoundPage(shell, lang, "/blog/", base), 404, NO_STORE);
+  }
   const robots = robotsFor(process.env.PUBLIC_BASE_URL);
   return html(renderBlogListPage(list, lang, shell, { base, robots }), 200, PAGE_CACHE);
 }

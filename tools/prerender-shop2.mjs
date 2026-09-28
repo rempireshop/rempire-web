@@ -64,7 +64,7 @@ import { fileURLToPath } from "node:url";
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
-import { applyBundlePrices, fetchBundlePrices } from "./lib/bundles-export.mjs";
+import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles-export.mjs";
 /* «Цена» and «Показывать в магазине» as the owner last saved them. Every list
    of products this file writes — an article's shelf and every grid on the
    storefront — is a set of links into /p/ addresses, and a hidden product's
@@ -280,14 +280,23 @@ function legalFor(slug, code) {
    this the <title>, the meta description and the schema.org Offer of every
    /set/ page kept the price of the last deploy while the shop charged the new
    one. See tools/lib/bundles-export.mjs. */
+/* …and only the ones the table still sells (liveBundles(), 28.09.2026): after
+   the go-live reset the table is empty and the file's eight are sets the owner
+   called made up, so an empty table writes no /sets/ pages at all — the same
+   way an empty blog writes no /blog/ pages. No database → the file, as ever. */
+const BUNDLE_ROWS = await fetchBundlePrices();
 const BUNDLES = applyBundlePrices(
-  await (async () => {
-    try {
-      return new Function(await readFile(path.join(SHOP, "bundles.js"), "utf8") + "\nreturn BUNDLES;")() || [];
-    } catch { return []; }
-  })(),
-  await fetchBundlePrices(),
+  liveBundles(
+    await (async () => {
+      try {
+        return new Function(await readFile(path.join(SHOP, "bundles.js"), "utf8") + "\nreturn BUNDLES;")() || [];
+      } catch { return []; }
+    })(),
+    BUNDLE_ROWS,
+  ),
+  BUNDLE_ROWS,
 );
+if (BUNDLE_ROWS && !BUNDLES.length) console.log("  (no set on sale in the database — no /sets/ pages this run)");
 const bundleText = (b, field, code) => (b[field] && (b[field][code] || b[field].RU)) || "";
 
 /* blog: [] silently when DATABASE_URL is not set, or when the database could
@@ -596,7 +605,7 @@ ${headBlock(spec)}
 <!-- seo:end -->
 ${headAssets}</head>
 <body>
-<div id="app"><!-- prerender:start --><div id="prerender">${spec.content}${blogDataScript(spec.lang.code)}</div><!-- prerender:end --></div>
+<div id="app"><!-- prerender:start --><div id="prerender">${spec.content}${blogDataScript(spec.lang.code)}${setsDataScript()}</div><!-- prerender:end --></div>
 ${bodyScripts}</body>
 </html>
 `;
@@ -607,7 +616,7 @@ ${bodyScripts}</body>
    be spliced by String.replace's own substitution rules. The Russian home
    page keeps its <html lang="ru"> (no fourth argument). */
 function patchedShell(spec) {
-  return patchShell(shell, headBlock(spec), spec.content + blogDataScript(spec.lang.code));
+  return patchShell(shell, headBlock(spec), spec.content + blogDataScript(spec.lang.code) + setsDataScript());
 }
 
 /* ---------- shared blocks ----------------------------------------------
@@ -1608,6 +1617,15 @@ function blogDataScript(code) {
     lang: code, stamp: BLOG_STAMP,
     posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10
   });
+}
+/* The ids of the sets this build found on sale, on every page, beside
+   #blogdata (28.09.2026). app.js shows sets from public/shop/bundles.js only
+   through this list until /api/bundles/ answers (SETS_AT_BUILD there): after
+   the go-live reset the file's sets are all made up, and without the list
+   each page load would flash them. `[]` is said out loud — «the build saw no
+   set» — rather than left out, which app.js reads the same way anyway. */
+function setsDataScript() {
+  return blogJsonScript("setsdata", BUNDLES.map(b => b.id));
 }
 function blogListPage(lang) {
   const { code, seg } = lang;

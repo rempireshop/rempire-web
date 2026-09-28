@@ -40,9 +40,12 @@
  *     → 0 → N fires «Сообщить, когда появится» for that product — which is why
  *       this runs AFTER tools/go-live-reset.mjs (it empties the test requests);
  *     → the owner's manual «нет в наличии» still beats any count.
- * The go-live reset runs WITHOUT --stock (docs/go-live-reset.md, step 6): the
- * 153 barcodes stay bound, and because every count here is absolute, the test
- * sales left in the history do not change the result.
+ * The go-live reset runs WITH --stock (Dim, 28.09.2026; docs/go-live-reset.md,
+ * step 6): every count, move and barcode on staging is a test, so «Склад» is
+ * empty when this runs. That is a state this tool handles as it stands — the
+ * «Склад» listing (getLevels()) still has every catalogue size, as «не
+ * считали», and setQty() creates the row it writes to — so every row reads
+ * «не считали → N» and nothing is OVERWRITTEN.
  *
  * A RETRY IS SAFE: setQty is absolute, and every request carries an
  * Idempotency-Key derived from (this CSV, the owner rows, the options, the
@@ -732,8 +735,9 @@ const USAGE = `import-shopify-stock — Shopify's inventory export → counted s
   --emit-browser-script <file>   write the same import as a script for the signed-in panel tab
                                  (no cookie leaves the browser; same idempotency keys)
 
-The export: Shopify admin → Products → Inventory → Export. Run right AFTER the go-live reset
-and as the last step before DNS — docs/go-live.md.`;
+The export: Shopify admin → Products → Inventory → Export. Run AFTER the go-live reset
+(which runs WITH --stock since 28.09.2026: «Склад» is empty, every row reads «не считали → N»)
+and as the last step before DNS — docs/go-live.md, the day, step 4.`;
 
 async function main() {
   let args;
