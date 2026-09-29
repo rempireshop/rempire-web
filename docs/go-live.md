@@ -107,12 +107,12 @@ why it is phase A on `/golive/`.
 | | | status |
 |---|---|---|
 | C | **Final pass, one push**: the whole unit suite and the e2e suite; a local production prerender check — `PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check` (not committed; put the generated files back); `index.html` has no `localhost:` and exactly two `boot.js` references. **The same push removes the footer «Админка» link** (`.ftr__admin` in `public/shop2/app.js`) — Renat is told first and uses `/admin`. | to do |
-| D R | **Delete everything made during the checks — the reset does it.** Decided 28.09.2026 (Dim): every promo code, set, blog post and newsletter, and all eight own products (`c-…`, none of them in Shopify) with their price edits and stock rows, are test data; so are every stock count, stock move and barcode on staging, and all seven gift cards. The reset takes them with `--test-content --stock --gift-cards-are-test-cards`; the dry run with `--stock --test-content` lists every code, set, post title, newsletter subject and own product by name — Dim and Renat read the list and approve it (a real own product Renat adds before the day is kept with `--keep-product <id>`). **Stays:** imported products and their prices and edits, settings, letter texts, delivery prices, the bank list; the stock comes back from Shopify right after (step 4 of the day). Blog and «Наборы» hide themselves while there is no published post / active set and come back by themselves with the first one. Nothing by hand. After the reset, `/feed/google-en.xml` shows no own product. | to do |
-| D R | **The last meeting with Renat.** 1) Which automatic letters go on right after the reset: unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. 2) How courier parcels leave — Montonio cannot order a pickup by API: a recurring pickup per carrier in the Montonio account, or a drop-off. 3) How a refund is paid after the payout (Stage 1, last row). 4) What Renat must know: a full refund returns every line to stock (write off the unsellable by hand), a partial one moves neither stock nor points; the footer link goes, sign in at `rempireshop.com/admin`. | to do |
-| D | **Close out the live-hour orders** (R-100095…R-100098 are real money; the reset deletes them and later refund notices for them are ignored): the refunds completed in Montonio; Montonio's report kept for the accountant; the DPD parcel 3888e013 cancelled if never handed over. Renat presses nothing on old orders — «Создать этикетку» on a sandbox-paid order books a real parcel. The sandbox refunds turning «overdue» ~29.09 are expected until the reset. | to do |
-| D | **Rehearse the reset**: `.env.railway.txt` (two lines), one `db-backup`, a dry run — `node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content`; read the TEST CONTENT list with Renat. | to do |
-| D C | **Rehearse the stock import**: Shopify → Products → Inventory → Export (all variants, CSV); `node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu` with `RMP_ADMIN_COOKIE`. Writes nothing. «NEED A DECISION» should be empty. | to do |
-| D | **Vercel environment**: `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_TO`, `SESSION_SECRET` (never rotate), `DATABASE_SSL_*`, `MONTONIO_ENV=live` + the live pair; `PAYMENT_PROVIDER` unset. `PUBLIC_BASE_URL` is the staging host today and changes only on the day. Crons (`vercel.json`): flows `0 7 * * *` UTC = 10:00 Tallinn (09:00 after 25.10), events retention `30 3 * * *`. Region `fra1`. | to do |
+| D R | **Delete everything made during the checks — the reset does it.** Decided 28.09.2026 (Dim): every promo code, set, blog post and newsletter, and all eight own products (`c-…`, none of them in Shopify) with their price edits and stock rows, are test data; so are every stock count, stock move and barcode on staging, and all seven gift cards. The reset takes them with `--test-content --stock --gift-cards-are-test-cards`; the dry run with `--stock --test-content` lists every code, set, post title, newsletter subject and own product by name — Dim reads it on the night; Renat is not needed (a real own product Renat adds before the day is kept with `--keep-product <id>`). **Stays:** imported products and their prices and edits, settings, letter texts, delivery prices, the bank list; the stock comes back from Shopify right after (step 4 of the day). Blog and «Наборы» hide themselves while there is no published post / active set and come back by themselves with the first one. Nothing by hand. After the reset, `/feed/google-en.xml` shows no own product. | to do |
+| D R | **The last meeting with Renat — the launch is at night and he is not there, so everything is decided here.** 1) Which automatic letters go on right after the reset: unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. 2) Parcels: a courier parcel may go into the same carrier's parcel machine if it fits (Montonio, 29.09.2026) — no courier pickup needed. 3) Montonio payout weekly instead of daily (Montonio's advice, /golive `payout-period`); a refund Montonio cancelled goes by bank transfer + «Отметить возврат (без денег)» (Montonio, 29.09.2026). 4) What Renat must know: a full refund returns every line to stock (write off the unsellable by hand), a partial one moves neither stock nor points; the footer link goes, sign in at `rempireshop.com/admin`. 5) Until the night Renat keeps the Shopify stock accurate and changes nothing in Shopify during the night; in the morning — step 9; in Telegram, «Start» on @rempireshop_bot. | to do |
+| D | **Close out the live-hour orders** (R-100095…R-100098 are real money; the reset deletes them and later refund notices for them are ignored): the refunds completed in Montonio; Montonio's report kept for the accountant; the DPD parcel 3888e013 cancelled if never handed over (it was handed over 27.09). The same for the €1 test orders abroad (Renat, 28.09+: Omniva / SmartPosti / Unisend) — refunds completed, parcels collected or returned. State 29.09: R-100095 fully refunded; R-100096 €0.50 waiting at Montonio, the other €0.50 refund or keep; R-100097 unpaid; R-100098 shipped. Renat presses nothing on old orders — «Создать этикетку» on a sandbox-paid order books a real parcel. The sandbox refunds turning «overdue» ~29.09 are expected until the reset. | to do |
+| D | **Rehearse the reset**: `.env.railway.txt` (two lines), one `db-backup`, a dry run — `node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content`. Done: the dry run 28.09 (read-only; CLEAR 18 tables, numbering continues at R-100099), the backup 29.09 (✓ 0.37 MB, 32 tables, read back by pg_restore; Docker works). | done 28–29.09 |
+| D C | **Rehearse the stock import**: Shopify → Products → Inventory → Export (all variants, CSV — the link arrives by e-mail); `node tools/import-shopify-stock.mjs --csv <file>` (offline). Done 28.09: 322 rows → 240 «в наличии», 67 «мало», 15 «нет»; the two merch rows from `tools/shopify-stock-owner-rows.json`; 24 Shopify rows (drafts, archive) not in the catalogue. The write goes through the open panel (`--emit-browser-script`), no cookie in a terminal. | done 28.09 |
+| D | **Vercel environment** — checked 28.09 in the dashboard: 27 variables, every needed one present (Montonio live + `MONTONIO_ENV=live`, database + `DATABASE_SSL_NO_VERIFY`, `SESSION_SECRET` (never rotate), `ADMIN_PASSWORD_HASH`, `CRON_SECRET`, `RESEND_*`, `MAIL_REPLY_TO`, `TELEGRAM_*`, `VAPID_*`, `GSC_*`, `R2_*`, `OPENAI_*`, `PAYMENT_PROVIDER` — payments run through Montonio, not mock); nothing extra (`DB_DRIVER`, `PGLITE_PATH`, `E2E_*` unset). Only `PUBLIC_BASE_URL` changes, on the night. Crons (`vercel.json`): flows `0 7 * * *` UTC = 10:00 Tallinn (09:00 after 25.10), events retention `30 3 * * *` — a 02:00 launch touches neither. Region `fra1`. Optional: limit the 11 «Needs Attention» secrets to Production. | done 28.09 |
 | D | **Add `rempireshop.com` and `www.rempireshop.com` in Vercel** (Settings → Domains): www → 308 → apex; apex is the address `PUBLIC_BASE_URL` will name, so Montonio's notices arrive with no redirect. `rempireshop.diipsolutions.eu` stays attached with **no** redirect. Write down the A and CNAME values Vercel asks for. «Invalid configuration» until DNS moves is normal. | to do |
 | D | **DNS at Cloudflare** (not ASCIO — that is only the registrar): TTL 300 on `A @` and `CNAME www`; note the rollback values `A @ 23.227.38.65`, `CNAME www shops.myshopify.com`. The keep-list, untouched on the day: `TXT google-site-verification`, `MX route1–3.mx.cloudflare.net` + SPF, `resend._domainkey`, `send` (MX + TXT) and `rsend`, `_dmarc`, `img.rempireshop.com` (R2 photos). | to do |
 | D | **Vercel plan**: Hobby forbids commercial use (`docs/HOSTING.md`). **Decided 27.09.2026 (Dim): stay on Hobby for now**; revisit if Vercel writes about commercial use, a third cron is needed, the functions hit Hobby's limits, or a second person needs the project. | decided |
@@ -121,13 +121,18 @@ why it is phase A on `/golive/`.
 
 ## Stage 4 — the day, in order
 
-Tuesday to Thursday, from about 08:30 Tallinn time. **In order** — several steps
-are only correct together. On `/golive/` each is its own numbered row.
+**At night**, from about 02:00 Tallinn time (Dim, 29.09.2026): no customers on
+either shop, and the 07:00 UTC cron is hours away. Renat is not there — what
+needs him is decided at the last meeting (T-1); he signs in in the morning
+(step 9). The date is not set yet. **In order** — several steps are only
+correct together. On `/golive/` each is its own numbered row. The two Shopify
+exports (steps 4 and 4b) arrive by e-mail to dim.novare@gmail.com and open
+within the Shopify login.
 
 1. **Backup.** `node --env-file=.env.railway.txt tools/db-backup.mjs` — a ✓ line
    and dozens of tables. No ✓ — stop.
-2. **Reset — before 10:00 or after 11:00 Tallinn** (the flows cron fires in the
-   10:00 hour; the 09:00 hour after 25.10). Dry run **with `--stock
+2. **Reset** — at night any time (by day it would be not in the 10:00 hour
+   Tallinn, the 09:00 hour after 25.10, when the flows cron fires). Dry run **with `--stock
    --test-content`**, read it (the TEST CONTENT list by name), paste the
    printed line — `--clear --confirm "…" --stock --test-content
    --gift-cards-are-test-cards` (decided 28.09.2026: the stock counts, moves
@@ -142,12 +147,15 @@ are only correct together. On `/golive/` each is its own numbered row.
    (Shopify → Products → Inventory → Export → all variants, CSV), then:
 
    ```
-   RMP_ADMIN_COOKIE=<rmp_admin cookie of a signed-in panel> \
-     node tools/import-shopify-stock.mjs --csv <export.csv> --base https://rempireshop.diipsolutions.eu
-   … the same --apply --confirm ИМПОРТ
+   node tools/import-shopify-stock.mjs --csv <export.csv> --emit-browser-script stock-apply.js
    ```
 
-   (PowerShell: `$env:RMP_ADMIN_COOKIE="…"` first.) The dry run prints
+   and `stock-apply.js` is run in the tab where the panel is signed in (Claude
+   does it) — nobody copies the `rmp_admin` cookie into a terminal. The script
+   reads the live «Склад» first, skips a size the shelf does not have, posts
+   one row at a time with the same idempotency keys, stops at a 401 and returns
+   the counts. (The terminal way — `--base … --apply --confirm ИМПОРТ` with
+   `RMP_ADMIN_COOKIE` — still exists as a fallback.) The dry run prints
    before → after per size, what needs a decision, what has no shelf row and
    what gets overwritten; `--apply` writes each count absolutely through
    `POST /api/admin/inventory/moves/` («ручная правка», «Импорт из Shopify»),
@@ -205,15 +213,19 @@ are only correct together. On `/golive/` each is its own numbered row.
 8. **Parcel webhook**: `node --env-file=.env.montonio-live.txt tools/montonio-webhook.mjs list`
    → `… register https://rempireshop.com/api/shipping/notify/` → «Подключения»
    green → `… delete <old id>` → `list` shows one webhook, four events.
-9. **Renat** signs in at `rempireshop.com/admin` (the session is per address),
-   adds it to the home screen again, switches notifications on there.
+9. **In the morning, not at night: Renat** signs in at `rempireshop.com/admin`
+   (the session is per address). On the iPhone: remove the old «Админка»
+   icon, add the new one from this address (Safari → Share → Add to Home
+   Screen), open it from the icon → «Ещё» → «Настройки» → «Оповещения на
+   телефон» → «Включить на этом телефоне» → «Отправить проверочное». Orders
+   placed during the night arrive in the Telegram group «Rempire заказы».
 10. **First real order** on rempireshop.com — bank link, «Самовывоз в салоне»;
     refund it the next business day and see «Деньги возвращены» arrive.
 11. **Merchant Center**, `docs/merchant-feed.md` step B: our three feeds beside
     the Shopify sources; the Shopify sources untouched.
 12. **Search Console**: submit `https://rempireshop.com/sitemap.xml`, request
     indexing.
-13. **Shopify orders** at 12:00, 18:00 and the next morning (72 hours in all) —
+13. **Shopify orders** in the morning after the night, at 12:00, 18:00 and the next morning (72 hours in all) —
     fulfil and write off by hand; Shopify's domain untouched until Merchant
     step E. **At the end of the day delete `.env.railway.txt` and
     `.env.montonio-live.txt`.**

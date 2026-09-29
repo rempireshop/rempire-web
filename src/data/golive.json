@@ -673,16 +673,15 @@
       "id": "test-data-cleanup",
       "area": "t1",
       "who": [
-        "dim",
-        "renat"
+        "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
-      "title": "Всё, что делалось во время проверок, стирает чистка — прочитать список",
-      "detail": "Решено 28.09.2026 (Дима): руками ничего не удалять — это делает чистка шага 2 с --test-content. Она стирает все промокоды, все наборы, все статьи блога, все рассылки и все восемь своих товаров (c-…, ни одного из них нет в Shopify) вместе с их правками цен и строками склада. С --stock — все остатки, историю склада и штрихкоды (тоже тесты), с --gift-cards-are-test-cards — все семь подарочных карт. Остаются: импортированные товары с их ценами и правками, настройки, тексты писем, цены доставки, список банков; остатки сразу после чистки приходят из Shopify (шаг 4 дня). Сухой прогон с --stock --test-content печатает каждый код, набор, статью, тему рассылки и свой товар поимённо — прочитать с Ренатом и одобрить. Настоящий свой товар, если Ренат его заведёт до запуска, оставляет --keep-product <id>. Блог и «Наборы» на витрине прячутся сами, пока нет опубликованной статьи и включённого набора, и возвращаются сами с первой. После чистки https://rempireshop.diipsolutions.eu/feed/google-en.xml — ни одного своего товара-пробы.",
+      "title": "Что стирает чистка — решено 28.09, Ренат не нужен",
+      "detail": "Решено 28.09.2026 (Дима): руками ничего не удалять — всё делает чистка шага 2 с --stock --test-content --gift-cards-are-test-cards: все промокоды, все наборы, все статьи блога, все рассылки, все восемь своих товаров (c-…, ни одного нет в Shopify, включая товар за 1 € для тестов), их правки цен и строки склада, все остатки и штрихкоды (тесты), все семь подарочных карт. Остаются: импортированные товары с их ценами (их правки совпадают с Shopify, проверено 28.09), настройки, тексты писем, цены доставки, банки. В ночь Дима читает список TEST CONTENT в сухом прогоне — Рената спрашивать не нужно. Если до ночи Ренат заведёт настоящий свой товар — его сохраняет --keep-product <id>. Блог и «Наборы» на витрине прячутся сами, пока пусты.",
       "en": {
-        "title": "Everything made during the checks — the reset deletes it: read the list",
-        "detail": "Decided 28.09.2026 (Dim): nothing by hand — the step-2 reset does it with --test-content. It deletes every promo code, every set, every blog post, every newsletter and all eight own products (c-…, none of them exists in Shopify) with their price edits and stock rows. With --stock, every stock count, the stock history and the barcodes (tests too); with --gift-cards-are-test-cards, all seven gift cards. Stays: imported products with their prices and edits, settings, letter texts, delivery prices, the bank list; the stock comes back from Shopify straight after the reset (step 4 of the day). The dry run with --stock --test-content prints every code, set, post, newsletter subject and own product by name — read it with Renat and approve it. A real own product Renat adds before the day is kept with --keep-product <id>. The blog and «Наборы» hide themselves on the storefront while there is no published post and no active set, and come back by themselves with the first one. After the reset https://rempireshop.diipsolutions.eu/feed/google-en.xml shows no own test product."
+        "title": "What the reset erases — decided 28.09, Renat not needed",
+        "detail": "Decided 28.09.2026 (Dim): delete nothing by hand — step 2's reset with --stock --test-content --gift-cards-are-test-cards does it: every promo code, every set, every blog post, every newsletter, all eight own products (c-…, none of them in Shopify, the €1 test product included) with their price edits and stock rows, all stock and barcodes (tests), all seven gift cards. What stays: the imported products with their prices (their edits match Shopify, checked 28.09), the settings, the letter texts, the delivery prices, the banks. On the night Dim reads the TEST CONTENT list in the dry run — no need to ask Renat. If Renat creates a real own product before the night, --keep-product <id> keeps it. The blog and «Наборы» hide themselves on the shop while empty."
       }
     },
     {
@@ -695,10 +694,10 @@
       "status": "todo",
       "blocking": true,
       "title": "Последняя встреча с Ренатом перед запуском",
-      "detail": "Решить вместе и записать. 1) Какие автописьма включить сразу после чистки («Маркетинг → Письма»): неоплаченные заказы, снова в наличии, брошенная корзина, скидка по брошенной корзине, день рождения. Заявки «Сообщить, когда появится» принимаются и при выключенном письме — и молча остаются без ответа; неоплаченные при выключенном письме висят «новыми» навсегда. Включает их шаг 3 дня — не раньше чистки. 2) Посылки: курьерскую посылку можно класть в пакомат того же перевозчика, если помещается (Montonio, 29.09.2026) — вызывать курьера не обязательно. 3) Выплата из Montonio раз в неделю вместо ежедневной — пункт «payout-period»; возврат, который Montonio отменил, — переводом и «Отметить возврат (без денег)». 4) Что Ренату знать: полный возврат возвращает на склад каждую строку (испорченное списать руками), частичный — ни склад, ни баллы; ссылка «Админка» из подвала уходит накануне — вход по rempireshop.com/admin, и в день запуска войти там заново.",
+      "detail": "Решить вместе и записать. 1) Какие автописьма включить сразу после чистки («Маркетинг → Письма»): неоплаченные заказы, снова в наличии, брошенная корзина, скидка по брошенной корзине, день рождения. Заявки «Сообщить, когда появится» принимаются и при выключенном письме — и молча остаются без ответа; неоплаченные при выключенном письме висят «новыми» навсегда. Включает их шаг 3 дня — не раньше чистки. 2) Посылки: курьерскую посылку можно класть в пакомат того же перевозчика, если помещается (Montonio, 29.09.2026) — вызывать курьера не обязательно. 3) Выплата из Montonio раз в неделю вместо ежедневной — пункт «payout-period»; возврат, который Montonio отменил, — переводом и «Отметить возврат (без денег)». 4) Что Ренату знать: полный возврат возвращает на склад каждую строку (испорченное списать руками), частичный — ни склад, ни баллы; ссылка «Админка» из подвала уходит накануне — вход по rempireshop.com/admin, и в день запуска войти там заново. 5) Ночью Рената не будет: всё решить сейчас. До ночи Ренат держит остатки в Shopify точными (их переносим) и в ночь ничего в Shopify не меняет; утром — шаг 9 (вход, иконка, уведомления); в Telegram открыть @rempireshop_bot и нажать «Start» (передача бота).",
       "en": {
         "title": "The last meeting with Renat before the launch",
-        "detail": "Decide together and write it down. 1) Which automatic letters go on right after the reset («Маркетинг → Письма»): unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. «Сообщить, когда появится» sign-ups are accepted while that letter is off — and silently never answered; with the unpaid letter off, unpaid orders stay «новый» for ever. Step 3 of the day switches them on — never before the reset. 2) Parcels: a courier parcel may go into the same carrier's parcel machine if it fits (Montonio, 29.09.2026) — no courier pickup needed. 3) Montonio payout weekly instead of daily — item «payout-period»; a refund Montonio cancelled goes by bank transfer and «Отметить возврат (без денег)». 4) What Renat needs to know: a full refund puts every line back on the shelf (write off anything unsellable by hand), a partial one moves neither stock nor points; the footer «Админка» link goes the day before — sign in at rempireshop.com/admin, and sign in there again on the day."
+        "detail": "Decide together and write it down. 1) Which automatic letters go on right after the reset («Маркетинг → Письма»): unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. «Сообщить, когда появится» sign-ups are accepted while that letter is off — and silently never answered; with the unpaid letter off, unpaid orders stay «новый» for ever. Step 3 of the day switches them on — never before the reset. 2) Parcels: a courier parcel may go into the same carrier's parcel machine if it fits (Montonio, 29.09.2026) — no courier pickup needed. 3) Montonio payout weekly instead of daily — item «payout-period»; a refund Montonio cancelled goes by bank transfer and «Отметить возврат (без денег)». 4) What Renat needs to know: a full refund puts every line back on the shelf (write off anything unsellable by hand), a partial one moves neither stock nor points; the footer «Админка» link goes the day before — sign in at rempireshop.com/admin, and sign in there again on the day. 5) Renat will not be there at night: decide everything now. Until the night Renat keeps the Shopify stock accurate (it is what gets imported) and changes nothing in Shopify during the night; in the morning — step 9 (sign-in, icon, notifications); in Telegram open @rempireshop_bot and press «Start» (the bot handover)."
       }
     },
     {
@@ -714,10 +713,10 @@
         "live-hour"
       ],
       "title": "Закрыть заказы живого часа — до чистки",
-      "detail": "Заказы R-100095…R-100098 — настоящие деньги, а чистка их удалит, и поздние уведомления Montonio о них магазин уже не примет. До чистки: в кабинете Montonio убедиться, что возвраты живого часа завершены; сохранить отчёт Montonio по этим заказам для бухгалтера; посылку DPD 3888e013 (R-100098) отменить в Montonio, если её так и не сдали. Ренат старые заказы в панели не трогает: «Создать этикетку» у заказа, оплаченного в песочнице, бронирует настоящую платную посылку. Песочные возвраты (R-100050, R-100054…) около 29.09 станут «просроченными» и покрасят «Подключения» и «Обзор» в красный — это нормально до чистки.",
+      "detail": "Заказы R-100095…R-100098 — настоящие деньги, а чистка их удалит, и поздние уведомления Montonio о них магазин уже не примет. До чистки: в кабинете Montonio убедиться, что возвраты живого часа завершены; сохранить отчёт Montonio по этим заказам для бухгалтера; посылку DPD 3888e013 (R-100098) отменить в Montonio, если её так и не сдали. Ренат старые заказы в панели не трогает: «Создать этикетку» у заказа, оплаченного в песочнице, бронирует настоящую платную посылку. Песочные возвраты (R-100050, R-100054…) около 29.09 станут «просроченными» и покрасят «Подключения» и «Обзор» в красный — это нормально до чистки. С 28.09 сюда же — тестовые заказы за 1 € за границу (Ренат, Omniva / SmartPosti / Unisend): возвраты завершены в Montonio, посылки получены или вернулись. R-100095 — возвращён полностью (28.09); R-100096 — 0,50 € ждёт Montonio, вторые 0,50 € вернуть или оставить; R-100097 — не оплачен, ничего; R-100098 — отправлен, вернуть по желанию.",
       "en": {
         "title": "Close out the live-hour orders — before the reset",
-        "detail": "Orders R-100095…R-100098 are real money, the reset deletes them, and the shop will not accept Montonio's late notices about them afterwards. Before the reset: in the Montonio account make sure the live hour's refunds completed; keep Montonio's report of these orders for the accountant; cancel the DPD parcel 3888e013 (R-100098) in Montonio if it was never handed over. Renat touches no old order in the panel: «Создать этикетку» on an order paid in the sandbox books a real, paid parcel. The sandbox refunds (R-100050, R-100054…) turn «overdue» around 29.09 and paint «Подключения» and «Обзор» red — expected until the reset."
+        "detail": "Orders R-100095…R-100098 are real money, the reset deletes them, and the shop will not accept Montonio's late notices about them afterwards. Before the reset: in the Montonio account make sure the live hour's refunds completed; keep Montonio's report of these orders for the accountant; cancel the DPD parcel 3888e013 (R-100098) in Montonio if it was never handed over. Renat touches no old order in the panel: «Создать этикетку» on an order paid in the sandbox books a real, paid parcel. The sandbox refunds (R-100050, R-100054…) turn «overdue» around 29.09 and paint «Подключения» and «Обзор» red — expected until the reset. Since 28.09 this also covers the €1 test orders abroad (Renat; Omniva / SmartPosti / Unisend): refunds completed at Montonio, parcels collected or returned. R-100095 — fully refunded (28.09); R-100096 — €0.50 waiting at Montonio, the other €0.50 refund or keep; R-100097 — unpaid, nothing; R-100098 — shipped, refund if wanted."
       }
     },
     {
@@ -742,17 +741,17 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "outside": "Railway",
       "needs": [
         "snapshot"
       ],
-      "title": "Репетиция чистки: файл, копия, сухой прогон",
-      "detail": "Накануне, чтобы утром не узнать, что не подключается. В папке rempire-web файл .env.railway.txt из двух строк: DATABASE_URL= (Railway → Postgres → Variables → DATABASE_PUBLIC_URL) и DATABASE_SSL_NO_VERIFY=1 — без второй инструмент чистки не примет сертификат Railway. Docker Desktop запущен. Копия: node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓ и десятки таблиц. Сухой прогон: node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — ничего не меняет; прочитать с Ренатом список TEST CONTENT (каждый промокод, набор, статья, рассылка и свой товар поимённо), подарочные карты, клиентов с согласием на рассылку и строку order_number_seq (продолжит после самого большого номера, не с R-100001). Файл не удалять до конца дня запуска. docs/go-live-reset.md, шаги 1–5.",
+      "title": "Репетиция чистки и копии базы — сделана 28–29.09",
+      "detail": "28.09.2026: сухой прогон чистки по боевой базе — только чтение, ничего не изменено (CLEAR 18 таблиц, нумерация продолжится с R-100099). 29.09.2026: копия базы — node --env-file=.env.railway.txt tools/db-backup.mjs — ✓ 0,37 МБ, 32 таблицы, прочитана pg_restore; Docker Desktop работает, файл .env.railway.txt подключается (DATABASE_SSL_NO_VERIFY=1 — второй строкой файла или перед командой). Файл копии — в %USERPROFILE%\\rempire-backups, вне репозитория: в нём имена и адреса покупателей. В ночь — те же две команды, репетировать заново не нужно. Файл .env.railway.txt не удалять до конца ночи.",
       "en": {
-        "title": "Rehearse the reset: the file, a copy, a dry run",
-        "detail": "The day before, so the morning does not find out it cannot connect. In the rempire-web folder, .env.railway.txt with two lines: DATABASE_URL= (Railway → Postgres → Variables → DATABASE_PUBLIC_URL) and DATABASE_SSL_NO_VERIFY=1 — without the second the reset tool refuses Railway's certificate. Docker Desktop running. A copy: node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line and dozens of tables. A dry run: node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — it changes nothing; read the TEST CONTENT list with Renat (every promo code, set, post, newsletter and own product by name), the gift cards, the customers with marketing consent and the order_number_seq line (it continues after the highest number, not at R-100001). Keep the file until the end of launch day. docs/go-live-reset.md, steps 1–5."
+        "title": "Rehearsal of the reset and the backup — done 28–29.09",
+        "detail": "28.09.2026: a dry run of the reset against the live database — read-only, nothing changed (CLEAR 18 tables, numbering continues at R-100099). 29.09.2026: a backup — node --env-file=.env.railway.txt tools/db-backup.mjs — ✓ 0.37 MB, 32 tables, read back by pg_restore; Docker Desktop works and .env.railway.txt connects (DATABASE_SSL_NO_VERIFY=1 — a second line in the file or before the command). The backup file sits in %USERPROFILE%\\rempire-backups, outside the repository: it holds customers' names and addresses. On the night — the same two commands, no new rehearsal needed. Keep .env.railway.txt until the night is over."
       }
     },
     {
@@ -762,17 +761,17 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "outside": "Shopify",
       "needs": [
         "code-stock-import"
       ],
-      "title": "Репетиция переноса остатков: сухой прогон",
-      "detail": "Накануне. Shopify → Products → Inventory → Export → все варианты, CSV. Потом сухой прогон по стенду: RMP_ADMIN_COOKIE (значение cookie rmp_admin из вошедшей панели, в чат не вставлять) и node tools/import-shopify-stock.mjs --csv <файл> --base https://rempireshop.diipsolutions.eu. Ничего не пишет. Прочитать: сколько строк «было → станет» (26.09 было 322), список «NEED A DECISION» — должен быть пуст (два мерч-товара решены в tools/shopify-stock-owner-rows.json), «no «Склад» row under that label», «will be OVERWRITTEN» и порог «мало», отличный от 1. Товары Shopify, которых нет в каталоге, не пишутся — это нормально. В день запуска перенос идёт в пустой «Склад» (чистка с --stock): каждая строка — «не считали → N», «will be OVERWRITTEN» пуст. На репетиции, до чистки, перезаписи — это нормально.",
+      "title": "Репетиция переноса остатков — сделана 28.09",
+      "detail": "28.09.2026: выгрузка Shopify → Products → Inventory → Export → все варианты, CSV (приходит письмом на dim.novare@gmail.com, ссылка открывается во входе Shopify). Сухой прогон — node tools/import-shopify-stock.mjs --csv <файл> — без сети: 322 строки → 240 «в наличии», 67 «мало», 15 «нет»; два мерч-товара — по tools/shopify-stock-owner-rows.json; 24 строки Shopify без товара в каталоге (черновики и архив) не пишутся. Запись в ночь — не через cookie в терминале, а скриптом в открытой панели: --emit-browser-script <файл> (те же ключи повтора, 401 — стоп).",
       "en": {
-        "title": "Rehearse the stock import: a dry run",
-        "detail": "The day before. Shopify → Products → Inventory → Export → all variants, CSV. Then a dry run against staging: RMP_ADMIN_COOKIE (the rmp_admin cookie of a signed-in panel — never pasted into a chat) and node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu. It writes nothing. Read: how many before → after rows (322 on 26.09), the «NEED A DECISION» list — it should be empty (the two merch products are decided in tools/shopify-stock-owner-rows.json), «no «Склад» row under that label», «will be OVERWRITTEN» and any «мало» threshold other than 1. Shopify products missing from the catalogue are not written — that is expected. On the day the import runs into an empty «Склад» (the reset runs with --stock): every row reads «не считали → N» and «will be OVERWRITTEN» is empty. In the rehearsal, before the reset, overwrites are expected."
+        "title": "Rehearsal of the stock import — done 28.09",
+        "detail": "28.09.2026: the export Shopify → Products → Inventory → Export → all variants, CSV (it arrives by e-mail to dim.novare@gmail.com; the link opens within the Shopify login). The dry run — node tools/import-shopify-stock.mjs --csv <file> — offline: 322 rows → 240 «в наличии», 67 «мало», 15 «нет»; the two merch products follow tools/shopify-stock-owner-rows.json; 24 Shopify rows with no product in the catalogue (drafts and archive) are not written. On the night the write goes not through a cookie in a terminal but through a script in the open panel: --emit-browser-script <file> (the same replay keys; a 401 stops it)."
       }
     },
     {
@@ -781,14 +780,14 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "outside": "Vercel",
-      "title": "Проверить переменные и расписания в Vercel",
-      "detail": "Vercel → Settings → Environment Variables, Production. Стоят: CRON_SECRET (без него ночные задания молча отвечают 503), RESEND_API_KEY, RESEND_TO (куда уходит письмо «новый заказ» — без него его просто нет), SESSION_SECRET (никогда не менять: на нём сессии, ссылки заказов и PDF подарочных карт), DATABASE_SSL_* как стоят сейчас, MONTONIO_ENV=live и боевая пара. PAYMENT_PROVIDER не задан (никогда не mock). PUBLIC_BASE_URL сегодня — адрес стенда; меняется в день запуска, шаг 5, не раньше. Расписания в vercel.json: письма, сверка оплат и посылок — 07:00 UTC (10:00 по Таллинну, 09:00 после 25.10), чистка событий — 03:30 UTC. Регион функций — fra1.",
+      "title": "Переменные Vercel — проверены 28.09",
+      "detail": "28.09.2026, в панели Vercel (rempire-web → Environment Variables): 27 переменных, все нужные на месте — Montonio (боевые, MONTONIO_ENV=live), база и DATABASE_SSL_NO_VERIFY, SESSION_SECRET (никогда не менять), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (оплаты идут через Montonio — не mock). Лишних нет: DB_DRIVER, PGLITE_PATH, E2E_* не заданы. В ночь меняется только PUBLIC_BASE_URL (шаг 5). Расписания: 07:00 UTC — письма, сверка оплат, возвратов и посылок; 03:30 UTC — чистка событий; ночной запуск в 02:00 их не задевает. По желанию: 11 секретов с пометкой «Needs Attention» открыты для всех окружений — можно ограничить «Production».",
       "en": {
-        "title": "Check the variables and the schedules in Vercel",
-        "detail": "Vercel → Settings → Environment Variables, Production. Set: CRON_SECRET (without it the nightly jobs answer 503 silently), RESEND_API_KEY, RESEND_TO (where the «new order» letter goes — without it there is none), SESSION_SECRET (never change it: sessions, order links and gift-card PDFs rest on it), DATABASE_SSL_* as they are now, MONTONIO_ENV=live and the live pair. PAYMENT_PROVIDER unset (never mock). PUBLIC_BASE_URL is the staging address today; it changes on the day, step 5, not before. The schedules in vercel.json: letters, the payment and parcel re-checks — 07:00 UTC (10:00 Tallinn, 09:00 after 25.10); event clean-up — 03:30 UTC. Function region fra1."
+        "title": "Vercel variables — checked 28.09",
+        "detail": "28.09.2026, in the Vercel dashboard (rempire-web → Environment Variables): 27 variables, every needed one present — Montonio (live, MONTONIO_ENV=live), the database and DATABASE_SSL_NO_VERIFY, SESSION_SECRET (never change it), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (payments go through Montonio — not mock). Nothing extra: DB_DRIVER, PGLITE_PATH, E2E_* are not set. On the night only PUBLIC_BASE_URL changes (step 5). Schedules: 07:00 UTC — letters, the payment, refund and parcel checks; 03:30 UTC — events clean-up; a 02:00 launch touches neither. Optional: 11 secrets marked «Needs Attention» are open to every environment — they can be limited to «Production»."
       }
     },
     {
@@ -832,10 +831,10 @@
       "blocking": true,
       "outside": "Vercel",
       "title": "Добавить rempireshop.com и www в Vercel",
-      "detail": "Vercel → проект → Settings → Domains → Add: rempireshop.com и www.rempireshop.com. www — перенаправление 308 на rempireshop.com; основной адрес — rempireshop.com без www: на нём будет PUBLIC_BASE_URL, и уведомления Montonio приходят туда же без редиректа (POST через редирект теряется). rempireshop.diipsolutions.eu остаётся в проекте, БЕЗ перенаправления — на нём старые адреса уведомлений, приложение Рената на экране телефона и push. Записать значения, которые Vercel просит для DNS (A для rempireshop.com, CNAME для www), — они нужны на шаге 6. Пока DNS указывает на Shopify, Vercel пишет «Invalid configuration» — это нормально, ничего не переключается.",
+      "detail": "Vercel → проект → Settings → Domains → Add: rempireshop.com и www.rempireshop.com. www — перенаправление 308 на rempireshop.com; основной адрес — rempireshop.com без www: на нём будет PUBLIC_BASE_URL, и уведомления Montonio приходят туда же без редиректа (POST через редирект теряется). rempireshop.diipsolutions.eu остаётся в проекте, БЕЗ перенаправления — на нём старые адреса уведомлений, приложение Рената на экране телефона и push. Записать значения, которые Vercel просит для DNS (A для rempireshop.com, CNAME для www), — они нужны на шаге 6. Пока DNS указывает на Shopify, Vercel пишет «Invalid configuration» — это нормально, ничего не переключается. Можно сделать заранее, хоть сейчас: пока DNS на Shopify, ничего не переключается.",
       "en": {
         "title": "Add rempireshop.com and www in Vercel",
-        "detail": "Vercel → project → Settings → Domains → Add: rempireshop.com and www.rempireshop.com. www — a 308 redirect to rempireshop.com; the main address is rempireshop.com without www: PUBLIC_BASE_URL will be that, and Montonio's notices arrive there with no redirect (a POST through a redirect is lost). rempireshop.diipsolutions.eu stays on the project, with NO redirect — the old notice addresses, Renat's home-screen app and push live on it. Write down the values Vercel asks for in DNS (A for rempireshop.com, CNAME for www) — step 6 needs them. While DNS still points at Shopify, Vercel says «Invalid configuration» — that is normal, nothing moves."
+        "detail": "Vercel → project → Settings → Domains → Add: rempireshop.com and www.rempireshop.com. www — a 308 redirect to rempireshop.com; the main address is rempireshop.com without www: PUBLIC_BASE_URL will be that, and Montonio's notices arrive there with no redirect (a POST through a redirect is lost). rempireshop.diipsolutions.eu stays on the project, with NO redirect — the old notice addresses, Renat's home-screen app and push live on it. Write down the values Vercel asks for in DNS (A for rempireshop.com, CNAME for www) — step 6 needs them. While DNS still points at Shopify, Vercel says «Invalid configuration» — that is normal, nothing moves. It can be done in advance, even now: while DNS points to Shopify, nothing switches."
       }
     },
     {
@@ -928,11 +927,11 @@
       "needs": [
         "reset-rehearsal"
       ],
-      "title": "1. Копия базы — утром, до всего",
-      "detail": "С ~08:30 по Таллинну. node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓, десятки таблиц, файл в rempire-backups. Отката у чистки нет, откат — это восстановление из этой копии (docs/go-live-reset.md, «Если всё-таки надо откатиться»). Нет строки с ✓ — дальше не идти.",
+      "title": "1. Копия базы — в начале ночи, до всего",
+      "detail": "В начале ночи (≈02:00). Отрепетировано 29.09 (✓ 0,37 МБ, 32 таблицы). node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓, десятки таблиц, файл в rempire-backups. Отката у чистки нет, откат — это восстановление из этой копии (docs/go-live-reset.md, «Если всё-таки надо откатиться»). Нет строки с ✓ — дальше не идти.",
       "en": {
-        "title": "1. A copy of the database — in the morning, before anything",
-        "detail": "From about 08:30 Tallinn time. node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line, dozens of tables, the file in rempire-backups. The reset has no undo; the undo is a restore from this copy (docs/go-live-reset.md, «if you do have to roll back»). No ✓ line — stop here."
+        "title": "1. A backup — at the start of the night, before anything",
+        "detail": "At the start of the night (≈02:00). Rehearsed 29.09 (✓ 0.37 MB, 32 tables). node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line, dozens of tables, the file in rempire-backups. The reset has no undo; the undo is a restore from this copy (docs/go-live-reset.md, «if you do have to roll back»). No ✓ line — stop here."
       }
     },
     {
@@ -948,19 +947,18 @@
         "test-data-cleanup",
         "live-hour-closeout"
       ],
-      "title": "2. Чистка — с --stock --test-content, до 10:00",
-      "detail": "До 10:00 по Таллинну или после 11:00: ночное задание писем приходит в 07:00 UTC (10:00–10:59 по Таллинну, 09:00–09:59 после 25.10). Сухой прогон — node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — прочитать, список TEST CONTENT поимённо; потом вставить строку, которую он напечатал: --clear --confirm … --stock --test-content --gift-cards-are-test-cards (все семь карт тестовые). Решено 28.09.2026: остатки, история склада и 10 штрихкодов — тоже тесты, настоящие числа шаг 4 пишет в пустой «Склад»; все промокоды, наборы, статьи, рассылки и свои товары (c-…) — тоже. Ещё раз сухой прогон: в CLEAR, STOCK и TEST CONTENT везде 0. На витрине нет ни «Блога», ни «Наборов». Открыть «Подключения»: красное от песочных возвратов и посылок должно уйти. Нумерация заказов продолжится после самого большого номера, не с R-100001. docs/go-live-reset.md.",
+      "title": "2. Чистка — с --stock --test-content",
+      "detail": "Ночью — в любое время; днём было бы до 10:00 или после 11:00 по Таллинну (ночное задание — 07:00 UTC). Сухой прогон — node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — прочитать, список TEST CONTENT поимённо; потом вставить строку, которую он напечатал: --clear --confirm … --stock --test-content --gift-cards-are-test-cards (все семь карт тестовые). Решено 28.09.2026: остатки, история склада и 10 штрихкодов — тоже тесты, настоящие числа шаг 4 пишет в пустой «Склад»; все промокоды, наборы, статьи, рассылки и свои товары (c-…) — тоже. Ещё раз сухой прогон: в CLEAR, STOCK и TEST CONTENT везде 0. На витрине нет ни «Блога», ни «Наборов». Открыть «Подключения»: красное от песочных возвратов и посылок должно уйти. Нумерация заказов продолжится после самого большого номера, не с R-100001. docs/go-live-reset.md.",
       "en": {
-        "title": "2. The reset — with --stock --test-content, before 10:00",
-        "detail": "Before 10:00 Tallinn time or after 11:00: the nightly letters job fires at 07:00 UTC (10:00–10:59 Tallinn, 09:00–09:59 after 25.10). Dry run — node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — read it, the TEST CONTENT list by name; then paste the line it printed: --clear --confirm … --stock --test-content --gift-cards-are-test-cards (all seven cards are test cards). Decided 28.09.2026: the stock counts, the stock history and the 10 barcodes are tests too, step 4 writes the real counts into the empty «Склад»; so are every promo code, set, post, newsletter and own product (c-…). Dry run again: 0 everywhere under CLEAR, STOCK and TEST CONTENT. No «Блог» and no «Наборы» on the storefront. Open «Подключения»: the red from sandbox refunds and parcels should be gone. Order numbers continue after the highest one, not at R-100001. docs/go-live-reset.md."
+        "title": "2. The reset — with --stock --test-content",
+        "detail": "At night — any time; by day it would be before 10:00 or after 11:00 Tallinn (the nightly job runs at 07:00 UTC). Dry run — node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content — read it, the TEST CONTENT list by name; then paste the line it printed: --clear --confirm … --stock --test-content --gift-cards-are-test-cards (all seven cards are test cards). Decided 28.09.2026: the stock counts, the stock history and the 10 barcodes are tests too, step 4 writes the real counts into the empty «Склад»; so are every promo code, set, post, newsletter and own product (c-…). Dry run again: 0 everywhere under CLEAR, STOCK and TEST CONTENT. No «Блог» and no «Наборы» on the storefront. Open «Подключения»: the red from sandbox refunds and parcels should be gone. Order numbers continue after the highest one, not at R-100001. docs/go-live-reset.md."
       }
     },
     {
       "id": "flows-on",
       "area": "switches",
       "who": [
-        "dim",
-        "renat"
+        "dim"
       ],
       "status": "todo",
       "needs": [
@@ -968,10 +966,10 @@
         "renat-meeting"
       ],
       "title": "3. Включить автописьма, о которых договорились",
-      "detail": "«Маркетинг → Письма»: включить ровно то, о чём договорились на встрече с Ренатом, — не больше и не раньше чистки (иначе неоплаченные отменят и напишут тестовым ящикам, брошенная корзина — тоже). Без «Снова в наличии» заявки «Сообщить, когда появится» молча остаются без ответа; без «Неоплаченных» такой заказ висит «новым» навсегда.",
+      "detail": "«Маркетинг → Письма»: включить ровно то, о чём договорились на встрече с Ренатом, — не больше и не раньше чистки (иначе неоплаченные отменят и напишут тестовым ящикам, брошенная корзина — тоже). Без «Снова в наличии» заявки «Сообщить, когда появится» молча остаются без ответа; без «Неоплаченных» такой заказ висит «новым» навсегда. Ночью Рената не спросить: что включать — записано в пункте «Последняя встреча с Ренатом».",
       "en": {
         "title": "3. Switch on the automatic letters that were agreed",
-        "detail": "«Маркетинг → Письма»: switch on exactly what was agreed at the meeting with Renat — nothing more, and never before the reset (the unpaid-order letter would cancel test orders and write to test mailboxes, and so would the abandoned cart). Without «Снова в наличии» a «Сообщить, когда появится» sign-up is silently never answered; without the unpaid letter such an order stays «новый» for ever."
+        "detail": "«Маркетинг → Письма»: switch on exactly what was agreed at the meeting with Renat — nothing more, and never before the reset (the unpaid-order letter would cancel test orders and write to test mailboxes, and so would the abandoned cart). Without «Снова в наличии» a «Сообщить, когда появится» sign-up is silently never answered; without the unpaid letter such an order stays «новый» for ever. Renat cannot be asked at night: what to switch on is written down in the item «The last meeting with Renat»."
       }
     },
     {
@@ -987,10 +985,10 @@
         "stock-rehearsal"
       ],
       "title": "4. Остатки из Shopify — последним перед DNS",
-      "detail": "Решено 26.09.2026 (вариант 1b): остаток каждого размера из Shopify становится счётом в «Складе», «мало» — только на последней штуке. Свежая выгрузка: Shopify → Products → Inventory → Export. Сухой прогон по стенду — node tools/import-shopify-stock.mjs --csv <файл> --base https://rempireshop.diipsolutions.eu с RMP_ADMIN_COOKIE — прочитать «было → станет»; потом то же с --apply --confirm ИМПОРТ. Чистка шага 2 идёт с --stock (решено 28.09.2026: ручные остатки и штрихкоды — тесты): «Склад» пуст, каждая строка сухого прогона — «не считали → N», перезаписывать нечего. До переноса витрина показывает ручные отметки наличия, поэтому он идёт сразу за чисткой и письмами. После чистки — потому что она стёрла тестовые заявки «Сообщить, когда появится», и размер с 0 на плюс не напишет тестовым ящикам. Shopify продаёт до самого DNS: заказ Shopify после выгрузки списать в «Складе» руками (шаг 13).",
+      "detail": "Решено 26.09.2026 (вариант 1b): остаток каждого размера из Shopify становится счётом в «Складе», «мало» — только на последней штуке. Ночью: Shopify → Products → Inventory → Export → все варианты, CSV — ссылка приходит письмом на dim.novare@gmail.com, открывается во входе Shopify (Claude скачивает сам). Сухой прогон — node tools/import-shopify-stock.mjs --csv <файл> — «было → станет»: после чистки с --stock «Склад» пуст, каждая строка «не считали → N» (28.09: 322 строки). Запись — тем же инструментом с --emit-browser-script <файл>: Claude запускает скрипт в открытой панели, cookie никто не копирует; повтор проигрывается, 401 — стоп. Сразу за чисткой и письмами: до переноса витрина показывает ручные отметки наличия. После чистки — она стёрла тестовые заявки «Сообщить, когда появится», и размер с 0 на плюс не напишет тестовым ящикам. Shopify продаёт до самого DNS: заказ Shopify после выгрузки списать в «Складе» руками (шаг 13).",
       "en": {
         "title": "4. Stock from Shopify — the last thing before DNS",
-        "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. A fresh export: Shopify → Products → Inventory → Export. A dry run against staging — node tools/import-shopify-stock.mjs --csv <file> --base https://rempireshop.diipsolutions.eu with RMP_ADMIN_COOKIE — read the before → after; then the same with --apply --confirm ИМПОРТ. The step-2 reset runs with --stock (decided 28.09.2026: the hand-set counts and the barcodes are tests): «Склад» is empty, every dry-run row reads «не считали → N», nothing is overwritten. Until the import the storefront shows the manual stock marks, so it runs straight after the reset and the letters. After the reset because it deleted the test «Сообщить, когда появится» requests, so a size going from 0 to a count writes to no test mailbox. Shopify keeps selling until DNS: a Shopify order after the export is written off in «Склад» by hand (step 13)."
+        "detail": "Decided 26.09.2026 (option 1b): each size's Shopify count becomes its count in «Склад», «мало» only on the last unit. At night: Shopify → Products → Inventory → Export → all variants, CSV — the link arrives by e-mail to dim.novare@gmail.com and opens within the Shopify login (Claude downloads it). The dry run — node tools/import-shopify-stock.mjs --csv <file> — «before → after»: after the reset with --stock «Склад» is empty, every row reads «не считали → N» (28.09: 322 rows). The write — the same tool with --emit-browser-script <file>: Claude runs the script in the open panel, nobody copies a cookie; a repeat replays, a 401 stops it. Right after the reset and the letters: until the import the shop shows the hand-set stock words. After the reset — it erased the test «Сообщить, когда появится» requests, so a size going from 0 to a count writes to no test mailbox. Shopify sells until DNS: a Shopify order after the export is written off in «Склад» by hand (step 13)."
       },
       "outside": "Shopify"
     },
@@ -1005,10 +1003,10 @@
         "run-reset"
       ],
       "title": "4b. Покупатели из Shopify — без согласия на рассылку",
-      "detail": "Решено 28.09.2026 (Дима, вариант B): переносятся только покупатели с именем — e-mail, телефон, если есть, и адрес по умолчанию, если магазин возит в его страну. Адрес хранится со страной, но без способа доставки (Дима, 28.09, вариант b): оформление открывается на их стране с обычным способом, а адрес встаёт в три поля курьера, только когда покупатель сам выберет «Курьер». Без согласия на рассылку: у всех marketing = false, что бы ни стояло в Shopify, — и это не отказ, они просто здесь не соглашались. Ни заказов, ни заметок, ни тегов, ни сумм. Выгрузка: Shopify → Customers → Export → All customers → Plain CSV, файл приходит на почту. Сухой прогон — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <файл> — печатает только числа и коды стран; потом то же с --apply --confirm ИМПОРТ-КЛИЕНТОВ, всё одной транзакцией. После чистки (она удаляет всех клиентов) и до DNS. E-mail, у которого уже есть кабинет, не трогается, поэтому второй запуск ничего не создаёт; ни кодов, ни писем никому. Нужна миграция 221 (customers.source = 'shopify') — она приезжает с деплоем. На выгрузке 28.09: 428 строк → 391 покупатель, 307 с телефоном, 316 с адресом; без имени — 33 строки, без e-mail — 4.",
+      "detail": "Решено 28.09.2026 (Дима, вариант B): переносятся только покупатели с именем — e-mail, телефон, если есть, и адрес по умолчанию, если магазин возит в его страну. Адрес хранится со страной, но без способа доставки (Дима, 28.09, вариант b): оформление открывается на их стране с обычным способом, а адрес встаёт в три поля курьера, только когда покупатель сам выберет «Курьер». Без согласия на рассылку: у всех marketing = false, что бы ни стояло в Shopify, — и это не отказ, они просто здесь не соглашались. Ни заказов, ни заметок, ни тегов, ни сумм. Выгрузка: Shopify → Customers → Export → All customers → Plain CSV, файл приходит на почту. Сухой прогон — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <файл> — печатает только числа и коды стран; потом то же с --apply --confirm ИМПОРТ-КЛИЕНТОВ, всё одной транзакцией. После чистки (она удаляет всех клиентов) и до DNS. E-mail, у которого уже есть кабинет, не трогается, поэтому второй запуск ничего не создаёт; ни кодов, ни писем никому. Нужна миграция 221 (customers.source = 'shopify') — она приезжает с деплоем. На выгрузке 28.09: 428 строк → 391 покупатель, 307 с телефоном, 316 с адресом; без имени — 33 строки, без e-mail — 4. Ночью: выгрузку покупателей Shopify тоже присылает письмом — Claude скачивает и запускает; файл с личными данными — вне репозитория.",
       "en": {
         "title": "4b. Customers from Shopify — without marketing consent",
-        "detail": "Decided 28.09.2026 (Dim, option B): only customers with a name come over — the e-mail, the phone if there is one, and the default address if the shop delivers to its country. The address is kept with its country but no delivery method (Dim, 28.09, option b): the checkout opens on their country with its usual method, and the address fills the courier's three boxes only when the shopper picks «Курьер» himself. No marketing consent: everyone gets marketing = false whatever Shopify says — and that is not an opt-out, they have simply never opted in here. No orders, notes, tags or totals. The export: Shopify → Customers → Export → All customers → Plain CSV; the file arrives by e-mail. Dry run — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <file> — prints only counts and country codes; then the same with --apply --confirm ИМПОРТ-КЛИЕНТОВ, all in one transaction. After the reset (it deletes every customer) and before DNS. An e-mail that already has an account is not touched, so a second run creates nothing; nobody gets a code or a letter. Needs migration 221 (customers.source = 'shopify'), which arrives with the deploy. On the 28.09 export: 428 rows → 391 customers, 307 with a phone, 316 with an address; 33 rows without a name and 4 without an e-mail skipped."
+        "detail": "Decided 28.09.2026 (Dim, option B): only customers with a name come over — the e-mail, the phone if there is one, and the default address if the shop delivers to its country. The address is kept with its country but no delivery method (Dim, 28.09, option b): the checkout opens on their country with its usual method, and the address fills the courier's three boxes only when the shopper picks «Курьер» himself. No marketing consent: everyone gets marketing = false whatever Shopify says — and that is not an opt-out, they have simply never opted in here. No orders, notes, tags or totals. The export: Shopify → Customers → Export → All customers → Plain CSV; the file arrives by e-mail. Dry run — node --env-file=.env.railway.txt tools/import-shopify-customers.mjs --csv <file> — prints only counts and country codes; then the same with --apply --confirm ИМПОРТ-КЛИЕНТОВ, all in one transaction. After the reset (it deletes every customer) and before DNS. An e-mail that already has an account is not touched, so a second run creates nothing; nobody gets a code or a letter. Needs migration 221 (customers.source = 'shopify'), which arrives with the deploy. On the 28.09 export: 428 rows → 391 customers, 307 with a phone, 316 with an address; 33 rows without a name and 4 without an e-mail skipped. At night: Shopify sends the customers export by e-mail too — Claude downloads it and runs the import; the file with personal data stays outside the repository."
       },
       "outside": "Shopify"
     },
@@ -1096,11 +1094,11 @@
       "needs": [
         "domain-dns"
       ],
-      "title": "9. Ренат входит в панель на rempireshop.com",
-      "detail": "Вход — по адресу, поэтому на новом адресе заново: rempireshop.com/admin, пароль. Добавить панель на экран телефона заново с этого адреса и включить уведомления о заказах там же — подписка старого адреса к новому не переходит.",
+      "title": "9. Утром: Ренат входит в панель на rempireshop.com",
+      "detail": "Не ночью — утром, когда Ренат проснётся; ночные заказы приходят в Telegram-группу «Rempire заказы». Вход привязан к адресу, поэтому на новом адресе заново: в Safari rempireshop.com/admin → пароль. Старую иконку «Админка» с экрана «Домой» удалить, новую добавить с этого адреса («Поделиться» → «На экран «Домой»»), открыть с иконки → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». Подписка старого адреса к новому не переходит.",
       "en": {
-        "title": "9. Renat signs in to the panel on rempireshop.com",
-        "detail": "Signing in is per address, so again on the new one: rempireshop.com/admin, the password. Add the panel to the phone's home screen again from this address and switch order notifications on there — the old address's subscription does not carry over."
+        "title": "9. In the morning: Renat signs in to the panel on rempireshop.com",
+        "detail": "Not at night — in the morning, when Renat is up; orders placed at night arrive in the Telegram group «Rempire заказы». The sign-in belongs to the address, so it is done again on the new one: in Safari rempireshop.com/admin → password. Remove the old «Админка» icon from the Home Screen, add a new one from this address (Share → Add to Home Screen), open it from the icon → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». The old address's subscription does not carry over."
       }
     },
     {
@@ -1170,10 +1168,10 @@
         "domain-dns"
       ],
       "title": "13. Заказы Shopify — в 12:00, 18:00 и утром; удалить два файла .env",
-      "detail": "DNS расходится не мгновенно: часть покупателей ещё попадает в Shopify. Заказы Shopify проверить в 12:00, 18:00 и на следующее утро (и дальше 72 часа), каждый — выполнить и списать в «Складе» руками. Домен в Shopify не трогать до шага E docs/merchant-feed.md. В конце дня удалить .env.railway.txt и .env.montonio-live.txt.",
+      "detail": "DNS расходится не мгновенно: часть покупателей ещё попадает в Shopify. Заказы Shopify проверить утром после ночи, в 12:00, 18:00 и следующим утром (и дальше 72 часа), каждый — выполнить и списать в «Складе» руками. Домен в Shopify не трогать до шага E docs/merchant-feed.md. В конце дня удалить .env.railway.txt и .env.montonio-live.txt.",
       "en": {
         "title": "13. Shopify orders at 12:00, 18:00 and next morning; delete the two .env files",
-        "detail": "DNS does not move everywhere at once: some shoppers still reach Shopify. Check Shopify's orders at 12:00, 18:00 and the next morning (and for 72 hours), fulfil each one and write it off in «Склад» by hand. Leave the domain in Shopify alone until step E of docs/merchant-feed.md. At the end of the day delete .env.railway.txt and .env.montonio-live.txt."
+        "detail": "DNS does not move everywhere at once: some shoppers still reach Shopify. Check Shopify's orders in the morning after the night, at 12:00, 18:00 and the next morning (and for 72 hours), fulfil each one and write it off in «Склад» by hand. Leave the domain in Shopify alone until step E of docs/merchant-feed.md. At the end of the day delete .env.railway.txt and .env.montonio-live.txt."
       }
     },
     {
