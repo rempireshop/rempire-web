@@ -107,12 +107,12 @@ describe("what each alert says", () => {
   const read = (action: string, payload: Record<string, unknown>, actor = "system", id = 7) =>
     alertForJournal({ id, actor, action, payload: { ...ORDER, ...payload } });
 
-  it("a refund Montonio cannot fund yet: not with the customer, Montonio retries, top up if urgent", () => {
+  it("a refund Montonio cannot fund yet: not with the customer, Montonio pays it from new sales, no transfer while it waits (Montonio, 29.09.2026)", () => {
     const a = read("order.refund_stuck", { amount: 25, ref: "rf-1", code: "INSUFFICIENT_FUNDS", status: "pending" })!;
     expect(a.kind).toBe("refund_stuck");
     expect(a.title).toBe("⚠️ Возврат ещё не дошёл: R-100050");
     expect(a.body).toBe(
-      "25 € ещё не у покупателя: на счёте магазина в Montonio не хватило денег. Montonio пробует сам до 10 дней; если срочно — пополните счёт в Montonio.",
+      "25 € ещё не у покупателя: на счёте магазина в Montonio не хватило денег. Montonio вернёт сам из новых оплат, ждёт до 10 дней. Пока ждёт — не переводите сами, уйдёт дважды.",
     );
     // the long sentence of the order card goes to Telegram and the letter
     expect(a.detail).toContain("На счёте магазина в Montonio не хватило денег");
@@ -122,7 +122,7 @@ describe("what each alert says", () => {
     const a = read("order.refund_stuck", { amount: 25, ref: "rf-2", code: "EXPIRED", status: "failed" })!;
     expect(a.kind).toBe("refund_cancelled");
     expect(a.title).toBe("⚠️ Возврат отменён: R-100050");
-    expect(a.body).toBe("Montonio отменил возврат 25 €: Montonio ждал 10 дней. Деньги остались у магазина — оформите возврат заново.");
+    expect(a.body).toBe("Montonio отменил возврат 25 €: Montonio ждал 10 дней. Деньги остались у магазина — верните их переводом со счёта магазина (IBAN: оплата банком — в Montonio, картой — у покупателя) и нажмите «Отметить возврат (без денег)».");
     // the ledger's own row about the same refund is the same alert
     const b = read("order.refund", { amount: 25, ref: "rf-2", status: "failed" }, "webhook")!;
     expect(b.key).toBe(a.key);

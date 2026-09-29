@@ -458,18 +458,28 @@ const REFUND_DESCRIPTION: Record<string, RefundStatusReason> = {
 
 const REFUND_REASON_TEXT: Record<Exclude<RefundStatusReason, "unknown">, Trilingual> = {
   insufficient_funds: {
+    /* Montonio, in writing, 29.09.2026: a refund short of balance stays
+       PENDING and is cancelled after 10 days; the account cannot be topped up
+       and no reserve can be kept; the refund is paid from the next payments.
+       If it is cancelled: bank-link payments — the payer's IBAN is in the
+       Montonio system; card payments — ask the customer for an IBAN; refund by
+       bank transfer. So: wait while it is PENDING (a transfer now could pay it
+       twice), transfer only once it is cancelled. docs/montonio-questions.md. */
     RU:
-      "На счёте магазина в Montonio не хватило денег на этот возврат. Montonio пробует сам — до 10 дней, " +
-      "и если денег так и не будет, возврат отменится. Ничего нажимать не нужно: следующие оплаты покупателей пополнят счёт. " +
-      "Если возврат срочный — пополните счёт в Montonio.",
+      "На счёте магазина в Montonio не хватило денег на этот возврат. Montonio вернёт деньги сам, когда придут новые оплаты покупателей, — ждёт до 10 дней, потом отменяет возврат. " +
+      "Пополнить счёт в Montonio нельзя. Пока возврат ждёт, не переводите деньги сами — они уйдут дважды. " +
+      "Если Montonio отменит: при оплате банковской ссылкой возьмите IBAN покупателя в Montonio, при оплате картой попросите IBAN у покупателя, " +
+      "переведите деньги со счёта магазина и нажмите в заказе «Отметить возврат (без денег)».",
     ET:
-      "Poe kontol Montonios ei jätkunud selle tagasimakse jaoks raha. Montonio proovib ise — kuni 10 päeva, " +
-      "ja kui raha ikka ei tule, tagasimakse tühistatakse. Midagi vajutada ei ole vaja: järgmised klientide maksed täidavad konto. " +
-      "Kui tagasimakse on kiire — kandke Montonio kontole raha juurde.",
+      "Poe kontol Montonios ei jätkunud selle tagasimakse jaoks raha. Montonio teeb tagasimakse ise, kui tulevad uued klientide maksed, — ootab kuni 10 päeva, siis tühistab. " +
+      "Montonio kontole raha juurde kanda ei saa. Kuni tagasimakse ootab, ärge makske ise ülekandega tagasi — raha läheks kaks korda. " +
+      "Kui Montonio tühistab: pangalingi makse puhul võtke kliendi IBAN Montoniost, kaardimakse puhul küsige IBAN kliendilt, " +
+      "tehke ülekanne poe kontolt ja vajutage tellimusel «Märgi tagastuseks (ilma rahata)».",
     EN:
-      "The shop's Montonio account did not have enough money for this refund. Montonio keeps retrying by itself — for up to 10 days, " +
-      "and if the money still is not there the refund is cancelled. Nothing to press: the next customer payments will top the account up. " +
-      "If the refund is urgent, add money to the Montonio account.",
+      "The shop's Montonio account did not have enough money for this refund. Montonio pays it by itself once new customer payments arrive — it waits up to 10 days, then cancels the refund. " +
+      "The Montonio account cannot be topped up. While the refund is waiting, do not pay it back yourself — the money would go twice. " +
+      "If Montonio cancels it: for a bank-link payment take the customer's IBAN from Montonio, for a card payment ask the customer for an IBAN, " +
+      "transfer from the shop's bank account and press «Mark as refunded (no money)» on the order.",
   },
   exceeds_paid: {
     RU:
@@ -505,11 +515,14 @@ const REFUND_REASON_TEXT: Record<Exclude<RefundStatusReason, "unknown">, Triling
   },
   expired: {
     RU:
-      "Срок возврата истёк: Montonio ждал 10 дней и отменил его. Деньги остались в магазине — оформите возврат заново, когда на счёте будут деньги.",
+      "Срок возврата истёк: Montonio ждал 10 дней и отменил его. Деньги остались в магазине — верните их переводом со счёта магазина " +
+      "(IBAN при оплате банковской ссылкой — в Montonio, при оплате картой — у покупателя) и нажмите «Отметить возврат (без денег)».",
     ET:
-      "Tagasimakse tähtaeg sai läbi: Montonio ootas 10 päeva ja tühistas selle. Raha jäi poodi — vormistage tagasimakse uuesti, kui kontol on raha.",
+      "Tagasimakse tähtaeg sai läbi: Montonio ootas 10 päeva ja tühistas selle. Raha jäi poodi — makske see tagasi ülekandega poe kontolt " +
+      "(IBAN pangalingi makse puhul Montoniost, kaardimakse puhul kliendilt) ja vajutage «Märgi tagastuseks (ilma rahata)».",
     EN:
-      "The refund timed out: Montonio waited 10 days and cancelled it. The money stayed with the shop — make the refund again once the account has funds.",
+      "The refund timed out: Montonio waited 10 days and cancelled it. The money stayed with the shop — pay it back by bank transfer from the shop's account " +
+      "(the IBAN of a bank-link payment is in Montonio; for a card payment ask the customer) and press «Mark as refunded (no money)».",
   },
   other: {
     RU:

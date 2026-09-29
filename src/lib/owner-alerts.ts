@@ -133,12 +133,13 @@ const REFUND_CAUSE: Record<RefundStatusReason, string> = {
 };
 /** …and what to do about a refund Montonio CANCELLED: the money is still the shop's. */
 const REFUND_FIX_CANCELLED: Record<RefundStatusReason, string> = {
-  insufficient_funds: "оформите возврат заново, когда на счёте будут деньги.",
+  // Montonio, 29.09.2026: the account cannot be topped up — a cancelled refund goes back by bank transfer
+  insufficient_funds: "верните их переводом со счёта магазина (IBAN: оплата банком — в Montonio, картой — у покупателя) и нажмите «Отметить возврат (без денег)».",
   exceeds_paid: "сверьте суммы в Montonio.",
   declined: "верните их другим способом.",
   expired_or_cancelled_card: "попросите у покупателя другие реквизиты.",
   lost_or_stolen_card: "попросите у покупателя другие реквизиты.",
-  expired: "оформите возврат заново.",
+  expired: "верните их переводом со счёта магазина (IBAN: оплата банком — в Montonio, картой — у покупателя) и нажмите «Отметить возврат (без денег)».",
   other: "откройте заказ в Montonio.",
   unknown: "откройте заказ в Montonio.",
 };
@@ -205,7 +206,7 @@ export function alertForJournal(row: JournalRow): OwnerAlert | null {
       const why = refundCause(code);
       const fix =
         why.reason === "insufficient_funds"
-          ? "Montonio пробует сам до 10 дней; если срочно — пополните счёт в Montonio."
+          ? "Montonio вернёт сам из новых оплат, ждёт до 10 дней. Пока ждёт — не переводите сами, уйдёт дважды."
           : "Откройте заказ в Montonio.";
       return {
         key: `refund_stuck:${ref || number}:${code}`,

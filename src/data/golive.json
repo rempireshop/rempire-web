@@ -372,14 +372,31 @@
       "who": [
         "dim"
       ],
+      "status": "done",
+      "blocking": false,
+      "outside": "Montonio",
+      "title": "Montonio ответил: чем платить возврат после выплаты",
+      "detail": "Ответ Montonio, 29.09.2026: возврат без денег на балансе ждёт PENDING и через 10 дней отменяется; пополнить баланс или держать резерв нельзя; обычно возврат берётся из следующих оплат. Если Montonio его отменил: при оплате банковской ссылкой IBAN покупателя есть в Montonio, при оплате картой — спросить у покупателя; перевести деньги со счёта магазина и нажать «Отметить возврат (без денег)». Пока возврат ждёт — сами не переводить, иначе он может пройти дважды. Так теперь пишут и карточка заказа, и оповещения (docs/montonio-questions.md § 14). Montonio советует при малом числе заказов выплату раз в неделю или месяц — пункт «payout-period».",
+      "en": {
+        "title": "Montonio answered: how a refund is paid after the payout",
+        "detail": "Montonio, 29.09.2026: a refund short of balance waits PENDING and is cancelled after 10 days; the balance cannot be topped up and no reserve can be kept; a refund is normally taken from the next payments. If Montonio cancelled it: for a bank-link payment the customer's IBAN is in Montonio, for a card payment ask the customer; transfer from the shop's account and press «Отметить возврат (без денег)». While the refund is waiting, do not transfer by hand — it could be paid twice. The order card and the alerts now say exactly this (docs/montonio-questions.md § 14). With few orders Montonio recommends a weekly or monthly payout — item «payout-period»."
+      }
+    },
+    {
+      "id": "payout-period",
+      "area": "montonio",
+      "who": [
+        "dim",
+        "renat"
+      ],
       "status": "todo",
       "blocking": false,
       "outside": "Montonio",
-      "title": "Спросить Montonio: чем платить возврат после ежедневной выплаты",
-      "detail": "Montonio платит возврат из баланса магазина у себя. После ежедневной выплаты на счёт баланс может быть пустым — тогда возврат висит PENDING (INSUFFICIENT_FUNDS), а через 10 дней Montonio его отменяет. Что в docs/payments.md написано «возврат в тот же день откажут» — живой час опроверг. Вопрос Montonio: как пополнить баланс под возврат или зачесть его из следующих оплат. Пока ответа нет, запасной путь: перевести деньги покупателю банком и отметить «возврат» в панели руками. Порядок решаем на встрече с Ренатом. Запуск этот пункт не держит.",
+      "title": "Выплата из Montonio — раз в неделю, а не каждый день?",
+      "detail": "Montonio советует (29.09.2026): при малом числе заказов ставить выплату раз в неделю или месяц — тогда на балансе остаются деньги и возвраты проходят сразу, а не ждут новых оплат. Минус: деньги приходят на счёт реже. Решить на встрече с Ренатом и поменять в кабинете Montonio.",
       "en": {
-        "title": "Ask Montonio how a refund is funded after the daily payout",
-        "detail": "Montonio pays a refund out of the shop's balance with them. After the daily payout to the bank that balance can be empty — the refund then sits PENDING (INSUFFICIENT_FUNDS), and after 10 days Montonio cancels it. What docs/payments.md says — «a same-day refund is refused» — the live hour disproved. The question for Montonio: how to top up the balance for a refund, or net it against the next payments. Until they answer, the fallback: pay the customer by bank transfer and mark «возврат» in the panel by hand. The procedure is settled at the meeting with Renat. This item does not hold the launch."
+        "title": "Montonio payout — weekly instead of daily?",
+        "detail": "Montonio recommends (29.09.2026): with few orders set the payout to weekly or monthly — the balance then keeps money and refunds go through at once instead of waiting for new payments. The cost: the money reaches the bank less often. Decide at the meeting with Renat and change it in the Montonio Partner System."
       }
     },
     {
@@ -678,10 +695,10 @@
       "status": "todo",
       "blocking": true,
       "title": "Последняя встреча с Ренатом перед запуском",
-      "detail": "Решить вместе и записать. 1) Какие автописьма включить сразу после чистки («Маркетинг → Письма»): неоплаченные заказы, снова в наличии, брошенная корзина, скидка по брошенной корзине, день рождения. Заявки «Сообщить, когда появится» принимаются и при выключенном письме — и молча остаются без ответа; неоплаченные при выключенном письме висят «новыми» навсегда. Включает их шаг 3 дня — не раньше чистки. 2) Как посылки уходят курьером: заказать курьера через API Montonio нельзя — постоянный вызов в кабинете Montonio по каждому перевозчику или сдача в пункт. 3) Как платить возврат после ежедневной выплаты — по ответу Montonio, а до него: перевод банком и «возврат» руками. 4) Что Ренату знать: полный возврат возвращает на склад каждую строку (испорченное списать руками), частичный — ни склад, ни баллы; ссылка «Админка» из подвала уходит накануне — вход по rempireshop.com/admin, и в день запуска войти там заново.",
+      "detail": "Решить вместе и записать. 1) Какие автописьма включить сразу после чистки («Маркетинг → Письма»): неоплаченные заказы, снова в наличии, брошенная корзина, скидка по брошенной корзине, день рождения. Заявки «Сообщить, когда появится» принимаются и при выключенном письме — и молча остаются без ответа; неоплаченные при выключенном письме висят «новыми» навсегда. Включает их шаг 3 дня — не раньше чистки. 2) Посылки: курьерскую посылку можно класть в пакомат того же перевозчика, если помещается (Montonio, 29.09.2026) — вызывать курьера не обязательно. 3) Выплата из Montonio раз в неделю вместо ежедневной — пункт «payout-period»; возврат, который Montonio отменил, — переводом и «Отметить возврат (без денег)». 4) Что Ренату знать: полный возврат возвращает на склад каждую строку (испорченное списать руками), частичный — ни склад, ни баллы; ссылка «Админка» из подвала уходит накануне — вход по rempireshop.com/admin, и в день запуска войти там заново.",
       "en": {
         "title": "The last meeting with Renat before the launch",
-        "detail": "Decide together and write it down. 1) Which automatic letters go on right after the reset («Маркетинг → Письма»): unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. «Сообщить, когда появится» sign-ups are accepted while that letter is off — and silently never answered; with the unpaid letter off, unpaid orders stay «новый» for ever. Step 3 of the day switches them on — never before the reset. 2) How courier parcels leave: Montonio's API cannot order a pickup — a recurring pickup in the Montonio account per carrier, or a drop-off at a point. 3) How a refund is paid after the daily payout — as Montonio answers, and until then: a bank transfer and «возврат» by hand. 4) What Renat needs to know: a full refund puts every line back on the shelf (write off anything unsellable by hand), a partial one moves neither stock nor points; the footer «Админка» link goes the day before — sign in at rempireshop.com/admin, and sign in there again on the day."
+        "detail": "Decide together and write it down. 1) Which automatic letters go on right after the reset («Маркетинг → Письма»): unpaid orders, back in stock, abandoned cart, the abandoned-cart discount, birthday. «Сообщить, когда появится» sign-ups are accepted while that letter is off — and silently never answered; with the unpaid letter off, unpaid orders stay «новый» for ever. Step 3 of the day switches them on — never before the reset. 2) Parcels: a courier parcel may go into the same carrier's parcel machine if it fits (Montonio, 29.09.2026) — no courier pickup needed. 3) Montonio payout weekly instead of daily — item «payout-period»; a refund Montonio cancelled goes by bank transfer and «Отметить возврат (без денег)». 4) What Renat needs to know: a full refund puts every line back on the shelf (write off anything unsellable by hand), a partial one moves neither stock nor points; the footer «Админка» link goes the day before — sign in at rempireshop.com/admin, and sign in there again on the day."
       }
     },
     {

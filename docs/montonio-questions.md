@@ -310,6 +310,34 @@ shipment quiet for 12 hours and applies the answer as the webhook would
 (`syncStaleShipments`). **The live webhook was registered on 23.09 with three
 events and must be registered again with four** — `docs/go-live.md`.
 
+### 14. A refund after the payout, and courier parcels in a parcel machine
+
+Asked 28.09.2026 after the go-live readiness pass (B3, B4 in
+`docs/audit-2026-09-27-readiness.md`). **Answers, 29.09.2026** (Estonian, in
+short):
+
+1. «Tagastus jääb olekusse PENDING (ebapiisav saldo) ja tühistatakse 10 päeva
+   pärast, eraldi "rahastada" kuidagi täna ei saa» — a refund short of balance
+   stays PENDING and is cancelled after 10 days; it cannot be funded
+   separately. The way out: for bank-link payments take the payer's **IBAN in
+   the Montonio system** and refund through the bank; for card payments
+   **contact the customer for an IBAN**. With few orders they recommend a
+   **weekly or monthly payout**, so the balance also covers refunds.
+2. «Raha tagastatakse järgmisest väljamaksest tavaliselt, paraku reservi pole
+   võimalik täna tekitada» — the money is normally taken from the next payout;
+   a reserve cannot be kept.
+3. «Võib panna pakiautomaati kui pakk mahub, kullerkorje kohustust ei ole» — a
+   courier parcel may go into a parcel machine if it fits; no courier pickup is
+   required.
+
+Done in the shop (29.09.2026): the order card's line for `INSUFFICIENT_FUNDS`
+and `EXPIRED` and the owner's alerts no longer say «пополните счёт в Montonio»
+(impossible); while the refund is PENDING they say not to transfer by hand (it
+could be paid twice), and once Montonio cancels it: IBAN from Montonio or from
+the customer → a bank transfer from the shop's account → «Отметить возврат (без
+денег)» (`src/lib/montonio-problems.ts`, `src/lib/owner-alerts.ts`). The payout
+period is the owner's decision — /go-live item `payout-period`.
+
 ---
 
 ## Also useful
