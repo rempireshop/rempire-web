@@ -217,9 +217,39 @@ describe("«Подробнее о заказе» — the row opens in place", ()
     expect(html).toContain("<span data-notr>Swedbank</span>");
   });
 
+  it("says nothing twice once the parcel line and the details are both on screen (Dim, 29.09.2026)", () => {
+    const shop = makeShop();
+    const locker = {
+      ...ORDER,
+      parcel: { carrier: "DPD", place: "locker", point: "Automaat Tallinna Narva mnt Selver", city: null, state: "inTransit" },
+      details: { ...DETAILS, delivery: { method: "parcel", place: "locker", carrier: "DPD", point: "Automaat Tallinna Narva mnt Selver", address: null, price: 2.59 } },
+    };
+    // the details name the method and the price; carrier and machine are in the parcel line above
+    const det = shop.details(locker);
+    expect(det).toContain("<span>Пакомат</span>");
+    expect(det).not.toContain("<span data-notr>DPD</span>");
+    expect(det).not.toContain("Automaat Tallinna Narva mnt Selver");
+    expect(shop.parcel(locker)).toContain("Automaat Tallinna Narva mnt Selver");
+    // a courier's full address stays: the parcel line names only the city
+    const courier = {
+      ...locker,
+      parcel: { carrier: "DPD", place: "courier", point: null, city: "Tallinn", state: "inTransit" },
+      details: { ...DETAILS, delivery: { method: "courier", place: null, carrier: "DPD", point: null, address: "Testitänav 1, 10111, Tallinn", price: 4 } },
+    };
+    expect(shop.details(courier)).toContain("Testitänav 1, 10111, Tallinn");
+    expect(shop.details(courier)).not.toContain("<span data-notr>DPD</span>");
+    // closed, the items' one-line summary is there; open, the details list them and the summary goes
+    expect(shop.row(locker)).toContain("rowcard__what");
+    shop.open["R-100042"] = true; // ORDER.number
+    expect(shop.row(locker)).not.toContain("rowcard__what");
+    expect(shop.row(locker)).toContain("Kevin.Murphy Fresh.Hair");
+  });
+
   it("names a gift card, points, a free courier delivery, a card payment and every kind of refund", () => {
     const html = makeShop().details({
       ...ORDER,
+      // not yet on its way: no parcel line above, so the details name the carrier themselves
+      parcel: null,
       details: {
         delivery: { method: "courier", place: null, carrier: "DPD", point: null, address: "Testitänav 1, 10111, Tallinn", price: 0 },
         promo: null,

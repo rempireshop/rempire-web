@@ -18135,7 +18135,11 @@
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + refundChip +
       track + acctParcelHTML(o) +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pts + pdfs + ret + acctOrderMoreHTML(o) + "</div>";
+      /* the one-line summary of the items stands for the details while they
+         are closed — open, the details list the same items with their prices,
+         and the row said everything twice (Dim, 29.09.2026) */
+      (what && !Object.prototype.hasOwnProperty.call(acctOrderOpen, o.number) ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") +
+      pts + pdfs + ret + acctOrderMoreHTML(o) + "</div>";
   }
 
   /* ---------- «Мои заказы»: the parcel in words, the order behind a tap -----
@@ -18226,8 +18230,14 @@
     else if (dv.method === "courier") where.push("<span>Курьер</span>");
     else if (dv.method === "pickup") where.push("<span>Самовывоз</span>");
     else if (dv.method === "digital") where.push("<span>Электронная доставка</span>");
-    if (dv.carrier) where.push("<span data-notr>" + esc(dv.carrier) + "</span>");
-    if (dv.point) where.push("<span data-notr>" + esc(dv.point) + "</span>");
+    /* The parcel line above the details (acctParcelHTML) already names the
+       carrier and the machine once the order is on its way — said here too,
+       the open row read them twice (Dim, 29.09.2026). Before that line exists
+       (an order not yet shipped) they belong here. The courier's full address
+       stays either way: the parcel line only names the city. */
+    var parcelShown = !!acctParcelHTML(o);
+    if (dv.carrier && !parcelShown) where.push("<span data-notr>" + esc(dv.carrier) + "</span>");
+    if (dv.point && !parcelShown) where.push("<span data-notr>" + esc(dv.point) + "</span>");
     if (dv.address) where.push("<span data-notr>" + esc(dv.address) + "</span>");
     out += line("Доставка", Number(dv.price) > 0 ? '<span class="num">' + eur(Number(dv.price)) + "</span>" : "<span>Бесплатно</span>") +
       (where.length ? '<p class="muted rowcard__dnote">' + where.join(" · ") + "</p>" : "");
