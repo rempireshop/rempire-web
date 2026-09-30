@@ -269,9 +269,9 @@ describe("«Посылка» and the row's chips", () => {
 
 /* ---------- «Обзор» → «Сделать сегодня» ----------------------------------- */
 
-function overview(data: unknown, orders: V[]): string {
+function overview(data: unknown, orders: V[], returns: V[] = []): string {
   // This repository's own source plus fixed stub text.
-  return new Function("DATA", "ORDERS", `
+  return new Function("DATA", "ORDERS", "RETURNS", `
     var S = { lang: "RU" };
     var SRV = { admin: true, orders: ORDERS, ordersErr: false };
     var OVERVIEW = { data: DATA, err: null };
@@ -284,7 +284,7 @@ function overview(data: unknown, orders: V[]): string {
     function admOrderVM(o) { return o; }
     function admLiveToShip() { return (ORDERS || []).filter(function (v) { return v.toShip; }); }
     function admWaitingCount() { return admLiveToShip().length; }
-    function admReturnsAsked() { return []; }
+    function admReturnsAsked() { return RETURNS; }
     function admInvoicesWaiting() { return []; }
     function companyIban() { return "EE00"; }
     function admHeldOrders() { return []; }
@@ -306,7 +306,7 @@ function overview(data: unknown, orders: V[]): string {
     ${fn("admLowRows")}
     ${fn("admOverviewHTML")}
     return admOverviewHTML();
-  `)(data, orders) as string;
+  `)(data, orders, returns) as string;
 }
 const SUMMARY = {
   attention: { ordersToShip: 0, proRequests: 0, reviewsPending: 0, stockAlerts: 0, returnRequests: 0 },
@@ -356,6 +356,28 @@ describe("«Сделать сегодня»", () => {
       vmOf("o-1", "A", { carrierHas: true, scanShips: true }), vmOf("o-2", "B", { carrierHas: true }),
     ]));
     expect(rows.find((r) => r.words.includes("уже в пути"))).toMatchObject({ big: "1", sub: "B", attrs: 'data-admorder="o-2"' });
+  });
+
+  /* Dim, 30.09.2026: «when there is only one return it should open that 1». */
+  it("one return request — the row opens that order's card", () => {
+    const one = { ...SUMMARY, attention: { ...SUMMARY.attention, returnRequests: 1 } };
+    const row = todo(overview(one, [], [{ id: "o-98", who: "Dim Novare" }])).find((r) => r.words.includes("на возврат"))!;
+    expect(row).toEqual({ attrs: 'data-admorder="o-98"', big: "1", words: "заявка на возврат", sub: "Dim Novare" });
+  });
+
+  it("several return requests — «Возвраты», the chip they are on", () => {
+    const two = { ...SUMMARY, attention: { ...SUMMARY.attention, returnRequests: 2 } };
+    const row = todo(overview(two, [], [{ id: "o-5", who: "A" }, { id: "o-98", who: "B" }])).find((r) => r.words.includes("на возврат"))!;
+    expect(row).toMatchObject({ big: "2", sub: "A · B", attrs: 'data-admtab="orders" data-admfilter="returns"' });
+  });
+
+  it("one counted but not loaded yet — the chip, never a card for an order the list does not hold", () => {
+    const counted2 = { ...SUMMARY, attention: { ...SUMMARY.attention, returnRequests: 2 } };
+    const row = todo(overview(counted2, [], [{ id: "o-98", who: "B" }])).find((r) => r.words.includes("на возврат"))!;
+    expect(row.attrs).toBe('data-admtab="orders" data-admfilter="returns"');
+    const summaryOnly = { ...SUMMARY, attention: { ...SUMMARY.attention, returnRequests: 1 } };
+    expect(todo(overview(summaryOnly, [], [])).find((r) => r.words.includes("на возврат"))!.attrs)
+      .toBe('data-admtab="orders" data-admfilter="returns"');
   });
 
   it("B11: the nightly job stopped — red, first, and it opens «Письма»", () => {

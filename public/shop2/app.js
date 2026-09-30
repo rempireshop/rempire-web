@@ -22280,11 +22280,14 @@
        way of telling Renat that somebody is waiting for him, and this is it.
        Since r16 the row leads to «Возвраты» — its own chip on «Заказы», which
        holds nothing else — instead of dropping him into «В пути» among all the
-       other parcels. The names under it still say whose. */
+       other parcels. The names under it still say whose. One request opens
+       its own card, as one parcel in «уже в пути» does (Dim, 30.09.2026) —
+       only when the loaded list holds that one: a count the summary has and
+       the list has not yet leads to the chip. */
     if (retN) tasks += admTaskRow(retN,
       ["заявка на возврат", "заявки на возврат", "заявок на возврат"],
       names(retList, function (v) { return v.who; }),
-      'data-admtab="orders" data-admfilter="returns"', true);
+      retN === 1 && retList.length === 1 ? 'data-admorder="' + esc(retList[0].id) + '"' : 'data-admtab="orders" data-admfilter="returns"', true);
     /* The first open: until the summary has answered, the rows it feeds are
        not known — grey bars, not «Всё в порядке» (1a, gap F10). A summary
        that failed says so above, and what the order list can tell is shown. */
@@ -23876,17 +23879,20 @@
     /* 1a (gap C8, recommended): a rust notice at the top of the card with
        «Обработано» outlined in it; once answered, the same notice goes quiet.
        What «Обработано» does and does not do is behind «?». */
+    /* Each line is its own <div>. The notice is a flex column, and loose
+       spans, « · » and <br> inside it each became a row of their own: the
+       title, a lone dot, the date (Dim's screenshot, 30.09.2026). */
     return '<section class="adm-onotice' + (done ? " adm-onotice--done" : "") + '" data-admreturn>' +
       (done
-        ? '<span>Возврат обработан</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnDoneAt)) + "</span><br>" +
+        ? '<div><span>Возврат обработан</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnDoneAt)) + "</span></div>" +
           // the date is its own node: translateTree() rewrites whole text
           // nodes, and a day glued into a sentence would take it out of reach
-          '<span>Просили вернуть заказ</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span>"
-        : '<span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
-          '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span><br>" +
+          '<div><span>Просили вернуть заказ</span> · <span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span></div>"
+        : '<div><span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
+          '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span></div>" +
           (admReturnCarrierNovaPost(v)
-            ? "<span>Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.</span>"
-            : "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span>")) +
+            ? "<div>Заказ ушёл через Nova Post — возвраты через него пока не принимаются. Напишите покупателю: товар он отправляет обратно сам.</div>"
+            : "<div>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</div>")) +
       '<div class="adm-acts adm-onotice__acts">' +
         '<button class="adm-btn adm-btn--row adm-btn--ghost" ' +
           'data-admreturndone="' + esc(v.id) + '" data-admreturnval="' + (done ? "0" : "1") + '"' +

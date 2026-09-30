@@ -64,6 +64,23 @@ describe("the return line on the order card", () => {
     }
   });
 
+  /* Dim's screenshot, 30.09.2026: the notice is a flex column, so loose
+     spans, « · » and <br> each took a row — title, a lone dot, the date. */
+  it("puts the title and the day on one line — no loose dot between rows", () => {
+    const open = card(order({ carrier: "dpd", method: "parcel" }));
+    expect(open).toContain(
+      '<div><span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · <span class="adm-mono">2026-09-24T10:00:00.000Z</span></div>',
+    );
+    const done = card({ ...order({ carrier: "dpd" }), returnDoneAt: "2026-09-30T09:00:00.000Z" });
+    expect(done).toContain('<div><span>Возврат обработан</span> · <span class="adm-mono">2026-09-30T09:00:00.000Z</span></div>');
+    expect(done).toContain('<div><span>Просили вернуть заказ</span> · <span class="adm-mono">2026-09-24T10:00:00.000Z</span></div>');
+    for (const html of [open, done]) {
+      expect(html).not.toContain("<br>");
+      // up to the buttons, the section holds nothing but whole <div> lines
+      expect(html).toMatch(/^<section[^>]*>(?:<div>(?:(?!<\/?div)[\s\S])*<\/div>)+<div class="adm-acts /);
+    }
+  });
+
   it("keeps the line it had for every other carrier", () => {
     for (const carrier of ["omniva", "smartpost", "dpd", "unisend", ""]) {
       const html = card(order({ carrier, method: "parcel" }));

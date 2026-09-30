@@ -163,16 +163,19 @@ test.describe("account — «Хочу вернуть заказ»", () => {
     // 6) And Renat is told the way the shop always tells him: a row in
     //    «Сделать сегодня» on «Обзор», which leads to the order's own card.
     await page.goto(shopUrl("", "/admin/"));
-    // r16: the row leads to «Возвраты» — the chip that holds nothing else —
-    // instead of «В пути», among all the other parcels
-    const queueRow = page.locator('.adm-row--click[data-admfilter="returns"]');
+    // r16: several requests lead to «Возвраты» — the chip that holds nothing
+    // else — instead of «В пути», among all the other parcels; one request
+    // opens its own card (Dim, 30.09.2026)
+    const queueRow = page.locator(".adm-todo", { hasText: /на возврат/ });
     await expect(queueRow, "«Обзор» never listed the return request").toBeVisible();
     // any count: every earlier run leaves its own open request in the e2e
     // database, and the row says «3 заявки», «5 заявок» as they pile up
     await expect(queueRow).toContainText(/заявк[аи] на возврат|заявок на возврат/);
+    const opensCard = (await queueRow.getAttribute("data-admorder")) !== null;
+    if (!opensCard) await expect(queueRow).toHaveAttribute("data-admfilter", "returns");
     await queueRow.click();
 
-    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    if (!opensCard) await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
     const card = page.locator("[data-admreturn]");
     await expect(card, "the order card says nothing about the return").toBeVisible();
     await expect(card).toContainText("Покупатель просит вернуть заказ");
