@@ -419,7 +419,8 @@ export async function applyShipmentUpdate(
      with the one letter the first of them sent. */
   const delivered = out.shipped ? statusMeaning(heard) === "delivered" : meaning === "delivered" && !out.stale;
   if (delivered && orderStatus === "shipped") {
-    await setOrderStatus(order.id, "delivered", "system");
+    // the carrier's own «delivered» — its date is the hand-over (setOrderStatus carrierDelivered)
+    await setOrderStatus(order.id, "delivered", "system", { carrierDelivered: true });
     out.applied = "delivered";
   }
 

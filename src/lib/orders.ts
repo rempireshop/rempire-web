@@ -2117,7 +2117,7 @@ export async function setOrderStatus(
   id: string,
   status: OrderStatus,
   actor = "system",
-  opts: { unless?: readonly OrderStatus[]; audit?: Record<string, unknown> } = {},
+  opts: { unless?: readonly OrderStatus[]; audit?: Record<string, unknown>; carrierDelivered?: boolean } = {},
 ): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;
   if (!ORDER_STATUSES.includes(status)) throw new OrderError("bad_status", String(status));
@@ -2151,21 +2151,28 @@ export async function setOrderStatus(
      wrote it identically, so the stamp and the UPDATE below are one, not two.
      The two readings of why are merged into this one comment. */
   const shippedStamp = status === "shipped" ? new Date().toISOString() : null;
+  /* …except when the CARRIER says it was delivered (the parcel webhook or the
+     nightly re-ask, shipment-sync.ts): that is the real hand-over and it
+     overwrites a date pressed by hand. R-100098, 28–30.09.2026: «Доставлен»
+     pressed by mistake and undone four seconds later left 28.09 as the
+     delivery date; DPD's own «delivered» two days later was ignored, and the
+     30-day return window started two days early. */
+  const overwriteDelivered = Boolean(opts.carrierDelivered && deliveredStamp);
   const rows = await query<OrderRow>(
     `update orders
         set status = $2,
             shipping = case
-              when $3::text is not null and (shipping -> 'deliveredAt') is null
+              when $3::text is not null and ($5::boolean or (shipping -> 'deliveredAt') is null)
                 then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('deliveredAt', $3::text)
               when $4::text is not null and (shipping -> 'shippedAt') is null
                 then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('shippedAt', $4::text)
               else shipping end,
             updated_at = now()
-      where id = $1${unless.length ? " and status <> all($5::text[])" : ""}
+      where id = $1${unless.length ? " and status <> all($6::text[])" : ""}
      returning *`,
     unless.length
-      ? [id, status, deliveredStamp, shippedStamp, [...unless]]
-      : [id, status, deliveredStamp, shippedStamp],
+      ? [id, status, deliveredStamp, shippedStamp, overwriteDelivered, [...unless]]
+      : [id, status, deliveredStamp, shippedStamp, overwriteDelivered],
   );
   // somebody else made this move between the read above and the UPDATE
   if (!rows.length) return null;

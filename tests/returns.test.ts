@@ -101,6 +101,23 @@ describe("the delivery stamp the window is counted from", () => {
     expect(new Date(again.updatedAt).getTime()).toBeGreaterThanOrEqual(new Date(first!).getTime());
   });
 
+  it("takes the carrier's own «delivered» over a date pressed by hand — R-100098, 28–30.09.2026", async () => {
+    const order = await delivered();
+    // pressed by mistake two days «ago», undone at once
+    await query("update orders set shipping = jsonb_set(shipping, '{deliveredAt}', to_jsonb('2026-09-28T10:05:56.920Z'::text)) where id = $1", [order.id]);
+    await setOrderStatus(order.id, "shipped");
+    // DPD reports the real hand-over (shipment-sync.ts passes carrierDelivered)
+    await setOrderStatus(order.id, "delivered", "system", { carrierDelivered: true });
+    const after = (await getOrder(order.id))!;
+    const stamp = deliveredAt(after)!;
+    expect(stamp).not.toBe("2026-09-28T10:05:56.920Z");
+    expect(Date.now() - new Date(stamp).getTime()).toBeLessThan(60_000);
+    // a hand press later still keeps it — only the carrier overwrites
+    await setOrderStatus(order.id, "shipped");
+    await setOrderStatus(order.id, "delivered");
+    expect(deliveredAt((await getOrder(order.id))!)).toBe(stamp);
+  });
+
   it("falls back to updated_at on an order delivered before the stamp existed", async () => {
     const order = await delivered();
     await query("update orders set shipping = shipping - 'deliveredAt' where id = $1", [order.id]);
