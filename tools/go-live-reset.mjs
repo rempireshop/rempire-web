@@ -15,10 +15,12 @@
  *   node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "…"   # the real thing
  *
  * On launch day both carry `--stock --test-content` as well (the owner's
- * decisions of 28.09.2026): every promo code, set, blog post and newsletter,
+ * decisions of 28.09.2026): every promo code and newsletter,
  * every own product with its edits, and every stock count and barcode on
  * staging is test data too — the real counts come from Shopify right after
- * (tools/import-shopify-stock.mjs). See TEST CONTENT below.
+ * (tools/import-shopify-stock.mjs). See TEST CONTENT below. Sets and blog
+ * posts are NOT (Dim, 02.10.2026): Renat builds them before the launch, and
+ * the test ones are deleted by hand beforehand.
  *
  * Read docs/go-live-reset.md before running it. Its first instruction is to
  * take a copy of the database (tools/db-backup.mjs) and check that it reads
@@ -127,23 +129,21 @@ export const PLAN = [
   {
     table: "bundles",
     verdict: "keep",
-    content: true,
     why:
       "Set definitions (name and description in three languages, contents, price or discount). Seeded by " +
-      "120_bundles.sql and edited in the admin since. Catalogue, not orders — kept by default. --test-content " +
-      "deletes them all: the owner's decision of 28.09.2026 is that every set on staging is made up, and the " +
-      "storefront hides «Наборы» by itself while there is no active set.",
+      "120_bundles.sql and edited in the admin since. Catalogue, not orders — always kept, --test-content " +
+      "included. Until 02.10.2026 --test-content emptied this table; Dim, 02.10.2026: Renat builds his own sets " +
+      "before the launch, so the test sets are taken out by hand beforehand and the reset leaves every set alone.",
   },
   {
     table: "posts",
     verdict: "keep",
-    content: true,
     why:
       "Blog articles, drafts and published alike, in three languages with covers and SEO. 071_blog_samples.sql " +
       "seeded some and he has been rewriting them since; nothing here distinguishes a seeded post from one he " +
-      "wrote, and it must not — both are the shop's content. Kept by default; --test-content deletes every " +
-      "row (the owner's decision of 28.09.2026: all of them are test texts), and the storefront hides the blog " +
-      "by itself until the first post is published. Tags and product cards are columns, not child tables.",
+      "wrote, and it must not — both are the shop's content. Always kept, --test-content included (Dim, " +
+      "02.10.2026: Renat writes posts before the launch; the test ones are deleted by hand beforehand). Tags " +
+      "and product cards are columns, not child tables.",
   },
   {
     table: "promo_codes",
@@ -444,13 +444,14 @@ export const DELETE_ORDER = [
 export const STOCK_ORDER = ["stock_moves", "stock_levels"];
 
 /**
- * --test-content (the owner's decision of 28.09.2026). Four KEEP tables that
+ * --test-content (the owner's decision of 28.09.2026). Two KEEP tables that
  * are emptied whole — their only children, promo_code_uses and
- * newsletter_sends, are on DELETE_ORDER and are gone before these run. Posts
- * and bundles have no child tables: a post's tags and product cards and a
- * set's contents are columns on the row itself.
+ * newsletter_sends, are on DELETE_ORDER and are gone before these run.
+ * Sets and blog posts were here too until 02.10.2026, when Dim decided Renat
+ * builds both before the launch: they are no longer test content, and the
+ * test ones are deleted by hand beforehand.
  */
-export const TEST_CONTENT_TABLES = ["promo_codes", "bundles", "posts", "newsletters"];
+export const TEST_CONTENT_TABLES = ["promo_codes", "newsletters"];
 
 /**
  * …and the own products, deleted BY ROW from the four tables keyed to a
@@ -641,23 +642,6 @@ export async function testContentLook(db, keep = []) {
     active: r.active === true || r.active === "t",
     note: r.note == null ? "" : String(r.note),
   }));
-  const sets = (await rows(db, "select id, name_ru, active from bundles order by sort, id")).map((r) => ({
-    id: String(r.id),
-    name: r.name_ru == null ? "" : String(r.name_ru),
-    active: r.active === true || r.active === "t",
-  }));
-  const posts = (
-    await rows(
-      db,
-      `select slug, title, status, (deleted_at is not null) as deleted
-         from posts order by coalesce(published_at, created_at), slug`,
-    )
-  ).map((r) => ({
-    slug: String(r.slug),
-    title: pickLang(r.title),
-    status: String(r.status),
-    deleted: r.deleted === true || r.deleted === "t",
-  }));
   const letters = (await rows(db, "select title, subject, status from newsletters order by created_at, id")).map((r) => ({
     title: r.title == null ? "" : String(r.title),
     subject: pickLang(r.subject),
@@ -717,7 +701,7 @@ export async function testContentLook(db, keep = []) {
       }
     }
   }
-  return { promos, sets, posts, letters, products, kept, going, rows: rowsGoing, eans, problems };
+  return { promos, letters, products, kept, going, rows: rowsGoing, eans, problems };
 }
 
 /* ---------- what the database can tell us before anything happens -------- */
@@ -1365,8 +1349,8 @@ export function flagsLine(opts) {
 }
 
 /**
- * The TEST CONTENT block. With the flag: every promo code, set, post,
- * newsletter and own product by name — the list the owner approves on the
+ * The TEST CONTENT block. With the flag: every promo code, newsletter and
+ * own product by name — the list the owner approves on the
  * night. Without it: one line of counts, and how to see the names.
  */
 export function formatTestContent(report) {
@@ -1374,8 +1358,8 @@ export function formatTestContent(report) {
   const t = report.before.tables;
   if (!report.testContent || !report.content) {
     L.push(
-      `TEST CONTENT — not touched without --test-content · ${t.promo_codes.n} promo code(s), ${t.bundles.n} set(s), ` +
-        `${t.posts.n} blog post(s), ${t.newsletters.n} newsletter(s), ${t.custom_products.n} own product(s)`,
+      `TEST CONTENT — not touched without --test-content · ${t.promo_codes.n} promo code(s), ` +
+        `${t.newsletters.n} newsletter(s), ${t.custom_products.n} own product(s)`,
     );
     L.push("  Run the dry run with --test-content to see every one of them by name.");
     L.push("");
@@ -1397,15 +1381,6 @@ export function formatTestContent(report) {
   for (const p of c.promos) {
     const v = p.kind === "percent" ? `${Number(p.value)} %` : `${p.value} EUR`;
     L.push(`      ${pad(p.code, wc)}${v}, used ${p.used}${p.active ? "" : ", off"}${p.note ? `  — ${p.note}` : ""}`);
-  }
-  L.push(`  sets · ${c.sets.length}`);
-  const ws = col(c.sets.map((s) => s.id));
-  for (const s of c.sets) L.push(`      ${pad(s.id, ws)}${q(s.name)}${s.active ? "" : "  (off)"}`);
-  L.push(`  blog posts · ${c.posts.length}`);
-  const wp = col(c.posts.map((p) => p.slug));
-  for (const p of c.posts) {
-    const state = p.deleted ? "in the bin" : p.status === "published" ? "published" : p.status;
-    L.push(`      ${pad(p.slug, wp)}${q(p.title)}  (${state})`);
   }
   L.push(`  newsletters · ${c.letters.length}`);
   for (const n of c.letters) L.push(`      ${q(n.subject)}  (${n.status}${n.title ? `; in the panel: ${n.title}` : ""})`);
@@ -1479,7 +1454,7 @@ const USAGE = `go-live-reset — remove the staging test data before the shop op
   second line, DATABASE_SSL_NO_VERIFY=1 (Railway signs its certificate with a
   private CA) — or DATABASE_SSL_CA with that CA. docs/go-live-reset.md, step 1.
 
-  --test-content                 also delete every promo code, set, blog post and newsletter, and every own
+  --test-content                 also delete every promo code and newsletter, and every own
                                  product (c-…) with its edits and stock rows — ON launch day (28.09.2026).
                                  The dry run with it lists every one by name.
   --keep-product <id>            with --test-content: keep this own product (repeat for more than one)

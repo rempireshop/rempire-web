@@ -52,8 +52,6 @@ type Money = { n: number; total: number };
 type OwnProduct = { id: string; brand: string; name: string; active: boolean; orphan: boolean };
 type Content = {
   promos: Array<{ code: string; kind: string; value: string; used: number; active: boolean; note: string }>;
-  sets: Array<{ id: string; name: string; active: boolean }>;
-  posts: Array<{ slug: string; title: string; status: string; deleted: boolean }>;
   letters: Array<{ title: string; subject: string; status: string }>;
   products: OwnProduct[];
   kept: OwnProduct[];
@@ -688,11 +686,14 @@ const WITH_CONTENT = { ...CLEAR_OK, testContent: true };
 describe("--test-content", () => {
   beforeEach(seedTestContent);
 
-  it("deletes every code, set, post, letter and own product — exactly those", async () => {
+  it("deletes every code, letter and own product — exactly those", async () => {
     const report = await run(WITH_CONTENT);
-    for (const t of ["promo_codes", "promo_code_uses", "bundles", "posts", "newsletters", "newsletter_sends", "custom_products"]) {
+    for (const t of ["promo_codes", "promo_code_uses", "newsletters", "newsletter_sends", "custom_products"]) {
       expect(await count(t), t).toBe(0);
     }
+    // Dim, 02.10.2026: Renat builds sets and posts before the launch — never test content
+    expect(await count("bundles")).toBe(2);
+    expect(await count("posts")).toBe(2);
     // only the imported product's rows are left in the product-keyed tables
     const left = async (table: string) =>
       (await query<{ product_id: string }>(`select distinct product_id from ${table} order by product_id`)).map((r) => r.product_id);
@@ -770,17 +771,11 @@ describe("--test-content", () => {
     for (const t of ALL_TABLES) expect(await count(t), t).toBe(counts[t]);
 
     expect(text).toContain("TEST CONTENT — deleted too, because --test-content was given");
-    // every promo code, every set name, every post title, every letter subject, every own product id + name
+    // every promo code, every letter subject, every own product id + name
     for (const s of [
       "promo codes · 2",
       "TEST5",
       "WELCOME10",
-      "sets · 2",
-      "«Дуэт ухода»",
-      "«Придуманный набор»  (off)",
-      "blog posts · 2",
-      "«Как мыть голову»  (published)",
-      "«A draft in the bin»  (in the bin)",
       "newsletters · 2",
       "«Скидки осени»  (sent; in the panel: Осенняя рассылка)",
       "«Проба рассылки»  (draft",
@@ -798,8 +793,13 @@ describe("--test-content", () => {
       expect(text).toContain(s);
     }
     expect(text).toContain("with their 2 product edit row(s), 1 stock row(s) (1 with a barcode), 1 stock move(s)");
+    // sets and posts are not on the list at all (Dim, 02.10.2026)
+    expect(text).not.toContain("sets ·");
+    expect(text).not.toContain("blog posts ·");
+    expect(text).not.toContain("«Придуманный набор»");
     // the → column says what is left of each table
-    expect(text).toMatch(/posts\s+2 → 0\s+all of them, --test-content/);
+    expect(text).not.toMatch(/posts\s+2 → 0/);
+    expect(text).toMatch(/promo_codes\s+2 → 0\s+all of them, --test-content/);
     expect(text).toMatch(/custom_products\s+4 → 1\s+the own products, --test-content — 1 kept by --keep-product/);
     expect(text).toMatch(/product_overrides\s+4 → 2\s+only the own products' rows/);
     expect(text).toMatch(/stock_levels\s+3 → 2\s+only the own products' rows/);
@@ -813,7 +813,8 @@ describe("--test-content", () => {
   it("reports what it deleted after the clear, by name", async () => {
     const text = formatReport(await run(WITH_CONTENT), {});
     expect(text).toContain("TEST CONTENT — deleted, because --test-content was given");
-    expect(text).toContain("«Придуманный набор»");
+    expect(text).toContain("«Проба рассылки»");
+    expect(text).not.toContain("«Придуманный набор»");
     expect(text).toMatch(/custom_products\s+4 → 0/);
     expect(text).toMatch(/product_overrides\s+4 → 1/);
     expect(text).toContain("promo_codes, newsletters  deleted whole by --test-content");
@@ -835,9 +836,9 @@ describe("--test-content", () => {
   it("without the flag: nothing of it moves, and the dry run only counts it", async () => {
     const dry = formatReport(await run({}), {});
     expect(dry).toContain(
-      "TEST CONTENT — not touched without --test-content · 2 promo code(s), 2 set(s), 2 blog post(s), 2 newsletter(s), 4 own product(s)",
+      "TEST CONTENT — not touched without --test-content · 2 promo code(s), 2 newsletter(s), 4 own product(s)",
     );
-    expect(dry).not.toContain("«Придуманный набор»");
+    expect(dry).not.toContain("«Проба рассылки»");
     expect(dry).not.toContain("--test-content --");
     expect(dry).toContain(`--confirm "${CONFIRM_PHRASE}" --gift-cards-are-test-cards`);
 
@@ -861,7 +862,12 @@ describe("--test-content", () => {
 
   it("deletes its tables after their children and by row where a product owns the row", () => {
     const tc = TEST_CONTENT_TABLES as unknown as string[];
-    expect([...tc].sort()).toEqual(["bundles", "newsletters", "posts", "promo_codes"]);
+    expect([...tc].sort()).toEqual(["newsletters", "promo_codes"]);
+    // sets and posts stay KEEP tables under every flag (Dim, 02.10.2026)
+    for (const t of ["bundles", "posts"]) {
+      expect(tc).not.toContain(t);
+      expect(plan.find((p) => p.table === t)?.verdict).toBe("keep");
+    }
     // promo_code_uses and newsletter_sends are on the always-clear list, which runs first
     expect(deleteOrder).toContain("promo_code_uses");
     expect(deleteOrder).toContain("newsletter_sends");
@@ -945,9 +951,9 @@ describe("verification", () => {
 
   it("knows --test-content: quiet when only the named rows went", () => {
     expect(verify(contentFixture(false), contentFixture(true), { testContent: true })).toEqual([]);
-    // the same after-picture without the flag is four KEEP tables that emptied
+    // the same after-picture without the flag is two KEEP tables that emptied
     const said = verify(contentFixture(false), contentFixture(true), {}).join(" | ");
-    expect(said).toContain("posts: 1 row(s) before, 0 after");
+    expect(said).toContain("promo_codes: 1 row(s) before, 0 after");
     expect(said).toContain("custom_products: 2 row(s) before, 1 after");
   });
 
@@ -966,10 +972,16 @@ describe("verification", () => {
       "stock_levels: 1 row(s) of the deleted own products are still there",
     );
     const notEmpty = contentFixture(true);
-    notEmpty.tables.posts = { n: 1, fp: "x" };
+    notEmpty.tables.promo_codes = { n: 1, fp: "x" };
     expect(verify(contentFixture(false), notEmpty, { testContent: true }).join(" | ")).toContain(
-      "posts: should be empty, still has 1 row(s)",
+      "promo_codes: should be empty, still has 1 row(s)",
     );
+  });
+
+  it("with --test-content a set or a post that went missing is a rollback, not a deletion", () => {
+    const after = contentFixture(true);
+    after.tables.bundles = { n: 0, fp: "-" };
+    expect(verify(contentFixture(false), after, { testContent: true }).join(" | ")).toContain("bundles: 1 row(s) before, 0 after");
   });
 
   it("will not call --test-content verified without the row-by-row picture", () => {
