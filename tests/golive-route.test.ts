@@ -164,16 +164,21 @@ describe("statusOf — the committed status is the floor, a mark is the overlay"
 });
 
 describe("gate — «all items done in the diipsolution environment» before the domain moves", () => {
-  it("is locked on the list as shipped, and names what is holding it", () => {
-    const { locked, blockers } = gate({});
+  /* Until 05.10.2026 the shipped list itself had blocking phase-A rows open,
+     and this read the lock straight off it. On 05.10 the last one closed —
+     the state the list exists to reach — so the lock is set up here instead:
+     one blocking row reopened over whatever the file says. */
+  it("is locked while a blocking phase-A row is open, and names what is holding it", () => {
+    const reopened: StateMap = { [BLOCKING[0].id]: { status: "doing", note: "", at: "2026-09-17T11:00:00.000Z", by: "dim" } };
+    const { locked, blockers } = gate(reopened);
     expect(locked).toBe(true);
-    expect(blockers.length).toBeGreaterThan(0);
+    expect(blockers).toContain(BLOCKING[0].id);
     // every blocker is a blocking phase-A row that is not done
     for (const id of blockers) {
       const item = PLAN.items.find((i) => i.id === id)!;
       expect(phaseOf(item)).toBe("a");
       expect(item.blocking).toBe(true);
-      expect(statusOf(item, {})).not.toBe("done");
+      expect(statusOf(item, reopened)).not.toBe("done");
     }
   });
 
@@ -396,6 +401,9 @@ describe("PUT /api/golive/", () => {
     const { PUT } = await import("@/app/api/golive/route");
     const phaseB = PLAN.items.find((i) => phaseOf(i) === "b");
     expect(phaseB).toBeDefined();
+    // a blocking phase-A row reopened first (the shipped list is all done since 05.10)
+    const reopen = { [BLOCKING[0].id]: { status: "doing" as const, note: "", at: "2026-09-17T09:00:00.000Z", by: "dim" as const } };
+    expect((await PUT(put({ states: reopen }, admin))).status).toBe(200);
     const res = await PUT(
       put({ states: { [phaseB!.id]: { status: "done", note: "", at: "2026-09-17T10:00:00.000Z", by: "claude" } } }, admin),
     );
@@ -404,7 +412,7 @@ describe("PUT /api/golive/", () => {
     expect(body.error).toBe("phase_b_locked");
     expect(body.detail).toContain(phaseB!.id);
     expect(body.gate.locked).toBe(true);
-    expect(await getGoliveStates()).toEqual({});
+    expect(Object.keys(await getGoliveStates())).toEqual([BLOCKING[0].id]);
   });
 
   it("still takes a note on a phase-B row while it is locked — that is what a locked phase is for", async () => {
