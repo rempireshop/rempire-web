@@ -121,10 +121,13 @@ why it is phase A on `/golive/`.
 
 ## Stage 4 — the day, in order
 
-**At night**, from about 02:00 Tallinn time (Dim, 29.09.2026): no customers on
-either shop, and the 07:00 UTC cron is hours away. Renat is not there — what
-needs him is decided at the last meeting (T-1); he signs in in the morning
-(step 9). The date is not set yet. **In order** — several steps are only
+**Wednesday 07.10.2026, from 22:00 Tallinn time** (Dim, 05.10.2026 — first
+set for 02:00 on the night of 05→06.10, postponed the same day): a quiet
+evening hour, and 22:00 Tallinn is 19:00 UTC, hours from either cron (07:00
+and 03:30 UTC). What needs Renat was decided in writing on 01.10 (T-1); he
+signs in that evening or next morning (step 9). The footer «Админка» link
+came back on 05.10 (eca0a11) and is removed again on Wednesday during the day
+(`git revert eca0a11`). **In order** — several steps are only
 correct together. On `/golive/` each is its own numbered row. The two Shopify
 exports (steps 4 and 4b) arrive by e-mail to dim.novare@gmail.com and open
 within the Shopify login.

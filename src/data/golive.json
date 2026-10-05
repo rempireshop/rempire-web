@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-09-27",
+  "asOf": "2026-10-05",
   "phases": [
     {
       "id": "a",
@@ -15,10 +15,10 @@
     {
       "id": "b",
       "name": "Шаг B — день запуска и первые недели",
-      "note": "Переключение на rempireshop.com строго по порядку, потом — что смотреть в первые дни. Открывается сам, когда закрыт шаг A.",
+      "note": "Переключение на rempireshop.com строго по порядку, потом — что смотреть в первые дни. Запуск — в среду 07.10.2026 с 22:00 (Дим, 05.10.2026; был назначен на 02:00 ночи 05→06.10). Открывается сам, когда закрыт шаг A.",
       "en": {
         "name": "Phase B — the day of the switch, and the first weeks",
-        "note": "The switch to rempireshop.com, strictly in order, then what to watch in the first days. It opens by itself once phase A is closed."
+        "note": "The switch to rempireshop.com, strictly in order, then what to watch in the first days. The launch is on Wednesday 07.10.2026 from 22:00 (Dim, 05.10.2026; it was set for 02:00 on the night of 05→06.10). It opens by itself once phase A is closed."
       }
     }
   ],
@@ -741,13 +741,13 @@
         "claude",
         "dim"
       ],
-      "status": "done",
+      "status": "todo",
       "blocking": true,
-      "title": "Ссылка «Админка» из подвала убрана (05.10)",
-      "detail": "Сделано 05.10.2026 (68f6968): кнопки в подвале больше нет; панель — rempireshop.com/admin. Ренату сказано в сообщении перед запуском. Ссылка внизу каждой страницы говорит любому, кто её увидит, где панель. Дим, 21.09.2026: на запуске она уходит, и Ренат открывает панель по адресу /admin — короткий адрес, который можно набрать, и он уже работает (редирект на /shop2/admin/, next.config.ts). Убрать `.ftr__admin` в public/shop2/app.js накануне — тем же пушем, что и «Последний проход». Ссылка, которой нет, — это не защита: пароль остаётся единственной. Но и подсказывать адрес незачем. Сказать Ренату ДО того, как убрали (пункт «Последняя встреча с Ренатом»): он ходит туда этой кнопкой каждый день.",
+      "title": "Убрать ссылку «Админка» из подвала — в среду, до 22:00",
+      "detail": "05.10.2026 ссылку убрали (68f6968), запуск перенесли на среду 07.10 22:00 — и по решению Дима ссылку вернули (eca0a11): до запуска Ренат ходит в панель этой кнопкой. Убрать снова в среду днём — git revert eca0a11 (тот же код, что 68f6968), сборка, пуш; прогона браузерных тестов это не требует — 05.10 он прошёл с этим изменением. Ссылка внизу каждой страницы говорит любому, кто её увидит, где панель. Дим, 21.09.2026: на запуске она уходит, и Ренат открывает панель по адресу /admin — короткий адрес, который можно набрать, и он уже работает (редирект на /shop2/admin/, next.config.ts). Убрать `.ftr__admin` в public/shop2/app.js накануне — тем же пушем, что и «Последний проход». Ссылка, которой нет, — это не защита: пароль остаётся единственной. Но и подсказывать адрес незачем. Сказать Ренату ДО того, как убрали (пункт «Последняя встреча с Ренатом»): он ходит туда этой кнопкой каждый день.",
       "en": {
-        "title": "The footer «Админка» link is gone (05.10)",
-        "detail": "Done 05.10.2026 (68f6968): the footer button is gone; the panel is rempireshop.com/admin. Renat is told in the message before the launch. A link at the bottom of every page tells anyone who sees it where the panel is. Dim, 21.09.2026: at the switch it comes off and Renat opens the panel at /admin — a short address he can type, already working (a redirect to /shop2/admin/ in next.config.ts). Remove `.ftr__admin` in public/shop2/app.js the day before — in the same push as «Final pass». A missing link is not a security measure — the password stays the only one — but there is no reason to advertise the address either. Tell Renat BEFORE it goes (the item «The last meeting with Renat»): that button is how he gets there every day."
+        "title": "Take the «Админка» link out of the footer — on Wednesday, before 22:00",
+        "detail": "05.10.2026 the link was removed (68f6968), the launch moved to Wednesday 07.10 22:00 — and on Dim's word the link came back (eca0a11): until the launch it is how Renat reaches the panel. Remove it again on Wednesday during the day — git revert eca0a11 (the same code as 68f6968), build, push; no new browser run needed — the 05.10 run passed with this change. A link at the bottom of every page tells anyone who sees it where the panel is. Dim, 21.09.2026: at the switch it comes off and Renat opens the panel at /admin — a short address he can type, already working (a redirect to /shop2/admin/ in next.config.ts). Remove `.ftr__admin` in public/shop2/app.js the day before — in the same push as «Final pass». A missing link is not a security measure — the password stays the only one — but there is no reason to advertise the address either. Tell Renat BEFORE it goes (the item «The last meeting with Renat»): that button is how he gets there every day."
       }
     },
     {
@@ -799,10 +799,10 @@
       "blocking": true,
       "outside": "Vercel",
       "title": "Переменные Vercel — проверены 28.09",
-      "detail": "28.09.2026, в панели Vercel (rempire-web → Environment Variables): 27 переменных, все нужные на месте — Montonio (боевые, MONTONIO_ENV=live), база и DATABASE_SSL_NO_VERIFY, SESSION_SECRET (никогда не менять), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (оплаты идут через Montonio — не mock). Лишних нет: DB_DRIVER, PGLITE_PATH, E2E_* не заданы. В ночь меняется только PUBLIC_BASE_URL (шаг 5). Расписания: 07:00 UTC — письма, сверка оплат, возвратов и посылок; 03:30 UTC — чистка событий; ночной запуск в 02:00 их не задевает. По желанию: 11 секретов с пометкой «Needs Attention» открыты для всех окружений — можно ограничить «Production».",
+      "detail": "28.09.2026, в панели Vercel (rempire-web → Environment Variables): 27 переменных, все нужные на месте — Montonio (боевые, MONTONIO_ENV=live), база и DATABASE_SSL_NO_VERIFY, SESSION_SECRET (никогда не менять), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (оплаты идут через Montonio — не mock). Лишних нет: DB_DRIVER, PGLITE_PATH, E2E_* не заданы. В ночь меняется только PUBLIC_BASE_URL (шаг 5). Расписания: 07:00 UTC — письма, сверка оплат, возвратов и посылок; 03:30 UTC — чистка событий; запуск в 22:00 по Таллинну (19:00 UTC) их не задевает. По желанию: 11 секретов с пометкой «Needs Attention» открыты для всех окружений — можно ограничить «Production».",
       "en": {
         "title": "Vercel variables — checked 28.09",
-        "detail": "28.09.2026, in the Vercel dashboard (rempire-web → Environment Variables): 27 variables, every needed one present — Montonio (live, MONTONIO_ENV=live), the database and DATABASE_SSL_NO_VERIFY, SESSION_SECRET (never change it), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (payments go through Montonio — not mock). Nothing extra: DB_DRIVER, PGLITE_PATH, E2E_* are not set. On the night only PUBLIC_BASE_URL changes (step 5). Schedules: 07:00 UTC — letters, the payment, refund and parcel checks; 03:30 UTC — events clean-up; a 02:00 launch touches neither. Optional: 11 secrets marked «Needs Attention» are open to every environment — they can be limited to «Production»."
+        "detail": "28.09.2026, in the Vercel dashboard (rempire-web → Environment Variables): 27 variables, every needed one present — Montonio (live, MONTONIO_ENV=live), the database and DATABASE_SSL_NO_VERIFY, SESSION_SECRET (never change it), ADMIN_PASSWORD_HASH, CRON_SECRET, RESEND_API_KEY / RESEND_TO / MAIL_REPLY_TO, TELEGRAM_*, VAPID_*, GSC_*, R2_*, OPENAI_*, PAYMENT_PROVIDER (payments go through Montonio — not mock). Nothing extra: DB_DRIVER, PGLITE_PATH, E2E_* are not set. On the night only PUBLIC_BASE_URL changes (step 5). Schedules: 07:00 UTC — letters, the payment, refund and parcel checks; 03:30 UTC — events clean-up; a 22:00 Tallinn launch (19:00 UTC) touches neither. Optional: 11 secrets marked «Needs Attention» are open to every environment — they can be limited to «Production»."
       }
     },
     {
@@ -942,11 +942,11 @@
       "needs": [
         "reset-rehearsal"
       ],
-      "title": "1. Копия базы — в начале ночи, до всего",
-      "detail": "В начале ночи (≈02:00). Отрепетировано 29.09 (✓ 0,37 МБ, 32 таблицы). node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓, десятки таблиц, файл в rempire-backups. Отката у чистки нет, откат — это восстановление из этой копии (docs/go-live-reset.md, «Если всё-таки надо откатиться»). Нет строки с ✓ — дальше не идти.",
+      "title": "1. Копия базы — в начале запуска, до всего",
+      "detail": "В начале запуска (среда 07.10, ≈22:00). Отрепетировано 29.09 (✓ 0,37 МБ, 32 таблицы). node --env-file=.env.railway.txt tools/db-backup.mjs — строка с ✓, десятки таблиц, файл в rempire-backups. Отката у чистки нет, откат — это восстановление из этой копии (docs/go-live-reset.md, «Если всё-таки надо откатиться»). Нет строки с ✓ — дальше не идти.",
       "en": {
-        "title": "1. A backup — at the start of the night, before anything",
-        "detail": "At the start of the night (≈02:00). Rehearsed 29.09 (✓ 0.37 MB, 32 tables). node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line, dozens of tables, the file in rempire-backups. The reset has no undo; the undo is a restore from this copy (docs/go-live-reset.md, «if you do have to roll back»). No ✓ line — stop here."
+        "title": "1. A backup — at the start of the launch, before anything",
+        "detail": "At the start of the launch (Wednesday 07.10, ≈22:00). Rehearsed 29.09 (✓ 0.37 MB, 32 tables). node --env-file=.env.railway.txt tools/db-backup.mjs — a ✓ line, dozens of tables, the file in rempire-backups. The reset has no undo; the undo is a restore from this copy (docs/go-live-reset.md, «if you do have to roll back»). No ✓ line — stop here."
       }
     },
     {
@@ -1109,11 +1109,11 @@
       "needs": [
         "domain-dns"
       ],
-      "title": "9. Утром: Ренат входит в панель на rempireshop.com",
-      "detail": "Не ночью — утром, когда Ренат проснётся; ночные заказы приходят в Telegram-группу «Rempire заказы». Вход привязан к адресу, поэтому на новом адресе заново: в Safari rempireshop.com/admin → пароль. Старую иконку «Админка» с экрана «Домой» удалить, новую добавить с этого адреса («Поделиться» → «На экран «Домой»»), открыть с иконки → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». Подписка старого адреса к новому не переходит.",
+      "title": "9. Ренат входит в панель на rempireshop.com — вечером или утром",
+      "detail": "После переключения — в среду вечером, если Ренат не спит, или в четверг утром; ночные заказы приходят в Telegram-группу «Rempire заказы». Вход привязан к адресу, поэтому на новом адресе заново: в Safari rempireshop.com/admin → пароль. Старую иконку «Админка» с экрана «Домой» удалить, новую добавить с этого адреса («Поделиться» → «На экран «Домой»»), открыть с иконки → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». Подписка старого адреса к новому не переходит.",
       "en": {
-        "title": "9. In the morning: Renat signs in to the panel on rempireshop.com",
-        "detail": "Not at night — in the morning, when Renat is up; orders placed at night arrive in the Telegram group «Rempire заказы». The sign-in belongs to the address, so it is done again on the new one: in Safari rempireshop.com/admin → password. Remove the old «Админка» icon from the Home Screen, add a new one from this address (Share → Add to Home Screen), open it from the icon → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». The old address's subscription does not carry over."
+        "title": "9. Renat signs in to the panel on rempireshop.com — that evening or next morning",
+        "detail": "After the switch — on Wednesday evening if Renat is up, or on Thursday morning; orders placed at night arrive in the Telegram group «Rempire заказы». The sign-in belongs to the address, so it is done again on the new one: in Safari rempireshop.com/admin → password. Remove the old «Админка» icon from the Home Screen, add a new one from this address (Share → Add to Home Screen), open it from the icon → «Ещё» → «Настройки» → «Оповещения на телефон» → «Включить на этом телефоне» → «Отправить проверочное». The old address's subscription does not carry over."
       }
     },
     {
