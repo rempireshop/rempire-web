@@ -721,17 +721,17 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "outside": "Montonio",
       "needs": [
         "live-hour"
       ],
-      "title": "Закрыть заказы живого часа — до чистки",
-      "detail": "Заказы R-100095…R-100104 — настоящие деньги, а чистка их удалит, и поздние уведомления Montonio о них магазин уже не примет. До чистки: сохранить отчёт Montonio по этим заказам для бухгалтера. Состояние 05.10.2026: R-100095 — возвращён полностью; R-100096 — 0,50 € вернули, вторые 0,50 € оставить или вернуть (Дим); R-100097 — не оплачен; R-100098 — Диму вернули наличными, «Обработано»; R-100101 и R-100102 (SmartPosti, Финляндия) — сканы 03.10, «Отправлен» сам, едут; R-100103 и R-100104 — доставлены. Ренат вернул деньги наличными за R-100101…R-100104 — через Montonio не возвращать. Дим, 05.10.2026: запуск посылок в Финляндию не ждёт — они уже у перевозчика, а после чистки их статусы магазину не нужны. Ренат старые заказы в панели не трогает: «Создать этикетку» у заказа, оплаченного в песочнице, бронирует настоящую платную посылку.",
+      "title": "Заказы живого часа закрыты (05.10)",
+      "detail": "Дим, 05.10.2026: закрыто. Отчёт по этим заказам лежит в кабинете Montonio и чистка его не трогает — скачать для бухгалтера можно в любой момент. Заказы R-100095…R-100104 — настоящие деньги, а чистка их удалит, и поздние уведомления Montonio о них магазин уже не примет. До чистки: сохранить отчёт Montonio по этим заказам для бухгалтера. Состояние 05.10.2026: R-100095 — возвращён полностью; R-100096 — 0,50 € вернули, вторые 0,50 € оставить или вернуть (Дим); R-100097 — не оплачен; R-100098 — Диму вернули наличными, «Обработано»; R-100101 и R-100102 (SmartPosti, Финляндия) — сканы 03.10, «Отправлен» сам, едут; R-100103 и R-100104 — доставлены. Ренат вернул деньги наличными за R-100101…R-100104 — через Montonio не возвращать. Дим, 05.10.2026: запуск посылок в Финляндию не ждёт — они уже у перевозчика, а после чистки их статусы магазину не нужны. Ренат старые заказы в панели не трогает: «Создать этикетку» у заказа, оплаченного в песочнице, бронирует настоящую платную посылку.",
       "en": {
-        "title": "Close out the live-hour orders — before the reset",
-        "detail": "Orders R-100095…R-100104 are real money, the reset deletes them, and the shop will not accept Montonio's late notices about them afterwards. Before the reset: keep Montonio's report of these orders for the accountant. State on 05.10.2026: R-100095 — fully refunded; R-100096 — €0.50 refunded, the other €0.50 keep or refund (Dim); R-100097 — unpaid; R-100098 — Dim paid back in cash, «Обработано»; R-100101 and R-100102 (SmartPosti, Finland) — scanned 03.10, «Отправлен» by itself, on their way; R-100103 and R-100104 — delivered. Renat paid R-100101…R-100104 back in cash — no Montonio refund. Dim, 05.10.2026: the launch does not wait for the Finland parcels — the carrier has them, and after the reset the shop needs none of their statuses. Renat touches no old order in the panel: «Создать этикетку» on an order paid in the sandbox books a real, paid parcel."
+        "title": "The live-hour orders are closed (05.10)",
+        "detail": "Dim, 05.10.2026: closed. The report of these orders lives in the Montonio account, which the reset does not touch — it can be downloaded for the accountant any time. Orders R-100095…R-100104 are real money, the reset deletes them, and the shop will not accept Montonio's late notices about them afterwards. Before the reset: keep Montonio's report of these orders for the accountant. State on 05.10.2026: R-100095 — fully refunded; R-100096 — €0.50 refunded, the other €0.50 keep or refund (Dim); R-100097 — unpaid; R-100098 — Dim paid back in cash, «Обработано»; R-100101 and R-100102 (SmartPosti, Finland) — scanned 03.10, «Отправлен» by itself, on their way; R-100103 and R-100104 — delivered. Renat paid R-100101…R-100104 back in cash — no Montonio refund. Dim, 05.10.2026: the launch does not wait for the Finland parcels — the carrier has them, and after the reset the shop needs none of their statuses. Renat touches no old order in the panel: «Создать этикетку» on an order paid in the sandbox books a real, paid parcel."
       }
     },
     {
