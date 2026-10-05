@@ -648,7 +648,7 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "blocking": true,
       "needs": [
         "code-shipping",
@@ -661,11 +661,11 @@
         "code-stock-import",
         "admin-link-off"
       ],
-      "title": "Последний проход накануне: всё прогнать, один пуш",
-      "detail": "Накануне, одним пушем — legal.js и снятая ссылка «Админка». Перед пушем: модульные тесты и браузерные (e2e) целиком; локальная проверка боевого пререндера — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (результат не коммитить, собранные файлы вернуть); в index.html нет ни одного localhost: и ровно две ссылки на boot.js. После пуша — сборка на Vercel зелёная, стенд открывается.",
+      "title": "Последний проход сделан (05.10)",
+      "detail": "Сделано 05.10.2026, коммиты 68f6968 (ссылка «Админка» убрана) и /golive: все unit-тесты (7028) и tsc зелёные; боевой пререндер с PUBLIC_BASE_URL=https://rempireshop.com — 825 страниц, prerender:check 0 ошибок, robots боевые, в index.html нет localhost: и ровно две ссылки на boot.js. Браузерные тесты, телефон и компьютер: 739 прошли. Упали только три файла «sweep» (случайные заказы и обход витрины): дев-сервер на миг отвечал 500 («Unexpected end of JSON input» — next dev читает свой полузаписанный манифест во время компиляции, в нашем коде такой строки нет), и при повторе падают уже другие случайные заказы; те же адреса на собранном стенде — 200. Один тест («abc» в телефоне, sweep-admin:360) падает и на коде до 05.10 — устарел, магазин не сломан. Починка тестов — после запуска. Накануне, одним пушем — legal.js и снятая ссылка «Админка». Перед пушем: модульные тесты и браузерные (e2e) целиком; локальная проверка боевого пререндера — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (результат не коммитить, собранные файлы вернуть); в index.html нет ни одного localhost: и ровно две ссылки на boot.js. После пуша — сборка на Vercel зелёная, стенд открывается.",
       "en": {
-        "title": "The final pass the day before: run everything, one push",
-        "detail": "The day before, in one push — legal.js and the footer «Админка» link removed. Before the push: the whole unit suite and the browser (e2e) suite; a local check of the production prerender — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (do not commit the result; put the generated files back); index.html carries no localhost: and exactly two boot.js references. After the push: the Vercel build is green and staging opens."
+        "title": "The final pass is done (05.10)",
+        "detail": "Done 05.10.2026, commits 68f6968 (the «Админка» link removed) and /golive: every unit test (7028) and tsc green; the production prerender with PUBLIC_BASE_URL=https://rempireshop.com — 825 pages, prerender:check 0 failures, production robots, no localhost: in index.html and exactly two boot.js references. Browser suite, phone and desktop: 739 passed. Only three «sweep» files failed (random orders and the storefront crawl): the dev server answered 500 for a moment («Unexpected end of JSON input» — next dev reading its own half-written manifest mid-compile; no line of ours in the stack), and a re-run fails different random orders; the same addresses on the built staging answer 200. One test («abc» as a phone, sweep-admin:360) fails on the code before 05.10 too — the test is stale, the shop is not broken. Fixing the tests — after the launch. The day before, in one push — legal.js and the footer «Админка» link removed. Before the push: the whole unit suite and the browser (e2e) suite; a local check of the production prerender — PUBLIC_BASE_URL=https://rempireshop.com npm run prerender && npm run prerender:check (do not commit the result; put the generated files back); index.html carries no localhost: and exactly two boot.js references. After the push: the Vercel build is green and staging opens."
       }
     },
     {
