@@ -129,6 +129,12 @@ correct together. On `/golive/` each is its own numbered row. The two Shopify
 exports (steps 4 and 4b) arrive by e-mail to dim.novare@gmail.com and open
 within the Shopify login.
 
+**Shopify sells until the switch** (Dim, 05.10.2026: the old shop runs as long
+as possible). Steps 1–4 change only the new shop; rempireshop.com stays Shopify
+until step 6 moves DNS. So the customers (4b) go **before** the stock (4), and
+the stock export is the very last thing before step 5 — the later it is, the
+fewer Shopify orders to write off by hand (step 13).
+
 1. **Backup.** `node --env-file=.env.railway.txt tools/db-backup.mjs` — a ✓ line
    and dozens of tables. No ✓ — stop.
 2. **Reset** — at night any time (by day it would be not in the 10:00 hour
@@ -138,11 +144,12 @@ within the Shopify login.
    --gift-cards-are-test-cards` (decided 28.09.2026: the stock counts, moves
    and the 10 barcodes are test data too; step 4 writes the real counts into
    the empty «Склад»). Dry run again: `0` everywhere under CLEAR, STOCK and
-   TEST CONTENT. No «Блог» and no «Наборы» on the storefront. Open
-   «Подключения». Order numbers continue after the highest one.
+   TEST CONTENT. «Наборы» and «Блог» are what they were (the reset leaves
+   them alone since 02.10). Open «Подключения». Order numbers continue after the highest one.
    `docs/go-live-reset.md`.
-3. **Automatic letters on** — exactly what the meeting with Renat agreed
-   («Маркетинг → Письма»), never before the reset.
+3. **Automatic letters** — all five are already on with Renat's numbers
+   (02.10) and the reset keeps the settings: only open «Маркетинг → Письма»
+   and look.
 4. **Stock from Shopify — the last thing before DNS.** A fresh export
    (Shopify → Products → Inventory → Export → all variants, CSV), then:
 
@@ -172,8 +179,8 @@ within the Shopify login.
    test «Сообщить, когда появится» requests. Shopify keeps selling until DNS:
    an order there after the export is written off by hand (step 13).
 
-4b. **Customers from Shopify («Покупатели из Shopify») — right after step 4,
-   still before DNS.** Decided 28.09.2026 (Dim, option B): only customers with
+4b. **Customers from Shopify («Покупатели из Shopify») — before step 4
+   (Dim, 05.10.2026: the stock export goes last), still before DNS.** Decided 28.09.2026 (Dim, option B): only customers with
    a name (first or last); their e-mail, their phone if there is one, and their
    default address if the shop delivers to its country. The address is kept
    with its country and **no delivery method** (Dim, 28.09, option b): the
