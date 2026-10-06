@@ -217,12 +217,13 @@ describe("the plan", () => {
   });
 
   it("computes the two hand decisions of 26.09.2026 from the day's export", () => {
-    expect(OWNER_ROWS).toHaveLength(3);
+    // three rows of 26.09.2026 first, then the five of 06.10.2026 (the next test)
+    expect(OWNER_ROWS).toHaveLength(8);
     expect(at("queen-of-colours")).toMatchObject({ qty: 3, source: "owner" });
     expect(at("oversized-t-shirt-unisex-with-print", "yellow-1")).toMatchObject({ qty: 0, source: "owner" });
     expect(at("oversized-t-shirt-unisex-with-print", "white-1")).toMatchObject({ qty: 5, source: "owner" });
     // the numbers the rule gave on 26.09 are kept beside it, for the dry run to be compared with
-    expect(OWNER_ROWS.map((o: { seen: string }) => o.seen)).toEqual([
+    expect(OWNER_ROWS.slice(0, 3).map((o: { seen: string }) => o.seen)).toEqual([
       expect.stringContaining("= 3"),
       expect.stringContaining("= 0"),
       expect.stringContaining("= 5"),
@@ -230,6 +231,24 @@ describe("the plan", () => {
     // …and the thirteen Shopify rows they answer are not left as questions
     expect(built.decide).toEqual([]);
     expect(built.decidedByHand).toHaveLength(13);
+  });
+
+  /* Dim, 06.10.2026: five products Shopify no longer sells (unpublished there,
+     some still with stock) move with the catalogue but stay out of stock. */
+  it("fixes the five products Shopify stopped selling at 0, whatever Shopify still counts", () => {
+    const unpublished = [
+      "captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder",
+      "creed-original-vetiver-eau-de-parfum-50ml",
+      "gummy-sheet-mask-madecassoside-sticker",
+      "kevin-murphy-crystal-angel",
+      "tom-ford-tobacco-vanille-eau-de-parfum-50ml",
+    ];
+    const rows = OWNER_ROWS.slice(3) as Array<{ productId: string; variant: string; qty?: number; decided: string }>;
+    expect(rows.map((r) => r.productId)).toEqual(unpublished);
+    for (const r of rows) {
+      expect(r, r.productId).toMatchObject({ variant: "", qty: 0 });
+      expect(r.decided, r.productId).toContain("06.10.2026");
+    }
   });
 
   it("without the hand decisions, names every row a person has to decide and writes none of them", () => {

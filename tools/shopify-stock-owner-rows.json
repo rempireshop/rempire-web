@@ -21,6 +21,41 @@
       "sum": { "handle": "oversized-t-shirt-unisex-with-print", "option": "white" },
       "decided": "Dim, 26.09.2026: our sizes are the colours only — the sum of every white size",
       "seen": "26.09.2026: white S 1 + M 1 + L 1 + XL 0 + XXL 2 = 5"
+    },
+    {
+      "productId": "captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder",
+      "variant": "",
+      "qty": 0,
+      "decided": "Dim, 06.10.2026: not on sale in Shopify any more (unpublished) — it moves with the catalogue but stays out of stock and cannot be ordered",
+      "seen": "28.09.2026 export: 5 available in Shopify"
+    },
+    {
+      "productId": "creed-original-vetiver-eau-de-parfum-50ml",
+      "variant": "",
+      "qty": 0,
+      "decided": "Dim, 06.10.2026: not on sale in Shopify any more (unpublished) — it moves with the catalogue but stays out of stock and cannot be ordered",
+      "seen": "28.09.2026 export: 1 available in Shopify"
+    },
+    {
+      "productId": "gummy-sheet-mask-madecassoside-sticker",
+      "variant": "",
+      "qty": 0,
+      "decided": "Dim, 06.10.2026: not on sale in Shopify any more (unpublished) — it moves with the catalogue but stays out of stock and cannot be ordered",
+      "seen": "28.09.2026 export: 8 available in Shopify"
+    },
+    {
+      "productId": "kevin-murphy-crystal-angel",
+      "variant": "",
+      "qty": 0,
+      "decided": "Dim, 06.10.2026: not on sale in Shopify any more (unpublished) — it moves with the catalogue but stays out of stock and cannot be ordered",
+      "seen": "28.09.2026 export: 0 available in Shopify"
+    },
+    {
+      "productId": "tom-ford-tobacco-vanille-eau-de-parfum-50ml",
+      "variant": "",
+      "qty": 0,
+      "decided": "Dim, 06.10.2026: not on sale in Shopify any more (unpublished) — it moves with the catalogue but stays out of stock and cannot be ordered",
+      "seen": "28.09.2026 export: 1 available in Shopify"
     }
   ]
 }
