@@ -23,6 +23,11 @@ test.beforeEach(async ({}, testInfo) => {
   test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 
+/* The soap in this set is the one name translated whole on the ET/EN sites
+   (trName()'s HEADS in app.js, 06.10.2026); the other two are Latin. */
+const SOAP_SHOWN: Record<string, string> = { RU: "Чёрное мыло 666", ET: "Must seep 666", EN: "Black soap 666" };
+const shownName = (name: string, code: string) => (name === "Чёрное мыло 666" ? SOAP_SHOWN[code] : name);
+
 for (const [i, lang] of LANGS.entries()) {
   test.describe(`sets — ${lang.code}`, () => {
     test.use({ extraHTTPHeaders: ipHeaders(70 + i) });
@@ -48,7 +53,7 @@ for (const [i, lang] of LANGS.entries()) {
       await waitForScreen(page, "bundle");
       await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/set/${BUNDLE.id}/?$`));
       for (const name of BUNDLE.componentNames) {
-        await expect(page.locator(".bitems")).toContainText(name);
+        await expect(page.locator(".bitems")).toContainText(shownName(name, lang.code));
       }
 
       // Two add-to-set buttons render on this page (a sticky-bar duplicate,
@@ -86,7 +91,7 @@ for (const [i, lang] of LANGS.entries()) {
       const parts = page.locator(".cosum .cline__parts").first();
       await expect(parts).toBeVisible();
       for (const name of BUNDLE.componentNames) {
-        await expect(parts).toContainText(name);
+        await expect(parts).toContainText(shownName(name, lang.code));
       }
     });
   });

@@ -8325,6 +8325,18 @@
      into franglais, so this never runs outside name-bearing elements. */
   function trName(s, lang) {
     var i = lang === "ET" ? 0 : 1;
+    /* Names that are Russian before the dash as well — the shop's own soaps.
+       The tables above only ever reach the tail, so these read «Чёрное мыло
+       666 — handmade» on the English site and in the Google feed (Dim,
+       06.10.2026: translate them). Kept inside the function, not as a fourth
+       table, so every copy lifted out of this file by source text (the
+       prerender, the tests) carries it without being taught a new name.
+       src/lib/product-name.ts holds the same list. */
+    var HEADS = [
+      ["Чёрное мыло 666", "Must seep 666", "Black soap 666"],
+      ["Розовое мыло Rule Nr 1", "Roosa seep Rule Nr 1", "Pink soap Rule Nr 1"]
+    ];
+    for (var h = 0; h < HEADS.length; h++) if (s.indexOf(HEADS[h][0]) >= 0) s = s.split(HEADS[h][0]).join(HEADS[h][1 + i]);
     return s.replace(/ — ([а-яё][а-яё \-]*)$/i, function (m, tail) {
       var low = tail.toLowerCase();
       if (TAIL_EXACT[low]) return " — " + TAIL_EXACT[low][i];

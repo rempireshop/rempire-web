@@ -353,7 +353,7 @@ describe("product names", () => {
 
   it("carry the type tail in the letter's language, as the storefront shows it", () => {
     const en = renderOrderConfirmed({ number: "R-4", items: ITEMS }, "en");
-    expect(en.text).toContain("Rempire Чёрное мыло 666 — handmade");
+    expect(en.text).toContain("Rempire Black soap 666 — handmade");
     // …and the volume after it: «215 мл» is the storefront's «215 ml» on both sites
     expect(en.text).toContain("System 4 Bio Botanical Shampoo — shampoo · 215 ml");
     expect(en.text).not.toMatch(/ручная работа|шампунь|мл/);

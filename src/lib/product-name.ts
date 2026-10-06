@@ -64,6 +64,17 @@ export const TAIL_EXACT: Readonly<Record<string, readonly [string, string]>> = {
 };
 
 /**
+ * Names that are Russian before the dash too — the shop's own soaps (Dim,
+ * 06.10.2026). [Russian, Estonian, English]. In app.js this list sits inside
+ * trName() itself (`var HEADS`), so every copy lifted from that file carries
+ * it; tests/product-name.test.ts holds the two to the same answers.
+ */
+export const NAME_HEADS: ReadonlyArray<readonly [string, string, string]> = [
+  ["Чёрное мыло 666", "Must seep 666", "Black soap 666"],
+  ["Розовое мыло Rule Nr 1", "Roosa seep Rule Nr 1", "Pink soap Rule Nr 1"],
+];
+
+/**
  * The tails the storefront can translate, in the order the tables list them
  * — what the assistant is told to choose from when it names a product
  * (src/lib/ai-prompts.ts), so it cannot be handed a word neither site knows.
@@ -117,7 +128,9 @@ export function translateProductName(name: string, lang: unknown): string {
   const L = tableLang(lang);
   if (!L) return name;
   const i = L === "ET" ? 0 : 1;
-  return String(name).replace(/ — ([а-яё][а-яё \-]*)$/i, (m, tail: string) => {
+  let s = String(name);
+  for (const [ru, et, en] of NAME_HEADS) if (s.includes(ru)) s = s.split(ru).join(i === 0 ? et : en);
+  return s.replace(/ — ([а-яё][а-яё \-]*)$/i, (m, tail: string) => {
     const low = tail.toLowerCase();
     if (Object.hasOwn(TAIL_EXACT, low)) return " — " + TAIL_EXACT[low][i];
     const parts = low.split(" ");

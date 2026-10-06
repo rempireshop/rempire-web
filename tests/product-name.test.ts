@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import { PRODUCT_NAME_FRAGS, PRODUCT_NAME_TAILS } from "@/lib/ai-prompts";
-import { NAME_FRAGS, NAME_TAILS, TAIL_EXACT, VARIANT_UNITS, translateProductName, translateVariant } from "@/lib/product-name";
+import { NAME_FRAGS, NAME_HEADS, NAME_TAILS, TAIL_EXACT, VARIANT_UNITS, translateProductName, translateVariant } from "@/lib/product-name";
 
 const APP_JS = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
 const CATALOGUE = JSON.parse(
@@ -115,6 +115,15 @@ describe("product-name — the server's copy of trName()", () => {
     expect(flat(NAME_FRAGS)).toEqual(flat(appFrags));
   });
 
+  it("carries the storefront's whole-name list (the soaps) word for word", () => {
+    const src = sliceFn("trName");
+    const at = src.indexOf("var HEADS = ");
+    expect(at, "trName() in app.js has no HEADS list").toBeGreaterThan(-1);
+    const literal = src.slice(at + "var HEADS = ".length, src.indexOf("];", at) + 1);
+    const appHeads = runInNewContext(`(${literal})`) as string[][];
+    expect(appHeads).toEqual(NAME_HEADS.map((h) => [...h]));
+  });
+
   it("agrees with the browser on every name in the catalogue, alone and with its brand", () => {
     let translated = 0;
     for (const p of CATALOGUE) {
@@ -138,8 +147,12 @@ describe("product-name — the server's copy of trName()", () => {
     // …and what that agreement means, spelled out
     expect(translateProductName("Bio Botanical Shampoo — шампунь", "en")).toBe("Bio Botanical Shampoo — shampoo");
     expect(translateProductName("Bio Botanical Shampoo — шампунь", "et")).toBe("Bio Botanical Shampoo — šampoon");
-    expect(translateProductName("Чёрное мыло 666 — ручная работа", "en")).toBe("Чёрное мыло 666 — handmade");
-    expect(translateProductName("Чёрное мыло 666 — ручная работа", "et")).toBe("Чёрное мыло 666 — käsitöö");
+    // the shop's own soaps are Russian before the dash too — translated whole since 06.10.2026
+    expect(translateProductName("Чёрное мыло 666 — ручная работа", "en")).toBe("Black soap 666 — handmade");
+    expect(translateProductName("Чёрное мыло 666 — ручная работа", "et")).toBe("Must seep 666 — käsitöö");
+    expect(translateProductName("Rempire Розовое мыло Rule Nr 1 — ручная работа", "en")).toBe("Rempire Pink soap Rule Nr 1 — handmade");
+    expect(translateProductName("Rempire Розовое мыло Rule Nr 1 — ручная работа", "et")).toBe("Rempire Roosa seep Rule Nr 1 — käsitöö");
+    expect(translateProductName("Чёрное мыло 666 — ручная работа", "ru")).toBe("Чёрное мыло 666 — ручная работа");
     expect(translateProductName("Davines OI Oil", "en")).toBe("Davines OI Oil");
     expect(translateProductName("Face Scrub — скраб для лица", "en")).toBe("Face Scrub — скраб для лица");
     expect(translateProductName("Wood & Spice — бальзам после бритья", "en")).toBe("Wood & Spice — balm");

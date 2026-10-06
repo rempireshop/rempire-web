@@ -270,8 +270,9 @@ const CYRILLIC = new RegExp("[" + String.fromCharCode(0x400) + "-" + String.from
  * tail («— шампунь» → «— shampoo»), and a tail it cannot translate is dropped
  * rather than printed in Russian — the storefront keeps «— скраб для лица» on
  * the English site, but a Russian word in an English feed is the kind of
- * mismatch Merchant Center flags. A name that is Russian through and through
- * («Чёрное мыло 666») has nothing to fall back on and stays as it is.
+ * mismatch Merchant Center flags. The two names that are Russian before the
+ * dash too — the shop's own soaps — are translated whole by NAME_HEADS in
+ * src/lib/product-name.ts (06.10.2026).
  */
 export function feedName(name: string, lang: FeedLang): string {
   if (lang === "RU") return name;

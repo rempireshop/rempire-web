@@ -224,7 +224,7 @@ describe("invoice PDF — the page", () => {
     const page = async (lang: InvoicePdfData["lang"]) =>
       pdfText(await renderInvoicePdf(data({ totals: invoiceLines(order, 24, lang) }, lang))).join("\n");
     const en = await page("en");
-    expect(en).toContain("Rempire Чёрное мыло 666 — handmade");
+    expect(en).toContain("Rempire Black soap 666 — handmade");
     // the volume wraps onto its own line in the narrow name column, so it is looked for on its own
     expect(en).toContain("— shampoo");
     expect(en).toContain("· 215 ml");
