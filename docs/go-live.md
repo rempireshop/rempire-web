@@ -121,6 +121,8 @@ why it is phase A on `/golive/`.
 
 ## Stage 4 — the day, in order
 
+**The one page for the night: `docs/launch-runbook.md`** — every command and click in order, with its check and its rollback (06.10.2026).
+
 **Wednesday 07.10.2026, from 22:00 Tallinn time** (Dim, 05.10.2026 — first
 set for 02:00 on the night of 05→06.10, postponed the same day): a quiet
 evening hour, and 22:00 Tallinn is 19:00 UTC, hours from either cron (07:00
