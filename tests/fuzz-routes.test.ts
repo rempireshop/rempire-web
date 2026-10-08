@@ -324,9 +324,9 @@ function routes(): RouteCase[] {
        (src/lib/product-page.ts, src/app/sitemap-custom.xml/route.ts). HTML
        and XML, so no {ok,error} shape — what matters is that no id, however
        hostile, is a 5xx, a file path, or a page for a hidden row. */
-    { name: "GET /shop2/p/[id]/", path: "/shop2/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/p/[id]/route"), params: { id: "" }, jsonBody: false },
-    { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/p/[id]/route"), params: { id: "" }, jsonBody: false },
-    { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/p/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /shop2/p/[id]/", path: "/shop2/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/products/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/et/products/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/products/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /sitemap-custom.xml", path: "/sitemap-custom.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-custom.xml/route"), jsonBody: false },
     /* the catalogue's product rows, served rather than written so a product
        hidden after the build leaves the sitemap with it */
@@ -340,19 +340,19 @@ function routes(): RouteCase[] {
        post, three languages — and the OG card drawn for a created product or a
        post (src/lib/og-card.ts). Same rule: hostile slugs/file names are a 404
        or a 400, never a 5xx or a file path. */
-    { name: "GET /shop2/blog/", path: "/shop2/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/blog/route"), jsonBody: false },
-    { name: "GET /shop2/et/blog/", path: "/shop2/et/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/blog/route"), jsonBody: false },
-    { name: "GET /shop2/en/blog/", path: "/shop2/en/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/blog/route"), jsonBody: false },
-    { name: "GET /shop2/blog/[slug]/", path: "/shop2/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
-    { name: "GET /shop2/et/blog/[slug]/", path: "/shop2/et/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
-    { name: "GET /shop2/en/blog/[slug]/", path: "/shop2/en/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/blog/", path: "/shop2/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/route"), jsonBody: false },
+    { name: "GET /shop2/et/blog/", path: "/shop2/et/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/route"), jsonBody: false },
+    { name: "GET /shop2/en/blog/", path: "/shop2/en/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/route"), jsonBody: false },
+    { name: "GET /shop2/blog/[slug]/", path: "/shop2/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/et/blog/[slug]/", path: "/shop2/et/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/en/blog/[slug]/", path: "/shop2/en/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /shop2/og/[file]", path: "/shop2/og/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/og/[file]/route"), params: { file: "" }, jsonBody: false },
     /* The catch-all under /shop2/ (src/lib/notfound-page.ts): everything the
        rewrites and the routes above did not claim. It reads nothing but the
        request path, so the hostile shapes it has to survive are addresses —
        an unfinished escape, a very long segment, a traversal attempt — none
        of which may become a 5xx or reach a file. */
-    { name: "GET /shop2/[...path]/", path: "/shop2/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/[...path]/route"), jsonBody: false },
+    { name: "GET /shop2/[...path]/", path: "/shop2/x/", method: "GET", exports: ["GET"], load: () => import("@/app/[...path]/route"), jsonBody: false },
     /* Merchant Center's «Checkout» link, /cart/<item id>:<qty>
        (src/lib/merchant-cart.ts). A redirect and nothing else: every id —
        real, stale, hostile — is a 302 into the shop, never a 5xx. */

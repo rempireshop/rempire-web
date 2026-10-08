@@ -126,7 +126,7 @@ describe("stored per language, shown per language", () => {
   it("the Estonian article page at request time prints Estonian chips, and its snapshot carries them", async () => {
     const post = (await publishPost((await upsertPost({ ...POST, tagsI18n: { ET: ["suvi", "juuksehooldus"], EN: ["summer"] } })).id))!;
     const bare = (await publishPost((await upsertPost({ ...POST, title: { RU: "Без переводов тегов", ET: "Ilma siltideta", EN: "No tags" } })).id))!;
-    const et = await import("@/app/shop2/et/blog/[slug]/route");
+    const et = await import("@/app/et/blogs/news/[slug]/route");
     const page = async (slug: string) =>
       (await et.GET(new Request(`${LIVE}/shop2/et/blog/${slug}/`), { params: Promise.resolve({ slug }) })).text();
     const html = await page(post.slug);

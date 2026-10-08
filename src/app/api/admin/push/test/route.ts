@@ -41,7 +41,7 @@ export async function POST(req: Request): Promise<Response> {
   const res = await sendPush({
     title: "REMPIRE — проверка",
     body: "Уведомления работают. Так будет выглядеть сообщение о новом заказе.",
-    url: "/shop2/admin/",
+    url: "/admin",
     /* A fixed tag on purpose: tapping «Проверить» four times leaves one line
        in the shade, not four. Orders carry their own number instead. */
     tag: "rempire-test",

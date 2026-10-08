@@ -731,9 +731,9 @@ test.describe("admin sections — the numbers explain themselves", () => {
           { query: "краска для волос таллинн", clicks: 0, impressions: 340, ctr: 0, position: 27.6 },
         ],
         topPages: [
-          { page: `https://rempire.ee/shop2/p/${PRODUCT.id}/`, clicks: 12, impressions: 480, ctr: 0.025, position: 8.2 },
-          { page: "https://rempire.ee/shop2/et/p/kevin-murphy-un-tangled-spray/", clicks: 0, impressions: 260, ctr: 0, position: 22.4 },
-          { page: "https://rempire.ee/shop2/", clicks: 1, impressions: 90, ctr: 0.011, position: 5.4 },
+          { page: `https://rempireshop.com/products/${PRODUCT.id}`, clicks: 12, impressions: 480, ctr: 0.025, position: 8.2 },
+          { page: "https://rempireshop.com/et/products/kevin-murphy-un-tangled-spray", clicks: 0, impressions: 260, ctr: 0, position: 22.4 },
+          { page: "https://rempireshop.com/", clicks: 1, impressions: 90, ctr: 0.011, position: 5.4 },
         ],
       }),
     }));

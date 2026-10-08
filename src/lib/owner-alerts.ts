@@ -340,7 +340,7 @@ export interface OwnerAlertResult {
 
 /** The panel on this order's card — the same path the paid-order push carries. */
 function orderPath(number: string): string {
-  return `/shop2/admin/?order=${encodeURIComponent(number)}`;
+  return `/admin?order=${encodeURIComponent(number)}`;
 }
 
 /** `claimed` — ours to send; `taken` — somebody sent it; `unknown` — no database answer, send anyway. */

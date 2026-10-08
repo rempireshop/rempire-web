@@ -14,11 +14,13 @@
  * to rewrite in place, the breadcrumb marked `ldjson-page`, and the body
  * under #prerender that app.js drops once its own first render has painted.
  *
- * Routes: src/app/shop2/{,et/,en/}p/[id]/route.ts. They only ever see a
- * /p/<id>/ that is not a prerendered file — next.config.ts routes the
- * prerendered ids at their files first and everything else under /shop2/
- * at the shell last — so a catalogue id that reaches here (a fresh clone
- * that has not prerendered yet) gets the shell exactly as before.
+ * Routes: src/app/{,ru/,et/}products/[id]/route.ts — /products/<id>,
+ * /ru/products/<id>, /et/products/<id>, Shopify's own addresses (since
+ * 08.10.2026; until then /shop2/{,et/,en/}p/<id>/). They only ever see an id
+ * that is not a prerendered file — next.config.ts routes the prerendered ids
+ * at their files first — so a catalogue id that reaches here (a fresh clone
+ * that has not prerendered yet) gets the shell exactly as before, and so does
+ * the gift card's /products/gift-card.
  *
  * Hidden (active=false) and unknown `c-…` ids answer 404 with the shell
  * carrying `noindex, nofollow`: the address is dropped from the index and
@@ -228,9 +230,10 @@ async function isHiddenProduct(id: string): Promise<boolean> {
 }
 
 /**
- * GET /shop2/{,et/,en/}p/<id>/ for anything the prerender did not write.
- * A `c-…` id is answered from its row; every other id gets the shell the
- * /shop2/:path+ fallback would have served.
+ * GET /{,ru/,et/}products/<id> for anything the prerender did not write.
+ * A `c-…` id is answered from its row; every other id gets the shell.
+ * `seg` is the language's prefix: "" English, "ru", "et" (LANGS in
+ * src/lib/seo-head.mjs).
  */
 /* Every id the catalogue ships. A product page for one of these is normally
    a static file the rewrites answer before this route is reached; the route
@@ -242,6 +245,9 @@ export async function productPageResponse(id: string, seg: string): Promise<Resp
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
   if (!lang) return html(shell, 200, "public, max-age=0, must-revalidate");
+  /* /products/gift-card is the gift card (Shopify's address for it): a page
+     of its own, prerendered — the shell where the file is not written yet. */
+  if (id === "gift-card") return html(shell, 200, "public, max-age=0, must-revalidate");
   if (!isCustomId(id)) {
     /* Two ways an address under /p/ is not a page a search engine should keep.
        An id in no catalogue never existed — before 07.09.2026 the shop answered

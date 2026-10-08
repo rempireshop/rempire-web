@@ -162,7 +162,7 @@ async function buyGiftCard(page: Page, browser: Browser): Promise<string> {
   await page.locator(".co__pay[data-pay]").click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: "Оплатить" }).click();
-  await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+  await page.waitForURL(/\/checkout\/done\?.*s=paid/);
   const orderNumber = new URL(page.url()).searchParams.get("n");
   expect(orderNumber, "sweep-checkout: gift-card order number").toBeTruthy();
 
@@ -583,7 +583,7 @@ for (let scenario = 0; scenario < 10; scenario++) {
       // the refusal, not the cancel: cancelling leaves the payment PENDING at
       // a real bank, and the mock says so too (the mock route's own comment)
       await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Банк отклонил платёж" }).click();
-      await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
+      await page.waitForURL(new RegExp(`/checkout/done\\?.*s=${outcome}`));
 
       const doneCtx: Ctx = { ...ctx, screen: `${ctx.screen}:receipt` };
       await expectScreen(page, "done", doneCtx);

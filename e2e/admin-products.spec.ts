@@ -496,8 +496,8 @@ test.describe("admin — product creation", () => {
       expect(served).toMatch(/^<!doctype html>\n<html lang="et">/);
       expect(served).toContain(`<title>${TITLE} — REMPIRE</title>`);
       expect(served).toContain('<meta name="description" content="Тоник в Rempire.">');
-      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2/et/p/${id}/" data-seo="canonical">`);
-      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/shop2/p/${id}/" data-seo="alt-x">`);
+      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/et/products/${id}" data-seo="canonical">`);
+      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/products/${id}" data-seo="alt-x">`);
       expect(served).toContain('<meta property="og:locale" content="et_EE"');
       // the link preview: the shop's own card, drawn from the row at request time (src/lib/og-card.ts)
       expect(served).toContain(`<meta property="og:image" content="${E2E_BASE_URL}/shop2/og/${id}.png?v=`);
@@ -526,7 +526,7 @@ test.describe("admin — product creation", () => {
       expect(sm.status()).toBe(200);
       expect(sm.headers()["content-type"]).toContain("xml");
       const xml = await sm.text();
-      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}/shop2${seg}/p/${id}/</loc>`);
+      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}${shopUrl(seg, `/p/${id}/`)}</loc>`);
       expect(await (await page.request.get("/sitemap.xml")).text()).toContain("/sitemap-custom.xml");
 
       // ---- «Сообщить о наличии»: sold out by the owner, an address left by a shopper ----
@@ -631,14 +631,14 @@ test.describe("admin — «Показывать в магазине» on a catal
            canonical is the home page's and it has no product <h1>. (The robots
            meta is not the tell — this suite builds against localhost, so every
            page is noindex here on purpose, docs/seo.md.) */
-        expect(html, seg || "ru").toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2${seg}/p/${ID}/"`);
+        expect(html, seg || "ru").toContain(`<link rel="canonical" href="${E2E_BASE_URL}${shopUrl(seg, `/p/${ID}/`)}"`);
         expect(html, seg || "ru").toContain('<h1 class="pdp__title">');
         expect(html, seg || "ru").toContain('"@type":"Product"');
       }
       // …and it is in the sitemap the app serves for the catalogue
       const listed = await (await page.request.get("/sitemap-products.xml")).text();
-      expect(listed).toContain(`/shop2/p/${ID}/`);
-      expect(listed).toContain(`/shop2/et/p/${ID}/`);
+      expect(listed).toContain(`/ru/products/${ID}<`);
+      expect(listed).toContain(`/et/products/${ID}<`);
 
       // ---- switched off: 404 with noindex, in all three languages ----------
       expect((await setHidden(true)).status()).toBe(200);
@@ -651,13 +651,13 @@ test.describe("admin — «Показывать в магазине» on a catal
            restatused: no product <h1>, and the canonical is no longer this
            address claiming to be a product page. */
         expect(html, seg || "ru").not.toContain('<h1 class="pdp__title">');
-        expect(html, seg || "ru").not.toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2${seg}/p/${ID}/"`);
+        expect(html, seg || "ru").not.toContain(`<link rel="canonical" href="${E2E_BASE_URL}${shopUrl(seg, `/p/${ID}/`)}"`);
       }
       // gone from the sitemap too, without anything being rebuilt
       const dropped = await (await page.request.get("/sitemap-products.xml")).text();
-      expect(dropped).not.toContain(`/p/${ID}/`);
+      expect(dropped).not.toMatch(new RegExp(`/products/${ID}["<]`));
       // the shop as a whole is still listed — hiding one product is not un-listing 220
-      expect(dropped).toContain(`/shop2/p/${PRODUCT.id}/`);
+      expect(dropped).toContain(`/ru/products/${PRODUCT.id}<`);
 
       // ---- and a real browser lands on «Страница не найдена» ---------------
       const shopper = await freshShop(browser);
@@ -671,7 +671,7 @@ test.describe("admin — «Показывать в магазине» on a catal
       const back = await page.request.get(shopUrl("", `/p/${ID}/`));
       expect(back.status()).toBe(200);
       expect(await back.text()).toContain('<h1 class="pdp__title">');
-      expect(await (await page.request.get("/sitemap-products.xml")).text()).toContain(`/shop2/p/${ID}/`);
+      expect(await (await page.request.get("/sitemap-products.xml")).text()).toContain(`/ru/products/${ID}<`);
       await assertClean(page, w, "hidden catalogue product");
     } finally {
       await setHidden(false);

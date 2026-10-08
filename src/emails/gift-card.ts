@@ -18,6 +18,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { hasMailText, mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -112,7 +113,7 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
   const name = pick(r.name);
   const from = pick(r.from);
   const message = pick(r.message);
-  const shopUrl = absUrl("/shop2/", "/shop2/");
+  const shopUrl = absUrl(shopPath(L, "/"));
 
   /* The three fields the owner may write (MAIL_TEXT_TEMPLATES, 19.09.2026).
      `{total}` is the card's face value, the one number these sentences carry.

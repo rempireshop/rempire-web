@@ -12,7 +12,8 @@
  *
  * Dim's answer (07.09.2026) was «Make a page not found». So:
  *
- *   · the status is a real 404, from `src/app/shop2/[...path]/route.ts`;
+ *   · the status is a real 404, from `src/app/[...path]/route.ts` (until
+ *     08.10.2026 `src/app/shop2/[...path]`, when the shop lived under /shop2/);
  *   · the body is the shop's own 404 screen, in the page's own language,
  *     with a link home and a link to the catalogue;
  *   · the head says `noindex, nofollow` — whatever `PUBLIC_BASE_URL` says
@@ -53,6 +54,7 @@ import {
   slugify,
   T,
 } from "@/lib/seo-head.mjs";
+import { LANG_PREFIX, parseShopPath, publicPath } from "@/lib/shop-paths.mjs";
 
 type Lang = { code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
 
@@ -67,7 +69,7 @@ const HTML = "text/html; charset=utf-8";
      could show the next person the last one's address. `no-store` is the one
      directive that closes all three — `no-cache` would still write the page
      to disk, and `private` would still let this browser keep it. Nothing
-     upstream loosens it: next.config.ts sets no Cache-Control for /shop2. */
+     upstream loosens it: next.config.ts sets no Cache-Control for a page. */
 const NO_STORE = "no-store";
 
 /* ---------- what exists, and what does not ------------------------------- */
@@ -99,23 +101,35 @@ const BRAND_SLUGS = new Set<string>(CATALOGUE.map((p) => slugify(p.b)));
 const LEGAL_SLUGS = new Set<string>(legalSlugsGenerated as string[]);
 
 /**
- * `/shop2/et/c/hair/` → `{ seg: "et", segs: ["c", "hair"] }`.
- * Null when the path is not under `/shop2` at all (nothing else reaches here).
+ * An address read back into the shop's internal route — Shopify's scheme since
+ * 08.10.2026 (src/lib/shop-paths.mjs):
+ *
+ *   `/et/collections/juuksehooldus` → `{ seg: "et", segs: ["c", "hair"], shape: true }`
+ *   `/ru/wat`                        → `{ seg: "ru", segs: ["wat"], shape: false }`
+ *
+ * `seg` is the language's prefix ("" English, "ru", "et"); `shape` says
+ * whether the address is one of the shop's page shapes at all — one that is
+ * not is a 404 whatever its segments happen to spell. Null for what is not a
+ * page address: the API and Next's own files never get the shop's 404.
  */
-export function shopPath(pathname: string): { seg: string; segs: string[] } | null {
-  const clean = String(pathname || "").split("?")[0];
-  if (!/^\/shop2(\/|$)/.test(clean)) return null;
-  let rest = clean.replace(/^\/shop2/, "").replace(/^\/+|\/+$/g, "");
-  let seg = "";
-  const m = /^(et|en|ru)(?:\/|$)/i.exec(rest);
-  if (m) {
-    // /shop2/ru/… is 301'd to the unprefixed path by next.config.ts; accepted
-    // here for the same reason app.js's router accepts it — a hand-typed URL.
-    seg = m[1].toLowerCase() === "ru" ? "" : m[1].toLowerCase();
-    rest = rest.slice(m[1].length).replace(/^\/+/, "");
+export function shopPath(pathname: string): { seg: string; segs: string[]; shape: boolean } | null {
+  const clean = String(pathname || "").split("?")[0] || "/";
+  if (/^\/(?:api|_next)(?:\/|$)/.test(clean)) return null;
+  const route = parseShopPath(clean);
+  if (route) {
+    return {
+      seg: LANG_PREFIX[route.lang as "EN" | "RU" | "ET"].replace(/^\//, ""),
+      segs: String(route.rest).split("/").filter(Boolean).map((s) => decodeSafe(s)),
+      shape: true,
+    };
   }
-  const segs = rest ? rest.split("/").map((s) => decodeSafe(s)) : [];
-  return { seg, segs };
+  const m = /^\/(ru|et)(?=\/|$)/i.exec(clean);
+  const tail = m ? clean.slice(m[0].length) : clean;
+  return {
+    seg: m ? m[1].toLowerCase() : "",
+    segs: tail.split("/").filter(Boolean).map((s) => decodeSafe(s)),
+    shape: false,
+  };
 }
 
 function decodeSafe(s: string): string {
@@ -130,12 +144,12 @@ function decodeSafe(s: string): string {
    to mean anything and are robots-disallowed; `brands` is a real landing.
    `scan` and `admin` are the owner's, and answering 404 for them would be a
    lie about a page that does exist. */
-const CLIENT_SCREENS = new Set(["search", "brands", "account", "checkout", "done", "admin", "scan"]);
+const CLIENT_SCREENS = new Set(["search", "brands", "account", "checkout", "done", "admin", "scan", "cart"]);
 /* The single pages the prerender writes. Listed so a tree that has not been
    prerendered still serves them — the same reason next.config.ts lists them
    off disk rather than assuming. `sets` is no longer one of them: since
    28.09.2026 the shop has no «Наборы» page while it has no set on sale (Dim:
-   «Blog and Sets will be off initially»), so /shop2/sets/ is asked of the
+   «Blog and Sets will be off initially»), so /collections/sets is asked of the
    `bundles` table in notFoundPageResponse(), exactly as a set's own page is.
    `blog` stays: it has a request-time route of its own that answers 404 for
    an empty blog (src/lib/blog-page.ts), and this list is never reached for
@@ -150,7 +164,7 @@ const SINGLE_PAGES = new Set(["gift", "blog"]);
  * `p/<id>` and `blog/<slug>` are accepted without checking the id: a custom
  * product and a post both live in the database, they each have their own
  * request-time route that answers 404 for an id nobody has
- * (src/app/shop2/{,et/,en/}p/[id] and .../blog/[slug]), and guessing here
+ * (src/app/{,ru/,et/}products/[id] and …/blogs/news/[slug]), and guessing here
  * from a build-time file would 404 a page the owner published an hour ago.
  * `set/<id>` used to be in that sentence too and had no such route behind it,
  * so every id anybody typed answered 200 with the shell — the soft 404 this
@@ -273,7 +287,7 @@ function notFoundContent(lang: Lang): string {
 }
 
 /**
- * The 404 page for one address. `rest` is the path under `/shop2` (with its
+ * The 404 page for one address. `rest` is the address's internal route (with its
  * leading slash and a trailing one), used only for the canonical — which is
  * this address itself, carrying `noindex`, rather than a canonical pointing
  * at the home page, which is what the shell used to claim.
@@ -299,7 +313,7 @@ export function renderNotFoundPage(shell: string, lang: Lang, rest: string, base
 }
 
 /**
- * GET anything under `/shop2/` that has no page: the shell, patched into the
+ * GET any page address that has no page: the shell, patched into the
  * 404 screen, at HTTP 404. A path the shop *does* serve client-side gets the
  * plain shell at 200 — that is the behaviour every one of those screens has
  * always had.
@@ -356,7 +370,7 @@ async function isPublishedSet(id: string): Promise<boolean> {
  * Does the shop sell any set at all? The «Наборы» page exists only while it
  * does (Dim, 28.09.2026 — the go-live reset deletes every set, and the page
  * comes back with the first one Renat switches on; no switch to remember).
- * A build that saw sets on sale wrote /shop2/sets/ as a file and the static
+ * A build that saw sets on sale wrote the /collections/sets page and the static
  * layer serves it before this is reached; so this answers the address when
  * the build saw none. Same «maybe» on a database that is down, for the same
  * reason as the two checks above.
@@ -381,29 +395,51 @@ async function hasPublishedSets(): Promise<boolean> {
  * crawler is most likely to be holding, and nothing on it has a field to fill.
  */
 export async function notFoundPageResponse(pathname: string, req?: Request): Promise<Response> {
-  const shell = readShell();
   const parsed = shopPath(pathname);
-  if (!parsed) return html(shell, 200);
+  /* Not a page address — an API route nobody has, a file that is not on
+     disk: a plain 404, not the shop's page (src/app/[...path] catches
+     everything the more specific routes and the files did not). */
+  if (!parsed || /\.[A-Za-z0-9]+$/.test(String(pathname || "").split("?")[0])) {
+    return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": NO_STORE } });
+  }
+  const shell = readShell();
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
-  if (isKnownShopPath(parsed.segs)) return html(withSessionIdentity(shell, req), 200);
+  if (parsed.shape && isKnownShopPath(parsed.segs)) return html(withSessionIdentity(shell, req), 200);
   /* The two shapes whose ids only the database knows, asked only once the
      closed lists above have said no. A brand slug reaches Postgres only when
      the catalogue has never heard of it; a set id reaches it whenever the
      static layer did not already answer with a prerendered page, which is
      what the request-time question is for. */
-  if (parsed.segs.length === 2) {
+  if (parsed.shape && parsed.segs.length === 2) {
     const [kind, id] = parsed.segs;
-    if (kind === "b" && (await isCustomBrand(id))) return html(shell, 200);
+    if (kind === "b") {
+      if (await isCustomBrand(id)) return html(shell, 200);
+      /* A collection the shop has never had — Shopify's, most likely, under a
+         handle nobody mapped: «Все товары» in the same language, as every
+         unknown Shopify collection has been answered since 07.09.2026
+         (src/lib/legacy-redirects.ts sends the ones it knows to their
+         section). Asked here and not in the middleware because only the
+         database knows the owner's own brands. */
+      return new Response(null, {
+        status: 301,
+        headers: {
+          location: publicPath(lang.code, "/c/all/"),
+          "cache-control": NO_STORE,
+          "x-rempire-redirect": "collection-unknown",
+        },
+      });
+    }
     if (kind === "set" && (await isPublishedSet(id))) return html(shell, 200);
   }
   // «Наборы» while there is a set on sale — see hasPublishedSets()
-  if (parsed.segs.length === 1 && parsed.segs[0] === "sets" && (await hasPublishedSets())) {
+  if (parsed.shape && parsed.segs.length === 1 && parsed.segs[0] === "sets" && (await hasPublishedSets())) {
     return html(withSessionIdentity(shell, req), 200);
   }
 
   /* The canonical is the address that was asked for, normalised the way the
-     rest of the shop writes one: lower-cased prefix, one trailing slash. */
+     rest of the shop writes one: lower-cased prefix, no trailing slash
+     (publicPath() spells the route back out). */
   const rest = "/" + parsed.segs.map((s) => encodeURIComponent(s)).join("/") + "/";
   const base = baseFrom(process.env.PUBLIC_BASE_URL);
   return html(renderNotFoundPage(shell, lang, rest, base), 404);

@@ -22,6 +22,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -101,10 +102,10 @@ export function renderBackInStock(
   const title = productTitle(product, L);
   const subjectName = pick(productName(product, L), t.fallbackName);
   const url = absUrl(
-    pick(product.url, product.slug ? `/shop2/p/${product.slug}/` : ""),
-    "/shop2/",
+    pick(product.url, product.slug ? shopPath(L, `/p/${product.slug}/`) : ""),
+    shopPath(L, "/"),
   );
-  const unsubscribe = absUrl(product.unsubscribeUrl, "/shop2/account/");
+  const unsubscribe = absUrl(product.unsubscribeUrl, shopPath(L, "/account/"));
 
   const values: MailTextValues = {
     product: subjectName,

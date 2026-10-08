@@ -43,18 +43,18 @@ const ctx = (slug: string) => ({ params: Promise.resolve({ slug }) });
 
 async function postPage(seg: "" | "et" | "en", slug: string): Promise<Response> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/blog/[slug]/route")
+    ? await import("@/app/et/blogs/news/[slug]/route")
     : seg === "en"
-      ? await import("@/app/shop2/en/blog/[slug]/route")
-      : await import("@/app/shop2/blog/[slug]/route");
+      ? await import("@/app/blogs/news/[slug]/route")
+      : await import("@/app/ru/blogs/news/[slug]/route");
   return mod.GET(new Request(`${LIVE}/shop2${seg ? "/" + seg : ""}/blog/${slug}/`), ctx(slug));
 }
 async function listPage(seg: "" | "et" | "en"): Promise<Response> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/blog/route")
+    ? await import("@/app/et/blogs/news/route")
     : seg === "en"
-      ? await import("@/app/shop2/en/blog/route")
-      : await import("@/app/shop2/blog/route");
+      ? await import("@/app/blogs/news/route")
+      : await import("@/app/ru/blogs/news/route");
   return mod.GET();
 }
 

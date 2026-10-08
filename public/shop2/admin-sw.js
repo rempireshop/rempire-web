@@ -10,20 +10,25 @@
  * ---- where this file lives, and why it is not in an admin/ folder ---------
  *
  * A worker may only control pages at or below the path it is SERVED from, so
- * the location is a decision and not a detail. Served from /shop2/, this file
- * could control the whole shop; it is registered with an explicit
- * `{ scope: "/shop2/admin/" }` instead, which is narrower than its own path
- * and therefore needs no `Service-Worker-Allowed` header from next.config.ts.
- * That scope is exactly the panel — it is `scope` and `start_url` in
+ * the location is a decision and not a detail. Since 08.10.2026 the panel is
+ * at /admin (it was /shop2/admin/), while this file stays where every asset
+ * stayed, /shop2/admin-sw.js. Its scope, `{ scope: "/admin" }`, is therefore
+ * OUTSIDE its own folder, which a browser allows only when the script is
+ * served with `Service-Worker-Allowed: /admin` — next.config.ts sends exactly
+ * that, for this one file. "/admin" without a slash, because the panel's
+ * address has none and a scope is the start of an address; it covers the
+ * scanner at /admin/scan too, which is harmless (there is no fetch handler).
+ * That scope is the panel — `scope` and `start_url` in
  * public/shop2/admin.webmanifest, the «Админка» Renat has on his Home Screen,
  * and the only address pathFor() in app.js ever pushes for the admin screen.
+ * A registration left at the old /shop2/admin/ scope is unsubscribed and
+ * removed by the panel itself (pushRetireOld() in app.js), or the phone would
+ * get every notice twice.
  *
- * The obvious alternative — public/shop2/admin/sw.js, which would get that
- * scope by default — was not taken. It would put a real directory at
- * /shop2/admin/, the one URL the owner opens twenty times a day, and that URL
- * reaches the panel today only because NOTHING is on disk there and the
- * fallback rewrite in next.config.ts hands it the shell. A storefront is not
- * the place to find out whether Vercel's static layer agrees.
+ * The obvious alternative — a public/admin/ folder for this file — was not
+ * taken: it would put a real directory at /admin, the one URL the owner
+ * opens twenty times a day, which reaches the panel only because NOTHING is
+ * on disk there and the catch-all route hands it the shell.
  *
  * ---- what it deliberately does NOT do ------------------------------------
  *
@@ -55,7 +60,7 @@ self.addEventListener("activate", function (event) {
   event.waitUntil(self.clients.claim());
 });
 
-var PANEL = "/shop2/admin/";
+var PANEL = "/admin";
 var ICON = "/shop2/icons/icon-192.png";
 /* NOT the same file as ICON. Android draws the badge — the little mark in the
    status bar — from the ALPHA CHANNEL alone: it silhouettes what it is given
@@ -159,7 +164,15 @@ self.addEventListener("notificationclick", function (event) {
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windows) {
       for (var i = 0; i < windows.length; i++) {
         var client = windows[i];
-        if (client.url.indexOf(target.origin + PANEL) !== 0) continue;
+        /* The panel itself — /admin, with or without its query — and not the
+           scanner at /admin/scan, which the same scope also covers. */
+        var at;
+        try {
+          at = new URL(client.url);
+        } catch (e) {
+          continue;
+        }
+        if (at.origin !== target.origin || at.pathname !== PANEL) continue;
         return Promise.resolve(client.focus ? client.focus() : client)
           .catch(function () {
             return client;

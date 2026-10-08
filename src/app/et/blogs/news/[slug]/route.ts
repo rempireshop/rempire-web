@@ -1,4 +1,4 @@
-/** GET /shop2/en/blog/<slug>/ — the English page of a post the build did not prerender. See ../../../blog/[slug]/route.ts. */
+/** GET /et/blogs/news/<slug> — the Estonian page of a post the build did not prerender. See ../../../../blogs/news/[slug]/route.ts. */
 import { blogPostPageResponse } from "@/lib/blog-page";
 
 export const runtime = "nodejs";
@@ -8,5 +8,5 @@ type Ctx = { params: Promise<{ slug: string }> };
 
 export async function GET(_req: Request, ctx: Ctx) {
   const { slug } = await ctx.params;
-  return blogPostPageResponse(slug, "en");
+  return blogPostPageResponse(slug, "et");
 }

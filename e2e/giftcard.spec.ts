@@ -1,20 +1,6 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import {
-  CATEGORY,
-  continueButton,
-  freshEmail,
-  functionalProject,
-  ipHeaders,
-  LANGS,
-  loginAsAdmin,
-  openSummary,
-  payButton,
-  PRODUCT,
-  shopUrl,
-  tr,
-  waitForScreen,
-} from "./fixtures";
+import { CATEGORY, continueButton, freshEmail, functionalProject, ipHeaders, LANGS, loginAsAdmin, openSummary, payButton, PRODUCT, shopUrl, tr, waitForScreen, shopUrlRe } from "./fixtures";
 
 /** The e2e-only admin lookup (src/app/api/e2e/gift-card/route.ts), in its own
  *  throwaway browser context so it never touches the customer `page`'s
@@ -71,7 +57,7 @@ async function payDigitalOrder(page: Page, buyerEmail: string, recipientEmail: s
   await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: "Оплатить" }).click();
-  await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+  await page.waitForURL(/\/checkout\/done\?.*s=paid/);
   const number = new URL(page.url()).searchParams.get("n");
   if (!number) throw new Error("payDigitalOrder: no order number (?n=) in the receipt URL");
   return number;
@@ -299,7 +285,7 @@ test.describe("the gift card as a banner slide", () => {
       await expect(slide.locator(".hero__art--gift")).toHaveCount(1);
       await slide.getByRole("button", { name: "Выбрать сумму" }).click();
       await waitForScreen(shop, "gift");
-      await expect(shop).toHaveURL(/\/shop2\/gift\/$/);
+      await expect(shop).toHaveURL(/\/ru\/products\/gift-card$/);
       await ctx.close();
     } finally {
       await page.request.put("/api/admin/settings/", { data: { hero: before.settings.hero ?? null } });
@@ -344,7 +330,7 @@ test.describe("the gift card in «Все товары»", () => {
 
       await tile.locator('[data-go="gift"]').click();
       await waitForScreen(page, "gift");
-      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+      await expect(page).toHaveURL(shopUrlRe(lang.seg, "/gift/"));
 
       // one shelf only — a category page does not carry it
       await page.goto(shopUrl(lang.seg, `/c/${CATEGORY.id}/`));
@@ -445,7 +431,7 @@ test.describe("gift card — refunds, both ways", () => {
       await expect(page.locator("[data-giftoff]")).toBeVisible();
       await expect(payButton(page)).toHaveText(tr("Оформить заказ", "RU"));
       await payButton(page).click();
-      await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+      await page.waitForURL(/\/checkout\/done\?.*s=paid/);
       await waitForScreen(page, "done");
       expect(page.url()).not.toMatch(/\/api\/payments\/mock\//);
       await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));

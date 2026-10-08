@@ -304,10 +304,10 @@ const LIVE_BASE = "https://rempireshop.com";
 
 async function postPage(seg: "" | "et" | "en", slug: string): Promise<string> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/blog/[slug]/route")
+    ? await import("@/app/et/blogs/news/[slug]/route")
     : seg === "en"
-      ? await import("@/app/shop2/en/blog/[slug]/route")
-      : await import("@/app/shop2/blog/[slug]/route");
+      ? await import("@/app/blogs/news/[slug]/route")
+      : await import("@/app/ru/blogs/news/[slug]/route");
   const res = await mod.GET(
     new Request(`${LIVE_BASE}/shop2${seg ? "/" + seg : ""}/blog/${slug}/`),
     { params: Promise.resolve({ slug }) },

@@ -33,6 +33,7 @@
  */
 
 import type { Lang } from "./types";
+import { publicPath } from "../lib/shop-paths.mjs";
 
 /* ---------- palette ---------------------------------------------------- */
 
@@ -188,10 +189,21 @@ export function assetUrl(path: string): string {
   return baseUrl() + (path.startsWith("/") ? path : "/" + path);
 }
 
+/**
+ * A page of the shop in the letter's language — Shopify's addresses since
+ * 08.10.2026 (src/lib/shop-paths.mjs): `shopPath("et", "/account/")` is
+ * `/et/account`, `shopPath("en", "/p/x/")` is `/products/x`. Every link a
+ * letter carries into the shop goes through here, so a letter opens the page
+ * in the language it was written in, at the page's own address.
+ */
+export function shopPath(lang: Lang | string, rest: string): string {
+  return publicPath(String(lang || "ru").toUpperCase(), rest);
+}
+
 /** Absolute URL from whatever the caller had — full URL, path, or nothing. */
 export function absUrl(
   url: string | null | undefined,
-  fallback = "/shop2/",
+  fallback = "/",
 ): string {
   const v = pick(url);
   if (/^https?:\/\//i.test(v)) return v;

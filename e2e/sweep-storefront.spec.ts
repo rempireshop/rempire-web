@@ -22,7 +22,7 @@
  */
 import { expect, type Page, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import { ipHeaders, LANGS, shopUrl } from "./fixtures";
+import { ipHeaders, LANGS, shopUrl, shopUrlRe } from "./fixtures";
 import {
   auditScreen,
   clientNav,
@@ -508,7 +508,7 @@ test.describe("sweep crawl — navigation invariants", () => {
     const ctx: Ctx = { screen: "lang-switch → ET", lang: "ET" };
     await expectScreen(page, "product", ctx);
     await expect(page, `${label(ctx)} the language switch left the product page`).toHaveURL(
-      new RegExp(`/shop2/et/p/${p.id}/?$`),
+      shopUrlRe("/et", `/p/${p.id}/`),
     );
     await expect(page.locator("[data-cartbadge]"), `${label(ctx)} the cart was lost on a language switch`)
       .toHaveText("1");

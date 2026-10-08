@@ -28,6 +28,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -99,7 +100,7 @@ export function renderPartnerWelcome(
     Number.isFinite(options.percent) && (options.percent as number) >= 0
       ? Math.round(options.percent as number)
       : DEFAULT_PERCENT;
-  const account = absUrl(null, "/shop2/account/");
+  const account = absUrl(null, shopPath(L, "/account/"));
 
   const values: MailTextValues = { name, percent, shop: BRAND.name };
   const hello = greeting(L, name);

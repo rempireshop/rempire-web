@@ -7,104 +7,210 @@ on is written out as a static file, in all three languages, by
 
 **813 pages** — 271 per language: 220 products, 8 categories plus `all`, 26
 brands **and the brands landing**, the home page, the 5 policy pages, 8 sets
-plus their landing, and the gift card. Every one of them carries a 1 200×630
-link-preview card that exists on disk. Verify with `npm run prerender:check`.
+plus their landing, and the gift card (fewer when the database has no set or
+post on sale). Every one of them carries a 1 200×630 link-preview card that
+exists on disk. Verify with `npm run prerender:check`.
 
-Nothing has been submitted to Google yet. The Search Console **domain property
-for rempireshop.com is verified** (03.09.2026); the site switch happens later.
-Everything below is generated against the staging base until then.
+The shop went live on rempireshop.com on 08.10.2026 at 22:55, at `/shop2/…`
+addresses, and moved to **Shopify's own addresses** the same night — see
+«URL move 2026-10 (Shopify scheme)» below for every decision and its
+evidence.
 
 ---
 
 ## URL scheme
 
-Russian is the default and the `x-default`. It has **no prefix** — that is what
-every old link, every legacy redirect and `docs/redirect-map.csv` already point
-at, and changing it would have thrown away the whole existing link graph.
+Shopify's addresses, exactly (Dim, 08.10.2026: «There was no shop2 on the site
+— the URLs need to be as they were previously»). **English has no prefix** and
+is the `x-default`, as it was on Shopify; Russian is `/ru`, Estonian `/et`. No
+page address ends in a slash. The whole table lives in one module,
+`src/lib/shop-paths.mjs` (`publicPath()` / `parseShopPath()`), mirrored in ES5
+in `public/shop2/app.js` (`shopPathFor()` / `shopRouteOf()`);
+`tests/shop-paths.test.ts` runs both over the same addresses.
 
-| | Russian | Estonian | English |
+| | English | Russian | Estonian |
 |---|---|---|---|
-| home | `/shop2/` | `/shop2/et/` | `/shop2/en/` |
-| category | `/shop2/c/<cat>/` | `/shop2/et/c/<cat>/` | `/shop2/en/c/<cat>/` |
-| brand | `/shop2/b/<brand>/` | `/shop2/et/b/<brand>/` | `/shop2/en/b/<brand>/` |
-| product | `/shop2/p/<id>/` | `/shop2/et/p/<id>/` | `/shop2/en/p/<id>/` |
-| policy page | `/shop2/info/<slug>/` | `/shop2/et/info/<slug>/` | `/shop2/en/info/<slug>/` |
-| sets landing | `/shop2/sets/` | `/shop2/et/sets/` | `/shop2/en/sets/` |
-| one set | `/shop2/set/<id>/` | `/shop2/et/set/<id>/` | `/shop2/en/set/<id>/` |
-| gift card | `/shop2/gift/` | `/shop2/et/gift/` | `/shop2/en/gift/` |
-| brands landing | `/shop2/brands/` | `/shop2/et/brands/` | `/shop2/en/brands/` |
+| home | `/` | `/ru` | `/et` |
+| product | `/products/<id>` | `/ru/products/<id>` | `/et/products/<id>` |
+| section | `/collections/hair-care` | `/ru/collections/uhod-za-volosami` | `/et/collections/juuksehooldus` |
+| «Все товары» | `/collections/all-products` | `/ru/collections/vse-tovary` | `/et/collections/koik-tooted` |
+| brand | `/collections/<brand>` | `/ru/collections/<brand>` | `/et/collections/<brand>` |
+| brands landing | `/collections/brands` | `/ru/collections/brands` | `/et/collections/brands` |
+| policy pages | `/policies/shipping-policy`, `/policies/refund-policy`, `/policies/privacy-policy`, `/policies/terms-of-service` | `/ru/policies/…` | `/et/policies/…` |
+| contact | `/pages/contact` | `/ru/pages/contact` | `/et/pages/contact` |
+| blog | `/blogs/news`, `/blogs/news/<slug>` | `/ru/blogs/news…` | `/et/blogs/news…` |
+| sets | `/collections/sets`, `/collections/sets/<id>` | `/ru/collections/sets…` | `/et/collections/sets…` |
+| gift card | `/products/gift-card` | `/ru/products/gift-card` | `/et/products/gift-card` |
+| search · account · basket · checkout · receipt | `/search?q=…` · `/account` · `/cart` · `/checkout` · `/checkout/done?n=…` | `/ru/…` | `/et/…` |
+| the panel · the scanner | `/admin` · `/admin/scan` (one address in every language) | | |
 
-`<cat>` is a catalogue key (`hair`, `styling`, `beard`, `face`, `body`,
-`perfume`, `merch`) plus `all`. `<brand>` is the brand name slugified.
-`<id>` is the product id from `public/shop/catalogue2.js`. `<slug>` is a key of
-`LEGAL` in `public/shop/legal.js` — `shipping`, `returns`, `terms`, `privacy`,
-`contact`; the router in app.js gates on that same object, so a page that
-existed only in a translation could not be reached cold and is not written.
-For sets, `<id>` is a `BUNDLES` id from `public/shop/bundles.js`.
+The sections' handles per language:
 
-**Note the singular `/set/<id>/` beside the plural `/sets/`.** That is what
-`pathFor()` in app.js pushes and what `routeFromPath()` matches, so it is what
-the prerender writes — an indexed URL and a clicked URL have to be one address.
+| section | English | Russian | Estonian |
+|---|---|---|---|
+| hair | `hair-care` | `uhod-za-volosami` | `juuksehooldus` |
+| styling | `hair-styling` | `stayling-dlya-volos` | `viimistlus` |
+| beard | `beard-care` | `uhod-za-borodoy` | `habemehooldus` |
+| face | `face-care` | `uhod-za-litsom` | `naohooldus` |
+| body | `body-care` | `uhod-za-telom` | `kehahooldus` |
+| perfume | `perfume` | `parfyumeriya` | `parfuumid` |
+| merch | `merch` | `merch` | `merch` |
+| all | `all-products` | `vse-tovary` | `koik-tooted` |
 
-The remaining screens — `search`, `account`, `checkout`, `done`, `admin` —
-are client-side only and take the same prefixes (`/shop2/et/search/`). They are
-deliberately **not** prerendered and **not** in the sitemap: every one of them
-needs state to mean anything (an empty checkout renders an empty checkout),
-every one is robots-disallowed, and a static copy of them would be a page that
-lies. `tools/prerender-shop2.mjs` throws if one of them ever reaches the
-sitemap, and `check-prerender.mjs` fails if one is found there.
+`<brand>` is the brand name slugified (the same in every language, as
+Shopify's brand collections were), except CBD Daily, whose Shopify collection
+was `cbd-daily-haircare` and keeps that address. `<id>` is the product id from
+`public/shop/catalogue2.js` (Shopify's handle, for the 220 products that came
+over), or a custom product's `c-…`.
 
-**`brands` was the sixth of them until 07.09.2026** and is a real page now
-(`brandsPage()` in the prerender): it was the one screen a shopper could land
-on cold, so `/shop2/et/brands/` and `/shop2/en/brands/` were served the Russian
-shell — the home page's title, the home page's description and a canonical
-pointing at `/shop2/`. It has its own head, its own crawlable list of the 26
-brand pages and its own sitemap row now (priority 0.5: it is a hub, below the
-pages it links to). `f8a3926` had already taught `setHead()` to correct the
-head once the script runs; this is the half a crawler without JavaScript
-reads.
+**Inside the shop nothing speaks these addresses.** app.js, the prerender, the
+request-time pages, the sitemaps, the feeds and the letters all build an
+internal ROUTE — the short shape of the old `/shop2/` scheme: `/p/<id>/`,
+`/c/hair/`, `/b/<brand>/`, `/info/returns/`, `/sets/`, `/set/<id>/`, `/gift/`,
+`/brands/`, `/blog/<slug>/`, `/search/`, `/account/`, `/checkout/`, `/done/`,
+`/cart/`, `/admin/`, `/scan/`, `/` — and hand it to `publicPath(lang, route)`
+(`langPath(seg, route)` in `src/lib/seo-head.mjs`, which takes the language's
+prefix: `""` English, `ru`, `et`). So the address scheme is one table in one
+file, and the prerendered files keep their internal folders
+(`public/shop2/{,ru/,et/}{p,c,b,info,…}/…/index.html` — English at the top).
 
-`/shop2/ru/...` is accepted by the router so a hand-typed URL still works, but
-`next.config.ts` 301s it to the unprefixed path so it can never become a second
-address for the same page.
+The remaining screens — `search`, `account`, `cart`, `checkout`, `done`,
+`admin`, `scan` — are client-side only and take the same prefixes
+(`/et/search`). They are deliberately **not** prerendered and **not** in the
+sitemap: every one of them needs state to mean anything, every one is
+robots-disallowed, and a static copy of them would be a page that lies.
+`tools/prerender-shop2.mjs` throws if one of them ever reaches the sitemap,
+and `check-prerender.mjs` fails if one is found there. `/cart` is Shopify's
+basket page: it opens the home page with the basket drawer pulled out (the
+basket is a drawer here), and `/cart/<item>:<qty>` is Merchant Center's
+checkout link (`src/lib/cart-permalink.ts`).
 
-### How the prefix behaves in app.js
+### The language of a page is its address
 
-All of this lives in the router / language region of `public/shop2/app.js`:
+SEO audit, 08.10.2026: until the move an unprefixed page RE-RENDERED in the
+browser's language (`guessLang()` in app.js) — an English browser on the
+Russian address got an English title, `<h1>` and `lang="en"` under a Russian
+canonical, and Googlebot renders with an en-US locale. Now:
 
-- **A prefix in the URL wins** over the saved preference and over
-  `guessLang()`. It is what a search engine indexed and what a shopper pasted.
-- **Internal navigation keeps the prefix.** `pathFor()` prepends
-  `SEG_OF_LANG[pathLang]`, so a visitor who arrived on `/shop2/et/` stays inside
-  the Estonian shop and the link they copy opens that way. Sharing a product
-  (`productUrl`) does the same.
-- **The switcher rewrites the prefix** with `history.replaceState` — not push,
-  because Back should leave the shop rather than walk back through language
-  changes.
-- **Unprefixed links behave exactly as before**: saved choice, else browser
-  language, else Russian, with the `/api/geo/` refinement on a first visit.
-- **`routeFromPath()` reads the prefix on every navigation**, so Back into an
-  entry written as `/shop2/et/…` returns to Estonian.
-- `setAltTags()` rewrites canonical, the four `hreflang` links, `og:url` and
-  `og:locale` on every render, so a crawler that runs JS reads the same head a
-  static fetch does.
+- **A storefront page renders in its address's language and nothing else** —
+  title, description, `<h1>`, JSON-LD, `<html lang>`, hreflang. Unprefixed is
+  English. app.js reads the language off the path at boot and on every Back
+  (`routeFromPath()`), and the switcher rewrites the prefix with
+  `history.replaceState`.
+- **A visitor who wants another language is SENT there, before the page is
+  served** — `src/middleware.ts`, for an unprefixed storefront address on a
+  GET: the switcher's saved choice (the `rempire_lang` cookie, `ru`/`et`/`en`)
+  wins, else the first of ru/et/en in `Accept-Language` (by `q`, then order);
+  Russian or Estonian → **302** to the `/ru…` / `/et…` twin (query kept),
+  `Vary: Accept-Language, Cookie`, `Cache-Control: private, no-store`. The
+  served unprefixed page carries the same `Vary`. **A client that sends
+  neither header nor cookie — Googlebot — gets the English page, 200.** A
+  prefixed address is never redirected for language, and neither is the
+  panel.
+- The cookie is written by the switcher (and once from an older saved
+  localStorage choice, for browsers from before the cookie existed). It is a
+  preference, not an identifier.
+- The client-side «refinement by country» (`/api/geo/`, an English browser in
+  Estonia re-rendered in Estonian) is **gone** — it re-rendered an address in
+  another language.
+- The panel (`/admin`, `/admin/scan`) has no language in its address; it opens
+  in the owner's saved choice, else the browser's language, else Russian.
 
-One deliberate asymmetry: **the canonical and the hreflang set come from the
-path, never from the displayed language.** An unprefixed `/shop2/` stays
-Russian for the crawler even when the visitor's browser has us rendering
-English — otherwise a German browser would tell Google that `/shop2/` is the
-English page. `<html lang>` follows the *displayed* language, because that one
-is read by screen readers and by the browser's translate prompt.
+The canonical never carries a query string (`?size=`, `?variant=`, `utm_*`,
+`country=` all name the same page) — the prerendered head is built from the
+route, and `setAltTags()` in app.js from the path alone.
 
-The cost of that asymmetry: a crawler that runs JS with an `en-US` browser
-fetches `/shop2/`, gets Russian HTML (correct), and then watches the script
-re-render it in English while the canonical stays Russian. The served HTML and
-the hreflang cluster are both right, and each language has its own URL to rank,
-so this is a soft signal rather than a fault — but the clean fix, if it ever
-matters, is an edge redirect on `Accept-Language` at the switch: send a browser
-that asks for `et` from `/shop2/` to `/shop2/et/` with a 302 and `Vary:
-Accept-Language`, and let the prefixed URLs be the only ones that render a
-non-Russian page. That belongs to the switch, not to the client.
+---
+
+## URL move 2026-10 (Shopify scheme)
+
+**What changed, 08–09.10.2026** (branch `feat/shopify-urls`): every page moved
+from `/shop2/…` (Russian unprefixed, `/shop2/et/…`, `/shop2/en/…`, trailing
+slash) to Shopify's own addresses (the table above). Assets did NOT move:
+`/shop2/app.min.js`, `/shop2/styles.css`, `/shop2/icons/…`, the manifests and
+`/shop2/admin-sw.js`, `/shop2/og/…` cards, `/shop/img/…`, `/shop/*.js`,
+`/shop/og/…`.
+
+### Decisions, with their evidence
+
+| decision | evidence / reason |
+|---|---|
+| English unprefixed, `/ru`, `/et` | Dim's choice («English without a prefix, as Shopify had»). Shopify's sitemap (`tools/harvest/old-urls.txt`) publishes exactly that. |
+| Section handles (the table above) | Shopify's header menu was Hair Care · Hair Styling · Beard Care · Face Care · Body Care · Merch (`docs/shopify/LIVE-PAGES-AUDIT.md`), plus Perfume; the per-language handles are Shopify's own translations, read off its sitemap, where the 47 collections are listed in the same order in every language (verified row by row). The SEO audit of 08.10 proposed the same table independently. |
+| face = `face-care`, not `skin-care` | Search Console (3 months to 08.10.2026): face-care family 4 impressions vs skin-care 1; and «Face Care» was the menu link. |
+| merch = `merch`, not `rempire-merch` | «Merch» was the menu link and `merch` is one handle in all three languages; `rempire-merch` had 41 impressions vs 31 (no clicks either) — too close to outweigh the menu. `rempire-merch`, `rempire-merch-1` 301 to `merch`. |
+| beard = `beard-care`, though `habemeolid` (beard oil) earned 66 impressions | A sub-collection is not the section; `beard-oil`/`habemeolid`/`maslo-dlya-borody` 301 to the beard section. Subcategory pages are later work. |
+| «Все товары» = `all-products`/`vse-tovary`/`koik-tooted` | 39 impressions for this family vs 29 for `shop-all-1`/`all-products-est`/`all-prioducts-rus` and 17 for Shopify's built-in `/collections/all`; it is also in Shopify's sitemap, and `/collections/all` is not. The other two families 301 to it. |
+| CBD Daily = `/collections/cbd-daily-haircare` | Shopify's collection handle (55 impressions); `/collections/cbd-daily` 301s to it. Every other brand is `/collections/<slug>`, as Shopify's brand collections were. |
+| Brands landing `/collections/brands` | Shopify had `/collections/brands` in all three languages; `top-brands`/`top-brandid`/`top-brendy` 301 to it. |
+| Policies at `/policies/<shopify slug>`, contact at `/pages/contact` | Shopify's addresses. `/pages/right-to-return` → refund policy, `/pages/data-sharing-opt-out` → privacy, `/policies/legal-notice` and `subscription-policy` → terms, `contact-information` → contact; an unknown `/pages/…` → contact. |
+| Blog at `/blogs/news` | Shopify's blog handle; `/blogs/blog` and the one Shopify article (`the-ultimate-guide-on-how-to-moisturize-…`) → the listing. |
+| Sets at `/collections/sets[/<id>]` | No Shopify equivalent; a set is a collection of products, and `sets` is no Shopify handle. |
+| Gift card at `/products/gift-card` | Shopify's gift card was a product; no catalogue id is `gift-card`. |
+| Receipt at `/checkout/done` | The closest Shopify shape (its thank-you page lived under the checkout). Built in the order's language (`receiptUrl()` takes `order.lang`); an unknown order gets the unprefixed address and the edge sends the browser on. |
+| Panel `/admin`, scanner `/admin/scan` | `/admin` was already the owner's door. The scanner moved under it: one prefix for everything of the owner's, one robots rule (`Disallow: /admin`), the panel's push worker scope (`/admin`) covers it harmlessly (no fetch handler), and a push tap only ever targets the exact `/admin` window (admin-sw.js). Kept as its own installable app (`scanner.webmanifest`, scope `/admin/scan`). |
+| Hidden product: 404, not its brand | «Показывать в магазине» is a toggle the owner flips back; a 301 to the brand would be cached by every browser that saw it and outlive the product's return. An UNKNOWN Shopify handle still goes alias → brand → «Все товары» (301). |
+| Unknown collection handle: «Все товары» (301), after asking the database | A handle may be a brand only the owner's own products carry (`custom_products`), so `src/app/[...path]` asks first (src/lib/notfound-page.ts). |
+| Shopify's `?variant=…&utm_…` on a page that exists: served, no redirect | The canonical folds it; a redirect would spend a hop for nothing. |
+| A trailing slash: one 301 to the slashless address | `trailingSlash: false` + `skipTrailingSlashRedirect: true` in next.config.ts; the middleware folds the slash into whatever other move the address needs, so it is never a chain. Every `/api/*` route answers BOTH spellings with no redirect (Montonio POSTs to `/api/payments/notify/`; the parcel webhook is registered at `/api/shipping/notify/`). |
+| Language negotiation at the edge, not in the page | SEO audit, 08.10.2026 (see «The language of a page is its address»). |
+| Shopify's Atom feeds (`/collections/<h>.atom`, `/blogs/news.atom`) | 60 of them in Search Console's crawled-not-indexed list (09.10.2026) → one 301 to the page they were a feed of. |
+| Left as a 404 on purpose | `/cdn/…` (Shopify's CDN paths and videos), `/v/media/…`, `/v1/produce`, `/wpm`, `/b`, `/llms.txt`, `/llms-full.txt` (llms.txt is added separately). |
+
+### What moves where (one 301 each, `src/lib/legacy-redirects.ts`)
+
+| old | new |
+|---|---|
+| `/shop2/…` (Russian), `/shop2/ru/…` | `/ru/…` — e.g. `/shop2/p/x/` → `/ru/products/x`, `/shop2/c/all/` → `/ru/collections/vse-tovary`, `/shop2/info/returns/` → `/ru/policies/refund-policy` |
+| `/shop2/et/…` | `/et/…` |
+| `/shop2/en/…` | the unprefixed English address |
+| `/shop2/admin/`, `/shop2/scan/` (any language) | `/admin`, `/admin/scan` |
+| `/shop2/done/?n=…`, `/shop2/checkout/?resume=…` | `/ru/checkout/done?n=…`, `/ru/checkout?resume=…` — **query kept** (receipts, resume links, `?order=`, `?q=`, `?size=` are ours) |
+| `/shop`, `/shop/c/…`, `/shop/b/…`, `/shop/<screen>`, `/shop/info/…`, `/shop/p/<id>/` | the same Russian targets, directly (the prototype's `/shop/p/` stubs too) |
+| `/en/…`, `/en-lv/…`, `/en-lt/…`, `/en-fi/…` | the unprefixed English address (Shopify's regional query dropped, `?q=` kept) |
+| `/ET/…`, `/RU/…` | lower case |
+| a section under another name or language (`/collections/shampoo`, `/et/collections/hair-care`) | the section, in the address's language |
+| `/products/<unknown>` | alias → brand → «Все товары»; `/products/delivery` → shipping policy |
+| `/collections/<x>/products/<y>`, `/collections/<x>/<tag>` | the product; the collection |
+| `/collections/vendors?q=<Brand>` | that brand's page, else the brands landing |
+| `/account/<anything>`, `/checkouts/…`, `/checkout/<anything>`, `/<digits>/orders/…`, `/<digits>/checkouts/…/recover` | `/account` |
+| `/discount/<code>?redirect=<path>` | the path (resolved in the same hop), else home |
+| `/gift_cards/…` · `/password` · `/apps/…`, `/a/…`, `/tools/…` · `/cart/<not a permalink>` | the gift card · home · home · `/cart` |
+| `/sitemap_*.xml` · `/agents.md` | `/sitemap.xml` · `/` |
+
+### Things the owner has to do
+
+- **Renat's phone**: the «Админка» and «Сканер» icons were installed from
+  `/shop2/admin/` and `/shop2/scan/`. They still open (one 301), but outside
+  the installed app's scope, i.e. in a browser tab. Remove both, open
+  `rempireshop.com/admin` (and `/admin/scan`), add them to the Home Screen
+  again, switch notifications on again. The panel retires the old
+  `/shop2/admin/` push registration itself on its first start (unsubscribes it
+  and removes its address from the server), so notices do not arrive twice.
+  `/test` check «panel-app-readd».
+- Search Console: submit `sitemap.xml` again (it lists only the new addresses).
+
+### How it is served
+
+- `src/middleware.ts` (matcher: every path except `/api`, `/_next` and files
+  with an extension, plus Shopify's `/sitemap_*.xml`, `/agents.md` and
+  `*.atom`): the 301s above, the language 302, the hidden-product 404.
+- `next.config.ts` `afterFiles` rewrites: address → prerendered file, from the
+  list the prerender writes (`src/data/prerendered-routes.json`, gitignored).
+- `src/app/{,ru/,et/}products/[id]`, `src/app/{,ru/,et/}blogs/news[/[slug]]`:
+  the request-time pages (custom products, posts published after the build).
+- `src/app/[...path]`: the shell for the client-side screens, the shop's 404
+  for anything else, and «Все товары» for an unknown collection.
+- The CSP: `script-src 'self'` (+ the Cloudflare beacon) is now the DEFAULT
+  for every path, since the shop's pages are the whole site; `/api/*`, the
+  prototype's `/shop/*` files and the hand-written `/test`, `/guide`, `/cards`,
+  `/golive` keep `'unsafe-inline'`. camera/microphone `(self)` on every page
+  (as on `/shop2/*` before), everything denied on the API.
+- robots: `Disallow: /admin`, `/checkout`, `/cart`, `/account`, `/search`
+  and their `/ru`, `/et` twins, `/api/` — with `Allow:` for the read-only
+  endpoints a renderer needs (`/api/overrides/`, `/api/bundles/`, `/api/blog/`,
+  `/api/reviews/`, `/api/shipping/carriers/`), so Googlebot's renderer sees the
+  live stock, prices and owner SEO texts.
 
 ---
 
@@ -235,16 +341,16 @@ one of those tags names the file it writes.
 
 | path | what |
 |---|---|
-| `public/shop2/index.html` | **patched in place** — the Russian home page (see below) |
-| `public/shop2/{et,en}/index.html` | the other two home pages |
-| `public/shop2/{,et/,en/}c/<cat>/index.html` | 8 categories × 3 |
-| `public/shop2/{,et/,en/}b/<brand>/index.html` | 26 brands × 3 |
-| `public/shop2/{,et/,en/}p/<id>/index.html` | 220 products × 3 |
-| `public/shop2/{,et/,en/}info/<slug>/index.html` | 5 policy pages × 3 |
-| `public/shop2/{,et/,en/}sets/index.html` | the sets landing × 3 |
-| `public/shop2/{,et/,en/}set/<id>/index.html` | 8 sets × 3 |
-| `public/shop2/{,et/,en/}gift/index.html` | the gift card × 3 |
-| `public/shop2/{,et/,en/}brands/index.html` | the brands landing × 3 |
+| `public/shop2/index.html` | **patched in place** — the English home page, `/` (see below) |
+| `public/shop2/{ru,et}/index.html` | the other two home pages, `/ru` and `/et` |
+| `public/shop2/{,ru/,et/}c/<cat>/index.html` | 8 categories × 3 |
+| `public/shop2/{,ru/,et/}b/<brand>/index.html` | 26 brands × 3 |
+| `public/shop2/{,ru/,et/}p/<id>/index.html` | 220 products × 3 |
+| `public/shop2/{,ru/,et/}info/<slug>/index.html` | 5 policy pages × 3 |
+| `public/shop2/{,ru/,et/}sets/index.html` | the sets landing × 3 |
+| `public/shop2/{,ru/,et/}set/<id>/index.html` | 8 sets × 3 |
+| `public/shop2/{,ru/,et/}gift/index.html` | the gift card × 3 |
+| `public/shop2/{,ru/,et/}brands/index.html` | the brands landing × 3 |
 | `public/shop/og/<id>.jpg` | one 1 200×630 card per product — drawn once |
 | `public/shop/og/set-<id>.jpg` | one card per set — drawn once |
 | `public/brand/og-default.png` | the card for pages with no photograph |
@@ -253,6 +359,7 @@ one of those tags names the file it writes.
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
 | `public/robots.production.txt` | the open policy, for reading and diffing |
 | `public/robots.staging.txt` | the closed policy, ditto |
+| `src/data/prerendered-routes.json` | address → file for every page written (gitignored), which `next.config.ts` turns into its rewrites |
 
 813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
 the brands landing, 1 home, 5 policy pages, 8 sets + the landing, 1 gift card.
@@ -350,11 +457,13 @@ pages and the gift card) → `/og-shop.png`. The last is the safety net for a
 run where sharp could not load: it is committed, it is 1 200×630, and it keeps
 the invariant true rather than falling back to a `.webp` no scraper reads.
 
-### index.html is the shell *and* the Russian home page
+### index.html is the shell *and* the English home page
 
-Vercel serves `public/shop2/index.html` for `/shop2/`, and there is no way to
-put a different file there. So that one file is **patched between markers**
-rather than rewritten:
+`public/shop2/index.html` is the file `/` is routed to (next.config.ts) and
+the file every client-side screen is served (`src/app/[...path]`). So that
+one file is **patched between markers** rather than rewritten — its
+`<html lang>` included, since 08.10.2026, when the unprefixed home page
+became the English one:
 
 - `<!-- seo:start --> … <!-- seo:end -->` in `<head>` — the tool owns this.
 - `<div id="app"><!-- prerender:start --> … <!-- prerender:end --></div>`.
@@ -364,8 +473,8 @@ asset tags, the `?v=` token, the script list. The tool reads those from there
 and copies them into the other 809 pages, so all of them always load the same
 assets. If the markers go missing the tool refuses to run rather than guess.
 
-The consequence: every non-prerendered `/shop2/` path (search, the cart, the
-checkout) is served that same file, so its raw HTML carries the home page's
+The consequence: every non-prerendered screen (search, the basket, the
+checkout, the panel) is served that same file, so its raw HTML carries the home page's
 head. app.js corrects the title, canonical and hreflang on boot. Those screens
 are robots-disallowed and out of the sitemap, so nobody arrives on one from a
 search. `info/<slug>`, `sets`, `set/<id>`, `gift` and `brands` used to be in
@@ -408,6 +517,14 @@ the file:
 ---
 
 ## «Страница не найдена» — the 404
+
+> Since 08.10.2026 the catch-all is `src/app/[...path]/route.ts` at the root
+> of the site and the shapes are Shopify's (`isKnownShopPath()` reads the
+> internal route `parseShopPath()` gives back); an address of no shop shape at
+> all is the 404, and an unknown `/collections/<handle>` — a Shopify shape —
+> lands on «Все товары» after the database has said it is no brand of the
+> owner's own. The history below is told in the `/shop2/` addresses of the
+> time.
 
 Until 07.09.2026 **every** unrecognised `/shop2/…` address answered **200 with
 the home page**: `next.config.ts`'s `/shop2/:path+` fallback rewrite handed the
@@ -483,6 +600,14 @@ one segment — and the more specific routes beside it (`p/[id]`, `blog`,
 
 ## Routing
 
+> Since 08.10.2026 (see «URL move 2026-10»): `trailingSlash: false` with
+> `skipTrailingSlashRedirect: true`; the rewrites map each Shopify address to
+> its prerendered file from `src/data/prerendered-routes.json`, which the
+> prerender writes; there is no `fallback` rewrite any more — the root
+> catch-all route serves the shell; and the `/shop/…` prototype addresses
+> (the `/shop/p/<id>/` stubs included) are one 301 each in the middleware.
+> The list below is the history of the `/shop2/` scheme.
+
 `next.config.ts`:
 
 - Vercel's static layer resolves `<dir>/index.html` for a trailing-slash URL by
@@ -519,8 +644,9 @@ one segment — and the more specific routes beside it (`p/[id]`, `blog`,
 
 ### The one thing that runs before the file: hidden products
 
-`src/middleware.ts` matches `/shop2/{,et/,en/}p/<id>/` as well as the Shopify
-addresses. Middleware is the **only** layer that runs before the static layer
+`src/middleware.ts` runs on every page address (since 08.10.2026; until then
+`/shop2/{,et/,en/}p/<id>/` and the Shopify shapes) and checks
+`/{,ru/,et/}products/<id>`. Middleware is the **only** layer that runs before the static layer
 answers, and that is exactly what a hidden product needs: switching
 «Показывать в магазине» off already removed the product from the listing, the
 search, the sets, the cart and the `p/[id]` route, but the prerendered file
@@ -645,9 +771,14 @@ runs the build's own list expressions over a hidden product.
 
 ## The old Shopify addresses
 
+> **Since 08.10.2026 Shopify's addresses ARE the shop's** — a product, a
+> section under its own handle, a brand, a policy page answer 200 directly.
+> What still moves, and where, is the table in «URL move 2026-10» above; the
+> table below is how the /shop2/ scheme answered them from 07.09 to 08.10.2026.
+
 Every URL Google holds of rempireshop.com today is a Shopify one, and the
 Search Console export of 07.09.2026 has **473 of them with impressions in a
-single week** (`docs/audit/2026-09-07-seo.md`). They are answered by
+single week** (`docs/audit/2026-09-07-seo.md`). They were answered by
 **`src/middleware.ts` → `src/lib/legacy-redirects.ts`**, with a 301 each:
 
 | old shape | where it lands |
@@ -680,9 +811,12 @@ budget is 1 MB).
 walks all of them and asserts this code does better;
 `e2e/seo.spec.ts` walks the twelve best-earning addresses through a real server.
 
-**One caveat:** `trailingSlash: true` means Next 308s `/products/x` to
-`/products/x/` before any middleware runs, so an old link is a 308 → 301 chain.
-Every `/shop/…` redirect in `next.config.ts` has always behaved this way.
+**The old caveat is gone:** with `trailingSlash: true` Next 308'd
+`/products/x` to `/products/x/` before any middleware ran, so an old link was
+a 308 → 301 chain. Since 08.10.2026 there is no trailing slash and no Next
+normalisation (`skipTrailingSlashRedirect`); every move is ONE 301, and
+`tests/legacy-redirects.test.ts` walks all 1 639 rows of
+`tools/harvest/old-urls.txt` to prove it.
 
 ## What the `Offer` may claim — availability
 
@@ -898,7 +1032,7 @@ A product the owner created in the panel («+ Товар», the assistant's
 `create_product`; `custom_products`, ids `c-…`, `src/lib/custom-products.ts`)
 does not exist when `npm run prerender` runs — the build has no database —
 so it has no static file. Its page is written **when the request arrives**
-instead: `src/app/shop2/{,et/,en/}p/[id]/route.ts` →
+instead: `src/app/{,ru/,et/}products/[id]/route.ts` (`/shop2/{,et/,en/}p/[id]` before 08.10.2026) →
 `src/lib/product-page.ts`, which takes `public/shop2/index.html` and patches
 it between the same two marker pairs the prerender patches, through the same
 builders. Those builders — `headBlock()`, `productSpec()`, the copy table
@@ -960,13 +1094,14 @@ hidden).
 
 ## Blog posts published after the build — the page at request time
 
-The prerender writes `/shop2/{,et/,en/}blog/<slug>/` for the posts that are
+The prerender writes the page at `/{,ru/,et/}blogs/news/<slug>` (until 08.10.2026
+`/shop2/{,et/,en/}blog/<slug>/`) for the posts that are
 published when `npm run build` runs (it reads them straight out of Postgres,
 `tools/lib/blog-export.mjs`). A post Renat publishes after that deploy had
 no page at all: the `/shop2/:path+` fallback handed a crawler — and a link
 scraper — the Russian home page, and the article existed only once app.js
 had fetched it (checked on staging: an unknown slug answered 200 with the
-home page's head). Now `src/app/shop2/{,et/,en/}blog/[slug]/route.ts` →
+home page's head). Now `src/app/{,ru/,et/}blogs/news/[slug]/route.ts` →
 `src/lib/blog-page.ts` writes the same page the prerender would have, from
 the row, when the request arrives: the per-language Google pair with the
 Russian fallback, canonical, hreflang, OpenGraph (`og:type: article`, the

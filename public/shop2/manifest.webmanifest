@@ -1,10 +1,10 @@
 {
-  "id": "/shop2/",
+  "id": "/",
   "name": "Rempire",
   "short_name": "Rempire",
   "description": "Салонная косметика для лица, тела и волос — магазин Rempire, Таллинн.",
-  "start_url": "/shop2/",
-  "scope": "/shop2/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "display_override": ["standalone"],
   "background_color": "#ffffff",

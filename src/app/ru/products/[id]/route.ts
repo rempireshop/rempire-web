@@ -1,4 +1,4 @@
-/** GET /shop2/en/p/<id>/ — the English product page for an id the build did not prerender. See ../../p/[id]/route.ts. */
+/** GET /ru/products/<id> — the Russian product page for an id the build did not prerender. See ../../../products/[id]/route.ts. */
 import { productPageResponse } from "@/lib/product-page";
 
 export const runtime = "nodejs";
@@ -8,5 +8,5 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
-  return productPageResponse(id, "en");
+  return productPageResponse(id, "ru");
 }

@@ -208,7 +208,7 @@ test.describe("admin — newsletter", () => {
     await expect(letter.locator("body")).toContainText(PRODUCT.brand);
     await expect(letter.locator("body")).toContainText("Отписаться");
     // the banner is a link to the product it was pointed at
-    await expect(letter.locator(`a[href$="/shop2/p/${PRODUCT.id}/"] img`).first()).toBeAttached();
+    await expect(letter.locator(`a[href$="/ru/products/${PRODUCT.id}"] img`).first()).toBeAttached();
 
     /* ---- Estonian: the same blocks, the reader's own words ---------------- */
     await page.locator('[data-newslang="ET"]').click();
@@ -237,7 +237,7 @@ test.describe("admin — newsletter", () => {
     const mine = (await captured(page, me))[0];
     expect(mine.subject).toBe(`[test] E2E teema ${tag}`);
     expect(mine.links.some((l) => l.includes("/api/mail/unsubscribe/")), "the test letter has no unsubscribe link").toBe(true);
-    expect(mine.links.some((l) => l.includes(`/shop2/et/p/${PRODUCT.id}/`)), "the banner does not lead to the Estonian product page").toBe(true);
+    expect(mine.links.some((l) => l.endsWith(`/et/products/${PRODUCT.id}`)), "the banner does not lead to the Estonian product page").toBe(true);
 
     /* ---- the send: the card names the count, then the count climbs ----- */
     const sendButton = page.locator("[data-newssend]");

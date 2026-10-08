@@ -1,4 +1,4 @@
-/** GET /shop2/et/p/<id>/ — the Estonian product page for an id the build did not prerender. See ../../p/[id]/route.ts. */
+/** GET /et/products/<id> — the Estonian product page for an id the build did not prerender. See ../../../products/[id]/route.ts. */
 import { productPageResponse } from "@/lib/product-page";
 
 export const runtime = "nodejs";

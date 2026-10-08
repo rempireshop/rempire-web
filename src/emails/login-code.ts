@@ -27,6 +27,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -88,7 +89,7 @@ export function renderLoginCode(
     Number.isFinite(options.minutes) && (options.minutes as number) > 0
       ? Math.round(options.minutes as number)
       : 15;
-  const account = absUrl(null, "/shop2/account/");
+  const account = absUrl(null, shopPath(L, "/account/"));
 
   const values: MailTextValues = { code: digits, shop: BRAND.name };
   const intro = mailText("login-code", L, "intro", values);

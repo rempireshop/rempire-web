@@ -25,21 +25,22 @@ test.describe("pwa manifests", () => {
     expect(await manifestHref(page)).toBe("/shop2/manifest.webmanifest");
     expect(await iosTitle(page)).toBe("Rempire");
 
-    const shop = await (await request.get(shopUrl("", "/manifest.webmanifest"))).json();
-    const admin = await (await request.get(shopUrl("", "/admin.webmanifest"))).json();
-    const scanner = await (await request.get(shopUrl("", "/scanner.webmanifest"))).json();
+    // the manifests are assets and stayed under /shop2/; the addresses inside them moved (08.10.2026)
+    const shop = await (await request.get("/shop2/manifest.webmanifest")).json();
+    const admin = await (await request.get("/shop2/admin.webmanifest")).json();
+    const scanner = await (await request.get("/shop2/scanner.webmanifest")).json();
     expect(shop.name).toBe("Rempire");
-    expect(shop.start_url).toBe("/shop2/");
-    expect(shop.scope).toBe("/shop2/");
+    expect(shop.start_url).toBe("/");
+    expect(shop.scope).toBe("/");
     expect(admin.short_name).toBe("Админка");
-    expect(admin.start_url).toBe("/shop2/admin/");
-    expect(admin.scope).toBe("/shop2/admin/");
+    expect(admin.start_url).toBe("/admin");
+    expect(admin.scope).toBe("/admin");
     // the scanner is its own app: own id, own scope, opens straight into the
     // viewfinder rather than into the panel
     expect(scanner.name).toBe("Rempire — сканер");
     expect(scanner.short_name).toBe("Сканер");
-    expect(scanner.start_url).toBe("/shop2/scan/");
-    expect(scanner.scope).toBe("/shop2/scan/");
+    expect(scanner.start_url).toBe("/admin/scan");
+    expect(scanner.scope).toBe("/admin/scan");
     const ids = [shop.id, admin.id, scanner.id];
     expect(new Set(ids).size, "the three manifests must not share an id").toBe(3);
     for (const m of [shop, admin, scanner]) {
@@ -151,7 +152,7 @@ test.describe("pwa manifests", () => {
    * The scanner app (docs/inventory.md → "Сканер как отдельное приложение"):
    * the manifest swap happens for a stranger too — that is what makes
    * "install, then sign in inside the app" work — but the screen behind it is
-   * the admin login card, exactly as on /shop2/admin/.
+   * the admin login card, exactly as on /admin.
    */
   test("the scan route swaps to the scanner manifest and is admin-only", async ({ page }) => {
     await page.goto(shopUrl("", "/scan/"));

@@ -162,7 +162,7 @@ test.describe("admin — «Удалить» a promo code", () => {
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
 
     // ---- back in the panel, with a list that knows about the payment -------
     await page.goto(shopUrl("", "/admin/"));

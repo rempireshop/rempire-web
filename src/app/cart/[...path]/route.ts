@@ -5,7 +5,7 @@
  * `https://rempireshop.com/cart/{id}:1`, with {id} the feed item's id. On the
  * day rempireshop.com points at this shop, that address lands here:
  * src/middleware.ts lets exactly this shape through (every other `/cart/…`
- * keeps its legacy redirect to the catalogue), and src/lib/merchant-cart.ts
+ * is folded into `/cart`, the basket), and src/lib/merchant-cart.ts
  * turns the id back into the product and the size the feed gave it.
  *
  * A 302 to the product page with `?size=…&buy=<qty>`, which puts it in the

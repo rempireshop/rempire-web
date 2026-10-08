@@ -87,10 +87,10 @@ const req = (path: string) => new Request(LIVE + path);
 
 async function pageFor(seg: "" | "et" | "en", id: string): Promise<Response> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/p/[id]/route")
+    ? await import("@/app/et/products/[id]/route")
     : seg === "en"
-      ? await import("@/app/shop2/en/p/[id]/route")
-      : await import("@/app/shop2/p/[id]/route");
+      ? await import("@/app/products/[id]/route")
+      : await import("@/app/ru/products/[id]/route");
   return mod.GET(req(`/shop2${seg ? "/" + seg : ""}/p/${id}/`), ctx(id));
 }
 

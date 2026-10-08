@@ -170,7 +170,7 @@ describe("GET /shop2/og/<file>.png", () => {
     const second = (await GET(req(`${p.id}.png`), ctx(`${p.id}.png`))).headers.get("etag");
     expect(second).not.toBe(first);
 
-    const { GET: page } = await import("@/app/shop2/et/p/[id]/route");
+    const { GET: page } = await import("@/app/et/products/[id]/route");
     const html = await (await page(new Request(`${LIVE}/shop2/et/p/${p.id}/`), { params: Promise.resolve({ id: p.id }) })).text();
     const stamp = Date.parse(edited!.updatedAt).toString(36);
     expect(html).toContain(`<meta property="og:image" content="${LIVE}/shop2/og/${p.id}.png?v=${stamp}" data-seo="og:image">`);

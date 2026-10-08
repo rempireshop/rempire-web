@@ -16,17 +16,36 @@
    the base URL and the robots value it needs, so the two callers decide
    those once each (docs/seo.md, "The three noindex layers"). */
 
+import { publicPath } from "./shop-paths.mjs";
+
+/* `seg` is the language's path prefix without its slash. Since 08.10.2026
+   English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
+   and Russian is "ru"; until then Russian was "" and English "en". The order
+   of the list (RU, ET, EN) is the order of every hreflang cluster, sitemap
+   and language bar, and did not change. */
 export const LANGS = [
-  { code: "RU", seg: "", tag: "ru", htmlLang: "ru", ogLocale: "ru_RU" },
+  { code: "RU", seg: "ru", tag: "ru", htmlLang: "ru", ogLocale: "ru_RU" },
   { code: "ET", seg: "et", tag: "et", htmlLang: "et", ogLocale: "et_EE" },
-  { code: "EN", seg: "en", tag: "en", htmlLang: "en", ogLocale: "en_US" }
+  { code: "EN", seg: "", tag: "en", htmlLang: "en", ogLocale: "en_US" }
 ];
 
-/** The language a path prefix stands for: "" → Russian, "et", "en". Null for anything else. */
+/** The language a path prefix stands for: "" → English, "ru", "et". Null for anything else. */
 export function langBySeg(seg) {
-  const s = String(seg == null ? "" : seg).replace(/^\/+|\/+$/g, "");
+  const s = String(seg == null ? "" : seg).replace(/^\/+|\/+$/g, "").toLowerCase();
   return LANGS.find(l => l.seg === s) || null;
 }
+
+/** The language for a code — "RU", "ET", "EN" (any case). Null for anything else. */
+export function langByCode(code) {
+  const c = String(code == null ? "" : code).toUpperCase();
+  return LANGS.find(l => l.code === c) || null;
+}
+
+/* A link-preview card drawn per language (src/lib/og-card.ts) is named after
+   the language the way it always was — Russian bare, `.et`, `.en` — whatever
+   the page addresses do, because those card URLs are already in every
+   scraper's cache. */
+export const ogLangSuffix = code => (code === "ET" ? ".et" : code === "EN" ? ".en" : "");
 
 /* ---------- robots: one switch ------------------------------------------
 
@@ -203,7 +222,9 @@ export function fitTitle(core, full, alt) {
   return clip(core, 60);
 }
 
-export const langPath = (seg, rest) => "/shop2" + (seg ? "/" + seg : "") + rest;
+/** The public address of an internal route ("/p/<id>/", "/c/hair/", "/") in
+    the language whose prefix is `seg` — src/lib/shop-paths.mjs publicPath(). */
+export const langPath = (seg, rest) => publicPath((langBySeg(seg) || LANGS[2]).code, rest);
 
 /* ---------- what a catalogue product costs TODAY --------------------------
  *
@@ -605,7 +626,8 @@ export const OG_FALLBACK = "/og-shop.png";           // shipped, 1200×630 — u
 /* ---------- the head ----------------------------------------------------- */
 
 /* One page's whole hreflang cluster: the three languages plus x-default, which
-   is the unprefixed Russian path — the one every old link already points at.
+   is the unprefixed English path — Shopify's own x-default, and the page a
+   crawler with no Accept-Language is served (src/middleware.ts).
    data-seo marks them so app.js rewrites these tags on client navigation
    instead of appending a second set. */
 export function headLinks(base, seg, rest) {
@@ -677,10 +699,10 @@ export const ldJson = o => JSON.stringify(o)
    verification lost — and with Merchant Center, the free listings behind it.
    The first token is also
    a DNS TXT record, which survives on its own; the other two exist only as
-   tags. «/» redirects to /shop2/ (next.config.ts), so they ride in the one
-   block every page's head is built from: the Russian home page the shell
-   serves for /shop2/, the ET and EN homes, and every other page, which costs
-   nothing and means no page can be the one that lacks them.
+   tags. They ride in the one block every page's head is built from: the
+   English home page the shell serves for «/», the RU and ET homes, and every
+   other page, which costs nothing and means no page can be the one that lacks
+   them.
    Tokens only — never a secret: they are public on the live page today. */
 export const GOOGLE_SITE_VERIFICATION = [
   "KUVTHWQUdqKHip0q8VUKTRnAj9L6isKgUsWE4163wNM",
@@ -851,8 +873,9 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
 
 /* ---------- the shell ---------------------------------------------------- */
 
-/* public/shop2/index.html is two things at once: the shell every /shop2/
-   path falls back to, and the Russian home page. The SEO head and the #app
+/* public/shop2/index.html is two things at once: the shell every client-side
+   screen (/search, /checkout, /admin …) is served, and the English home page
+   at «/». The SEO head and the #app
    content are replaced between these markers; everything else — the asset
    tags with their ?v= token, the script list — stays hand-maintained. */
 export const HEAD_MARK = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
@@ -860,8 +883,7 @@ export const PRE_MARK = /<!-- prerender:start -->[\s\S]*?<!-- prerender:end -->/
 
 /* Replacement functions, not strings: a description containing $& or $1 would
    otherwise be spliced by String.replace's own substitution rules. `htmlLang`
-   is optional — the prerender patches the Russian home page in place and
-   leaves the attribute alone. */
+   is optional — when it is left out the attribute stays what it was. */
 export function patchShell(shell, headHtml, contentHtml, htmlLang) {
   let out = shell
     .replace(HEAD_MARK, () => "<!-- seo:start -->\n" + headHtml + "\n<!-- seo:end -->")

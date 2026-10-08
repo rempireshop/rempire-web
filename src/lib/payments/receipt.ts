@@ -1,5 +1,6 @@
 /**
- * The receipt's address — `/shop2/done/?n=R-100042&s=paid|failed|pending` —
+ * The receipt's address — `/checkout/done?n=R-100042&s=paid|failed|pending`,
+ * `/ru/checkout/done?…`, `/et/checkout/done?…` in the order's language —
  * built in one place for the two things that send a shopper there: the
  * provider's return (src/app/api/payments/return/route.ts) and an order that
  * had nothing left to pay, settled on the spot by POST /api/payments/create/
@@ -7,11 +8,21 @@
  * screenDone() in public/shop2/app.js, which reads only this query.
  */
 
+import { publicPath } from "@/lib/shop-paths.mjs";
+
 export type ReceiptState = "paid" | "failed" | "pending";
 
 export interface ReceiptParams {
   number: string | null;
   state: ReceiptState;
+  /**
+   * The order's language (RU / ET / EN), which decides the receipt's address
+   * since 08.10.2026: the language of a page is its address now (Shopify's
+   * scheme, src/lib/shop-paths.mjs), and a shopper who paid in Russian comes
+   * back to /ru/checkout/done. Unknown (no order found) is the unprefixed
+   * address, which src/middleware.ts sends on to the browser's language.
+   */
+  lang?: string | null;
   /**
    * `t` (analytics agent) rides along only on a paid receipt — it is what
    * lets the done screen's client-side `track("purchase", …)` beacon report
@@ -128,7 +139,7 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   if (owing && p.orderId && p.country && COUNTRY_RE.test(p.country)) {
     params.set("c", p.country.toUpperCase());
   }
-  return `${base}/shop2/done/?${params.toString()}`;
+  return base + publicPath(p.lang || "EN", `/done/?${params.toString()}`);
 }
 
 /**

@@ -254,7 +254,7 @@ test.describe("admin — speed", () => {
       const blocked = await page.evaluate(() => (window as unknown as { __blocked: number }).__blocked);
       if (i) { colds.push(took); coldReqs.push(calls.length); coldBlocked.push(blocked); lastCalls = calls; }
     }
-    table.push({ name: "cold open of /shop2/admin/ (signed in)", sync: r1(median(coldBlocked)),
+    table.push({ name: "cold open of /admin (signed in)", sync: r1(median(coldBlocked)),
       ready: median(colds), reqs: median(coldReqs), nodes: "—" });
     console.log("\nAPI calls the cold open makes (" + lastCalls.length + "):\n  " + lastCalls.join("\n  "));
 

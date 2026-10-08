@@ -126,7 +126,7 @@ for (const [i, lang] of LANGS.entries()) {
       await page.waitForURL(/\/api\/payments\/mock\//);
       await page.getByRole("link", { name: "Оплатить" }).click();
 
-      await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+      await page.waitForURL(/\/checkout\/done\?.*s=paid/);
       await waitForScreen(page, "done");
       await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", lang.code));
       await expect(page.locator(".done__num")).toContainText(/R-\d+/);
@@ -158,7 +158,7 @@ for (const [i, lang] of LANGS.entries()) {
       await page.waitForURL(/\/api\/payments\/mock\//);
       await page.getByRole("link", { name: "Отменить" }).click();
 
-      await page.waitForURL(/\/shop2.*\/done\/\?.*s=pending/);
+      await page.waitForURL(/\/checkout\/done\?.*s=pending/);
       await waitForScreen(page, "done");
       await expect(page.locator("h1")).toHaveText(tr("Заказ не оплачен", lang.code));
       // the order travels on the receipt, so there is something to press
@@ -185,7 +185,7 @@ for (const [i, lang] of LANGS.entries()) {
       await page.waitForURL(/\/api\/payments\/mock\//);
       await page.getByRole("link", { name: "Банк отклонил платёж" }).click();
 
-      await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
+      await page.waitForURL(/\/checkout\/done\?.*s=failed/);
       await waitForScreen(page, "done");
       await expect(page.locator("h1")).toHaveText(tr("Оплата не прошла", lang.code));
     });
@@ -217,7 +217,7 @@ test.describe("checkout — pickup", () => {
     await page.waitForURL(/\/api\/payments\/mock\//);
     await page.getByRole("link", { name: "Оплатить" }).click();
 
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
     await expect(page.locator(".done__num")).toContainText(/R-\d+/);

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CATEGORY, eur, functionalProject, ipHeaders, LANGS, PRODUCT, searchFor, shopUrl, tr, waitForScreen } from "./fixtures";
+import { CATEGORY, eur, functionalProject, ipHeaders, LANGS, PRODUCT, searchFor, shopUrl, tr, waitForScreen, shopUrlRe } from "./fixtures";
 import variants from "../src/data/catalogue.variants.json";
 
 /** Category nav, brand page, search, infinite scroll, and the product card
@@ -83,7 +83,7 @@ for (const lang of LANGS) {
 
       await page.locator(`[data-go-cat="${CATEGORY.id}"]`).first().click();
       await waitForScreen(page, "catalog");
-      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/c/${CATEGORY.id}/?$`));
+      await expect(page).toHaveURL(shopUrlRe(lang.seg, `/c/${CATEGORY.id}/`));
 
       await expect(page.locator("#catgrid .card").first()).toBeVisible();
       // "N товаров" / "N toodet" / "N products" — assert the number only,
@@ -118,7 +118,7 @@ for (const lang of LANGS) {
       // searchFor() goes through the header field on a laptop and the
       // bottom nav's «Поиск» tab on a phone — see fixtures.ts.
       await searchFor(page, "System");
-      await expect(page).toHaveURL(/\/search\/\?q=System/);
+      await expect(page).toHaveURL(/\/search\?q=System/);
       await expect(page.locator(".grid .card").first()).toBeVisible();
 
       await page.locator("[data-search2]").fill("zzzznonexistentquery12345");

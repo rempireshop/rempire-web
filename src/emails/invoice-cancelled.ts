@@ -27,6 +27,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import type { Lang, OrderLike, RenderedEmail } from "./types";
@@ -105,7 +106,7 @@ const T: Record<Lang, Strings> = {
 
 /** `/`, `/et/`, `/en/` — the shop the company can order from again. */
 function shopUrl(lang: Lang): string {
-  return `${baseUrl()}/shop2${lang === "et" ? "/et" : lang === "en" ? "/en" : ""}/`;
+  return baseUrl() + shopPath(lang, "/");
 }
 
 export function renderInvoiceCancelled(

@@ -28,7 +28,7 @@ import { renderAbandonedCart } from "@/emails/abandoned-cart";
 import { renderAbandonedCartDiscount } from "@/emails/abandoned-cart-discount";
 import { renderBackInStock } from "@/emails/back-in-stock";
 import { renderBirthday } from "@/emails/birthday";
-import { baseUrl, normalizeLang } from "@/emails/layout";
+import { baseUrl, normalizeLang, shopPath } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
 import { optedOutSet, unsubscribeHeaders, unsubscribeUrl, withdrawnSet } from "@/lib/consent";
 import { query } from "@/lib/db";
@@ -358,7 +358,7 @@ function sign(payload: string): string {
 }
 
 /**
- * `<base64url(payload)>.<hmac>` for `/shop2/checkout/?resume=…`.
+ * `<base64url(payload)>.<hmac>` for `/checkout?resume=…` (in the letter's language).
  *
  * The payload carries product ids, sizes and quantities and **no e-mail** — a
  * reminder link travels through mail servers and browser history, and a
@@ -430,16 +430,14 @@ export function readResumeToken(token: string | null | undefined, now: number = 
   }
 }
 
-/** `/shop2/et/checkout/?resume=…`, absolute. `code` rides inside the token. */
+/** `/et/checkout?resume=…`, absolute. `code` rides inside the token. */
 function resumeUrl(lang: LangCode, items: CartLine[], code?: string | null): string {
-  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
   const token = makeResumeToken(items, Date.now(), code);
-  return `${baseUrl()}/shop2${seg}/checkout/?resume=${encodeURIComponent(token)}`;
+  return baseUrl() + shopPath(lang, `/checkout/?resume=${encodeURIComponent(token)}`);
 }
 
 function productUrl(lang: LangCode, id: string): string {
-  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
-  return `${baseUrl()}/shop2${seg}/p/${encodeURIComponent(id)}/`;
+  return baseUrl() + shopPath(lang, `/p/${encodeURIComponent(id)}/`);
 }
 
 /* ---------- «Брошенная корзина» ------------------------------------------- */
@@ -1738,7 +1736,7 @@ function unpaidOrderLike(row: UnpaidRow): Record<string, unknown> {
   };
 }
 
-/** `/shop2/et/done/?n=R-…&s=failed&o=<id>&c=FI` — the screen with «Оплатить ещё раз».
+/** `/et/checkout/done?n=R-…&s=failed&o=<id>&c=FI` — the screen with «Оплатить ещё раз».
  *
  *  `c` is the order's delivery country and it is not decoration: the screen
  *  draws one country's bank chips, and a letter is opened in a browser that
@@ -1749,12 +1747,11 @@ function unpaidOrderLike(row: UnpaidRow): Record<string, unknown> {
  *  letter also needs the language segment, which a receipt redirect never has.
  */
 function payAgainUrl(lang: LangCode, row: UnpaidRow): string {
-  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
   const q = new URLSearchParams({ n: row.number, s: "failed", o: row.id });
   const ship = row.shipping as { country?: unknown } | null | undefined;
   const country = ship && typeof ship === "object" ? String(ship.country ?? "") : "";
   if (/^[A-Za-z]{2}$/.test(country)) q.set("c", country.toUpperCase());
-  return `${baseUrl()}/shop2${seg}/done/?${q.toString()}`;
+  return baseUrl() + shopPath(lang, `/done/?${q.toString()}`);
 }
 
 export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidRun> {

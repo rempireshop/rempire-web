@@ -251,23 +251,24 @@ test.describe("router — malformed addresses", () => {
        (`6933a0c`): the QUERY is what came back mangled, and it used to throw
        URIError out of the router during boot, leaving the prerendered page
        lying under an app that never painted. */
-    for (const path of ["/search/?q=%E0", "/et/search/?q=%E0%E0"]) {
-      await page.goto(`/shop2${path}`);
+    for (const path of ["/ru/search?q=%E0", "/et/search?q=%E0%E0"]) {
+      await page.goto(path);
       await waitForScreen(page, "search");
       await expect(page.locator("#prerender"), `${path}: the prerendered page stayed under the app`).toHaveCount(0);
       expect(errors, `${path}: uncaught page error`).toEqual([]);
     }
 
     /* A mangled PATH is not an address at all, and Next refuses to decode one
-       into a route parameter: /shop2/p/%E0/ has answered 400 ever since the
-       request-time product page existed, and since 07.09.2026 every /shop2/
-       path is a route, so they all answer the same way. What matters here is
-       that it is a clean refusal with a status — never a 5xx, never a stack.
+       into a route parameter, so a mangled id answers 400 — or, for a
+       product, the 301 every handle the catalogue does not have gets since
+       08.10.2026 (Shopify's scheme: an unknown /products/<handle> goes to its
+       brand or «Все товары»). What matters here is that it is a clean answer
+       with a status — never a 5xx, never a stack.
        (Question 4 in docs/audit/2026-09-07-storefront.md: whether that 400
        should be dressed as the shop's own 404 is Dim's call.) */
-    for (const path of ["/p/%E0/", "/b/%E0/", "/set/%E0/"]) {
-      const res = await page.request.get(`/shop2${path}`);
-      expect(res.status(), path).toBe(400);
+    for (const [path, want] of [["/ru/products/%E0", [301]], ["/ru/collections/%E0", [400]], ["/ru/collections/sets/%E0", [400]]] as const) {
+      const res = await page.request.get(path, { maxRedirects: 0 });
+      expect(want as readonly number[], `${path} answered ${res.status()}`).toContain(res.status());
     }
 
     /* …and the router's own safeDecode() still holds for a mangled id the SPA
@@ -276,7 +277,7 @@ test.describe("router — malformed addresses", () => {
     await page.goto(shopUrl("", "/sets/"));
     await waitForScreen(page, "bundles");
     await page.evaluate(() => {
-      history.pushState({}, "", "/shop2/set/%E0/");
+      history.pushState({}, "", "/ru/collections/sets/%E0");
       window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
     });
     await waitForScreen(page, "bundle");
@@ -350,7 +351,7 @@ test.describe("receipt — the purchase beacon", () => {
       page.waitForResponse((r) => r.url().includes("/api/bundles/")),
       page.waitForResponse((r) => r.url().includes("/api/overrides/")),
     ]);
-    await page.goto("/shop2/done/?n=R-100042&s=paid&t=41.90");
+    await page.goto("/ru/checkout/done?n=R-100042&s=paid&t=41.90");
     await waitForScreen(page, "done");
     await expect(page.locator(".done__num")).toHaveText("Заказ R-100042");
     await boot;
@@ -379,7 +380,7 @@ test.describe("receipt — the purchase beacon", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
     });
     const boot = page.waitForResponse((r) => r.url().includes("/api/bundles/"));
-    await page.goto("/shop2/done/?n=R-100043&s=failed");
+    await page.goto("/ru/checkout/done?n=R-100043&s=failed");
     await waitForScreen(page, "done");
     await expect(page.locator(".done__tick--bad")).toBeVisible();
     await boot;
@@ -421,7 +422,7 @@ test.describe("statistics — what a «view» beacon carries", () => {
     await page.goto(shopUrl("", `/search/?q=${encodeURIComponent("шампунь")}`));
     await waitForScreen(page, "search");
     await expect.poll(() => views.length).toBeGreaterThan(0);
-    expect(views).toContain("/shop2/search/");
+    expect(views).toContain("/ru/search");
     for (const path of views) {
       expect(path).not.toContain("?");
       expect(path).not.toContain("шампунь");
@@ -512,7 +513,7 @@ for (const lang of LANGS) {
       }));
       expect(head.htmlLang).toBe(lang.htmlLang);
       expect(head.canonical, "the canonical still points at the shell it was served from").toContain(
-        `/shop2${lang.seg}/brands/`,
+        shopUrl(lang.seg, "/brands/"),
       );
       expect(head.title, `Cyrillic left in the ${lang.code} tab title: ${head.title}`).not.toMatch(/[Ѐ-ӿ]/);
       expect(head.desc, `Cyrillic left in the ${lang.code} description: ${head.desc}`).not.toMatch(/[Ѐ-ӿ]/);
@@ -616,10 +617,15 @@ test.describe("404 — an address the shop has no page for", () => {
       const res = await page.request.get(shopUrl("", path));
       expect(res.status(), `${path} must not have become a 404`).toBe(200);
     }
-    // …and a category or a brand that does not exist is a 404 like anything else
-    for (const path of ["/c/not-a-category/", "/b/not-a-brand/", "/info/not-a-page/"]) {
-      const res = await page.request.get(shopUrl("", path));
-      expect(res.status(), `${path} should not resolve`).toBe(404);
+    /* …and a collection or a page that does not exist is Shopify's address
+       shape (since 08.10.2026 the shop's own): like every unknown Shopify
+       collection it lands on «Все товары», and an unknown /pages/… on the
+       contact page — one 301 each, never a 200 that pretends to be them. An
+       address of no shape at all is the 404 (above). */
+    for (const [path, want] of [["/ru/collections/not-a-category", "/ru/collections/vse-tovary"], ["/ru/pages/not-a-page", "/ru/pages/contact"]]) {
+      const res = await page.request.get(path, { maxRedirects: 0 });
+      expect(res.status(), `${path} should not resolve as itself`).toBe(301);
+      expect(new URL(res.headers().location, "http://x").pathname).toBe(want);
     }
   });
 });
@@ -834,7 +840,7 @@ test.describe("«Бренды» — a page of its own, before any script runs", 
     test(`«${lang.code}» — the served HTML is the brands page, not the Russian shell`, async ({ page }) => {
       /* The crawler's view: the bytes off the wire, no JavaScript. Until
          07.09.2026 this was the home page's head at every prefix, with a
-         canonical pointing at /shop2/. */
+         canonical pointing at the home page. */
       const res = await page.request.get(shopUrl(lang.seg, "/brands/"));
       expect(res.status()).toBe(200);
       const html = await res.text();
@@ -850,7 +856,7 @@ test.describe("«Бренды» — a page of its own, before any script runs", 
         "уход за волосами и бородой, стайлинг",
       );
       // every brand is a real link out of it — the second crawlable path to the 26
-      expect((html.match(/href="\/shop2[^"]*\/b\/[^"]+\/"/g) || []).length).toBeGreaterThan(20);
+      expect((html.match(/href="(?:\/ru|\/et)?\/collections\/[a-z0-9-]+"/g) || []).length).toBeGreaterThan(20);
 
       // …and it is in the sitemap now that it is a page
       const sm = await page.request.get("/sitemap-1.xml");
@@ -972,7 +978,7 @@ test.describe("the consent banner", () => {
     // and on a phone the bar would sit over «Оплатить»
     await expect(page.locator(".cbanner__box")).toHaveCount(0);
 
-    await page.goto("/shop2/done/?n=R-100099&s=paid&t=9.00");
+    await page.goto("/ru/checkout/done?n=R-100099&s=paid&t=9.00");
     await waitForScreen(page, "done");
     await expect(page.locator(".cbanner__box")).toHaveCount(0);
   });
@@ -1133,7 +1139,7 @@ test.describe("search — the box survives its own results", () => {
     // the empty state are gone
     await expect(page.locator("[data-searchres] [data-q]")).toHaveCount(0);
     // …and the query still rides on the address, as it did before
-    await expect(page).toHaveURL(/\/search\/\?q=rasvased/);
+    await expect(page).toHaveURL(/\/search\?q=rasvased/);
 
     // clearing the field, the other half of the finding
     await page.keyboard.press("ControlOrMeta+a");

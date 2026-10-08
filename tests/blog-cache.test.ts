@@ -79,9 +79,9 @@ describe("every public blog answer, in every language, is filed under the tag a 
   it("the article pages and the list pages built at request time — /shop2/, /shop2/et/, /shop2/en/", async () => {
     const post = await livePost();
     const pages = {
-      "": [await import("@/app/shop2/blog/[slug]/route"), await import("@/app/shop2/blog/route")],
-      et: [await import("@/app/shop2/et/blog/[slug]/route"), await import("@/app/shop2/et/blog/route")],
-      en: [await import("@/app/shop2/en/blog/[slug]/route"), await import("@/app/shop2/en/blog/route")],
+      "": [await import("@/app/ru/blogs/news/[slug]/route"), await import("@/app/ru/blogs/news/route")],
+      et: [await import("@/app/et/blogs/news/[slug]/route"), await import("@/app/et/blogs/news/route")],
+      en: [await import("@/app/blogs/news/[slug]/route"), await import("@/app/blogs/news/route")],
     } as const;
     for (const [seg] of LANGS) {
       const [article, listing] = pages[seg];

@@ -338,7 +338,7 @@ export async function warnOwnerOnce(now: number = Date.now(), campaign?: ParkedC
     body,
     /* The panel, not a letter's screen: what he can do about it is change the
        cap or wait, and both live there. */
-    url: "/shop2/admin/",
+    url: "/admin",
     /* One line in the shade per day — a second notice replaces the first. */
     tag: `mail-budget:${day}`,
   };

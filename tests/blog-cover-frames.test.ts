@@ -147,7 +147,7 @@ describe("the page built at request time wears each frame's own setting", () => 
   it("the article's cover by the article frame, a tile under it by the list frame", async () => {
     const other = (await publishPost((await post("Другая", "fill list 10 20 250 post 90 80 100 og 50 50 100")).id))!;
     const main = (await publishPost((await post("Главная", LONG)).id))!;
-    const { GET } = await import("@/app/shop2/blog/[slug]/route");
+    const { GET } = await import("@/app/ru/blogs/news/[slug]/route");
     const html = await (await GET(new Request(`${ORIGIN}/shop2/blog/${main.slug}/`), { params: Promise.resolve({ slug: main.slug }) })).text();
 
     const cover = /<img class="pre__img blog__cover"[^>]*>/.exec(html)?.[0] ?? "";

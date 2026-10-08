@@ -13,14 +13,19 @@
  */
 import { expect, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
+import { publicPath } from "../src/lib/shop-paths.mjs";
 
 export type LangCode = "RU" | "ET" | "EN";
 
-/** `pathFor()`'s SEG_OF_LANG (app.js) — RU is the default, unprefixed language. */
-export const LANGS: Array<{ code: LangCode; seg: string; htmlLang: string }> = [
-  { code: "RU", seg: "", htmlLang: "ru" },
-  { code: "ET", seg: "/et", htmlLang: "et" },
-  { code: "EN", seg: "/en", htmlLang: "en" },
+/** The three storefront languages. `seg` is this suite's own token for a
+ *  language — "" Russian, "/et", "/en" — the prefixes of the /shop2/ scheme the
+ *  specs were written against; shopUrl() turns it into the address the shop
+ *  has today (Shopify's: English unprefixed, /ru/…, /et/…). `prefix` is that
+ *  real prefix. */
+export const LANGS: Array<{ code: LangCode; seg: string; prefix: string; htmlLang: string }> = [
+  { code: "RU", seg: "", prefix: "/ru", htmlLang: "ru" },
+  { code: "ET", seg: "/et", prefix: "/et", htmlLang: "et" },
+  { code: "EN", seg: "/en", prefix: "", htmlLang: "en" },
 ];
 
 /** The projects a functional storefront spec runs on. "desktop" is the
@@ -33,9 +38,33 @@ export function functionalProject(testInfo: TestInfo): boolean {
   return testInfo.project.name === "desktop" || testInfo.project.name === "mobile-safari";
 }
 
-/** `/shop2<seg><path>` — path must start with "/" (or be "" for the home page). */
+/**
+ * The shop's address of a screen — `seg` is this suite's language token
+ * ("" Russian, "/et", "/en" — see LANGS) and `path` the screen's internal
+ * route ("/", "/p/<id>/", "/c/hair/", "/checkout/", "/search/?q=…"), and the
+ * answer is the address since 08.10.2026, Shopify's own
+ * (src/lib/shop-paths.mjs): shopUrl("", "/p/x/") is "/ru/products/x",
+ * shopUrl("/en", "/c/hair/") is "/collections/hair-care". An unprefixed
+ * address is English now; every spec that meant Russian with "" keeps
+ * meaning it.
+ */
 export function shopUrl(seg: string, path: string): string {
-  return `/shop2${seg}${path}`;
+  const s = String(seg || "").replace(/^\/+/, "").toLowerCase();
+  const lang = s === "et" ? "ET" : s === "en" ? "EN" : "RU";
+  return publicPath(lang, path || "/");
+}
+
+/** Matches a page's full URL when its path is exactly shopUrl(seg, path) —
+ *  for `toHaveURL()`; a query or a hash after it is allowed. */
+export function shopUrlRe(seg: string, path: string): RegExp {
+  const p = shopUrl(seg, path).split("?")[0];
+  return new RegExp("^[a-z]+://[^/]+" + p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?:[?#].*)?$");
+}
+
+/** The language of an address the shop serves: "RU", "ET" or "EN" (unprefixed). */
+export function langOfUrl(url: string): LangCode {
+  const p = new URL(url, "http://x").pathname;
+  return /^\/ru(\/|$)/.test(p) ? "RU" : /^\/et(\/|$)/.test(p) ? "ET" : "EN";
 }
 
 /** A product with 3 differently-priced sizes (src/data/catalogue.variants.json),
@@ -273,7 +302,8 @@ export async function payOrder(page: Page, email: string, outcome: "paid" | "fai
      refusal is `failed` (src/app/api/payments/mock/route.ts). This helper's
      callers want a finished, failed order. */
   await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Банк отклонил платёж" }).click();
-  await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
+  // the receipt: /checkout/done?… under the order's language prefix (08.10.2026)
+  await page.waitForURL(new RegExp(`/checkout/done\\?.*s=${outcome}`));
   const number = new URL(page.url()).searchParams.get("n");
   if (!number) throw new Error("payOrder: no order number (?n=) in the receipt URL");
   return number;
