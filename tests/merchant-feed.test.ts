@@ -14,6 +14,9 @@
  *     counted to zero);
  *   · every g:shipping entry against quoteFromRules() over the stored rules,
  *     the free-delivery threshold and a switched-off country included;
+ *   · the delivery times against the ones the shop prints — «Доставка и
+ *     оплата» (DELIVERY_ROWS in app.js) and clause 7.2 of the terms — and
+ *     every feed under the 4.5 MB a Vercel Function may answer with;
  *   · hidden products and switched-off custom products absent;
  *   · every link on the live domain, whatever PUBLIC_BASE_URL says;
  *   · the required attributes on every item of all three feeds, ids inside
@@ -36,12 +39,15 @@ import {
   buildFeed,
   feedBase,
   feedLangOf,
+  HANDLING_DAYS,
   idStem,
   MAX_ID,
   merchantId,
   sellCountries,
   shippingFor,
   sizeSlug,
+  TRANSIT_DAYS,
+  transitFor,
   validGtin,
 } from "@/lib/merchant-feed";
 import { OrderError, priceItems, setSetting, upsertOverride } from "@/lib/orders";
@@ -80,7 +86,7 @@ const TEE = "oversized-t-shirt-unisex"; // merch, «white / S» … «yellow / X
 
 const unxml = (s: string) => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
-type Ship = { country: string; service: string; price: string };
+type Ship = { country: string; service: string; price: string; minTransit?: string; maxTransit?: string };
 type Parsed = { fields: Record<string, string[]>; shipping: Ship[] };
 
 function items(xml: string): Parsed[] {
@@ -90,6 +96,8 @@ function items(xml: string): Parsed[] {
       country: /<g:country>([^<]*)</.exec(s[1])![1],
       service: unxml(/<g:service>([^<]*)</.exec(s[1])![1]),
       price: /<g:price>([^<]*)</.exec(s[1])![1],
+      minTransit: /<g:min_transit_time>([^<]*)</.exec(s[1])?.[1],
+      maxTransit: /<g:max_transit_time>([^<]*)</.exec(s[1])?.[1],
     }));
     const rest = body.replace(/<g:shipping>[\s\S]*?<\/g:shipping>/g, "");
     const fields: Record<string, string[]> = {};
@@ -473,6 +481,88 @@ describe("shipping", () => {
     for (const c of countries) expect(options.some((o) => o.country === c && o.service === "courier"), c).toBe(true);
     expect(options.some((o) => o.country === "GR" && o.service === "parcel")).toBe(false);
     expect(shippingFor(250, DEFAULT_SHIPPING_RULES).every((o) => o.price === 0)).toBe(true);
+  });
+});
+
+/* ---------- delivery times ---------------------------------------------- */
+
+describe("delivery times", () => {
+  it("every item carries the shop's own days, and every g:shipping the carrier's days to its country", async () => {
+    for (const lang of ["en", "et", "ru"] as const) {
+      const { xml, list } = await feed(lang);
+      expect(list.length).toBeGreaterThan(300);
+      for (const it of list) {
+        const id = one(it, "id")!;
+        expect(it.fields.min_handling_time, id).toEqual([String(HANDLING_DAYS.min)]);
+        expect(it.fields.max_handling_time, id).toEqual([String(HANDLING_DAYS.max)]);
+        for (const s of it.shipping) {
+          const span = transitFor(s.country)!;
+          expect(span, `${id} ${s.country}`).not.toBeNull();
+          expect(s.minTransit, `${id} ${s.country}`).toBe(String(span.min));
+          expect(s.maxTransit, `${id} ${s.country}`).toBe(String(span.max));
+        }
+      }
+      // handling is the item's, once — never repeated inside a g:shipping
+      expect(xml).not.toMatch(/<g:shipping>(?:(?!<\/g:shipping>)[\s\S])*_handling_time/);
+    }
+    const { list } = await feed("en");
+    const gatsby = byProduct(list, GATSBY)[0];
+    const at = (country: string, service: string) => gatsby.shipping.find((s) => s.country === country && s.service === service)!;
+    expect(at("EE", "Parcel locker")).toMatchObject({ minTransit: "1", maxTransit: "3" });
+    expect(at("EE", "Courier")).toMatchObject({ minTransit: "1", maxTransit: "3" });
+    expect(at("FI", "Courier")).toMatchObject({ minTransit: "2", maxTransit: "5" });
+    expect(at("PL", "Parcel locker")).toMatchObject({ minTransit: "3", maxTransit: "8" });
+  });
+
+  it("are the shop's handling decision: the same day, sometimes the next", () => {
+    expect(HANDLING_DAYS).toEqual({ min: 0, max: 1 });
+  });
+
+  it("are the times the shop itself prints: «Доставка и оплата» and clause 7.2 of the terms, in every language", () => {
+    const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+    const block = /var DELIVERY_ROWS = \[([\s\S]*?)\];/.exec(app)![1];
+    const rows = [...block.matchAll(/\["([A-Z]{2})", "[^"]*", "(\d+)–(\d+) [^"]*"\]/g)].map(
+      (m) => [m[1], { min: Number(m[2]), max: Number(m[3]) }] as const,
+    );
+    expect(rows.map((r) => r[0])).toEqual(["EE", "LV", "LT", "FI", "EU"]);
+    // exactly the page's rows: a country's own number belongs on the page first, then here
+    expect(TRANSIT_DAYS).toEqual(Object.fromEntries(rows));
+
+    for (const file of ["legal.js", "legal.ru.js", "legal.et.js", "legal.en.js"]) {
+      const text = readFileSync(fileURLToPath(new URL(`../public/shop/${file}`, import.meta.url)), "utf8");
+      const clause = /<b>7\.2<\/b>([^<]*)/.exec(text)?.[1] ?? "";
+      expect(clause, file).toMatch(/14:00/);
+      const spans = [...clause.matchAll(/(\d+)–(\d+)/g)].map((m) => ({ min: Number(m[1]), max: Number(m[2]) }));
+      // Estonia; Latvia, Lithuania and Finland; the rest of Europe — in that order
+      expect(spans, file).toEqual([TRANSIT_DAYS.EE, TRANSIT_DAYS.LV, TRANSIT_DAYS.EU]);
+      expect(TRANSIT_DAYS.LT, file).toEqual(TRANSIT_DAYS.LV);
+      expect(TRANSIT_DAYS.FI, file).toEqual(TRANSIT_DAYS.LV);
+    }
+  });
+
+  it("reach every country the checkout offers, and none the shop promises no time for", () => {
+    const everywhere: ShippingRules = { ...DEFAULT_SHIPPING_RULES, countriesOff: [] };
+    for (const rules of [DEFAULT_SHIPPING_RULES, everywhere]) {
+      for (const o of shippingFor(15, rules)) expect(o.transit, o.country).toEqual(transitFor(o.country));
+      for (const c of sellCountries(rules)) expect(transitFor(c), c).not.toBeNull();
+    }
+    expect(transitFor("DE")).toEqual(TRANSIT_DAYS.EU);
+    expect(transitFor("GB")).toEqual(TRANSIT_DAYS.EU);
+    // outside Europe the shop promises nothing, so the feed says nothing
+    for (const c of ["US", "UA", "BY", "KZ", "", "constructor", "toString"]) expect(transitFor(c), c).toBeNull();
+  });
+
+  /* A Vercel Function answers with 4.5 MB at most; past it the feed is a 413
+     and Merchant Center fetches nothing. The shipping block is three
+     quarters of the file (some 15 800 g:shipping entries per feed), which is
+     why the handling days are written once per item and not inside each. */
+  it("keeps every feed under the 4.5 MB a Vercel Function may answer with", () => {
+    for (const lang of ["EN", "ET", "RU"] as const) {
+      const { xml } = buildFeed({
+        lang, base: LIVE, overrides: {}, descriptions: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES,
+      });
+      expect(Buffer.byteLength(xml, "utf8"), lang).toBeLessThan(4_500_000);
+    }
   });
 });
 

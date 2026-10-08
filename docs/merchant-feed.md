@@ -32,6 +32,7 @@ whenever Google asks for it:
   - the brand
   - the barcode, where Renat has scanned one in «Склад»
   - the delivery price to every country the checkout offers
+  - the delivery time to each of those countries (since 08.10.2026)
 - **Each size is its own item.** A shampoo sold in 75, 250 and 500 ml is
   three items, grouped together. Today that is **322 items from 220
   products**, plus any product the owner created in the panel that has a
@@ -154,9 +155,28 @@ is what to do about it:
 3. After step E, when the Shopify sources are gone, go to **Settings →
    Shipping and returns** and **delete the Shopify shipping policies**.
    Nothing else uses them by then.
-4. Delivery **times** are not in the feed yet. If Merchant Center flags our
-   items for a missing delivery time (check the wording), tell Dim. The feed
-   can carry the times too: 1–3 days in Estonia, and so on.
+4. **Delivery times are in the feed too** (since 08.10.2026). Every product
+   says two things, both in business days:
+   - **we hand the parcel to the carrier in 0–1 days.** Usually the same
+     day, sometimes the next. This is Dim's decision of 08.10.2026.
+   - **the carrier then needs:** 1–3 days in Estonia, 2–5 days in Latvia,
+     Lithuania and Finland, and 3–8 days in the rest of Europe. These are
+     the times the shop already promises, on «Доставка и оплата» and in the
+     terms of delivery (point 7.2). A parcel locker and a courier get the
+     same times, because the shop promises them the same.
+
+   Google adds the two together, so it may show Estonia as "delivery in 1–4
+   days" (check the wording). The Shopify "4–12 days" policy does not apply
+   to our items: when an item carries its own delivery price, Google ignores
+   the account's shipping settings, delivery times included.
+
+   On the second day, when you check three products (step C.2), also look
+   for a delivery time, for example Estonia 1–4 days. If Merchant Center
+   flags our items for the delivery time (check the wording), tell Dim.
+
+   **If the promised times change**, change «Доставка и оплата» and the
+   terms first. The feed must say the same as the shop. A test fails until
+   both say the same numbers.
 
 ## D. Watch it for 1–3 days
 
@@ -229,11 +249,13 @@ is what to do about it:
 | Links | `liveBaseFrom()` in `src/lib/seo-head.mjs`. It uses `PUBLIC_BASE_URL` when that is `rempireshop.com` or `www.`, and `https://rempireshop.com` otherwise. A staging or preview copy never emits its own host. |
 | Price | `rungsOf()` restates `priceItems()` in `src/lib/orders.ts`: the owner's ladder, else the file's ladder shifted by his «Цена», else the file. The test prices items through `priceItems()` itself. |
 | Availability | The stock word from `getOverrides()` plus `stockByVariant`: a size counted to zero is `out_of_stock`. Hidden products are left out. |
-| Shipping | `shippingFor()`: `quoteFromRules()` over `settings.shipping_rules` for each carrier `offeredCarriers()` lists, the cheapest per country for parcel (only where `pickupOffered()`) and for courier, with the item's price as the subtotal. Countries are EE, LV, LT, FI and `EUROPE` minus `countriesOff`. Per item, both services, about 2.3 MB per feed raw and about 100 KB gzipped. |
+| Shipping | `shippingFor()`: `quoteFromRules()` over `settings.shipping_rules` for each carrier `offeredCarriers()` lists, the cheapest per country for parcel (only where `pickupOffered()`) and for courier, with the item's price as the subtotal. Countries are EE, LV, LT, FI and `EUROPE` minus `countriesOff`. Per item, both services. |
+| Delivery times | Handling: `HANDLING_DAYS` (0–1, Dim 08.10.2026), written once per item as the standalone `g:min_handling_time` / `g:max_handling_time`. Google accepts these instead of the `g:shipping` sub-attributes. Transit: `TRANSIT_DAYS` via `transitFor()`, where a country's own row comes first, then its `shippingZone()` row. It is written in every `g:shipping` as `g:min_transit_time` / `g:max_transit_time`, the same span for locker and courier. The table is exactly `DELIVERY_ROWS` in `public/shop2/app.js` and clause 7.2 of `public/shop/legal*.js`, and the test fails when they differ. A zone with no row gets no transit time. Not sent: `handling_cutoff_time` (14:00, clause 7.2) and `shipping_*_business_days` (Google assumes Monday to Saturday). |
+| Size | About 3.7 MB per feed raw (RU 4.0 MB), 130–160 KB gzipped, with some 15 800 `g:shipping` entries per feed. **A Vercel Function may answer with 4.5 MB at most**, and past that the feed is a 413. That is why handling time is written per item and not per `g:shipping`: there it would add about 1.4 MB. The test fails when a feed passes 4.5 MB. |
 | IDs | The product id, plus `_<size>` for one size of several. Ids longer than 50 characters get a shortened, hashed stem (`idStem()`). `item_group_id` is the stem. All ids are handed out by `planFeed()`, which `feedOffers()` exposes. |
 | Checkout link | `/cart/<id>:<qty>` (Merchant Center → Business info → Checkout). `src/middleware.ts` lets exactly that shape past the legacy `/cart` redirect (`src/lib/cart-permalink.ts`); `src/app/cart/[...path]/route.ts` looks the id up in `feedOffers()` (`src/lib/merchant-cart.ts`) and answers 302 to the product page with `?size=…&buy=<qty>`, which `buyFromLink()` in `public/shop2/app.js` turns into a basket line and the checkout. Sold out: the product page, nothing added. Hidden or unknown: the home page. |
 | GTIN | `stock_levels.ean`, only when it is a valid GTIN-8/12/13/14 outside the in-store ranges. `identifier_exists=no` only for the brand Rempire. |
-| Not in the feed | Sets (bundles); gift cards; custom products with no photo, whose placeholder SVG Google cannot read; `unit_pricing` beyond ml/g sizes; delivery times. |
+| Not in the feed | Sets (bundles); gift cards; custom products with no photo, whose placeholder SVG Google cannot read; `unit_pricing` beyond ml/g sizes; the order cut-off time; per-carrier delivery times. |
 
 Known data gaps (23.09.2026, catalogue files; the database can only add to
 these):
