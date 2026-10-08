@@ -123,13 +123,14 @@ why it is phase A on `/golive/`.
 
 **The one page for the night: `docs/launch-runbook.md`** — every command and click in order, with its check and its rollback (06.10.2026).
 
-**Wednesday 07.10.2026, from 22:00 Tallinn time** (Dim, 05.10.2026 — first
-set for 02:00 on the night of 05→06.10, postponed the same day): a quiet
+**Thursday 08.10.2026, 22:00–23:00 Tallinn time** (Dim, 08.10.2026 — first
+set for 02:00 on the night of 05→06.10, then Wednesday 07.10): a quiet
 evening hour, and 22:00 Tallinn is 19:00 UTC, hours from either cron (07:00
 and 03:30 UTC). What needs Renat was decided in writing on 01.10 (T-1); he
 signs in that evening or next morning (step 9). The footer «Админка» link
-came back on 05.10 (eca0a11) and is removed again on Wednesday during the day
-(`git revert eca0a11`). **In order** — several steps are only
+came back on 05.10 (eca0a11) and went again on 08.10 before the launch
+(`git revert eca0a11`). Blog: only Renat's posts stay — the three August
+posts go to the bin by hand once he has written his (Dim, 08.10). **In order** — several steps are only
 correct together. On `/golive/` each is its own numbered row. The two Shopify
 exports (steps 4 and 4b) arrive by e-mail to dim.novare@gmail.com and open
 within the Shopify login.

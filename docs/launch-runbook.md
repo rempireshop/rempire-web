@@ -1,4 +1,4 @@
-# Launch runbook — Wednesday 07.10.2026, from 22:00 Tallinn
+# Launch runbook — Thursday 08.10.2026, 22:00–23:00 Tallinn
 
 One page for the night. The why of every step is in `docs/go-live.md` and on
 `/golive/`; this is only what to type and click, what to check, and how to go
@@ -7,10 +7,10 @@ back. Commands run in `C:\Users\Dmitri.MARKIT\source\repos\rempire-web`.
 **Rule of the night:** rempireshop.com stays on Shopify until step 6. Steps 1–4
 touch only the new shop; nobody notices them. Step 6 is the switch.
 
-## Before 22:00 (Wednesday daytime)
+## Before 22:00 (Thursday daytime)
 
-- [ ] Claude: footer «Админка» link off — `git revert eca0a11`, minify + retoken,
-      tests, push; staging deploy green.
+- [x] Claude: footer «Админка» link off — `git revert eca0a11`, minify + retoken,
+      tests, push; staging deploy green (done 08.10 afternoon).
 - [ ] Chrome «Browser 1» signed in to: the staging admin
       (`rempireshop.diipsolutions.eu/shop2/admin/`), Shopify admin, Vercel (team
       «rempire»), Cloudflare, Gmail.
