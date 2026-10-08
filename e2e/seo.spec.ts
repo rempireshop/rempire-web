@@ -12,6 +12,11 @@ test.beforeEach(async ({}, testInfo) => {
 });
 test.use({ extraHTTPHeaders: ipHeaders(110) });
 
+/* An API context made inside the runner inherits the project's storageState —
+ * the suite's own rempire_lang=en cookie (playwright.config.ts). A client that
+ * stands for Googlebot or for a first-time Russian visitor must carry none. */
+const NO_COOKIES = { cookies: [], origins: [] };
+
 test("a prerendered product page carries the full hreflang cluster and a Product JSON-LD block", async ({ page, request }) => {
   const url = shopUrl("/et", `/p/${PRODUCT.id}/`);
   expect(url).toBe(`/et/products/${PRODUCT.id}`);
@@ -64,7 +69,7 @@ test("a prerendered product page carries the full hreflang cluster and a Product
  * page is served. */
 test.describe("the language comes from the address, never from the browser", () => {
   test("Googlebot's view — no Accept-Language, no cookie — is the address's own language, with no redirect", async () => {
-    const bot = await apiRequest.newContext({ baseURL: E2E_BASE_URL, extraHTTPHeaders: { "user-agent": "Googlebot/2.1", ...ipHeaders(111) } });
+    const bot = await apiRequest.newContext({ baseURL: E2E_BASE_URL, storageState: NO_COOKIES, extraHTTPHeaders: { "user-agent": "Googlebot/2.1", ...ipHeaders(111) } });
     for (const [path, lang] of [[`/products/${PRODUCT.id}`, "en"], [`/ru/products/${PRODUCT.id}`, "ru"], ["/et", "et"], ["/", "en"]] as const) {
       const res = await bot.get(path, { maxRedirects: 0 });
       expect(res.status(), path).toBe(200);
@@ -109,6 +114,7 @@ test.describe("the language comes from the address, never from the browser", () 
     ] as const) {
       const ctx = await apiRequest.newContext({
         baseURL: E2E_BASE_URL,
+        storageState: NO_COOKIES,
         extraHTTPHeaders: { "accept-language": header, ...(cookie ? { cookie } : {}), ...ipHeaders(114) },
       });
       const res = await ctx.get(`/products/${PRODUCT.id}?size=250ml`, { maxRedirects: 0 });
@@ -119,10 +125,10 @@ test.describe("the language comes from the address, never from the browser", () 
       await ctx.dispose();
     }
     /* …and one that chose English stays, whatever its browser says */
-    const en = await apiRequest.newContext({ baseURL: E2E_BASE_URL, extraHTTPHeaders: { "accept-language": "ru-RU", cookie: "rempire_lang=en", ...ipHeaders(115) } });
+    const en = await apiRequest.newContext({ baseURL: E2E_BASE_URL, storageState: NO_COOKIES, extraHTTPHeaders: { "accept-language": "ru-RU", cookie: "rempire_lang=en", ...ipHeaders(115) } });
     expect((await en.get(`/products/${PRODUCT.id}`, { maxRedirects: 0 })).status()).toBe(200);
     /* the panel has no language in its address and is never sent anywhere */
-    const owner = await apiRequest.newContext({ baseURL: E2E_BASE_URL, extraHTTPHeaders: { "accept-language": "ru-RU", ...ipHeaders(116) } });
+    const owner = await apiRequest.newContext({ baseURL: E2E_BASE_URL, storageState: NO_COOKIES, extraHTTPHeaders: { "accept-language": "ru-RU", ...ipHeaders(116) } });
     expect((await owner.get("/admin", { maxRedirects: 0 })).status()).toBe(200);
     await en.dispose();
     await owner.dispose();
