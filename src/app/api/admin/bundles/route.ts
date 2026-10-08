@@ -31,6 +31,8 @@ import {
   upsertBundle,
   validateBundle,
 } from "@/lib/bundles";
+import { setUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 import { getOverrides, writeAuditSafe } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -92,6 +94,8 @@ export async function POST(req: Request) {
       price: bundle.price,
       active: bundle.active,
     });
+    // a set on sale is a page; the engines hear it changed (live shop only, fire-and-forget)
+    if (bundle.active) submitIndexNow(setUrls(bundle.id));
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] write failed:", err);
@@ -122,6 +126,7 @@ export async function PATCH(req: Request) {
     const bundle = await setBundleActive(id, body.active);
     if (!bundle) return bad("not_found", 404);
     await writeAuditSafe("admin", "bundle.active", { id: bundle.id, active: bundle.active });
+    submitIndexNow(setUrls(bundle.id));   // on sale or off: its page appeared or went
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] patch failed:", err);
@@ -140,6 +145,7 @@ export async function DELETE(req: Request) {
     const bundle = await deleteBundle(id);
     if (!bundle) return bad("not_found", 404);
     await writeAuditSafe("admin", "bundle.delete", { id: bundle.id });
+    submitIndexNow(setUrls(bundle.id));   // its page now answers 404
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] delete failed:", err);

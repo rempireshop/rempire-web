@@ -37,6 +37,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { refreshBlogCache } from "@/lib/blog-cache";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
+import { blogPostUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 import {
   BlogError,
   deletePost,
@@ -204,6 +206,7 @@ export async function PATCH(req: Request) {
       const post = body.publish ? await publishPost(target) : await unpublishPost(target);
       if (!post) return bad("not_found", 404);
       refreshBlogCache();   // in, or out: every list and page changes either way
+      submitIndexNow(blogPostUrls(post.slug));   // …and the engines hear it (live shop only)
       return Response.json({ ok: true, post }, { headers: NO_STORE });
     }
 
@@ -211,7 +214,10 @@ export async function PATCH(req: Request) {
     const id = idRaw || (await getPostBySlug(slugRaw))?.id;
     if (!id) return bad("not_found", 404);
     const post = await upsertPost({ ...fieldsOf(body), id });
-    if (post.status === "published") refreshBlogCache();
+    if (post.status === "published") {
+      refreshBlogCache();
+      submitIndexNow(blogPostUrls(post.slug));
+    }
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
     if (err instanceof BlogError) return bad(err.code, err.code === "not_found" ? 404 : 400);
@@ -232,6 +238,7 @@ export async function DELETE(req: Request) {
     if (!post) return bad("not_found", 404);
     // it may have been live a moment ago — the row no longer says, so assume it was
     refreshBlogCache();
+    submitIndexNow(blogPostUrls(post.slug));
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/blog DELETE failed", err);

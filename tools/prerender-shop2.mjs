@@ -63,8 +63,9 @@
 
 import { readFile, writeFile, mkdir, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { register } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
@@ -75,7 +76,7 @@ import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles
    of products this file writes — an article's shelf and every grid on the
    storefront — is a set of links into /p/ addresses, and a hidden product's
    address answers 404. See tools/lib/overrides-export.mjs. */
-import { fetchProductOverrides } from "./lib/overrides-export.mjs";
+import { fetchProductOverrides, fetchStockEans } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
    number somebody remembers to raise. tools/lib/asset-token.mjs says why the
@@ -94,7 +95,8 @@ import {
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
+  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
+  STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
 } from "../src/lib/seo-head.mjs";
 import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS } from "../src/lib/shop-paths.mjs";
 
@@ -482,7 +484,9 @@ try {
    defaults that app.js applyShipRules() does (key by key, a bad number
    ignored), so the page prints what the checkout will bill. Without
    DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
-const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts"]);
+/* `content` only for its opening hours, which the Organization block names
+   when the owner has filled them in (ORG_LD below). */
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts", "content"]);
 function mergeShipRules(defaults, raw) {
   const out = JSON.parse(JSON.stringify(defaults));
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
@@ -528,6 +532,67 @@ if (DELIVERY) {
   console.log("  delivery page: " + (LIVE_SETTINGS.shipping_rules ? "live tariffs from settings.shipping_rules" : "built-in tariff defaults") +
     " · EE parcel " + SHIP_RULES_LIVE.methods.parcel.EE + " € · free from " + SHIP_RULES_LIVE.freeFrom + " €");
 }
+/* ---------- what the Merchant Center feed says, for the structured data -----
+
+   A product page's offers — one per size, at the feed's prices and ids and
+   `?size=` links, each with its delivery prices — and the Organization's
+   shipping and returns policy are the feed's own answers, not a second copy
+   of them: src/lib/merchant-feed.ts (feedOffers(), shippingFor(),
+   shippingTerms(), sellCountries()) over src/lib/shipping.ts's own parse of
+   the stored rules. Both are TypeScript; Node strips the types itself
+   (22.18+) and tools/lib/ts-resolve.mjs resolves their `@/…` imports, the way
+   tools/render-emails.mjs runs the letters.
+
+   Not fatal when it cannot load: the product pages then carry the single
+   offer they always had and the Organization the four home countries, and
+   the run says so. A missing delivery block costs a rich result; a build
+   that refused to write the shop over it would cost the shop. */
+const STOCK_EANS = await fetchStockEans();
+let MERCHANT = null;
+try {
+  if (!process.features || !process.features.typescript) {
+    throw new Error("this Node strips no TypeScript types (22.18+ does by default)");
+  }
+  register(pathToFileURL(path.join(ROOT, "tools", "lib", "ts-resolve.mjs")).href);
+  const feed = await import(pathToFileURL(path.join(ROOT, "src", "lib", "merchant-feed.ts")).href);
+  const ship = await import(pathToFileURL(path.join(ROOT, "src", "lib", "shipping.ts")).href);
+  /* the rules exactly as loadShippingRules() reads the stored row for the feed */
+  const rules = LIVE_SETTINGS.shipping_rules ? ship.parseShippingRules(LIVE_SETTINGS.shipping_rules) : ship.DEFAULT_SHIPPING_RULES;
+  const offersById = new Map();
+  for (const o of feed.feedOffers({ overrides: PRODUCT_OVERRIDES, descriptions: {}, custom: [] })) {
+    if (!offersById.has(o.productId)) offersById.set(o.productId, []);
+    offersById.get(o.productId).push(o);
+  }
+  const shipMemo = new Map();
+  MERCHANT = {
+    offersById,
+    countries: feed.sellCountries(rules),
+    terms: feed.shippingTerms(rules),
+    handling: feed.HANDLING_DAYS,
+    shipping: price => {
+      if (!shipMemo.has(price)) shipMemo.set(price, feed.shippingFor(price, rules));
+      return shipMemo.get(price);
+    },
+    gtin: (id, label) => feed.validGtin((STOCK_EANS[id] || {})[label == null ? "" : label]),
+  };
+  console.log("  structured data: offers for " + offersById.size + " products from the Merchant feed, delivery to " +
+    MERCHANT.countries.length + " countries, " + Object.keys(STOCK_EANS).length + " products with a barcode");
+} catch (e) {
+  console.warn("! " + e.message + "\n! product JSON-LD is written with a single offer and no delivery or returns block");
+  MERCHANT = null;
+}
+
+/** What the feed says about one catalogue product — productOffersLD() in src/lib/seo-head.mjs reads it. */
+function productCommerce(p) {
+  if (!MERCHANT) return undefined;
+  return {
+    offers: (MERCHANT.offersById.get(p.id) || []).map(o => ({ ...o, gtin: MERCHANT.gtin(p.id, o.label) })),
+    shipping: MERCHANT.shipping,
+    handling: MERCHANT.handling,
+    returnCountries: MERCHANT.countries,
+  };
+}
+
 /* app.js eur(): «12,90 €» for RU/ET, «€12.90» for EN, whole euros without
    decimals — so the static English page prints the price the live one does. */
 function eurFor(n, code) {
@@ -709,6 +774,9 @@ const ORG_ID = abs("/") + "#organization";
    `Store`, not only `Organization`: there is a counter at Mardi 1 and the
    checkout offers pickup from it, so the physical shop is a fact, not a
    flourish. */
+/* The hours as the owner last saved them in «Настройки → Контент», else the
+   defaults — empty in both today, so none are published (openingHoursLD()). */
+const ORG_HOURS = openingHoursLD((LIVE_SETTINGS.content && LIVE_SETTINGS.content.hours) || SHOP_CONTENT.hours);
 const ORG_LD = {
   "@context": "https://schema.org", "@type": ["Organization", "Store"],
   "@id": ORG_ID,
@@ -723,8 +791,22 @@ const ORG_LD = {
   vatID: IDENTITY.vatNumber || undefined,
   taxID: IDENTITY.regCode || undefined,
   address: postalAddress(IDENTITY.address),
-  areaServed: ["EE", "LV", "LT", "FI"],
-  sameAs: SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean)
+  /* the pin and a map link, the hours when the owner has given them, the
+     salon's own site beside the socials (STORE_* in src/lib/seo-head.mjs) */
+  geo: STORE_GEO,
+  hasMap: STORE_MAP_URL,
+  ...(ORG_HOURS.length ? { openingHoursSpecification: ORG_HOURS } : {}),
+  /* every country the checkout delivers to — the Merchant feed's own list
+     (sellCountries() over the stored rules); the four home countries when
+     the feed could not be read this run */
+  areaServed: MERCHANT ? MERCHANT.countries : ["EE", "LV", "LT", "FI"],
+  sameAs: [...SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean), ...STORE_SAME_AS],
+  /* the shop-wide returns and delivery policy, from the same functions as
+     every offer's (src/lib/seo-head.mjs, src/lib/merchant-feed.ts) */
+  ...(MERCHANT ? {
+    hasMerchantReturnPolicy: returnPolicyLD(MERCHANT.countries, abs(langPath("", "/info/returns/"))),
+    hasShippingService: shippingServiceLD(MERCHANT.terms, MERCHANT.handling),
+  } : {})
 };
 /* JSON.stringify drops an undefined value, so an empty setting leaves the key
    out rather than publishing "" — but a reader of this file should not have to
@@ -926,7 +1008,9 @@ function productPage(p, lang) {
        square .webp cutout is never offered to a scraper: half of them refuse
        the format outright and the rest crop it through the middle. */
     image: ogPick(productCard(p)),
-    imageUrls: [imgUrl(p)]
+    imageUrls: [imgUrl(p)],
+    // its sizes, delivery and returns, as the Merchant feed has them
+    commerce: productCommerce(p)
   });
   const { rest, core, priceText: price, crumbItems } = spec;
 
