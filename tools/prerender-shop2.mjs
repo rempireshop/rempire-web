@@ -77,6 +77,8 @@ import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles
    address answers 404. See tools/lib/overrides-export.mjs. */
 import { fetchProductOverrides } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
+/* «Доставка и оплата»: the builder and the rules the checkout bills from, lifted out of app.js. */
+import { liftDelivery } from "./lib/delivery-lift.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
    number somebody remembers to raise. tools/lib/asset-token.mjs says why the
    token exists at all and what a stale one cost. */
@@ -459,29 +461,19 @@ const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s)
 
 /* ---------- «Доставка и оплата»: the builder, lifted the same way ---------
 
-   deliveryPageHTML() and the five declarations it reads — SHIP_RULES (the
-   defaults the checkout bills with), MONTONIO_PRICE (what an empty box
-   charges), CARRIER_NAMES, CARRIERS_BY_COUNTRY and
-   DELIVERY_ROWS — live in app.js and only there, next to the checkout that
-   uses them. Lifted here, so the static /info/shipping/ page and the one the
-   shop draws live are the same function over the same tables; the builder
-   is written as a pure function of its `ctx` for exactly this reason (see
-   its comment in app.js). If the slices stop coming out, the page falls back
-   to the policy text and the tool says so. */
+   deliveryPageHTML() and the tables it reads — SHIP_RULES, MONTONIO_PRICE,
+   CARRIER_NAMES, CARRIERS_BY_COUNTRY, DELIVERY_ROWS — live in app.js and only
+   there, next to the checkout that uses them, and so do the functions that
+   turn the owner's stored row into the table the checkout bills from
+   (setShipRules(): shipStoredMerge() over shipRulesBase()). All of it is
+   lifted by tools/lib/delivery-lift.mjs, so the static shipping page and the
+   one the shop draws live are the same function over the same table; the
+   builder is written as a pure function of its `ctx` for exactly this reason
+   (see its comment in app.js). If the slices stop coming out, the page falls
+   back to the policy text and the tool says so. */
 let DELIVERY = null;
 try {
-  const pieces = [
-    sliceFrom(/^ {2}var SHIP_RULES = \{$/, DECL_END),
-    sliceFrom(/^ {2}var MONTONIO_PRICE = \{$/, DECL_END),
-    sliceFrom(/^ {2}var CARRIER_NAMES = \{$/, DECL_END),
-    sliceFrom(/^ {2}var CARRIERS_BY_COUNTRY = \{$/, DECL_END),
-    sliceFrom(/^ {2}var DELIVERY_ROWS = \[$/, DECL_END),
-    sliceFrom(/^ {2}function deliveryPageHTML\(ctx\) \{$/, FN_END)
-  ];
-  if (pieces.some(p => !p)) throw new Error("could not lift the delivery page (deliveryPageHTML & co) out of app.js");
-  DELIVERY = new Function(pieces.join("\n") +
-    "\nreturn { rules: SHIP_RULES, montonio: MONTONIO_PRICE, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY, rows: DELIVERY_ROWS, page: deliveryPageHTML };")();
-  if (typeof DELIVERY.page !== "function" || !DELIVERY.rules.methods) throw new Error("the lifted delivery page has the wrong shape");
+  DELIVERY = liftDelivery(appSrc);
 } catch (e) {
   console.warn("! " + e.message + "\n! /info/shipping/ is written from the policy text alone");
   DELIVERY = null;
@@ -504,46 +496,19 @@ try {
   RETURNS_ASK = null;
 }
 
-/* The live rules, when the database is there — the same merge over the
-   defaults that app.js applyShipRules() does (key by key, a bad number
-   ignored), so the page prints what the checkout will bill. Without
-   DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
+/* The rules the page prints — the table the checkout bills from. Until
+   09.10.2026 this was a merge of the build's own: the owner's stored row laid
+   over SHIP_RULES, the table of a shop with NO row, whose courier column holds
+   three home numbers (EE 10,84 €, LV and LT 9,90 €). The shop never bills
+   from that once a row exists — setShipRules() lays the row over the
+   Montonio-priced base, and parseShippingRules() on the server does the same —
+   so the static page promised a 10,84 € courier while the checkout and the bill
+   charged 6,89–7,39 €. liveRules() is the shop's own path, lifted
+   (tools/lib/delivery-lift.mjs); tests/delivery-page-prices.test.ts holds the
+   printed prices to the server's quote. No DATABASE_URL = no row = the
+   defaults, which is what src/lib/shipping.ts bills a shop with no row too. */
 const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts"]);
-function mergeShipRules(defaults, raw) {
-  const out = JSON.parse(JSON.stringify(defaults));
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
-  if (raw.freeFrom === null || typeof raw.freeFrom === "number") out.freeFrom = raw.freeFrom;
-  if (raw.freeFromByCountry && typeof raw.freeFromByCountry === "object") out.freeFromByCountry = raw.freeFromByCountry;
-  if (raw.methods && typeof raw.methods === "object") {
-    for (const m of ["parcel", "courier", "pickup"]) {
-      if (!raw.methods[m] || typeof raw.methods[m] !== "object") continue;
-      for (const c of Object.keys(raw.methods[m])) {
-        const v = Number(raw.methods[m][c]);
-        if (Number.isFinite(v) && v >= 0) out.methods[m][c] = v;
-      }
-    }
-  }
-  /* Cell by cell, exactly as parseShippingRules() on the server and
-     applyShipRules() in app.js do it. Since 13.09.2026 the defaults hold one
-     price per carrier from Montonio's own tariffs, so an absent cell means
-     «charge what Montonio charges for this carrier» — replacing the whole
-     table with the owner's partial one would put this page back on a single
-     «Пакомат» number per country while the checkout billed per carrier. */
-  if (raw.carriers && typeof raw.carriers === "object") {
-    out.carriers = out.carriers || {};
-    for (const k of Object.keys(raw.carriers)) {
-      const row = raw.carriers[k];
-      if (!row || typeof row !== "object") continue;
-      out.carriers[k] = out.carriers[k] || {};
-      for (const c of Object.keys(row)) {
-        const v = Number(row[c]);
-        if (Number.isFinite(v) && v >= 0) out.carriers[k][c] = v;
-      }
-    }
-  }
-  return out;
-}
-const SHIP_RULES_LIVE = DELIVERY ? mergeShipRules(DELIVERY.rules, LIVE_SETTINGS.shipping_rules) : null;
+const SHIP_RULES_LIVE = DELIVERY ? DELIVERY.liveRules(LIVE_SETTINGS.shipping_rules) : null;
 /* What the head copy reads — the free-delivery threshold of the home page's
    Estonian description — from the same rules the delivery page prints and the
    checkout bills (seoCtx() in app.js hands it SHIP_RULES). */
