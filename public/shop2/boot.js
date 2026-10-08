@@ -54,3 +54,16 @@
       .catch(function () { return null; });
   } catch (e) { /* no localStorage, no fetch — app.js asks for itself */ }
 })();
+
+/* The prerendered page is hidden from a browser that runs scripts (the
+ * <style> next to this file's tag in index.html) so it never flashes before
+ * the shop draws. app.js removes it on its first render. If that has not
+ * happened after 8 s — app.min.js blocked, a dead connection, a script error
+ * on the way — show it after all: a plain page beats a blank one.
+ */
+setTimeout(function () {
+  try {
+    var pre = document.getElementById("prerender");
+    if (pre) pre.style.visibility = "visible";
+  } catch (e) { /* nothing to show */ }
+}, 8000);
