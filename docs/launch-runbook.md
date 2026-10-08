@@ -33,15 +33,17 @@ Check: a `✓` line, ~0.4 MB, «32 tables», read back by pg_restore. **No ✓ �
 ## 2. Reset — Claude dry run, Dim runs the real one
 
 ```
-DATABASE_SSL_NO_VERIFY=1 node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content --gift-cards-are-test-cards
+DATABASE_SSL_NO_VERIFY=1 node --env-file=.env.railway.txt tools/go-live-reset.mjs --stock --test-content --gift-cards-are-test-cards --keep-product c-kevin-murphy-flawless-bond-building-styling-lotion
 ```
 
 Read the TEST CONTENT list: 8 promo codes, 7 newsletters, 8 own `c-…` products
 (hoodie, t-shirt, «Cheap price», «Claude test товар», the €1 product…).
-`bundles` and `posts` must say **untouched**. Then Dim pastes the line it prints:
+`bundles` and `posts` must say **untouched**. Renat's own product of 08.10 —
+Kevin.Murphy FLAWLESS Bond Building Styling Lotion — must read «KEPT by
+--keep-product» (custom_products 9 → 1); it is not in Shopify. Then Dim pastes the line it prints:
 
 ```
-DATABASE_SSL_NO_VERIFY=1 node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --stock --test-content --gift-cards-are-test-cards
+DATABASE_SSL_NO_VERIFY=1 node --env-file=.env.railway.txt tools/go-live-reset.mjs --clear --confirm "I HAVE A BACKUP AND I WANT TO DELETE THE TEST DATA" --stock --test-content --keep-product c-kevin-murphy-flawless-bond-building-styling-lotion --gift-cards-are-test-cards
 ```
 
 Check: dry run again → `0` under CLEAR, STOCK and TEST CONTENT; 8 sets and 3
@@ -81,6 +83,10 @@ Vetiver, Crystal.Angel, Expedition Reserve, Gummy mask). Then Claude runs
 `stock-apply.js` in the signed-in admin tab and checks the counts in the
 database, not on screen. A Shopify order after this export is written off by
 hand (step 13).
+
+**Then FLAWLESS by hand:** the reset's `--stock` emptied its count and Shopify
+does not have it — «Склад» → Kevin.Murphy FLAWLESS Bond Building Styling Lotion
+→ 200 ml = **3** (Renat's count of 08.10; ask him if it changed).
 
 ## 5. PUBLIC_BASE_URL + Redeploy — Dim
 
