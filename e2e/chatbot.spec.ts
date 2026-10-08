@@ -248,7 +248,7 @@ test("«Развернуть» makes the panel a wide window, and the session re
 
 /* r21. The shop prompt asks the assistant to end an answer with the article's
    own address — «add its link at the end of your reply as a bare relative
-   path: /shop2/blog/<slug>/» (src/app/api/assistant/route.ts) — and the bubble
+   path: /blogs/news/<slug>» (src/app/api/assistant/route.ts) — and the bubble
    printed it as text a shopper could only retype into the address bar.
 
    The model is stubbed here, both halves of it: this suite runs with no key on
@@ -267,7 +267,7 @@ test("the article the assistant points at is a link, and it opens the article", 
     await route.fulfill({
       status: 200, contentType: "application/json",
       body: JSON.stringify({
-        reply: `Зимой борода сохнет — вот статья про это: /shop2/blog/${SLUG}/`,
+        reply: `Зимой борода сохнет — вот статья про это: /blogs/news/${SLUG}`,
         product_ids: [],
       }),
     });
@@ -282,12 +282,13 @@ test("the article the assistant points at is a link, and it opens the article", 
 
   const link = panel.locator(`.sbot__msg--bot a[data-go-blog="${SLUG}"]`);
   await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute("href", `/shop2/blog/${SLUG}/`);
+  // in the language the shopper is reading — this page is /ru
+  await expect(link).toHaveAttribute("href", `/ru/blogs/news/${SLUG}`);
 
   // …and it is the shop's own link: the article opens in place, no reload
   await link.click();
   await waitForScreen(page, "blogpost");
-  expect(new URL(page.url()).pathname).toBe(`/shop2/blog/${SLUG}/`);
+  expect(new URL(page.url()).pathname).toBe(`/ru/blogs/news/${SLUG}`);
 });
 });
 

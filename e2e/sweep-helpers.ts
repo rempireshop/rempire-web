@@ -85,9 +85,10 @@ function isExpectedResourceError(text: string, url: string): boolean {
   /* Since 08.09.2026 «Показывать в магазине» takes the product's own page
      away the moment it is switched off, with no rebuild — the 404 IS the
      answer that switch now gives, and Chromium logs the status of a
-     document it just loaded as a console error. A /shop2/ page address
-     only: a 404 on a script, an image or an API call still fails. */
-  if (/404/.test(text) && /\/shop2\/[^?#]*\/$/.test(url)) return true;
+     document it just loaded as a console error. A page address only (no
+     file extension, not the API — Shopify's scheme since 08.10.2026): a 404
+     on a script, an image or an API call still fails. */
+  if (/404/.test(text) && /^https?:\/\/[^/]+\/(?!api\/|_next\/)[^?#.]*(?:[?#].*)?$/.test(url)) return true;
   return /\/api\/(admin|account|assistant|promos)\//.test(url) || /\/favicon|\.png|\.webp|\.jpg|\.svg/.test(url);
 }
 

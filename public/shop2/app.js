@@ -2111,8 +2111,8 @@
       "Салон": "Salong",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Tegelikud jäägid — mitu tükki on tegelikult laos. Skaneerige triipkood, et võtta kaup vastu või kanda maha müük.",
-      "Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
-        "Avage /shop2/admin/ telefonis ja lisage avakuvale — tekib eraldi ikoon «Админка» (pood paigaldub oma ikooniga «Rempire»): Safaris — «Jaga» → «Lisa avakuvale»; Chrome’is — menüü (⋮) → «Installi rakendus».",
+      "Откройте /admin на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "Avage /admin telefonis ja lisage avakuvale — tekib eraldi ikoon «Админка» (pood paigaldub oma ikooniga «Rempire»): Safaris — «Jaga» → «Lisa avakuvale»; Chrome’is — menüü (⋮) → «Installi rakendus».",
       "Войдите в панель, чтобы видеть склад.": "Logige paneeli sisse, et näha laoseisu.",
       "Сканировать": "Skaneeri",
       "Найти товар, бренд, EAN…": "Otsi toodet, brändi, EAN…",
@@ -2291,12 +2291,12 @@
       "На складе уже 0 — списывать нечего.": "Laos on juba 0 — pole midagi maha kanda.",
       "Это уже записано. Если бутылка новая, отсканируйте ещё раз.":
         "See on juba kirjas. Kui pudel on uus, skaneerige veel kord.",
-      // scanner app: the standalone /shop2/scan/ route
+      // scanner app: the standalone /admin/scan route
       "Rempire · Сканер": "Rempire · Skanner", "Сканер": "Skanner",
       "В админку": "Paneeli", "Сканер открывается…": "Skanner avaneb…",
       "Открыть сканер": "Ava skanner",
-      "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
-        "📷 Skanner eraldi rakendusena: avage telefonis /shop2/scan/ ja lisage avakuvale — tekib ikoon «Сканер», mis avaneb kohe kaameras.",
+      "📷 Сканер как отдельное приложение: откройте /admin/scan на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
+        "📷 Skanner eraldi rakendusena: avage telefonis /admin/scan ja lisage avakuvale — tekib ikoon «Сканер», mis avaneb kohe kaameras.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
       /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
       "Маркетинг": "Turundus",
@@ -5688,8 +5688,8 @@
       "Салон": "Salon",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Real stock levels — how many units are actually on the shelf. Scan a barcode to receive goods or log a sale.",
-      "Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
-        "Open /shop2/admin/ on your phone and add it to the home screen — you get a separate «Админка» icon (the shop installs with its own «Rempire» icon): in Safari — Share → Add to Home Screen; in Chrome — menu (⋮) → Install app.",
+      "Откройте /admin на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "Open /admin on your phone and add it to the home screen — you get a separate «Админка» icon (the shop installs with its own «Rempire» icon): in Safari — Share → Add to Home Screen; in Chrome — menu (⋮) → Install app.",
       "Войдите в панель, чтобы видеть склад.": "Sign in to the panel to see the stock.",
       "Сканировать": "Scan",
       "Найти товар, бренд, EAN…": "Find a product, brand, EAN…",
@@ -5867,12 +5867,12 @@
       "На складе уже 0 — списывать нечего.": "The shelf is already at 0 — there is nothing to write off.",
       "Это уже записано. Если бутылка новая, отсканируйте ещё раз.":
         "This is already recorded. If the bottle is a new one, scan it again.",
-      // scanner app: the standalone /shop2/scan/ route
+      // scanner app: the standalone /admin/scan route
       "Rempire · Сканер": "Rempire · Scanner", "Сканер": "Scanner",
       "В админку": "To the panel", "Сканер открывается…": "The scanner is opening…",
       "Открыть сканер": "Open the scanner",
-      "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
-        "📷 The scanner as its own app: open /shop2/scan/ on the phone and add it to the home screen — an icon «Сканер» appears that opens straight into the camera.",
+      "📷 Сканер как отдельное приложение: откройте /admin/scan на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
+        "📷 The scanner as its own app: open /admin/scan on the phone and add it to the home screen — an icon «Сканер» appears that opens straight into the camera.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
       /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
       "Маркетинг": "Marketing",
@@ -10761,7 +10761,7 @@
     scanAssignPick: "",    // product id currently showing its size picker (multi-size assign)
     scanManual: "",
     scanQty: 1,            // the stepper's number, applied by «+ Приход» / «− Списание»
-    scanApp: false,        // the standalone /shop2/scan/ route, not the «Склад» overlay
+    scanApp: false,        // the standalone /admin/scan route, not the «Склад» overlay
     scanZoom: 0,           // where the pinch has the lens (0 = the lens has no zoom)
     scanBusy: false,       // a move is in flight — the two confirm buttons are disabled
     scanReady: false,      // the last move went through: «сканируйте следующий код»
@@ -10792,23 +10792,137 @@
      and reset the flag to false every time — the saved preference was never
      seen as explicit, and the geo refinement below overrode it. */
   var savedHadLang = false;
+  var savedLang = "";   // the switcher's last choice, from localStorage (persist())
 
-  /* ---------- the language in the URL ------------------------------------
-     /shop2/ is Russian and the x-default; /shop2/et/… and /shop2/en/… are the
-     same shop one language over. The prefix is the strongest signal there is —
-     it is what a search engine indexed and what a shopper pasted — so it beats
-     both the saved preference and the browser's languages. Paths without a
-     prefix behave exactly as they did: saved choice, else browser, else RU. */
-  var LANG_OF_SEG = { et: "ET", en: "EN", ru: "RU" };
-  var SEG_OF_LANG = { RU: "", ET: "/et", EN: "/en" };
+  /* ---------- the shop's addresses — Shopify's, since 08.10.2026 ----------
+     Dim: «There was no shop2 on the site — the URLs need to be as they were
+     previously». English is unprefixed (/, /products/<id>, /collections/…),
+     Russian is /ru/…, Estonian /et/…, and no page address ends in a slash.
+     This is src/lib/shop-paths.mjs written in ES5 — publicPath() is
+     shopPathFor(), parseShopPath() is shopRouteOf() — because a script the
+     page loads without a build step cannot import that file;
+     tests/shop-paths.test.ts runs both over the same addresses and demands the
+     same answers. Everything inside the shop still speaks the short internal
+     ROUTE of the /shop2/ scheme ("/p/<id>/", "/c/hair/", "/info/returns/",
+     "/admin/"); these two functions are the only place a route becomes an
+     address and back.
+
+     The language of a storefront page is its ADDRESS and nothing else
+     (SEO audit, 08.10.2026): an English browser on /ru/products/x reads
+     Russian, a Russian one on /products/x reads English. A saved choice or the
+     browser's languages may only send a visitor to the prefixed twin BEFORE
+     the page is served — the 302 in src/middleware.ts — never re-render a page
+     in another language under the same address, which is what a crawler with
+     an en-US locale used to be shown. */
+  var LANG_OF_SEG = { et: "ET", ru: "RU" };
+  var SEG_OF_LANG = { RU: "/ru", ET: "/et", EN: "" };
+  var SHOP_CAT_HANDLES = {
+    hair: { EN: "hair-care", ET: "juuksehooldus", RU: "uhod-za-volosami" },
+    styling: { EN: "hair-styling", ET: "viimistlus", RU: "stayling-dlya-volos" },
+    beard: { EN: "beard-care", ET: "habemehooldus", RU: "uhod-za-borodoy" },
+    face: { EN: "face-care", ET: "naohooldus", RU: "uhod-za-litsom" },
+    body: { EN: "body-care", ET: "kehahooldus", RU: "uhod-za-telom" },
+    perfume: { EN: "perfume", ET: "parfuumid", RU: "parfyumeriya" },
+    merch: { EN: "merch", ET: "merch", RU: "merch" },
+    all: { EN: "all-products", ET: "koik-tooted", RU: "vse-tovary" }
+  };
+  var SHOP_BRAND_HANDLES = { "cbd-daily": "cbd-daily-haircare" };
+  var SHOP_INFO_PATHS = {
+    shipping: "/policies/shipping-policy",
+    returns: "/policies/refund-policy",
+    privacy: "/policies/privacy-policy",
+    terms: "/policies/terms-of-service",
+    contact: "/pages/contact"
+  };
+  var SHOP_CAT_OF_HANDLE = {}, SHOP_BRAND_OF_HANDLE = {}, SHOP_INFO_OF_PATH = {};
+  (function () {
+    var k, l;
+    for (k in SHOP_CAT_HANDLES) for (l in SHOP_CAT_HANDLES[k]) SHOP_CAT_OF_HANDLE[SHOP_CAT_HANDLES[k][l]] = k;
+    for (k in SHOP_BRAND_HANDLES) SHOP_BRAND_OF_HANDLE[SHOP_BRAND_HANDLES[k]] = k;
+    for (k in SHOP_INFO_PATHS) SHOP_INFO_OF_PATH[SHOP_INFO_PATHS[k]] = k;
+  })();
+  /** The public address of an internal route in one language (publicPath). */
+  function shopPathFor(lang, rest) {
+    var L = lang === "RU" || lang === "ET" ? lang : "EN";
+    var pre = SEG_OF_LANG[L];
+    var raw = String(rest == null || rest === "" ? "/" : rest);
+    var qi = raw.indexOf("?");
+    var query = qi >= 0 ? raw.slice(qi) : "";
+    var segs = (qi >= 0 ? raw.slice(0, qi) : raw).split("/").filter(Boolean);
+    var n = segs.length, kind = segs[0], id = segs[1], p;
+    if (!n) p = "";
+    else if (kind === "p" && n === 2) p = "/products/" + id;
+    else if (kind === "c" && n === 2) p = "/collections/" + ((SHOP_CAT_HANDLES[id] && SHOP_CAT_HANDLES[id][L]) || id);
+    else if (kind === "b" && n === 2) p = "/collections/" + (SHOP_BRAND_HANDLES[id] || id);
+    else if (kind === "brands" && n === 1) p = "/collections/brands";
+    else if (kind === "sets" && n === 1) p = "/collections/sets";
+    else if (kind === "set" && n === 2) p = "/collections/sets/" + id;
+    else if (kind === "gift" && n === 1) p = "/products/gift-card";
+    else if (kind === "info" && n === 2) p = SHOP_INFO_PATHS[id] || "/pages/" + id;
+    else if (kind === "blog" && n === 1) p = "/blogs/news";
+    else if (kind === "blog" && n === 2) p = "/blogs/news/" + id;
+    else if (kind === "done" && n === 1) p = "/checkout/done";
+    else if (kind === "admin" && n === 1) return "/admin" + query;
+    else if (kind === "scan" && n === 1) return "/admin/scan" + query;
+    else if ((kind === "search" || kind === "account" || kind === "checkout" || kind === "cart") && n === 1) p = "/" + kind;
+    else p = "/" + segs.join("/");
+    return (pre + p || "/") + query;
+  }
+  /** The route behind an address, {lang, prefixed, rest}, or null (parseShopPath). */
+  function shopRouteOf(pathname) {
+    var segs = String(pathname == null ? "/" : pathname).split(/[?#]/)[0].split("/").filter(Boolean);
+    var lang = "EN", prefixed = false;
+    var first = String(segs[0] || "").toLowerCase();
+    if (first === "ru" || first === "et") { lang = first.toUpperCase(); prefixed = true; segs = segs.slice(1); }
+    var n = segs.length, k = segs[0], a = segs[1], rest = null;
+    if (!n) rest = "/";
+    else if (k === "products" && n === 2) rest = a === "gift-card" ? "/gift/" : "/p/" + a + "/";
+    else if (k === "collections" && n === 2) {
+      if (a === "brands") rest = "/brands/";
+      else if (a === "sets") rest = "/sets/";
+      else if (SHOP_CAT_OF_HANDLE[a]) rest = "/c/" + SHOP_CAT_OF_HANDLE[a] + "/";
+      else rest = "/b/" + (SHOP_BRAND_OF_HANDLE[a] || a) + "/";
+    } else if (k === "collections" && n === 3 && a === "sets") rest = "/set/" + segs[2] + "/";
+    else if ((k === "policies" || k === "pages") && n === 2) {
+      if (SHOP_INFO_OF_PATH["/" + k + "/" + a]) rest = "/info/" + SHOP_INFO_OF_PATH["/" + k + "/" + a] + "/";
+    } else if (k === "blogs" && a === "news" && n === 2) rest = "/blog/";
+    else if (k === "blogs" && a === "news" && n === 3) rest = "/blog/" + segs[2] + "/";
+    else if (n === 1 && (k === "search" || k === "account" || k === "checkout" || k === "cart" || k === "admin")) rest = "/" + k + "/";
+    else if (k === "checkout" && a === "done" && n === 2) rest = "/done/";
+    else if (k === "admin" && a === "scan" && n === 2) rest = "/scan/";
+    return rest === null ? null : { lang: lang, prefixed: prefixed, rest: rest };
+  }
+  /** The language an address is in: "RU", "ET", or "" for an unprefixed one (English). */
   function langFromPath(p) {
-    var m = String(p || "").match(/^\/shop2\/(et|en|ru)(?:\/|$)/i);
+    var m = String(p || "").match(/^\/(et|ru)(?:\/|$)/i);
     return m ? LANG_OF_SEG[m[1].toLowerCase()] : "";
   }
-  /* Everything after /shop2/<lang> — the router matches on this, so one set of
-     patterns serves all three languages. */
+  /** The address without its language prefix — "/ru/foo/bar" → "/foo/bar". */
   function stripLangPrefix(p) {
-    return String(p || "").replace(/^\/shop2\/(et|en|ru)(?=\/|$)/i, "/shop2");
+    return String(p || "").replace(/^\/(et|ru)(?=\/|$)/i, "") || "/";
+  }
+  /** The panel and its scanner live at one address in every language (/admin, /admin/scan). */
+  function isOwnerPath(p) {
+    var r = shopRouteOf(p);
+    return !!r && (r.rest === "/admin/" || r.rest === "/scan/");
+  }
+  /* The saved choice the edge reads (src/middleware.ts): ru / et / en. Written
+     by the switcher, and once from this browser's older saved language if the
+     cookie is not there yet — so its next visit to an unprefixed address is
+     sent to its own language before the page is served. A preference, the
+     kind of cookie a language switch is; it identifies nobody. */
+  var LANG_COOKIE = "rempire_lang";
+  function langCookie() {
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)rempire_lang=(ru|et|en)\b/);
+      return m ? m[1].toUpperCase() : "";
+    } catch (e) { return ""; }
+  }
+  function setLangCookie(lang) {
+    try {
+      document.cookie = LANG_COOKIE + "=" + String(lang || "EN").toLowerCase() +
+        "; path=/; max-age=31536000; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
+    } catch (e) {}
   }
   /* decodeURIComponent throws on a malformed escape — «/p/%E0/», a share
      link a messenger mangled, a crawler's guess — and it used to throw out of
@@ -10820,12 +10934,13 @@
   function safeDecode(s) {
     try { return decodeURIComponent(s); } catch (e) { return String(s); }
   }
-  /* What the URL itself declares, which is not always what is on screen: an
-     unprefixed path stays Russian for the canonical and the hreflang cluster
-     even when the visitor's browser has us rendering English. Getting that
-     backwards would tell Google that /shop2/ is the English page. */
+  /* What the URL itself declares — and, on every storefront page, what is on
+     screen: unprefixed is English. Only the panel (/admin, /admin/scan) has
+     a language of its own, the owner's saved one, because its address has
+     none. */
   var urlLang = langFromPath(location.pathname);
-  var pathLang = urlLang || "RU";
+  var pathLang = urlLang || "EN";
+  var ownerBoot = isOwnerPath(location.pathname);
   // the path this document was served for — what any prerendered markup in it
   // describes, and therefore what stops being true the moment we navigate
   var loadedPath = location.pathname;
@@ -10871,20 +10986,24 @@
         });
       } catch (e) { S.cart = saved.cart; }
     }
-    if (saved.lang) { S.lang = saved.lang; savedHadLang = true; }
+    if (saved.lang) { savedLang = saved.lang; S.lang = saved.lang; savedHadLang = true; }
     else S.lang = guessLang();
   } catch (e) {}
-  /* Applied last so it beats both. It is deliberately not persisted: someone
-     who arrives on /shop2/en/ from a search result and never touches the
-     switcher keeps their own preference on the unprefixed paths. The flag is
-     set because the language IS decided — the geo refinement below must not
-     second-guess a URL. */
-  if (urlLang) { S.lang = urlLang; savedHadLang = true; }
-  /* First visit: follow the browser's language. Estonian browsers get ET,
-     English get EN, everything else stays RU — the shop's core audience.
-     A generic-English browser is then refined by the visitor's country
-     (/api/geo/, from Vercel's IP header) after the first paint; an explicit
-     choice from the switcher always wins and is never overridden. */
+  /* A storefront address decides its own language — unprefixed is English,
+     whatever this browser saved or asks for (see the top of this region; the
+     edge has already sent a visitor who wanted another language to its
+     twin). Only the panel, whose address has no language, keeps the owner's
+     saved one. */
+  if (!ownerBoot) { S.lang = pathLang; savedHadLang = true; }
+  /* …and the edge learns this browser's saved choice, if it has not yet: the
+     language a visitor picked before the cookie existed (08.10.2026). */
+  if (savedLang && !langCookie()) setLangCookie(savedLang);
+  /* The panel's first visit: follow the browser's language. Estonian browsers
+     get ET, English get EN, everything else RU — the owner's own. (Until
+     08.10.2026 the storefront did this too, re-rendering an unprefixed page
+     in the browser's language, and refined a generic-English browser by its
+     country from /api/geo/. Both are gone: a storefront address has one
+     language, and only the edge may send a visitor elsewhere.) */
   function guessLang() {
     try {
       var ls = navigator.languages || [navigator.language || ""];
@@ -10897,8 +11016,12 @@
     } catch (e) {}
     return "RU";
   }
+  /* The language this browser CHOSE — with the switcher — which is not the
+     language of whatever page it is reading: since 08.10.2026 a storefront
+     page is in its address's language, and reading /ru/… is not a choice to
+     remember. The panel opens in it; the cookie the edge reads mirrors it. */
   function persist() {
-    try { localStorage.setItem(LS, JSON.stringify({ cart: S.cart, lang: S.lang })); } catch (e) {}
+    try { localStorage.setItem(LS, JSON.stringify({ cart: S.cart, lang: savedLang || undefined })); } catch (e) {}
   }
 
   // ---------- helpers ----------
@@ -12074,9 +12197,13 @@
     "System 4": "/shop/brands/system-4.webp",
     "Lumin Skin": "/shop/brands/lumin-skin.webp"
   };
-  function brandMark(name, cls) {
+  /* `decor`: the mark is a picture of a name a heading beside it already
+     says (the brand page's own <h1>), so it is hidden from assistive tech
+     rather than read out twice. */
+  function brandMark(name, cls, decor) {
     return BRAND_LOGOS[name]
-      ? '<span class="' + cls + '__logo" style="background-image:url(\'' + BRAND_LOGOS[name] + '\')" role="img" aria-label="' + esc(name) + '"></span>'
+      ? '<span class="' + cls + '__logo" style="background-image:url(\'' + BRAND_LOGOS[name] + '\')" ' +
+        (decor ? 'aria-hidden="true"' : 'role="img" aria-label="' + esc(name) + '"') + "></span>"
       : '<span class="' + cls + '__word">' + esc(name) + "</span>";
   }
   function brands() {
@@ -13570,7 +13697,7 @@
     return d.length === 3 ? d[2] + "." + d[1] + "." + d[0] : "";
   }
   function blogPath(slug) {
-    return "/shop2" + SEG_OF_LANG[pathLang] + "/blog/" + encodeURIComponent(slug) + "/";
+    return shopPathFor(S.lang, "/blog/" + encodeURIComponent(slug) + "/");
   }
   function blogUrl(slug) {
     return location.origin + blogPath(slug);
@@ -14874,8 +15001,13 @@
       '<div class="crumbs"><button data-go="home">Главная</button> / ' +
         (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
+        /* A brand with a logo shows the logo instead of the heading — and
+           until 08.10.2026 that left the page with no <h1> at all, which is
+           the one heading a crawler reads first (SEO audit). The name is the
+           page's <h1> now, kept off the screen because the logo already
+           says it; nothing visible changes. */
         (S.brand && BRAND_LOGOS[S.brand]
-          ? '<div class="brandhead">' + brandMark(S.brand, "brandhead") + "</div>"
+          ? '<div class="brandhead"><h1 class="vh">' + esc(S.brand) + "</h1>" + brandMark(S.brand, "brandhead", true) + "</div>"
           : '<h1 class="display h1">' + esc(name) + "</h1>") +
         '<p class="sec__intro">' + intro + "</p>" +
         (function () {
@@ -16637,7 +16769,7 @@
   function blogProductLinkHTML(id, L) {
     var p = productsById([id])[0];
     if (!p) return "";
-    var href = "/shop2" + (SEG_OF_LANG[L] || "") + "/p/" + encodeURIComponent(p.id) + "/";
+    var href = shopPathFor(L, "/p/" + encodeURIComponent(p.id) + "/");
     /* The words, in the language the text around them is written in — the
        same helper the storefront card uses, so a card in the Estonian article
        reads Estonian in the editor, in the saved HTML, for a crawler and for
@@ -26998,7 +27130,7 @@
   /** Where a published article is read — in the panel's own language, the
       way the owner would open it himself. */
   function blogShopPath(slug) {
-    return "/shop2" + (SEG_OF_LANG[S.lang] || "") + "/blog/" + encodeURIComponent(slug) + "/";
+    return shopPathFor(S.lang, "/blog/" + encodeURIComponent(slug) + "/");
   }
   /** «Блог», and the header's right side: «+ Статья» and the ONE dark button
       (README rule 2) — «+ Статья» itself while no article is open,
@@ -29799,33 +29931,41 @@
       "На ссылку нажали " + v + " раза.",
       "На ссылку нажали " + v + " раз.");
   }
-  /** A Search Console page is a whole address — «https://rempire.ee/shop2/et/
-      p/reuzel-fiber/». The owner does not think in addresses, he thinks in the
-      товар he sells and the pages of his own shop, so the address is read back
-      into that name. The language stays beside it: /shop2/ and /shop2/et/ are
-      two different pages to Google, and the same product listed twice with
-      nothing to tell the two apart would read as a fault in the panel. What
-      the shop has no name for keeps its path — still something he can open
-      and recognise, and never a guess. */
+  /** A Search Console page is a whole address — «https://rempireshop.com/et/
+      products/reuzel-fiber». The owner does not think in addresses, he thinks
+      in the товар he sells and the pages of his own shop, so the address is
+      read back into that name. The language stays beside it: /products/x and
+      /et/products/x are two different pages to Google, and the same product
+      listed twice with nothing to tell the two apart would read as a fault in
+      the panel. English, the unprefixed one, goes untagged. The /shop2/
+      addresses of the night before the move (08.10.2026, Russian unprefixed)
+      are read the way they were meant. What the shop has no name for keeps its
+      path — still something he can open and recognise, and never a guess. */
   function gscPageName(url) {
     var path = String(url || "").replace(/^https?:\/\/[^/]+/i, "").split("?")[0].split("#")[0];
-    var tag = langFromPath(path);
-    var p = stripLangPrefix(path).replace(/\/+$/, "");
-    if (tag === "RU") tag = "";
+    var old = path.match(/^\/shop2(?:\/(et|en|ru))?(\/.*)?$/i);
+    if (old) {
+      var oldLang = old[1] ? old[1].toUpperCase() : "RU";
+      path = shopPathFor(oldLang, (old[2] || "/").replace(/\/?$/, "/"));
+    }
+    var route = shopRouteOf(path);
+    var tag = route && route.lang !== "EN" ? route.lang : "";
+    var p = route ? route.rest.replace(/\/+$/, "") : null;
     var m;
-    if ((m = p.match(/^\/shop2\/p\/([^/]+)$/))) {
+    if (p === null) return [path.replace(/\/+$/, "") || "/", langFromPath(path)];
+    if ((m = p.match(/^\/p\/([^/]+)$/))) {
       var prod = byIdOrNull(safeDecode(m[1]));
       return [prod ? (prod.brand ? prod.brand + " — " : "") + prod.name : safeDecode(m[1]), tag];
     }
-    if ((m = p.match(/^\/shop2\/c\/([^/]+)$/))) {
+    if ((m = p.match(/^\/c\/([^/]+)$/))) {
       return [m[1] === "all" ? "Каталог" : CAT_NAMES[m[1]] || safeDecode(m[1]), tag];
     }
-    if ((m = p.match(/^\/shop2\/b\/([^/]+)$/))) return [BRAND_BY_SLUG[safeDecode(m[1])] || safeDecode(m[1]), tag];
-    if (p === "/shop2" || p === "") return ["Главная", tag];
-    if (p === "/shop2/sets") return ["Наборы", tag];
-    if (p === "/shop2/gift") return ["Подарочная карта", tag];
-    if (p === "/shop2/blog") return ["Блог", tag];
-    return [p.replace(/^\/shop2/, "") || "/", tag];
+    if ((m = p.match(/^\/b\/([^/]+)$/))) return [BRAND_BY_SLUG[safeDecode(m[1])] || safeDecode(m[1]), tag];
+    if (p === "") return ["Главная", tag];
+    if (p === "/sets") return ["Наборы", tag];
+    if (p === "/gift") return ["Подарочная карта", tag];
+    if (p === "/blog") return ["Блог", tag];
+    return [stripLangPrefix(path).replace(/\/+$/, "") || "/", tag];
   }
   /** One line of the Google block: what was typed, or which page it was, and
       under it the two sentences saying what Google did with it. Words and
@@ -30266,10 +30406,32 @@
       pushSyncHere();
     }).catch(function () { PUSH.err = "net"; PUSH.answered = true; render(); });
   }
+  /* Где живёт работник оповещений. Файл — /shop2/admin-sw.js (файлы не
+     переезжали), область — /admin, адрес панели с 08.10.2026; выше своей
+     папки работнику разрешает подняться заголовок Service-Worker-Allowed
+     (next.config.ts). Без косой черты на конце: /admin её не имеет, а
+     область — это начало адреса. */
+  var ADMIN_SW_SCOPE = "/admin";
+  /* Работник старой области /shop2/admin/ (панель жила там до 08.10.2026)
+     получал бы те же оповещения второй раз: его подписка отписывается, её
+     адрес убирается с сервера, сам он снимается. Один раз на телефон —
+     потом его просто нет. */
+  function pushRetireOld() {
+    try {
+      navigator.serviceWorker.getRegistration("/shop2/admin/").then(function (old) {
+        if (!old || !/\/shop2\/admin\/$/.test(old.scope)) return;
+        return old.pushManager.getSubscription().then(function (sub) {
+          if (!sub) return;
+          var endpoint = sub.endpoint;
+          return sub.unsubscribe().catch(function () {}).then(function () { return pushDropCall(endpoint); });
+        }).catch(function () {}).then(function () { return old.unregister(); });
+      }).catch(function () {});
+    } catch (e) {}
+  }
   /** Какой из подключённых — этот самый телефон. */
   function pushSyncHere() {
     if (!pushCan() || Notification.permission !== "granted") { PUSH.here = ""; return; }
-    navigator.serviceWorker.getRegistration("/shop2/admin/").then(function (reg) {
+    navigator.serviceWorker.getRegistration(ADMIN_SW_SCOPE).then(function (reg) {
       return reg && reg.pushManager.getSubscription();
     }).then(function (sub) {
       PUSH.here = sub ? sub.endpoint : "";
@@ -30280,7 +30442,7 @@
     if (PUSH.busy || !pushCan()) return;
     PUSH.busy = true; PUSH.err = ""; PUSH.sent = ""; render();
     var reg;
-    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: "/shop2/admin/" })
+    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: ADMIN_SW_SCOPE })
       .then(function () { return navigator.serviceWorker.ready; })
       .then(function (r) { reg = r; return Notification.requestPermission(); })
       .then(function (p) {
@@ -30306,7 +30468,7 @@
     if (PUSH.busy || !PUSH.here) return;
     var endpoint = PUSH.here;
     PUSH.busy = true; PUSH.err = ""; PUSH.sent = ""; render();
-    navigator.serviceWorker.getRegistration("/shop2/admin/")
+    navigator.serviceWorker.getRegistration(ADMIN_SW_SCOPE)
       .then(function (reg) { return reg && reg.pushManager.getSubscription(); })
       .then(function (sub) { return sub && sub.unsubscribe(); })
       .catch(function () {})
@@ -30335,7 +30497,7 @@
   /* На каждом запуске панели: браузер иногда меняет подписку сам, и тогда
      сервер шлёт на адрес, которого больше нет. Без метки — метку, которую
      владелец уже видит в списке, перезаписывать нечем (см. маршрут). */
-  /* Нажатие на оповещение открывает /shop2/admin/?order=R-100042 — номер, а
+  /* Нажатие на оповещение открывает /admin?order=R-100042 — номер, а
      не внутренний id, потому что номер и напечатан в самом оповещении. Пока
      заказы не приехали, открывать нечего, поэтому номер запоминается и
      срабатывает один раз, когда список пришёл. Не нашли — просто «Заказы»:
@@ -30425,9 +30587,10 @@
       PUSH.loaded = true;
       if (PUSH.configured && PUSH.publicKey) pushResub();
     }).catch(function () {});
+    pushRetireOld();
   }
   function pushResub() {
-    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: "/shop2/admin/" })
+    navigator.serviceWorker.register("/shop2/admin-sw.js", { scope: ADMIN_SW_SCOPE })
       .then(function () { return navigator.serviceWorker.ready; })
       .then(function (reg) {
         return reg.pushManager.getSubscription().then(function (sub) {
@@ -40983,7 +41146,7 @@
       if (window.navigator && window.navigator.standalone) return "";
       if (localStorage.getItem("rmp-pwa-hint-dismissed") === "1") return "";
     } catch (e) {}
-    return '<div class="adm-note" data-pwahint><span>Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
+    return '<div class="adm-note" data-pwahint><span>Откройте /admin на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
       '<button class="adm-link adm-link--muted" data-pwahintclose>Скрыть</button></div>';
   }
   /* «привязано 12 из 348» — where the first pass over the shelves has got to.
@@ -47770,10 +47933,12 @@
     return clipDesc(lead, room).replace(/\.$/, "") + " · " + tail;
   }
   /* One page, three URLs, one cluster: canonical plus ru/et/en/x-default. The
-     addresses come from the path, never from S.lang — a German browser
-     rendering /shop2/ in English must not tell a crawler that /shop2/ is the
-     English page. x-default is the unprefixed path, which is what every old
-     link and every legacy redirect already points at. */
+     addresses come from the path — the route behind it, re-spelled in each
+     language (a section's handle is per language: /collections/hair-care is
+     /ru/collections/uhod-za-volosami). x-default is the unprefixed English
+     address, what a crawler with no Accept-Language is served. No query
+     string ever reaches the canonical: ?size=, ?variant=, utm_… name the same
+     page (SEO audit, 08.10.2026). */
   /** The absolute address of a product photo, for the JSON-LD `image`.
    *
    *  The origin goes in front of a PATH, never in front of a URL: an
@@ -47789,18 +47954,22 @@
   }
   var ALT_TAGS = [["RU", "ru"], ["ET", "et"], ["EN", "en"]];
   function setAltTags() {
-    var rest = stripLangPrefix(location.pathname).replace(/^\/shop2/, "") || "/";
+    var route = shopRouteOf(location.pathname);
+    var lang = route ? route.lang : (langFromPath(location.pathname) || "EN");
+    /* an address the shop has no page for keeps its own segments (the 404's
+       canonical is the address that was asked for) */
+    var rest = route ? route.rest : stripLangPrefix(location.pathname);
     var origin = location.origin;
-    setLinkTag("canonical", "canonical", origin + "/shop2" + SEG_OF_LANG[pathLang] + rest);
+    var own = origin + shopPathFor(lang, rest);
+    setLinkTag("canonical", "canonical", own);
     for (var i = 0; i < ALT_TAGS.length; i++) {
-      setLinkTag("alt-" + ALT_TAGS[i][1], "alternate",
-        origin + "/shop2" + SEG_OF_LANG[ALT_TAGS[i][0]] + rest, ALT_TAGS[i][1]);
+      setLinkTag("alt-" + ALT_TAGS[i][1], "alternate", origin + shopPathFor(ALT_TAGS[i][0], rest), ALT_TAGS[i][1]);
     }
-    setLinkTag("alt-x", "alternate", origin + "/shop2" + rest, "x-default");
-    setMetaProp("og:url", origin + "/shop2" + SEG_OF_LANG[pathLang] + rest);
-    setMetaProp("og:locale", { RU: "ru_RU", ET: "et_EE", EN: "en_US" }[pathLang]);
-    // the displayed language, not the path's: this one is read by screen
-    // readers and by the browser's own translation prompt
+    setLinkTag("alt-x", "alternate", origin + shopPathFor("EN", rest), "x-default");
+    setMetaProp("og:url", own);
+    setMetaProp("og:locale", { RU: "ru_RU", ET: "et_EE", EN: "en_US" }[lang]);
+    // the language on screen — on every storefront page the address's own;
+    // read by screen readers and by the browser's translation prompt
     try { document.documentElement.lang = { RU: "ru", ET: "et", EN: "en" }[S.lang]; } catch (e) {}
   }
   /* The three meta descriptions the info, sets and gift screens carry. They
@@ -47832,8 +48001,15 @@
      it. Read at boot, before setHead() has ever run. */
   var SERVED_ROBOTS = (function () {
     var m = document.querySelector('meta[name="robots"]');
-    return (m && m.getAttribute("content")) || "";
+    /* A screen behind a basket or a login is served `noindex` with the
+       deploy's own value kept beside it (data-served — src/lib/notfound-page.ts
+       stateShell()), so a shopper who walks on from it to a page carries the
+       page's real value, not the screen's. */
+    return (m && (m.getAttribute("data-served") || m.getAttribute("content"))) || "";
   })();
+  /* The screens that need state to mean anything: robots-disallowed, never in
+     a sitemap, and `noindex` in the rendered DOM too (since 08.10.2026). */
+  var NOINDEX_SCREENS = { notfound: 1, search: 1, account: 1, checkout: 1, done: 1, admin: 1, scan: 1 };
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -47873,7 +48049,8 @@
       d = so && so.d ? so.d
         : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d
           : descFromText(unentity(stripTags(descFor(p))), priceText, stockText, S.lang);
-      var pUrl = location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(p.id) + "/";
+      // the page's own address, in the address's language and with no query (?size=)
+      var pUrl = location.origin + shopPathFor(langFromPath(location.pathname) || "EN", "/p/" + encodeURIComponent(p.id) + "/");
       // same shape the prerendered pages carry, so taking over a static page
       // does not quietly thin out its structured data
       var ld = {
@@ -47977,7 +48154,7 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
-    if (SERVED_ROBOTS) setMetaTag("robots", S.screen === "notfound" ? "noindex, nofollow" : SERVED_ROBOTS);
+    if (SERVED_ROBOTS) setMetaTag("robots", NOINDEX_SCREENS[S.screen] ? "noindex, nofollow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
@@ -48784,32 +48961,37 @@
   }
   CATALOGUE.forEach(function (p) { BRAND_BY_SLUG[slugify(p.brand)] = p.brand; });
 
-  /* Whatever language prefix the visitor arrived on rides along on every
-     internal navigation, so a link copied out of the address bar keeps its
-     language and the canonical keeps agreeing with the path. Russian has no
-     prefix — it is the default and the x-default. */
+  /* The address of what is on screen, in the language that is on screen —
+     so a link copied out of the address bar opens in the language it was
+     read in, and the canonical keeps agreeing with the path. English has no
+     prefix (Shopify's scheme, 08.10.2026); the route below is turned into
+     Shopify's address by shopPathFor(). The panel and the scanner are one
+     address in every language (/admin, /admin/scan). */
   function pathFor() {
-    var b = "/shop2" + SEG_OF_LANG[pathLang];
     /* A 404 keeps the address the shopper asked for — that is the whole point
-       of it. Nothing pushes /shop2/notfound/ into the history. The language
-       prefix still follows the switcher, so «EN» on a missing page moves to
-       the English shop's version of the same missing address rather than
-       silently leaving a Russian prefix over English words. */
+       of it. Nothing pushes a «notfound» address into the history. The
+       language prefix still follows the switcher, so «RU» on a missing page
+       moves to the Russian shop's version of the same missing address rather
+       than leaving an English address over Russian words. */
     if (S.screen === "notfound") {
-      return b + stripLangPrefix(location.pathname).replace(/^\/shop2/, "") + location.search;
+      var tail = stripLangPrefix(location.pathname);
+      return (SEG_OF_LANG[S.lang] + (tail === "/" ? "" : tail) || "/") + location.search;
     }
-    if (S.screen === "product" && S.productId) return b + "/p/" + encodeURIComponent(S.productId) + "/";
-    if (S.screen === "catalog") return S.brand ? b + "/b/" + slugify(S.brand) + "/" : b + "/c/" + S.cat + "/";
-    if (S.screen === "search") return b + "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
-    if (S.screen === "info" && S.infoSlug) return b + "/info/" + S.infoSlug + "/";
-    // features: /shop2/sets/ is the list, /shop2/set/<id>/ one set
-    if (S.screen === "bundles") return b + "/sets/";
-    if (S.screen === "bundle" && S.bundleId) return b + "/set/" + encodeURIComponent(S.bundleId) + "/";
-    // blog: /shop2/blog/ is the list (falls through to the generic rule
-    // below), /shop2/blog/<slug>/ one post
-    if (S.screen === "blogpost" && S.blogSlug) return b + "/blog/" + encodeURIComponent(S.blogSlug) + "/";
-    if (S.screen === "home") return b + "/";
-    return b + "/" + S.screen + "/";
+    return shopPathFor(S.lang, screenRoute());
+  }
+  /** The internal route of the screen on show — "/p/<id>/", "/c/hair/", "/". */
+  function screenRoute() {
+    if (S.screen === "product" && S.productId) return "/p/" + encodeURIComponent(S.productId) + "/";
+    if (S.screen === "catalog") return S.brand ? "/b/" + slugify(S.brand) + "/" : "/c/" + S.cat + "/";
+    if (S.screen === "search") return "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
+    if (S.screen === "info" && S.infoSlug) return "/info/" + S.infoSlug + "/";
+    // features: /collections/sets is the list, /collections/sets/<id> one set
+    if (S.screen === "bundles") return "/sets/";
+    if (S.screen === "bundle" && S.bundleId) return "/set/" + encodeURIComponent(S.bundleId) + "/";
+    // blog: /blogs/news is the list (the generic rule below), /blogs/news/<slug> one post
+    if (S.screen === "blogpost" && S.blogSlug) return "/blog/" + encodeURIComponent(S.blogSlug) + "/";
+    if (S.screen === "home") return "/";
+    return "/" + S.screen + "/";
   }
   function here() { return location.pathname + location.search; }
   /* Stamp the live scroll onto the entry being left, so Back returns to the
@@ -49792,12 +49974,16 @@
     // their Russian templates — translateTree only converts FROM Russian, so
     // an already-translated header would otherwise stick on the old language.
     if (d.lang) {
-      S.lang = d.lang; S.langOpen = false; savedHadLang = true; persist();
+      S.lang = d.lang; S.langOpen = false; savedHadLang = true; savedLang = d.lang; persist();
+      /* …and the edge is told, so the next visit to an unprefixed address
+         opens in this language before the page is served (src/middleware.ts) */
+      setLangCookie(d.lang);
       /* The URL is half the answer: switching language rewrites the prefix in
          place, so the address bar, the canonical and what is on screen never
          disagree, and the link the shopper copies opens in the language they
          are reading. replaceState, not push — Back should leave the shop, not
-         walk back through language changes. */
+         walk back through language changes. (The panel's address has no
+         language, so there it stays /admin.) */
       pathLang = d.lang;
       try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
       hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
@@ -53209,12 +53395,12 @@
     svg.classList.add("is-ident");
   }
 
-  /* Every product has a real page at /shop/p/<id>/ carrying its own link
-     preview, so sharing one shares that product rather than the shop. */
+  /* Every product has a real page carrying its own link preview, so sharing
+     one shares that product rather than the shop. */
   function productUrl(id) {
     // in the language the sharer is reading, so the link opens that way for
-    // whoever gets it — /shop2/p/… is Russian, /shop2/et/p/… Estonian
-    return location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(id) + "/";
+    // whoever gets it — /products/… is English, /ru/products/… Russian
+    return location.origin + shopPathFor(S.lang, "/p/" + encodeURIComponent(id) + "/");
   }
   function shareProduct(id) {
     var p = byId(id), url = productUrl(id);
@@ -53236,23 +53422,30 @@
      state so a deep link, a reload and the Back button all land on the same
      screen — this is the only thing that turns a URL back into a view. */
   function routeFromPath() {
-    /* Read the language off the path first and strip it, so one set of
-       patterns below serves all three languages. Doing it here and not only at
-       boot is what makes Back work across a language switch: stepping into an
-       entry written as /shop2/et/… returns to Estonian. */
-    var lp = langFromPath(location.pathname);
-    pathLang = lp || "RU";
-    if (lp && lp !== S.lang) {
-      S.lang = lp;
-      // the persistent slots hold already-translated markup; translateTree only
-      // converts FROM Russian, so they have to be rebuilt, not re-translated
-      if (hdrSlot) hdrSlot.innerHTML = "";
-      if (navSlot) navSlot.innerHTML = "";
-      ovlKey = "";
+    /* The address becomes a route (shopRouteOf — /ru/collections/vse-tovary
+       is "/c/all/" in Russian), so one set of patterns below serves all three
+       languages. The language is read here and not only at boot, which is what
+       makes Back work across a language switch: stepping into an entry written
+       as /et/… returns to Estonian, and into an unprefixed one to English. The
+       panel's address has no language, so it leaves the owner's alone. */
+    var route = shopRouteOf(location.pathname);
+    if (!route || (route.rest !== "/admin/" && route.rest !== "/scan/")) {
+      var lp = route ? route.lang : (langFromPath(location.pathname) || "EN");
+      pathLang = lp;
+      if (lp !== S.lang) {
+        S.lang = lp;
+        // the persistent slots hold already-translated markup; translateTree only
+        // converts FROM Russian, so they have to be rebuilt, not re-translated
+        if (hdrSlot) hdrSlot.innerHTML = "";
+        if (navSlot) navSlot.innerHTML = "";
+        ovlKey = "";
+      }
     }
-    var p = stripLangPrefix(location.pathname).replace(/\/+$/, "");
+    /* Not one of the shop's shapes at all: the 404, below. */
+    var p = route ? route.rest.replace(/\/+$/, "") : null;
+    if (p === null) { S.screen = "notfound"; return true; }
     var m;
-    if ((m = p.match(/\/shop2\/p\/([^/]+)$/))) {
+    if ((m = p.match(/^\/p\/([^/]+)$/))) {
       var id = safeDecode(m[1]), found = null;
       CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
       if (found) {
@@ -53276,21 +53469,21 @@
         return true;
       }
     }
-    if ((m = p.match(/\/shop2\/c\/([^/]+)$/)) && (m[1] === "all" || CAT_NAMES[m[1]])) {
+    if ((m = p.match(/^\/c\/([^/]+)$/)) && (m[1] === "all" || CAT_NAMES[m[1]])) {
       S.brand = ""; S.cat = m[1]; S.shown = 12; S.screen = "catalog";
       return true;
     }
-    if ((m = p.match(/\/shop2\/b\/([^/]+)$/)) && BRAND_BY_SLUG[safeDecode(m[1])]) {
+    if ((m = p.match(/^\/b\/([^/]+)$/)) && BRAND_BY_SLUG[safeDecode(m[1])]) {
       S.brand = BRAND_BY_SLUG[safeDecode(m[1])]; S.shown = 12; S.screen = "catalog";
       return true;
     }
-    if (/\/shop2\/search$/.test(p)) {
+    if (/^\/search$/.test(p)) {
       var q = location.search.match(/[?&]q=([^&]*)/);
       S.query = q ? safeDecode(q[1].replace(/\+/g, " ")) : "";
       S.screen = "search";
       return true;
     }
-    if ((m = p.match(/\/shop2\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
+    if ((m = p.match(/^\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
       S.infoSlug = m[1]; S.screen = "info"; return true;
     }
     /* features: sets and the gift card.
@@ -53302,43 +53495,48 @@
        silently become the home page. The address is accepted as what it is,
        and screenBundle() answers honestly: the set, «Наборы сейчас
        недоступны», or «Набор не найден» — never a 404, never a bounce home. */
-    if ((m = p.match(/\/shop2\/set\/([^/]+)$/))) {
+    if ((m = p.match(/^\/set\/([^/]+)$/))) {
       S.bundleId = safeDecode(m[1]); S.screen = "bundle"; return true;
     }
-    if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
-    if (/\/shop2\/gift$/.test(p)) { S.screen = "gift"; return true; }
+    if (/^\/sets$/.test(p)) { S.screen = "bundles"; return true; }
+    if (/^\/gift$/.test(p)) { S.screen = "gift"; return true; }
     /* blog: posts live in the database, not in a client-side list like
        CATALOGUE or BUNDLES, so there is nothing to check synchronously here
        — the slug is accepted optimistically and screenBlogPost() resolves it
        (found / not found / still loading) once its fetch answers. */
-    if ((m = p.match(/\/shop2\/blog\/([^/]+)$/))) {
+    if ((m = p.match(/^\/blog\/([^/]+)$/))) {
       S.blogSlug = safeDecode(m[1]); S.screen = "blogpost"; return true;
     }
-    if (/\/shop2\/blog$/.test(p)) { S.screen = "blog"; return true; }
-    /* scanner app: /shop2/scan/ is the admin's third installable icon — the
+    if (/^\/blog$/.test(p)) { S.screen = "blog"; return true; }
+    /* scanner app: /admin/scan is the admin's third installable icon — the
        barcode scanner on its own route, gated on the admin session by
-       screenScan() exactly the way /shop2/admin/ is (docs/inventory.md). */
-    if ((m = p.match(/\/shop2\/(brands|account|admin|scan)$/))) { S.screen = m[1]; return true; }
+       screenScan() exactly the way /admin is (docs/inventory.md). */
+    if ((m = p.match(/^\/(brands|account|admin|scan)$/))) { S.screen = m[1]; return true; }
     /* The receipt IS a place to land cold — it is where the bank sends the
        shopper back to, with ?n=&s= naming the order and how it went. Without
        that query there is no order behind it, and home is the honest answer.
        A payment form with an empty basket bounces straight back out anyway. */
-    if (/\/shop2\/done$/.test(p)) {
+    if (/^\/done$/.test(p)) {
       if (/[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) { S.screen = "done"; return true; }
       return routeHome();
     }
-    if (/\/shop2\/checkout$/.test(p)) {
+    if (/^\/checkout$/.test(p)) {
       if (S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
       return routeHome();
     }
+    /* /cart — Shopify's basket page. The basket is a drawer here, so the
+       address opens the shop with it pulled out: the home page underneath
+       (and in the address bar), the drawer on top once the first paint is
+       done (S.cartAtBoot, firstPaint()). Back from there closes the drawer. */
+    if (p === "/cart") { S.cartAtBoot = true; return routeHome(); }
     // the home page itself, in any of the three languages
-    if (p === "/shop2" || p === "") { S.screen = "home"; return true; }
+    if (p === "") { S.screen = "home"; return true; }
     /* Everything this cascade did not recognise is an address the shop has no
        page for. It used to be answered with the home page at HTTP 200 — a
        soft 404, which Google de-indexes and which leaves a shopper on a stale
        link wondering what happened (Dim, 07.09.2026: «Make a page not
        found»). The server says 404 for the same set of paths
-       (src/app/shop2/[...path]/route.ts → src/lib/notfound-page.ts); this is
+       (src/app/[...path]/route.ts → src/lib/notfound-page.ts); this is
        the same answer once the script has taken over, on the address the
        shopper actually asked for. */
     S.screen = "notfound";
@@ -53346,8 +53544,8 @@
   }
 
   /* The address bar has to agree with the screen. Two addresses are
-     legitimate to ask for and impossible to render — /shop2/checkout/ with an
-     empty basket, /shop2/done/ with no order in its query — and both used to
+     legitimate to ask for and impossible to render — /checkout with an
+     empty basket, /checkout/done with no order in its query — and both used to
      draw the home page while leaving their own URL up, so a reload, the tab
      title and the canonical all described a page the shopper was not on
      (Dim, 07.09.2026: fix it, address included). Replaced, never pushed:
@@ -53355,7 +53553,7 @@
   function routeHome() {
     S.screen = "home";
     try {
-      var want = "/shop2" + SEG_OF_LANG[pathLang] + "/";
+      var want = shopPathFor(S.lang, "/");
       if (location.pathname + location.search !== want) {
         history.replaceState({ y: 0, shown: S.shown }, "", want);
       }
@@ -53932,25 +54130,15 @@
     if (!document.hidden) acctRefresh();
   });
 
-  /* Country refinement for the first visit only: an English-language browser
-     physically in Estonia gets the Estonian shop, in a Russian-speaking
-     country the Russian one. A shopper who has ever touched the switcher is
-     left alone. */
-  if (!savedHadLang) {
-    fetch("/api/geo/").then(function (r) { return r.json(); }).then(function (j) {
-      var want = S.lang;
-      if (S.lang === "EN") {
-        if (j.country === "EE") want = "ET";
-        else if (j.country === "RU" || j.country === "BY" || j.country === "UA") want = "RU";
-      }
-      if (want !== S.lang && !savedHadLang) {
-        S.lang = want;
-        hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
-        render();
-        blogPrefetchSoon();
-      }
-    }).catch(function () {});
-  }
+  /* «/cart» — the shop with the basket open (Shopify's cart page, and every
+     old link to it). The router has already put the home page under it and
+     the address back to the home page's; the drawer parks its own history
+     entry, so Back closes it like any basket. */
+  if (S.cartAtBoot) { S.cartAtBoot = false; openDrawer("cart"); }
+  /* (Until 08.10.2026 a first visit was also «refined» here by the visitor's
+     country — an English browser in Estonia re-rendered in Estonian on the
+     same address. A storefront address has one language now; see the top of
+     the language region.) */
   }
   /* product creation: a direct visit to a product the file does not have
      (/shop2/p/c-…/) that this browser has no copy of yet — the first paint
@@ -53959,9 +54147,10 @@
      page paints at once, exactly as it always has. */
   var bootWait = false;
   try {
-    var bootPath = stripLangPrefix(location.pathname);
-    var bootProd = bootPath.match(/\/shop2\/p\/(c-[^/]+)\/?$/);
-    var bootBrand = bootPath.match(/\/shop2\/b\/([^/]+)\/?$/);
+    var bootRoute = shopRouteOf(location.pathname);
+    var bootPath = bootRoute ? bootRoute.rest : "";
+    var bootProd = bootPath.match(/^\/p\/(c-[^/]+)\/$/);
+    var bootBrand = bootPath.match(/^\/b\/([^/]+)\/$/);
     var bootLetter = resumePayload(resumeToken());
     bootWait = !!((bootProd && !byIdOrNull(decodeURIComponent(bootProd[1]))) ||
       // …or a brand page of a brand only the owner's own products carry

@@ -44,6 +44,8 @@
    page loads without a build step cannot import this file. That one is a
    deliberate twin; docs/blog.md holds the comparison. */
 
+import { modernShopHref } from "./shop-paths.mjs";
+
 /* ---------- markdown → safe HTML ------------------------------------------
  *
  * A deliberately small subset, hand-written so there is no dependency to
@@ -99,7 +101,8 @@ function inline(escaped) {
     return u ? `<img src="${u}" alt="${alt}" loading="lazy">` : whole;
   });
   s = s.replace(/\[([^\]\n]*)\]\(\s*([^)\s]+)\s*\)/g, (whole, text, url) => {
-    const u = safeUrl(url);
+    // a link written while the shop lived under /shop2/ goes to the page, not to a redirect
+    const u = safeUrl(modernShopHref(url));
     if (!u) return whole;
     const ext = /^https?:\/\//i.test(u) ? ' target="_blank" rel="noopener noreferrer"' : "";
     return `<a href="${u}"${ext}>${text || u}</a>`;
@@ -331,7 +334,8 @@ function openTag(name, attrsRaw) {
        fillBlogCardPrices() in src/lib/seo-head.mjs for why. */
     if (String(attrs["data-price"] || "").trim().toLowerCase() === "live") out += ' data-price="live"';
   }
-  const href = attrs.href ? safeUrl(attrs.href) : null;
+  // a link written while the shop lived under /shop2/ goes to the page, not to a redirect
+  const href = attrs.href ? safeUrl(modernShopHref(attrs.href)) : null;
   if (href) {
     out += ` href="${escapeUrlAttr(href)}"`;
     if (/^https?:\/\//i.test(href)) out += ' target="_blank" rel="noopener noreferrer"';

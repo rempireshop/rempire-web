@@ -56,12 +56,12 @@ export default defineConfig({
 
   use: {
     baseURL: BASE_URL,
-    /* Same reason as playwright.config.ts: guessLang() falls back to the
-       *browser's* language before it falls back to Russian, and every
-       unprefixed URL this suite asks for is expected to answer in Russian —
-       that is what "no prefix" means in docs/seo.md. Chromium's own default is
-       en-US, so without this the RU column of the page matrix would be
-       measuring this machine's locale. */
+    /* The panel opens in the browser's language (guessLang()), and its
+       pages are read in Russian. The storefront no longer reads it: since
+       08.10.2026 a page is in its address's language (English unprefixed,
+       /ru, /et — docs/seo.md), and a browser that asks for Russian on an
+       unprefixed address is sent to its /ru twin by the edge — which is why
+       e2e/smoke.spec.ts sets the rempire_lang=en cookie for its English walk. */
     locale: "ru-RU",
     /* The consent banner, answered with «Только необходимое» before the first
        page load. Two reasons, and the second is the important one:

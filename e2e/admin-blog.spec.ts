@@ -419,7 +419,7 @@ test.describe("blog — the visual editor", () => {
   });
 
   /* A post published after the last build has no static page — until now the
-     /shop2/:path+ fallback handed a crawler the Russian home page. The page
+     shell's fallback handed a crawler the home page. The page
      is built from the row at request time (src/lib/blog-page.ts): what the
      server sends before any script runs is what is asserted first, then what
      the tab shows once app.js has taken over, the sitemap the app serves,
@@ -454,15 +454,15 @@ test.describe("blog — the visual editor", () => {
       expect(served).toMatch(/^<!doctype html>\n<html lang="et">/);
       expect(served).toContain(`<title>Google ET ${marker} — REMPIRE</title>`);
       expect(served).toContain(`<meta name="description" content="Kirjeldus ET ${marker}">`);
-      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2/et/blog/${post.slug}/" data-seo="canonical">`);
-      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/shop2/blog/${post.slug}/" data-seo="alt-x">`);
+      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/et/blogs/news/${post.slug}" data-seo="canonical">`);
+      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/blogs/news/${post.slug}" data-seo="alt-x">`);
       expect(served).toContain('<meta property="og:type" content="article">');
       expect(served).toContain('<meta property="og:locale" content="et_EE"');
       expect(served).toContain(`<meta property="og:image" content="${E2E_BASE_URL}/shop2/og/blog-${post.slug}.et.png?v=`);
       expect(served).toContain('"@type":"BlogPosting"');
       expect(served).toContain(`<h1 class="display h1">Artikkel pärast ehitust ${marker}</h1>`);
       expect(served).toContain("<h2>Osa</h2><p>Tekst <strong>paks</strong>.</p>");
-      expect(served).toContain(`href="/shop2/et/p/${PRODUCT.id}/"`);
+      expect(served).toContain(`href="/et/products/${PRODUCT.id}"`);
       expect(served).toContain('<script type="application/json" id="blogpost">');
       // …and what the tab shows once app.js has taken over: the same head, the real article
       await waitForScreen(shop.page, "blogpost");
@@ -481,7 +481,7 @@ test.describe("blog — the visual editor", () => {
 
       // the sitemap the app serves names it, in three languages
       const xml = await (await page.request.get("/sitemap-custom.xml")).text();
-      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}/shop2${seg}/blog/${post.slug}/</loc>`);
+      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}${shopUrl(seg, `/blog/${post.slug}/`)}</loc>`);
 
       // taken down: 404 with noindex, gone from the sitemap, the browser still lands home
       expect((await page.request.patch("/api/admin/blog/", { data: { id: post.id, publish: false } })).status()).toBe(200);
@@ -782,7 +782,7 @@ test.describe("blog — the whole article", () => {
     const cards = box.locator("a[data-product]");
     await expect(cards, "the article the assistant wrote has not got its two product cards").toHaveCount(2);
     await expect(cards.first()).toHaveAttribute("data-product", PRODUCT.id);
-    await expect(cards.first(), "the card does not link to the Russian product page").toHaveAttribute("href", `/shop2/p/${PRODUCT.id}/`);
+    await expect(cards.first(), "the card does not link to the Russian product page").toHaveAttribute("href", `/ru/products/${PRODUCT.id}`);
     await expect(cards.first(), "the panel never wrote the name the model was not given").toContainText(PRODUCT.brand);
     /* The PRICE is not in the card's words — it is `data-price="live"`, the
        marker each of the three renderers fills in as it draws (blogProductHTML
@@ -793,7 +793,7 @@ test.describe("blog — the whole article", () => {
     await expect(cards.first(), "the card does not carry the live-price marker")
       .toHaveAttribute("data-price", "live");
     await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
-    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/p/${PRODUCT_2.id}/`);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/ru/products/${PRODUCT_2.id}`);
     await expect(cards.nth(1)).toContainText(PRODUCT_2.brand);
 
     const ru = await box.innerHTML();
@@ -817,15 +817,15 @@ test.describe("blog — the whole article", () => {
     /* ---- and what came back: the same cards, in their places, in Estonian --- */
     await page.locator('[data-admbloglang="ET"]').click();
     await expect(cards, "the Estonian article came back without its cards").toHaveCount(2);
-    await expect(cards.first()).toHaveAttribute("href", `/shop2/et/p/${PRODUCT.id}/`);
-    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/et/p/${PRODUCT_2.id}/`);
+    await expect(cards.first()).toHaveAttribute("href", `/et/products/${PRODUCT.id}`);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/et/products/${PRODUCT_2.id}`);
     const etHtml = await box.innerHTML();
     expect(etHtml).toContain("ET:");
     expect(etHtml, "a card was appended at the end instead of staying in its paragraph")
       .toMatch(new RegExp(`Первый абзац[\\s\\S]*${PRODUCT.id}[\\s\\S]*Второй раздел[\\s\\S]*${PRODUCT_2.id}[\\s\\S]*Третий абзац`));
     await page.locator('[data-admbloglang="EN"]').click();
-    await expect(cards.first()).toHaveAttribute("href", `/shop2/en/p/${PRODUCT.id}/`);
-    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/en/p/${PRODUCT_2.id}/`);
+    await expect(cards.first()).toHaveAttribute("href", `/products/${PRODUCT.id}`);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/products/${PRODUCT_2.id}`);
     await page.locator('[data-admbloglang="RU"]').click();
     await assertClean(page, w, "the article's own product cards in the editor");
 
@@ -1390,7 +1390,7 @@ test.describe("blog — the product cards survive a translation", () => {
     const cards = box.locator("a[data-product]");
     await expect(cards, "the Estonian text came back without the product cards").toHaveCount(2);
     await expect(cards.nth(0)).toHaveAttribute("data-product", PRODUCT.id);
-    await expect(cards.nth(0)).toHaveAttribute("href", `/shop2/et/p/${PRODUCT.id}/`);
+    await expect(cards.nth(0)).toHaveAttribute("href", `/et/products/${PRODUCT.id}`);
     await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
     /* …and it READS Estonian (Renat, 13.09.2026: «The products added into the
        text of the blog post are in russian»). The catalogue is written in

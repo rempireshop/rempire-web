@@ -6,7 +6,7 @@
  * preview in the admin looks like the design files Renat already signed off.
  */
 
-import { BRAND, baseUrl, money, normalizeLang } from "./layout";
+import { BRAND, baseUrl, money, normalizeLang, shopPath } from "./layout";
 import { renderAbandonedCart } from "./abandoned-cart";
 import { renderAbandonedCartDiscount } from "./abandoned-cart-discount";
 import { renderBackInStock } from "./back-in-stock";
@@ -424,7 +424,7 @@ export function renderDemo(
     case "order-unpaid":
       return renderOrderUnpaid({ ...demoOrder(L), status: "new" }, L, {
         daysLeft: 4,
-        payUrl: `${baseUrl()}/shop2/done/?n=R-100042&s=failed`,
+        payUrl: `${baseUrl()}/ru/checkout/done?n=R-100042&s=failed`,
       });
     case "order-cancelled":
       return renderOrderCancelled({ ...demoOrder(L), status: "cancelled" }, L, { kind: "cancelled" });
@@ -448,9 +448,9 @@ export function renderDemo(
         amount: 95,
       });
     case "abandoned-cart":
-      return renderAbandonedCart(demoCart(L), L, "/shop2/checkout/");
+      return renderAbandonedCart(demoCart(L), L, shopPath(L, "/checkout/"));
     case "abandoned-cart-discount":
-      return renderAbandonedCartDiscount(demoCart(L), L, "/shop2/checkout/", {
+      return renderAbandonedCartDiscount(demoCart(L), L, shopPath(L, "/checkout/"), {
         code: DEMO_CART_CODE,
         percent: demoCartPercent(opts),
         /* A fixed date, not «30 days from now»: the preview is the one letter

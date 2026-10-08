@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
@@ -7,8 +7,10 @@
      top pixels; with the black announce bar first it went dark or light
      depending on scroll state. Pin it. -->
 <meta name="theme-color" content="#ffffff">
-<!-- This file is both the shell every /shop2/ path falls back to AND the
-     Russian home page, because that is the file Vercel serves for /shop2/.
+<!-- This file is both the shell every client-side screen is served (/search,
+     /checkout, /admin … — src/app/[...path]) AND the English home page, the
+     file next.config.ts routes «/» to (Shopify's addresses since 08.10.2026;
+     English is the unprefixed language).
      Everything the search engines read — title, description, canonical, the
      hreflang cluster, OpenGraph, JSON-LD — is written between the markers
      below by tools/prerender-shop2.mjs (`npm run prerender`), together with
@@ -17,31 +19,31 @@
      it — with one exception, the assets' ?v= token, which the same tool
      derives from the files it versions and patches in on every run. -->
 <!-- seo:start -->
-<title>REMPIRE — магазин косметики в Таллинне</title>
-<meta name="description" content="Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1.">
+<title>REMPIRE — professional hair care &amp; cosmetics in Tallinn</title>
+<meta name="description" content="Rempire shop: hair and beard care, styling, fragrance and merch. Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="google-site-verification" content="KUVTHWQUdqKHip0q8VUKTRnAj9L6isKgUsWE4163wNM">
 <meta name="google-site-verification" content="vnp_AFwYKflLNLDsABZXCMqo_75IxmAD8RLMIgh4ahs">
 <meta name="google-site-verification" content="k3GujBXDQzx0nVeZE5Raig1rp6QDNY8SsR0ONwTb2lw">
-<link rel="canonical" href="https://rempireshop.com/shop2/" data-seo="canonical">
-<link rel="alternate" hreflang="ru" href="https://rempireshop.com/shop2/" data-seo="alt-ru">
-<link rel="alternate" hreflang="et" href="https://rempireshop.com/shop2/et/" data-seo="alt-et">
-<link rel="alternate" hreflang="en" href="https://rempireshop.com/shop2/en/" data-seo="alt-en">
-<link rel="alternate" hreflang="x-default" href="https://rempireshop.com/shop2/" data-seo="alt-x">
+<link rel="canonical" href="https://rempireshop.com/" data-seo="canonical">
+<link rel="alternate" hreflang="ru" href="https://rempireshop.com/ru" data-seo="alt-ru">
+<link rel="alternate" hreflang="et" href="https://rempireshop.com/et" data-seo="alt-et">
+<link rel="alternate" hreflang="en" href="https://rempireshop.com/" data-seo="alt-en">
+<link rel="alternate" hreflang="x-default" href="https://rempireshop.com/" data-seo="alt-x">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="REMPIRE">
-<meta property="og:locale" content="ru_RU" data-seo="og:locale">
-<meta property="og:url" content="https://rempireshop.com/shop2/" data-seo="og:url">
-<meta property="og:title" content="REMPIRE — магазин косметики в Таллинне" data-seo="og:title">
-<meta property="og:description" content="Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1." data-seo="og:description">
+<meta property="og:locale" content="en_US" data-seo="og:locale">
+<meta property="og:url" content="https://rempireshop.com/" data-seo="og:url">
+<meta property="og:title" content="REMPIRE — professional hair care &amp; cosmetics in Tallinn" data-seo="og:title">
+<meta property="og:description" content="Rempire shop: hair and beard care, styling, fragrance and merch. Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1." data-seo="og:description">
 <meta property="og:image" content="https://rempireshop.com/og-shop.png" data-seo="og:image">
 <meta property="og:image:alt" content="REMPIRE">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="REMPIRE — магазин косметики в Таллинне" data-seo="twitter:title">
-<meta name="twitter:description" content="Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1." data-seo="twitter:description">
+<meta name="twitter:title" content="REMPIRE — professional hair care &amp; cosmetics in Tallinn" data-seo="twitter:title">
+<meta name="twitter:description" content="Rempire shop: hair and beard care, styling, fragrance and merch. Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1." data-seo="twitter:description">
 <meta name="twitter:image" content="https://rempireshop.com/og-shop.png" data-seo="twitter:image">
 <style id="prestyle">#prerender .pre__img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; background: var(--page); }
 /* A blog cover is not square. It carries .blog__cover as well as .pre__img,
@@ -74,8 +76,8 @@
 #prerender .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }
 #prerender .pre__nm { display: block; font-size: 13.5px; }
 #prerender .pre__pr { display: block; font-size: 13.5px; font-weight: 600; }</style>
-<script type="application/ld+json" data-seo="ldjson-page">{"@context":"https://schema.org","@type":["Organization","Store"],"@id":"https://rempireshop.com/shop2/#organization","name":"REMPIRE","alternateName":["Rempire","Rempire Shop","rempireshop","Rempire Store OÜ"],"legalName":"Rempire Store OÜ","url":"https://rempireshop.com/shop2/","logo":"https://rempireshop.com/brand/rempire-tower.svg","image":"https://rempireshop.com/og-shop.png","email":"info@rempireshop.com","telephone":"+372 5623 7237","vatID":"EE102723858","taxID":"12216136","address":{"@type":"PostalAddress","streetAddress":"Mardi 1","addressCountry":"EE","postalCode":"10145","addressLocality":"Tallinn"},"areaServed":["EE","LV","LT","FI"],"sameAs":["https://www.instagram.com/rempire.shop/","https://www.facebook.com/Rempire.Official.Tallinn","https://www.tiktok.com/@rempire.official","https://www.youtube.com/@rempire.official"]}</script>
-<script type="application/ld+json" data-seo="ldjson-page">{"@context":"https://schema.org","@type":"WebSite","@id":"https://rempireshop.com/shop2/#website","name":"REMPIRE","alternateName":["Rempire","Rempire Shop","rempireshop.com"],"url":"https://rempireshop.com/shop2/","inLanguage":"ru","publisher":{"@id":"https://rempireshop.com/shop2/#organization"}}</script>
+<script type="application/ld+json" data-seo="ldjson-page">{"@context":"https://schema.org","@type":["Organization","Store"],"@id":"https://rempireshop.com/#organization","name":"REMPIRE","alternateName":["Rempire","Rempire Shop","rempireshop","Rempire Store OÜ"],"legalName":"Rempire Store OÜ","url":"https://rempireshop.com/","logo":"https://rempireshop.com/brand/rempire-tower.svg","image":"https://rempireshop.com/og-shop.png","email":"info@rempireshop.com","telephone":"+372 5623 7237","vatID":"EE102723858","taxID":"12216136","address":{"@type":"PostalAddress","streetAddress":"Mardi 1","addressCountry":"EE","postalCode":"10145","addressLocality":"Tallinn"},"areaServed":["EE","LV","LT","FI"],"sameAs":["https://www.instagram.com/rempire.shop/","https://www.facebook.com/Rempire.Official.Tallinn","https://www.tiktok.com/@rempire.official","https://www.youtube.com/@rempire.official"]}</script>
+<script type="application/ld+json" data-seo="ldjson-page">{"@context":"https://schema.org","@type":"WebSite","@id":"https://rempireshop.com/#website","name":"REMPIRE","alternateName":["Rempire","Rempire Shop","rempireshop.com"],"url":"https://rempireshop.com/","inLanguage":"en","publisher":{"@id":"https://rempireshop.com/#organization"}}</script>
 <!-- seo:end -->
 <!-- The tab icon and every app icon below are the header's own tower mark
      (tower() in app.js), ink on white, drawn into /shop2/icons/ by
@@ -95,7 +97,7 @@
      and is not possible: /shop2/* is served under script-src 'self'
      (next.config.ts), which is the rule that makes this shop's innerHTML safe
      and is not worth loosening for 400 bytes. -->
-<script src="/shop2/boot.js?v=cb3fcd436c0d" async></script>
+<script src="/shop2/boot.js?v=4e59366e7fdd" async></script>
 <!-- The prerendered page (#prerender) is for search engines and for a browser
      that runs no scripts. Dim, 08.10.2026: on a reload it showed for a moment
      — a different, plainer page — before app.js drew the shop over it, because
@@ -108,8 +110,8 @@
      page and not a blank screen. -->
 <style>#prerender { visibility: hidden; }</style>
 <noscript><style>#prerender { visibility: visible; }</style></noscript>
-<!-- PWA: the shop manifest (scope /shop2/) for everyone. On the admin route
-     app.js swaps this link to /shop2/admin.webmanifest (scope /shop2/admin/)
+<!-- PWA: the shop manifest (scope /) for everyone. On the admin route
+     app.js swaps this link to /shop2/admin.webmanifest (scope /admin)
      so the owner gets a separate «Админка» icon and a customer is never
      offered an app by that name — see syncAppManifest() in app.js and
      docs/inventory.md. iOS Safari does not read the manifest for its own
@@ -162,34 +164,34 @@
      on every build, so it is stale in exactly the cases where nothing
      changed. /shop/content.js keeps a token of its own on purpose and is not
      part of the set. -->
-<link rel="stylesheet" href="/shop2/styles.css?v=cb3fcd436c0d">
+<link rel="stylesheet" href="/shop2/styles.css?v=4e59366e7fdd">
 <!-- the admin design system (docs/design/admin-handoff-README.md): tokens
      and components for /shop2/admin/, all scoped to .adm2 / adm-*.
      media="print" so it does not hold up the storefront's first paint; app.js
      flips it to "all" the moment it runs (top of the file), before anything
      that wears its classes is rendered. -->
-<link rel="stylesheet" href="/shop2/admin.css?v=cb3fcd436c0d" media="print" data-admin-css>
+<link rel="stylesheet" href="/shop2/admin.css?v=4e59366e7fdd" media="print" data-admin-css>
 </head>
 <body>
-<div id="app"><!-- prerender:start --><div id="prerender"><div class="wrap"><section class="sec"><h1 class="display h1">REMPIRE — магазин косметики в Таллинне</h1><p class="sec__intro">Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. Доставка Omniva, SmartPosti и DPD по Эстонии, Латвии, Литве и Финляндии, самовывоз на Mardi 1.</p><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Разделы</h2><ul class="pre__list"><li><a href="/shop2/c/all/">Все товары</a></li><li><a href="/shop2/c/hair/">Уход за волосами</a></li><li><a href="/shop2/c/styling/">Стайлинг</a></li><li><a href="/shop2/c/beard/">Уход за бородой</a></li><li><a href="/shop2/c/face/">Уход за лицом</a></li><li><a href="/shop2/c/body/">Уход за телом</a></li><li><a href="/shop2/c/perfume/">Парфюмерия</a></li><li><a href="/shop2/c/merch/">Мерч</a></li></ul><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Бренды</h2><ul class="pre__list"><li><a href="/shop2/b/anua/">Anua</a></li><li><a href="/shop2/b/byredo/">Byredo</a></li><li><a href="/shop2/b/captain-fawcett/">Captain Fawcett</a></li><li><a href="/shop2/b/cbd-daily/">CBD Daily</a></li><li><a href="/shop2/b/christian-dior/">Christian Dior</a></li><li><a href="/shop2/b/cosrx/">Cosrx</a></li><li><a href="/shop2/b/creed/">Creed</a></li><li><a href="/shop2/b/davines/">Davines</a></li><li><a href="/shop2/b/gatsby/">Gatsby</a></li><li><a href="/shop2/b/guerlain/">Guerlain</a></li><li><a href="/shop2/b/gummy/">Gummy</a></li><li><a href="/shop2/b/kevin-murphy/">Kevin.Murphy</a></li><li><a href="/shop2/b/kilian/">Kilian</a></li><li><a href="/shop2/b/laneige/">LANEIGE</a></li><li><a href="/shop2/b/lumin-skin/">Lumin Skin</a></li><li><a href="/shop2/b/maison-francis-kurkdjian/">Maison Francis Kurkdjian</a></li><li><a href="/shop2/b/nature-republic/">Nature Republic</a></li><li><a href="/shop2/b/paul-mitchell/">Paul Mitchell</a></li><li><a href="/shop2/b/proraso/">Proraso</a></li><li><a href="/shop2/b/rempire/">Rempire</a></li><li><a href="/shop2/b/roja/">Roja</a></li><li><a href="/shop2/b/system-4/">System 4</a></li><li><a href="/shop2/b/tom-ford/">Tom Ford</a></li><li><a href="/shop2/b/versace/">Versace</a></li><li><a href="/shop2/b/xerjoff/">Xerjoff</a></li><li><a href="/shop2/b/yumain/">Yumain</a></li></ul><ul class="grid" style="list-style:none;padding:0"><li><a class="pre__card" href="/shop2/p/system-4-bio-botanical-shampoo/"><img class="pre__img" src="/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5" alt="System 4 Bio Botanical Shampoo — шампунь" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Shampoo — шампунь</span><span class="pre__pr num">от 9 €</span></a></li><li><a class="pre__card" href="/shop2/p/system-4-bio-botanical-serum/"><img class="pre__img" src="/shop/img/system-4-bio-botanical-serum-0.webp?v=5" alt="System 4 Bio Botanical Serum — сыворотка для кожи головы" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Serum — сыворотка для кожи головы</span><span class="pre__pr num">от 8 €</span></a></li><li><a class="pre__card" href="/shop2/p/sim-sensitive-system-4-oil-cure-scalp-treatment-o/"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=5" alt="System 4 Oil Cure Scalp Treatment O — маска для кожи головы" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Oil Cure Scalp Treatment O — маска для кожи головы</span><span class="pre__pr num">от 7,90 €</span></a></li><li><a class="pre__card" href="/shop2/p/touchable/"><img class="pre__img" src="/shop/img/touchable-0.webp?v=5" alt="Kevin.Murphy Touchable" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Touchable</span><span class="pre__pr num">27 €</span></a></li><li><a class="pre__card" href="/shop2/p/repair-me-wash/"><img class="pre__img" src="/shop/img/repair-me-wash-0.webp?v=5" alt="Kevin.Murphy Repair-Me.Wash — шампунь" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Repair-Me.Wash — шампунь</span><span class="pre__pr num">от 7 €</span></a></li><li><a class="pre__card" href="/shop2/p/kevin-murphy-un-tangled-spray/"><img class="pre__img" src="/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=5" alt="Kevin.Murphy Un.Tangled Spray — спрей для волос" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Un.Tangled Spray — спрей для волос</span><span class="pre__pr num">от 8 €</span></a></li><li><a class="pre__card" href="/shop2/p/night-rider/"><img class="pre__img" src="/shop/img/night-rider-0.webp?v=5" alt="Kevin.Murphy Night.Rider — паста для укладки" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Night.Rider — паста для укладки</span><span class="pre__pr num">от 11 €</span></a></li><li><a class="pre__card" href="/shop2/p/free-hold/"><img class="pre__img" src="/shop/img/free-hold-0.webp?v=5" alt="Kevin.Murphy Free.Hold" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Free.Hold</span><span class="pre__pr num">от 11 €</span></a></li><li><a class="pre__card" href="/shop2/p/killer-curls-rinse/"><img class="pre__img" src="/shop/img/killer-curls-rinse-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Rinse — кондиционер" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Rinse — кондиционер</span><span class="pre__pr num">от 6 €</span></a></li><li><a class="pre__card" href="/shop2/p/killer-curls-wash/"><img class="pre__img" src="/shop/img/killer-curls-wash-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Wash — шампунь" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Wash — шампунь</span><span class="pre__pr num">от 6 €</span></a></li><li><a class="pre__card" href="/shop2/p/system-4-mild-shampoo-3/"><img class="pre__img" src="/shop/img/system-4-mild-shampoo-3-0.webp?v=5" alt="System 4 Mild Shampoo 3 — шампунь" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Mild Shampoo 3 — шампунь</span><span class="pre__pr num">от 7,90 €</span></a></li><li><a class="pre__card" href="/shop2/p/sim-sensitive-system-4-scalp-tonic-t/"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=5" alt="System 4 Scalp Tonic T — тоник для кожи головы" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Scalp Tonic T — тоник для кожи головы</span><span class="pre__pr num">от 7,90 €</span></a></li></ul></section><nav class="pre__langs" aria-label="Язык"><a href="/shop2/" hreflang="ru" aria-current="true">RU</a><a href="/shop2/et/" hreflang="et">ET</a><a href="/shop2/en/" hreflang="en">EN</a></nav></div></div><!-- prerender:end --></div>
-<script src="/shop/catalogue2.js?v=cb3fcd436c0d"></script>
+<div id="app"><!-- prerender:start --><div id="prerender"><div class="wrap"><section class="sec"><h1 class="display h1">REMPIRE — professional hair care &amp; cosmetics in Tallinn</h1><p class="sec__intro">Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.</p><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Sections</h2><ul class="pre__list"><li><a href="/collections/all-products">All products</a></li><li><a href="/collections/hair-care">Hair care</a></li><li><a href="/collections/hair-styling">Styling</a></li><li><a href="/collections/beard-care">Beard care</a></li><li><a href="/collections/face-care">Face care</a></li><li><a href="/collections/body-care">Body care</a></li><li><a href="/collections/perfume">Fragrance</a></li><li><a href="/collections/merch">Merch</a></li></ul><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Brands</h2><ul class="pre__list"><li><a href="/collections/anua">Anua</a></li><li><a href="/collections/byredo">Byredo</a></li><li><a href="/collections/captain-fawcett">Captain Fawcett</a></li><li><a href="/collections/cbd-daily-haircare">CBD Daily</a></li><li><a href="/collections/christian-dior">Christian Dior</a></li><li><a href="/collections/cosrx">Cosrx</a></li><li><a href="/collections/creed">Creed</a></li><li><a href="/collections/davines">Davines</a></li><li><a href="/collections/gatsby">Gatsby</a></li><li><a href="/collections/guerlain">Guerlain</a></li><li><a href="/collections/gummy">Gummy</a></li><li><a href="/collections/kevin-murphy">Kevin.Murphy</a></li><li><a href="/collections/kilian">Kilian</a></li><li><a href="/collections/laneige">LANEIGE</a></li><li><a href="/collections/lumin-skin">Lumin Skin</a></li><li><a href="/collections/maison-francis-kurkdjian">Maison Francis Kurkdjian</a></li><li><a href="/collections/nature-republic">Nature Republic</a></li><li><a href="/collections/paul-mitchell">Paul Mitchell</a></li><li><a href="/collections/proraso">Proraso</a></li><li><a href="/collections/rempire">Rempire</a></li><li><a href="/collections/roja">Roja</a></li><li><a href="/collections/system-4">System 4</a></li><li><a href="/collections/tom-ford">Tom Ford</a></li><li><a href="/collections/versace">Versace</a></li><li><a href="/collections/xerjoff">Xerjoff</a></li><li><a href="/collections/yumain">Yumain</a></li></ul><ul class="grid" style="list-style:none;padding:0"><li><a class="pre__card" href="/products/system-4-bio-botanical-shampoo"><img class="pre__img" src="/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5" alt="System 4 Bio Botanical Shampoo — shampoo" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Shampoo — shampoo</span><span class="pre__pr num">from 9 €</span></a></li><li><a class="pre__card" href="/products/system-4-bio-botanical-serum"><img class="pre__img" src="/shop/img/system-4-bio-botanical-serum-0.webp?v=5" alt="System 4 Bio Botanical Serum — serum for scalp" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Serum — serum for scalp</span><span class="pre__pr num">from 8 €</span></a></li><li><a class="pre__card" href="/products/sim-sensitive-system-4-oil-cure-scalp-treatment-o"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=5" alt="System 4 Oil Cure Scalp Treatment O — mask for scalp" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Oil Cure Scalp Treatment O — mask for scalp</span><span class="pre__pr num">from 7,90 €</span></a></li><li><a class="pre__card" href="/products/touchable"><img class="pre__img" src="/shop/img/touchable-0.webp?v=5" alt="Kevin.Murphy Touchable" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Touchable</span><span class="pre__pr num">27 €</span></a></li><li><a class="pre__card" href="/products/repair-me-wash"><img class="pre__img" src="/shop/img/repair-me-wash-0.webp?v=5" alt="Kevin.Murphy Repair-Me.Wash — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Repair-Me.Wash — shampoo</span><span class="pre__pr num">from 7 €</span></a></li><li><a class="pre__card" href="/products/kevin-murphy-un-tangled-spray"><img class="pre__img" src="/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=5" alt="Kevin.Murphy Un.Tangled Spray — spray for hair" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Un.Tangled Spray — spray for hair</span><span class="pre__pr num">from 8 €</span></a></li><li><a class="pre__card" href="/products/night-rider"><img class="pre__img" src="/shop/img/night-rider-0.webp?v=5" alt="Kevin.Murphy Night.Rider — paste for styling" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Night.Rider — paste for styling</span><span class="pre__pr num">from 11 €</span></a></li><li><a class="pre__card" href="/products/free-hold"><img class="pre__img" src="/shop/img/free-hold-0.webp?v=5" alt="Kevin.Murphy Free.Hold" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Free.Hold</span><span class="pre__pr num">from 11 €</span></a></li><li><a class="pre__card" href="/products/killer-curls-rinse"><img class="pre__img" src="/shop/img/killer-curls-rinse-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Rinse — conditioner" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Rinse — conditioner</span><span class="pre__pr num">from 6 €</span></a></li><li><a class="pre__card" href="/products/killer-curls-wash"><img class="pre__img" src="/shop/img/killer-curls-wash-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Wash — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Wash — shampoo</span><span class="pre__pr num">from 6 €</span></a></li><li><a class="pre__card" href="/products/system-4-mild-shampoo-3"><img class="pre__img" src="/shop/img/system-4-mild-shampoo-3-0.webp?v=5" alt="System 4 Mild Shampoo 3 — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Mild Shampoo 3 — shampoo</span><span class="pre__pr num">from 7,90 €</span></a></li><li><a class="pre__card" href="/products/sim-sensitive-system-4-scalp-tonic-t"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=5" alt="System 4 Scalp Tonic T — toner for scalp" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Scalp Tonic T — toner for scalp</span><span class="pre__pr num">from 7,90 €</span></a></li></ul></section><nav class="pre__langs" aria-label="Language"><a href="/ru" hreflang="ru">RU</a><a href="/et" hreflang="et">ET</a><a href="/" hreflang="en" aria-current="true">EN</a></nav></div><script type="application/json" id="setsdata">["beard-start","shave-smooth","tattoo-care","styling-duo","gift-rempire","hair-young-again","face-basic","barberism"]</script></div><!-- prerender:end --></div>
+<script src="/shop/catalogue2.js?v=4e59366e7fdd"></script>
 <!-- curated sets, generated by tools/build-bundles.mjs — optional: without it
      the shop simply has no «Наборы» -->
-<script src="/shop/bundles.js?v=cb3fcd436c0d"></script>
-<script src="/shop/paylogos.js?v=cb3fcd436c0d"></script>
-<script src="/shop/shipping-data.js?v=cb3fcd436c0d"></script>
+<script src="/shop/bundles.js?v=4e59366e7fdd"></script>
+<script src="/shop/paylogos.js?v=4e59366e7fdd"></script>
+<script src="/shop/shipping-data.js?v=4e59366e7fdd"></script>
 <script src="/shop/content.js?v=c2"></script>
-<script src="/shop/legal.js?v=cb3fcd436c0d"></script>
-<script src="/shop/content.ru.js?v=cb3fcd436c0d"></script>
-<script src="/shop/content.et.js?v=cb3fcd436c0d"></script>
-<script src="/shop/legal.ru.js?v=cb3fcd436c0d"></script>
-<script src="/shop/legal.et.js?v=cb3fcd436c0d"></script>
-<script src="/shop/legal.en.js?v=cb3fcd436c0d"></script>
+<script src="/shop/legal.js?v=4e59366e7fdd"></script>
+<script src="/shop/content.ru.js?v=4e59366e7fdd"></script>
+<script src="/shop/content.et.js?v=4e59366e7fdd"></script>
+<script src="/shop/legal.ru.js?v=4e59366e7fdd"></script>
+<script src="/shop/legal.et.js?v=4e59366e7fdd"></script>
+<script src="/shop/legal.en.js?v=4e59366e7fdd"></script>
 <!-- app.min.js, not app.js: same program, comments and indentation out, 38 %
      smaller over the wire — and this is the one script standing between a
      visitor and any screen at all. Built by tools/minify-shop2.mjs, which
      says why; edit public/shop2/app.js. -->
-<script src="/shop2/app.min.js?v=cb3fcd436c0d"></script>
+<script src="/shop2/app.min.js?v=4e59366e7fdd"></script>
 <!-- The shop assistant (/shop2/chat.js) is NOT listed here on purpose: it is
      wanted on a wide screen, in the shop, outside the checkout, and never on
      a phone (Dim, 07.09.2026). app.js adds the tag itself when the screen and

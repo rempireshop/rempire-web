@@ -97,7 +97,7 @@ describe("a picture block is the Outlook-safe banner", () => {
   it("wraps the picture in a block link to the chosen page", () => {
     const { html } = letter(AROMATIC);
     const a = anchorAround(html, IMG);
-    expect(a, "the banner lost its link").toContain(`href="${BASE}/shop2/p/${PRODUCT}/"`);
+    expect(a, "the banner lost its link").toContain(`href="${BASE}/ru/products/${PRODUCT}"`);
     // an inline <a> round a block image draws an underline stripe in Outlook
     expect(a).toContain("display:block");
     expect(a).toContain("text-decoration:none");
@@ -116,9 +116,9 @@ describe("a picture block is the Outlook-safe banner", () => {
   });
 
   it("sends each reader to the page in their own language", () => {
-    expect(anchorAround(letter(AROMATIC, "et").html, IMG)).toContain(`${BASE}/shop2/et/p/${PRODUCT}/`);
-    expect(anchorAround(letter(AROMATIC, "en").html, IMG2)).toContain(`${BASE}/shop2/en/c/beard/`);
-    expect(anchorAround(letter(AROMATIC, "ru").html, IMG2)).toContain(`${BASE}/shop2/c/beard/`);
+    expect(anchorAround(letter(AROMATIC, "et").html, IMG)).toContain(`${BASE}/et/products/${PRODUCT}`);
+    expect(anchorAround(letter(AROMATIC, "en").html, IMG2)).toContain(`${BASE}/collections/beard-care`);
+    expect(anchorAround(letter(AROMATIC, "ru").html, IMG2)).toContain(`${BASE}/ru/collections/uhod-za-borodoy`);
   });
 
   it("leaves a picture with no link a picture", () => {
@@ -129,8 +129,8 @@ describe("a picture block is the Outlook-safe banner", () => {
 
   it("the plain-text part says where the banner goes, not which file it is", () => {
     const { text } = letter(AROMATIC);
-    expect(text).toContain(`${BASE}/shop2/p/${PRODUCT}/`);
-    expect(text).toContain(`Борода: ${BASE}/shop2/c/beard/`);
+    expect(text).toContain(`${BASE}/ru/products/${PRODUCT}`);
+    expect(text).toContain(`Борода: ${BASE}/ru/collections/uhod-za-borodoy`);
     expect(text).not.toContain(IMG);
   });
 });
@@ -156,10 +156,10 @@ describe("the other blocks", () => {
     const { html, text } = letter(AROMATIC, "et");
     const btn = /<td[^>]*class="em-btn"[^>]*>\s*<a href="([^"]+)"[^>]*>([^<]+)<\/a>/.exec(html);
     expect(btn, "no bulletproof button").toBeTruthy();
-    expect(btn![1]).toBe(`${BASE}/shop2/et/`);
+    expect(btn![1]).toBe(`${BASE}/et`);
     expect(btn![2]).toBe("Poodi");
     expect(html).toMatch(/bgcolor="[^"]+"[^>]*mso-padding-alt/); // Outlook paints the cell, not the <a>
-    expect(text).toContain(`Poodi: ${BASE}/shop2/et/`);
+    expect(text).toContain(`Poodi: ${BASE}/et`);
   });
 
   it("a button with no link or no words draws nothing rather than a dead button", () => {
@@ -219,7 +219,7 @@ describe("links", () => {
       "data:text/html,<script>alert(1)</script>",
       "mailto:a@b.ee",
       "//evil.example/",
-      "/shop2/c/hair/",
+      "/ru/collections/uhod-za-volosami",
       "https://user:pass@evil.example/",
       'https://x.ee/"onmouseover="alert(1)',
       "ftp://x.ee/",
@@ -320,7 +320,7 @@ describe("which languages a block letter can go out in", () => {
 /* ---------- the letter written before blocks ------------------------------- */
 
 describe("an old letter", () => {
-  const OLD_RU = '<h2>Новинки</h2><p>Привезли <strong>System 4</strong>.</p><figure><a href="/shop2/c/hair/"><img src="/shop/img/x.webp" alt="Фото"></a></figure>' +
+  const OLD_RU = '<h2>Новинки</h2><p>Привезли <strong>System 4</strong>.</p><figure><a href="/ru/collections/uhod-za-volosami"><img src="/shop/img/x.webp" alt="Фото"></a></figure>' +
     `<p><a data-product="${PRODUCT}"></a></p>`;
 
   it("renders from its body exactly as before when it has no blocks", () => {
@@ -433,7 +433,7 @@ describe("block letters through the database and the routes", () => {
     expect(j.ok).toBe(true);
     expect(j.lang).toBe("ET");
     expect(j.subject).toBe("Sügise uudised");
-    expect(j.html).toContain(`${BASE}/shop2/et/p/${PRODUCT}/`);
+    expect(j.html).toContain(`${BASE}/et/products/${PRODUCT}`);
     expect(j.html).toContain('<base target="_blank">'); // a tap in the preview opens a tab, not the frame
     expect(j.html).toContain("/api/mail/unsubscribe/");
     expect(j.ready).toEqual(["RU"]);
@@ -456,7 +456,7 @@ describe("block letters through the database and the routes", () => {
     const { GET } = await import("@/app/api/admin/newsletters/[id]/preview/route");
     const page = await (await GET(req(`/api/admin/newsletters/${n.id}/preview/?lang=EN`, { cookie: admin }), { params: Promise.resolve({ id: n.id }) })).text();
     expect(page).toContain(IMG);
-    expect(page).toContain(`${BASE}/shop2/en/p/${PRODUCT}/`);
+    expect(page).toContain(`${BASE}/products/${PRODUCT}`);
     expect(page).toContain("To the shop");
 
     const { result, lang } = await sendNewsletterTest(n, "renat@example.com", "ET");
@@ -464,7 +464,7 @@ describe("block letters through the database and the routes", () => {
     expect(lang).toBe("ET");
     expect(sent).toHaveLength(1);
     expect(sent[0].subject).toBe("[test] Sügise uudised");
-    expect(anchorAround(sent[0].html, IMG)).toContain(`${BASE}/shop2/et/p/${PRODUCT}/`);
+    expect(anchorAround(sent[0].html, IMG)).toContain(`${BASE}/et/products/${PRODUCT}`);
   });
 
   it("a block letter with nothing in it is refused as empty, one without a subject as such", async () => {

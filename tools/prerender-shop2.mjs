@@ -5,14 +5,21 @@
    is fine for a shopper and useless for a search engine, which indexes what
    the HTML says before any script runs. This writes that HTML out:
 
-     public/shop2/{,et/,en/}index.html            three home pages
-     public/shop2/{,et/,en/}c/<cat>/index.html    category pages
-     public/shop2/{,et/,en/}b/<brand>/index.html  brand pages
-     public/shop2/{,et/,en/}p/<id>/index.html     product pages
-     public/shop2/{,et/,en/}info/<slug>/index.html  the policy pages
-     public/shop2/{,et/,en/}sets/index.html       the sets landing
-     public/shop2/{,et/,en/}set/<id>/index.html   one set
-     public/shop2/{,et/,en/}gift/index.html       the gift card
+     public/shop2/{,ru/,et/}index.html            three home pages
+     public/shop2/{,ru/,et/}c/<cat>/index.html    category pages
+     public/shop2/{,ru/,et/}b/<brand>/index.html  brand pages
+     public/shop2/{,ru/,et/}p/<id>/index.html     product pages
+     public/shop2/{,ru/,et/}info/<slug>/index.html  the policy pages
+     public/shop2/{,ru/,et/}sets/index.html       the sets landing
+     public/shop2/{,ru/,et/}set/<id>/index.html   one set
+     public/shop2/{,ru/,et/}gift/index.html       the gift card
+
+   The folder is the page's internal route and its language (English, the
+   unprefixed one, at the top); the ADDRESS each file answers at is Shopify's
+   — /products/<id>, /ru/collections/uhod-za-volosami, /policies/refund-policy
+   (src/lib/shop-paths.mjs, since 08.10.2026). The run writes the list of
+   address → file to src/data/prerendered-routes.json, and next.config.ts
+   routes each address to its file from that list.
 
    Each carries a full head (title, description, canonical, the hreflang
    cluster, OpenGraph/Twitter, JSON-LD) and, inside #app, the screen's real
@@ -21,9 +28,8 @@
    `#prerender`, leaves it alone until its own first render has painted, and
    then drops it, so nothing ever blanks or flashes.
 
-   The paths are the ones app.js itself pushes to history (pathFor()), so a
-   crawled URL and a clicked URL are the same address — including the
-   singular /set/<id>/ for one set beside the plural /sets/ for the landing.
+   The addresses are the ones app.js itself pushes to history (pathFor() →
+   shopPathFor()), so a crawled URL and a clicked URL are the same address.
 
    Nothing here is hand-written twice: the asset tags come out of
    public/shop2/index.html and the translation tables come out of
@@ -90,6 +96,7 @@ import {
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
 } from "../src/lib/seo-head.mjs";
+import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS } from "../src/lib/shop-paths.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -530,9 +537,9 @@ function eurFor(n, code) {
 
 /* ---------- shell: the exact asset tags index.html uses ------------------
 
-   public/shop2/index.html is two things at once: the shell every /shop2/ path
-   falls back to, and the Russian home page — Vercel serves that file for
-   /shop2/ and there is no way to put a different one there. So it is the one
+   public/shop2/index.html is two things at once: the shell every client-side
+   screen is served (/search, /checkout, /admin — src/app/[...path]) and the
+   English home page at «/». So it is the one
    file the tool patches instead of writing: the SEO head and the #app content
    are replaced between their markers, and everything else — the asset tags,
    the script list — stays hand-maintained and is read from there for every
@@ -613,10 +620,10 @@ ${bodyScripts}</body>
 
 /* patchShell() replaces between the two marker pairs with replacement
    functions, not strings — a description containing $& or $1 would otherwise
-   be spliced by String.replace's own substitution rules. The Russian home
-   page keeps its <html lang="ru"> (no fourth argument). */
+   be spliced by String.replace's own substitution rules. The shell is the
+   English home page since 08.10.2026, so its <html lang> is written too. */
 function patchedShell(spec) {
-  return patchShell(shell, headBlock(spec), spec.content + blogDataScript(spec.lang.code) + setsDataScript());
+  return patchShell(shell, headBlock(spec), spec.content + blogDataScript(spec.lang.code) + setsDataScript(), spec.lang.htmlLang);
 }
 
 /* ---------- shared blocks ----------------------------------------------
@@ -690,7 +697,7 @@ function postalAddress(oneLine) {
 const SOCIAL_ORDER = ["instagram", "facebook", "tiktok", "youtube"];
 /* One node, named, so the WebSite block on every home page can point at it
    instead of describing the shop a second time. */
-const ORG_ID = abs("/shop2/") + "#organization";
+const ORG_ID = abs("/") + "#organization";
 /* «rempire» is the shop's biggest query — 141 impressions in the week of
    29.08–05.09.2026 — and it ranks 3.79th for its own name. A brand ranks for
    its name on the strength of what the site says the brand IS: the names it
@@ -708,7 +715,7 @@ const ORG_LD = {
   name: "REMPIRE",
   alternateName: ["Rempire", "Rempire Shop", "rempireshop", IDENTITY.legalName].filter(Boolean),
   legalName: IDENTITY.legalName,
-  url: abs("/shop2/"),
+  url: abs("/"),
   logo: abs("/brand/rempire-tower.svg"),
   image: abs(OG_FALLBACK),
   email: IDENTITY.email || undefined,
@@ -975,7 +982,9 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
   const t = T[code];
   const crumbItems = [
     [t.home, langPath(seg, "/")],
-    ...(kind === "b" ? [[t.brands, langPath(seg, "/c/all/")]] : []),
+    /* «Бренды» is the brands landing (/collections/brands), as it is in the
+       shop's own crumb — it pointed at «Все товары» until 08.10.2026. */
+    ...(kind === "b" ? [[t.brands, langPath(seg, "/brands/")]] : []),
     [heading, null]
   ];
   const first = list[0];
@@ -1255,9 +1264,12 @@ function infoPage(slug, lang) {
      policy text at all — it is built from the shop's own details, as in
      screenContact(), and it needs no lawyer's note under it. */
   const isContact = slug === "contact";
+  /* …and a policy text that links to another policy links to it in THIS
+     page's language (a page translated from the Russian text kept the
+     Russian addresses otherwise). */
   const body = isContact
     ? contactBody(code)
-    : resolveIdentity(String(pg.html || "")).replace(/<(\/?)h1(\s|>)/gi, "<$1h2$2");
+    : respellShopLinks(resolveIdentity(String(pg.html || "")), code).replace(/<(\/?)h1(\s|>)/gi, "<$1h2$2");
 
   const others = LEGAL_SLUGS.filter(s => s !== slug).map(s => {
     const o = legalFor(s, code);
@@ -1871,8 +1883,11 @@ for (const { file, spec } of pages) {
 
 /* Anything left over under the directories this tool owns is a product,
    category or brand that no longer exists — a page Google would keep asking
-   for. Sweep it. index.html, app.js, chat.js and styles.css are not ours. */
-const OWNED = ["p", "c", "b", "info", "set", "sets", "gift", "blog", "et", "en"];
+   for. Sweep it. index.html, app.js, chat.js and styles.css are not ours.
+   `en` is the English folder of the /shop2/ scheme (before 08.10.2026, when
+   English moved to the top and Russian to `ru`): nothing is written there any
+   more, so a run empties it. */
+const OWNED = ["p", "c", "b", "info", "set", "sets", "gift", "blog", "brands", "ru", "et", "en"];
 let removed = 0;
 async function sweep(dir) {
   let entries;
@@ -1899,6 +1914,18 @@ for (const d of OWNED) await sweep(path.join(SHOP2, d));
 await writeFile(path.join(ROOT, "src", "data", "blog.prerendered.json"),
   JSON.stringify({ slugs: BLOG_POSTS.map(p => p.slug) }, null, 2) + "\n", "utf8");
 
+/* Address → file for every page written above, for next.config.ts's rewrites
+   (prerenderedRewrites). The address is Shopify's (publicPath), the file is
+   the internal folder; neither layer could work out one from the other, and
+   this run is the one thing that knows both. Gitignored: every build writes it
+   before `next build` reads the config. */
+const ROUTES = pages.map(({ file, spec }) => [
+  publicPath(spec.lang.code, spec.rest),
+  "/" + path.relative(PUB, file).split(path.sep).join("/"),
+]);
+await writeFile(path.join(ROOT, "src", "data", "prerendered-routes.json"),
+  JSON.stringify({ pages: ROUTES }, null, 0).replace(/\],\[/g, "],\n[") + "\n", "utf8");
+
 /* ---------- sitemap ----------------------------------------------------- */
 
 const today = new Date().toISOString().slice(0, 10);
@@ -1912,7 +1939,7 @@ const urlEntry = (rest, seg, priority) => sitemapUrlEntry(BASE, rest, seg, prior
 
 /* The sitemap is exactly the set of pages written above — nothing that only
    exists client-side, and in particular nothing behind a basket. Asking
-   Google to crawl /shop2/checkout/, /cart/, /account/, /admin/ or /done/
+   Google to crawl /checkout, /cart, /account, /admin or /checkout/done
    would spend crawl budget on a screen that renders empty without state and
    is robots-disallowed anyway; those paths are never generated, so they
    cannot leak in here by accident. */
@@ -1946,12 +1973,16 @@ for (const lang of LANGS) {
 }
 
 /* Belt and braces: if one of these ever appears in the list, a page was
-   generated for a screen that must not be indexed. */
-const NEVER = /^\/shop2(?:\/(?:et|en))?\/(?:checkout|cart|account|admin|scan|done|search)\/$/;
+   generated for a screen that must not be indexed (STATE_RESTS in
+   src/lib/shop-paths.mjs — the search, the account, the basket, the checkout,
+   the receipt, the panel and the scanner). */
 for (const e of entries) {
   const loc = (e.match(/<loc>([^<]+)<\/loc>/) || [])[1] || "";
   const p = loc.replace(/^https?:\/\/[^/]+/, "");
-  if (NEVER.test(p)) throw new Error("sitemap would contain a screen that must never be indexed: " + p);
+  const route = parseShopPath(p);
+  if (!route || STATE_RESTS.includes(route.rest)) {
+    throw new Error("sitemap would contain an address that is not an indexable page: " + p);
+  }
 }
 
 const CHUNK = 1000;   // the protocol allows 50 000; small files are easier to read and to diff
@@ -2004,20 +2035,32 @@ await writeFile(path.join(PUB, "sitemap.xml"),
    allowed on staging, and keeping staging out of an index is left to the
    robots meta and the header, which those bots do not act on. */
 
-/* /shop2/scan/ is the admin's standalone barcode scanner (docs/inventory.md),
-   admin-only and useless without a session — it belongs on this list next to
-   /shop2/admin/ for exactly the same reason. */
-/* The three at the end are ours, not the shop's: /test/ is the owner's
-   acceptance list, /guide/ the manual written for him, /golive/ the launch
+/* The screens behind a basket, a login or a search box, at their addresses
+   since 08.10.2026 (src/lib/shop-paths.mjs): the panel and its scanner
+   (/admin, /admin/scan — one rule, no language), and the four state screens in
+   each language (/checkout covers the receipt at /checkout/done). These are
+   Shopify's own Disallow lines, at Shopify's own addresses. The old /shop2/…
+   addresses are deliberately NOT here: they answer with a 301 now, and a
+   crawler has to be allowed to fetch one to learn where the page went. */
+/* The three at the end are ours, not the shop's: /test is the owner's
+   acceptance list, /guide the manual written for him, /golive the launch
    checklist. Each carries a `noindex` meta of its own, which is the
    authoritative half — this list is what keeps them out of the crawl in the
    first place. They were missing until 19.09.2026, and the launch list is the
    one that mattered: audit F18. */
 const NO_INDEX_PATHS = [
-  "/shop2/admin", "/shop2/scan", "/shop2/checkout", "/shop2/cart", "/shop2/account", "/shop2/done", "/shop2/search",
-  "/shop2/*/admin", "/shop2/*/scan", "/shop2/*/checkout", "/shop2/*/cart", "/shop2/*/account", "/shop2/*/done", "/shop2/*/search",
-  "/api/", "/test/", "/guide/", "/golive/"
+  "/admin",
+  ...["", "/ru", "/et"].flatMap(pre => ["/checkout", "/cart", "/account", "/search"].map(p => pre + p)),
+  "/api/", "/test", "/guide", "/golive"
 ];
+/* …and inside /api/, the read-only answers a page is drawn from. Googlebot
+   renders the page (it reads the DOM app.js leaves, not the file), and with
+   all of /api/ disallowed its renderer could not fetch /api/overrides/: the
+   live stock, price, «Показывать в магазине» and the owner's own Google texts
+   — five products rendered InStock in their JSON-LD while sold out live (SEO
+   audit, 08.10.2026). The longest matching rule wins, so these open exactly
+   these addresses and nothing else under /api/. */
+const ALLOW_API = ["/api/overrides/", "/api/bundles/", "/api/blog/", "/api/reviews/", "/api/shipping/carriers/"];
 const CLOSED_BOTS = ["facebookexternalhit", "meta-externalagent", "WhatsApp", "Twitterbot", "LinkedInBot",
   "TelegramBot", "Slackbot-LinkExpanding", "Slackbot", "Discordbot", "Applebot", "SkypeUriPreview", "vkShare"];
 
@@ -2033,6 +2076,7 @@ const LIVE_BASE = "https://rempireshop.com";
 const robotsProduction = GEN +
   "# REMPIRE — production policy: open, minus everything behind a basket.\n" +
   "\nUser-agent: *\nAllow: /\n" +
+  ALLOW_API.map(p => "Allow: " + p).join("\n") + "\n" +
   "\n# Nothing behind a cart, a payment form or a login belongs in an index.\n" +
   NO_INDEX_PATHS.map(p => "Disallow: " + p).join("\n") + "\n" +
   `\nSitemap: ${(LIVE ? BASE : LIVE_BASE) + "/sitemap.xml"}\n`;

@@ -162,7 +162,7 @@ function ownerSummary(order: OrderLike, headline: string): string {
 
 /** The panel on this order's card — the path a push carries. */
 export function ownerOrderPath(order: OrderLike): string {
-  return `/shop2/admin/?order=${encodeURIComponent(orderNumber(order))}`;
+  return `/admin?order=${encodeURIComponent(orderNumber(order))}`;
 }
 /** …and the whole address, for the letter and Telegram, which have no origin of their own. */
 function ownerOrderUrl(order: OrderLike): string {

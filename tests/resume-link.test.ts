@@ -1,7 +1,7 @@
 /**
  * The abandoned-cart letter's button, opened where letters are opened.
  *
- * Both letters link to `/shop2/checkout/?resume=<signed token>`. They are
+ * Both letters link to `/ru/checkout?resume=<signed token>` (or `/et/…`, `/…`). They are
  * read on a phone that never saw the basket, or days later in a browser that
  * has been cleared — an EMPTY basket, not signed in. Until 23.09.2026 that
  * browser was sent to the home page with nothing in the basket and nothing
@@ -31,6 +31,9 @@ const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url))
 const src = readFileSync(APP_JS, "utf8");
 
 /** Cut `function <name>(…) { … }` out of app.js by brace matching. */
+/* The shop's address functions (shopPathFor / shopRouteOf / langFromPath …), the
+   region of app.js the router stands on since 08.10.2026. */
+const ADDRESSES = src.slice(src.indexOf("  var LANG_OF_SEG = "), src.indexOf("  var urlLang = langFromPath(location.pathname);"));
 function slice(name: string): string {
   const start = src.indexOf(`function ${name}(`);
   if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
@@ -103,10 +106,7 @@ function boot(url: string, cart: Line[] = [], fetchImpl: (u: string) => Promise<
   const applied: unknown[][] = [];
   const body = `
     var pathLang = "RU", preRendered = null, hdrSlot = null, navSlot = null, ovlKey = "";
-    var LANG_OF_SEG = { et: "ET", en: "EN", ru: "RU" };
-    var SEG_OF_LANG = { RU: "", ET: "/et", EN: "/en" };
-    ${slice("langFromPath")}
-    ${slice("stripLangPrefix")}
+    ${ADDRESSES}
     ${slice("safeDecode")}
     ${slice("here")}
     ${slice("routeHome")}
@@ -138,7 +138,10 @@ function boot(url: string, cart: Line[] = [], fetchImpl: (u: string) => Promise<
   return { S, toasts, fetched, applied, address: () => location.pathname + location.search };
 }
 
-const link = (tok: string, lang = "") => `/shop2${lang}/checkout/?resume=${encodeURIComponent(tok)}`;
+/* the letter's own address: /ru/checkout?resume=… for the Russian letter,
+   /et/… for the Estonian, unprefixed for the English (Shopify's scheme, 08.10.2026) */
+const link = (tok: string, lang = "") =>
+  `${lang === "/et" ? "/et" : lang === "/en" ? "" : "/ru"}/checkout?resume=${encodeURIComponent(tok)}`;
 
 describe("the letter's button in a browser that has never seen the basket", () => {
   it("fills the basket — lines, sizes, quantities — and opens the checkout", () => {
@@ -154,14 +157,14 @@ describe("the letter's button in a browser that has never seen the basket", () =
 
   it("leaves the checkout's own address behind, so a reload adds nothing", () => {
     const out = boot(link(makeResumeToken(LETTER)));
-    expect(out.address()).toBe("/shop2/checkout/");
+    expect(out.address()).toBe("/ru/checkout");
   });
 
   it("works from the Estonian and the English letter too", () => {
     const et = boot(link(makeResumeToken(LETTER), "/et"));
     expect(et.S.screen).toBe("checkout");
     expect(et.S.lang).toBe("ET");
-    expect(et.address()).toBe("/shop2/et/checkout/");
+    expect(et.address()).toBe("/et/checkout");
     expect(boot(link(makeResumeToken(LETTER), "/en")).S.cart).toHaveLength(2);
   });
 
@@ -210,7 +213,7 @@ describe("a link that cannot bring the basket back says so", () => {
     const out = boot(link(stale));
     expect(out.S.cart).toEqual([]);
     expect(out.S.screen).toBe("home");
-    expect(out.address()).toBe("/shop2/");
+    expect(out.address()).toBe("/ru");
     expect(out.toasts).toEqual(["Ссылка из письма устарела — корзину не восстановить"]);
   });
 
@@ -219,16 +222,16 @@ describe("a link that cannot bring the basket back says so", () => {
     const out = boot(link(stale), [{ id: "comb", size: 0, qty: 3 }]);
     expect(out.S.cart).toEqual([{ id: "comb", size: 0, qty: 3 }]);
     expect(out.S.screen).toBe("checkout");
-    expect(out.address()).toBe("/shop2/checkout/");
+    expect(out.address()).toBe("/ru/checkout");
     expect(out.toasts).toEqual(["Ссылка из письма устарела — корзину не восстановить"]);
   });
 
   it("a mangled one (a mail client cut the address): the home page and a sentence", () => {
     for (const tok of ["%%%", "bm90LWpzb24.sig", "eyJ2IjoxfQ.sig"]) {
-      const out = boot(`/shop2/checkout/?resume=${tok}`);
+      const out = boot(`/ru/checkout?resume=${tok}`);
       expect(out.S.cart, tok).toEqual([]);
       expect(out.S.screen, tok).toBe("home");
-      expect(out.address(), tok).toBe("/shop2/");
+      expect(out.address(), tok).toBe("/ru");
       expect(out.toasts, tok).toEqual(["Ссылка из письма повреждена — корзину не восстановить"]);
     }
   });
@@ -241,7 +244,7 @@ describe("a link that cannot bring the basket back says so", () => {
   });
 
   it("no ?resume= at all is an ordinary visit — nothing said", () => {
-    const out = boot("/shop2/checkout/", [{ id: "comb", size: 0, qty: 1 }]);
+    const out = boot("/ru/checkout", [{ id: "comb", size: 0, qty: 1 }]);
     expect(out.toasts).toEqual([]);
     expect(out.S.screen).toBe("checkout");
   });

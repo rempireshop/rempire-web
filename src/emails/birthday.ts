@@ -22,6 +22,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -137,8 +138,8 @@ export function renderBirthday(
       : DEFAULT_PERCENT;
   const promo = String(code || "").trim().toUpperCase() || "REM-BDAY";
   const until = t.validUntil(formatDate(resolveExpiry(options.expires), L));
-  const url = absUrl(null, "/shop2/");
-  const unsubscribe = absUrl(customer.unsubscribeUrl, "/shop2/account/");
+  const url = absUrl(null, shopPath(L, "/"));
+  const unsubscribe = absUrl(customer.unsubscribeUrl, shopPath(L, "/account/"));
 
   const values: MailTextValues = {
     name,

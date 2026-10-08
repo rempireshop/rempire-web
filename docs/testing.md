@@ -893,7 +893,11 @@ is the exact class of fault the 07.09 work set out to remove. They were
 reported rather than asserted at first, on the rule that a permanently red
 smoke run is a smoke run nobody reads. Both are fixed, and the assertions now
 live in the "a page that must not exist answers 404 with noindex, in every
-language" test, beside `c/<nope>` and `b/<nope>`.
+language" test, beside the unknown address in each language. (Since
+08.10.2026 an unknown `/collections/<nope>` is a Shopify shape and answers
+ONE 301 to «Все товары», an unknown `/pages/<nope>` one to `/pages/contact`
+— the test asserts those as redirects, and the 404s on `/ru/<nope>`,
+`/<nope>` and `/collections/sets/<nope>`.)
 
 They are worth keeping in this document because they failed in opposite ways,
 and only one of them could ever have been caught on a laptop:

@@ -246,7 +246,7 @@ describe("POST /api/payments/create", () => {
       expect(res.body.provider).toBe("none");
       // the same receipt a provider's return lands on — paid, with the total for the funnel beacon,
       // and `d=pickup`: a self-pickup is promised a letter, not a tracking number (25.09.2026)
-      expect(res.body.redirectUrl).toBe(`${ORIGIN}/shop2/done/?n=${o.number}&s=paid&t=0.00&d=pickup`);
+      expect(res.body.redirectUrl).toBe(`${ORIGIN}/ru/checkout/done?n=${o.number}&s=paid&t=0.00&d=pickup`);
 
       const r = await row(o.orderId);
       expect(r.status).toBe("paid");
@@ -487,7 +487,7 @@ describe("POST /api/payments/create", () => {
       const back = await comeBack(o.number, o.total, "failed");
       expect(back.status).toBe(303);
       const location = new URL(back.headers.get("location") ?? "");
-      expect(location.pathname).toBe("/shop2/done/");
+      expect(location.pathname).toBe("/ru/checkout/done");
       expect(location.searchParams.get("s")).toBe("failed");
       expect(location.searchParams.get("n")).toBe(o.number);
       expect(location.searchParams.get("o")).toBe(o.orderId);

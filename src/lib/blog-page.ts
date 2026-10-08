@@ -1,13 +1,14 @@
 /**
  * A blog page built at request time — for the posts the build did not write.
  *
- * tools/prerender-shop2.mjs writes /shop2/{,et/,en/}blog/<slug>/index.html
- * for every post published when `npm run build` ran (blogPostPage /
+ * tools/prerender-shop2.mjs writes public/shop2/{,ru/,et/}blog/<slug>/index.html
+ * — the page at /blogs/news/<slug>, /ru/blogs/news/<slug>, /et/… — for every
+ * post published when `npm run build` ran (blogPostPage /
  * blogListPage there): the per-language Google pair, canonical, the
  * hreflang cluster, OpenGraph, BlogPosting JSON-LD, the article inside
  * #prerender and the list in #blogdata for hydrateBlog(). A post Renat
- * publishes after that deploy had none of it — the /shop2/:path+ fallback
- * handed a crawler (and a link scraper) the Russian home page, and the
+ * publishes after that deploy had none of it — the shell's fallback
+ * handed a crawler (and a link scraper) the home page, and the
  * article only ever existed once app.js had fetched it. This file writes
  * the same page, from the row, when the request arrives — the shell
  * patched between the same marker pairs through the same builders
@@ -17,7 +18,7 @@
  * Served only when there is no static file, by construction rather than by
  * choice: Vercel's static layer answers a prerendered index.html before any
  * rewrite or route runs, and next.config.ts's afterFiles rewrites do the
- * same locally, so the routes below (src/app/shop2/{,et/,en/}blog/[slug])
+ * same locally, so the routes below (src/app/{,ru/,et/}blogs/news/[slug])
  * only ever see a slug — or a listing — the build did not write. The
  * prerendered copy of an older post therefore keeps its build-time head
  * until the next deploy (app.js re-syncs the body from the API either way);
@@ -55,6 +56,7 @@ import {
   langBySeg,
   langNav,
   langPath,
+  ogLangSuffix,
   noindexShell,
   overriddenPrice,
   patchShell,
@@ -168,9 +170,9 @@ function shelf(products: ShelfProduct[], seg: string, t: { from: string }, code:
     "</a></li>").join("") + "</ul>";
 }
 
-/** The card /shop2/og/blog-<slug>[.et|.en].png draws at request time (src/lib/og-card.ts). */
+/** The card /shop2/og/blog-<slug>[.et|.en].png draws at request time (src/lib/og-card.ts) — an asset, so it kept its address and its per-language names. */
 function ogImage(base: string, post: Post, lang: Lang): string {
-  return `${base}/shop2/og/blog-${encodeURIComponent(post.slug)}${lang.seg ? "." + lang.seg : ""}.png?v=${ogStamp(post.updatedAt)}`;
+  return `${base}/shop2/og/blog-${encodeURIComponent(post.slug)}${ogLangSuffix(lang.code)}.png?v=${ogStamp(post.updatedAt)}`;
 }
 
 /* ---------- the two pages ------------------------------------------------ */
@@ -324,7 +326,7 @@ export function renderBlogListPage(
     base, robots, lang, seg, rest,
     title: fitTitle(heading, heading + " — REMPIRE"),
     desc: clip(t.blogDesc, 158),
-    image: first ? `${base}/shop2/og/blog-${encodeURIComponent(first.slug)}${seg ? "." + seg : ""}.png?v=${ogStamp(first.updatedAt)}` : base + "/brand/og-default.png",
+    image: first ? `${base}/shop2/og/blog-${encodeURIComponent(first.slug)}${ogLangSuffix(code)}.png?v=${ogStamp(first.updatedAt)}` : base + "/brand/og-default.png",
     imageAlt: heading, ogType: "website", ldMain: false,
     jsonld: [
       breadcrumbLD(base, [[t.home, langPath(seg, "/")], [heading, null]]),
@@ -388,7 +390,7 @@ const cheapest = cheapestPrice as (prices: Array<number | null | undefined>, fal
  *
  * It answers in two parts, because a card inside the text needs to know WHY a
  * product is not on the shelf. `offSale` holds the ids this call is CERTAIN
- * have no page to link to — `/shop2/{,et/,en/}p/<id>/` answers 404 noindex
+ * have no page to link to — `/{,ru/,et/}products/<id>` answers 404 noindex
  * for each of them (src/middleware.ts for a hidden catalogue product,
  * src/lib/product-page.ts for an unknown id and for one of the owner's own
  * that is gone or switched off). A product the query could not speak for is
@@ -468,7 +470,7 @@ async function shelfProducts(
   return { products: out, offSale };
 }
 
-/** GET /shop2/{,et/,en/}blog/<slug>/ for a slug the prerender did not write. */
+/** GET /{,ru/,et/}blogs/news/<slug> for a slug the prerender did not write. `seg` is the language prefix: "" English, "ru", "et". */
 export async function blogPostPageResponse(slug: string, seg: string): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
@@ -513,7 +515,7 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
   );
 }
 
-/** GET /shop2/{,et/,en/}blog/ when the build wrote no listing (no database at build time). */
+/** GET /{,ru/,et/}blogs/news when the build wrote no listing (no database at build time). */
 export async function blogListPageResponse(seg: string): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;

@@ -16,7 +16,8 @@
  *   · a hidden product is a 404 no cache may keep, a shown one is cached for
  *     a minute, a database outage is the shell, uncached;
  *   · the sitemap escapes and caches sanely;
- *   · the /shop2/* CSP has no 'unsafe-inline' in script-src, the page carries
+ *   · the shop's CSP (every page since 08.10.2026, when the shop moved to
+ *     Shopify's addresses at the root) has no 'unsafe-inline' in script-src, the page carries
  *     no inline executable script, and the inline <style> the shell ships is
  *     covered by style-src.
  */
@@ -32,11 +33,13 @@ const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
 
 async function pageFor(seg: "" | "et" | "en", id: string): Promise<Response> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/p/[id]/route")
+    ? await import("@/app/et/products/[id]/route")
     : seg === "en"
-      ? await import("@/app/shop2/en/p/[id]/route")
-      : await import("@/app/shop2/p/[id]/route");
-  return mod.GET(new Request(`${LIVE}/shop2${seg ? "/" + seg : ""}/p/${encodeURIComponent(id)}/`), ctx(id));
+      ? await import("@/app/products/[id]/route")
+      : await import("@/app/ru/products/[id]/route");
+  // this suite's "" is Russian, as it was under /shop2/; the address is Shopify's since 08.10.2026
+  const prefix = seg === "et" ? "/et" : seg === "en" ? "" : "/ru";
+  return mod.GET(new Request(`${LIVE}${prefix}/products/${encodeURIComponent(id)}`), ctx(id));
 }
 
 const title = (html: string) => (html.match(/<title>([\s\S]*?)<\/title>/) || [])[1] ?? "";
@@ -245,7 +248,7 @@ describe("sitemap-custom.xml", () => {
     expect(res.headers.get("content-type")).toBe("application/xml; charset=utf-8");
     expect(res.headers.get("cache-control")).toBe("public, s-maxage=300, stale-while-revalidate=3600");
     const xml = await res.text();
-    expect(xml).toContain(`<loc>${LIVE}/shop2/p/${p.id}/</loc>`);
+    expect(xml).toContain(`<loc>${LIVE}/ru/products/${p.id}</loc>`);
     // only slugs ever reach the XML, and every text node is escaped: no raw ampersand, no tag but the sitemap's own
     expect(xml).not.toMatch(/&(?!amp;|lt;|gt;|quot;|apos;|#)/);
     expect(xml.replace(/<\/?(?:\?xml|urlset|url|loc|xhtml:link|lastmod|priority)\b[^>]*>/g, "")).not.toMatch(/[<>]/);
@@ -274,14 +277,15 @@ function directives(csp: string): Record<string, string[]> {
   return out;
 }
 
-describe("the security headers over /shop2/*", () => {
+describe("the security headers over the shop's pages", () => {
   it("script-src has no 'unsafe-inline' or 'unsafe-eval'; the inline <style> is covered; HSTS and framing are set", async () => {
     const { default: nextConfig } = await import("../next.config");
     const rules = await nextConfig.headers!();
     const header = (source: string, key: string) =>
       rules.find((r) => r.source === source)?.headers.find((h) => h.key === key)?.value ?? "";
 
-    for (const source of ["/shop2", "/shop2/:path*"]) {
+    /* the default rule IS the shop's since 08.10.2026: its pages are the whole site */
+    for (const source of ["/:path*"]) {
       const d = directives(header(source, "Content-Security-Policy"));
       expect(d["script-src"], source).toBeTruthy();
       expect(d["script-src"], source).not.toContain("'unsafe-inline'");
@@ -296,11 +300,16 @@ describe("the security headers over /shop2/*", () => {
       expect(header(source, "X-Content-Type-Options"), source).toBe("nosniff");
     }
     // nothing anywhere loosened past what the audit accepted: 'unsafe-inline' for
-    // scripts only on the two rules that need it, never eval, never hashes
+    // scripts only on the rules that need it — the API (some routes answer HTML
+    // of their own), the prototype's leftover files and the four hand-written
+    // pages with an inline script each — never eval, never hashes
     const inlineScript = rules
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
-    expect(inlineScript).toEqual(["/:path*", "/api/admin/mail/preview/:path*"]);
+    expect(inlineScript).toEqual([
+      "/api/:path*", "/shop/:path*", "/:page(test|guide|cards|golive)", "/:page(test|guide|cards|golive)/:path*",
+      "/api/admin/mail/preview/:path*",
+    ]);
     // 'unsafe-eval' exists nowhere at all. It used to be granted to
     // /prototypes/*, the design archive that compiled its own JSX in the
     // browser; that archive was deleted on 07.09 with the rest of the
@@ -314,18 +323,18 @@ describe("the security headers over /shop2/*", () => {
 
   /* The Permissions-Policy a request actually gets, not a rule looked up by
      name: Next applies every rule whose `source` matches, the later one
-     winning a key. `/shop2/admin/` is where the assistant's microphone and
+     winning a key. `/admin` is where the assistant's microphone and
      the scanner's camera are used (both `(self)` — ours, no third party, no
-     frame); `/shop2/` is the plain shop page on the same two rules; the API
-     is on the catch-all and keeps the full deny list. Until 12.09.2026 the
-     microphone was `()` under /shop2/* too, and every tap of the assistant's
+     frame); `/ru` and `/` are plain shop pages on the same rule; the API
+     keeps the full deny list. Until 12.09.2026 the
+     microphone was `()` under the shop's pages too, and every tap of the assistant's
      mic failed as `not-allowed` before the browser could ask the owner. */
   it("Permissions-Policy: camera and microphone are (self) on the admin and the shop, everything else is denied everywhere", async () => {
     const { default: nextConfig } = await import("../next.config");
     const rules = (await nextConfig.headers!()).filter((r) => !("missing" in r) && !("has" in r));
-    // `/shop2` matches `/shop2/` too: trailingSlash is on (nextConfig.trailingSlash)
+    // a `:name(a|b)` parameter matches only its own alternatives, as in Next
     const matches = (source: string, pathname: string) =>
-      new RegExp("^" + source.replace(/:[A-Za-z]+\*/g, ".*").replace(/:[A-Za-z]+(\([^)]*\))?/g, "[^/]+") + "/?$").test(pathname);
+      new RegExp("^" + source.replace(/:[A-Za-z]+\*/g, ".*").replace(/:[A-Za-z]+\(([^)]*)\)/g, "($1)").replace(/:[A-Za-z]+/g, "[^/]+") + "$").test(pathname);
     const policyFor = (pathname: string) =>
       rules
         .filter((r) => matches(r.source, pathname))
@@ -335,7 +344,7 @@ describe("the security headers over /shop2/*", () => {
     const features = (policy: string) =>
       Object.fromEntries(policy.split(",").map((part) => part.trim().split("=") as [string, string]));
 
-    for (const path of ["/shop2/admin/", "/shop2/"]) {
+    for (const path of ["/admin", "/admin/scan", "/ru", "/", "/products/x"]) {
       const f = features(policyFor(path));
       expect(f.microphone, `${path}: microphone`).toBe("(self)");
       expect(f.camera, `${path}: camera`).toBe("(self)");
@@ -349,13 +358,17 @@ describe("the security headers over /shop2/*", () => {
     expect(Object.keys(api).length, "/api/geo/: a policy at all").toBeGreaterThan(5);
     for (const [name, value] of Object.entries(api)) expect(value, `/api/geo/: ${name}`).toBe("()");
     // and the two openings are the only differences between the two policies
-    expect(Object.keys(features(policyFor("/shop2/admin/"))).sort()).toEqual(Object.keys(api).sort());
+    expect(Object.keys(features(policyFor("/admin"))).sort()).toEqual(Object.keys(api).sort());
   });
 
-  it("the site root is a redirect to the shop, not a page — and no rule mentions the retired prototype surfaces", async () => {
+  it("the site root is the shop's English home page, not a redirect — and no rule mentions the retired prototype surfaces", async () => {
     const { default: nextConfig } = await import("../next.config");
     const redirects = await nextConfig.redirects!();
-    expect(redirects[0]).toMatchObject({ source: "/", destination: "/shop2/", permanent: false });
+    /* Shopify's scheme, 08.10.2026: «/» is a page (the shell, routed to its
+       file), and no config redirect answers it any more. */
+    expect(redirects.find((r) => r.source === "/")).toBeUndefined();
+    const rw = (await nextConfig.rewrites!()) as { afterFiles: { source: string; destination: string }[] };
+    expect(rw.afterFiles.find((r) => r.source === "/")).toMatchObject({ destination: "/shop2/index.html" });
 
     const rules = await nextConfig.headers!();
     const rewrites = await nextConfig.rewrites!();

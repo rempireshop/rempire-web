@@ -166,7 +166,7 @@ async function ensureGiftCard(page: Page, browser: Browser): Promise<string> {
   await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: "Оплатить" }).click();
-  await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+  await page.waitForURL(/\/checkout\/done\?.*s=paid/);
 
   giftOrder = receiptNumber(page);
   const cards = await cardsOf(browser, giftOrder);
@@ -212,7 +212,7 @@ test.describe("payments — Apple Pay / Google Pay", () => {
     await expect(page.locator("[data-mock-page]")).toHaveAttribute("data-mock-page", "card");
     await expect(page.locator("[data-mock-method]")).toContainText("Apple Pay / Google Pay");
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
     const number = receiptNumber(page);
@@ -299,7 +299,7 @@ test.describe("payments — a gift card at checkout", () => {
 
     await payButton(page).click();
     // no bank page in between — the receipt straight away, paid
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     expect(page.url()).not.toMatch(/\/api\/payments\/mock\//);
     await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
@@ -343,7 +343,7 @@ test.describe("payments — a gift card at checkout", () => {
     // nothing taken off the card until the bank says paid
     expect(await giftBalance(browser)).toBe(before);
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
 
     const order = await adminOrder(browser, receiptNumber(page));
@@ -369,7 +369,7 @@ test.describe("payments — the money goes back", () => {
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     /* A self-pickup is promised a letter when it can be collected — there is
        no parcel and no tracking number (staging, 25.09.2026, R-100083). */
@@ -445,7 +445,7 @@ test.describe("payments — cancelled at the bank", () => {
        the order token still says PENDING and the receipt is `pending`, not
        `failed`. That receipt used to carry nothing but «Вернуться в магазин». */
     await page.getByRole("link", { name: "Отменить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=pending/);
+    await page.waitForURL(/\/checkout\/done\?.*s=pending/);
     await waitForScreen(page, "done");
     await expect(page.locator("h1")).toHaveText(tr("Заказ не оплачен", "RU"));
     const number = receiptNumber(page);
@@ -466,7 +466,7 @@ test.describe("payments — cancelled at the bank", () => {
     await expect(page.locator(".ref").first()).toContainText(number);
     await expect(page.locator("[data-mock-method]")).toHaveText(bankLine);
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     expect(receiptNumber(page)).toBe(number);
     await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
@@ -496,7 +496,7 @@ test.describe("payments — cancelled at the bank", () => {
     await expect(page.locator("[data-mock-page]")).toHaveAttribute("data-mock-page", "bank");
     // a refusal, not a cancel — this test is about the `failed` receipt
     await page.getByRole("link", { name: "Банк отклонил платёж" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
+    await page.waitForURL(/\/checkout\/done\?.*s=failed/);
     await waitForScreen(page, "done");
     const number = receiptNumber(page);
 
@@ -517,7 +517,7 @@ test.describe("payments — cancelled at the bank", () => {
     await expect(page.locator("[data-mock-method]")).toContainText("банковская карта");
 
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
     await waitForScreen(page, "done");
     expect(receiptNumber(page)).toBe(number);
 

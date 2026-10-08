@@ -1,21 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  BUNDLE,
-  CATEGORY,
-  eur,
-  freshEmail,
-  functionalProject,
-  ipHeaders,
-  LANGS,
-  adminSection,
-  loginAsAdmin,
-  openSummary,
-  payOrder,
-  PRODUCT,
-  shopUrl,
-  tr,
-  waitForScreen,
-} from "./fixtures";
+import { BUNDLE, CATEGORY, eur, freshEmail, functionalProject, ipHeaders, LANGS, adminSection, loginAsAdmin, openSummary, payOrder, PRODUCT, shopUrl, tr, waitForScreen, shopUrlRe } from "./fixtures";
 
 /** Sets: landing, single set page, add to cart, checkout line shows the
  *  components. Desktop only — see docs/testing.md. */
@@ -51,7 +35,7 @@ for (const [i, lang] of LANGS.entries()) {
       await card.click();
 
       await waitForScreen(page, "bundle");
-      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/set/${BUNDLE.id}/?$`));
+      await expect(page).toHaveURL(shopUrlRe(lang.seg, `/set/${BUNDLE.id}/`));
       for (const name of BUNDLE.componentNames) {
         await expect(page.locator(".bitems")).toContainText(shownName(name, lang.code));
       }
@@ -203,7 +187,7 @@ test.describe("sets switched off", () => {
           await expect(shop.locator("h1")).toContainText(tr("Наборы сейчас недоступны", lang.code));
           await expect(shop.locator("[data-addbundle]")).toHaveCount(0);
           // never a 404 and never a bounce home: the address stays itself
-          expect(new URL(shop.url()).pathname).toContain(path.replace(/\/$/, ""));
+          expect(new URL(shop.url()).pathname).toBe(shopUrl(lang.seg, path));
         }
 
         // the gift card is NOT a set: still reachable, still in the footer

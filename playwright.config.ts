@@ -95,13 +95,11 @@ export default defineConfig({
 
   use: {
     baseURL: E2E_BASE_URL,
-    // app.js's guessLang() (cold load, no URL prefix, no saved preference)
-    // falls back to the *browser's* language before it falls back to
-    // Russian — and Chromium's own default locale is en-US, not ru. Every
-    // "RU" case in this suite navigates to an unprefixed URL expecting
-    // Russian (that is what "no prefix" means throughout app.js and
-    // docs/seo.md), so the locale has to be pinned here or "RU" silently
-    // becomes "whatever this machine's Chromium defaults to".
+    // The panel (/admin, an address with no language) opens in the owner's
+    // saved language, else the browser's — app.js guessLang() — and every
+    // admin spec reads Russian; Chromium's own default locale is en-US. The
+    // storefront no longer reads it at all: since 08.10.2026 a storefront
+    // page is in its address's language (English unprefixed, /ru, /et).
     locale: "ru-RU",
     /* Every test starts as a visitor who has already answered the consent
        banner (07.09.2026, docs/features.md § «Данные и cookie»): analytics
@@ -111,8 +109,21 @@ export default defineConfig({
        is a fact about the banner, not about the checkout they are testing.
        The banner's own tests (e2e/storefront-sweep-2.spec.ts) clear this key
        for themselves and drive it from a genuine first visit. */
+    /* …and has chosen English on the language switch once (the `rempire_lang`
+       cookie). Since 08.10.2026 English is the unprefixed language and the
+       edge sends a browser that asks for Russian — which this ru-RU browser
+       does — from an unprefixed page to its /ru twin (src/middleware.ts). Every
+       spec that means English opens an unprefixed address (shopUrl("/en", …)),
+       and means it; the specs about that redirect clear the cookie. Russian
+       pages carry their /ru prefix and are not affected, and the panel keeps
+       its own language (the owner's saved choice / this browser's, RU). */
     storageState: {
-      cookies: [],
+      cookies: [
+        {
+          name: "rempire_lang", value: "en", domain: "localhost", path: "/",
+          expires: -1, httpOnly: false, secure: false, sameSite: "Lax",
+        },
+      ],
       origins: [
         {
           origin: E2E_BASE_URL,

@@ -134,7 +134,7 @@ export async function POST(req: Request) {
       paid: true,
       provider: "none",
       ref: "",
-      redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift, pickup: isPickupOrder(row) }),
+      redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift, pickup: isPickupOrder(row), lang: (row as { lang?: string }).lang }),
     });
   }
 

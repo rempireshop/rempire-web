@@ -16,15 +16,22 @@
  *   node tools/check-legacy-redirects.mjs --all     # every row, including the fallbacks
  *
  * It fails loudly (exit 1) on the only two outcomes that lose money: a URL
- * with no redirect at all, and a product URL that lands on a generic page
- * instead of that product.
+ * that answers neither a page nor a redirect, and a product URL that lands on
+ * a generic page instead of that product.
+ *
+ * Since 08.10.2026 the shop answers at Shopify's own addresses
+ * (src/lib/shop-paths.mjs), so most of these URLs are now the page itself
+ * and answer 200 directly; a 3xx is the rest. Shopify's live sitemap is gone
+ * with Shopify — `--harvest` reads its last copy, tools/harvest/old-urls.txt.
+ *
+ *   SHOP_BASE=http://localhost:3300 node tools/check-legacy-redirects.mjs --harvest
  */
 
 /* legacy-redirects.ts is TypeScript with a `@/` import; the tool reads the
    catalogue itself and evaluates the module's compiled shape through tsx if
    it is present, else it asks the DEPLOYED shop the same question over HTTP —
    which is in fact the better check, because it measures what is serving. */
-const OURS = process.env.SHOP_BASE || "https://rempireshop.diipsolutions.eu";
+const OURS = process.env.SHOP_BASE || "https://rempireshop.com";
 const SHOPIFY = process.env.SHOPIFY_BASE || "https://rempireshop.com";
 
 async function locs(url) {
@@ -41,7 +48,9 @@ async function locs(url) {
    not ask for. A 404 is the honest answer, so they are not failures. */
 const NOT_PAGES = new Set(["/agents.md", "/llms.txt", "/.well-known/shopify/monorail"]);
 
-const shopUrls = await locs(`${SHOPIFY}/sitemap.xml`);
+const shopUrls = process.argv.includes("--harvest")
+  ? (await import("node:fs")).readFileSync(new URL("./harvest/old-urls.txt", import.meta.url), "utf8").trim().split(/\r?\n/)
+  : await locs(`${SHOPIFY}/sitemap.xml`);
 /* The path is what matters, not the host: after the cutover these arrive on
    our own domain. Deduplicated, because six locales publish the same product. */
 const paths = [...new Set(shopUrls.map((u) => new URL(u).pathname))].sort();
@@ -54,7 +63,9 @@ async function target(path) {
   return { status: r.status, to: loc ? new URL(loc, OURS).pathname : "" };
 }
 
-const GENERIC = ["/shop2/c/all/", "/shop2/", "/shop2/info/contact/"];
+/* the pages a product URL should NOT end on: the homes, «Все товары», contact */
+const GENERIC = ["/", "/ru", "/et", "/collections/all-products", "/ru/collections/vse-tovary", "/et/collections/koik-tooted",
+  "/pages/contact", "/ru/pages/contact", "/et/pages/contact"];
 const rows = [];
 let done = 0;
 for (const p of paths) {
@@ -63,14 +74,15 @@ for (const p of paths) {
   if (++done % 100 === 0) process.stderr.write(`  ${done}/${paths.length}\r`);
 }
 
-const none = rows.filter(([p, s]) => (s < 300 || s >= 400) && !NOT_PAGES.has(p));
+const none = rows.filter(([p, s]) => s !== 200 && (s < 300 || s >= 400) && !NOT_PAGES.has(p));
 const productRows = rows.filter(([p]) => /\/products\//.test(p));
-const vague = productRows.filter(([, , to]) => GENERIC.includes(to) || /\/shop2\/(et\/|en\/)?b\//.test(to));
+const vague = productRows.filter(([, s, to]) => s !== 200 && (GENERIC.includes(to) || !/\/products\//.test(to)));
 const exact = productRows.length - vague.length;
 
 console.log(`\nURLs Shopify publishes: ${paths.length}`);
+console.log(`  served directly (200): ${rows.filter(([, s]) => s === 200).length}`);
 console.log(`  redirected           : ${rows.filter(([, s]) => s >= 300 && s < 400).length}`);
-console.log(`  NOT redirected       : ${none.length}`);
+console.log(`  neither              : ${none.length}`);
 console.log(`  product URLs         : ${productRows.length}`);
 console.log(`    → that exact product: ${exact}`);
 console.log(`    → a brand or catalogue page instead: ${vague.length}`);

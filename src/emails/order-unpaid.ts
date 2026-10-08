@@ -8,7 +8,7 @@
  * plainly by when the order will be let go.
  *
  * The button goes to the failed receipt of that same order
- * (`/shop2/done/?n=…&s=failed&o=<id>`), which is the screen that already
+ * (`/ru/checkout/done?n=…&s=failed&o=<id>`, per language), which is the screen that already
  * carries «Оплатить ещё раз» and, since 07.09.2026, the choice of another
  * payment method. Nothing new had to be built to give the customer a way back.
  *

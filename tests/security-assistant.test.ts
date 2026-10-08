@@ -269,7 +269,7 @@ describe("the per-language Google pair — capped on the way in, escaped on the 
     expect(body.product.seo.RU.desc).toHaveLength(170);
     expect(body.product.seo.ET).toEqual({ title: "a b" });
 
-    const { GET: page } = await import("@/app/shop2/en/p/[id]/route");
+    const { GET: page } = await import("@/app/products/[id]/route");
     const html = await (await page(new Request(`${ORIGIN}/shop2/en/p/${p.id}/`), ctx(p.id))).text();
     expect(title(html)).toBe("&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt; — REMPIRE");
     expect(meta(html, "description")).toBe("&quot;&gt;&lt;script&gt;alert(2)&lt;/script&gt;");

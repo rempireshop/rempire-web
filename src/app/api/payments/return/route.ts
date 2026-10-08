@@ -10,7 +10,8 @@ import { guardTokenChecks } from "@/lib/payments/token-guard";
  * GET /api/payments/return/ — where the provider sends the shopper back.
  *
  * Verifies the signed token, moves the order, and lands the shopper on the
- * receipt: /shop2/done/?n=<number>&s=paid|failed|pending — built by
+ * receipt: /checkout/done?n=<number>&s=paid|failed|pending (under the order's
+ * language prefix) — built by
  * src/lib/payments/receipt.ts, which also says what `t`, `g` and `o` are.
  *
  * This is a redirect endpoint, never an error page: whatever goes wrong, the
@@ -39,6 +40,7 @@ function done(
     bank?: string;
     country?: string;
     pickup?: boolean;
+    lang?: string | null;
   } = {},
 ) {
   return NextResponse.redirect(receiptUrl(base, { number, state, ...extra }), 303);
@@ -116,15 +118,15 @@ async function handle(req: Request, params: URLSearchParams) {
     if (guard.verdict === "unknown") {
       /* Nothing settled, and the shopper is told the truth: the shop is
          checking. The webhook is the authority on money and is still coming. */
-      return done(base, order.number, "pending", { orderId: order.id, ...retry(order) });
+      return done(base, order.number, "pending", { orderId: order.id, ...retry(order), lang: order.lang });
     }
     if (guard.verdict === "refused") {
-      return done(base, order.number, "failed", { orderId: order.id, ...retry(order) });
+      return done(base, order.number, "failed", { orderId: order.id, ...retry(order), lang: order.lang });
     }
     result = guard.result;
   } catch (err) {
     console.error("payments/return: token checks failed to run", err);
-    return done(base, order.number, "pending", { orderId: order.id, ...retry(order) });
+    return done(base, order.number, "pending", { orderId: order.id, ...retry(order), lang: order.lang });
   }
 
   let outcome;
@@ -139,6 +141,7 @@ async function handle(req: Request, params: URLSearchParams) {
   } catch (err) {
     console.error("payments/return: apply failed", err);
     return done(base, order.number, result.status, {
+      lang: order.lang,
       orderId: order.id,
       method: methodOf(order),
       bank: bankOf(order),
@@ -165,6 +168,7 @@ async function handle(req: Request, params: URLSearchParams) {
   // before it mails.
   const gift = state === "paid" ? await giftLinks(order.id) : "";
   return done(base, order.number, state, {
+    lang: order.lang,
     total: state === "paid" ? Number(order.total) : undefined,
     gift,
     /* A payment that did not go through keeps the order: «Оплатить ещё раз»

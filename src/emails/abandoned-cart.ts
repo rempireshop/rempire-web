@@ -23,6 +23,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -71,8 +72,8 @@ export function renderAbandonedCart(
   const stored = num(cart.total ?? cart.subtotal, NaN);
   const total = Number.isFinite(stored) ? stored : items.sum;
 
-  const url = absUrl(resumeUrl, "/shop2/checkout/");
-  const unsubscribe = absUrl(cart.unsubscribeUrl, "/shop2/account/");
+  const url = absUrl(resumeUrl, shopPath(L, "/checkout/"));
+  const unsubscribe = absUrl(cart.unsubscribeUrl, shopPath(L, "/account/"));
 
   const values: MailTextValues = {
     name,

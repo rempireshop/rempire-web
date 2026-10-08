@@ -147,14 +147,14 @@ describe("the page built at request time wears each frame's own setting", () => 
   it("the article's cover by the article frame, a tile under it by the list frame", async () => {
     const other = (await publishPost((await post("Другая", "fill list 10 20 250 post 90 80 100 og 50 50 100")).id))!;
     const main = (await publishPost((await post("Главная", LONG)).id))!;
-    const { GET } = await import("@/app/shop2/blog/[slug]/route");
-    const html = await (await GET(new Request(`${ORIGIN}/shop2/blog/${main.slug}/`), { params: Promise.resolve({ slug: main.slug }) })).text();
+    const { GET } = await import("@/app/ru/blogs/news/[slug]/route");
+    const html = await (await GET(new Request(`${ORIGIN}/ru/blogs/news/${main.slug}`), { params: Promise.resolve({ slug: main.slug }) })).text();
 
     const cover = /<img class="pre__img blog__cover"[^>]*>/.exec(html)?.[0] ?? "";
     expect(cover).toContain(`style="${coverImgStyle(LONG, "post")}"`);
     expect(cover).not.toContain("scale(");
 
-    const tile = new RegExp(`<a class="pre__card blog__tile" href="[^"]*${other.slug}/">(<img[^>]*>)`).exec(html)?.[1] ?? "";
+    const tile = new RegExp(`<a class="pre__card blog__tile" href="/ru/blogs/news/${other.slug}">(<img[^>]*>)`).exec(html)?.[1] ?? "";
     expect(tile).toContain(`style="${coverImgStyle(other.coverFocus, "list")}"`);
     expect(tile).toContain("transform:scale(2.5);transform-origin:10% 20%");
     // #blogpost carries the whole string, for the SPA that adopts it

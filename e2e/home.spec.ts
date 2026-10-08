@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { functionalProject, ipHeaders, LANGS, shopUrl, tr, waitForScreen } from "./fixtures";
+import { functionalProject, ipHeaders, LANGS, shopUrl, tr, waitForScreen, shopUrlRe } from "./fixtures";
 
 /**
  * Home: hero, rails, sets rail, the gift-card block, the blog label, the
@@ -89,7 +89,7 @@ for (const lang of LANGS) {
       await expect(navGift).toHaveText(tr("Подарочная карта", lang.code));
       await navGift.click();
       await waitForScreen(page, "gift");
-      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+      await expect(page).toHaveURL(shopUrlRe(lang.seg, "/gift/"));
       await expect(navGift).toHaveAttribute("aria-current", "true");
 
       // …and the home block's own button reaches the same screen.
@@ -141,20 +141,21 @@ test.describe("language switch", () => {
     await page.getByRole("option", { name: "Eesti" }).click();
 
     // history.replaceState, not a real navigation — expect() polls page.url().
-    await expect(page).toHaveURL(/\/shop2\/et\/?$/);
+    await expect(page).toHaveURL(/^[a-z]+:\/\/[^/]+\/et$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "et");
     await expect(page.locator('[data-go-cat="all"]').first()).toHaveText("Kõik tooted");
 
     await page.locator("[data-langtoggle]").click();
     await page.getByRole("option", { name: "English" }).click();
-    await expect(page).toHaveURL(/\/shop2\/en\/?$/);
+    // English is the unprefixed one since 08.10.2026
+    await expect(page).toHaveURL(/^[a-z]+:\/\/[^/]+\/$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.locator('[data-go-cat="all"]').first()).toHaveText("All products");
 
     // Back to Русский.
     await page.locator("[data-langtoggle]").click();
     await page.getByRole("option", { name: "Русский" }).click();
-    await expect(page).toHaveURL(/\/shop2\/?$/);
+    await expect(page).toHaveURL(/^[a-z]+:\/\/[^/]+\/ru$/);
     await expect(page.locator('[data-go-cat="all"]').first()).toHaveText("Все товары");
   });
 
@@ -201,7 +202,7 @@ test.describe("the navigation on a 360-px phone", () => {
       await gift.scrollIntoViewIfNeeded();
       await gift.click();
       await waitForScreen(page, "gift");
-      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+      await expect(page).toHaveURL(shopUrlRe(lang.seg, "/gift/"));
     });
   }
 });

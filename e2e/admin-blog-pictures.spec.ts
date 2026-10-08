@@ -315,7 +315,7 @@ test.describe("blog pictures — the cover's two frames and the four presets", (
     test.setTimeout(120_000);
     await openAdmin(page);
     const ID = "proraso-wood-spice-beard-balm-100ml";
-    const cardTag = `<a data-product="${ID}" data-price="live" href="/shop2/p/${ID}/">Proraso Wood &amp; Spice — бальзам для бороды</a>`;
+    const cardTag = `<a data-product="${ID}" data-price="live" href="/ru/products/${ID}">Proraso Wood &amp; Spice — бальзам для бороды</a>`;
     const r = await page.request.post("/api/admin/blog/", {
       data: {
         title: { RU: `Карточка ${Date.now().toString().slice(-6)}`, ET: "", EN: "" },

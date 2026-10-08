@@ -54,10 +54,10 @@
  * Self-contained HTML on purpose: no font, no image, nothing fetched from
  * anywhere — the page has to render wherever a mail client opens it. The one
  * script is inline and so are the styles; the shop's CSP allows both on this
- * path (next.config.ts: only /shop2/* gets the strict `script-src 'self'`).
+ * path (next.config.ts: the API keeps 'unsafe-inline'; the shop's pages get the strict `script-src 'self'`).
  */
 import { clientIp, rateLimit } from "@/lib/auth";
-import { baseUrl, esc } from "@/emails/layout";
+import { baseUrl, esc, shopPath } from "@/emails/layout";
 import {
   hasPendingStockAlerts,
   maskEmail,
@@ -155,8 +155,7 @@ const T: Record<LangCode, Strings> = {
 };
 
 function shopUrl(lang: LangCode): string {
-  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
-  return `${baseUrl()}/shop2${seg}/`;
+  return baseUrl() + shopPath(lang, "/");
 }
 
 const HTML_HEADERS = {

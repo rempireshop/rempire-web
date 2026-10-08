@@ -94,8 +94,8 @@ describe("an article's page at request time, in all three languages", () => {
     const post = (await publishPost(row.id))!;
     for (const seg of ["", "et", "en"] as const) {
       const mod = seg === "et"
-        ? await import("@/app/shop2/et/blog/[slug]/route")
-        : seg === "en" ? await import("@/app/shop2/en/blog/[slug]/route") : await import("@/app/shop2/blog/[slug]/route");
+        ? await import("@/app/et/blogs/news/[slug]/route")
+        : seg === "en" ? await import("@/app/blogs/news/[slug]/route") : await import("@/app/ru/blogs/news/[slug]/route");
       const res = await mod.GET(new Request(`${LIVE}/shop2${seg ? "/" + seg : ""}/blog/${post.slug}/`), { params: Promise.resolve({ slug: post.slug }) });
       const html = await res.text();
       const title = (html.match(/<title>([\s\S]*?)<\/title>/) || [])[1] ?? "";

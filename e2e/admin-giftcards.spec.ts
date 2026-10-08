@@ -39,7 +39,7 @@ async function buyGiftCard(page: Page): Promise<string> {
   await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: "Оплатить" }).click();
-  await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+  await page.waitForURL(/\/checkout\/done\?.*s=paid/);
   const number = new URL(page.url()).searchParams.get("n");
   if (!number) throw new Error("no order number on the receipt");
   return number;

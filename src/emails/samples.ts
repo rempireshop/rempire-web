@@ -35,7 +35,7 @@ import {
   type GiftCardLike,
   type TemplateId,
 } from "./index";
-import { setBrandOverride, type BrandOverride } from "./layout";
+import { setBrandOverride, shopPath, type BrandOverride } from "./layout";
 import type {
   CartLike,
   CustomerLike,
@@ -257,7 +257,7 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
       case "order-unpaid":
         return renderOrderUnpaid({ ...sampleOrder(lang), status: "new" }, lang, {
           daysLeft: 4,
-          payUrl: "/shop2/done/?n=R-100042&s=failed",
+          payUrl: "/ru/checkout/done?n=R-100042&s=failed",
         });
       case "order-cancelled":
         return renderOrderCancelled({ ...sampleOrder(lang), status: "cancelled" }, lang, {
@@ -285,12 +285,12 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
           { method: "cash" },
         );
       case "abandoned-cart":
-        return renderAbandonedCart(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7");
+        return renderAbandonedCart(sampleCart(lang), lang, shopPath(lang, "/checkout/?resume=cart-7"));
       /* Its follow-up: the same basket a few days later, with the single-use
          code the letter is for. Five per cent is the shop's own default, and
          the date is fixed so the screenshots do not move every day. */
       case "abandoned-cart-discount":
-        return renderAbandonedCartDiscount(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7", {
+        return renderAbandonedCartDiscount(sampleCart(lang), lang, shopPath(lang, "/checkout/?resume=cart-7"), {
           code: "REM-CART-2417",
           percent: 5,
           expires: "2026-10-19T12:00:00",

@@ -1,10 +1,10 @@
 {
-  "id": "/shop2/scan/",
+  "id": "/admin/scan",
   "name": "Rempire — сканер",
   "short_name": "Сканер",
   "description": "Сканер штрихкодов Rempire: приход и списание в три касания, привязка новых кодов к товарам.",
-  "start_url": "/shop2/scan/",
-  "scope": "/shop2/scan/",
+  "start_url": "/admin/scan",
+  "scope": "/admin/scan",
   "display": "standalone",
   "display_override": ["standalone"],
   "background_color": "#ffffff",

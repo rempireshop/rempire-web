@@ -21,6 +21,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -127,8 +128,8 @@ function parseTracking(
   const url = explicit
     ? absUrl(explicit)
     : code && carrier
-      ? carrierUrl(carrier, code, lang) || absUrl("/shop2/account/")
-      : absUrl("/shop2/account/");
+      ? carrierUrl(carrier, code, lang) || absUrl(shopPath(lang, "/account/"))
+      : absUrl(shopPath(lang, "/account/"));
   return { code, url, carrier };
 }
 

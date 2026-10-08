@@ -181,7 +181,7 @@ test.describe("the checkout takes a scoped code off the matching lines only", ()
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
     await page.getByRole("link", { name: "Оплатить" }).click();
-    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await page.waitForURL(/\/checkout\/done\?.*s=paid/);
 
     const orders = await (await page.request.get("/api/admin/orders/?limit=5")).json();
     const order = (orders.orders as Array<{

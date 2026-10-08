@@ -30,7 +30,8 @@ const GATSBY = "mandom-gatsby-moving-rubber"; // no sizes at all
 
 const EMPTY: FeedInput = { overrides: {}, descriptions: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES };
 const withOverrides = (overrides: FeedInput["overrides"]): FeedInput => ({ ...EMPTY, overrides });
-const go = (path: string, input: FeedInput = EMPTY, seg = "") => resolveCartLink(parseCartPermalink(path)!, input, seg);
+/* `seg` is the language prefix — "ru", "et", or "" for English since 08.10.2026 */
+const go = (path: string, input: FeedInput = EMPTY, seg = "ru") => resolveCartLink(parseCartPermalink(path)!, input, seg);
 
 describe("the permalink's shape", () => {
   it("reads one id and its quantity, with or without the trailing slash", () => {
@@ -56,21 +57,21 @@ describe("the permalink's shape", () => {
 
   it("opens the shop in the browser's language — Estonian, Russian or English", () => {
     expect(segFromAcceptLanguage("et-EE,et;q=0.9,en;q=0.8")).toBe("et");
-    expect(segFromAcceptLanguage("ru-RU,ru;q=0.9")).toBe("");
-    expect(segFromAcceptLanguage("en-GB,en;q=0.9")).toBe("en");
-    expect(segFromAcceptLanguage("fi-FI,fi;q=0.9,ru;q=0.5")).toBe("");
-    expect(segFromAcceptLanguage("de-DE")).toBe("en");
-    expect(segFromAcceptLanguage(null)).toBe("en");
+    expect(segFromAcceptLanguage("ru-RU,ru;q=0.9")).toBe("ru");
+    expect(segFromAcceptLanguage("en-GB,en;q=0.9")).toBe("");
+    expect(segFromAcceptLanguage("fi-FI,fi;q=0.9,ru;q=0.5")).toBe("ru");
+    expect(segFromAcceptLanguage("de-DE")).toBe("");
+    expect(segFromAcceptLanguage(null)).toBe("");
   });
 });
 
 describe("an id the feed wrote → the product and the size", () => {
   it("a product with no sizes: its page, and into the basket", () => {
-    expect(go(`/cart/${GATSBY}:1`)).toEqual({ path: `/shop2/p/${GATSBY}/?buy=1`, reason: "buy" });
+    expect(go(`/cart/${GATSBY}:1`)).toEqual({ path: `/ru/products/${GATSBY}?buy=1`, reason: "buy" });
   });
 
   it("one size of several: that size", () => {
-    expect(go(`/cart/${SHAMPOO}_250ml:2`)).toEqual({ path: `/shop2/p/${SHAMPOO}/?size=250ml&buy=2`, reason: "buy" });
+    expect(go(`/cart/${SHAMPOO}_250ml:2`)).toEqual({ path: `/ru/products/${SHAMPOO}?size=250ml&buy=2`, reason: "buy" });
   });
 
   it("a long id the feed shortened to a hashed stem", () => {
@@ -79,13 +80,13 @@ describe("an id the feed wrote → the product and the size", () => {
     for (const o of ids) {
       expect(o.id.startsWith(idStem(LONG, 6) + "_")).toBe(true);
       expect(o.id).not.toContain(LONG);   // it IS the shortened form
-      expect(go(`/cart/${o.id}:1`)).toEqual({ path: `/shop2/p/${LONG}/?size=${o.slug}&buy=1`, reason: "buy" });
+      expect(go(`/cart/${o.id}:1`)).toEqual({ path: `/ru/products/${LONG}?size=${o.slug}&buy=1`, reason: "buy" });
     }
   });
 
   it("in the language the browser asked for", () => {
-    expect(go(`/cart/${GATSBY}:1`, EMPTY, "et").path).toBe(`/shop2/et/p/${GATSBY}/?buy=1`);
-    expect(go(`/cart/${GATSBY}:1`, EMPTY, "en").path).toBe(`/shop2/en/p/${GATSBY}/?buy=1`);
+    expect(go(`/cart/${GATSBY}:1`, EMPTY, "et").path).toBe(`/et/products/${GATSBY}?buy=1`);
+    expect(go(`/cart/${GATSBY}:1`, EMPTY, "").path).toBe(`/products/${GATSBY}?buy=1`);
   });
 
   it("every item of today's feed comes back as its own product and size", () => {
@@ -95,8 +96,8 @@ describe("an id the feed wrote → the product and the size", () => {
     expect(offers.filter((o) => !o.available).length).toBeGreaterThan(0);
     for (const o of offers) {
       const query = [o.slug ? `size=${encodeURIComponent(o.slug)}` : "", o.available ? "buy=1" : ""].filter(Boolean).join("&");
-      const want = `/shop2/p/${encodeURIComponent(o.productId)}/` + (query ? "?" + query : "");
-      expect([o.id, resolveCartLink([{ id: o.id, qty: 1 }], EMPTY, "", offers).path]).toEqual([o.id, want]);
+      const want = `/ru/products/${encodeURIComponent(o.productId)}` + (query ? "?" + query : "");
+      expect([o.id, resolveCartLink([{ id: o.id, qty: 1 }], EMPTY, "ru", offers).path]).toEqual([o.id, want]);
     }
   });
 
@@ -111,20 +112,20 @@ describe("an id the feed wrote → the product and the size", () => {
     const { xml } = buildFeed({ ...input, lang: "RU", base: "https://rempireshop.com" });
     const gids = [...xml.matchAll(/<g:id>([^<]*)<\/g:id>/g)].map((m) => m[1]);
     expect(feedOffers(input).map((o) => o.id)).toEqual(gids);
-    expect(go(`/cart/${SHAMPOO}_50ml-2:1`, input).path).toBe(`/shop2/p/${SHAMPOO}/?size=50ml-2&buy=1`);
-    expect(go(`/cart/${SHAMPOO}_v3:1`, input).path).toBe(`/shop2/p/${SHAMPOO}/?size=v3&buy=1`);
+    expect(go(`/cart/${SHAMPOO}_50ml-2:1`, input).path).toBe(`/ru/products/${SHAMPOO}?size=50ml-2&buy=1`);
+    expect(go(`/cart/${SHAMPOO}_v3:1`, input).path).toBe(`/ru/products/${SHAMPOO}?size=v3&buy=1`);
   });
 
   it("carries the quantity through", () => {
-    expect(go(`/cart/${GATSBY}:4`).path).toBe(`/shop2/p/${GATSBY}/?buy=4`);
-    expect(go(`/cart/${GATSBY}:1000`).path).toBe(`/shop2/p/${GATSBY}/?buy=99`);
+    expect(go(`/cart/${GATSBY}:4`).path).toBe(`/ru/products/${GATSBY}?buy=4`);
+    expect(go(`/cart/${GATSBY}:1000`).path).toBe(`/ru/products/${GATSBY}?buy=99`);
   });
 });
 
 describe("what cannot be put in the basket", () => {
   it("a sold-out product: its page, on that size, and nothing added", () => {
     const input = withOverrides({ [SHAMPOO]: { stock: "out" } as never });
-    expect(go(`/cart/${SHAMPOO}_250ml:1`, input)).toEqual({ path: `/shop2/p/${SHAMPOO}/?size=250ml`, reason: "sold-out" });
+    expect(go(`/cart/${SHAMPOO}_250ml:1`, input)).toEqual({ path: `/ru/products/${SHAMPOO}?size=250ml`, reason: "sold-out" });
   });
 
   it("one size counted to zero: that size's page; its siblings still go in", () => {
@@ -135,20 +136,20 @@ describe("what cannot be put in the basket", () => {
 
   it("a hidden product: the shop's home page, not its 404", () => {
     const input = withOverrides({ [SHAMPOO]: { hidden: true } as never });
-    expect(go(`/cart/${SHAMPOO}_250ml:1`, input)).toEqual({ path: "/shop2/", reason: "hidden" });
+    expect(go(`/cart/${SHAMPOO}_250ml:1`, input)).toEqual({ path: "/ru", reason: "hidden" });
     expect(go(`/cart/${GATSBY}:1`, withOverrides({ [GATSBY]: { hidden: true } as never }), "et"))
-      .toEqual({ path: "/shop2/et/", reason: "hidden" });
+      .toEqual({ path: "/et", reason: "hidden" });
   });
 
   it("a size since taken off the ladder: the product's page", () => {
-    expect(go(`/cart/${SHAMPOO}_999ml:1`)).toEqual({ path: `/shop2/p/${SHAMPOO}/`, reason: "product" });
-    expect(go(`/cart/${idStem(LONG, 6)}_2l:1`)).toEqual({ path: `/shop2/p/${LONG}/`, reason: "product" });
+    expect(go(`/cart/${SHAMPOO}_999ml:1`)).toEqual({ path: `/ru/products/${SHAMPOO}`, reason: "product" });
+    expect(go(`/cart/${idStem(LONG, 6)}_2l:1`)).toEqual({ path: `/ru/products/${LONG}`, reason: "product" });
   });
 
   it("an id nobody issued: the home page", () => {
-    expect(go("/cart/no-such-thing:1")).toEqual({ path: "/shop2/", reason: "unknown" });
-    expect(go("/cart/12345678901:1", EMPTY, "en")).toEqual({ path: "/shop2/en/", reason: "unknown" });
-    expect(go("/cart/abc-0123abcd_x:1")).toEqual({ path: "/shop2/", reason: "unknown" });
+    expect(go("/cart/no-such-thing:1")).toEqual({ path: "/ru", reason: "unknown" });
+    expect(go("/cart/12345678901:1", EMPTY, "")).toEqual({ path: "/", reason: "unknown" });
+    expect(go("/cart/abc-0123abcd_x:1")).toEqual({ path: "/ru", reason: "unknown" });
   });
 });
 
@@ -167,8 +168,8 @@ describe("the storefront: ?buy= puts it in the basket and opens the checkout", (
   function run(search: string, product: P | null, cart: Array<Record<string, unknown>> = [], sizeGone = false) {
     const S: Record<string, unknown> = { screen: "product", productId: product ? product.id : "x", size: 1, cart };
     const calls: string[] = [];
-    let url = "/shop2/p/x/" + search;
-    const loc = { get search() { return url.slice(url.indexOf("?") >= 0 ? url.indexOf("?") : url.length); }, pathname: "/shop2/p/x/" };
+    let url = "/ru/products/x" + search;
+    const loc = { get search() { return url.slice(url.indexOf("?") >= 0 ? url.indexOf("?") : url.length); }, pathname: "/ru/products/x" };
     const hist = { state: null, replaceState: (_s: unknown, _t: string, u: string) => { url = u; } };
     new Function("S", "location", "history", "byIdOrNull", "sizeOut", "CART_MAX_QTY", "persist", "cartPush", "pushCart", "track", "sizePrice", "go",
       `${slice("buyFromLink")} buyFromLink();`)(
@@ -184,7 +185,7 @@ describe("the storefront: ?buy= puts it in the basket and opens the checkout", (
     const out = run("?size=250ml&buy=2", P1);
     expect(out.S.cart).toEqual([{ id: SHAMPOO, size: 1, qty: 2 }]);
     expect(out.calls).toContain("go:checkout");
-    expect(out.url).toBe("/shop2/p/x/?size=250ml");   // `buy` gone, `size` kept — a reload adds nothing
+    expect(out.url).toBe("/ru/products/x?size=250ml");   // `buy` gone, `size` kept — a reload adds nothing
   });
 
   it("the same link twice is one line, not two", () => {
@@ -197,7 +198,7 @@ describe("the storefront: ?buy= puts it in the basket and opens the checkout", (
       const out = run("?buy=1", p, [], gone);
       expect(out.S.cart).toEqual([]);
       expect(out.calls).not.toContain("go:checkout");
-      expect(out.url).toBe("/shop2/p/x/");
+      expect(out.url).toBe("/ru/products/x");
     }
   });
 
@@ -231,14 +232,15 @@ describe("the door: middleware and route", () => {
     expect(pass.headers.get("x-middleware-next")).toBe("1");
     const legacy = await middleware(new NextRequest("https://rempireshop.com/cart/"));
     expect(legacy.status).toBe(301);
-    expect(legacy.headers.get("location")).toBe("https://rempireshop.com/shop2/c/all/");
+    // every other /cart/… is folded into /cart, the basket (Shopify's scheme, 08.10.2026)
+    expect(legacy.headers.get("location")).toBe("https://rempireshop.com/cart");
   });
 
   it("the route answers with a 302 to the product, never cached", async () => {
     const { GET } = await import("@/app/cart/[...path]/route");
     const res = await GET(new Request(`https://rempireshop.com/cart/${SHAMPOO}_250ml:1/`, { headers: { "accept-language": "et-EE,et" } }));
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe(`https://rempireshop.com/shop2/et/p/${SHAMPOO}/?size=250ml&buy=1`);
+    expect(res.headers.get("location")).toBe(`https://rempireshop.com/et/products/${SHAMPOO}?size=250ml&buy=1`);
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(res.headers.get("x-rempire-cart")).toBe("buy");
   });
@@ -247,7 +249,7 @@ describe("the door: middleware and route", () => {
     await query("insert into product_overrides (product_id, hidden) values ($1, true)", [SHAMPOO]);
     const { GET } = await import("@/app/cart/[...path]/route");
     const res = await GET(new Request(`https://rempireshop.com/cart/${SHAMPOO}_250ml:1/`, { headers: { "accept-language": "ru" } }));
-    expect(res.headers.get("location")).toBe("https://rempireshop.com/shop2/");
+    expect(res.headers.get("location")).toBe("https://rempireshop.com/ru");
     expect(res.headers.get("x-rempire-cart")).toBe("hidden");
   });
 });

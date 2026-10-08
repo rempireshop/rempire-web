@@ -41,6 +41,7 @@ import {
   rowTitle,
   shell,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
@@ -160,8 +161,8 @@ export function renderAbandonedCartDiscount(
      only true when the caller said when. */
   const codeNote = expires ? `${t.onlyThisCart} ${t.validUntil(formatDate(expires, L))}` : t.onlyThisCart;
 
-  const url = absUrl(resumeUrl, "/shop2/checkout/");
-  const unsubscribe = absUrl(cart.unsubscribeUrl, "/shop2/account/");
+  const url = absUrl(resumeUrl, shopPath(L, "/checkout/"));
+  const unsubscribe = absUrl(cart.unsubscribeUrl, shopPath(L, "/account/"));
 
   const values: MailTextValues = {
     name,

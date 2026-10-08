@@ -3,7 +3,7 @@
  * used to be the only source (db/migrations/131_custom_products.sql):
  *
  *   · its page at request time — src/lib/product-page.ts behind
- *     src/app/shop2/{,et/,en/}p/[id]/route.ts — carries the head the
+ *     src/app/{,ru/,et/}products/[id]/route.ts — carries the head the
  *     prerender writes for a catalogue product (title, description,
  *     canonical, hreflang, OpenGraph, Product JSON-LD with an offer), from
  *     the row's RU/ET/EN fields with the Russian fallback; hidden → 404 and
@@ -85,13 +85,15 @@ const BALM = {
 const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
 const req = (path: string) => new Request(LIVE + path);
 
-async function pageFor(seg: "" | "et" | "en", id: string): Promise<Response> {
+/* `seg` is the language's path prefix since the URL move of 08.10.2026:
+   "ru" /ru/products/<id>, "et" /et/products/<id>, "" the unprefixed English one. */
+async function pageFor(seg: "ru" | "et" | "", id: string): Promise<Response> {
   const mod = seg === "et"
-    ? await import("@/app/shop2/et/p/[id]/route")
-    : seg === "en"
-      ? await import("@/app/shop2/en/p/[id]/route")
-      : await import("@/app/shop2/p/[id]/route");
-  return mod.GET(req(`/shop2${seg ? "/" + seg : ""}/p/${id}/`), ctx(id));
+    ? await import("@/app/et/products/[id]/route")
+    : seg === "ru"
+      ? await import("@/app/ru/products/[id]/route")
+      : await import("@/app/products/[id]/route");
+  return mod.GET(req(`${seg ? "/" + seg : ""}/products/${id}`), ctx(id));
 }
 
 const title = (html: string) => (html.match(/<title>([\s\S]*?)<\/title>/) || [])[1] ?? "";
@@ -127,14 +129,15 @@ describe("a custom product's page at request time", () => {
     expect(title(html)).toBe("Proraso бальзам для бороды — купить — REMPIRE");
     expect(meta(html, "description")).toBe("Бальзам Proraso в Rempire.");
     expect(meta(html, "robots")).toBe("index, follow, max-image-preview:large");
-    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/et/p/${p.id}/`);
-    expect(link(html, 'rel="alternate" hreflang="ru"')).toBe(`${LIVE}/shop2/p/${p.id}/`);
-    expect(link(html, 'rel="alternate" hreflang="et"')).toBe(`${LIVE}/shop2/et/p/${p.id}/`);
-    expect(link(html, 'rel="alternate" hreflang="en"')).toBe(`${LIVE}/shop2/en/p/${p.id}/`);
-    expect(link(html, 'rel="alternate" hreflang="x-default"')).toBe(`${LIVE}/shop2/p/${p.id}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/et/products/${p.id}`);
+    expect(link(html, 'rel="alternate" hreflang="ru"')).toBe(`${LIVE}/ru/products/${p.id}`);
+    expect(link(html, 'rel="alternate" hreflang="et"')).toBe(`${LIVE}/et/products/${p.id}`);
+    expect(link(html, 'rel="alternate" hreflang="en"')).toBe(`${LIVE}/products/${p.id}`);
+    // x-default is the unprefixed English address — Shopify's own, and what a crawler is served
+    expect(link(html, 'rel="alternate" hreflang="x-default"')).toBe(`${LIVE}/products/${p.id}`);
     expect(meta(html, "og:type")).toBe("product");
     expect(meta(html, "og:locale")).toBe("et_EE");
-    expect(meta(html, "og:url")).toBe(`${LIVE}/shop2/et/p/${p.id}/`);
+    expect(meta(html, "og:url")).toBe(`${LIVE}/et/products/${p.id}`);
     expect(meta(html, "og:title")).toBe(title(html));
     // uploads are WebP, which no link scraper reads: the card is the shop's
     // own 1 200×630 PNG drawn from the row at request time (tests/og-card.test.ts)
@@ -153,10 +156,10 @@ describe("a custom product's page at request time", () => {
     expect(product.category).toBe("Habemehooldus");
     expect(product.description).toBe("Habemepalsam.");
     expect(product.image).toEqual(["https://cdn.example.com/p/balm.webp"]);
-    expect(product.url).toBe(`${LIVE}/shop2/et/p/${p.id}/`);
+    expect(product.url).toBe(`${LIVE}/et/products/${p.id}`);
     expect(product.offers).toMatchObject({
       "@type": "Offer", priceCurrency: "EUR", price: "14.9",
-      availability: "https://schema.org/InStock", url: `${LIVE}/shop2/et/p/${p.id}/`,
+      availability: "https://schema.org/InStock", url: `${LIVE}/et/products/${p.id}`,
     });
     const crumbs = ld.find((o) => o["@type"] === "BreadcrumbList") as Record<string, unknown> & { itemListElement: Array<{ name: string }> };
     expect(crumbs.attrs).toContain('data-seo="ldjson-page"');
@@ -169,7 +172,7 @@ describe("a custom product's page at request time", () => {
     expect(html).toContain("<li>100 мл · <span class=\"num\">14,90 €</span></li>");
     expect(html).toContain("<li>250 мл · <span class=\"num\">24,90 €</span></li>");
     expect(html).toContain('<div class="acc__rich"><p>Habemepalsam.</p></div>');
-    expect(html).toContain(`href="/shop2/et/b/proraso/"`);
+    expect(html).toContain(`href="/et/collections/proraso"`);
     // the shell's own assets travel unchanged
     expect(html).toContain('<script src="/shop2/app.min.js?v=');
     expect(html).toContain("<!-- seo:end -->");
@@ -177,12 +180,12 @@ describe("a custom product's page at request time", () => {
 
   it("EN: the owner's English title, the Russian description as the fallback for the meta, the Russian text in the JSON-LD", async () => {
     const p = await createCustomProduct(BALM);
-    const html = await (await pageFor("en", p.id)).text();
+    const html = await (await pageFor("", p.id)).text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(title(html)).toBe("Proraso beard balm — buy in Tallinn — REMPIRE");
     expect(meta(html, "description")).toBe("Бальзам Proraso в Rempire.");
     expect(meta(html, "og:locale")).toBe("en_US");
-    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/en/p/${p.id}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/products/${p.id}`);
     const product = ldBlocks(html).find((o) => o["@type"] === "Product") as Record<string, unknown>;
     expect(product.category).toBe("Beard care");
     expect(product.description).toBe("Бальзам для бороды. Смягчает и укладывает.");
@@ -192,7 +195,7 @@ describe("a custom product's page at request time", () => {
 
   it("RU with no pair builds the title from the product; a stock override reaches the offer and the chip; an override price reaches both", async () => {
     const p = await createCustomProduct({ ...BALM, seo: null });
-    let html = await (await pageFor("", p.id)).text();
+    let html = await (await pageFor("ru", p.id)).text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="ru">/);
     /* The title ladder's middle rung and the description's tail, both added
        07.09.2026 (src/lib/seo-head.mjs fitTitle()/descFrom(),
@@ -210,11 +213,11 @@ describe("a custom product's page at request time", () => {
     expect(meta(html, "description")).toBe(
       "Бальзам для бороды. Смягчает и укладывает · доставка по Эстонии и Балтии · самовывоз в Таллинне",
     );
-    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/p/${p.id}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/ru/products/${p.id}`);
     expect(html).toContain('<span class="chip chip--ok">В наличии</span>');
 
     await upsertOverride(p.id, { stock: "out", price: 12 });
-    html = await (await pageFor("", p.id)).text();
+    html = await (await pageFor("ru", p.id)).text();
     const product = ldBlocks(html).find((o) => o["@type"] === "Product") as { offers: Record<string, unknown> };
     expect(product.offers.availability).toBe("https://schema.org/OutOfStock");
     expect(product.offers.price).toBe("12");
@@ -238,16 +241,16 @@ describe("a custom product's page at request time", () => {
     const p = await createCustomProduct(BALM);
     const html = await (await pageFor("et", p.id)).text();
     expect(meta(html, "robots")).toBe("noindex, nofollow");
-    expect(link(html, 'rel="canonical"')).toBe(`https://rempireshop.diipsolutions.eu/shop2/et/p/${p.id}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`https://rempireshop.diipsolutions.eu/et/products/${p.id}`);
     expect(meta(html, "og:image")).toMatch(new RegExp(`^https://rempireshop\\.diipsolutions\\.eu/shop2/og/${p.id}\\.png\\?v=[0-9a-z]+$`));
   });
 
   it("hidden → 404 with the noindex shell; unknown `c-…` → 404; a catalogue id → the shell, 200", async () => {
     const p = await createCustomProduct(BALM);
     await setCustomProductActive(p.id, false);
-    for (const seg of ["", "et", "en"] as const) {
+    for (const seg of ["ru", "et", ""] as const) {
       const res = await pageFor(seg, p.id);
-      expect(res.status, seg || "ru").toBe(404);
+      expect(res.status, seg || "en").toBe(404);
       expect(res.headers.get("cache-control")).toBe("no-store");
       const html = await res.text();
       expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
@@ -257,13 +260,15 @@ describe("a custom product's page at request time", () => {
     const missing = await pageFor("et", "c-no-such-product");
     expect(missing.status).toBe(404);
 
-    const catalogue = await pageFor("", "system-4-bio-botanical-shampoo");
+    const catalogue = await pageFor("ru", "system-4-bio-botanical-shampoo");
     expect(catalogue.status).toBe(200);
     const shell = await catalogue.text();
     expect(shell).toContain("<!-- seo:start -->");
     expect(shell).toContain('<div id="app">');
-    // the shell is the Russian home page, untouched: its own title, no Product block
-    expect(title(shell)).toBe("REMPIRE — магазин косметики в Таллинне");
+    /* the shell is the home page served at «/» — English since the URL move of
+       08.10.2026 — untouched: its own title, no Product block (app.js reads the
+       language off the /ru address and draws the page) */
+    expect(title(shell)).toBe("REMPIRE — professional hair care &amp; cosmetics in Tallinn");
     expect(shell).not.toContain('id="ldjson"');
   });
 });
@@ -283,7 +288,7 @@ describe("sitemap-custom.xml", () => {
     const xml = await res.text();
     expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">');
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual([`${LIVE}/shop2/p/${a.id}/`, `${LIVE}/shop2/et/p/${a.id}/`, `${LIVE}/shop2/en/p/${a.id}/`]);
+    expect(locs).toEqual([`${LIVE}/ru/products/${a.id}`, `${LIVE}/et/products/${a.id}`, `${LIVE}/products/${a.id}`]);
     expect((xml.match(/<xhtml:link/g) || []).length).toBe(12);
     expect(xml).toContain(`<lastmod>${a.updatedAt.slice(0, 10)}</lastmod>`);
     expect(xml).not.toContain(b.id);
@@ -305,12 +310,12 @@ describe("sitemap-custom.xml", () => {
     const { GET } = await import("@/app/sitemap-custom.xml/route");
     const xml = await (await GET()).text();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual([`${LIVE}/shop2/p/${shown.id}/`, `${LIVE}/shop2/et/p/${shown.id}/`, `${LIVE}/shop2/en/p/${shown.id}/`]);
+    expect(locs).toEqual([`${LIVE}/ru/products/${shown.id}`, `${LIVE}/et/products/${shown.id}`, `${LIVE}/products/${shown.id}`]);
     expect(xml).not.toContain(hidden.id);
 
     // switched back on, it is back in the sitemap
     await upsertOverride(hidden.id, { hidden: false });
-    expect(await (await GET()).text()).toContain(`/shop2/p/${hidden.id}/`);
+    expect(await (await GET()).text()).toContain(`/ru/products/${hidden.id}`);
   });
 
   it("is an empty, valid urlset when there is nothing to list", async () => {
@@ -360,7 +365,7 @@ describe("stock alerts for a custom product", () => {
     // (src/lib/product-name.ts), not «— бальзам для бороды» to an Estonian
     expect(sent[0].text).toContain("Proraso Beard Balm — palsam habemele");
     expect(sent[0].text).not.toContain("бальзам");
-    expect(sent[0].text).toContain(`${LIVE}/shop2/et/p/${p.id}/`);
+    expect(sent[0].text).toContain(`${LIVE}/et/products/${p.id}`);
     // once
     expect((await sweepBackInStock()).sent).toBe(0);
   });
@@ -373,7 +378,7 @@ describe("stock alerts for a custom product", () => {
     expect(sent).toHaveLength(0);
     await upsertOverride(p.id, { stock: "in" });
     expect(sent).toHaveLength(1);
-    expect(sent[0].text).toContain(`${LIVE}/shop2/p/${p.id}/`);
+    expect(sent[0].text).toContain(`${LIVE}/ru/products/${p.id}`);
     expect((await runBackInStock(p.id)).sent).toBe(0);
   });
 

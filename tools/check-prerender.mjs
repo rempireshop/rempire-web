@@ -14,6 +14,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assetToken, currentToken } from "./lib/asset-token.mjs";
 import { VIEWPORT_META } from "../src/lib/seo-head.mjs";
+import { parseShopPath, publicPath, STATE_RESTS } from "../src/lib/shop-paths.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -101,7 +102,7 @@ const decode = (s) => String(s)
   .replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")
   .replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&");
 
-async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = true, minBody = 400 }) {
+async function checkPage(file, { lang, rest, product, blogPost, needImg = true, minBody = 400 }) {
   checked++;
   let html;
   try { html = await readFile(file, "utf8"); }
@@ -123,9 +124,11 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
   else PAGE_ROBOTS.add(meta);
 
   const canonical = (html.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
-  const wantPath = "/shop2" + (seg ? "/" + seg : "") + rest;
+  // the page's own address — Shopify's scheme (src/lib/shop-paths.mjs), not its folder
+  const wantPath = publicPath(lang, rest);
+  const pathOf = (u) => u.replace(/^https?:\/\/[^/]+/, "");
   if (!canonical) fail(file, "no canonical");
-  else if (!canonical.endsWith(wantPath)) fail(file, `canonical ends "${canonical.slice(-60)}", expected "${wantPath}"`);
+  else if (pathOf(canonical) !== wantPath) fail(file, `canonical is "${canonical.slice(-60)}", expected "${wantPath}"`);
 
   const alts = all(/<link rel="alternate" hreflang="([^"]+)"/g, html);
   for (const want of ["ru", "et", "en", "x-default"]) {
@@ -135,9 +138,9 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
 
   // the alternates must be the same page in the other languages, not a stale copy
   const altHrefs = all(/<link rel="alternate" hreflang="(?:ru|et|en)" href="([^"]+)"/g, html);
-  for (const [i, s] of ["", "/et", "/en"].entries()) {
-    const want = "/shop2" + s + rest;
-    if (altHrefs[i] && !altHrefs[i].endsWith(want)) fail(file, `alternate ${i} ends "${altHrefs[i].slice(-50)}", expected "${want}"`);
+  for (const [i, code] of ["RU", "ET", "EN"].entries()) {
+    const want = publicPath(code, rest);
+    if (altHrefs[i] && pathOf(altHrefs[i]) !== want) fail(file, `alternate ${i} ends "${altHrefs[i].slice(-50)}", expected "${want}"`);
   }
 
   /* The tag carries an attribute — id="ldjson" on a product page, otherwise
@@ -231,7 +234,10 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
      address answers 404. */
   const emptySection = /class="[^"]*sec__empty/.test(body);
   if (needImg && !emptySection && !/<img [^>]*alt="[^"]+"/.test(body)) fail(file, "no <img> with a non-empty alt");
-  if (!/<a href="\/shop2/.test(body)) fail(file, "no crawlable /shop2 links");
+  /* crawlable links into the shop, at its own addresses — and not one left at
+     a /shop2/ address, which only answers with a 301 since 08.10.2026 */
+  if (!/<a href="\/(?:"|products|collections|ru|et|policies|pages|blogs)/.test(body)) fail(file, "no crawlable links into the shop");
+  if (/href="\/shop2\//.test(body)) fail(file, "links to a /shop2/ address — those answer with a 301 since 08.10.2026");
   if (product) {
     if (!/pdp__price/.test(body)) fail(file, "no price on the product page");
     if (!/class="acc__rich"/.test(body) && !/pdp__title/.test(body)) fail(file, "no description block");
@@ -247,14 +253,17 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
   if (!html.includes(VIEWPORT_META)) fail(file, "viewport meta differs from VIEWPORT_META — re-run npm run prerender");
 }
 
-const LANGS = [["ru", ""], ["et", "et"], ["en", "en"]];
+/* [html lang, folder under public/shop2/]. English is the unprefixed language
+   since 08.10.2026, so its pages are at the top of the folder and Russian has
+   its own. */
+const LANGS = [["ru", "ru"], ["et", "et"], ["en", ""]];
 const BRANDS = [...new Set(CATALOGUE.map((p) => p.brand))]
   .map((b) => b.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""));
 
 /* blog: unlike CATALOGUE/LEGAL_SLUGS/BUNDLES, there is no committed file that
    says which posts exist — the database is the only source of truth, and
    this script reads no network and no database (file header). So the set of
-   slugs to check is read off the Russian pages themselves; `null` means "no
+   slugs to check is read off the English pages themselves; `null` means "no
    /shop2/blog/ at all", which is exactly what a build with no DATABASE_URL
    (or no published post) writes — the whole blog section below is then
    skipped, the same way it is skipped for an empty BUNDLES. */
@@ -264,10 +273,10 @@ const BLOG_SLUGS = await readdir(path.join(SHOP2, "blog"), { withFileTypes: true
 if (!BLOG_SLUGS) console.log("blog: no public/shop2/blog/ — nothing to check this run");
 
 for (const [lang, seg] of LANGS) {
-  await checkPage(path.join(SHOP2, seg, "index.html"), { lang, seg, rest: "/" });
+  await checkPage(path.join(SHOP2, seg, "index.html"), { lang, rest: "/" });
   for (const c of ["all", ...Object.keys(CAT_NAMES)]) {
     const file = path.join(SHOP2, seg, "c", c, "index.html");
-    await checkPage(file, { lang, seg, rest: `/c/${c}/` });
+    await checkPage(file, { lang, rest: `/c/${c}/` });
     /* Everything else here checks that a page is built correctly — lang
        attribute, hreflang, canonical, JSON-LD. None of it notices a page that
        is built correctly and written in the wrong language, which is what an
@@ -285,11 +294,11 @@ for (const [lang, seg] of LANGS) {
     }
   }
   for (const b of BRANDS) {
-    await checkPage(path.join(SHOP2, seg, "b", b, "index.html"), { lang, seg, rest: `/b/${b}/` });
+    await checkPage(path.join(SHOP2, seg, "b", b, "index.html"), { lang, rest: `/b/${b}/` });
   }
   for (const p of CATALOGUE) {
     await checkPage(path.join(SHOP2, seg, "p", p.id, "index.html"),
-      { lang, seg, rest: `/p/${encodeURIComponent(p.id)}/`, product: true });
+      { lang, rest: `/p/${encodeURIComponent(p.id)}/`, product: true });
   }
   /* The four screens that used to be shell-only. The paths are the ones
      app.js pushes in pathFor() — the singular /set/<id>/ beside the plural
@@ -298,30 +307,30 @@ for (const [lang, seg] of LANGS) {
     /* A policy page has no photograph and app.js does not draw one either;
        the body is the legal text, which is thousands of characters. */
     await checkPage(path.join(SHOP2, seg, "info", slug, "index.html"),
-      { lang, seg, rest: `/info/${slug}/`, needImg: false, minBody: 600 });
+      { lang, rest: `/info/${slug}/`, needImg: false, minBody: 600 });
   }
   if (BUNDLES.length) {
-    await checkPage(path.join(SHOP2, seg, "sets", "index.html"), { lang, seg, rest: "/sets/" });
+    await checkPage(path.join(SHOP2, seg, "sets", "index.html"), { lang, rest: "/sets/" });
     for (const b of BUNDLES) {
       await checkPage(path.join(SHOP2, seg, "set", b.id, "index.html"),
-        { lang, seg, rest: `/set/${encodeURIComponent(b.id)}/`, product: true });
+        { lang, rest: `/set/${encodeURIComponent(b.id)}/`, product: true });
     }
   }
   /* The brands landing — a page of its own since 07.09.2026, so it is
      checked like the rest. No product photograph on it: it is a list of
      26 links. */
   await checkPage(path.join(SHOP2, seg, "brands", "index.html"),
-    { lang, seg, rest: "/brands/", needImg: false, minBody: 200 });
+    { lang, rest: "/brands/", needImg: false, minBody: 200 });
   await checkPage(path.join(SHOP2, seg, "gift", "index.html"),
-    { lang, seg, rest: "/gift/", minBody: 700 });
+    { lang, rest: "/gift/", minBody: 700 });
   // blog: skipped whole when BLOG_SLUGS is null (see its declaration above) —
   // a cover is optional, so needImg is off for both the listing and a post
   if (BLOG_SLUGS) {
     await checkPage(path.join(SHOP2, seg, "blog", "index.html"),
-      { lang, seg, rest: "/blog/", needImg: false, minBody: 200 });
+      { lang, rest: "/blog/", needImg: false, minBody: 200 });
     for (const slug of BLOG_SLUGS) {
       await checkPage(path.join(SHOP2, seg, "blog", slug, "index.html"),
-        { lang, seg, rest: `/blog/${encodeURIComponent(slug)}/`, needImg: false, minBody: 300, blogPost: true });
+        { lang, rest: `/blog/${encodeURIComponent(slug)}/`, needImg: false, minBody: 300, blogPost: true });
     }
   }
 }
@@ -344,7 +353,7 @@ if (sharp) {
 }
 
 /* ---------- the policy slugs the request-time 404 believes in ------------
-   src/lib/notfound-page.ts answers 404 for an `/shop2/info/<slug>/` that is
+   src/lib/notfound-page.ts answers 404 for a policy page whose slug is
    not in src/data/legal-slugs.json, which tools/pack-legal.mjs writes from
    this same LEGAL. A JSON left behind by an edit to legal.js would 404 a
    policy page that is sitting right there on disk, so the two lists are
@@ -371,8 +380,8 @@ const stale = [
   ["p", new Set(CATALOGUE.map((p) => p.id)), "product"],
   ["set", new Set(BUNDLES.map((b) => b.id)), "set"],
   ["info", new Set(LEGAL_SLUGS), "policy page"],
-  // the Russian slugs ARE the keep-set here (see BLOG_SLUGS above), so this
-  // only ever flags et/en drifting from ru, not ru drifting from the database
+  // the English slugs ARE the keep-set here (see BLOG_SLUGS above), so this
+  // only ever flags ru/et drifting from en, not en drifting from the database
   ...(BLOG_SLUGS ? [["blog", BLOG_SLUGS, "blog post"]] : []),
 ];
 for (const [, seg] of LANGS) {
@@ -384,7 +393,7 @@ for (const [, seg] of LANGS) {
     for (const d of dirs.filter((e) => e.isDirectory()).map((e) => e.name)) {
       if (!keep.has(d)) {
         failed++;
-        console.error(`FAIL stale page for a ${what} that no longer exists: ${seg || "ru"}/${kind}/${d}/`);
+        console.error(`FAIL stale page for a ${what} that no longer exists: ${seg || "en"}/${kind}/${d}/`);
       }
     }
   }
@@ -439,23 +448,27 @@ else {
   for (const l of locs.slice(0, 5)) if (!/^https?:\/\//.test(l)) { failed++; console.error(`FAIL sitemap <loc> is not absolute: ${l}`); }
   // every prerendered page must be in it, and only those
   const paths = new Set(locs.map((l) => l.replace(/^https?:\/\/[^/]+/, "")));
-  for (const [, seg] of LANGS) {
-    const b = "/shop2" + (seg ? "/" + seg : "");
+  for (const [lang] of LANGS) {
+    const at = (rest) => publicPath(lang, rest);
     const want = [
       // no product row here — src/app/sitemap-products.xml/route.ts serves those
-      ...LEGAL_SLUGS.map((s) => b + "/info/" + s + "/"),
-      ...(BUNDLES.length ? [b + "/sets/", ...BUNDLES.map((x) => b + "/set/" + x.id + "/")] : []),
-      b + "/gift/",
-      ...(BLOG_SLUGS ? [b + "/blog/", ...[...BLOG_SLUGS].map((s) => b + "/blog/" + s + "/")] : []),
+      ...LEGAL_SLUGS.map((s) => at("/info/" + s + "/")),
+      ...(BUNDLES.length ? [at("/sets/"), ...BUNDLES.map((x) => at("/set/" + x.id + "/"))] : []),
+      at("/gift/"),
+      ...(BLOG_SLUGS ? [at("/blog/"), ...[...BLOG_SLUGS].map((s) => at("/blog/" + s + "/"))] : []),
     ];
     for (const w of want) if (!paths.has(w)) { failed++; console.error(`FAIL sitemap is missing ${w}`); }
   }
   /* A screen that needs a basket, a payment form or a login behind it must
      never be offered to a crawler — it renders empty without state, it is
      robots-disallowed, and asking for it spends crawl budget on nothing. */
-  const NEVER = /^\/shop2(?:\/(?:et|en))?\/(?:checkout|cart|account|admin|done|search)\/?$/;
   for (const p of paths) {
-    if (NEVER.test(p)) { failed++; console.error(`FAIL sitemap offers a screen that must never be indexed: ${p}`); }
+    const route = parseShopPath(p);
+    if (!route || STATE_RESTS.includes(route.rest)) {
+      failed++; console.error(`FAIL sitemap offers an address that is not an indexable page: ${p}`);
+    } else if (route.canonical !== p) {
+      failed++; console.error(`FAIL sitemap offers ${p}, which is not the page's own address (${route.canonical})`);
+    }
   }
   console.log(`sitemap: ${locs.length} urls, ${xh} hreflang alternates`);
 }
@@ -468,8 +481,8 @@ const robotsFiles = {
   production: path.join(PUB, "robots.production.txt"),
   staging: path.join(PUB, "robots.staging.txt"),
 };
-const NO_INDEX = ["/shop2/admin", "/shop2/checkout", "/shop2/cart", "/shop2/account",
-  "/shop2/done", "/shop2/search", "/api/"];
+const NO_INDEX = ["/admin", "/api/",
+  ...["", "/ru", "/et"].flatMap((pre) => ["/checkout", "/cart", "/account", "/search"].map((p) => pre + p))];
 
 for (const [name, f] of Object.entries(robotsFiles)) {
   if (!existsSync(f)) { failed++; console.error(`FAIL public/robots.${name}.txt is missing`); continue; }

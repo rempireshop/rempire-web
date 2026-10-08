@@ -516,7 +516,7 @@
       "lang": "RU",
       "title": "Ссылка на один объём",
       "steps": [
-        "Открыть /shop2/p/system-4-bio-botanical-shampoo/?size=500ml на стенде.",
+        "Открыть /ru/products/system-4-bio-botanical-shampoo?size=500ml на стенде.",
         "Посмотреть выбранный объём и цену.",
         "Убрать из адреса ?size=500ml и открыть снова.",
         "Вписать ?size=999ml и открыть ещё раз."
@@ -530,12 +530,12 @@
       "why": "Google Shopping ведёт на каждый объём своей ссылкой — иначе цены «не совпадают».",
       "risk": "med",
       "writes": false,
-      "mark": "new",
-      "markedAt": "2026-09-23T12:08:43.855Z",
+      "mark": "reworded",
+      "markedAt": "2026-10-08T21:53:17.279Z",
       "en": {
         "title": "A link to one size",
         "steps": [
-          "Open /shop2/p/system-4-bio-botanical-shampoo/?size=500ml on staging.",
+          "Open /ru/products/system-4-bio-botanical-shampoo?size=500ml on staging.",
           "Look at the selected size and the price.",
           "Remove ?size=500ml from the address and open it again.",
           "Type ?size=999ml and open it once more."
@@ -902,14 +902,14 @@
         "После чистки перед запуском (с --test-content) открыть магазин на телефоне.",
         "Посмотреть ряд ссылок вверху и главную страницу.",
         "Открыть «Подарочная карта» и посмотреть строку над заголовком.",
-        "Открыть адреса /shop2/blog/ и /shop2/sets/.",
+        "Открыть адреса /ru/blogs/news и /ru/collections/sets.",
         "Открыть «Все товары» и поискать «Claude» и «hoodie»."
       ],
       "expect": [
         "Вверху нет ни «Наборов», ни «Блога»; «Подарочная карта» на месте.",
         "На главной нет ряда наборов.",
         "Над «Подарочной картой» только «Главная», без «Наборов».",
-        "/shop2/blog/ и /shop2/sets/ показывают «Страница не найдена».",
+        "/ru/blogs/news и /ru/collections/sets показывают «Страница не найдена».",
         "Своих товаров-проб нет, импортированные товары и их цены на месте."
       ],
       "why": "Решение Димы 28.09.2026: блог и наборы выключены, пока Ренат не напишет первую статью и не соберёт первый набор. Пустая страница «Блог» или «Наборы» — обещание, которого магазин не держит. Возвращаются сами, с первой статьёй и первым включённым набором — переключателя нет.",
@@ -921,20 +921,20 @@
           "After the go-live reset (with --test-content) open the shop on a phone.",
           "Look at the row of links at the top and at the home page.",
           "Open «Подарочная карта» (gift card) and look at the line above the heading.",
-          "Open the addresses /shop2/blog/ and /shop2/sets/.",
+          "Open the addresses /ru/blogs/news and /ru/collections/sets.",
           "Open «Все товары» and search for «Claude» and «hoodie»."
         ],
         "expect": [
           "No «Наборы» and no «Блог» at the top; «Подарочная карта» still there.",
           "No row of sets on the home page.",
           "Above the gift card only «Главная», no «Наборы».",
-          "/shop2/blog/ and /shop2/sets/ show «Страница не найдена».",
+          "/ru/blogs/news and /ru/collections/sets show «Страница не найдена».",
           "No own test products; the imported products and their prices are there."
         ],
         "why": "Dim's decision of 28.09.2026: the blog and sets stay off until Renat writes the first article and makes the first set. An empty «Блог» or «Наборы» page is a promise the shop does not keep. They come back by themselves with the first article and the first set switched on — there is no switch."
       },
-      "mark": "new",
-      "markedAt": "2026-09-28T15:27:20.649Z"
+      "mark": "reworded",
+      "markedAt": "2026-10-08T21:53:17.279Z"
     },
     {
       "id": "shop-info-pages",
@@ -1369,6 +1369,49 @@
           "It is not there after a reload either."
         ],
         "why": "An unchecked review is somebody else's advertising, or abuse, on your product page."
+      }
+    },
+    {
+      "id": "shop-addresses",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Адреса как в Shopify",
+      "steps": [
+        "Открыть rempireshop.com/products/system-4-bio-botanical-shampoo.",
+        "Открыть тот же адрес с /ru и с /et в начале.",
+        "Открыть старую ссылку rempireshop.com/shop2/p/system-4-bio-botanical-shampoo/.",
+        "Телефон на русском языке: открыть просто rempireshop.com.",
+        "Переключить язык на EN и обновить страницу."
+      ],
+      "expect": [
+        "Без приставки страница на английском, с /ru на русском, с /et на эстонском.",
+        "Старая ссылка открыла тот же товар по-русски, адрес начинается с /ru/products.",
+        "Русский телефон сам попал на rempireshop.com/ru.",
+        "После выбора EN обновление оставляет английский и не уводит на /ru."
+      ],
+      "why": "Google знает адреса Shopify — с 08.10.2026 это и есть адреса магазина, без /shop2.",
+      "risk": "high",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-08T21:53:17.279Z",
+      "en": {
+        "title": "Addresses as on Shopify",
+        "steps": [
+          "Open rempireshop.com/products/system-4-bio-botanical-shampoo.",
+          "Open the same address with /ru and with /et in front.",
+          "Open the old link rempireshop.com/shop2/p/system-4-bio-botanical-shampoo/.",
+          "On a phone set to Russian: open plain rempireshop.com.",
+          "Switch the language to EN and reload the page."
+        ],
+        "expect": [
+          "With no prefix the page is English, with /ru Russian, with /et Estonian.",
+          "The old link opened the same product in Russian, its address starts /ru/products.",
+          "The Russian phone landed on rempireshop.com/ru by itself.",
+          "After choosing EN a reload stays English and does not jump to /ru."
+        ],
+        "why": "Google knows Shopify's addresses — since 08.10.2026 they are the shop's addresses, no /shop2."
       }
     },
     {
@@ -2410,6 +2453,49 @@
           "Sideways, nothing hides under the notch."
         ],
         "why": "A cut-off screen edge hides a switch you will neither see nor press."
+      }
+    },
+    {
+      "id": "panel-app-readd",
+      "area": "panel",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Значки «Админка» и «Сканер» заново",
+      "steps": [
+        "Удалить с экрана телефона старые значки «Админка» и «Сканер».",
+        "Открыть rempireshop.com/admin и войти.",
+        "Добавить на экран: Safari «Поделиться» → «На экран Домой», Chrome — «Установить приложение».",
+        "Включить оповещения о заказах на этом телефоне, как в первый раз.",
+        "Открыть rempireshop.com/admin/scan и так же добавить «Сканер» на экран."
+      ],
+      "expect": [
+        "Значок «Админка» открывает панель без адресной строки.",
+        "Проверочное оповещение приходит один раз, а не два.",
+        "Нажатие на оповещение открывает этот заказ в панели.",
+        "Значок «Сканер» открывается сразу в камере."
+      ],
+      "why": "Панель переехала с /shop2/admin/ на /admin — старый значок открывает её во вкладке браузера.",
+      "risk": "high",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-08T21:53:17.279Z",
+      "en": {
+        "title": "The «Админка» and «Сканер» icons again",
+        "steps": [
+          "Remove the old «Админка» and «Сканер» icons from the phone's screen.",
+          "Open rempireshop.com/admin and sign in.",
+          "Add it to the screen: Safari Share → Add to Home Screen, Chrome — Install app.",
+          "Switch order notifications on for this phone, as the first time.",
+          "Open rempireshop.com/admin/scan and add «Сканер» to the screen the same way."
+        ],
+        "expect": [
+          "The «Админка» icon opens the panel with no address bar.",
+          "The test notification arrives once, not twice.",
+          "Tapping the notification opens that order in the panel.",
+          "The «Сканер» icon opens straight into the camera."
+        ],
+        "why": "The panel moved from /shop2/admin/ to /admin — the old icon opens it in a browser tab."
       }
     },
     {
@@ -7748,7 +7834,7 @@
         "Выключить переключатель у одного набора и открыть магазин.",
         "Нажать «Вернуть» в сообщении внизу.",
         "Открыть набор, нажать «Удалить набор» → «Удалить» и сразу «Вернуть».",
-        "Выключить переключатели у всех наборов, открыть магазин и адрес /shop2/sets/.",
+        "Выключить переключатели у всех наборов, открыть магазин и адрес /ru/collections/sets.",
         "Включить один набор обратно и открыть магазин снова.",
         "Выключить «Наборы» в «Ещё» → «Настройки» → «Главная страница».",
         "Открыть магазин и посмотреть меню и главную.",
@@ -7758,7 +7844,7 @@
         "Скрытый набор пропал из магазина, «Вернуть» показывает его снова.",
         "Удаление сначала спрашивает, а «Вернуть» возвращает набор на место.",
         "Без включённых наборов нет «Наборов» в меню, на главной и над «Подарочной картой».",
-        "/shop2/sets/ тогда показывает «Страница не найдена»; один включённый набор возвращает всё сам.",
+        "/ru/collections/sets тогда показывает «Страница не найдена»; один включённый набор возвращает всё сам.",
         "С выключенными наборами пункт «Наборы» исчез из меню.",
         "«Подарочная карта» осталась на месте."
       ],
@@ -7771,7 +7857,7 @@
           "Switch one set off with its switch and open the shop.",
           "Press «Вернуть» (undo) in the message at the bottom.",
           "Open a set, press «Удалить набор» → «Удалить» (delete) and «Вернуть» at once.",
-          "Switch every set off, then open the shop and the address /shop2/sets/.",
+          "Switch every set off, then open the shop and the address /ru/collections/sets.",
           "Switch one set back on and open the shop again.",
           "Switch «Наборы» off in «Ещё» → «Настройки» → «Главная страница».",
           "Open the shop and look at the menu and the home page.",
@@ -7781,14 +7867,14 @@
           "The hidden set has gone from the shop; «Вернуть» shows it again.",
           "Deleting asks first, and «Вернуть» puts the set back in its place.",
           "With every set off, «Наборы» is gone from menu, home page and gift card.",
-          "/shop2/sets/ then shows «Страница не найдена»; one set switched on brings it all back.",
+          "/ru/collections/sets then shows «Страница не найдена»; one set switched on brings it all back.",
           "With sets switched off the «Наборы» menu item is gone.",
           "«Подарочная карта» is still where it was."
         ],
         "why": "A withdrawn set still on sale brings an order you cannot fill. And an empty «Наборы» page is a promise the shop does not keep: after the go-live reset there is not one set (Dim, 28.09.2026)."
       },
-      "mark": "redo",
-      "markedAt": "2026-09-28T15:27:20.649Z"
+      "mark": "reworded",
+      "markedAt": "2026-10-08T21:53:17.279Z"
     },
     {
       "id": "blog-new-post",

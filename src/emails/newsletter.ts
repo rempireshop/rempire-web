@@ -41,8 +41,10 @@ import {
   shell,
   stripHtml,
   textBody,
+  shopPath,
   textFooter,
 } from "./layout";
+import { modernShopHref } from "../lib/shop-paths.mjs";
 import type { Lang, RenderedEmail } from "./types";
 import type { NewsBlock } from "../lib/newsletter-blocks";
 import { translateProductName } from "../lib/product-name";
@@ -107,11 +109,9 @@ const T: Record<Lang, Strings> = {
   },
 };
 
-const SEG: Record<Lang, string> = { ru: "", et: "/et", en: "/en" };
-
-/** `https://rempireshop.com/shop2/et/p/<id>/` — the product page in the reader's language. */
+/** `https://rempireshop.com/et/products/<id>` — the product page in the reader's language. */
 export function newsletterProductUrl(id: string, lang: Lang): string {
-  return `${baseUrl()}/shop2${SEG[lang]}/p/${encodeURIComponent(id)}/`;
+  return baseUrl() + shopPath(lang, `/p/${encodeURIComponent(id)}/`);
 }
 
 /* ---------- a block's link ------------------------------------------------ */
@@ -128,8 +128,9 @@ const SHOP_LINKS: Array<[RegExp, (m: RegExpExecArray) => string]> = [
 
 /**
  * One of the shop's own places, written as a token — `cat:hair`,
- * `product:<id>`, `post:<slug>`… (src/lib/newsletter-blocks.ts) — as the path
- * under /shop2/<lang>. Null for anything that is not such a token. The one
+ * `product:<id>`, `post:<slug>`… (src/lib/newsletter-blocks.ts) — as the
+ * shop's internal route ("/c/hair/"), which shopPath() spells as the page's
+ * address in the reader's language. Null for anything that is not such a token. The one
  * grammar: the cleaning asks this, and so does the renderer.
  */
 export function shopLinkPath(href: string): string | null {
@@ -150,7 +151,7 @@ export function newsletterLinkUrl(href: string, lang: Lang): string {
   const h = String(href ?? "").trim();
   if (!h) return "";
   const path = shopLinkPath(h);
-  if (path !== null) return `${baseUrl()}/shop2${SEG[lang]}${path}`;
+  if (path !== null) return baseUrl() + shopPath(lang, path);
   return /^https?:\/\/[^\s<>"'`\\]+$/i.test(h) ? h : "";
 }
 
@@ -360,7 +361,7 @@ function inlineHtml(nodes: Node[], lang: Lang, cards: Map<string, NewsletterCard
       if (n.tag === "em") return `<em style="font-style:italic;">${inlineHtml(n.kids, lang, cards)}</em>`;
       if (n.tag === "a") {
         const pid = n.attrs["data-product"];
-        const href = pid ? newsletterProductUrl(pid, lang) : absUrl(n.attrs.href, "/shop2/");
+        const href = pid ? newsletterProductUrl(pid, lang) : absUrl(modernShopHref(n.attrs.href), shopPath(lang, "/"));
         const card = pid ? cards.get(pid) : undefined;
         const inner = textOf(n.kids).trim() ? inlineHtml(n.kids, lang, cards) : esc(card ? cardName(card, lang) : href);
         return `<a href="${esc(href)}" class="em-link" style="color:${C.ink}; text-decoration:underline;">${inner}</a>`;
@@ -379,7 +380,7 @@ function inlineText(nodes: Node[], lang: Lang, cards: Map<string, NewsletterCard
       if (n.tag === "br") return "\n";
       if (n.tag === "a") {
         const pid = n.attrs["data-product"];
-        const href = pid ? newsletterProductUrl(pid, lang) : absUrl(n.attrs.href, "/shop2/");
+        const href = pid ? newsletterProductUrl(pid, lang) : absUrl(modernShopHref(n.attrs.href), shopPath(lang, "/"));
         const card = pid ? cards.get(pid) : undefined;
         const words = textOf(n.kids).trim() || (card ? cardName(card, lang) : "");
         return words ? `${words} (${href})` : href;
@@ -430,9 +431,9 @@ function build(html: string, lang: Lang, cards: Map<string, NewsletterCard>): Bu
   const image = (attrs: Record<string, string>, href = "") => {
     const src = pick(attrs.src);
     if (!src) return;
-    const abs = absUrl(src, "/shop2/");
+    const abs = absUrl(src, shopPath(lang, "/"));
     const alt = stripHtml(pick(attrs.alt)) || t.picture;
-    const link = href ? absUrl(href, "/shop2/") : "";
+    const link = href ? absUrl(modernShopHref(href), shopPath(lang, "/")) : "";
     out.rows.push(imageRow(abs, alt, link));
     /* The plain-text part quotes where the banner GOES, not the .jpg it is
        made of: a reader on a text-only client wants the shop, not the file. */
@@ -609,7 +610,7 @@ export function renderNewsletter(input: NewsletterInput, lang: Lang | string = "
   // the last row keeps the card's bottom clear of the footer's rule
   body += `        <tr><td class="em-card" style="padding:0 0 24px 0; background-color:${C.card};"></td></tr>\n`;
 
-  const unsubscribe = absUrl(input.unsubscribeUrl, "/shop2/account/");
+  const unsubscribe = absUrl(input.unsubscribeUrl, shopPath(L, "/account/"));
   const footerNote =
     `${esc(t.why)} <a href="${esc(unsubscribe)}" class="em-link" style="color:#6f6b57; text-decoration:underline;">${esc(c.unsubscribe)}</a>`;
 

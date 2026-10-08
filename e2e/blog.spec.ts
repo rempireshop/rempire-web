@@ -74,7 +74,7 @@ test.describe("blog — tiles read as links", () => {
     await page.goto(shopUrl("", "/blog/"));
     await waitForScreen(page, "blog");
     // a real link (Ctrl-click opens a tab, the keyboard reaches it) — and the pointer says so
-    await expect(page.locator(".blog__tile").first()).toHaveAttribute("href", /\/shop2\/blog\/[^/]+\/$/);
+    await expect(page.locator(".blog__tile").first()).toHaveAttribute("href", /^\/ru\/blogs\/news\/[^/]+$/);
     await expectPointer(page, ".blog__tile");
 
     await page.locator(`.blog__tile[data-go-blog="${SLUGS[0]}"]`).click();

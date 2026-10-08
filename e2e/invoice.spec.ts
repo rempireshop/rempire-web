@@ -90,7 +90,7 @@ test.describe("invoice for companies", () => {
     await form.locator('[data-invf="regCode"]').fill(COMPANY.regCode);
     await payButton(page).click();
     await expect(page.locator('[data-invoice] div.err[role="alert"]').first()).toContainText("Укажите название фирмы");
-    await expect(page).not.toHaveURL(/\/done\//);
+    await expect(page).not.toHaveURL(/\/checkout\/done/);
 
     await page.locator('[data-invf="name"]').fill(COMPANY.name);
     await page.locator('[data-invf="vatNumber"]').fill(COMPANY.vatNumber);
@@ -110,7 +110,7 @@ test.describe("invoice for companies", () => {
     const number = body.number;
 
     await waitForScreen(page, "done");
-    await expect(page).toHaveURL(new RegExp(`/shop2/done/\\?n=${number}&s=invoice`));
+    await expect(page).toHaveURL(new RegExp(`/checkout/done\\?n=${number}&s=invoice`));
     await expect(page.locator("h1")).toHaveText("Заказ оформлен");
     await expect(page.locator(".done__num")).toContainText(number);
     const done = page.locator("[data-invoicedone]");

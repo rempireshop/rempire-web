@@ -364,7 +364,7 @@ test.describe("admin assistant — the page may ask for the microphone at all", 
   test.use({ extraHTTPHeaders: ipHeaders(136) });
 
   test("Permissions-Policy opens the microphone (and the camera) to this origin on the admin and the shop, nothing else", async ({ page, request }) => {
-    for (const path of ["/shop2/admin/", "/shop2/"]) {
+    for (const path of ["/admin", "/ru"]) {
       const res = await request.get(path);
       expect(res.status(), path).toBe(200);
       const policy = res.headers()["permissions-policy"] || "";

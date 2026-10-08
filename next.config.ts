@@ -1,100 +1,98 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
 
 /**
  * Prerendered shop pages (tools/prerender-shop2.mjs, `npm run prerender`).
  *
- * Vercel's static layer resolves <dir>/index.html for a trailing-slash URL on
- * its own, and it does that before any rewrite here runs. `next dev` and
- * `next start` do NOT — they match public/ paths exactly — so without these
- * rules a local /shop2/et/p/x/ falls through to the shell and the prerendered
- * page is only reachable at its .../index.html. These make local match
- * production.
+ * Since 08.10.2026 the shop answers at Shopify's own addresses
+ * (src/lib/shop-paths.mjs) — `/products/<id>`, `/ru/collections/<handle>`,
+ * `/policies/refund-policy` — while the files the prerender writes stay where
+ * the build has always put them, under public/shop2/ in the shop's internal
+ * route shape (`shop2/ru/p/<id>/index.html`, `shop2/c/hair/index.html`). So
+ * every page needs a rewrite from its address to its file, on Vercel as much
+ * as locally: neither layer could guess that /et/collections/juuksehooldus
+ * lives in shop2/et/c/hair/.
  *
- * The ids are read off disk rather than left as a bare :id. A parameterised
- * rewrite would send every /shop2/p/<anything>/ at a file, and a product added
- * to the catalogue but not yet prerendered would 404 instead of rendering
- * client-side. Listed this way, anything not on disk simply falls through to
- * the shell rewrite below. Rebuild after `npm run prerender` — the config is
- * read once, at dev-server start and at build.
+ * The prerender writes the list of what it wrote, address → file, to
+ * src/data/prerendered-routes.json (gitignored — every build regenerates it,
+ * before `next build` reads this file). Reading the list rather than the
+ * directories keeps the address scheme in one module: this file never learns
+ * that hair is «uhod-za-volosami» in Russian.
+ *
+ * Only what is on disk is routed. A product added to the catalogue but not
+ * yet prerendered falls through to the request-time route
+ * (src/app/{,ru/,et/}products/[id]) instead of 404ing on a missing file, and
+ * a fresh clone that has never run the prerender still serves the shell
+ * everywhere (src/app/[...path]). The config is read once, at dev-server start
+ * and at build — restart `next dev` after `npm run prerender`.
  */
 function prerenderedRewrites() {
-  const PUBLIC = path.join(process.cwd(), "public");
   const out: { source: string; destination: string }[] = [];
+  let pages: Array<[string, string]> = [];
+  try {
+    const file = path.join(process.cwd(), "src", "data", "prerendered-routes.json");
+    if (existsSync(file)) pages = (JSON.parse(readFileSync(file, "utf8")) as { pages?: Array<[string, string]> }).pages ?? [];
+  } catch {
+    pages = [];
+  }
+  /* A page whose file has gone since the list was written must not be routed
+     to a 404 — the request-time routes answer it instead. */
+  const PUBLIC = path.join(process.cwd(), "public");
+  pages = pages.filter(([, dest]) => existsSync(path.join(PUBLIC, dest)));
 
-  /* Subdirectories of public/<rel> that actually hold an index.html. */
-  const dirs = (rel: string) => {
-    const full = path.join(PUBLIC, rel);
-    if (!existsSync(full)) return [];
-    return readdirSync(full, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(path.join(full, d.name, "index.html")))
-      .map((d) => d.name)
-      .filter((n) => /^[A-Za-z0-9._-]+$/.test(n));
-  };
-
-  /* Next refuses a rewrite whose built source is over 4096 characters, and 220
-     product ids in one alternation is about 7.5 KB — so the list is split
-     across as many rules as it takes. */
+  /* `/products/<id>` → `/shop2/p/<id>/index.html` for 220 ids is one rule with
+     an alternation, not 220 rules; the same for brands, sets, blog posts and
+     the two prefixed homes. Next refuses a rewrite whose built source is over
+     4 096 characters, so a long alternation is split across as many rules as
+     it takes. Everything else (a section, whose handle differs from its
+     folder; a policy page; the gift card) is a literal rule of its own. */
   const MAX = 3600;
-  const group = (urlBase: string, rel: string) => {
-    const ids = dirs(rel).map((i) => i.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const groups = new Map<string, { from: string; to: string; ids: string[] }>();
+  for (const [source, destination] of pages) {
+    const cut = source.lastIndexOf("/");
+    const id = source.slice(cut + 1);
+    const tail = "/" + id + "/index.html";
+    if (id && /^[A-Za-z0-9._-]+$/.test(id) && destination.endsWith(tail)) {
+      const from = source.slice(0, cut);
+      const to = destination.slice(0, -tail.length);
+      const key = from + "|" + to;
+      if (!groups.has(key)) groups.set(key, { from, to, ids: [] });
+      groups.get(key)!.ids.push(id);
+    } else {
+      out.push({ source, destination });
+    }
+  }
+  for (const { from, to, ids } of groups.values()) {
+    if (ids.length === 1) {
+      out.push({ source: from + "/" + ids[0], destination: to + "/" + ids[0] + "/index.html" });
+      continue;
+    }
     let chunk: string[] = [];
     let len = 0;
     const flush = () => {
-      if (chunk.length) {
-        out.push({ source: `${urlBase}/:id(${chunk.join("|")})`, destination: `${urlBase}/:id/index.html` });
-      }
+      if (chunk.length) out.push({ source: `${from}/:id(${chunk.join("|")})`, destination: `${to}/:id/index.html` });
       chunk = [];
       len = 0;
     };
-    for (const id of ids) {
+    for (const raw of ids) {
+      const id = raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       if (len + id.length + 1 > MAX) flush();
       chunk.push(id);
       len += id.length + 1;
     }
     flush();
-  };
-
-  for (const prefix of ["", "/et", "/en"]) {
-    const dir = path.join("shop2", prefix.slice(1));
-    if (prefix && existsSync(path.join(PUBLIC, dir, "index.html"))) {
-      out.push({ source: `/shop2${prefix}`, destination: `/shop2${prefix}/index.html` });
-    }
-    /* p/c/b are the catalogue; info and set were added when the policy pages,
-       the sets and the gift card stopped being shell-only. `set` is singular
-       and `sets` is the landing — that is what pathFor() in app.js pushes, so
-       that is what has to resolve. `blog` here is the per-post pages, one
-       level under the listing (/shop2/blog/<slug>/) — the listing itself is
-       the single page below, same shape as `sets`/`gift`. */
-    for (const kind of ["p", "c", "b", "info", "set", "blog"]) {
-      group(`/shop2${prefix}/${kind}`, path.join(dir, kind));
-    }
-    /* Single pages, so no alternation to build — but still listed off disk,
-       so a run of `npm run prerender` that has not happened yet leaves them
-       falling through to the shell rather than 404ing. */
-    for (const one of ["sets", "gift", "blog", "brands"]) {
-      if (existsSync(path.join(PUBLIC, dir, one, "index.html"))) {
-        out.push({ source: `/shop2${prefix}/${one}`, destination: `/shop2${prefix}/${one}/index.html` });
-      }
-    }
   }
-  /* The old per-product pages under /shop/p/... — they carry the link previews
-     the shop has been sharing and hand humans over with a script, so they have
-     to keep answering locally too. */
-  group("/shop/p", path.join("shop", "p"));
-  // /shop2/ itself: public/shop2/index.html is not matched by the :path+ rule
-  // below (it needs at least one segment), so a local /shop2/ used to 404
-  out.push({ source: "/shop2", destination: "/shop2/index.html" });
+  /* The English home page is the shell itself, which is committed — so «/» is
+     routed even before the first prerender. */
+  if (!out.some((r) => r.source === "/")) out.push({ source: "/", destination: "/shop2/index.html" });
+
   /* The hand-written pages under public/ that are not part of the shop:
-     /guide/ (what the rebuild does), /cards/ (the product-card options),
-     /test/ (the acceptance checklist Renat and Dim fill in) and /golive/
-     (what is left before launch, and the lock on the domain switch). Vercel
-     resolves <dir>/index.html for these on its own; `next dev` and `next
-     start` do not (see this function's own comment), so locally they answered
-     only at .../index.html — which is not the address anybody is given, and
-     not an address an e2e can drive. One line each, no build step, and local
-     now matches production. */
+     /guide (what the rebuild does), /cards (the product-card options), /test
+     (the acceptance checklist Renat and Dim fill in) and /golive (what is
+     left before launch, and the lock on the domain switch). Neither Vercel
+     nor `next start` serves a directory's index.html for a slashless address,
+     and no page address has a slash any more. */
   for (const page of ["guide", "cards", "test", "golive"]) {
     if (existsSync(path.join(PUBLIC, page, "index.html"))) {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
@@ -110,20 +108,19 @@ function prerenderedRewrites() {
  * docs/audit/security-api.md H5. The policy below is written around what this
  * repository actually loads, verified against the built output:
  *
- *   · scripts   — every script in public/shop2/ is a file with a src. The two
- *                 <script type="application/ld+json"> blocks in the prerendered
- *                 pages are data, not code, and are not covered by script-src.
- *                 So /shop2/* gets a strict `script-src 'self'`.
- *                 Everything else keeps 'unsafe-inline' for two reasons: the
- *                 95 legacy product pages under public/shop/p/ hand humans
- *                 over with an inline location.replace(), and Next's App
- *                 Router would stream its flight payload through inline
- *                 <script> tags the day a rendered page is added back (there
- *                 is none today — the questionnaire and design-review pages
- *                 were retired 07.09, docs/audit/2026-09-07-cleanup.md).
- *                 Both are ours, neither renders untrusted input; the admin
- *                 panel — the one screen a stranger's text reaches — is under
- *                 /shop2/ and gets the strict policy.
+ *   · scripts   — every script the shop loads is a file with a src. The
+ *                 <script type="application/ld+json"> blocks in the
+ *                 prerendered pages are data, not code, and are not covered by
+ *                 script-src. So every page gets a strict `script-src 'self'`
+ *                 — since 08.10.2026 the shop's pages are the whole site
+ *                 (/, /products/…, /ru/…, /admin), so the strict policy is the
+ *                 DEFAULT and the loose one is the named exception: the API
+ *                 (a few routes answer HTML of their own — the unsubscribe
+ *                 page, the letter previews) and the four hand-written pages
+ *                 (/test, /guide, /cards, /golive), which carry an inline
+ *                 script each, keep 'unsafe-inline'. Both are ours, neither
+ *                 renders untrusted input; the admin panel — the one screen a
+ *                 stranger's text reaches — is on the strict policy.
  *   · styles    — app.js writes style="…" attributes on nearly every row, so
  *                 'unsafe-inline' is load-bearing here and cannot be dropped
  *                 without rewriting the renderer. Google Fonts is a stylesheet.
@@ -132,17 +129,13 @@ function prerenderedRewrites() {
  *                 editor now accepts (docs/media.md, «Видео»): the frame src
  *                 is https://www.instagram.com/reel/<id>/embed/, built by
  *                 parseVideo() from an id and never from the pasted string.
- *                 Listed on the shared policy for the same reason the other
- *                 two are — the product page exists both under /shop2/* and
- *                 in the legacy /shop/p/ pages — and it grants nothing beyond
- *                 "a frame may point at instagram.com".
  *   · connect   — only our own API. The Montonio hosts are listed because the
  *                 checkout hands the shopper over to them; the handover is a
  *                 navigation and a form post, not a fetch.
  *
  * Header rules are applied in order and the LAST match wins for a given key
  * (Next writes them with res.setHeader), so the general rule comes first and
- * the two narrower ones override it.
+ * the narrower ones override it.
  */
 const MONTONIO = "https://stargate.montonio.com https://sandbox-stargate.montonio.com";
 
@@ -153,8 +146,8 @@ const MONTONIO = "https://stargate.montonio.com https://sandbox-stargate.montoni
  * token is filled in, not something to remember to add later. The script
  * itself loads from the "static." subdomain, but the beacon's own reporting
  * call lands on the bare domain — both are allowed so a mismatch here cannot
- * silently turn "token filled in" into "blocked by our own CSP". /shop2/*
- * only: this must never widen the strict default policy everywhere else. */
+ * silently turn "token filled in" into "blocked by our own CSP". The shop's
+ * pages only: this never widens the policy of the API. */
 const CF_BEACON_SCRIPT = "https://static.cloudflareinsights.com";
 const CF_BEACON_CONNECT = "https://static.cloudflareinsights.com https://cloudflareinsights.com";
 
@@ -176,7 +169,7 @@ function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): s
   ].join("; ");
 }
 
-/** Locked down everywhere by default — see SHOP2_PERMISSIONS_POLICY below for the two exceptions. */
+/** Locked down everywhere by default — see SHOP_PERMISSIONS_POLICY below for the two exceptions. */
 const DEFAULT_PERMISSIONS_POLICY =
   "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), " +
   "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()";
@@ -190,14 +183,14 @@ const DEFAULT_PERMISSIONS_POLICY =
  *
  * The microphone, the same way (12.09.2026): the admin assistant's voice
  * input (app.js admVoiceStart, the browser's own SpeechRecognition) needs
- * it, and `microphone=()` here blocked the API outright — every tap of the
- * mic ended in `not-allowed` before the browser could even ask the owner
- * (Dim's S21 FE: «Нет доступа к микрофону», no prompt, ever). `(self)` lets
- * the page ask; the owner still answers the prompt himself. Every other
- * permission — geolocation, usb, payment, … — stays denied under /shop2/*
- * exactly like it is everywhere else, and both openings are ours alone.
+ * it, and `microphone=()` blocked the API outright — every tap of the mic
+ * ended in `not-allowed` before the browser could even ask the owner (Dim's
+ * S21 FE: «Нет доступа к микрофону», no prompt, ever). `(self)` lets the page
+ * ask; the owner still answers the prompt himself. Every other permission —
+ * geolocation, usb, payment, … — stays denied on the shop's pages exactly
+ * like it is everywhere else, and both openings are ours alone.
  */
-const SHOP2_PERMISSIONS_POLICY = DEFAULT_PERMISSIONS_POLICY
+const SHOP_PERMISSIONS_POLICY = DEFAULT_PERMISSIONS_POLICY
   .replace("camera=()", "camera=(self)")
   .replace("microphone=()", "microphone=(self)");
 
@@ -215,6 +208,17 @@ function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_
   ];
 }
 
+/** The shop's own policy: no inline script anywhere. */
+const SHOP_HEADERS = [
+  { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
+  ...baseSecurityHeaders("DENY", SHOP_PERMISSIONS_POLICY),
+];
+/** The API's and the hand-written pages': an inline script is allowed, nothing is opened. */
+const LOOSE_HEADERS = [
+  { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
+  ...baseSecurityHeaders(),
+];
+
 /**
  * Serverful Next.js on Vercel. Static export was dropped on 2026-08-21 (for
  * the questionnaire's /api/submit, since retired) and is no longer possible
@@ -222,7 +226,16 @@ function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_
  * card renderer and two cron jobs all need a running function.
  */
 const nextConfig: NextConfig = {
-  trailingSlash: true,
+  /* No page address ends in a slash — Shopify's scheme, 08.10.2026. Next's
+     own normalisation would answer `/products/x/` with a 308 and, worse,
+     `/api/payments/notify` the same way, so it is switched off and
+     src/middleware.ts does the job instead: a page address with a slash gets
+     ONE 301 to the slashless page (folded into whatever other move it needs),
+     and an API route answers both spellings with no redirect at all —
+     Montonio POSTs to /api/payments/notify/ and the parcel webhook is
+     registered at /api/shipping/notify/, and a redirect loses a POST. */
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
   images: { unoptimized: true },
   reactStrictMode: true,
   /**
@@ -257,73 +270,35 @@ const nextConfig: NextConfig = {
    */
   outputFileTracingIncludes: {
     "/api/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    /* A custom product's page is the shell patched at request time
-       (src/lib/product-page.ts, the /shop2/{,et/,en/}p/[id] routes) — the
-       function has to be able to read the file the static layer serves. The
-       blog pages a build did not write (src/lib/blog-page.ts) patch the same
-       shell, and /shop2/og/** draws the preview card from the fonts. */
-    "/shop2/**": ["./public/shop2/index.html", "./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    /* Both sitemaps list the blog, which is how they reach the card drawer. */
-    "/sitemap-custom.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    "/sitemap-products.xml": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    /* The Merchant Center feeds read getOverrides() and the custom products,
-       and those modules reach the letters and so the gift-card PDF. The feed
-       itself reads nothing from public/ — its photos and texts are imported
-       from src/data/catalogue.feed.json (tools/pack-feed.mjs). */
-    "/feed/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
-    /* Merchant Center's «Checkout» link (src/lib/merchant-cart.ts) reads the
-       feed's own input — the same modules, the same reach — to find the id. */
-    "/cart/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    /* Every page route — the request-time product and blog pages
+       (src/lib/product-page.ts, src/lib/blog-page.ts), the catch-all that
+       serves the shell and the 404 (src/app/[...path]), /shop2/og/** which
+       draws the preview cards from the fonts, the sitemaps, the feeds and
+       Merchant Center's «Checkout» link (they reach the letters and so the
+       gift-card PDF) — patches or reads the same files. Since 08.10.2026 those
+       routes sit at the root of the site, so the key is the root. */
+    "/**": ["./public/shop2/index.html", "./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
   },
-  /**
-   * The shop is one static page that now names its screen in the URL, so the
-   * back button works and a category can be linked to. Those paths have no
-   * files behind them — every one of them serves the same shell, which reads
-   * the path back into its state on boot. Products are the exception: they
-   * are written out per product for their link previews, so /shop/p/... is
-   * already real and must not be swallowed here.
-   */
-  /* Design accepted 03.09: the round-two variant IS the shop. Every page
-     route of the original prototype lands on its /shop2/ twin; the assets it
-     shares (catalogue, images, content) stay where they are, and the
-     prerendered /shop/p/... pages keep their link previews and hand humans
-     over with a script. */
-  /* SEO, 03.09: products, categories, brands, the three home pages, the five
-     policy pages, the sets and the gift card are no longer shell-only — each
-     is written out per language under public/shop2/ by `npm run prerender`,
-     and the language lives in the path (/shop2/ is Russian and the x-default,
-     /shop2/et/… and /shop2/en/… the others). See prerenderedRewrites() above
-     and docs/seo.md. */
   async headers() {
     return [
-      /* Everything, including the Next-rendered pages and the legacy
-         /shop/p/... redirect stubs, which carry an inline script. */
-      {
-        source: "/:path*",
-        headers: [
-          { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
-          ...baseSecurityHeaders(),
-        ],
-      },
+      /* Every page of the shop — wherever it lives now — and the admin. This is
+         the rule that turns the class of innerHTML mistakes the audit found
+         into a broken layout instead of a takeover. */
+      { source: "/:path*", headers: SHOP_HEADERS },
+      /* The API, the prototype's leftover files under /shop/ and the four
+         hand-written pages: see the note above. */
+      { source: "/api/:path*", headers: LOOSE_HEADERS },
+      { source: "/shop/:path*", headers: LOOSE_HEADERS },
+      { source: "/:page(test|guide|cards|golive)", headers: LOOSE_HEADERS },
+      { source: "/:page(test|guide|cards|golive)/:path*", headers: LOOSE_HEADERS },
       /* Keep search engines out of everything that is not the shop's own
-         domain. This used to be a global `X-Robots-Tag: noindex, nofollow,
-         noarchive` on `/(.*)` in vercel.json, from the days when the whole
-         thing was a prototype nobody should find. Left there it would have
-         quietly outranked every canonical, hreflang and sitemap on the
-         production domain the day the DNS moved (audit row 9, docs/seo.md).
-
-         `missing` inverts the host test into an ALLOWLIST: the header is sent
-         unless the host is rempireshop.com or www.rempireshop.com. The old
-         `has` version was a denylist — it named *.vercel.app and the staging
-         host, so anything it did not name (a new preview alias, a custom
-         staging domain, an IP, a copy someone points at the app) was indexable
-         by default. This way a host nobody thought about is closed, which is
-         the same rule the `<meta name="robots">` layer and robots.txt already
-         follow (docs/seo.md, "The three noindex layers").
-
-         Next compiles the value as `^…$` itself; the anchors are written here
-         too so the intent survives a copy-paste. A request with no Host header
-         matches nothing and therefore gets the header — the safe direction. */
+         domain. `missing` inverts the host test into an ALLOWLIST: the header
+         is sent unless the host is rempireshop.com or www.rempireshop.com, so
+         a host nobody thought about (a preview alias, the staging domain, an
+         IP) is closed — the same rule the `<meta name="robots">` layer and
+         robots.txt follow (docs/seo.md, "The three noindex layers"). A request
+         with no Host header matches nothing and therefore gets the header —
+         the safe direction. */
       {
         source: "/:path*",
         missing: [
@@ -334,22 +309,13 @@ const nextConfig: NextConfig = {
         ],
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
-      /* The shop and the admin panel: no inline script anywhere, so no
-         'unsafe-inline'. This is the rule that turns the class of innerHTML
-         mistakes the audit found into a broken layout instead of a takeover. */
+      /* The panel's service worker is served from /shop2/admin-sw.js (an
+         asset — assets did not move) and controls /admin, which is outside
+         its own folder: a worker may only take a scope above its path when
+         the response says so. */
       {
-        source: "/shop2",
-        headers: [
-          { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
-          ...baseSecurityHeaders("DENY", SHOP2_PERMISSIONS_POLICY),
-        ],
-      },
-      {
-        source: "/shop2/:path*",
-        headers: [
-          { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
-          ...baseSecurityHeaders("DENY", SHOP2_PERMISSIONS_POLICY),
-        ],
+        source: "/shop2/admin-sw.js",
+        headers: [{ key: "Service-Worker-Allowed", value: "/admin" }],
       },
       /* The one page the shop frames itself: «Письма» in the admin shows the
          real templates in an <iframe>. frame-ancestors 'none' would blank it. */
@@ -364,7 +330,7 @@ const nextConfig: NextConfig = {
          («Письмо целиком», src/app/api/admin/newsletters/[id]/preview/).
          Only the framing is relaxed: a letter carries inline styles, which
          style-src already allows everywhere, and no script at all — so
-         script-src stays at 'self', tighter than the catch-all above. */
+         script-src stays at 'self', tighter than the API's own rule. */
       {
         source: "/api/admin/newsletters/:id/preview/:path*",
         headers: [
@@ -374,80 +340,33 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  /* The shop's own moves — /shop2/…, /shop/…, Shopify's other spellings, a
+     trailing slash — are src/middleware.ts's: they are lookups, and each is
+     ONE 301. What is left here are the hand-written pages at the name a human
+     types. Dim asked for the checklist twice as /tests before anyone noticed
+     the page is at /test; a page whose whole job is to be opened on a phone
+     from a chat message cannot 404 on the plural. Same for the other two, and
+     for /karty — the page is Russian, so a Russian spelling is a fair guess. */
   async redirects() {
     return [
-      /* The site root. It used to be a React page that client-redirected to
-         the /demo review hub; the hub, the two questionnaires and the design
-         prototypes were deleted on 07.09 (docs/audit/2026-09-07-cleanup.md),
-         and with no page left at `/` a bare rempireshop.com would 404. A
-         redirect answers before the router looks for a page, so this is the
-         whole of it.
-
-         307, not 308: at the switch the shop is expected to BE the root
-         (docs/seo.md), and a permanent redirect cached in every visitor's
-         browser is the one thing that would make that move painful. */
-      { source: "/", destination: "/shop2/", permanent: false },
-      /* The owner's own door. The panel has always lived at /shop2/admin/ and
-         been reached by a link in the shop's footer; Dim, 21.09.2026: at the
-         switch that link comes off the storefront and Renat opens /admin
-         instead. A short address he can type is what makes taking the link
-         away reasonable rather than annoying — and a link nobody but him has
-         is not a security measure, so the password remains the only one.
-
-         307: the panel's real path may yet move, and a permanent redirect
-         cached in his phone is exactly what would make moving it painful. */
-      { source: "/admin", destination: "/shop2/admin/", permanent: false },
-      { source: "/shop", destination: "/shop2/", permanent: false },
-      { source: "/shop/c/:cat", destination: "/shop2/c/:cat/", permanent: false },
-      { source: "/shop/b/:brand", destination: "/shop2/b/:brand/", permanent: false },
-      { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop2/:screen/", permanent: false },
-      /* The policy pages moved with the rest; without this /shop/info/... was
-         the one legacy path that 404ed instead of landing on its twin. */
-      { source: "/shop/info/:slug", destination: "/shop2/info/:slug/", permanent: false },
-      /* Russian is the default and has no prefix. /shop2/ru/... is accepted by
-         the router so a hand-typed URL still works, but it must not become a
-         second address for the same page. */
-      { source: "/shop2/ru", destination: "/shop2/", permanent: true },
-      { source: "/shop2/ru/:path*", destination: "/shop2/:path*/", permanent: true },
-      /* The hand-written pages, at the name a human types. Dim asked for the
-         checklist twice as /tests/ before anyone noticed the page is at
-         /test/; a page whose whole job is to be opened on a phone from a chat
-         message cannot 404 on the plural. Same for the other two, and for
-         /karty — the page is Russian, so a Russian spelling is a fair guess. */
-      { source: "/tests", destination: "/test/", permanent: false },
-      { source: "/checklist", destination: "/test/", permanent: false },
-      { source: "/card", destination: "/cards/", permanent: false },
-      { source: "/karty", destination: "/cards/", permanent: false },
-      { source: "/guides", destination: "/guide/", permanent: false },
+      { source: "/tests", destination: "/test", permanent: false },
+      { source: "/checklist", destination: "/test", permanent: false },
+      { source: "/card", destination: "/cards", permanent: false },
+      { source: "/karty", destination: "/cards", permanent: false },
+      { source: "/guides", destination: "/guide", permanent: false },
     ];
   },
-  /* Three phases, not one list. A plain array is `afterFiles`, which Next
-     checks BEFORE its dynamic routes — and the shell rewrite in it would have
-     swallowed src/app/shop2/{,et/,en/}p/[id]/route.ts, the request-time page
-     of a product the owner created in the panel (src/lib/product-page.ts).
-     So: the prerendered files first (afterFiles — a file on disk beats
-     everything), the dynamic /p/[id] routes next (Next's own order), and the
-     shell for whatever is left (fallback). */
+  /* The prerendered files are `afterFiles` rewrites: a file on disk beats
+     every route. Next's dynamic routes come after them — the request-time
+     product and blog pages (src/app/{,ru/,et/}products/[id],
+     src/app/{,ru/,et/}blogs/news/…) and, last, src/app/[...path], which
+     serves the shell for the screens that live only in the browser (/search,
+     /checkout, /admin …) and the shop's 404 for everything else. */
   async rewrites() {
     return {
       beforeFiles: [],
-      afterFiles: [
-        { source: "/shop/c/:cat", destination: "/shop/index.html" },
-        { source: "/shop/b/:brand", destination: "/shop/index.html" },
-        { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop/index.html" },
-        /* Products, categories, brands and the three home pages are written out
-           per language for search engines — those win. */
-        ...prerenderedRewrites(),
-      ],
-      /* Everything else under /shop2/ — search, the cart, the account, the
-         checkout, the receipt, the admin — is still one shell that reads the
-         path back into its state on boot. Those need state to mean anything,
-         they are robots-disallowed, and none of them is prerendered or in the
-         sitemap. index.html is both that shell and the Russian home page; see
-         the comment at the top of the file. A /p/<id>/ that is neither on
-         disk nor a custom product never gets here: the [id] route answers it
-         with this same shell. */
-      fallback: [{ source: "/shop2/:path+", destination: "/shop2/index.html" }],
+      afterFiles: prerenderedRewrites(),
+      fallback: [],
     };
   },
 };

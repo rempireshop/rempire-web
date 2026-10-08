@@ -1,9 +1,11 @@
 /**
  * The shape of Shopify's cart permalink — `/cart/<id>:<qty>[,<id>:<qty>…]` —
- * which Merchant Center's «Checkout» link is built on. Pure and dependency-
- * free, because src/middleware.ts (the edge) has to recognise it before the
- * legacy `/cart/*` redirect fires; what the ids mean is src/lib/merchant-cart.ts.
+ * which Merchant Center's «Checkout» link is built on. Pure, and its one
+ * import is too, because src/middleware.ts (the edge) has to recognise it
+ * before the legacy `/cart/*` redirect fires; what the ids mean is
+ * src/lib/merchant-cart.ts.
  */
+import { langFromAcceptLanguage } from "@/lib/shop-paths.mjs";
 
 /** The storefront's own ceiling for one basket line (CART_MAX_QTY in app.js, `bad_qty` in orders.ts). */
 export const CART_LINK_MAX_QTY = 99;
@@ -12,8 +14,9 @@ export const CART_LINK_MAX_QTY = 99;
 export type CartLinkLine = { id: string; qty: number };
 
 /**
- * The shape and nothing else, with or without the trailing slash
- * `trailingSlash: true` adds. Shopify's variant ids were digits; ours are
+ * The shape and nothing else, with or without a trailing slash (the
+ * middleware lets this one shape through untouched, slash and all).
+ * Shopify's variant ids were digits; ours are
  * `[a-z0-9-]` plus `_` before a size, and a custom product's `c-…`.
  */
 const PERMALINK = /^\/cart\/([A-Za-z0-9_%.-]+:\d{1,6}(?:,[A-Za-z0-9_%.-]+:\d{1,6})*)\/?$/;
@@ -46,25 +49,14 @@ export function parseCartPermalink(pathname: string): CartLinkLine[] | null {
 }
 
 /**
- * Which of the shop's three languages to open: the first of Estonian,
- * Russian and English the browser asks for, English for any other — the
- * link carries no language of its own, and one template serves all three
- * feeds.
+ * Which of the shop's three languages to open, as its path prefix: the first
+ * of Estonian, Russian and English the browser asks for — "et", "ru", or ""
+ * for English, which is the unprefixed one since 08.10.2026 — and English for
+ * any other. The link carries no language of its own, and one template serves
+ * all three feeds. The same reading of the header src/middleware.ts makes for
+ * an unprefixed page (langFromAcceptLanguage in src/lib/shop-paths.mjs).
  */
 export function segFromAcceptLanguage(header: string | null | undefined): string {
-  const tags = String(header || "")
-    .split(",")
-    .map((part) => {
-      const [tag, ...params] = part.trim().split(";");
-      const q = params.map((p) => p.trim()).find((p) => p.startsWith("q="));
-      return { lang: tag.trim().toLowerCase().split("-")[0], q: q ? Number(q.slice(2)) || 0 : 1 };
-    })
-    .filter((t) => t.lang && t.q > 0)
-    .sort((a, b) => b.q - a.q);
-  for (const t of tags) {
-    if (t.lang === "et") return "et";
-    if (t.lang === "ru") return "";
-    if (t.lang === "en") return "en";
-  }
-  return "en";
+  const lang = langFromAcceptLanguage(header);
+  return lang === "RU" ? "ru" : lang === "ET" ? "et" : "";
 }

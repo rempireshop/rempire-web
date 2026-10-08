@@ -33,8 +33,8 @@
   /* The language on screen, not the saved preference: app.js writes <html
      lang> on every render (setHead), and the observer below already watches
      it. The saved choice is only ever the fallback before the first paint —
-     reading it first greeted a first visit to /shop2/et/ in Russian, and a
-     link into /shop2/en/ in whatever the shopper had once picked. */
+     reading it first greeted a first visit to /et in Russian, and a link
+     into the English shop in whatever the shopper had once picked. */
   var LANG_OF = { ru: "RU", et: "ET", en: "EN" };
   function lang() {
     var shown = LANG_OF[String(document.documentElement.lang || "").toLowerCase()];
@@ -325,21 +325,23 @@
   }
   /* The shop prompt asks the assistant to finish an answer with the article's
      own address — «add its link at the end of your reply as a bare relative
-     path: /shop2/blog/<slug>/» (src/app/api/assistant/route.ts) — and the
-     bubble printed it as text: a shopper reading «/shop2/blog/kak-uhazhivat/»
+     path: /blogs/news/<slug>» (src/app/api/assistant/route.ts) — and the
+     bubble printed it as text: a shopper reading «/blogs/news/kak-uhazhivat»
      had to retype it into the address bar. It becomes the shop's own blog link
      here, AFTER escaping, so the path stays text until this line makes it a
      link and nothing else in the reply can: the slug is [a-z0-9-] and nothing
-     else, and `data-go-blog` is what a tile on /shop2/blog/ carries, so the
+     else, and `data-go-blog` is what a tile on /blogs/news carries, so the
      click is app.js's and stays in the SPA. The href is built in the language
-     the shopper is reading — the model always writes the Russian path. */
-  var BLOG_SEG = { RU: "", ET: "/et", EN: "/en" };
-  var BLOG_PATH_RX = /\/shop2\/(?:et\/|en\/|ru\/)?blog\/([a-z0-9-]{1,80})\/?/gi;
+     the shopper is reading, whatever prefix the model wrote. The /shop2/…
+     spelling (the shop's addresses until 08.10.2026) is still read, for a
+     conversation that started before the move. */
+  var BLOG_SEG = { RU: "/ru", ET: "/et", EN: "" };
+  var BLOG_PATH_RX = /(?:\/(?:ru|et|en))?\/blogs\/news\/([a-z0-9-]{1,80})|\/shop2\/(?:et\/|en\/|ru\/)?blog\/([a-z0-9-]{1,80})\/?/gi;
   function withBlogLinks(html) {
-    return String(html).replace(BLOG_PATH_RX, function (whole, slug) {
-      var s = String(slug).toLowerCase();
-      return '<a href="/shop2' + (BLOG_SEG[lang()] || "") + "/blog/" + encodeURIComponent(s) +
-        '/" data-go-blog="' + s + '">' + whole + "</a>";
+    return String(html).replace(BLOG_PATH_RX, function (whole, slug, oldSlug) {
+      var s = String(slug || oldSlug).toLowerCase();
+      return '<a href="' + (BLOG_SEG[lang()] || "") + "/blogs/news/" + encodeURIComponent(s) +
+        '" data-go-blog="' + s + '">' + whole + "</a>";
     });
   }
   function rulesReply(q) {
