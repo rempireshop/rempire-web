@@ -5,10 +5,11 @@ what the HTML says before any script runs, so every page a shopper could land
 on is written out as a static file, in all three languages, by
 `tools/prerender-shop2.mjs`. app.js then takes over in the browser.
 
-**813 pages** — 271 per language: 220 products, 8 categories plus `all`, 26
-brands **and the brands landing**, the home page, the 5 policy pages, 8 sets
-plus their landing, and the gift card (fewer when the database has no set or
-post on sale). Every one of them carries a 1 200×630 link-preview card that
+**837 pages** — 279 per language: 220 products, 8 categories plus `all`, 8
+subcollections (since 09.10.2026, «Subcollections» below), 26 brands **and the
+brands landing**, the home page, the 5 policy pages, 8 sets plus their
+landing, and the gift card (fewer when the database has no set or post on
+sale). Every one of them carries a 1 200×630 link-preview card that
 exists on disk. Verify with `npm run prerender:check`.
 
 The shop went live on rempireshop.com on 08.10.2026 at 22:55, at `/shop2/…`
@@ -34,6 +35,7 @@ in `public/shop2/app.js` (`shopPathFor()` / `shopRouteOf()`);
 | product | `/products/<id>` | `/ru/products/<id>` | `/et/products/<id>` |
 | section | `/collections/hair-care` | `/ru/collections/uhod-za-volosami` | `/et/collections/juuksehooldus` |
 | «Все товары» | `/collections/all-products` | `/ru/collections/vse-tovary` | `/et/collections/koik-tooted` |
+| subcollection (8, «Subcollections» below) | `/collections/beard-oil` | `/ru/collections/maslo-dlya-borody` | `/et/collections/habemeolid` |
 | brand | `/collections/<brand>` | `/ru/collections/<brand>` | `/et/collections/<brand>` |
 | brands landing | `/collections/brands` | `/ru/collections/brands` | `/et/collections/brands` |
 | policy pages | `/policies/shipping-policy`, `/policies/refund-policy`, `/policies/privacy-policy`, `/policies/terms-of-service` | `/ru/policies/…` | `/et/policies/…` |
@@ -139,7 +141,7 @@ slash) to Shopify's own addresses (the table above). Assets did NOT move:
 | Section handles (the table above) | Shopify's header menu was Hair Care · Hair Styling · Beard Care · Face Care · Body Care · Merch (`docs/shopify/LIVE-PAGES-AUDIT.md`), plus Perfume; the per-language handles are Shopify's own translations, read off its sitemap, where the 47 collections are listed in the same order in every language (verified row by row). The SEO audit of 08.10 proposed the same table independently. |
 | face = `face-care`, not `skin-care` | Search Console (3 months to 08.10.2026): face-care family 4 impressions vs skin-care 1; and «Face Care» was the menu link. |
 | merch = `merch`, not `rempire-merch` | «Merch» was the menu link and `merch` is one handle in all three languages; `rempire-merch` had 41 impressions vs 31 (no clicks either) — too close to outweigh the menu. `rempire-merch`, `rempire-merch-1` 301 to `merch`. |
-| beard = `beard-care`, though `habemeolid` (beard oil) earned 66 impressions | A sub-collection is not the section; `beard-oil`/`habemeolid`/`maslo-dlya-borody` 301 to the beard section. Subcategory pages are later work. |
+| beard = `beard-care`, though `habemeolid` (beard oil) earned 66 impressions | A sub-collection is not the section. Since 09.10.2026 `beard-oil`/`habemeolid`/`maslo-dlya-borody` is a page of its own again, with seven more subcollections («Subcollections» below); until then it 301'd to the beard section. |
 | «Все товары» = `all-products`/`vse-tovary`/`koik-tooted` | 39 impressions for this family vs 29 for `shop-all-1`/`all-products-est`/`all-prioducts-rus` and 17 for Shopify's built-in `/collections/all`; it is also in Shopify's sitemap, and `/collections/all` is not. The other two families 301 to it. |
 | CBD Daily = `/collections/cbd-daily-haircare` | Shopify's collection handle (55 impressions); `/collections/cbd-daily` 301s to it. Every other brand is `/collections/<slug>`, as Shopify's brand collections were. |
 | Brands landing `/collections/brands` | Shopify had `/collections/brands` in all three languages; `top-brands`/`top-brandid`/`top-brendy` 301 to it. |
@@ -169,7 +171,10 @@ slash) to Shopify's own addresses (the table above). Assets did NOT move:
 | `/shop`, `/shop/c/…`, `/shop/b/…`, `/shop/<screen>`, `/shop/info/…`, `/shop/p/<id>/` | the same Russian targets, directly (the prototype's `/shop/p/` stubs too) |
 | `/en/…`, `/en-lv/…`, `/en-lt/…`, `/en-fi/…` | the unprefixed English address (Shopify's regional query dropped, `?q=` kept) |
 | `/ET/…`, `/RU/…` | lower case |
-| a section under another name or language (`/collections/shampoo`, `/et/collections/hair-care`) | the section, in the address's language |
+| a section under another name or language (`/collections/hair-mask`, `/et/collections/hair-care`) | the section, in the address's language |
+| a subcollection under another language's handle (`/collections/habemeolid`, `/ru/collections/beard-oil`) | the subcollection, in the address's language |
+| `aftershave` · `raseerimisjargne-hooldus` · `losony-posle-britya` | the shaving subcollection (`shaving` · `raseerimine` · `sredstva-dlya-britya`) |
+| `beard-and-mustache-wax` · `habeme-vuntsivahad` · `vosk-dlya-borody-i-usov` | the beard-balm subcollection, which holds the three moustache waxes |
 | `/products/<unknown>` | alias → brand → «Все товары»; `/products/delivery` → shipping policy |
 | `/collections/<x>/products/<y>`, `/collections/<x>/<tag>` | the product; the collection |
 | `/collections/vendors?q=<Brand>` | that brand's page, else the brands landing |
@@ -211,6 +216,69 @@ slash) to Shopify's own addresses (the table above). Assets did NOT move:
   endpoints a renderer needs (`/api/overrides/`, `/api/bundles/`, `/api/blog/`,
   `/api/reviews/`, `/api/shipping/carriers/`), so Googlebot's renderer sees the
   live stock, prices and owner SEO texts.
+
+---
+
+## Subcollections (since 09.10.2026)
+
+SEO audit 08.10.2026 §6.2, §7.1 and T6, approved by Dim: the chips under a
+section's heading («Масла», «Шампуни» …) were browser-side filters with no
+address, so Google had nothing to index for «habemeõli», «palsamid» or
+«juuksevaha» — and the Shopify collections that ranked for them 301'd to the
+whole section. Eight of the chips are now a page each, **at the handle Shopify
+had for it**, so the history Google keeps carries over:
+
+| subcollection | route | EN | RU | ET | products |
+|---|---|---|---|---|---|
+| beard oil | `/c/beard/oi/` | `beard-oil` | `maslo-dlya-borody` | `habemeolid` | 12 |
+| beard balm + moustache wax | `/c/beard/ba/` | `beard-balm` | `balzam-dlya-borody` | `habemepalsamid` | 7 |
+| shaving + aftershave | `/c/beard/af/` | `shaving` | `sredstva-dlya-britya` | `raseerimine` | 9 |
+| shampoo | `/c/hair/sh/` | `shampoo` | `shampuni-dlya-volos` | `shampoonid` | 40 |
+| conditioner | `/c/hair/co/` | `conditioner` | `konditsionery-dlya-volos` | `palsamid` | 27 |
+| scalp care | `/c/hair/sc/` | `scalp-treatment` | `skraby-dlya-golovy` | `peanaha-hooldus` | 16 |
+| hair wax, paste & clay | `/c/styling/pw/` | `hair-wax` | `vosk-dlya-volos` | `juuksevaha` | 7 |
+| Korean cosmetics | `/c/face/kr/` | `korean-cosmetics` | `korean-cosmetics` | `korean-cosmetics` | 15 |
+
+- **Who is in which subtype** is one function, `subcatsAuto()` in
+  `public/shop2/app.js`, beside the chips: rules over the product's name (the
+  Russian type tail) and its id (Shopify's English handle), `SUB_PICKS` for the
+  seven products whose name says nothing («Touchable», «Super.Goo»), and the
+  owner's «Подраздел» from the panel over both (`product_overrides.subcat`,
+  `custom_products.subcat`). A product may be in two (a System 4 shampoo is a
+  shampoo and scalp care). The prerender lifts that function and its tables
+  out of app.js the way it lifts the dictionary — FATAL if the slices do not
+  come out — so a static page lists exactly what its chip filters.
+  `tests/subcollections.test.ts` holds every one of the 183 products of the
+  four sections to its subtypes.
+- **Publishing** is `SUB_HANDLES` in `src/lib/shop-paths.mjs` (and its ES5
+  twin `SHOP_SUB_HANDLES` in app.js): a subcollection needs
+  `SUBCOLLECTION_MIN` = 6 catalogue products and its words in all three
+  languages (`SUB_PAGES` in app.js: `<h1>`, the line under it, title ≤ 60,
+  description ≤ 155). The prerender refuses to run when a published one falls
+  below that. Moustache wax (3 products; the audit asked for 4) has no page:
+  it is on the beard-balm page and its handles go there.
+- **The page** is the section's listing template exactly — crumbs Home ›
+  Section › Subcollection (and the same `BreadcrumbList`), `<h1>`, the line,
+  the grid, `ItemList` — self-canonical, the hreflang cluster of its three
+  handles, in `sitemap-1.xml` at priority 0.7.
+- **The chips**: a published one, and «Все», is an `<a href>` to its address,
+  drawn exactly like the button chips (`a.scchip` in styles.css); a plain tap
+  filters in place as before and pushes the address, Back returns to the
+  section; a tap with a modifier opens a tab. A chip with no page stays a
+  button and a filter on the section's address.
+- **Redirects**: the subcollection's own handle in any language is the page
+  (another language's spelling → one 301 to this language's). `aftershave`
+  and the moustache-wax handles go to the shaving and beard-balm pages; every
+  other Shopify sub-handle (`hair-mask`, `hair-spray`, `face-sheet-masks` …)
+  still goes to its section. Unpublish a subcollection and its handles fall
+  back to its section by themselves (`COLLECTION_CAT` keeps them).
+- **Request time**: `src/lib/notfound-page.ts` answers a published
+  subcollection's route with the shell (app.js draws it) when no prerendered
+  file is there; an unpublished `/c/<cat>/<sub>/` is a 404.
+
+To publish another: give the chip its handles in both `SUB_HANDLES` tables,
+its words in `SUB_PAGES`, and a row in `EXPECTED`/`ADDRESSES` of
+`tests/subcollections.test.ts`.
 
 ---
 
@@ -344,6 +412,7 @@ one of those tags names the file it writes.
 | `public/shop2/index.html` | **patched in place** — the English home page, `/` (see below) |
 | `public/shop2/{ru,et}/index.html` | the other two home pages, `/ru` and `/et` |
 | `public/shop2/{,ru/,et/}c/<cat>/index.html` | 8 categories × 3 |
+| `public/shop2/{,ru/,et/}c/<cat>/<sub>/index.html` | 8 subcollections × 3 (`c/beard/oi/` …) |
 | `public/shop2/{,ru/,et/}b/<brand>/index.html` | 26 brands × 3 |
 | `public/shop2/{,ru/,et/}p/<id>/index.html` | 220 products × 3 |
 | `public/shop2/{,ru/,et/}info/<slug>/index.html` | 5 policy pages × 3 |
@@ -361,8 +430,9 @@ one of those tags names the file it writes.
 | `public/robots.staging.txt` | the closed policy, ditto |
 | `src/data/prerendered-routes.json` | address → file for every page written (gitignored), which `next.config.ts` turns into its rewrites |
 
-813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
-the brands landing, 1 home, 5 policy pages, 8 sets + the landing, 1 gift card.
+837 pages — 279 per language: 220 products, 8 categories + `all`, 8
+subcollections, 26 brands, the brands landing, 1 home, 5 policy pages, 8 sets +
+the landing, 1 gift card.
 `public/sitemap.xml`
 is **always a `sitemapindex`**: the pages that no database row can take away
 go into `public/sitemap-1.xml` (`-N.xml` chunks of 1 000 above that), and the

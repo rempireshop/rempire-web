@@ -54,7 +54,7 @@ import {
   slugify,
   T,
 } from "@/lib/seo-head.mjs";
-import { LANG_PREFIX, parseShopPath, publicPath } from "@/lib/shop-paths.mjs";
+import { isSubcollection, LANG_PREFIX, parseShopPath, publicPath } from "@/lib/shop-paths.mjs";
 
 type Lang = { code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
 
@@ -199,6 +199,9 @@ export function isKnownShopPath(segs: string[]): boolean {
   if (segs.length === 0) return true; // the home page in one of the three languages
   const [kind, id] = segs;
   if (segs.length === 1) return CLIENT_SCREENS.has(kind) || SINGLE_PAGES.has(kind);
+  /* A published subcollection (SUB_HANDLES in src/lib/shop-paths.mjs) is a
+     page whether or not this tree has been prerendered: app.js draws it. */
+  if (segs.length === 3) return kind === "c" && isSubcollection(id, segs[2]);
   if (segs.length !== 2 || !id) return false;
   if (kind === "p" || kind === "blog") return true;
   if (kind === "c") return CATEGORIES.has(id);

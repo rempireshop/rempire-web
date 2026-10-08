@@ -103,7 +103,9 @@ describe("old addresses that used to take two hops — one now", () => {
       ["/en-fi/collections/fall-deals.atom", "/collections/all-products"],
       ["/et/collections/viimistlus.atom", "/et/collections/viimistlus"],
       ["/collections/kevin-murphy.atom", "/collections/kevin-murphy"],
-      ["/ru/collections/shampuni-dlya-volos.atom", "/ru/collections/uhod-za-volosami"],
+      // a published subcollection since 09.10.2026 — its feed lands on it
+      ["/ru/collections/shampuni-dlya-volos.atom", "/ru/collections/shampuni-dlya-volos"],
+      ["/ru/collections/maski-dlya-volos.atom", "/ru/collections/uhod-za-volosami"],
       ["/et/blogs/news.atom", "/et/blogs/news"],
     ]) {
       const hit = legacyTarget(from);
