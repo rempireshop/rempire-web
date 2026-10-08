@@ -780,6 +780,237 @@ export function breadcrumbLD(base, items) {
   };
 }
 
+/* ---------- what an offer costs to send, and to send back -----------------
+
+   Google's merchant listings read three things off an offer beyond its price:
+   what delivery costs and how long it takes (`shippingDetails`), and the
+   returns policy (`hasMerchantReturnPolicy`). None of the numbers is this
+   file's. The caller hands in what src/lib/merchant-feed.ts says —
+   shippingFor(price, rules), the call every g:shipping entry of the Merchant
+   Center feed is built from, its HANDLING_DAYS, sellCountries() — so the page
+   and the feed cannot quote two prices for one parcel. These functions only
+   reshape them into schema.org (docs/seo.md § «Structured data»).
+   tests/structured-data.test.ts parses the result back and holds it to
+   Google's required fields and to the feed. */
+
+const round2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+const daySpan = (span, unitCode) => ({ "@type": "QuantitativeValue", minValue: span.min, maxValue: span.max, unitCode });
+const isCountry = c => /^[A-Z]{2}$/.test(String(c));
+
+/**
+ * Offer.shippingDetails from the feed's delivery options for ONE item price
+ * (`{ country, service, price, transit }[]` — shippingFor()). Per country the
+ * cheapest option, which is the price Google shows as «delivery from» and the
+ * one the feed's cheapest g:shipping entry carries; countries that cost the
+ * same and take as long share one entry. `handling` is the shop's own days
+ * (HANDLING_DAYS); a country the feed promises no transit time for gets no
+ * deliveryTime rather than a guessed one.
+ */
+export function shippingDetailsLD(options, handling) {
+  const best = new Map();
+  for (const o of options || []) {
+    if (!o || !isCountry(o.country) || !Number.isFinite(Number(o.price))) continue;
+    const had = best.get(o.country);
+    if (!had || Number(o.price) < Number(had.price)) best.set(o.country, o);
+  }
+  const groups = new Map();
+  for (const o of best.values()) {
+    const key = round2(o.price) + "|" + (o.transit ? o.transit.min + "-" + o.transit.max : "");
+    if (!groups.has(key)) groups.set(key, { price: round2(o.price), transit: o.transit || null, countries: [] });
+    groups.get(key).countries.push(o.country);
+  }
+  return [...groups.values()].map(g => ({
+    "@type": "OfferShippingDetails",
+    shippingRate: { "@type": "MonetaryAmount", value: g.price, currency: "EUR" },
+    shippingDestination: g.countries.map(c => ({ "@type": "DefinedRegion", addressCountry: c })),
+    ...(handling && g.transit
+      ? { deliveryTime: { "@type": "ShippingDeliveryTime", handlingTime: daySpan(handling, "DAY"), transitTime: daySpan(g.transit, "DAY") } }
+      : {})
+  }));
+}
+
+/* The returns policy — what public/shop/legal.{ru,et,en}.js «returns» says,
+   and nothing it does not. tests/structured-data.test.ts quotes the
+   sentences, so an edit to the text that changes one of these facts fails a
+   test instead of leaving the markup contradicting the page it links to:
+
+     «We operate a 30-day returns policy: you may ask to return an item
+      within 30 days of receiving it.»            → a finite window, 30 days
+     «returns have to be sent to: {{address}}»   → by mail, to Estonia
+                                                    (Mardi 1, Tallinn)
+     «The shop does not issue a return label»    → the customer's label
+     «in the condition you received it in — unworn or unused, with its tags
+      on, and in its original packaging»         → new condition
+     «the money goes back automatically to the payment method you originally
+      used»                                      → a refund, not credit
+
+   Left out because the text does not say it: WHO PAYS for the parcel back
+   (`returnFees`) — an owner's answer (docs/seo.md). The exclusions have no
+   field in Google's markup and need none: the text excludes OPENED
+   cosmetics («personal-hygiene goods (such as opened cosmetics)», «Sealed
+   cosmetics that have been opened cannot be returned once unsealed»), so an
+   unopened bottle of anything the shop sells is returnable, and perishable,
+   made-to-order and hazardous goods and gift cards are not what a product
+   page offers. The 14-day statutory window is the shorter one and is
+   covered by the 30. */
+export const RETURN_POLICY = Object.freeze({ days: 30, country: "EE" });
+
+/** MerchantReturnPolicy for the countries the shop sells to (sellCountries()); `link` = the refund policy page. */
+export function returnPolicyLD(countries, link) {
+  const list = [...new Set((countries || []).filter(isCountry))];
+  if (!list.length) return null;
+  return {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: list.slice(0, 50),
+    returnPolicyCountry: RETURN_POLICY.country,
+    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: RETURN_POLICY.days,
+    returnMethod: "https://schema.org/ReturnByMail",
+    returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
+    itemCondition: "https://schema.org/NewCondition",
+    refundType: "https://schema.org/FullRefund",
+    ...(link ? { merchantReturnLink: link } : {})
+  };
+}
+
+/** `{ gtin13: "…" }` (or gtin8/12/14) for a code validGtin() in src/lib/merchant-feed.ts already accepted; `{}` otherwise. */
+export function gtinLD(code) {
+  const s = String(code == null ? "" : code);
+  return /^(?:\d{8}|\d{12,14})$/.test(s) ? { ["gtin" + s.length]: s } : {};
+}
+
+function offerLD({ url, sku, price, available, gtin, shippingDetails, returnPolicy }) {
+  return {
+    "@type": "Offer",
+    ...(sku ? { sku } : {}),
+    ...gtinLD(gtin),
+    priceCurrency: "EUR",
+    price: String(price),
+    availability: "https://schema.org/" + (available ? "InStock" : "OutOfStock"),
+    itemCondition: "https://schema.org/NewCondition",
+    url,
+    seller: { "@type": "Organization", name: "REMPIRE" },
+    ...(shippingDetails && shippingDetails.length ? { shippingDetails } : {}),
+    ...(returnPolicy ? { hasMerchantReturnPolicy: returnPolicy } : {})
+  };
+}
+
+/**
+ * A product's `offers`: one Offer per size the Merchant Center feed lists
+ * (`commerce.offers` — feedOffers() in src/lib/merchant-feed.ts: the feed's
+ * item id as `sku`, its price, its availability, its `?size=` link), each
+ * with its delivery and the returns policy. One size — or no feed items at
+ * all (a hidden product, a build that could not read the feed) — is the
+ * single Offer at the page's own address it always was, priced and stocked
+ * by the caller. A gtin rides the offer of its size; for a single offer the
+ * caller puts it on the Product (see productSpec()).
+ *
+ *   commerce = {
+ *     offers:   [{ id, slug, price, available, gtin }],   the feed's items
+ *     shipping: price => ShippingOption[],               shippingFor(price, rules)
+ *     handling: { min, max },                            HANDLING_DAYS
+ *     returnCountries: ["EE", …],                        sellCountries(rules)
+ *   }
+ */
+export function productOffersLD({ url, price, stock, commerce, returnLink }) {
+  const c = commerce || {};
+  const memo = new Map();
+  const ship = p => {
+    if (typeof c.shipping !== "function") return null;
+    const k = round2(p);
+    if (!memo.has(k)) memo.set(k, shippingDetailsLD(c.shipping(k), c.handling));
+    return memo.get(k);
+  };
+  const policy = returnPolicyLD(c.returnCountries, returnLink);
+  const items = feedItems(commerce);
+  if (!items.length) {
+    return offerLD({ url, price, available: stock !== "out", shippingDetails: ship(price), returnPolicy: policy });
+  }
+  const many = items.length > 1;
+  const list = items.map(o => offerLD({
+    url: o.slug ? url + "?size=" + encodeURIComponent(o.slug) : url,
+    sku: o.id, price: o.price, available: !!o.available,
+    gtin: many ? o.gtin : null,
+    shippingDetails: ship(o.price), returnPolicy: policy
+  }));
+  return many ? list : list[0];
+}
+const feedItems = commerce =>
+  (commerce && Array.isArray(commerce.offers) ? commerce.offers : []).filter(o => o && Number(o.price) > 0);
+
+/* ---------- the shop itself: where it is, how it ships -------------------- */
+
+/* The counter at Mardi 1, Tallinn — the Google Maps pin of the building
+   (SEO audit 08.10.2026 § 8), and the address the checkout's pickup and the
+   returns go to. The map link is a search for the shop by name and street:
+   the place id the audit suggested (`?cid=17186155096233197657`) opens an
+   empty place with no name on Google Maps (checked 09.10.2026), so it is not
+   one we can vouch for. */
+export const STORE_GEO = Object.freeze({ "@type": "GeoCoordinates", latitude: 59.430905, longitude: 24.759414 });
+export const STORE_MAP_URL = "https://www.google.com/maps/search/?api=1&query=REMPIRE+Mardi+1+Tallinn";
+/* The salon's own site at the same address — the other half of the same
+   name (barbershop and tattoo studio, Mardi 1). Beside the shop's socials in
+   `sameAs`. */
+export const STORE_SAME_AS = Object.freeze(["https://rempire.ee"]);
+
+const servicePeriod = span => ({ "@type": "ServicePeriod", duration: daySpan(span, "d") });
+
+/**
+ * The Organization's shop-wide shipping policy (`hasShippingService`): per
+ * country the delivery the feed lists as cheapest, free from the basket the
+ * checkout makes it free from, with the carrier's days — `terms` is
+ * shippingTerms(rules) in src/lib/merchant-feed.ts, the same shippingFor()
+ * and quoteFromRules() the feed and the checkout run. One condition per
+ * country below its threshold and one from it; a country that is never free
+ * (or always free) has one.
+ */
+export function shippingServiceLD(terms, handling) {
+  const conditions = [];
+  const rate = v => ({ "@type": "MonetaryAmount", value: round2(v), currency: "EUR" });
+  for (const t of terms || []) {
+    if (!t || !isCountry(t.country) || !Number.isFinite(Number(t.price))) continue;
+    const where = {
+      "@type": "ShippingConditions",
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: t.country },
+      ...(t.transit ? { transitTime: servicePeriod(t.transit) } : {})
+    };
+    const free = t.freeFrom == null ? null : Number(t.freeFrom);
+    if (free !== null && free > 0 && round2(t.price) > 0) {
+      conditions.push({ ...where, orderValue: { "@type": "MonetaryAmount", minValue: 0, maxValue: round2(free - 0.01), currency: "EUR" }, shippingRate: rate(t.price) });
+      conditions.push({ ...where, orderValue: { "@type": "MonetaryAmount", minValue: round2(free), currency: "EUR" }, shippingRate: rate(0) });
+    } else {
+      conditions.push({ ...where, shippingRate: rate(free === 0 ? 0 : t.price) });
+    }
+  }
+  if (!conditions.length) return null;
+  return {
+    "@type": "ShippingService",
+    fulfillmentType: "https://schema.org/FulfillmentTypeDelivery",
+    ...(handling ? { handlingTime: servicePeriod(handling) } : {}),
+    shippingConditions: conditions
+  };
+}
+
+/* The opening hours, from «Настройки → Контент» (content.hours — "10:00–19:00"
+   per day, "closed", or empty). Only a day that says when it opens and when
+   it closes becomes a line; empty today, so the shop publishes none — an
+   owner's to fill in (docs/seo.md). */
+const WEEK = [["mon", "Monday"], ["tue", "Tuesday"], ["wed", "Wednesday"], ["thu", "Thursday"],
+  ["fri", "Friday"], ["sat", "Saturday"], ["sun", "Sunday"]];
+export function openingHoursLD(hours) {
+  const h = hours && typeof hours === "object" ? hours : {};
+  const out = [];
+  for (const [key, day] of WEEK) {
+    const m = /^\s*(\d{1,2})[:.](\d{2})\s*[–—-]\s*(\d{1,2})[:.](\d{2})\s*$/.exec(String(h[key] || ""));
+    if (!m) continue;
+    out.push({
+      "@type": "OpeningHoursSpecification", dayOfWeek: "https://schema.org/" + day,
+      opens: m[1].padStart(2, "0") + ":" + m[2], closes: m[3].padStart(2, "0") + ":" + m[4]
+    });
+  }
+  return out;
+}
+
 /* ---------- one product's head ------------------------------------------
 
    The title ladder, the description, the breadcrumb and the Product JSON-LD
@@ -817,7 +1048,14 @@ export function descFrom(text, t) {
   return clip(lead, room).replace(/\.$/, "") + " · " + tail;
 }
 
-export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls }) {
+/**
+ * `commerce` (optional) is what the Merchant Center feed knows about the
+ * product — its items per size, their delivery, the countries it sells to —
+ * see productOffersLD() above. Without it the offer is the single one it
+ * always was.
+ * @param {{ base: any, lang: any, id: any, cat: any, catName: any, brand: any, name: any, price: any, priceFrom: any, stock: any, seoTitle: any, seoDesc: any, body: any, image: any, imageUrls: any, commerce?: any }} spec
+ */
+export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls, commerce }) {
   const t = T[lang.code];
   const seg = lang.seg;
   const rest = "/p/" + encodeURIComponent(id) + "/";
@@ -843,6 +1081,7 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     [core, null]
   ];
   const url = base + langPath(seg, rest);
+  const items = feedItems(commerce);
   const productLD = {
     "@context": "https://schema.org", "@type": "Product",
     name: core,
@@ -851,16 +1090,10 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     description: clip(text, 500),
     category: section,
     sku: id,
+    // one size: its barcode is the product's (several: each offer carries its own)
+    ...(items.length === 1 ? gtinLD(items[0].gtin) : {}),
     url,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "EUR",
-      price: String(price),
-      availability: "https://schema.org/" + (stock === "out" ? "OutOfStock" : "InStock"),
-      itemCondition: "https://schema.org/NewCondition",
-      url,
-      seller: { "@type": "Organization", name: "REMPIRE" }
-    }
+    offers: productOffersLD({ url, price, stock, commerce, returnLink: base + langPath(seg, "/info/returns/") })
   };
 
   return {

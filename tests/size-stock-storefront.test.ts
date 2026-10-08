@@ -438,8 +438,13 @@ describe("the offer the head publishes", () => {
   it("setHead() publishes that answer, not p.stock, in the offer and the snippet", () => {
     const head = slice("setHead");
     expect(head).toContain("var pGoneSeo = soldOut(p);");
-    // the Product offer Googlebot reads off the rendered DOM
-    expect(head).toContain('availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock")');
+    // the Product offer Googlebot reads off the rendered DOM — one per size
+    // since 09.10.2026 (ldOffers()), every one of them out when pGoneSeo is
+    expect(head).toContain("offers: ldOffers(p, pUrl, pGoneSeo)");
+    const offers = slice("ldOffers");
+    expect(offers).toContain("return ldOffer(pUrl, p.price, !gone);");
+    expect(offers).toContain("!gone && !sizeOut(p, r.i)");
+    expect(slice("ldOffer")).toContain('availability: "https://schema.org/" + (inStock ? "InStock" : "OutOfStock")');
     // …and the sentence the result listing prints under it
     expect(head).toContain('trText(pGoneSeo ? "нет в наличии"');
     // the old rule must be gone from both, or one of them still lies

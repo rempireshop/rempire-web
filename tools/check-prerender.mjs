@@ -172,13 +172,19 @@ async function checkPage(file, { lang, rest, product, blogPost, needImg = true, 
     if (ld["@type"] === "Product") {
       if (!ld.name) fail(file, "Product JSON-LD has no name");
       if (!ld.offers) fail(file, "Product JSON-LD has no offers");
-      else {
-        if (ld.offers.priceCurrency !== "EUR") fail(file, `offers.priceCurrency is ${ld.offers.priceCurrency}`);
-        if (!(Number(ld.offers.price) >= 0)) fail(file, `offers.price is ${ld.offers.price}`);
-        if (!/schema\.org\/(In|Out Of|OutOf)Stock/.test(ld.offers.availability || "")) {
-          fail(file, `offers.availability is ${ld.offers.availability}`);
+      /* one Offer, or one per size (productOffersLD() in src/lib/seo-head.mjs) */
+      else for (const offer of Array.isArray(ld.offers) ? ld.offers : [ld.offers]) {
+        if (offer.priceCurrency !== "EUR") fail(file, `offers.priceCurrency is ${offer.priceCurrency}`);
+        if (!(Number(offer.price) >= 0)) fail(file, `offers.price is ${offer.price}`);
+        if (!/schema\.org\/(In|Out Of|OutOf)Stock/.test(offer.availability || "")) {
+          fail(file, `offers.availability is ${offer.availability}`);
         }
-        if (!/^https?:\/\//.test(ld.offers.url || "")) fail(file, `offers.url is not absolute: ${ld.offers.url}`);
+        if (!/^https?:\/\//.test(offer.url || "")) fail(file, `offers.url is not absolute: ${offer.url}`);
+        for (const d of offer.shippingDetails || []) {
+          if (!d.shippingRate || d.shippingRate.currency !== "EUR" || !(Number(d.shippingRate.value) >= 0)) {
+            fail(file, `offers.shippingDetails has no EUR rate`);
+          }
+        }
       }
     }
     if (ld["@type"] === "ItemList") {
