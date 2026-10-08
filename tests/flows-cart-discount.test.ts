@@ -76,9 +76,11 @@ function mockResend(): void {
 }
 const recipients = () => sent.map((m) => m.to);
 
-/* The letter's own button, out of the plain-text part. The language segment
-   is optional because the fixtures are English carts and RU has none. */
-const RESUME_RX = /\/shop2\/(?:et\/|en\/)?checkout\/\?resume=([A-Za-z0-9._~%-]+)/;
+/* The letter's own button, out of the plain-text part: the shop's checkout
+   at its address since the URL move of 08.10.2026 (/checkout, /ru/checkout,
+   /et/checkout — no trailing slash). The language segment is optional
+   because the fixtures are English carts and English has none. */
+const RESUME_RX = /https?:\/\/[^/\s"]+(?:\/(?:ru|et))?\/checkout\?resume=([A-Za-z0-9._~%-]+)/;
 function resumeTokenIn(text: string): string {
   const m = RESUME_RX.exec(text);
   expect(m, "the letter carries no resume link").not.toBeNull();

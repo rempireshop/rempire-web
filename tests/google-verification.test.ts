@@ -5,13 +5,16 @@
  * carries three `google-site-verification` tags — Search Console and Merchant
  * Center verifications. When rempireshop.com points at this shop, whatever
  * «/» serves has to carry them too, or a re-check drops the property (and
- * Merchant Center's free listings with it). «/» redirects to /shop2/, which
- * is the shell public/shop2/index.html; every prerendered page and the
- * request-time pages are built from the same headBlock() in
- * src/lib/seo-head.mjs — the one source for all of them.
+ * Merchant Center's free listings with it). Since the URL move of 08.10.2026
+ * «/» IS the shell public/shop2/index.html — the English home page, served as
+ * it is (no redirect); every prerendered page and the request-time pages are
+ * built from the same headBlock() in src/lib/seo-head.mjs — the one source for
+ * all of them.
  */
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import nextConfig from "../next.config";
+import { legacyTarget } from "@/lib/legacy-redirects";
 import { GOOGLE_SITE_VERIFICATION, LANGS, headBlock, verificationMeta } from "@/lib/seo-head.mjs";
 
 const LIVE_TAGS = [
@@ -45,7 +48,7 @@ describe("google-site-verification", () => {
     }
   });
 
-  it("is in the head of /shop2/ — the shell, which is also the Russian home page", () => {
+  it("is in the head of «/» — the shell, which is also the English home page", () => {
     const shell = readFileSync("public/shop2/index.html", "utf8").replace(/\r\n?/g, "\n");
     const { head: h, seo } = head(shell);
     for (const t of LIVE_TAGS) {
@@ -57,8 +60,18 @@ describe("google-site-verification", () => {
     expect(seo).toMatch(new RegExp('<meta name="robots" content="[^"]*">\\n' + LIVE_TAGS.map((t) => tag(t)).join("\\n")));
   });
 
-  it("«/» is a redirect to /shop2/, so the shell's head is the one Google reads", () => {
-    const cfg = readFileSync("next.config.ts", "utf8");
-    expect(cfg).toMatch(/\{ source: "\/", destination: "\/shop2\/", permanent: false \}/);
+  it("«/» is the shell itself, so the shell's head is the one Google reads", async () => {
+    type Rule = { source: string; destination: string };
+    const cfg = nextConfig as {
+      rewrites: () => Promise<{ afterFiles: Rule[] }>;
+      redirects: () => Promise<Rule[]>;
+    };
+    // the address is answered by the shell's own file…
+    const { afterFiles } = await cfg.rewrites();
+    expect(afterFiles.find((r) => r.source === "/")?.destination).toBe("/shop2/index.html");
+    // …and nothing moves it first: no config redirect, and no 301 at the edge
+    // (Googlebot sends no Accept-Language and no cookie, so no language 302 either)
+    expect((await cfg.redirects()).find((r) => r.source === "/")).toBeUndefined();
+    expect(legacyTarget("/")).toBeNull();
   });
 });

@@ -8,7 +8,7 @@
  *
  * Where the number was lost, link by link:
  *
- *   · the payload — `/shop2/admin/?order=R-…` (src/lib/mail-hooks.ts), right;
+ *   · the payload — `/admin?order=R-…` (src/lib/mail-hooks.ts), right;
  *   · the worker — a closed panel is opened on that address, right; an OPEN
  *     panel was navigate()d (a reload that loses a half-typed note) or, on iOS
  *     where navigate() does not exist, merely focused on whatever screen it
@@ -72,7 +72,7 @@ function panel(opts: { search: string; admin?: boolean | null; orders?: Order[] 
     ${ONE_DECL}
     var PUSH = { want: null };
     var ADM_OV = { at: 0 };   // admLogin asks for the panel's own product read again (loadAdminOverrides)
-    var location = { search: env.search, pathname: "/shop2/admin/", hash: "" };
+    var location = { search: env.search, pathname: "/admin", hash: "" };
     var history = { state: { y: 0 }, replaceState: function (s, t, url) { env.replaced.push(url); location.search = url.indexOf("?") >= 0 ? url.slice(url.indexOf("?")) : ""; } };
     function apiJson(url) { return env.ask(url, "GET"); }
     function apiSend(url, method, body) { return env.ask(url, method, body); }
@@ -139,7 +139,7 @@ describe("the panel opens the order the notification names", () => {
     p.load();
     p.find(isList)[0].answer({ status: 200, body: { ok: true, orders: [PAID] } });
     await flush();
-    expect(p.replaced).toEqual(["/shop2/admin/?x=1"]);
+    expect(p.replaced).toEqual(["/admin?x=1"]);
   });
 
   it("an order the list does not hold is fetched on its own, and its card opens", async () => {
@@ -157,7 +157,7 @@ describe("the panel opens the order the notification names", () => {
   it("a panel that is already open is told by the worker, re-reads the list and opens the card", async () => {
     const p = panel({ search: "", orders: [OTHER] });
     p.S.adminOrder = "u-41";                    // another card is open
-    p.message("https://rempireshop.com/shop2/admin/?order=R-100042");
+    p.message("https://rempireshop.com/admin?order=R-100042");
     const list = p.find(isList);
     expect(list.length, "the open panel did nothing with the tapped address").toBe(1);
     list[0].answer({ status: 200, body: { ok: true, orders: [PAID, OTHER] } });
@@ -212,57 +212,57 @@ afterEach(() => { vi.useRealTimers(); });
 describe("the worker hands the tap to the panel that is open", () => {
   it("focuses it and tells it the address — no reload", async () => {
     const client: FakeClient = {
-      url: "https://rempireshop.com/shop2/admin/",
+      url: "https://rempireshop.com/admin",
       focus: vi.fn(async () => client),
       navigate: vi.fn(async () => client),
       postMessage: vi.fn((msg: unknown, ports: Array<{ postMessage: (d: unknown) => void }>) => ports[0].postMessage({ ok: true })),
     };
     const w = worker([client]);
-    await w.tap("/shop2/admin/?order=R-100042");
+    await w.tap("/admin?order=R-100042");
     expect(client.focus).toHaveBeenCalled();
     expect(client.postMessage).toHaveBeenCalledTimes(1);
-    expect(client.postMessage.mock.calls[0][0]).toEqual({ type: "rempire:open", url: "https://rempireshop.com/shop2/admin/?order=R-100042" });
+    expect(client.postMessage.mock.calls[0][0]).toEqual({ type: "rempire:open", url: "https://rempireshop.com/admin?order=R-100042" });
     expect(client.navigate, "the open panel was reloaded — a half-typed note is gone").not.toHaveBeenCalled();
     expect(w.opened).toEqual([]);
   });
 
   it("an iPhone panel (no navigate) is told too, not merely focused on the old screen", async () => {
     const client: FakeClient = {
-      url: "https://rempireshop.com/shop2/admin/",
+      url: "https://rempireshop.com/admin",
       focus: vi.fn(async () => client),
       postMessage: vi.fn((msg: unknown, ports: Array<{ postMessage: (d: unknown) => void }>) => ports[0].postMessage({ ok: true })),
     };
-    await worker([client]).tap("/shop2/admin/?order=R-100042");
+    await worker([client]).tap("/admin?order=R-100042");
     expect(client.postMessage).toHaveBeenCalledTimes(1);
   });
 
   it("a panel that does not answer (older code in the tab) is reloaded onto the address", async () => {
     vi.useFakeTimers();
     const client: FakeClient = {
-      url: "https://rempireshop.com/shop2/admin/",
+      url: "https://rempireshop.com/admin",
       focus: vi.fn(async () => client),
       navigate: vi.fn(async () => client),
       postMessage: vi.fn(),
     };
     const w = worker([client]);
-    const done = w.tap("/shop2/admin/?order=R-100042");
+    const done = w.tap("/admin?order=R-100042");
     await vi.advanceTimersByTimeAsync(2000);
     await done;
-    expect(client.navigate).toHaveBeenCalledWith("https://rempireshop.com/shop2/admin/?order=R-100042");
+    expect(client.navigate).toHaveBeenCalledWith("https://rempireshop.com/admin?order=R-100042");
   });
 
   it("with no panel open, a new window opens on the address itself", async () => {
-    const shop: FakeClient = { url: "https://rempireshop.com/shop2/", focus: vi.fn(), postMessage: vi.fn() };
+    const shop: FakeClient = { url: "https://rempireshop.com/", focus: vi.fn(), postMessage: vi.fn() };
     const w = worker([shop]);
-    await w.tap("/shop2/admin/?order=R-100042");
-    expect(w.opened).toEqual(["https://rempireshop.com/shop2/admin/?order=R-100042"]);
+    await w.tap("/admin?order=R-100042");
+    expect(w.opened).toEqual(["https://rempireshop.com/admin?order=R-100042"]);
     expect(shop.postMessage).not.toHaveBeenCalled();
   });
 });
 
 describe("the address the notification and the letter carry", () => {
   it("is the panel with the order NUMBER — what the notification prints", () => {
-    expect(ownerOrderPath({ number: "R-100042", id: "u-42" } as never)).toBe("/shop2/admin/?order=R-100042");
+    expect(ownerOrderPath({ number: "R-100042", id: "u-42" } as never)).toBe("/admin?order=R-100042");
   });
 
   it("the panel reads that very parameter", () => {
