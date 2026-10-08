@@ -252,7 +252,7 @@ describe("upsellHTML: the price it quotes is the price the «+» adds", () => {
       return upsellHTML(SUM, THR);
     `;
     return new Function(
-      "CATALOGUE", "S", "byId", "complementsFor", "media", "esc", "eur", "cartSumRetail", "SUM", "THR",
+      "CATALOGUE", "S", "byId", "complementsFor", "media", "esc", "eur", "cartSumRetail", "linkHref", "SUM", "THR",
       body,
     )(
       CATALOGUE,
@@ -263,6 +263,8 @@ describe("upsellHTML: the price it quotes is the price the «+» adds", () => {
       (s: string) => String(s),
       (n: number) => `${n} €`,
       () => 0,
+      // the name is a link to the product since 09.10.2026 (tests/shop-links.test.ts)
+      (kind: string, v: string) => `/${kind}/${v}`,
       // 52 € in the basket against a 59 € threshold: a 7 € gap
       52,
       59,

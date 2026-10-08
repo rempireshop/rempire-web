@@ -188,7 +188,7 @@ function shop(opts: {
   const { nav, hdr, document } = fakeHeader(opts.nav || ["gift", "brands"]);
   const run = new Function(
     "S", "DEMO", "BUNDLES", "SETS_AT_BUILD", "BLOG_AT_BUILD", "document", "hdrSlot",
-    "announceHTML", "announceBody", "towerDraw", "icon", "CATS", "esc", "cartCount", "FLAG", "LANGS", "translateTree",
+    "announceHTML", "announceBody", "towerDraw", "icon", "CATS", "esc", "cartCount", "FLAG", "LANGS", "translateTree", "linkHref",
     FNS.map(slice).join("\n") +
       "\nreturn { allBundles: allBundles, setsKnown: setsKnown, bundleById: bundleById, shownBundleById: shownBundleById," +
       " blogShown: blogShown, blogKnownEmpty: blogKnownEmpty, settleEmptyScreens: settleEmptyScreens," +
@@ -198,6 +198,8 @@ function shop(opts: {
     S, DEMO, FILE, opts.build === undefined ? null : opts.build, !!opts.blogAtBuild, document, hdr,
     () => "", () => "", () => "", () => "", [{ id: "hair", name: "Уход за волосами" }], (s: string) => String(s), () => 0,
     { RU: "" }, [], () => {},
+    // the menu's entries are links since 09.10.2026 (tests/shop-links.test.ts)
+    (kind: string, v: string) => `/${kind}/${v}`,
   );
   return Object.assign(api, { S, nav });
 }
@@ -393,7 +395,8 @@ describe("an empty shelf's address is the 404 screen — once the shop knows", (
   });
 
   it("offers no way «back into the blog» from a missing article when the blog is empty", () => {
-    expect(slice("screenBlogPost")).toContain("(blogShown() ? '<p><button class=\"link\" data-go=\"blog\">Вернуться в блог</button></p>' : \"\")");
+    // a link since 09.10.2026 (tests/shop-links.test.ts), under the same condition
+    expect(slice("screenBlogPost")).toContain("(blogShown() ? '<p><a class=\"link\" href=\"' + linkHref(\"go\", \"blog\") + '\" data-go=\"blog\">Вернуться в блог</a></p>' : \"\")");
   });
 
   it("never promises «Наборы скоро появятся» any more", () => {
