@@ -100,7 +100,7 @@ import { parseShopPath, publicPath, STATE_RESTS } from "../src/lib/shop-paths.mj
 /* The titles and meta descriptions of the home page, the sections, the brands
    and the blog list (audit §1A) — the module app.js's setHead() carries a copy
    of, so the head written here and the head after boot are one text. */
-import { seoHead } from "../src/lib/seo-copy.mjs";
+import { seoBrandIntro, seoHead } from "../src/lib/seo-copy.mjs";
 import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -1880,7 +1880,10 @@ for (const lang of LANGS) {
       lang, kind: "b", id: BRAND_SLUG.get(b), heading: b, list,
       rest: "/b/" + BRAND_SLUG.get(b) + "/",
       desc: head.d, title: head.t,
-      intro: tr(catIntro("", b), lang.code, false)
+      /* the owner's own paragraph where he has approved one (eight brands,
+         seoBrandIntro()), the shop's generic line everywhere else — the
+         same choice screenCatalog() makes */
+      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false)
     }));
   }
 

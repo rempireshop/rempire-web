@@ -15000,7 +15000,13 @@
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
     var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
-    var intro = esc(catIntro(S.cat, S.brand));
+    /* A brand the owner has written a paragraph for shows it, in the page's
+       own language (seoBrandIntro(), src/lib/seo-copy.mjs — the prerender
+       writes the same one); every other page keeps the shop's line, which
+       translateTree() translates. `data-notr` keeps the owner's words off
+       the dictionary. */
+    var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : "";
+    var intro = esc(ownIntro || catIntro(S.cat, S.brand));
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / ' +
         (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
@@ -15013,7 +15019,7 @@
         (S.brand && BRAND_LOGOS[S.brand]
           ? '<div class="brandhead"><h1 class="vh">' + esc(S.brand) + "</h1>" + brandMark(S.brand, "brandhead", true) + "</div>"
           : '<h1 class="display h1">' + esc(name) + "</h1>") +
-        '<p class="sec__intro">' + intro + "</p>" +
+        '<p class="sec__intro"' + (ownIntro ? " data-notr" : "") + ">" + intro + "</p>" +
         (function () {
           var defs = subcatsFor(S.cat === "all" || S.brand ? [] : CATALOGUE.filter(function (p) { return p.cat === S.cat; }));
           if (!defs.length) return "";
@@ -48086,11 +48092,152 @@
           RU: ["Все товары: волосы, борода, кожа, парфюмерия | REMPIRE", "Весь ассортимент REMPIRE: салонный уход и стайлинг для волос, уход за бородой, корейская косметика, уход за телом и парфюмерия. Самовывоз в Таллинне."]
         }
       },
-      /* A brand page: its own [title, meta description] where the owner has
-         approved a text for it, otherwise the template's fallback title
-         «{brand} in Tallinn | REMPIRE» (audit §1A) over the description the
-         brand pages have always carried. */
-      brand: {},
+      /* A brand page: its own title, meta description and the visible intro
+         under its heading, where the owner has approved them — the eight
+         below, word for word from Rempire/seo/brand-intros.json (Dim,
+         09.10.2026; the intros with the history trimmed). Every other brand
+         keeps the line it always had under its heading (catIntro() in app.js)
+         and the description it always carried (brandGeneric), under the
+         template's fallback title «{brand} in Tallinn | REMPIRE» (audit §1A).
+         The intro is the shop's own paragraph, not a snippet: seoBrandIntro(). */
+      brand: {
+        "System 4": {
+          RU: {
+            title: "System 4 (Sim Sensitive): шампуни №1–4 и сыворотка | REMPIRE",
+            meta: "System 4 (Sim Sensitive): шампуни №1–4 для жирной, сухой и чувствительной кожи головы, тоник T, маска O и сыворотка Bio Botanical. Самовывоз на Mardi 1.",
+            intro: "System 4 — финская линия Sim Sensitive для кожи головы. Номер на шампуне подсказывает тип кожи головы: №1 — жирная и склонная к перхоти, №2 — сухая с перхотью, №3 — для ежедневного ухода, №4 — очень жирная и чувствительная. К ним — тоник T, маска O и сыворотка Bio Botanical. Подобрать номер поможем в салоне на Mardi 1."
+          },
+          ET: {
+            title: "System 4 (Sim Sensitive): šampoonid ja seerum | REMPIRE",
+            meta: "Sim Sensitive'i System 4: šampoonid 1–4 rasusele, kuivale ja tundlikule peanahale, toonik T, mask O ja Bio Botanical seerum. Järeletulek Mardi 1, Tallinn.",
+            intro: "System 4 on Sim Sensitive'i Soome peanahahoolduse sari. Šampooni number näitab peanaha tüüpi: 1 – rasune ja kõõmale kalduv, 2 – kuiv ja kõõmale kalduv, 3 – igapäevaseks hoolduseks, 4 – väga rasune ja tundlik. Lisaks toonik T, mask O ja Bio Botanical seerum. Õige numbri aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "System 4 by Sim Sensitive: Scalp Shampoos & Serum | REMPIRE",
+            meta: "System 4 by Sim Sensitive: shampoos 1–4 for oily, dry or sensitive scalps, T tonic, O scalp mask and Bio Botanical serum. Pickup at Mardi 1, Tallinn.",
+            intro: "System 4 is Sim Sensitive's Finnish scalp-care range. The number on each shampoo tells you which scalp it suits: 1 for oily, dandruff-prone, 2 for dry, dandruff-prone, 3 for everyday care and 4 for very oily, sensitive scalps. Alongside them: T tonic, O scalp mask and Bio Botanical serum. We'll help you pick yours at Mardi 1."
+          }
+        },
+        "Kevin.Murphy": {
+          RU: {
+            title: "Kevin.Murphy — шампуни, маски и стайлинг | REMPIRE",
+            meta: "Kevin.Murphy в Таллинне: шампуни и маски Angel, Hydrate-Me, Repair-Me, Young.Again и стайлинг Night.Rider, Session.Spray. Самовывоз на Mardi 1.",
+            intro: "Kevin.Murphy — австралийская марка салонного ухода за волосами. У нас шампуни и маски Angel, Hydrate-Me, Repair-Me и Young.Again, стайлинг Night.Rider, Rough.Rider, Session.Spray и Anti.Gravity. Что подойдёт вашим волосам, подскажем в салоне на Mardi 1."
+          },
+          ET: {
+            title: "Kevin.Murphy juuksehooldus ja viimistlus | REMPIRE",
+            meta: "Kevin.Murphy Tallinnas: Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning Night.Rider ja Session.Spray viimistlus. Järeletulek Mardi 1.",
+            intro: "Kevin.Murphy on Austraalia salongi juuksehoolduse bränd. Meil on Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning viimistlustooted Night.Rider, Rough.Rider, Session.Spray ja Anti.Gravity. Mis sinu juustele sobib, aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "Kevin.Murphy: Shampoos, Masks & Styling | REMPIRE",
+            meta: "Kevin Murphy products in Tallinn: Angel, Hydrate-Me, Repair-Me and Young.Again care, Night.Rider and Session.Spray styling. Pickup at Mardi 1.",
+            intro: "Kevin.Murphy is an Australian salon hair-care brand. We carry Angel, Hydrate-Me, Repair-Me and Young.Again shampoos and masks, plus Night.Rider, Rough.Rider, Session.Spray and Anti.Gravity styling. We'll help you choose what suits your hair at the salon on Mardi 1."
+          }
+        },
+        "Davines": {
+          RU: {
+            title: "Davines — шампуни, маски и масло для бороды | REMPIRE",
+            meta: "Davines из Пармы: шампуни Naturaltech, маски The Circle Chronicles, масло для бороды и гели для бритья Pasta & Love. Самовывоз на Mardi 1.",
+            intro: "Davines — итальянская марка из Пармы. У нас шампуни Naturaltech для разных задач волос и кожи головы, маски The Circle Chronicles и мужская линия Pasta & Love: масло для бороды, которое подходит и перед бритьём, гели для бритья, паста и глина для укладки."
+          },
+          ET: {
+            title: "Davines: šampoonid, juuksemaskid ja habemeõli | REMPIRE",
+            meta: "Davines Itaaliast: Naturaltechi šampoonid, The Circle Chronicles maskid, Pasta & Love habemeõli ja raseerimisgeelid. Järeletulek Mardi 1, Tallinn.",
+            intro: "Davines on Itaalia bränd Parmast. Meil on Naturaltechi šampoonid juuste ja peanaha eri vajadusteks, The Circle Chronicles juuksemaskid ning meeste sari Pasta & Love: habemeõli, mis sobib ka enne raseerimist, raseerimisgeelid, viimistluspasta ja -savi."
+          },
+          EN: {
+            title: "Davines: Shampoos, Hair Masks & Beard Oil | REMPIRE",
+            meta: "Davines from Parma: Naturaltech shampoos, The Circle Chronicles masks, Pasta & Love beard oil and shaving gels. Pickup at Mardi 1, Tallinn.",
+            intro: "Davines is an Italian brand from Parma. We carry Naturaltech shampoos for different hair and scalp needs, The Circle Chronicles hair masks and the Pasta & Love men's line: a beard oil that doubles as a pre-shave oil, shaving gels, styling paste and clay."
+          }
+        },
+        "Captain Fawcett": {
+          RU: {
+            title: "Captain Fawcett: масло для бороды, бальзам и воск | REMPIRE",
+            meta: "Британский Captain Fawcett: масла и бальзамы для бороды, воск для усов серий Nebula (John Petrucci), Booze & Baccy, Barberism. Самовывоз на Mardi 1.",
+            intro: "Captain Fawcett — британская марка ухода за бородой и усами. У нас масла и бальзамы для бороды и воск для усов серий Nebula, Booze & Baccy и Barberism — у каждой серии свой аромат. Аромат и фиксацию поможем подобрать в салоне на Mardi 1."
+          },
+          ET: {
+            title: "Captain Fawcett: habemeõli, -palsam ja vuntsivaha | REMPIRE",
+            meta: "Briti Captain Fawcett: habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula (John Petrucci), Booze & Baccy ja Barberism. Järeletulek Mardi 1, Tallinn.",
+            intro: "Captain Fawcett on Briti habeme- ja vuntsihoolduse bränd. Meil on habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula, Booze & Baccy ja Barberism – igal sarjal oma lõhn. Lõhna ja hoidvuse aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "Captain Fawcett: Beard Oil, Balm & Moustache Wax | REMPIRE",
+            meta: "Captain Fawcett, UK: beard oils, beard balms and moustache wax from the Nebula (John Petrucci), Booze & Baccy and Barberism series. Pickup at Mardi 1.",
+            intro: "Captain Fawcett is a British beard and moustache care brand. We carry beard oils, beard balms and moustache wax from the Nebula, Booze & Baccy and Barberism series, each with its own scent. We'll help you pick the scent and the hold at Mardi 1."
+          }
+        },
+        "Proraso": {
+          RU: {
+            title: "Proraso — масло для бороды и средства после бритья | REMPIRE",
+            meta: "Proraso из Флоренции: масла для бороды Azur Lime, Cypress & Vetyver, Wood & Spice, бальзамы и лосьоны после бритья. Самовывоз на Mardi 1, Таллинн.",
+            intro: "Proraso — итальянская марка из Флоренции, классика барбершопов. У нас бальзамы и лосьоны после бритья (зелёная линия — с эвкалиптом и ментолом), масла для бороды Azur Lime, Cypress & Vetyver и Wood & Spice и бальзам Wood & Spice для первых недель роста бороды."
+          },
+          ET: {
+            title: "Proraso: habemeõli ja raseerimisjärgne hooldus | REMPIRE",
+            meta: "Itaalia Proraso: habemeõlid Azur Lime, Cypress & Vetyver ja Wood & Spice, raseerimisjärgsed palsamid ja losjoonid. Järeletulek Mardi 1, Tallinn.",
+            intro: "Proraso on Itaalia bränd Firenzest, barbershopide klassika. Meil on raseerimisjärgsed palsamid ja losjoonid (roheline sari eukalüpti ja mentooliga), habemeõlid Azur Lime, Cypress & Vetyver ja Wood & Spice ning Wood & Spice habemepalsam habeme esimesteks kasvunädalateks."
+          },
+          EN: {
+            title: "Proraso: Beard Oil, Aftershave Balm & Lotion | REMPIRE",
+            meta: "Proraso from Florence: Azur Lime, Cypress & Vetyver and Wood & Spice beard oils, aftershave balms and lotions. Pickup at Mardi 1, Tallinn.",
+            intro: "Proraso is an Italian barbershop classic from Florence. We carry its aftershave balms and lotions (the green line with eucalyptus and menthol), Azur Lime, Cypress & Vetyver and Wood & Spice beard oils, and the Wood & Spice balm for the first weeks of beard growth."
+          }
+        },
+        "Creed": {
+          RU: {
+            title: "Creed: Aventus, Aventus Cologne и Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (бергамот, ананас, берёза), Aventus Cologne с имбирём и Original Vetiver в Таллинне. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            intro: "Creed — нишевый парфюмерный дом. У нас Creed Aventus с бергамотом, ананасом и дымной берёзой, более свежий Aventus Cologne с имбирём и Original Vetiver с лимоном, зелёными нотами и ветивером. Выбрать между ними поможем на Mardi 1."
+          },
+          ET: {
+            title: "Creed: Aventus, Aventus Cologne, Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (bergamott, ananass, kask), ingveriga Aventus Cologne ja Original Vetiver Tallinnas. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Creed on nišiparfüümide maja. Meil on Creed Aventus bergamoti, ananassi ja suitsuse kasepuuga, värskem Aventus Cologne ingveriga ning Original Vetiver sidruni, roheliste nootide ja vetiveriga. Mardi 1 poes aitame neist valida."
+          },
+          EN: {
+            title: "Creed: Aventus, Aventus Cologne & Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (bergamot, pineapple, birch), the ginger-led Aventus Cologne and Original Vetiver in Tallinn. Pickup at Mardi 1, delivery across the Baltics.",
+            intro: "Creed is a niche fragrance house. We carry Creed Aventus with bergamot, pineapple and smoky birch, the brighter Aventus Cologne with ginger, and Original Vetiver with lemon, green notes and vetiver. We'll help you choose at Mardi 1."
+          }
+        },
+        "Xerjoff": {
+          RU: {
+            title: "Xerjoff (Ксерджофф): 1861 Naxos и Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos (Ксерджофф Наксос) из коллекции 1861: лаванда, мёд, табак, ваниль, а также Tony Iommi Monkey Special с ромом и кожей. Самовывоз на Mardi 1.",
+            intro: "Xerjoff (Ксерджофф) — парфюмерный дом из Турина. Xerjoff Naxos из коллекции 1861 — лаванда, бергамот, мёд, табачный лист и ваниль; Tony Iommi Monkey Special — ром, кожа, корица и карамель. Оба аромата тёплые и сладковатые, выбрать поможем на Mardi 1."
+          },
+          ET: {
+            title: "Xerjoff: 1861 Naxos ja Tony Iommi Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos kollektsioonist 1861 (lavendel, mesi, tubakas, vanill) ja Tony Iommi Monkey Special. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Xerjoff on Torino parfümeeriamaja. Kollektsiooni 1861 Xerjoff Naxos: lavendel, bergamott, mesi, tubakaleht ja vanill; Tony Iommi Monkey Special: rumm, nahk, kaneel ja karamell. Mõlemad on soojad, magusapoolsed lõhnad – valida aitame Mardi 1 poes."
+          },
+          EN: {
+            title: "Xerjoff: 1861 Naxos & Tony Iommi Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos from the 1861 collection (lavender, honey, tobacco, vanilla) and Tony Iommi Monkey Special in Tallinn. Pickup at Mardi 1, Baltic delivery.",
+            intro: "Xerjoff is a perfume house from Turin. Xerjoff Naxos from the 1861 collection: lavender, bergamot, honey, tobacco leaf and vanilla; Tony Iommi Monkey Special: rum, leather, cinnamon and caramel. Both are warm, sweet-leaning scents; we'll help you choose at Mardi 1."
+          }
+        },
+        "Byredo": {
+          RU: {
+            title: "Byredo — Blanche, Mojave Ghost и гель для душа | REMPIRE",
+            meta: "Byredo Blanche — альдегиды, роза и мускус, аромат чистого белья; гель для душа Blanche и Mojave Ghost. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            intro: "Byredo — парфюмерный дом из Стокгольма. Byredo Blanche — аромат чистого белья: альдегиды, роза, пион, мускус и сандал; к нему есть гель для душа Blanche. Mojave Ghost — амбретта, магнолия, сандал и кедр."
+          },
+          ET: {
+            title: "Byredo: Blanche, Mojave Ghost ja dušigeel | REMPIRE",
+            meta: "Byredo Blanche (aldehüüdid, roos, muskus – puhta pesu lõhn), Blanche'i dušigeel ja Mojave Ghost. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Byredo on Stockholmi parfümeeriamaja. Byredo Blanche lõhnab nagu puhas pesu: aldehüüdid, roos, pojeng, muskus ja sandlipuu; sellele lisaks Blanche'i dušigeel. Mojave Ghost: ambretiseeme, magnoolia, sandlipuu ja seeder."
+          },
+          EN: {
+            title: "Byredo: Blanche, Mojave Ghost & Blanche Body Wash | REMPIRE",
+            meta: "Byredo Blanche (aldehydes, rose, musk: the scent of clean linen), Blanche body wash and Mojave Ghost. Pickup at Mardi 1, delivery across the Baltics.",
+            intro: "Byredo is a perfume house from Stockholm. Byredo Blanche smells of clean linen: aldehydes, rose, peony, musk and sandalwood, with a matching Blanche body wash. Mojave Ghost: ambrette, magnolia, sandalwood and cedarwood."
+          }
+        }
+      },
       brandFallback: { EN: "{brand} in Tallinn | REMPIRE", ET: "{brand} Tallinnas | REMPIRE", RU: "{brand} в Таллинне | REMPIRE" },
       brandGeneric: {
         EN: "{brand} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.",
@@ -48151,6 +48298,16 @@
       writes everywhere else, so a title ends the same way on every page. */
   function seoHouse(t) {
     return String(t).replace(/\s*\|\s*REMPIRE$/, " — REMPIRE");
+  }
+
+  /**
+   * The paragraph under a brand page's heading, in the page's language — or
+   * "" for a brand with no approved text, whose page keeps the shop's
+   * generic line (catIntro() in app.js). Plain text, not HTML.
+   */
+  function seoBrandIntro(brand, lang) {
+    var b = seoCopy().brand[brand];
+    return (b && b[lang] && b[lang].intro) || "";
   }
 
   /** «от 7,90 €» / «alates 7,90 €» / «from €7.90» — a product's price as its title prints it. */
