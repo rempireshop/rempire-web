@@ -296,10 +296,14 @@
       "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Värske kaup: hooldus ja viimistlus, parfüümid ja uus merch.",
       "Категории": "Kategooriad",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professionaalsed tooted, millega Rempire'i meeskond salongis töötab.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire'i firmasärgid — meie kunstnike kavandid, trükime väikestes kogustes.",
-      "Ниша и классика, которые держим в наличии в Таллинне.": "Nišš ja klassika, mida hoiame Tallinnas laos.",
-      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas ise keedetud seep.",
-      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, viimistlus, habe, nägu, keha, parfüümid ja merch.",
+      "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.": "Kogu Rempire'i valik: šampoonid, viimistlus, habemehooldus, Korea nahahooldus, parfüümid ja merch.",
+      "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.": "Šampoonid, palsamid, juuksemaskid ja peanahahooldus — tooted, millega Rempire'i salong töötab.",
+      "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.": "Juuksevaha, pasta, savi, juukselakk ja puuder — viimistlustooted meie barberite valikust.",
+      "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.": "Habemeõlid, habemepalsamid, vuntsivaha ja raseerimistooted — habemehooldus meie barberite valikust.",
+      "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.": "Korea nahahooldus ja meeste näohooldus: toonikud, näopesuvahendid, seerumid, maskid ja SPF.",
+      "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.": "Tätoveeringu järelhooldus, dušigeelid ja seep — sealhulgas Rempire'i enda käsitööseep.",
+      "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.": "Nišiparfüümid ja klassika — originaaltooted, mida hoiame Tallinnas laos.",
+      "Футболки Rempire с принтами наших художников — печатаем малыми тиражами.": "Rempire'i T-särgid meie kunstnike trükistega — trükime väikestes tiraažides.",
       "Под эти фильтры ничего не подошло.": "Nende filtritega ei leidnud ühtegi toodet.",
       "Сначала дешевле": "Soodsamad ees", "Сначала дороже": "Kallimad ees",
       /* «Купить через» is followed by the Google Pay mark, not by words, so it
@@ -3908,10 +3912,14 @@
       "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Fresh arrivals: care and styling, fragrance and new merch.",
       "Категории": "Categories",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professional products the Rempire team works with in the salon.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire tees — prints by our own artists, made in small runs.",
-      "Ниша и классика, которые держим в наличии в Таллинне.": "Niche and classics we keep in stock in Tallinn.",
-      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Gels, soap and body care — including our own handmade soap.",
-      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "The full Rempire range: care, styling, beard, face, body, fragrance and merch.",
+      "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.": "The whole Rempire range: shampoos, styling, beard care, Korean skincare, perfume and merch.",
+      "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.": "Shampoos, conditioners, hair masks and scalp care — what the Rempire salon works with.",
+      "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.": "Hair wax, paste, clay, hairspray and powder — the styling our barbers work with.",
+      "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.": "Beard oil, beard balm, moustache wax and shaving products — our barbers' own pick.",
+      "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.": "Korean skincare and men's face care: toners, cleansers, serums, masks and SPF.",
+      "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.": "Tattoo aftercare, body wash and soap — including Rempire's own handmade soap.",
+      "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.": "Niche and classic perfume — original fragrances in stock in Tallinn.",
+      "Футболки Rempire с принтами наших художников — печатаем малыми тиражами.": "Rempire T-shirts with prints by our own artists, made in small runs.",
       "Под эти фильтры ничего не подошло.": "Nothing matched these filters.",
       "Сначала дешевле": "Price: low to high", "Сначала дороже": "Price: high to low",
       "Поделиться": "Share", "Купить через": "Buy now with", "Другие способы оплаты": "Other payment methods",
@@ -14987,10 +14995,14 @@
      and last lines, so the static page carries the same line the shop draws
      a moment later instead of a sentence of its own. */
   var CAT_INTROS = {
-    all: "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.",
-    merch: "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.",
-    perfume: "Ниша и классика, которые держим в наличии в Таллинне.",
-    body: "Гели, мыло и уход за телом — включая мыло собственной варки."
+    all: "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.",
+    hair: "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.",
+    styling: "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.",
+    beard: "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.",
+    face: "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.",
+    body: "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.",
+    perfume: "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.",
+    merch: "Футболки Rempire с принтами наших художников — печатаем малыми тиражами."
   };
   /** The intro of a section — or of a brand page, when `brand` is given. Plain text, not HTML. */
   function catIntro(cat, brand) {
