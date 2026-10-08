@@ -9,13 +9,18 @@ touch only the new shop; nobody notices them. Step 6 is the switch.
 
 ## Before 22:00 (Thursday daytime)
 
-- [x] Claude: footer «Админка» link off — `git revert eca0a11`, minify + retoken,
-      tests, push; staging deploy green (done 08.10 afternoon).
 - [ ] Chrome «Browser 1» signed in to: the staging admin
       (`rempireshop.diipsolutions.eu/shop2/admin/`), Shopify admin, Vercel (team
       «rempire»), Cloudflare, Gmail.
 - [ ] Docker Desktop running (the backup needs it).
 - [ ] `.env.railway.txt` and `.env.montonio-live.txt` in the repo folder.
+
+## 0. Footer «Админка» link off — Claude, at 22:00
+
+Renat writes a blog post on staging until the launch, so the button stays until
+now (Dim, 08.10). `git revert 1d526806`, minify + retoken, push. The build runs
+while steps 1–2 happen; check the deployed bundle has no `ftr__admin` before
+step 5. The panel is `/admin` from here on.
 
 ## 1. Backup — Claude
 

@@ -128,8 +128,8 @@ set for 02:00 on the night of 05→06.10, then Wednesday 07.10): a quiet
 evening hour, and 22:00 Tallinn is 19:00 UTC, hours from either cron (07:00
 and 03:30 UTC). What needs Renat was decided in writing on 01.10 (T-1); he
 signs in that evening or next morning (step 9). The footer «Админка» link
-came back on 05.10 (eca0a11) and went again on 08.10 before the launch
-(`git revert eca0a11`). Blog: only Renat's posts stay — the three August
+stays until the launch — Renat writes a blog post on staging — and comes off
+at 22:00 as step 0 (`git revert 1d526806`, docs/launch-runbook.md). Blog: only Renat's posts stay — the three August
 posts go to the bin by hand once he has written his (Dim, 08.10). **In order** — several steps are only
 correct together. On `/golive/` each is its own numbered row. The two Shopify
 exports (steps 4 and 4b) arrive by e-mail to dim.novare@gmail.com and open
