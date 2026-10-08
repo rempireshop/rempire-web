@@ -252,9 +252,9 @@ describe("a hidden catalogue product, without a rebuild", () => {
     expect((await productPageResponse(plain.id, "")).status).toBe(200);
 
     await upsertOverride(plain.id, { hidden: true });
-    for (const seg of ["", "et", "en"]) {
+    for (const seg of ["ru", "et", ""]) {
       const res = await productPageResponse(plain.id, seg);
-      expect(res.status, seg || "ru").toBe(404);
+      expect(res.status, seg || "en").toBe(404);
       expect(await res.text()).toContain('<meta name="robots" content="noindex, nofollow">');
     }
 
@@ -269,15 +269,15 @@ describe("a hidden catalogue product, without a rebuild", () => {
     const before = await locs();
     // every product in every language, each <url> carrying the whole cluster
     expect(before).toHaveLength(CATALOGUE.length * 3);
-    expect(before).toContain(`${LIVE}/shop2/p/${plain.id}/`);
-    expect(before).toContain(`${LIVE}/shop2/et/p/${plain.id}/`);
+    expect(before).toContain(`${LIVE}/ru/products/${plain.id}`);
+    expect(before).toContain(`${LIVE}/et/products/${plain.id}`);
 
     await upsertOverride(plain.id, { hidden: true });
     const after = await locs();
     expect(after).toHaveLength((CATALOGUE.length - 1) * 3);
     expect(after.some((l) => l.includes(`/p/${plain.id}/`))).toBe(false);
     // the neighbours are untouched — hiding one product is not un-listing the shop
-    expect(after).toContain(`${LIVE}/shop2/p/${sized.id}/`);
+    expect(after).toContain(`${LIVE}/ru/products/${sized.id}`);
 
     await upsertOverride(plain.id, { hidden: false });
     expect(await locs()).toHaveLength(CATALOGUE.length * 3);
@@ -296,10 +296,10 @@ describe("a hidden catalogue product, without a rebuild", () => {
        can buy today. */
     const out = CATALOGUE.find((p) => p.s === "out");
     if (out) {
-      const row = xml.split("<url>").find((u) => u.includes(`/shop2/p/${out.id}/<`))!;
+      const row = xml.split("<url>").find((u) => u.includes(`/ru/products/${out.id}<`))!;
       expect(row).toContain("<priority>0.4</priority>");
     }
-    const inStock = xml.split("<url>").find((u) => u.includes(`/shop2/p/${plain.id}/<`))!;
+    const inStock = xml.split("<url>").find((u) => u.includes(`/ru/products/${plain.id}<`))!;
     expect(inStock).toContain("<priority>0.7</priority>");
   });
 });

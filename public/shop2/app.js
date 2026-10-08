@@ -48001,8 +48001,15 @@
      it. Read at boot, before setHead() has ever run. */
   var SERVED_ROBOTS = (function () {
     var m = document.querySelector('meta[name="robots"]');
-    return (m && m.getAttribute("content")) || "";
+    /* A screen behind a basket or a login is served `noindex` with the
+       deploy's own value kept beside it (data-served — src/lib/notfound-page.ts
+       stateShell()), so a shopper who walks on from it to a page carries the
+       page's real value, not the screen's. */
+    return (m && (m.getAttribute("data-served") || m.getAttribute("content"))) || "";
   })();
+  /* The screens that need state to mean anything: robots-disallowed, never in
+     a sitemap, and `noindex` in the rendered DOM too (since 08.10.2026). */
+  var NOINDEX_SCREENS = { notfound: 1, search: 1, account: 1, checkout: 1, done: 1, admin: 1, scan: 1 };
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -48147,7 +48154,7 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
-    if (SERVED_ROBOTS) setMetaTag("robots", S.screen === "notfound" ? "noindex, nofollow" : SERVED_ROBOTS);
+    if (SERVED_ROBOTS) setMetaTag("robots", NOINDEX_SCREENS[S.screen] ? "noindex, nofollow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */

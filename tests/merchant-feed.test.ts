@@ -106,7 +106,7 @@ function items(xml: string): Parsed[] {
   });
 }
 const one = (it: Parsed, key: string) => it.fields[key]?.[0];
-const productOf = (it: Parsed) => decodeURIComponent(/\/p\/([^/?]+)\/(\?size=[^/]*)?$/.exec(one(it, "link") ?? "")![1]);
+const productOf = (it: Parsed) => decodeURIComponent(/\/products\/([^/?]+)(\?size=[^/]*)?$/.exec(one(it, "link") ?? "")![1]);
 const byProduct = (list: Parsed[], id: string) => list.filter((it) => productOf(it) === id);
 const euros = (price: string) => Number(price.replace(/ EUR$/, ""));
 
@@ -206,7 +206,7 @@ describe("GET /feed/<file>", () => {
       const xml = await res.text();
       expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">\n<channel>\n')).toBe(true);
       expect(xml.endsWith("</channel>\n</rss>\n")).toBe(true);
-      expect(xml).toMatch(/<channel>\n {2}<title>REMPIRE<\/title>\n {2}<link>https:\/\/rempireshop\.com\/shop2\/[^<]*<\/link>\n {2}<description>[^<]+<\/description>/);
+      expect(xml).toMatch(/<channel>\n {2}<title>REMPIRE<\/title>\n {2}<link>https:\/\/rempireshop\.com\/[^<]*<\/link>\n {2}<description>[^<]+<\/description>/);
       assertWellFormed(xml);
     }
   });
@@ -254,7 +254,8 @@ describe("GET /feed/<file>", () => {
 
 describe("the items", () => {
   it("carry every attribute Merchant Center requires, in all three languages", async () => {
-    const segs = { en: "/shop2/en/p/", et: "/shop2/et/p/", ru: "/shop2/p/" };
+    // each feed links its own language's page — Shopify's addresses since 08.10.2026
+    const segs = { en: "/products/", et: "/et/products/", ru: "/ru/products/" };
     for (const lang of ["en", "et", "ru"] as const) {
       const { list } = await feed(lang);
       // the whole catalogue: one item per size, one for a product without sizes
@@ -272,7 +273,7 @@ describe("the items", () => {
         const desc = one(it, "description")!;
         expect(desc.length, id).toBeGreaterThan(10);
         expect(desc.length, id).toBeLessThanOrEqual(5000);
-        expect(one(it, "link"), id).toMatch(new RegExp("^https://rempireshop\\.com" + segs[lang] + "[^/?]+/(\\?size=[a-z0-9-]+)?$"));
+        expect(one(it, "link"), id).toMatch(new RegExp("^https://rempireshop\\.com" + segs[lang] + "[^/?]+(\\?size=[a-z0-9-]+)?$"));
         expect(one(it, "image_link"), id).toMatch(/^https:\/\/rempireshop\.com\/shop\/img\/[^?]+\.webp(\?v=\d+)?$/);
         for (const extra of it.fields.additional_image_link ?? []) expect(extra).toMatch(/^https:\/\//);
         expect((it.fields.additional_image_link ?? []).length).toBeLessThanOrEqual(10);
@@ -406,7 +407,7 @@ describe("prices and availability", () => {
     for (const lang of ["en", "et", "ru"] as const) {
       const { xml, list } = await feed(lang);
       expect(byProduct(list, PRORASO)).toEqual([]);
-      expect(xml).not.toContain(`/p/${PRORASO}/`);
+      expect(xml).not.toContain(`/products/${PRORASO}`);
       expect(byProduct(list, off.id)).toEqual([]);
       expect(byProduct(list, hiddenCustom.id)).toEqual([]);
       // a product with no photo Merchant Center can read is left out, not sent to be disapproved
@@ -753,7 +754,7 @@ describe("a size's link opens the page on that size", () => {
       const link = one(it, "link")!;
       const q = link.match(/\?size=.*$/);
       if (!q) continue;
-      const id = decodeURIComponent(link.match(/\/p\/([^/?]+)\//)![1]);
+      const id = decodeURIComponent(link.match(/\/products\/([^/?]+)/)![1]);
       const sizes = VARIANTS[id]?.sizes ?? [];
       const at = shop.sizeFromQuery({ sizes }, q[0]);
       expect(at, link).not.toBeNull();

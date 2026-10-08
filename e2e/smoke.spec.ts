@@ -5,15 +5,21 @@
  * against a deployed shop».
  *
  * ======================================================================
- *  READ-ONLY. EVERY REQUEST IN THIS FILE MUST BE A GET A CRAWLER COULD MAKE.
+ *  READ-ONLY. NO REQUEST IN THIS FILE MAY CHANGE ANYTHING ON THE SHOP.
  * ======================================================================
  *
  * There is a real shop on the other end of this base URL, with Renat's real
  * catalogue, Renat's real customers and a real payment provider behind it. So:
- * no orders, no letters, no admin writes, no sign-in, no POST, no PUT, no
- * PATCH, no DELETE, nothing that costs a cent or leaves a row. Everything here
- * is a GET of a URL Googlebot would be welcome to fetch, and the only state
- * this suite creates anywhere is a Playwright trace on the runner's own disk.
+ * no orders, no letters, no admin writes, no sign-in, no PUT, no PATCH, no
+ * DELETE, nothing that costs a cent or leaves a row. Everything here is a GET
+ * of a URL Googlebot would be welcome to fetch — with ONE exception, which is
+ * also the only POST in the file: an EMPTY one to the payment webhook
+ * (`postEmpty()` below), which the route refuses with a 400 before it has
+ * opened a database, and which is here because «does Montonio's address answer
+ * by itself, rather than with a redirect that loses the POST» is a question
+ * only a POST can ask. The only state this suite creates anywhere is a
+ * Playwright trace on the runner's own disk — and, for that one POST, a log
+ * line on the shop's.
  *
  * The rule is enforced, not merely written down. `forbidWrites()` below hangs a
  * route handler on every page that answers any non-GET the storefront attempts
@@ -21,7 +27,8 @@
  * and every test that opens a page then asserts nothing was recorded. Add a
  * write and the suite goes red on the machine you add it on, before it can
  * ever go red on Renat's database. Requests made without a browser go through
- * `get()`, which is the only door this file opens and takes no body.
+ * `get()` and `postEmpty()`, the only two doors this file opens, and neither
+ * of them takes a body.
  *
  * The one thing the storefront would otherwise write is the analytics beacon:
  * `POST /api/track/` on every page view. It is not intercepted, it is not
@@ -62,15 +69,16 @@
  *     scanner. `/api/admin/me/` is asked exactly once, anonymously, and the
  *     only acceptable answer is 401 — which is a test that the door is shut,
  *     not an attempt to open it.
- *   · **The cart, the checkout screens, `/done`, `/account`, `/search`.**
- *     Robots-disallowed, not prerendered, not in the sitemap, and meaningless
- *     without state (docs/seo.md). A crawler never sees them and neither does
- *     this file.
+ *   · **`/cart`, `/checkout`, `/checkout/done`, `/account`, `/search`** (and
+ *     their `/ru`, `/et` twins). Robots-disallowed, not prerendered, not in
+ *     the sitemap, and meaningless without state (docs/seo.md). A crawler
+ *     never sees them and neither does this file.
  *   · **Visual snapshots.** A baseline that has to be renewed whenever Renat
  *     edits a banner would be a suite nobody trusts by the third false alarm.
  */
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { assetTokenWith, currentToken, versionedAssets } from "../tools/lib/asset-token.mjs";
+import { LANG_COOKIE, LANG_PREFIX, parseShopPath, publicPath } from "../src/lib/shop-paths.mjs";
 import { isProductionBase, smokeBaseUrl } from "./env.mjs";
 import { SWEEP_SEED, makeRng, pickOne, sample, watchPage, type Watch } from "./sweep-shop-helpers";
 
@@ -84,18 +92,41 @@ const LIVE = isProductionBase(BASE);
 const abs = (path: string): string => new URL(path, `${BASE}/`).toString();
 
 /* ------------------------------------------------------------------------ */
-/* The only door: GET                                                        */
+/* The two doors: GET, and one empty POST                                    */
 /* ------------------------------------------------------------------------ */
 
 /**
- * Every request this file makes without a browser. It exists so the read-only
- * rule has one place to be true rather than forty call sites to be trusted at,
- * and so `maxRedirects: 0` is the default everywhere: a page that answers 200
- * today and a 308 tomorrow is a deployment change worth failing over, and a
- * client that quietly follows the hop would report the new page as the old one.
+ * Every request this file makes without a browser, but one. It exists so the
+ * read-only rule has one place to be true rather than forty call sites to be
+ * trusted at, and so `maxRedirects: 0` is the rule everywhere: a page that
+ * answers 200 today and a 301 tomorrow is a deployment change worth failing
+ * over, and a client that quietly follows the hop would report the new page as
+ * the old one.
+ *
+ * Asked the way a crawler asks: Playwright's request context sends no
+ * Accept-Language (the config's `locale` is a browser setting) and this suite
+ * gives it no cookie, so an unprefixed address is answered as the English page
+ * itself — never with the 302 to its /ru or /et twin that src/middleware.ts
+ * sends a browser that asked for Russian or Estonian. `headers` is for the one
+ * test that asks on purpose.
  */
-function get(request: APIRequestContext, url: string, opts: { redirects?: boolean } = {}) {
-  return request.get(url, { maxRedirects: opts.redirects ? 5 : 0, timeout: 45_000 });
+function get(request: APIRequestContext, url: string, opts: { headers?: Record<string, string> } = {}) {
+  return request.get(url, { maxRedirects: 0, timeout: 45_000, headers: opts.headers });
+}
+
+/**
+ * The one request in this file that is not a GET, and the whole of what it
+ * may do: POST nothing to the payment webhook and read the status. No body —
+ * the route (src/app/api/payments/notify/route.ts) cannot parse an empty one:
+ * the provider's verifyNotification() throws `bad_body`, and the route answers
+ * 400 before it has looked up an order or opened a database, leaving a log
+ * line and one tick of an in-memory rate limiter behind. It is here for the one question only a POST can ask: does
+ * Montonio's address answer by itself, rather than with a redirect that would
+ * lose the payment notice? Do not give it a body, and do not point it anywhere
+ * else.
+ */
+function postEmpty(request: APIRequestContext, url: string) {
+  return request.post(url, { maxRedirects: 0, timeout: 45_000 });
 }
 
 /** The body of a GET that has to have succeeded first. `what` names the thing
@@ -156,7 +187,8 @@ const ogImageOf = (html: string) => cap(html, /<meta[^>]+property="og:image"[^>]
 /** What the prerender wrote between its markers — the page's own body, before
  *  app.js has run. `PRE_MARK` in src/lib/seo-head.mjs writes exactly this
  *  shape, and comparing this block is how "its own content, not the shell" is
- *  answered below: the shell's block is the Russian home page. */
+ *  answered below: the shell's block is the English home page (since
+ *  08.10.2026 — it was the Russian one while unprefixed meant Russian). */
 const prerenderBlockOf = (html: string) =>
   cap(html, /<!-- prerender:start -->([\s\S]*?)<!-- prerender:end -->/);
 
@@ -190,9 +222,35 @@ const EXPECTED_ROBOTS_META = LIVE ? "index, follow, max-image-preview:large" : "
 type Discovered = {
   /** Every `<loc>` in the two file-backed sitemaps, absolute, on this base. */
   all: string[];
-  /** One representative URL per kind of page, Russian (no prefix). */
+  /** One representative address per kind of page, Russian (`/ru/…`). */
   kinds: Array<{ kind: string; path: string; screen: string }>;
 };
+
+/** Every `<loc>` of a sitemap, as written. */
+const locsOf = (xml: string): string[] => [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+
+/**
+ * The shop's page addresses among some sitemap URLs, each read back into its
+ * language and the shop's internal route ("/p/<id>/", "/c/hair/", "/b/<brand>/",
+ * "/info/shipping/", "/" …) by parseShopPath() — the same reader the
+ * middleware, the catch-all and app.js use (src/lib/shop-paths.mjs). Since
+ * 08.10.2026 the address of a page says much less on its face than the /shop2/
+ * one did: `/ru/collections/uhod-za-volosami` and `/collections/kevin-murphy`
+ * are a section and a brand, and only the table of section handles can tell
+ * which is which. So a page is classified by the route it stands for, never by
+ * a regex over its handle. URLs on another host, and addresses that are no
+ * page shape at all, are left out.
+ */
+function shopPages(urls: string[]): Array<{ path: string; lang: string; rest: string }> {
+  const out: Array<{ path: string; lang: string; rest: string }> = [];
+  for (const u of urls) {
+    if (!u.startsWith(`${BASE}/`)) continue;
+    const path = new URL(u).pathname;
+    const route = parseShopPath(path);
+    if (route) out.push({ path, lang: String(route.lang), rest: String(route.rest) });
+  }
+  return out;
+}
 
 let discovery: Promise<Discovered> | null = null;
 
@@ -204,21 +262,20 @@ function discover(request: APIRequestContext): Promise<Discovered> {
 async function discoverOnce(request: APIRequestContext): Promise<Discovered> {
   const staticXml = await getText(request, abs("/sitemap-1.xml"), "the static sitemap");
   const productXml = await getText(request, abs("/sitemap-products.xml"), "the products sitemap");
-  const locs = (xml: string) => [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  const all = [...locs(staticXml), ...locs(productXml)];
+  const all = [...locsOf(staticXml), ...locsOf(productXml)];
 
-  /* Russian paths only — the prefixed twins are built from these below, which
-     is also how the three-language matrix stays honest: the same page, the
-     same id, three prefixes. */
-  const paths = all
-    .filter((u) => u.startsWith(`${BASE}/shop2/`))
-    .map((u) => u.slice(BASE.length))
-    .filter((p) => !p.startsWith("/shop2/et/") && !p.startsWith("/shop2/en/"));
+  /* Russian addresses only — the other two spellings are built from these
+     below (inLang), which is also how the three-language matrix stays honest:
+     the same page, the same id, three addresses. Russian rather than the
+     unprefixed English because Russian is the language the shop is run in and
+     the one the old /shop2/ walk used — the representatives a failure names
+     read the way Renat reads his shop. */
+  const pages = shopPages(all).filter((p) => p.lang === "RU");
 
   const rng = makeRng(SWEEP_SEED);
   const oneOf = (re: RegExp, what: string): string => {
-    const found = paths.filter((p) => re.test(p));
-    expect(found.length, `the deployment's sitemaps name no ${what} (${re})`).toBeGreaterThan(0);
+    const found = pages.filter((p) => re.test(p.rest)).map((p) => p.path);
+    expect(found.length, `the deployment's sitemaps name no Russian ${what} (route ${re})`).toBeGreaterThan(0);
     return pickOne(rng, found);
   };
   /* Sets and blog posts are the two kinds a shop may legitimately have NONE
@@ -228,55 +285,73 @@ async function discoverOnce(request: APIRequestContext): Promise<Discovered> {
      walked when the sitemap names one, and «the empty shelf is invisible»
      test below holds the shop to the other half. */
   const maybeOneOf = (re: RegExp): string | null => {
-    const found = paths.filter((p) => re.test(p));
+    const found = pages.filter((p) => re.test(p.rest)).map((p) => p.path);
     return found.length ? pickOne(rng, found) : null;
   };
-  const setPath = maybeOneOf(/^\/shop2\/set\/[^/]+\/$/);
-  const postPath = maybeOneOf(/^\/shop2\/blog\/[^/]+\/$/);
+  const setPath = maybeOneOf(/^\/set\/[^/]+\/$/);
+  const postPath = maybeOneOf(/^\/blog\/[^/]+\/$/);
 
   /* `screen` is what app.js writes into body[data-screen] once it has taken
-     over — the same names e2e/sweep-storefront.spec.ts asserts on. */
+     over — the same names e2e/sweep-storefront.spec.ts asserts on. The fixed
+     pages are spelled by publicPath(), so «Бренды» is /ru/collections/brands
+     and the gift card /ru/products/gift-card without this file having to know. */
+  const ru = (rest: string) => publicPath("RU", rest);
   const kinds: Discovered["kinds"] = [
-    { kind: "home", path: "/shop2/", screen: "home" },
-    { kind: "product", path: oneOf(/^\/shop2\/p\/[^/]+\/$/, "product page"), screen: "product" },
-    { kind: "category", path: oneOf(/^\/shop2\/c\/[^/]+\/$/, "category page"), screen: "catalog" },
-    { kind: "brand", path: oneOf(/^\/shop2\/b\/[^/]+\/$/, "brand page"), screen: "catalog" },
-    { kind: "brands", path: "/shop2/brands/", screen: "brands" },
+    { kind: "home", path: ru("/"), screen: "home" },
+    { kind: "product", path: oneOf(/^\/p\/[^/]+\/$/, "product page"), screen: "product" },
+    { kind: "category", path: oneOf(/^\/c\/[^/]+\/$/, "section page"), screen: "catalog" },
+    { kind: "brand", path: oneOf(/^\/b\/[^/]+\/$/, "brand page"), screen: "catalog" },
+    { kind: "brands", path: ru("/brands/"), screen: "brands" },
     ...(setPath
       ? [
-          { kind: "sets", path: "/shop2/sets/", screen: "bundles" },
+          { kind: "sets", path: ru("/sets/"), screen: "bundles" },
           { kind: "set", path: setPath, screen: "bundle" },
         ]
       : []),
-    { kind: "gift", path: "/shop2/gift/", screen: "gift" },
+    { kind: "gift", path: ru("/gift/"), screen: "gift" },
     ...(postPath
       ? [
-          { kind: "blog", path: "/shop2/blog/", screen: "blog" },
+          { kind: "blog", path: ru("/blog/"), screen: "blog" },
           { kind: "blogpost", path: postPath, screen: "blogpost" },
         ]
       : []),
   ];
   /* Every policy page, not a sample: there are five of them, they are the
      pages a shopper reads before deciding to trust the shop, and «Контакты»
-     going missing is not something to find out about from a customer. */
-  for (const p of paths.filter((p) => /^\/shop2\/info\/[^/]+\/$/.test(p)).sort()) {
-    kinds.push({ kind: `info:${p.split("/")[3]}`, path: p, screen: "info" });
+     going missing is not something to find out about from a customer. The
+     kind is named by the route's slug (`info:privacy`), not by Shopify's
+     address for it (/policies/privacy-policy). */
+  for (const p of pages.filter((p) => /^\/info\/[^/]+\/$/.test(p.rest)).sort((a, b) => a.rest.localeCompare(b.rest))) {
+    kinds.push({ kind: `info:${p.rest.split("/")[2]}`, path: p.path, screen: "info" });
   }
   return { all, kinds };
 }
 
-/** The three languages, and the prefix each one lives under (docs/seo.md:
- *  Russian is the default, has no prefix, and is the x-default). */
-const LANGS = [
-  { lang: "RU", seg: "", html: "ru" },
-  { lang: "ET", seg: "/et", html: "et" },
-  { lang: "EN", seg: "/en", html: "en" },
+type Lang = "RU" | "ET" | "EN";
+
+/** The three languages, and the prefix each one lives under (docs/seo.md,
+ *  src/lib/shop-paths.mjs): since 08.10.2026 English is the default, has no
+ *  prefix and is the x-default — Shopify's own scheme — and Russian and
+ *  Estonian are /ru and /et. */
+const LANGS: Array<{ lang: Lang; prefix: string; html: string }> = [
+  { lang: "RU", prefix: LANG_PREFIX.RU, html: "ru" },
+  { lang: "ET", prefix: LANG_PREFIX.ET, html: "et" },
+  { lang: "EN", prefix: LANG_PREFIX.EN, html: "en" },
 ];
 
-/** `/shop2/p/x/` in Estonian is `/shop2/et/p/x/` — the prefix goes after
- *  `/shop2`, which is what pathFor() in app.js builds and what the prerender
- *  writes to disk. */
-const inLang = (path: string, seg: string): string => (seg ? path.replace("/shop2", `/shop2${seg}`) : path);
+/**
+ * A page's address in another language. Not a prefix swap: a section's handle
+ * is translated (`/ru/collections/uhod-za-volosami` is
+ * `/et/collections/juuksehooldus` and `/collections/hair-care`), so the address
+ * is read back into the shop's internal route and spelled out again — by the
+ * same two functions app.js (shopRouteOf/shopPathFor), the prerender and the
+ * middleware use, so this file cannot hold a private opinion about an address.
+ */
+function inLang(path: string, lang: Lang): string {
+  const route = parseShopPath(path);
+  if (!route) throw new Error(`inLang: ${path} is not one of the shop's page addresses`);
+  return publicPath(lang, route.rest);
+}
 
 /* ------------------------------------------------------------------------ */
 /* Visiting a page in a browser                                              */
@@ -301,6 +376,17 @@ type Guard = { writes: string[]; broken: string[]; watch: Watch; document: strin
 async function guardPage(page: Page): Promise<Guard> {
   const writes = await forbidWrites(page);
   const watch = watchPage(page);
+  /* A browser that has chosen English with the language switcher. The smoke
+     config gives Chromium `locale: "ru-RU"` (it was written when an unprefixed
+     address was Russian), so without the switcher's cookie every unprefixed —
+     English — address this suite opens would be answered with the edge's 302
+     to its /ru twin (src/middleware.ts), and the EN column of the walk would
+     quietly be the RU one again. The saved choice beats Accept-Language there,
+     exactly as it does for a shopper; a /ru or /et address is served as itself
+     whatever the cookie says. Set in the browser only — it is the shop's own
+     preference cookie (`rempire_lang`), not a request to the shop. visit()
+     then holds every page load to «no redirect at all». */
+  await page.context().addCookies([{ name: LANG_COOKIE, value: "en", url: BASE }]);
   const g: Guard = {
     writes,
     broken: [],
@@ -330,6 +416,11 @@ async function guardPage(page: Page): Promise<Guard> {
 async function visit(page: Page, g: Guard, url: string, screen: string, what: string, status = 200): Promise<void> {
   g.reset(url);
   const res = await page.goto(url, { waitUntil: "domcontentloaded" });
+  /* page.goto() follows redirects and reports the page it ended on, so a 301
+     or the edge's language 302 would otherwise pass as a 200 of somebody
+     else's page. The response's own URL is the address the document was
+     served for (app.js may rewrite the bar afterwards; this is before). */
+  expect(res?.url(), `${what}: GET ${url} was redirected`).toBe(url);
   expect(res?.status(), `${what}: GET ${url}`).toBe(status);
   await expect(page.locator(`body[data-screen="${screen}"]`), `${what}: app.js should paint "${screen}"`).toBeAttached();
   /* The storefront paints synchronously and then settles — the boot probes
@@ -381,22 +472,30 @@ test.describe(`deployed shop — ${BASE}`, () => {
     const { kinds } = await discover(request);
 
     /* The shell — public/shop2/index.html — is what a page falls back to when
-       a rewrite misses, and it is also the Russian home page, which is why
-       "did I get the shell?" cannot be answered by looking for a marker. It is
-       answered by comparing: the shell's own prerendered block is the home
-       page's, so any other page whose block equals it was not served its own
-       file. That is the exact failure /shop2/et/brands/ had until 07.09.2026
-       (docs/seo.md) — the right URL, a 200, and the Russian home page in it. */
-    const shellBlock = prerenderBlockOf(await getText(request, abs("/shop2/"), "the shell"));
+       a rewrite misses, and it is also the English home page, served at `/`
+       (next.config.ts routes `/` to it), which is why "did I get the shell?"
+       cannot be answered by looking for a marker. It is answered by
+       comparing: the shell's own prerendered block is the home page's, so any
+       other page whose block equals it was not served its own file. That is
+       the exact failure the Estonian «Бренды» had until 07.09.2026, when it
+       lived at /shop2/et/brands/ (docs/seo.md) — the right URL, a 200, and the
+       home page in it. It matters more since 08.10.2026, not less: every page
+       now reaches its file through a rewrite from a Shopify address, and a
+       rewrite that misses lands on the catch-all, which hands out this shell.
+
+       Asked with get(), so the way a crawler asks — no Accept-Language, no
+       cookie: an unprefixed address must answer as the English page itself,
+       never with the edge's 302 to a twin. */
+    const shellBlock = prerenderBlockOf(await getText(request, abs("/"), "the shell (the English home page)"));
     expect(shellBlock.length, "the shell has no prerendered block at all").toBeGreaterThan(200);
 
     const titles = new Map<string, string>();
-    for (const { lang, seg, html } of LANGS) {
-      const homePath = inLang("/shop2/", seg);
+    for (const { lang, html } of LANGS) {
+      const homePath = publicPath(lang, "/");
       const homeBlock = prerenderBlockOf(await getText(request, abs(homePath), `${lang} home`));
 
       for (const { kind, path } of kinds) {
-        const url = abs(inLang(path, seg));
+        const url = abs(inLang(path, lang));
         const at = `${lang} · ${kind} · ${url}`;
         const res = await get(request, url);
         expect(res.status(), `${at}: should answer 200 with no redirect`).toBe(200);
@@ -411,7 +510,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
         expect(block.length, `${at}: no prerendered content — this is the bare shell`).toBeGreaterThan(200);
         if (kind !== "home") {
           expect(block, `${at}: served the ${lang} home page's content, not its own`).not.toBe(homeBlock);
-          expect(block, `${at}: served the Russian shell's content, not its own`).not.toBe(shellBlock);
+          expect(block, `${at}: served the shell's (English home page's) content, not its own`).not.toBe(shellBlock);
         }
 
         /* A title two pages share is a title Google has to choose between, and
@@ -430,9 +529,13 @@ test.describe(`deployed shop — ${BASE}`, () => {
   test("the link-preview card of the home page and of a product is really there", async ({ request }) => {
     /* prerender:check proves every og:image is on disk and is 1 200×630; what
        it cannot prove is that the deployment serves it. A card that 404s is
-       invisible until somebody pastes a link into Telegram. */
+       invisible until somebody pastes a link into Telegram. Both homes — `/`
+       is the link anybody types, and the cards are drawn per language — and
+       the product the walk picked. The cards themselves still live under
+       /shop2/og/ (assets did not move on 08.10.2026). */
     const { kinds } = await discover(request);
-    for (const path of ["/shop2/", ...kinds.filter((k) => k.kind === "product").map((k) => k.path)]) {
+    const homes = [publicPath("EN", "/"), publicPath("RU", "/")];
+    for (const path of [...homes, ...kinds.filter((k) => k.kind === "product").map((k) => k.path)]) {
       const html = await getText(request, abs(path), `og:image of ${path}`);
       const card = ogImageOf(html);
       expect(card, `${path}: no og:image`).toMatch(/^https?:\/\//);
@@ -442,7 +545,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
     }
   });
 
-  for (const { lang, seg } of LANGS) {
+  for (const { lang } of LANGS) {
     test(`${lang}: every page kind renders in a browser with no console error`, async ({ page, request }) => {
       const { kinds } = await discover(request);
       /* One policy page rather than five: the five differ only in the prose
@@ -453,7 +556,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
       const walk = kinds.filter((k) => !k.kind.startsWith("info:") || k.kind === "info:privacy");
       const g = await guardPage(page);
       for (const { kind, path, screen } of walk) {
-        await visit(page, g, abs(inLang(path, seg)), screen, `${lang} · ${kind}`);
+        await visit(page, g, abs(inLang(path, lang)), screen, `${lang} · ${kind}`);
       }
     });
   }
@@ -483,12 +586,36 @@ test.describe(`deployed shop — ${BASE}`, () => {
     expect(closed, "robots.staging.txt should still let the link-preview scrapers in").toContain("facebookexternalhit");
     /* Both keep the cart, the checkout and the account out of an index, and
        that half of the policy is the half that must never be dropped by
-       accident — it is the one part of robots.txt with a shopper behind it. */
+       accident — it is the one part of robots.txt with a shopper behind it.
+       Since 08.10.2026 those screens are at Shopify's own addresses, which are
+       Shopify's own Disallow lines too: the panel at /admin (no language), the
+       state screens unprefixed and again under /ru and /et (/checkout covers
+       the receipt at /checkout/done). Compared line by line, so a
+       `Disallow: /ru/checkout` cannot pass for `Disallow: /checkout`. */
+    const lines = (body: string) => body.split(/\r?\n/).map((l) => l.trim());
+    const shut = ["/admin", "/api/"];
+    for (const pre of ["", "/ru", "/et"]) for (const p of ["/checkout", "/cart", "/account", "/search"]) shut.push(pre + p);
     for (const [name, body] of [["production", open], ["staging", closed]] as const) {
-      for (const shut of ["/shop2/admin", "/shop2/checkout", "/shop2/account", "/api/"]) {
-        expect(body, `robots.${name}.txt should disallow ${shut}`).toContain(`Disallow: ${shut}`);
+      for (const path of shut) {
+        expect(lines(body), `robots.${name}.txt should disallow ${path}`).toContain(`Disallow: ${path}`);
       }
+      /* …and NOT the old /shop2/ addresses. Every one of them is a 301 now
+         (src/middleware.ts), and a crawler that is told not to fetch one can
+         never learn where the page went — the old Disallow lines would have
+         pinned Google to addresses that no longer have pages. */
+      expect(
+        lines(body).filter((l) => /^Disallow: \/shop2(?:\/|$)/.test(l)),
+        `robots.${name}.txt still closes an old /shop2/ address — a crawler has to be let through to follow its 301`,
+      ).toEqual([]);
     }
+    /* Inside the closed /api/, the read-only answers a page is drawn from are
+       opened again, in the production policy (tools/prerender-shop2.mjs,
+       ALLOW_API): Googlebot renders a page, and with /api/overrides/ shut its
+       renderer drew live sold-out products as InStock (SEO audit, 08.10.2026).
+       The longest matching rule wins, so the Allow line is what does it. */
+    expect(lines(open), "robots.production.txt should let the renderer read the live prices and stock").toContain(
+      "Allow: /api/overrides/",
+    );
 
     /* The `Sitemap:` line is the one line that legitimately differs between
        the policy file and the robots.txt built from it, because it names the
@@ -510,8 +637,9 @@ test.describe(`deployed shop — ${BASE}`, () => {
        host rather than on the build, so it is the only one of the three a file
        check can never see — and the one that would have quietly outranked
        every canonical on the day the DNS moved, had it stayed the global rule
-       it used to be in vercel.json. */
-    for (const path of ["/shop2/", "/robots.txt", "/api/geo/"]) {
+       it used to be in vercel.json. Both homes — `/` is the English one now,
+       and the Russian one is /ru — then a file and an API route. */
+    for (const path of ["/", "/ru", "/robots.txt", "/api/geo/"]) {
       const res = await get(request, abs(path));
       const tag = res.headers()["x-robots-tag"];
       if (LIVE) {
@@ -551,6 +679,19 @@ test.describe(`deployed shop — ${BASE}`, () => {
       expect(one.root, `${loc}: should be a <urlset>`).toBe("urlset");
       for (const u of one.locs) {
         expect(u, `${loc}: names ${u}, which is not on this host`).toContain(`${BASE}/`);
+        /* …and names the page, not a hop to it. Since 08.10.2026 every page
+           has exactly one address (src/lib/shop-paths.mjs): not under /shop2/
+           (those are 301s now), no trailing slash, a section in its own
+           language's handle. parseShopPath() reading the address back to
+           itself is that whole rule in one comparison — a sitemap that lists
+           redirects is a sitemap Google learns not to trust. Two of the three
+           files are written by the app at request time, so this is a question
+           only a deployment can answer. */
+        const path = new URL(u).pathname;
+        expect(
+          parseShopPath(path)?.canonical,
+          `${loc}: names ${u}, which is not a page address in the shop's own spelling`,
+        ).toBe(path);
       }
       everyLoc.push(...one.locs);
     }
@@ -558,7 +699,9 @@ test.describe(`deployed shop — ${BASE}`, () => {
     /* Hundreds of URLs across the three; a smoke run walks a seeded sample of
        them. Fixed seed, so the same twenty are walked every time and a failure
        is reproducible — and the sample is drawn from the pooled list rather
-       than per file, so it is weighted the way the sitemap itself is. */
+       than per file, so it is weighted the way the sitemap itself is. Asked
+       as a crawler asks (get(): no Accept-Language), so an unprefixed English
+       address has to be a 200 itself, not a 302 to a twin. */
     expect(everyLoc.length, "the sitemaps between them should offer a catalogue's worth of URLs").toBeGreaterThan(100);
     const walk = sample(makeRng(SWEEP_SEED), [...new Set(everyLoc)], 20);
     for (const url of walk) {
@@ -575,8 +718,11 @@ test.describe(`deployed shop — ${BASE}`, () => {
        already recomputes it against the working tree, but a working tree
        always agrees with itself — the question only has teeth when it is asked
        of the bytes a deployment is handing to browsers. Same function, same
-       rule, a reader that fetches instead of one that opens files. */
-    const shell = await getText(request, abs("/shop2/"), "the shell");
+       rule, a reader that fetches instead of one that opens files. The shell
+       is read at `/`: the English home page is public/shop2/index.html itself
+       (next.config.ts), and the files it versions are still under /shop2/ —
+       the page addresses moved on 08.10.2026, the assets did not. */
+    const shell = await getText(request, abs("/"), "the shell (the English home page)");
     const token = currentToken(shell);
     expect(token, "the shell carries no ?v= token at all").toMatch(/^[0-9a-f]{12}$/);
 
@@ -602,7 +748,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
   });
 
   test("every script and stylesheet the shell asks for loads at the token it asks for", async ({ request }) => {
-    const shell = await getText(request, abs("/shop2/"), "the shell");
+    const shell = await getText(request, abs("/"), "the shell (the English home page)");
     const token = currentToken(shell);
 
     /* The tags carrying the shared token, plus the one that carries its own
@@ -630,44 +776,44 @@ test.describe(`deployed shop — ${BASE}`, () => {
   /* ------------------------------------------------------------------ 404 */
 
   test("a page that must not exist answers 404 with noindex, in every language", async ({ page, request }) => {
-    /* Since 07.09.2026 an unknown address under /shop2/ is a real 404 rather
-       than a 200 with the home page in it — a soft 404 is the one thing Google
-       asks a site not to do, because a page that says "found" while showing
+    /* Since 07.09.2026 an address the shop has no page for is never a 200
+       with the home page in it — a soft 404 is the one thing Google asks a
+       site not to do, because a page that says "found" while showing
        something else is indexed, then quietly dropped, and it drags the pages
        it links to down with it (src/lib/notfound-page.ts). The name below is
-       deliberately something no product, category or post could be called. */
+       deliberately something no product, section, brand or post could be
+       called.
+
+       Since 08.10.2026 the shop is the whole site, at Shopify's addresses, and
+       an unknown address has one of two honest answers rather than one:
+
+         · a real 404 page — for an address of no shop shape at all, and for a
+           set id nobody has;
+         · ONE 301 to the nearest page that exists — for the shapes Shopify
+           had (/collections/…, /products/…, /pages/…, /policies/…), where
+           Google still holds thousands of addresses from years of the old
+           store, and a 404 would throw away what each of them had earned
+           (src/lib/legacy-redirects.ts). */
     const NOPE = "smoke-test-no-such-page-8f2c1";
 
-    /* The shapes the `[...path]` route answers itself: a real 404 page, in the
-       language of the path, with a canonical that is its own address.
+    /* The 404s the root catch-all (src/app/[...path]) answers itself: a real
+       404 page, in the language of the prefix, with a canonical that is its
+       own address. The unprefixed one is the English 404 — there is no
+       "outside the shop" for an unknown address to fall into any more.
 
-       `info/` and `set/` were measured as 200 here on 08.09.2026, reported as
-       findings rather than asserted, and fixed the same day; this is where
-       they are held. They are worth naming because they failed in opposite
-       ways, and only one of the two could ever have been caught on a laptop:
-
-         · `info/<slug>` was checked against the directories `npm run prerender`
-           writes under public/shop2/info/, which no deployment has — only
-           public/shop2/index.html is traced into the function bundle — so the
-           check passed locally and was off on every host that serves the shop.
-           The five slugs are a build-time module now (src/data/legal-slugs.json,
-           tools/pack-legal.mjs), traced because the source names it.
-         · `set/<id>` was accepted whatever the id, on the stated grounds that
-           it had "its own request-time route that answers 404 for an id nobody
-           has" — true of p/<id> and blog/<slug>, and never true of sets. Sets
-           are the owner's to create and hide, so the id is asked of the
-           `bundles` table, exactly as a brand slug is.
-
-       Both were soft 404s in unlimited numbers, noindex on staging only for as
-       long as the whole host is, and indexable on rempireshop.com. */
-    for (const { lang, seg, html } of LANGS) {
-      for (const path of [
-        `/shop2${seg}/${NOPE}/`,
-        `/shop2${seg}/c/${NOPE}/`,
-        `/shop2${seg}/b/${NOPE}/`,
-        `/shop2${seg}/info/${NOPE}/`,
-        `/shop2${seg}/set/${NOPE}/`,
-      ]) {
+       `set/<id>` is held here for a reason worth keeping. On 08.09.2026, when
+       the shop lived under /shop2/, it was measured as a 200: it had been
+       accepted whatever the id, on the stated grounds that it had "its own
+       request-time route that answers 404 for an id nobody has" — true of
+       products and blog posts, never true of sets. Sets are the owner's to
+       create and hide, so the id is asked of the `bundles` table, exactly as a
+       brand slug is. (Its sibling that day, `info/<slug>`, was a 200 on every
+       host because the check read directories only a developer's disk has;
+       an unknown policy address is a 301 now, below.) Both were soft 404s in
+       unlimited numbers, noindex on staging only for as long as the whole
+       host is, and indexable on rempireshop.com. */
+    for (const { lang, prefix, html } of LANGS) {
+      for (const path of [`${prefix}/${NOPE}`, `${prefix}/collections/sets/${NOPE}`]) {
         const url = abs(path);
         const at = `${lang} · ${url}`;
         const res = await get(request, url);
@@ -675,29 +821,60 @@ test.describe(`deployed shop — ${BASE}`, () => {
         const body = await res.text();
         expect(robotsMetaOf(body), `${at}: a 404 must be noindex whatever the environment`).toMatch(/^noindex/);
         expect(canonicalOf(body), `${at}: canonical should be this address`).toBe(url);
-        expect(langOf(body), `${at}: <html lang> should follow the path`).toBe(html);
+        expect(langOf(body), `${at}: <html lang> should follow the prefix`).toBe(html);
       }
 
-      /* A product id nobody has is a different, deliberate shape: 404 **with
-         the noindex shell**, byte for byte what a hidden product gets, so that
-         a product switched off in the panel and a product that never existed
-         behave identically (docs/seo.md, "A product id nobody has is a 404
-         too"). The shell's head is the Russian home page's, so the canonical
-         and the <html lang> are not this address and are not asserted here —
-         app.js settles it on «Страница не найдена» a moment later, which
+      /* The Shopify shapes: ONE 301, to a page in the same language, and the
+         page answers 200 itself — a hop, never a chain and never a page that
+         is not the address's own.
+
+           · a collection handle nobody has → «Все товары» (asked of the
+             database first, in case it is a brand only the owner's own
+             products carry — notFoundPageResponse());
+           · a product handle that is no product, no alias and starts with no
+             brand → «Все товары» too;
+           · a policy or a page nobody has → «Контакты». */
+      const allProducts = publicPath(lang, "/c/all/");
+      const contact = publicPath(lang, "/info/contact/");
+      const moved: Array<[string, string]> = [
+        [`${prefix}/collections/${NOPE}`, allProducts],
+        [`${prefix}/products/${NOPE}`, allProducts],
+        [`${prefix}/pages/${NOPE}`, contact],
+        [`${prefix}/policies/${NOPE}`, contact],
+      ];
+      for (const [path, to] of moved) {
+        const url = abs(path);
+        const at = `${lang} · ${url}`;
+        const res = await get(request, url);
+        expect(res.status(), `${at}: should be one 301 to ${to}`).toBe(301);
+        const location = new URL(res.headers()["location"] || "", url).toString();
+        expect(location, `${at}: should move to ${to}`).toBe(abs(to));
+        expect((await get(request, location)).status(), `${at} → ${to}: the target should be a page, not another hop`).toBe(200);
+      }
+
+      /* A product id nobody has in the owner's own `c-…` shape is the one
+         product address that stays a 404 — **with the noindex shell**, byte
+         for byte what a hidden product gets, so that a product switched off in
+         the panel and a product that never existed behave identically
+         (docs/seo.md, "A product id nobody has is a 404 too"). Any other
+         handle is a Shopify address first and gets the 301 above. The shell's
+         head is the English home page's, so the canonical and the <html lang>
+         are not this address and are not asserted here — app.js settles it on
+         «Страница не найдена» a moment later, which
          e2e/sweep-storefront.spec.ts drives. The status and the noindex are
          the whole of the server-side contract, and they are what is checked. */
-      const prod = abs(`/shop2${seg}/p/${NOPE}/`);
+      const prod = abs(`${prefix}/products/c-${NOPE}`);
       const res = await get(request, prod);
       expect(res.status(), `${lang} · ${prod}: an id nobody has should be a 404`).toBe(404);
       expect(robotsMetaOf(await res.text()), `${lang} · ${prod}: must be noindex`).toMatch(/^noindex/);
     }
 
-    /* Outside /shop2/ there is no shell to patch, so this is Next's own
-       not-found — still a 404, which is the only part that matters. */
-    expect((await get(request, abs(`/${NOPE}/`))).status(), "a 404 outside /shop2/").toBe(404);
+    /* Not a page address at all — an API route nobody has. A plain 404, not
+       the shop's page: notFoundPageResponse() keeps that for addresses a
+       shopper could have typed. */
+    expect((await get(request, abs(`/api/${NOPE}`))).status(), "an unknown /api/ address").toBe(404);
 
-    await visit(page, await guardPage(page), abs(`/shop2/${NOPE}/`), "notfound", "the 404 screen", 404);
+    await visit(page, await guardPage(page), abs(publicPath("RU", `/${NOPE}/`)), "notfound", "the 404 screen", 404);
   });
 
   /* --------------------------------------------------------- empty shelves */
@@ -719,91 +896,186 @@ test.describe(`deployed shop — ${BASE}`, () => {
     const noPosts = !(Number((await blogRes.json()).total) > 0);
     test.skip(!noSets && !noPosts, "the shop has sets and articles — the page walk above covers both");
 
-    for (const { lang, seg } of LANGS) {
+    /* «Наборы» is /collections/sets and «Блог» /blogs/news since 08.10.2026,
+       in each language's prefix — publicPath() spells both. */
+    for (const { lang } of LANGS) {
       if (noSets) {
-        const url = abs(`/shop2${seg}/sets/`);
+        const url = abs(publicPath(lang, "/sets/"));
         expect((await get(request, url)).status(), `${lang} · ${url} with no set on sale`).toBe(404);
       }
       if (noPosts) {
-        const url = abs(`/shop2${seg}/blog/`);
+        const url = abs(publicPath(lang, "/blog/"));
         const res = await get(request, url);
         expect(res.status(), `${lang} · ${url} with no published article`).toBe(404);
         expect(robotsMetaOf(await res.text()), `${lang} · ${url}: a 404 must be noindex`).toMatch(/^noindex/);
       }
     }
-    const staticXml = await getText(request, abs("/sitemap-1.xml"), "the static sitemap");
-    if (noSets) expect(staticXml, "the sitemap names a set page with no set on sale").not.toMatch(/\/shop2\/(?:(?:et|en)\/)?sets?\//);
-    if (noPosts) expect(staticXml, "the sitemap names a blog page with no article").not.toMatch(/\/shop2\/(?:(?:et|en)\/)?blog\//);
+    /* Read by route, not by spelling: a set page is any address whose route
+       is /sets/ or /set/<id>/, in whichever language's prefix. */
+    const listed = shopPages(locsOf(await getText(request, abs("/sitemap-1.xml"), "the static sitemap")));
+    const named = (re: RegExp) => listed.filter((p) => re.test(p.rest)).map((p) => p.path);
+    if (noSets) expect(named(/^\/sets?\//), "the sitemap names a set page with no set on sale").toEqual([]);
+    if (noPosts) expect(named(/^\/blog\//), "the sitemap names a blog page with no article").toEqual([]);
 
     /* …and in a browser, once app.js has taken over and the boot probes have
        answered (visit() waits for the network to go quiet). */
     const g = await guardPage(page);
-    await visit(page, g, abs("/shop2/"), "home", "home with an empty shelf");
+    await visit(page, g, abs(publicPath("RU", "/")), "home", "home with an empty shelf");
     if (noSets) {
       await expect(page.locator("[data-nav-bundles]"), "«Наборы» in the header with no set on sale").toHaveCount(0);
       await expect(page.locator(".sec--bundles"), "a sets row on the home page with no set on sale").toHaveCount(0);
     }
     if (noPosts) await expect(page.locator("[data-nav-blog]"), "«Блог» in the header with no article").toHaveCount(0);
     if (noSets) {
-      await visit(page, g, abs("/shop2/gift/"), "gift", "the gift card with no set on sale");
+      await visit(page, g, abs(publicPath("RU", "/gift/")), "gift", "the gift card with no set on sale");
       await expect(page.locator('.crumbs [data-go="bundles"]'), "a «Наборы» crumb over the gift card").toHaveCount(0);
-      await visit(page, g, abs("/shop2/sets/"), "notfound", "«Наборы» with no set on sale", 404);
+      await visit(page, g, abs(publicPath("RU", "/sets/")), "notfound", "«Наборы» with no set on sale", 404);
     }
-    if (noPosts) await visit(page, g, abs("/shop2/blog/"), "notfound", "«Блог» with no article", 404);
+    if (noPosts) await visit(page, g, abs(publicPath("RU", "/blog/")), "notfound", "«Блог» with no article", 404);
   });
 
   /* ------------------------------------------------------------- redirects */
 
-  test("the redirects next.config.ts declares still redirect", async ({ request }) => {
-    /* `/` is the shop's front door at the switch and a 307 today on purpose —
-       a permanent redirect cached in every visitor's browser is the one thing
-       that would make moving the shop to the root painful (next.config.ts).
-       The `/shop2/ru/…` pair is permanent, and must stay permanent: it is what
-       stops a hand-typed prefix becoming a second address for the same page. */
-    const hops: Array<[string, string, number[]]> = [
-      ["/", "/shop2/", [307]],
-      ["/shop", "/shop2/", [307, 308]],
-      ["/shop2/ru/", "/shop2/", [301, 308]],
-      ["/shop2/ru/c/hair/", "/shop2/c/hair/", [301, 308]],
-      /* The names a human types for the three hand-written pages. Dim asked
-         for the checklist as /tests/ twice, from his phone, and got a 404
-         both times — a page whose whole job is to be opened from a chat
-         message cannot fail on the plural. 307, because these pages move to
-         the real domain later and nothing should have cached them. */
-      ["/tests/", "/test/", [307]],
-      ["/checklist/", "/test/", [307]],
-      ["/card/", "/cards/", [307]],
-      ["/karty/", "/cards/", [307]],
-      ["/guides/", "/guide/", [307]],
+  test("every old address answers ONE redirect to its page, and / is a page", async ({ request }) => {
+    /* Since 08.10.2026 the shop answers at Shopify's own addresses
+       (src/lib/shop-paths.mjs) and `/` is the English home page itself — a
+       200, where until that night it was a 307 to /shop2/. Every address that
+       is not the page answers ONE 301 to it (src/middleware.ts,
+       src/lib/legacy-redirects.ts), and one is the number that matters: each
+       extra hop is another round trip on a phone and a link Google follows
+       with less confidence. So nothing here follows a redirect — each hop is
+       read off the first response, and its target must answer 200 by itself.
+
+         · /shop2/… — the shop's address from 25.08 to the night of 08.10.2026:
+           in sent letters, in Montonio's trip back from the bank, on Renat's
+           home screen (/shop2/admin/). Unprefixed was RUSSIAN there, so
+           /shop2/c/hair/ is /ru/…, and /shop2/en/… is the unprefixed page.
+         · /shop — the prototype's, same convention.
+         · /products/<id>/ — no page address ends in a slash any more.
+         · /en-lv/… — one of Shopify's regional English storefronts, still in
+           Google's index.
+
+       The product is the one the page walk picked from the sitemap, so this
+       never names an id the shop has stopped selling. */
+    const { kinds } = await discover(request);
+    const id = kinds.find((k) => k.kind === "product")!.path.split("/").pop();
+
+    const home = await get(request, abs("/"));
+    expect(home.status(), "/ is the English home page — a 200, not a redirect").toBe(200);
+
+    const hops: Array<[string, string, number]> = [
+      ["/shop", "/ru", 301],
+      ["/shop2/", "/ru", 301],
+      ["/shop2/ru/", "/ru", 301],
+      ["/shop2/ru/c/hair/", "/ru/collections/uhod-za-volosami", 301],
+      ["/shop2/c/hair/", "/ru/collections/uhod-za-volosami", 301],
+      [`/shop2/en/p/${id}/`, `/products/${id}`, 301],
+      ["/shop2/admin/", "/admin", 301],
+      [`/products/${id}/`, `/products/${id}`, 301],
+      [`/en-lv/products/${id}`, `/products/${id}`, 301],
+      /* The names a human types for the hand-written pages (next.config.ts).
+         Dim asked for the checklist as /tests twice, from his phone, and got
+         a 404 both times — a page whose whole job is to be opened from a chat
+         message cannot fail on the plural. 307, because nothing should have
+         cached them. */
+      ["/tests", "/test", 307],
+      ["/checklist", "/test", 307],
+      ["/card", "/cards", 307],
+      ["/karty", "/cards", 307],
+      ["/guides", "/guide", 307],
     ];
-    for (const [from, to, codes] of hops) {
-      /* The first hop of `/shop` is trailingSlash's own `/shop` → `/shop/`,
-         so these follow to the end and compare the destination, with the
-         status of the first hop checked separately below. */
-      const followed = await get(request, abs(from), { redirects: true });
-      expect(followed.url(), `${from} should end up at ${to}`).toBe(abs(to));
-      expect(followed.status(), `${from} → ${to} should end in a page`).toBe(200);
-      const first = await get(request, abs(from));
-      expect(codes, `${from}: first hop answered ${first.status()}`).toContain(first.status());
+    for (const [from, to, code] of hops) {
+      const res = await get(request, abs(from));
+      expect(res.status(), `${from}: should answer ${code}`).toBe(code);
+      const location = new URL(res.headers()["location"] || "", abs(from)).toString();
+      expect(location, `${from} should move to ${to}`).toBe(abs(to));
+      const landed = await get(request, location);
+      expect(landed.status(), `${from} → ${to}: the target should be the page itself — one hop, no more`).toBe(200);
     }
+  });
+
+  test("the payment webhook answers both spellings of its address without a redirect", async ({ request }) => {
+    /* The other half of «no page address ends in a slash», and the half that
+       is money. Montonio POSTs every payment notice to /api/payments/notify/,
+       the address registered with it — and a webhook sender is not a
+       browser: most do not follow a redirect at all, and one that does may
+       resend the POST as a GET. A 301 or 308 here is not a slower answer, it
+       is a payment the shop never hears about, and an order that reads
+       «ожидает оплаты» for ever. So the API is outside the trailing-slash
+       rule (next.config.ts skipTrailingSlashRedirect, the middleware's
+       matcher) and answers both spellings itself.
+
+       postEmpty() sends no body, which the route refuses (`bad_body`) with a
+       400 before it has looked up an order: the status is the whole answer.
+       400 rather than "anything but 3xx", because a 404 (the route gone) or a
+       503 (no payment provider configured) would be a fault of its own. */
+    for (const path of ["/api/payments/notify/", "/api/payments/notify"]) {
+      const res = await postEmpty(request, abs(path));
+      expect(res.status(), `POST ${path} with an empty body should be refused by the route itself`).toBe(400);
+    }
+  });
+
+  /* ------------------------------------------------------------- language */
+
+  test("an unprefixed page is English to a crawler and a 302 to /ru for a Russian browser", async ({ request }) => {
+    /* Since 08.10.2026 an unprefixed address is English — Shopify's scheme, and
+       the x-default — and the edge sends a browser that asked for Russian or
+       Estonian to the twin in its language (src/middleware.ts): the saved
+       choice first (the `rempire_lang` cookie the switcher writes), else
+       Accept-Language. A 302, never a 301 — the same address answers
+       differently for different visitors, and a permanent redirect would be
+       cached as the answer for all of them — with `Vary: Accept-Language,
+       Cookie` on both answers, so no cache between the edge and a browser hands
+       a Russian visitor's redirect to a crawler, or the crawler's English page
+       to a Russian visitor. Googlebot sends no Accept-Language, and it must be
+       given the English page itself: anything else and the x-default is not
+       indexable at all. */
+    const { kinds } = await discover(request);
+    const ruProduct = kinds.find((k) => k.kind === "product")!.path;
+    const enProduct = abs(inLang(ruProduct, "EN"));
+
+    /* No Accept-Language and no cookie: get() sends neither. */
+    const bare = await get(request, enProduct);
+    expect(bare.status(), `${enProduct} with no language asked for: the English page itself`).toBe(200);
+    expect(langOf(await bare.text()), `${enProduct}: <html lang> with no language asked for`).toBe("en");
+    expect(bare.headers()["vary"] || "", `${enProduct}: the English page should say what it was chosen by`).toMatch(
+      /accept-language/i,
+    );
+
+    const asked = await get(request, enProduct, { headers: { "Accept-Language": "ru-RU" } });
+    expect(asked.status(), `${enProduct} for a Russian browser: a 302 to the /ru twin`).toBe(302);
+    expect(new URL(asked.headers()["location"] || "", enProduct).toString(), `${enProduct}: where the Russian browser is sent`).toBe(
+      abs(ruProduct),
+    );
+    expect(asked.headers()["vary"] || "", `${enProduct}: the 302 must vary on what decided it`).toMatch(/accept-language/i);
   });
 
   /* -------------------------------------------------------------- headers */
 
   test("the security headers next.config.ts sets are on a deployed response", async ({ request }) => {
     const { kinds } = await discover(request);
-    const shell = await getText(request, abs("/shop2/"), "the shell");
+    const shell = await getText(request, abs("/"), "the shell (the English home page)");
     const token = currentToken(shell);
+    const product = kinds.find((k) => k.kind === "product")!.path;
 
-    /* Two families, because next.config.ts sets two policies: /shop2/* — the
-       storefront and the admin panel, the one screen a stranger's text reaches
-       — gets a script-src with no 'unsafe-inline' at all, and that is the rule
-       that turns an innerHTML mistake into a broken layout instead of a
-       takeover (docs/audit/security-api.md H5). Everything else keeps
-       'unsafe-inline' for the legacy /shop/p/ pages' inline handover script. */
+    /* Two families, because next.config.ts sets two policies. Since
+       08.10.2026 the shop's pages are the whole site — `/`, `/ru`, every
+       product, and the admin panel at /admin, the one screen a stranger's text
+       reaches — so the strict policy is the DEFAULT for every path: a
+       script-src with no 'unsafe-inline' at all, the rule that turns an
+       innerHTML mistake into a broken layout instead of a takeover
+       (docs/audit/security-api.md H5). The files those pages load, still
+       under /shop2/ (assets did not move), carry it too. The named exceptions
+       keep 'unsafe-inline': the API (a few routes answer HTML of their own),
+       the prototype's leftovers under /shop/ and the four hand-written pages
+       (/test, /guide, /cards, /golive). /admin is asked anonymously, like
+       everything here: the shell at 200, the panel's door still shut. */
     const cases: Array<{ url: string; strict: boolean }> = [
-      { url: abs("/shop2/"), strict: true },
-      ...kinds.filter((k) => k.kind === "product").map((k) => ({ url: abs(k.path), strict: true })),
+      { url: abs("/"), strict: true },
+      { url: abs(publicPath("RU", "/")), strict: true },
+      { url: abs(product), strict: true },
+      { url: abs(inLang(product, "EN")), strict: true },
+      { url: abs("/admin"), strict: true },
       { url: abs(`/shop2/app.min.js?v=${token}`), strict: true },
       { url: abs("/api/geo/"), strict: false },
     ];
@@ -818,11 +1090,12 @@ test.describe(`deployed shop — ${BASE}`, () => {
       expect(h["referrer-policy"], `${url}: Referrer-Policy`).toBe("strict-origin-when-cross-origin");
       expect(h["strict-transport-security"], `${url}: HSTS`).toBe("max-age=31536000; includeSubDomains");
 
-      /* The camera and the microphone are the two permissions /shop2/* opens
-         — the admin's barcode scanner and the assistant's voice input — and
-         `(self)` is the whole of each opening: no third party and no
-         cross-origin frame gets either. Everywhere else, and every other
-         permission everywhere, stays denied. */
+      /* The camera and the microphone are the two permissions the shop's
+         pages open — the admin's barcode scanner and the assistant's voice
+         input, at /admin and /admin/scan — and `(self)` is the whole of each
+         opening: no third party and no cross-origin frame gets either. The
+         loose family (the API) keeps both shut, and every other permission
+         everywhere stays denied. */
       const perms = h["permissions-policy"] || "";
       expect(perms, `${url}: Permissions-Policy`).toContain(strict ? "camera=(self)" : "camera=()");
       expect(perms, `${url}: Permissions-Policy`).toContain(strict ? "microphone=(self)" : "microphone=()");
@@ -853,7 +1126,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
       if (strict) {
         expect(
           csp["script-src"],
-          `${url}: /shop2/* must never allow an inline script — this is the policy the audit asked for`,
+          `${url}: the shop's pages and assets must never allow an inline script — this is the policy the audit asked for`,
         ).not.toContain("'unsafe-inline'");
       }
     }

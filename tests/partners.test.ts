@@ -233,7 +233,8 @@ describe("renderPartnerWelcome", () => {
       const mail = renderPartnerWelcome({ email: "x@example.com", customer_name: "Kai" }, lang, { percent: 25 });
       expect(mail.html).toContain(needle);
       expect(mail.text).toContain(needle);
-      expect(mail.html).toContain("/shop2/account/");
+      // the account page in the letter's own language (/ru/account, /et/account, /account)
+      expect(mail.html).toContain(`${lang === "en" ? "" : "/" + lang}/account"`);
       expect(mail.subject).toContain("Rempire");
       // a service letter — no unsubscribe link
       expect(mail.html).not.toContain("Отписаться");

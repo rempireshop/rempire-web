@@ -25,7 +25,7 @@ import { describe, expect, it } from "vitest";
 import { renderNewsletter } from "@/emails/newsletter";
 
 const IMG = "https://cdn.example.com/banner.jpg";
-const TO = "https://rempireshop.com/shop2/c/hair/";
+const TO = "https://rempireshop.com/collections/hair-care";
 
 function letter(body: string) {
   return renderNewsletter({ subject: "Тема", body }, "ru");

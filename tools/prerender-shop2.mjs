@@ -96,7 +96,7 @@ import {
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
 } from "../src/lib/seo-head.mjs";
-import { parseShopPath, publicPath, STATE_RESTS } from "../src/lib/shop-paths.mjs";
+import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS } from "../src/lib/shop-paths.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -1264,9 +1264,12 @@ function infoPage(slug, lang) {
      policy text at all — it is built from the shop's own details, as in
      screenContact(), and it needs no lawyer's note under it. */
   const isContact = slug === "contact";
+  /* …and a policy text that links to another policy links to it in THIS
+     page's language (a page translated from the Russian text kept the
+     Russian addresses otherwise). */
   const body = isContact
     ? contactBody(code)
-    : resolveIdentity(String(pg.html || "")).replace(/<(\/?)h1(\s|>)/gi, "<$1h2$2");
+    : respellShopLinks(resolveIdentity(String(pg.html || "")), code).replace(/<(\/?)h1(\s|>)/gi, "<$1h2$2");
 
   const others = LEGAL_SLUGS.filter(s => s !== slug).map(s => {
     const o = legalFor(s, code);

@@ -97,7 +97,7 @@ describe("an id the feed wrote → the product and the size", () => {
     for (const o of offers) {
       const query = [o.slug ? `size=${encodeURIComponent(o.slug)}` : "", o.available ? "buy=1" : ""].filter(Boolean).join("&");
       const want = `/ru/products/${encodeURIComponent(o.productId)}` + (query ? "?" + query : "");
-      expect([o.id, resolveCartLink([{ id: o.id, qty: 1 }], EMPTY, "", offers).path]).toEqual([o.id, want]);
+      expect([o.id, resolveCartLink([{ id: o.id, qty: 1 }], EMPTY, "ru", offers).path]).toEqual([o.id, want]);
     }
   });
 
