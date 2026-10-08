@@ -31,6 +31,11 @@
  *                 the checkout offers, per item, with the item's own price as
  *                 the basket: a bottle that reaches a country's free-delivery
  *                 threshold ships at 0 there. See shippingFor().
+ *   delivery      business days the shop already promises: its own handling
+ *                 time (the same day, sometimes the next — the owner's
+ *                 answer) and the carriers' transit times printed on
+ *                 «Доставка и оплата» and in the terms of delivery. See
+ *                 HANDLING_DAYS and TRANSIT_DAYS.
  *   title/text    the storefront's own name (translateProductName, the
  *                 server port of trName() in app.js) and its description:
  *                 the owner's override for the language, else the static
@@ -67,6 +72,7 @@ import {
   loadShippingRules,
   pickupOffered,
   quoteFromRules,
+  shippingZone,
   type ShippingRules,
 } from "@/lib/shipping";
 import { offeredCarriers } from "@/lib/shipping/country-prices";
@@ -347,7 +353,79 @@ const SERVICE: Record<FeedLang, { parcel: string; courier: string }> = {
   RU: { parcel: "Пакомат", courier: "Курьер" },
 };
 
-export type ShippingOption = { country: string; service: "parcel" | "courier"; price: number };
+/* ---------- delivery times ---------------------------------------------- */
+
+/** A span of business days, both ends included. */
+export type DaySpan = { min: number; max: number };
+
+/**
+ * How long the shop takes to hand a parcel to the carrier, in business days:
+ * usually the same day, sometimes the next — the owner's answer (Dim,
+ * 08.10.2026), and what the terms of delivery already say (7.2 in
+ * public/shop/legal.*.js: an order placed on a working day before 14:00
+ * usually leaves that same day).
+ *
+ * Written once per item, as the standalone g:min_handling_time and
+ * g:max_handling_time, not inside every g:shipping. Google takes either
+ * («you can also use the standalone handling time attributes instead of the
+ * shipping handling time sub-attributes»), and the parcel leaves the same
+ * shelf whichever country it is bound for. Inside every g:shipping the pair
+ * would cost about 1.4 MB per feed (some 15 800 entries × 86 bytes), and the
+ * Russian feed would pass the 4.5 MB a Vercel Function may answer with — a
+ * 413 instead of a feed. tests/merchant-feed.test.ts keeps every feed under it.
+ */
+export const HANDLING_DAYS: DaySpan = { min: 0, max: 1 };
+
+/**
+ * How long the carrier takes, in business days, from hand-over to the
+ * customer — by a country's own row, else by the zone the checkout prices by
+ * (shippingZone()). These are the times the shop already promises, and no
+ * others:
+ *   · the terms of delivery, 7.2 in public/shop/legal.{en,et,ru}.js —
+ *     «Delivery inside Estonia normally takes 1–3 working days; to Latvia,
+ *     Lithuania and Finland 2–5 working days; elsewhere in Europe 3–8
+ *     working days»;
+ *   · the «Сроки» list of «Доставка и оплата» (DELIVERY_ROWS in
+ *     public/shop2/app.js), whose note calls them the carriers' estimate.
+ * tests/merchant-feed.test.ts holds this table to both, so a number reaches
+ * Google only once the shop itself prints it.
+ *
+ * One span for a locker and a courier: neither the terms nor the page tells
+ * them apart, and no carrier's own time is recorded anywhere in the shop
+ * (src/data/montonio-tariffs.json carries prices only). A zone with no row —
+ * `default`, outside Europe, which the feed never lists — gets no transit
+ * time rather than a guessed one.
+ *
+ * Not sent: which weekdays count — Google assumes Monday to Saturday unless
+ * shipping_handling_business_days / shipping_transit_business_days say
+ * otherwise, and whether a parcel leaves on a Saturday is the owner's to say
+ * — and the 14:00 cut-off of 7.2, which Google takes as a g:shipping
+ * sub-attribute (g:handling_cutoff_time + _timezone): some 1.9 MB more per
+ * feed.
+ */
+export const TRANSIT_DAYS: Readonly<Record<string, DaySpan>> = {
+  EE: { min: 1, max: 3 },
+  LV: { min: 2, max: 5 },
+  LT: { min: 2, max: 5 },
+  FI: { min: 2, max: 5 },
+  EU: { min: 3, max: 8 },
+};
+
+/** The carrier's days to one country: its own row, else its zone's, else null — never a made-up one. */
+export function transitFor(country: string): DaySpan | null {
+  const has = (k: string) => Object.prototype.hasOwnProperty.call(TRANSIT_DAYS, k);
+  if (has(country)) return TRANSIT_DAYS[country];
+  const zone = shippingZone(country);
+  return has(zone) ? TRANSIT_DAYS[zone] : null;
+}
+
+export type ShippingOption = {
+  country: string;
+  service: "parcel" | "courier";
+  price: number;
+  /** The carrier's business days to that country — TRANSIT_DAYS; null where the shop promises none. */
+  transit: DaySpan | null;
+};
 
 /**
  * What delivering ONE of this item costs, country by country — the cheapest
@@ -376,11 +454,14 @@ export function shippingFor(price: number, rules: ShippingRules): ShippingOption
     return Math.min(...quotes);
   };
   for (const country of sellCountries(rules)) {
+    const transit = transitFor(country);
     if (pickupOffered(rules, country)) {
       const carriers = offeredCarriers(country, "parcel");
-      if (carriers.length) out.push({ country, service: "parcel", price: cheapest(country, "parcel", carriers) });
+      if (carriers.length) out.push({ country, service: "parcel", price: cheapest(country, "parcel", carriers), transit });
     }
-    out.push({ country, service: "courier", price: cheapest(country, "courier", offeredCarriers(country, "courier")) });
+    out.push({
+      country, service: "courier", price: cheapest(country, "courier", offeredCarriers(country, "courier")), transit,
+    });
   }
   return out;
 }
@@ -624,7 +705,9 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     missingGtin: 0, hidden: 0, skippedNoImage: [], cyrillicTitles: [],
   };
 
-  /* Many items share a price, and the shipping block depends on nothing else. */
+  /* Many items share a price, and the shipping block depends on nothing else.
+     Each entry carries the carrier's days where the shop promises some; the
+     shop's own days are the item's (HANDLING_DAYS, below). */
   const shipMemo = new Map<string, string>();
   const shippingXml = (price: number) => {
     const key = money(price).toFixed(2);
@@ -633,7 +716,11 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
       xml = shippingFor(price, rules)
         .map((s) =>
           `<g:shipping><g:country>${s.country}</g:country><g:service>${xmlText(service[s.service])}</g:service>` +
-          `<g:price>${eurText(s.price)}</g:price></g:shipping>`)
+          `<g:price>${eurText(s.price)}</g:price>` +
+          (s.transit
+            ? `<g:min_transit_time>${s.transit.min}</g:min_transit_time><g:max_transit_time>${s.transit.max}</g:max_transit_time>`
+            : "") +
+          "</g:shipping>")
         .join("\n    ");
       shipMemo.set(key, xml);
     }
@@ -731,6 +818,9 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
         f.push(el("g:age_group", "adult"));
         f.push(el("g:gender", "unisex"));
       }
+      /* the shop's own days, once for every g:shipping below — HANDLING_DAYS */
+      f.push(el("g:min_handling_time", HANDLING_DAYS.min));
+      f.push(el("g:max_handling_time", HANDLING_DAYS.max));
       f.push(shippingXml(r.price));
       items.push("  <item>\n    " + f.join("\n    ") + "\n  </item>");
       stats.items++;
