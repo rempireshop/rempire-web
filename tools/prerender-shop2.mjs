@@ -79,6 +79,8 @@ import { fetchProductOverrides } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* «Доставка и оплата»: the builder and the rules the checkout bills from, lifted out of app.js. */
 import { liftDelivery } from "./lib/delivery-lift.mjs";
+/* /llms.txt, from the data this run writes the pages from. */
+import { buildLlmsTxt, deliveryFromPage } from "./lib/llms-txt.mjs";
 /* robots.txt: the production and the staging policy (see «robots» below). */
 import { robotsProduction as robotsProductionPolicy, robotsStaging as robotsStagingPolicy } from "./lib/robots-policy.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
@@ -2063,6 +2065,47 @@ const robotsStaging = robotsStagingPolicy(abs("/sitemap.xml"));
 await writeFile(path.join(PUB, "robots.production.txt"), robotsProduction, "utf8");
 await writeFile(path.join(PUB, "robots.staging.txt"), robotsStaging, "utf8");
 await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsStaging, "utf8");
+
+/* ---------- llms.txt ------------------------------------------------------
+
+   The shop described for AI assistants (llmstxt.org) — tools/lib/llms-txt.mjs
+   says what goes in. Every fact comes from what this run has just written the
+   pages from: the catalogue on sale, the section and brand descriptions of
+   src/lib/seo-copy.mjs, the shipping page's own price table over the rules
+   the checkout bills with, its pickup, delivery-time and returns sentences in
+   English, the policy titles, the shop's details and the published posts. So
+   it is regenerated with every deploy and cannot drift from the pages. No
+   line for it in robots.txt: robots.txt has no convention for one. */
+{
+  const EN = s => tr(s, "EN", false);
+  /* the English shipping page, drawn exactly as /policies/shipping-policy is
+     (minus the parts llms.txt has no use for: logos, contacts, the policy) */
+  const facts = DELIVERY && SHIP_RULES_LIVE ? deliveryFromPage(DELIVERY.page({
+    lang: "EN", tr: EN, esc, eur: n => eurFor(n, "EN"), title: "",
+    rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
+    montonio: DELIVERY.montonio, address: IDENTITY.address, hoursHTML: "", phoneHTML: "", mailHTML: "",
+    logos: {}, banks: null, loyalty: LOYALTY_LIVE, link: (s, label) => esc(label), legalHtml: ""
+  }), { returnsHeading: EN("Возврат товара") }) : null;
+  const delivery = facts && facts.rows.length ? facts : null;
+  const hours = CONTENT_DAYS.filter(([key]) => SHOP_CONTENT.hours && SHOP_CONTENT.hours[key])
+    .map(([key, ru]) => EN(ru) + ": " + (SHOP_CONTENT.hours[key] === "closed" ? EN("выходной") : SHOP_CONTENT.hours[key]));
+  const llms = buildLlmsTxt({
+    base: BASE,
+    products: ON_SALE,
+    identity: IDENTITY,
+    social: SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean),
+    hours,
+    policies: LEGAL_SLUGS.map(slug => {
+      const pg = legalFor(slug, "EN");
+      return { slug, title: LEGAL_EN[slug] ? pg.title : EN((LEGAL[slug] || pg).title) };
+    }),
+    delivery,
+    returns: facts ? facts.returns : "",
+    posts: BLOG_POSTS.map(p => ({ title: pickLang(p.title, "EN") || p.slug, slug: p.slug })),
+    ctx: SEO_CTX
+  });
+  await writeFile(path.join(PUB, "llms.txt"), llms, "utf8");
+}
 
 const perLang = CATALOGUE.length + CATS.length + 1 + BRANDS.length + 1 +
   LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 + 1 +
