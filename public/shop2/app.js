@@ -14607,9 +14607,7 @@
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
         cSocialsHTML("socials--bottom") +
-        /* No «Админка» link here since the launch (Dim, 21.09.2026): Renat
-           opens the panel at /admin, and the shop does not advertise it. */
-        "</div>" +
+        '<button class="link ftr__admin" data-go="admin">Админка</button></div>' +
     "</div></footer>";
   }
 
