@@ -65,8 +65,9 @@ import {
   stripTags,
   T,
 } from "@/lib/seo-head.mjs";
+import { seoHead } from "@/lib/seo-copy.mjs";
 
-type Lang = { code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
+type Lang ={ code: "RU" | "ET" | "EN"; seg: string; tag: string; htmlLang: string; ogLocale: string };
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
 const CATALOGUE = new Map((catalogueMin as Min[]).map((p) => [p.id, p]));
 type Variants = Record<string, { sizes: string[]; prices: number[] } | undefined>;
@@ -322,10 +323,13 @@ export function renderBlogListPage(
     dataScript(code, list.posts, list.total) +
     "</div>";
   const first = list.posts[0];
+  /* The blog list's own title and description (audit §1A) — the words the
+     prerendered list and setHead() in app.js print, from src/lib/seo-copy.mjs. */
+  const copy = seoHead("blog", "", code, null);
   const head = headBlock({
     base, robots, lang, seg, rest,
-    title: fitTitle(heading, heading + " — REMPIRE"),
-    desc: clip(t.blogDesc, 158),
+    title: copy.t,
+    desc: copy.d,
     image: first ? `${base}/shop2/og/blog-${encodeURIComponent(first.slug)}${ogLangSuffix(code)}.png?v=${ogStamp(first.updatedAt)}` : base + "/brand/og-default.png",
     imageAlt: heading, ogType: "website", ldMain: false,
     jsonld: [

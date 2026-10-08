@@ -1794,8 +1794,6 @@
          they all follow from this one line — src/lib/seo-head.mjs carries the
          same word for the request-time blog page). */
       "Блог": "Blogi",
-      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
-        "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
       "Блог временно недоступен — попробуйте позже.": "Blogi pole ajutiselt saadaval — proovige hiljem uuesti.",
       "Другие статьи": "Teised artiklid",
@@ -5372,8 +5370,6 @@
         "By pressing “Place the order” you agree to the terms and the returns policy.",
       // blog
       "Блог": "Blog",
-      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
-        "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
       "Статей пока нет — загляните позже.": "No articles yet — check back soon.",
       "Блог временно недоступен — попробуйте позже.": "The blog is temporarily unavailable — please try again later.",
       "Другие статьи": "More articles",
@@ -14984,19 +14980,27 @@
       "</div></section></div>";
   }
 
+  /* The line under a section's heading, in Russian; translateTree() puts it
+     into ET and EN through the dictionary like every other string here.
+     Top level, one key per line, on purpose: tools/prerender-shop2.mjs lifts
+     this declaration and catIntro() below out of this file by their first
+     and last lines, so the static page carries the same line the shop draws
+     a moment later instead of a sentence of its own. */
+  var CAT_INTROS = {
+    all: "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.",
+    merch: "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.",
+    perfume: "Ниша и классика, которые держим в наличии в Таллинне.",
+    body: "Гели, мыло и уход за телом — включая мыло собственной варки."
+  };
+  /** The intro of a section — or of a brand page, when `brand` is given. Plain text, not HTML. */
+  function catIntro(cat, brand) {
+    if (brand) return "Всё, что есть в наличии от " + brand + " — во всех разделах магазина.";
+    return CAT_INTROS[cat] || "Профессиональные средства, которыми команда Rempire работает в салоне.";
+  }
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
-    var CAT_INTROS = {
-      merch: "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.",
-      perfume: "Ниша и классика, которые держим в наличии в Таллинне.",
-      body: "Гели, мыло и уход за телом — включая мыло собственной варки."
-    };
     var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
-    var intro = S.brand
-      ? "Всё, что есть в наличии от " + esc(S.brand) + " — во всех разделах магазина."
-      : S.cat === "all"
-        ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
-        : CAT_INTROS[S.cat] || "Профессиональные средства, которыми команда Rempire работает в салоне.";
+    var intro = esc(catIntro(S.cat, S.brand));
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / ' +
         (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
@@ -47989,7 +47993,6 @@
   function giftDescText(lang) {
     return trText(GIFT_DESC_HEAD, lang, false) + " " + giftAmountsPhrase() + " " + trText(GIFT_DESC_TAIL, lang, false);
   }
-  var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   // the sentence screenBrands() opens with, reused as that page's description
   var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
   // the sentence screenNotFound() opens with, reused as that page's description
@@ -48003,6 +48006,229 @@
     var m = document.querySelector('meta[name="robots"]');
     return (m && m.getAttribute("content")) || "";
   })();
+  /* ---------- the head copy: src/lib/seo-copy.mjs, copied ------------------
+     The titles, meta descriptions and link-preview texts of the home page,
+     the sections, the brands and the blog list, and the product-title rule —
+     the SAME block the prerender and the request-time pages import, so the
+     head a crawler is served and the head it reads after this script runs
+     are one text (SEO audit 08.10.2026, W4/T2). Written by
+     `node tools/sync-seo-copy.mjs`; never edit between the markers by hand —
+     tests/seo-copy.test.ts and the prerender both refuse a drifted copy. */
+/* seo-copy:start */
+  var SEO_TITLE_MAX = 60;
+  var SEO_DESC_MAX = 155;
+
+  /** The copy itself — a function, not a var, so the shop can call it from
+      anywhere in its script whatever order the lines run in. */
+  function seoCopy() {
+    return {
+      home: {
+        EN: {
+          t: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1, Tallinn; EU-wide delivery.",
+          ogT: "REMPIRE — salon hair, beard & skin care, Tallinn",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our Tallinn salon team. Pickup at Mardi 1 or delivery across Europe."
+        },
+        ET: {
+          t: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1, tasuta tarne alates {free}.",
+          dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa.",
+          ogT: "REMPIRE — salongi juukse-, habeme- ja nahahooldus",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie Tallinna salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa."
+        },
+        RU: {
+          t: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона REMPIRE. Самовывоз на Mardi 1, доставка по Эстонии и ЕС.",
+          ogT: "REMPIRE — салонный уход для волос, бороды и кожи",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона в Таллинне. Самовывоз на Mardi 1 или доставка по Европе."
+        }
+      },
+      /* [title, description] per section and language — «all» is «Все товары». */
+      cat: {
+        hair: {
+          EN: ["Hair Care: Shampoos, Conditioners, Masks & Scalp Care", "System 4, Kevin.Murphy, Davines and Paul Mitchell: shampoos, conditioners, masks and scalp treatments for oily, dry or thinning hair. Pickup in Tallinn."],
+          ET: ["Juuksehooldus: šampoonid, palsamid ja juuksemaskid", "System 4, Kevin.Murphy, Davines ja Paul Mitchell: šampoonid, palsamid, juuksemaskid ja peanahahooldus rasustele, kuivadele või hõrenevatele juustele."],
+          RU: ["Уход за волосами: шампуни, кондиционеры, маски", "System 4, Kevin.Murphy, Davines и Paul Mitchell: шампуни, кондиционеры, маски и средства для кожи головы — от жирности, сухости и выпадения."]
+        },
+        styling: {
+          EN: ["Hair Styling: Wax, Paste, Clay, Hairspray & Powder", "Kevin.Murphy, Davines, Gatsby and Paul Mitchell styling: matte paste, wax, clay, texture spray and volume powder, plus our paste-vs-wax guide."],
+          ET: ["Viimistlus: juuksevaha, pasta, savi ja juukselakk", "Kevin.Murphy, Davines, Gatsby ja Paul Mitchell: juuksevaha, matt pasta, savi, tekstuurisprei ja puuder. Pasta, vaha või savi? Vaata meie juhendit."],
+          RU: ["Стайлинг: воск, паста, глина и спреи для волос", "Kevin.Murphy, Davines, Gatsby и Paul Mitchell: воск, матовая паста, глина, текстурирующие спреи и пудра для объёма. Что выбрать — в нашем разборе."]
+        },
+        beard: {
+          EN: ["Beard Care & Shaving: Beard Oil, Balm & Aftershave", "Captain Fawcett, Proraso and Davines beard oils, balms, moustache wax, shaving gels and aftershave — the products our Tallinn barbers use. EU delivery."],
+          ET: ["Habemehooldus: habemeõli, habemepalsam, raseerimine", "Captain Fawcett, Proraso ja Davines: habemeõlid, habemepalsamid, vuntsivaha, raseerimisgeelid ja raseerimisjärgne hooldus. Järeletulek Mardi 1."],
+          RU: ["Уход за бородой: масло, бальзам, воск, бритьё", "Captain Fawcett, Proraso и Davines: масла и бальзамы для бороды, воск для усов, гели для бритья и лосьоны после бритья. Самовывоз на Mardi 1."]
+        },
+        face: {
+          EN: ["Face Care: Korean Skincare, Toners, Serums & Masks", "Anua, Cosrx, Laneige, Nature Republic and Gummy Korean skincare plus Lumin for men: toners, cleansers, serums, masks and SPF. Pickup in Tallinn."],
+          ET: ["Näohooldus: Korea kosmeetika, toonikud ja seerumid", "Anua, Cosrx, Laneige, Nature Republic, Gummy ja Lumin meestele: toonikud, puhastusvahendid, seerumid, maskid ja päikesekreem. Järeletulek Mardi 1."],
+          RU: ["Уход за лицом: корейская косметика, тонеры, сыворотки", "Anua, Cosrx, Laneige, Nature Republic, Gummy и мужская косметика Lumin: тонеры, умывалки, сыворотки, маски и SPF. Самовывоз на Mardi 1, Таллинн."]
+        },
+        body: {
+          EN: ["Body Care: Tattoo Aftercare, Handmade Soap & Body Wash", "Yumain tattoo aftercare (numbing serum, balm, cleansing foam), REMPIRE's own handmade soap and Davines and Byredo body wash. Pickup at Mardi 1, Tallinn."],
+          ET: ["Kehahooldus: tätoveeringu hooldus, käsitööseep, dušigeel", "Yumaini tätoveeringu järelhooldus (seerum, palsam, puhastusvaht), REMPIRE'i käsitööseep ning Davinesi ja Byredo dušigeelid. Järeletulek Mardi 1."],
+          RU: ["Уход за телом: уход за тату, мыло ручной работы", "Yumain для ухода за татуировкой (сыворотка, бальзам, пенка), мыло ручной работы REMPIRE, гели для душа Davines и Byredo. Самовывоз на Mardi 1."]
+        },
+        perfume: {
+          EN: ["Niche & Designer Perfume: Creed, Xerjoff, Byredo, Kilian", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 and Roja: original perfume, in stock in Tallinn. Pickup at Mardi 1."],
+          ET: ["Nišiparfüümid: Creed, Xerjoff, Byredo, Tom Ford, Kilian", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 ja Roja: originaalparfüümid, laos Tallinnas. Järeletulek Mardi 1."],
+          RU: ["Нишевая парфюмерия: Creed, Xerjoff, Byredo, Tom Ford", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 и Roja — оригинальная парфюмерия в наличии в Таллинне. Самовывоз на Mardi 1."]
+        },
+        merch: {
+          EN: ["REMPIRE Merch: Artist T-Shirts in Small Runs", "Oversized and deep-cut T-shirts with prints by REMPIRE's artists, in small runs — including the Siim Hanikat × REMPIRE collab. EU delivery."],
+          ET: ["REMPIRE merch: kunstnike disainiga T-särgid", "Oversized ja sügava kaelusega T-särgid REMPIRE'i kunstnike trükistega, väikestes tiraažides, sh Siim Hanikat × REMPIRE. Järeletulek Tallinnas."],
+          RU: ["Мерч REMPIRE: футболки с принтами художников", "Оверсайз-футболки и футболки с глубоким вырезом с принтами художников REMPIRE, малыми тиражами, включая коллаб Siim Hanikat × REMPIRE."]
+        },
+        all: {
+          EN: ["All Products: Hair, Beard, Skin Care & Perfume | REMPIRE", "Every product on the REMPIRE shelf: salon hair care and styling, beard care, Korean skincare, body care and niche perfume. Pickup in Tallinn, EU delivery."],
+          ET: ["Kõik tooted: juuksed, habe, nahk ja parfüümid | REMPIRE", "Kogu REMPIRE'i valik: salongi juuksehooldus ja viimistlus, habemehooldus, Korea nahahooldus, kehahooldus ja nišiparfüümid. Järeletulek Tallinnas."],
+          RU: ["Все товары: волосы, борода, кожа, парфюмерия | REMPIRE", "Весь ассортимент REMPIRE: салонный уход и стайлинг для волос, уход за бородой, корейская косметика, уход за телом и парфюмерия. Самовывоз в Таллинне."]
+        }
+      },
+      /* A brand page: its own [title, meta description] where the owner has
+         approved a text for it, otherwise the template's fallback title
+         «{brand} in Tallinn | REMPIRE» (audit §1A) over the description the
+         brand pages have always carried. */
+      brand: {},
+      brandFallback: { EN: "{brand} in Tallinn | REMPIRE", ET: "{brand} Tallinnas | REMPIRE", RU: "{brand} в Таллинне | REMPIRE" },
+      brandGeneric: {
+        EN: "{brand} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.",
+        ET: "{brand} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.",
+        RU: "{brand} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина."
+      },
+      blog: {
+        EN: ["Hair, Beard & Skin Care Guides — REMPIRE Blog", "Practical guides from the REMPIRE salon in Tallinn: how to choose a shampoo for your scalp, paste vs wax vs clay, beard care in winter, and more."],
+        ET: ["Juukse-, habeme- ja nahahoolduse nõuanded — REMPIRE", "Praktilised juhendid REMPIRE'i salongist Tallinnas: kuidas valida šampooni peanaha järgi, pasta, vaha või savi, habemehooldus talvel ja muud."],
+        RU: ["Советы по уходу за волосами, бородой и кожей — REMPIRE", "Разборы от салона REMPIRE в Таллинне: как выбрать шампунь по типу кожи головы, паста, воск или глина, уход за бородой зимой и другое."]
+      },
+      /* The words Russians type for two products, from Search Console (audit
+         §1A): «шампунь номер 1» and «ксерджофф наксос». `tail` goes after the
+         type, `name` in brackets after the maker's name. Nothing else gets
+         one — an alias nobody searches for is a longer title for nothing. */
+      ruAlias: {
+        "system-4-special-shampoo-1": { tail: "№1" },
+        "xerjoff-1861-naxos-eau-de-parfum-100ml": { name: "Ксерджофф Наксос" }
+      },
+      from: { EN: "from ", ET: "alates ", RU: "от " }
+    };
+  }
+
+  /** «70 €» / «€70» — the shop's money, whole euros without decimals (eur() in app.js). */
+  function seoEur(n, lang) {
+    var v = (Math.round(n * 100) / 100).toFixed(2);
+    return lang === "EN" ? "€" + v.replace(".00", "") : v.replace(".", ",").replace(",00", "") + " €";
+  }
+
+  /** Cut at a word with «…», never mid-word — clip() in src/lib/seo-head.mjs. */
+  function seoClip(s, max) {
+    var t = String(s == null ? "" : s).trim();
+    if (t.length <= max) return t;
+    var cut = t.slice(0, max - 1), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
+  }
+
+  function seoFill(s, vars) {
+    return String(s).replace(/\{(\w+)\}/g, function (m, k) {
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : m;
+    });
+  }
+
+  /**
+   * The free-delivery threshold for one country, from the rules the checkout
+   * bills with: the country's own key, then the shop-wide «freeFrom» — the
+   * steps threshold() in app.js and quoteFromRules() on the server take (no
+   * Baltic country has a zone key of its own). null where delivery to it is
+   * never free.
+   */
+  function seoFreeFrom(rules, cc) {
+    var by = (rules && rules.freeFromByCountry) || {};
+    var v = Object.prototype.hasOwnProperty.call(by, cc) ? by[cc] : rules ? rules.freeFrom : null;
+    return typeof v === "number" && isFinite(v) && v >= 0 ? v : null;
+  }
+
+  /** «… | REMPIRE» in the shop's house form, «… — REMPIRE» — what fitTitle()
+      writes everywhere else, so a title ends the same way on every page. */
+  function seoHouse(t) {
+    return String(t).replace(/\s*\|\s*REMPIRE$/, " — REMPIRE");
+  }
+
+  /** «от 7,90 €» / «alates 7,90 €» / «from €7.90» — a product's price as its title prints it. */
+  function seoPriceText(price, from, lang) {
+    return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
+  }
+
+  /** «brand + name — type», with the one alias Russians type for it, if any. */
+  function seoProductCore(id, core, lang) {
+    var a = lang === "RU" ? seoCopy().ruAlias[id] : null;
+    if (!a) return core;
+    var cut = core.lastIndexOf(" — ");
+    if (a.name) return cut > 0 ? core.slice(0, cut) + " (" + a.name + ")" + core.slice(cut) : core + " (" + a.name + ")";
+    return core + " " + a.tail;
+  }
+
+  /**
+   * A product's title: brand, the maker's name and the type, with the price
+   * when it still fits — and never «— купить в Rempire» or «— REMPIRE» to
+   * fill the line (audit §1A). Too long even bare, it is cut at a word.
+   */
+  function seoProductTitle(core, priceText) {
+    var full = core + " · " + priceText;
+    if (priceText && full.length <= SEO_TITLE_MAX) return full;
+    return seoClip(core, SEO_TITLE_MAX);
+  }
+
+  /**
+   * The head of one page: { t, d, ogT, ogD } — title, meta description and the
+   * link-preview pair (the same two, except on the home page).
+   *
+   *   kind  "home" | "cat" | "brand" | "blog"
+   *   key   the section ("hair" … "all") or the brand's name; "" otherwise
+   *   lang  "RU" | "ET" | "EN"
+   *   ctx   { rules } — settings.shipping_rules as the checkout bills them
+   */
+  function seoHead(kind, key, lang, ctx) {
+    var C = seoCopy();
+    var rules = ctx && ctx.rules;
+    var t = "", d = "", ogT = "", ogD = "";
+    if (kind === "home") {
+      var h = C.home[lang] || C.home.EN;
+      var free = seoFreeFrom(rules, "EE");
+      t = h.t;
+      d = h.dNoFree && free === null ? h.dNoFree : seoFill(h.d, { free: free === null ? "" : seoEur(free, lang) });
+      ogT = h.ogT;
+      ogD = h.ogD;
+    } else if (kind === "cat") {
+      var c = (C.cat[key] || C.cat.all)[lang] || C.cat.all.EN;
+      t = c[0];
+      d = c[1];
+    } else if (kind === "brand") {
+      var b = C.brand[key] && C.brand[key][lang];
+      if (b) {
+        t = b.title;
+        d = b.meta;
+      } else {
+        t = seoFill(C.brandFallback[lang] || C.brandFallback.EN, { brand: key });
+        d = seoFill(C.brandGeneric[lang] || C.brandGeneric.EN, { brand: key });
+      }
+      /* the house's name once: a brand that IS the house (Rempire's own
+         soap and merch) needs no second one, and a long brand name keeps its
+         words rather than the suffix */
+      var bare = t.replace(/\s*\|\s*REMPIRE$/, "");
+      if (/rempire/i.test(bare) || seoHouse(t).length > SEO_TITLE_MAX) t = bare;
+    } else if (kind === "blog") {
+      var g = C.blog[lang] || C.blog.EN;
+      t = g[0];
+      d = g[1];
+    }
+    t = seoClip(seoHouse(t), SEO_TITLE_MAX);
+    d = seoClip(d, SEO_DESC_MAX);
+    return { t: t, d: d, ogT: ogT ? seoClip(ogT, SEO_TITLE_MAX) : t, ogD: ogD ? seoClip(ogD, SEO_DESC_MAX) : d };
+  }
+/* seo-copy:end */
+  /** What the copy needs to know about the shop right now: the delivery
+      rules the checkout bills with (the free-delivery threshold). */
+  function seoCtx() { return { rules: SHIP_RULES }; }
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -48010,8 +48236,9 @@
   }
   function setHead() {
     var base = siteTitle();
-    var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
-    var t = base, d = "";
+    /* `ogT`/`ogD`: the link-preview pair, where it is not the title and the
+       description themselves — the home page's (seoHead()). */
+    var t = base, d = "", ogT = "", ogD = "";
     /* A prerendered page ships JSON-LD describing itself — a breadcrumb, a
        product list, the organisation. It is right until the shopper walks
        somewhere else, and then it is a description of a page they have left. */
@@ -48022,13 +48249,16 @@
     if (S.screen === "product") {
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
-      var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
+      var priceText = seoPriceText(p.price, p.priceFrom, S.lang);
       /* soldOut(), not `p.stock === "out"`: a product whose whole size ladder
          has been counted to zero prints «нет в наличии» on the page and has
          no buy row, so the snippet must not offer it either. */
       var pGoneSeo = soldOut(p);
       var stockText = trText(pGoneSeo ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
-      t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
+      /* Brand, the maker's name and the type, the price when it fits — no
+         «— купить в Rempire» filler (seoProductTitle(), the same rule
+         productSpec() in src/lib/seo-head.mjs writes into the static page). */
+      t = seoProductTitle(seoProductCore(p.id, core, S.lang), priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
          wrote nothing; everything else is built from the product. */
@@ -48073,7 +48303,14 @@
     } else {
       var s2 = document.getElementById("ldjson");
       if (s2) s2.remove();
-      if (S.screen === "catalog") t = (S.brand || trText(S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat] || "", S.lang, false)) + " — REMPIRE";
+      /* The home page, a section, a brand: the words of src/lib/seo-copy.mjs
+         (audit §1A) — the static page's own, so taking a page over no longer
+         changes its title or leaves another language's description under it.
+         A section the copy does not know (none today) reads as «all». */
+      var sh = S.screen === "home" ? seoHead("home", "", S.lang, seoCtx())
+        : S.screen === "catalog" ? (S.brand ? seoHead("brand", S.brand, S.lang, seoCtx()) : seoHead("cat", S.cat, S.lang, seoCtx()))
+          : null;
+      if (sh) { t = sh.t; d = sh.d; ogT = sh.ogT; ogD = sh.ogD; }
       /* The body of a policy page goes through translateTree(), the title did
          not: legalFor() serves Russian titles on LEGAL, so an English page
          showed «Доставка и оплата» in the tab. The four descriptions below are
@@ -48130,8 +48367,9 @@
       // dictionary); a post's are the author's own text, already in S.lang
       // from the API — never translated, only fitted to the tab.
       else if (S.screen === "blog") {
-        t = trText("Блог", S.lang, false) + " — REMPIRE";
-        d = trText(BLOG_DESC, S.lang, false).slice(0, 158);
+        var bh = seoHead("blog", "", S.lang, seoCtx());
+        t = bh.t;
+        d = bh.d;
       } else if (S.screen === "blogpost") {
         var pen = blogEntry(S.blogSlug);
         var post = pen ? pen.post : blogListItem(S.blogSlug);   // the tile's title while the body is on its way
@@ -48152,8 +48390,8 @@
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
     setAltTags();
-    setMetaProp("og:title", t);
-    if (d) setMetaProp("og:description", d);
+    setMetaProp("og:title", ogT || t);
+    if (ogD || d) setMetaProp("og:description", ogD || d);
   }
 
   /* ---------- admin: patch the DOM in place -------------------------------

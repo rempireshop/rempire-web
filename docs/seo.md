@@ -1012,6 +1012,31 @@ with `set_seo`, and a pair somebody wrote is used exactly as written with
 nothing appended. The three t-shirts are where to start, because they are the
 only case where the shop actively tells Google that three pages are the same.
 
+## Titles and descriptions: one copy, three renderers (09.10.2026)
+
+The `<title>`, the meta description and the link-preview pair of the home
+page, the eight sections («Все товары» included), every brand page and the blog
+list, and the rule a product title is built by, live in
+**`src/lib/seo-copy.mjs`** — the words of the SEO audit's §1A, approved by Dim
+on 08.10.2026. The prerender and the request-time pages import it; app.js
+cannot import anything, so it carries a copy of the block between the
+`seo-copy:start` / `seo-copy:end` markers, written by
+`node tools/sync-seo-copy.mjs`. The prerender refuses to write a page while the
+two differ, and `tests/seo-copy.test.ts` runs both copies over every page of
+every kind in all three languages and wants the same head — which is what
+ended the static «Habemehooldus — osta Rempire'ist» / rendered «Habemehooldus —
+REMPIRE» pair (audit W4/T2).
+
+Rules the module holds: titles ≤ 60, descriptions ≤ 155; no «— купить в
+Rempire / osta Rempire'ist / buy at Rempire» filler (a product title is brand +
+the maker's name + the type, with the price when it fits); a trailing «| REMPIRE»
+in the house form «— REMPIRE»; the one figure the copy quotes — the free-delivery
+threshold in the Estonian home description — comes from `settings.shipping_rules`
+(`seoCtx()` in app.js, `SEO_CTX` in the prerender) and drops out when delivery
+is never free; Russian aliases only where Search Console shows them
+(«шампунь №1», «Ксерджофф Наксос»). The home page's `<h1>` is still `T.base`:
+a heading is not a search snippet.
+
 ## Title and description per language (admin override)
 
 The product editor's «Google» tab holds a title/description pair for each

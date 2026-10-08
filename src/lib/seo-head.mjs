@@ -17,6 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
+import { seoPriceText, seoProductCore, seoProductTitle } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -469,7 +470,11 @@ export const withOwnerStock = (list, overrides) =>
    later, in the same place, about the same bottle. Nothing compares the two
    tables; when you touch either, touch both.
    Mirrors the strings setHead() in app.js uses, so the tab title does not
-   change under the shopper when the script takes over. */
+   change under the shopper when the script takes over.
+   The title and the meta description of the home page, the sections, the
+   brands and the blog list are not in here any more: since 09.10.2026 they
+   are src/lib/seo-copy.mjs, which app.js carries a checked copy of (audit
+   §1A). `base` is the home page's <h1>, no longer its <title>. */
 export const T = {
   RU: {
     base: "REMPIRE — магазин косметики в Таллинне",
@@ -477,16 +482,12 @@ export const T = {
     home: "Главная", catalogue: "Каталог", brands: "Бренды", all: "Все товары",
     homeIntro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. " +
       "Доставка Omniva, SmartPosti и DPD по Эстонии, Латвии, Литве и Финляндии, самовывоз на Mardi 1.",
-    homeDesc: "Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. " +
-      "Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1.",
     catsTitle: "Разделы", brandsTitle: "Бренды",
     sizes: "Размеры", description: "Описание",
     inStock: "В наличии", low: "мало", out: "нет в наличии",
     from: "от ",
     tax: "Налоги включены. Доставка рассчитается при оформлении.",
     lang: "Язык", loading: "Загружаем магазин…",
-    catDesc: c => `${c} в магазине Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    brandDesc: b => `${b} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Магазин Rempire, Таллинн — доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
     /* What a product's own copy gets after it, when the description is cut
@@ -502,7 +503,6 @@ export const T = {
        the live head from the same two halves (giftDescText). */
     giftDesc: amounts => `Подарочная карта Rempire на ${amounts} — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.`,
     infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
-    blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
     blogEmpty: "Статей пока нет — загляните позже.",
     otherPosts: "Другие статьи",
     /* the request-time blog page (src/lib/blog-page.ts) — the prerender
@@ -522,16 +522,12 @@ export const T = {
     home: "Avaleht", catalogue: "Kataloog", brands: "Brändid", all: "Kõik tooted",
     homeIntro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas. " +
       "Tarne Omniva, SmartPosti ja DPD-ga Eestis, Lätis, Leedus ja Soomes, järeletulek Mardi 1.",
-    homeDesc: "Rempire'i pood: juukse- ja habemehooldus, viimistlus, parfüümid ja merch. " +
-      "Tarne üle Eesti ja Baltikumi, järeletulek Tallinnas Mardi 1.",
     catsTitle: "Osakonnad", brandsTitle: "Brändid",
     sizes: "Suurused", description: "Kirjeldus",
     inStock: "Laos", low: "viimased", out: "otsas",
     from: "alates ",
     tax: "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
     lang: "Keel", loading: "Laeme poodi…",
-    catDesc: c => `${c} Rempire'i poes Tallinnas. Tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     descTail: () => "tarne Eestis ja Baltikumis · järeletulek Tallinnas",
@@ -540,7 +536,6 @@ export const T = {
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     giftDesc: amounts => `Rempire'i kinkekaart ${amounts} — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.`,
     infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
-    blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
     otherPosts: "Teised artiklid",
     // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
@@ -555,16 +550,12 @@ export const T = {
     home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
     homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +
       "Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.",
-    homeDesc: "Rempire shop: hair and beard care, styling, fragrance and merch. " +
-      "Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1.",
     catsTitle: "Sections", brandsTitle: "Brands",
     sizes: "Sizes", description: "Description",
     inStock: "In stock", low: "low stock", out: "out of stock",
     from: "from ",
     tax: "Taxes included. Delivery is calculated at checkout.",
     lang: "Language", loading: "Loading the shop…",
-    catDesc: c => `${c} at Rempire, Tallinn. Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     descTail: () => "delivery across Estonia and the Baltics · pickup in Tallinn",
@@ -573,7 +564,6 @@ export const T = {
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     giftDesc: amounts => `A Rempire gift card for ${amounts} — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.`,
     infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
-    blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
     blogEmpty: "No articles yet — check back soon.",
     otherPosts: "More articles",
     blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found.",
@@ -716,8 +706,12 @@ export const verificationMeta = () =>
    the markers in index.html and inlines it verbatim into every generated
    page; the request-time product page writes the same block. `base` is the
    absolute-URL base, `robots` the value the meta carries (robotsFor()). */
-export function headBlock({ base, robots, lang, seg, rest, title, desc, image, imageAlt, ogType, jsonld, ldMain }) {
+export function headBlock({ base, robots, lang, seg, rest, title, desc, ogTitle = "", ogDesc = "", image, imageAlt, ogType, jsonld, ldMain }) {
   const canonical = base + langPath(seg, rest);
+  /* The link-preview pair is the title and the description, except where a
+     page has one of its own — the home page (audit §1A b, seoHead()). */
+  const cardTitle = ogTitle || title;
+  const cardDesc = ogDesc || desc;
   const ld = (Array.isArray(jsonld) ? jsonld : [jsonld]).filter(Boolean);
   const isMain = o => !!ldMain && o["@type"] === "Product";
   return `<title>${esc(title)}</title>
@@ -729,16 +723,16 @@ ${headLinks(base, seg, rest)}
 <meta property="og:site_name" content="REMPIRE">
 <meta property="og:locale" content="${lang.ogLocale}" data-seo="og:locale">
 <meta property="og:url" content="${esc(canonical)}" data-seo="og:url">
-<meta property="og:title" content="${esc(title)}" data-seo="og:title">
-<meta property="og:description" content="${esc(desc)}" data-seo="og:description">
+<meta property="og:title" content="${esc(cardTitle)}" data-seo="og:title">
+<meta property="og:description" content="${esc(cardDesc)}" data-seo="og:description">
 <meta property="og:image" content="${esc(image)}" data-seo="og:image">
 <meta property="og:image:alt" content="${esc(imageAlt)}">
 <meta property="og:image:type" content="${/\.png(\?|$)/i.test(image) ? "image/png" : "image/jpeg"}">
 <meta property="og:image:width" content="${OG_W}">
 <meta property="og:image:height" content="${OG_H}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}" data-seo="twitter:title">
-<meta name="twitter:description" content="${esc(desc)}" data-seo="twitter:description">
+<meta name="twitter:title" content="${esc(cardTitle)}" data-seo="twitter:title">
+<meta name="twitter:description" content="${esc(cardDesc)}" data-seo="twitter:description">
 <meta name="twitter:image" content="${esc(image)}" data-seo="twitter:image">
 <style id="prestyle">${PRE_CSS}</style>
 ${ld.map(o => '<script type="application/ld+json"' +
@@ -822,9 +816,12 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
   const seg = lang.seg;
   const rest = "/p/" + encodeURIComponent(id) + "/";
   const core = brand + " " + name;
-  const priceText = (priceFrom ? t.from : "") + eur(price);
-  const full = core + " — " + t.buy + " · " + priceText;
-  let title = fitTitle(core, full, core + " · " + priceText);
+  /* «от 7,90 €» / «alates 7,90 €» / «from €7.90» — in the language's own money
+     format, as app.js prints it; and the title is brand + the maker's name +
+     the type with the price when it fits, never «— купить в Rempire» (audit
+     §1A, src/lib/seo-copy.mjs — the same two calls setHead() makes). */
+  const priceText = seoPriceText(price, priceFrom, lang.code);
+  let title = seoProductTitle(seoProductCore(id, core, lang.code), priceText);
   if (seoTitle) title = fitTitle(seoTitle, "");
 
   const text = textForSnippet(body);

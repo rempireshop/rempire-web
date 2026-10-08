@@ -97,6 +97,11 @@ import {
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
 } from "../src/lib/seo-head.mjs";
 import { parseShopPath, publicPath, STATE_RESTS } from "../src/lib/shop-paths.mjs";
+/* The titles and meta descriptions of the home page, the sections, the brands
+   and the blog list (audit §1A) — the module app.js's setHead() carries a copy
+   of, so the head written here and the head after boot are one text. */
+import { seoHead } from "../src/lib/seo-copy.mjs";
+import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -398,6 +403,10 @@ const DECL_END = /^ {2}[}\]];$/;
 const FN_END = /^ {2}}$/;
 
 let trText = s => s;
+/* catIntro(): the line under a section's or a brand's heading, in Russian, as
+   screenCatalog() draws it — lifted with the dictionary that translates it, so
+   the static .sec__intro is the shop's own line and not a second sentence. */
+let catIntro = () => "";
 try {
   const pieces = [
     sliceFrom(/^ {2}var UI = \{$/, DECL_END),
@@ -406,10 +415,12 @@ try {
     sliceFrom(/^ {2}var NAME_FRAGS = \[$/, DECL_END),
     sliceFrom(/^ {2}var TAIL_EXACT = \{$/, DECL_END),
     sliceFrom(/^ {2}function trName\(s, lang\) \{$/, FN_END),
-    sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END)
+    sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END),
+    sliceFrom(/^ {2}var CAT_INTROS = \{$/, DECL_END),
+    sliceFrom(/^ {2}function catIntro\(cat, brand\) \{$/, FN_END)
   ];
   if (pieces.some(p => !p)) throw new Error("could not lift the translation tables out of app.js");
-  trText = new Function(pieces.join("\n") + "\nreturn trText;")();
+  ({ trText, catIntro } = new Function(pieces.join("\n") + "\nreturn { trText: trText, catIntro: catIntro };")());
   // smoke: the dictionary must actually answer, or the slices caught the wrong thing
   if (trText("Уход за волосами", "ET", false) === "Уход за волосами") {
     throw new Error("the lifted dictionary does not translate — check the app.js slices");
@@ -430,6 +441,21 @@ try {
   process.exit(1);
 }
 const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s), code, !!allowName));
+
+/* The head copy (src/lib/seo-copy.mjs) and app.js's copy of it must be the
+   same block, or every page written below carries one title and the shop
+   rewrites it to another the moment it boots — the very drift that block
+   exists to end (audit W4/T2). FATAL, like the dictionary above: the fix is
+   one command. */
+{
+  const own = seoCopyBlock(await readFile(path.join(ROOT, "src", "lib", "seo-copy.mjs"), "utf8"));
+  const app = seoCopyBlock(appSrc);
+  if (own === null || app === null || own !== app) {
+    console.error("x public/shop2/app.js does not carry the current src/lib/seo-copy.mjs block");
+    console.error("x run: node tools/sync-seo-copy.mjs");
+    process.exit(1);
+  }
+}
 
 /* ---------- «Доставка и оплата»: the builder, lifted the same way ---------
 
@@ -518,6 +544,10 @@ function mergeShipRules(defaults, raw) {
   return out;
 }
 const SHIP_RULES_LIVE = DELIVERY ? mergeShipRules(DELIVERY.rules, LIVE_SETTINGS.shipping_rules) : null;
+/* What the head copy reads — the free-delivery threshold of the home page's
+   Estonian description — from the same rules the delivery page prints and the
+   checkout bills (seoCtx() in app.js hands it SHIP_RULES). */
+const SEO_CTX = { rules: SHIP_RULES_LIVE };
 const LOYALTY_LIVE = (() => {
   const l = LIVE_SETTINGS.pricing && LIVE_SETTINGS.pricing.loyalty;
   if (!l || typeof l !== "object") return { enabled: true, earnPct: 5 };
@@ -977,7 +1007,11 @@ function productPage(p, lang) {
   };
 }
 
-function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
+/* `desc` is the meta description, `intro` the line under the heading — two
+   different texts since 09.10.2026: the description is the search snippet
+   (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
+   which the static page used to replace with the snippet. */
+function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -1006,7 +1040,7 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
-      '<p class="sec__intro">' + esc(desc) + "</p>" +
+      '<p class="sec__intro">' + esc(intro) + "</p>" +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
           (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
@@ -1130,11 +1164,15 @@ function homePage(lang) {
     "</section>" +
     langNav(seg, rest, t) +
     "</div>";
+  /* The title, the description and the link-preview pair of the home page
+     (audit §1A) — seoHead(), the call setHead() makes once the shop boots. The
+     <h1> above stays T.base: a heading is not a search snippet. */
+  const head = seoHead("home", "", code, SEO_CTX);
   return {
     file: path.join(SHOP2, seg, "index.html"),
     spec: {
       lang, seg, rest,
-      title: t.base, desc: t.homeDesc,
+      title: head.t, desc: head.d, ogTitle: head.ogT, ogDesc: head.ogD,
       image: ogPick(OG_FALLBACK), imageAlt: "REMPIRE", ogType: "website",
       /* The WebSite block names the site the way a searcher types it and
          hands the publisher back to the Organization node above rather than
@@ -1652,12 +1690,13 @@ function blogListPage(lang) {
     langNav(seg, rest, t) +
     "</div>";   // #blogdata rides on every page — fullPage()/patchedShell() add it
 
+  const head = seoHead("blog", "", code, SEO_CTX);
   return {
     file: path.join(SHOP2, seg, "blog", "index.html"),
     spec: {
       lang, seg, rest,
-      title: fitTitle(heading, heading + " — REMPIRE"),
-      desc: clip(t.blogDesc, 158),
+      title: head.t,
+      desc: head.d,
       image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, OG_DEFAULT),
       imageAlt: heading, ogType: "website",
       jsonld: [
@@ -1820,24 +1859,28 @@ for (const lang of LANGS) {
   const t = T[lang.code];
   pages.push(homePage(lang));
 
+  /* Title and description: seoHead(), as setHead() in app.js — no «— купить
+     в Rempire» filler (audit §1A). Intro: the shop's own line, catIntro(). */
   for (const c of ["all", ...CATS]) {
     const list = c === "all" ? ON_SALE : ON_SALE.filter(p => p.cat === c);
     const heading = c === "all" ? t.all : tr(CAT_NAMES[c], lang.code, false);
+    const head = seoHead("cat", c, lang.code, SEO_CTX);
     pages.push(listingPage({
       lang, kind: "c", id: c, heading, list,
       rest: "/c/" + c + "/",
-      desc: clip(t.catDesc(heading), 158),
-      title: fitTitle(heading, heading + " — " + t.buy)
+      desc: head.d, title: head.t,
+      intro: tr(catIntro(c, ""), lang.code, false)
     }));
   }
 
   for (const b of BRANDS) {
     const list = ON_SALE.filter(p => p.brand === b);
+    const head = seoHead("brand", b, lang.code, SEO_CTX);
     pages.push(listingPage({
       lang, kind: "b", id: BRAND_SLUG.get(b), heading: b, list,
       rest: "/b/" + BRAND_SLUG.get(b) + "/",
-      desc: clip(t.brandDesc(b), 158),
-      title: fitTitle(b, b + " — " + t.buy)
+      desc: head.d, title: head.t,
+      intro: tr(catIntro("", b), lang.code, false)
     }));
   }
 

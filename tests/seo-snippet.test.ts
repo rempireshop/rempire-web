@@ -199,8 +199,10 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
     /* The entity decode the SEO path used to skip. */
     expect(app).toContain("descFromText(unentity(stripTags(descFor(p)))");
     expect(app).toContain("unentity(stripTags(descFor(p))).slice(0, 500)");
-    /* And the title's third rung. */
-    expect(app).toContain('fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText)');
+    /* And the title: since 09.10.2026 the product-title rule of
+       src/lib/seo-copy.mjs (audit §1A, no «— купить в Rempire» rung) —
+       tests/seo-copy.test.ts holds the two copies of it to each other. */
+    expect(app).toContain("seoProductTitle(seoProductCore(p.id, core, S.lang), priceText)");
   });
 
   /* The words themselves, not only the shape of the sentence. Four cells of

@@ -225,7 +225,8 @@ describe("a custom product's page at request time", () => {
   it("a product with no text at all still has a description, built from price, section and stock", async () => {
     const p = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
     const html = await (await pageFor("et", p.id)).text();
-    expect(title(html)).toBe("Acme Wax — osta Rempire'ist · 9 €");
+    // brand, name and the price — no «osta Rempire'ist» filler (audit §1A, src/lib/seo-copy.mjs)
+    expect(title(html)).toBe("Acme Wax · 9 €");
     expect(meta(html, "description")).toBe("9 € · Viimistlus · Laos. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.");
     const product = ldBlocks(html).find((o) => o["@type"] === "Product") as Record<string, unknown>;
     // no photo yet: the JSON-LD points at the shop's card rather than at an SVG placeholder Google cannot read
