@@ -610,8 +610,24 @@ export const catName = (cat, code) => (CAT_NAMES_I18N[cat] && (CAT_NAMES_I18N[ca
 /* A link preview is a 1 200×630 JPEG or PNG or it is nothing — see the long
    note in tools/prerender-shop2.mjs. The two shared cards are committed. */
 export const OG_W = 1200, OG_H = 630;
-export const OG_DEFAULT = "/brand/og-default.png";   // tower on the ground, for pages with no card of their own
-export const OG_FALLBACK = "/og-shop.png";           // shipped, 1200×630 — used when sharp is missing
+export const OG_DEFAULT = "/brand/og-default.png";   // tower on the ground — the last resort when no card is on disk
+export const OG_FALLBACK = "/og-shop.png";           // the shop's card in English (= og-shop-en.png), shipped
+
+/* The shop's own link-preview card, one per language — «Juuksed. Habe. Stiil.»
+   (tools/og-shop.mjs, Dim's design and line of 08.10.2026). The card of every
+   page that has no picture of its own: the home page, the sections, the
+   brands, the policy pages, the gift card, the brands landing and the 404.
+   Until 09.10.2026 the home page showed the staging poster «НОВЫЙ МАГАЗИН …
+   черновик для Рената», sections and brands whatever product sorted first,
+   and the rest the tower alone with no name (SEO audit §1A b, T15). A product,
+   a set and an article keep their own card. */
+export const ogShopCard = code => "/og-shop-" + (code === "ET" ? "et" : code === "RU" ? "ru" : "en") + ".png";
+
+/* The picture of the shop as an organisation — Organization/Store `image` in
+   the JSON-LD. The logo lockup (tower and wordmark), not a link-preview card:
+   the card is an advertisement with a product shelf on it, and until
+   09.10.2026 this was the staging poster (audit W7). */
+export const ORG_IMAGE = "/brand/rempire-lockup-dark.svg";
 
 /* ---------- the head ----------------------------------------------------- */
 

@@ -57,6 +57,7 @@ import {
   langNav,
   langPath,
   ogLangSuffix,
+  ogShopCard,
   noindexShell,
   overriddenPrice,
   patchShell,
@@ -330,7 +331,7 @@ export function renderBlogListPage(
     base, robots, lang, seg, rest,
     title: copy.t,
     desc: copy.d,
-    image: first ? `${base}/shop2/og/blog-${encodeURIComponent(first.slug)}${ogLangSuffix(code)}.png?v=${ogStamp(first.updatedAt)}` : base + "/brand/og-default.png",
+    image: first ? `${base}/shop2/og/blog-${encodeURIComponent(first.slug)}${ogLangSuffix(code)}.png?v=${ogStamp(first.updatedAt)}` : base + ogShopCard(code),
     imageAlt: heading, ogType: "website", ldMain: false,
     jsonld: [
       breadcrumbLD(base, [[t.home, langPath(seg, "/")], [heading, null]]),

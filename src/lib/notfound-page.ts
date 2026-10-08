@@ -48,7 +48,7 @@ import {
   langBySeg,
   langNav,
   langPath,
-  OG_DEFAULT,
+  ogShopCard,
   patchShell,
   ROBOTS_CLOSED,
   slugify,
@@ -302,7 +302,8 @@ export function renderNotFoundPage(shell: string, lang: Lang, rest: string, base
     rest,
     title: t.notFound + " — REMPIRE",
     desc: t.notFoundText,
-    image: base + OG_DEFAULT,
+    // the shop's own card in this language (ogShopCard), as on every page with no picture of its own
+    image: base + ogShopCard(lang.code),
     imageAlt: "REMPIRE",
     ogType: "website",
     jsonld: [breadcrumbLD(base, [[t.home, langPath(lang.seg, "/")], [t.notFound, null]])],

@@ -89,7 +89,7 @@ import { assetToken, currentToken, retokenise } from "./lib/asset-token.mjs";
    OG cards, the writing. */
 import {
   LANGS, esc, eur, stripTags, slugify, clip, fitTitle, langPath, T,
-  OG_W, OG_H, OG_DEFAULT, OG_FALLBACK,
+  OG_W, OG_H, OG_DEFAULT, OG_FALLBACK, ogShopCard, ORG_IMAGE,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
@@ -747,7 +747,8 @@ const ORG_LD = {
   legalName: IDENTITY.legalName,
   url: abs("/"),
   logo: abs("/brand/rempire-tower.svg"),
-  image: abs(OG_FALLBACK),
+  /* the logo lockup, not a link-preview card (ORG_IMAGE, src/lib/seo-head.mjs) */
+  image: abs(ORG_IMAGE),
   email: IDENTITY.email || undefined,
   telephone: IDENTITY.phone || undefined,
   vatID: IDENTITY.vatNumber || undefined,
@@ -791,8 +792,10 @@ const CATS = Object.keys(CAT_NAMES);
    promise `summary_large_image` and always state width and height. */
 
 const OGDIR = path.join(SHOP, "og");
-// OG_W × OG_H, OG_DEFAULT (tower on the ground, for pages with no product) and
-// OG_FALLBACK (shipped, 1200×630 — used when sharp is missing) are imported
+// OG_W × OG_H, ogShopCard(code) (the shop's own card per language, drawn by
+// tools/og-shop.mjs and committed — every page with no picture of its own),
+// OG_DEFAULT (tower on the ground, the last resort) and OG_FALLBACK (the
+// English card under its old name) are imported
 const OG_GROUND = { r: 0xed, g: 0xea, b: 0xe1 };
 
 let sharp = null;
@@ -1021,7 +1024,6 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
     ...(kind === "b" ? [[t.brands, langPath(seg, "/brands/")]] : []),
     [heading, null]
   ];
-  const first = list[0];
   /* A section with nothing in it for the moment. Until 18.09.2026 `list` was
      a slice of the catalogue file and could not be empty; it is
      «Показывать в магазине» that can empty it — a brand the shop stocks one
@@ -1052,7 +1054,9 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
     file: path.join(SHOP2, seg, kind, id, "index.html"),
     spec: {
       lang, seg, rest, title, desc,
-      image: ogPick(first ? productCard(first) : null, OG_FALLBACK),
+      /* the shop's card in this language (ogShopCard) — not whichever product
+         happens to sort first, which is what a shared section link used to show */
+      image: ogPick(ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
@@ -1123,7 +1127,7 @@ function brandsPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(desc, 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
@@ -1173,7 +1177,7 @@ function homePage(lang) {
     spec: {
       lang, seg, rest,
       title: head.t, desc: head.d, ogTitle: head.ogT, ogDesc: head.ogD,
-      image: ogPick(OG_FALLBACK), imageAlt: "REMPIRE", ogType: "website",
+      image: ogPick(ogShopCard(code)), imageAlt: "REMPIRE", ogType: "website",
       /* The WebSite block names the site the way a searcher types it and
          hands the publisher back to the Organization node above rather than
          repeating it — one entity, three language home pages. No
@@ -1343,7 +1347,7 @@ function infoPage(slug, lang) {
         lang, seg, rest,
         title: fitTitle(heading, heading + " — REMPIRE"),
         desc: clip(t.infoDesc(heading), 158),
-        image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "article",
+        image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
         jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
         content: '<div class="wrap wrap--mid">' +
           crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
@@ -1373,7 +1377,7 @@ function infoPage(slug, lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(t.infoDesc(heading), 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "article",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
     }
@@ -1515,7 +1519,7 @@ function setsPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — " + t.buy),
       desc: clip(t.setsDesc, 158),
-      image: ogPick(BUNDLES[0] ? "/shop/og/set-" + BUNDLES[0].id + ".jpg" : null, OG_DEFAULT),
+      image: ogPick(BUNDLES[0] ? "/shop/og/set-" + BUNDLES[0].id + ".jpg" : null, ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
@@ -1592,7 +1596,7 @@ function giftPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(t.giftDesc(giftAmountsPhrase(code)), 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "website",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
     }
@@ -1697,7 +1701,7 @@ function blogListPage(lang) {
       lang, seg, rest,
       title: head.t,
       desc: head.d,
-      image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, OG_DEFAULT),
+      image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
@@ -1828,7 +1832,7 @@ function blogPostPage(post, lang) {
     spec: {
       lang, seg, rest,
       title: pageTitle, desc,
-      image: ogPick(blogCard1200(post)), imageAlt: title, ogType: "article",
+      image: ogPick(blogCard1200(post), ogShopCard(code)), imageAlt: title, ogType: "article",
       jsonld: [
         {
           "@context": "https://schema.org", "@type": "BlogPosting",

@@ -451,11 +451,19 @@ on the `#edeae1` ground with the tower mark at +56/+48, no text — the title
 and the price travel as OG text fields and each platform sets those in its own
 type). A set gets its three items in a row on the same ground.
 
-The chain, first hit wins: the page's own card → for a listing, the first
-product's card → `/brand/og-default.png` (the tower alone, for the policy
-pages and the gift card) → `/og-shop.png`. The last is the safety net for a
-run where sharp could not load: it is committed, it is 1 200×630, and it keeps
-the invariant true rather than falling back to a `.webp` no scraper reads.
+The chain, first hit wins: the page's own card (a product, a set, an article)
+→ the shop's card in the page's language, `/og-shop-{en,et,ru}.png`
+(`ogShopCard()`) → `/brand/og-default.png` (the tower alone) → `/og-shop.png`.
+Since 09.10.2026 the language card is what the home page, the sections, the
+brands, the brands landing, the policy pages, the gift card and the 404 show —
+until then the home page showed the staging poster «НОВЫЙ МАГАЗИН … черновик
+для Рената», a section or brand whichever product sorted first, and the policy
+pages the tower with no name (SEO audit §1A b, T15). The three cards are drawn
+by `node tools/og-shop.mjs` (Playwright, the shop's own fonts; Dim's design
+and line «JUUKSED. HABE. STIIL.») and committed; `/og-shop.png` is a copy of
+the English one, kept for every scraper that cached the old name. The
+`Organization` block's `image` is the logo lockup
+(`/brand/rempire-lockup-dark.svg`, `ORG_IMAGE`), not a link-preview card.
 
 ### index.html is the shell *and* the English home page
 
