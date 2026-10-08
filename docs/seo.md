@@ -357,8 +357,8 @@ one of those tags names the file it writes.
 | `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-products.xml` and `sitemap-custom.xml`**, which are not files but routes — see "The sitemaps the app serves" and "Custom products" below |
 | `public/sitemap-1.xml` | the 153 URLs the database cannot hide, with `xhtml:link` alternates |
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
-| `public/robots.production.txt` | the open policy, for reading and diffing |
-| `public/robots.staging.txt` | the closed policy, ditto |
+| `public/robots.production.txt` | the open policy, for reading and diffing — `*`, plus one group naming the AI search, assistant and training crawlers (OAI-SearchBot, ChatGPT-User, GPTBot, PerplexityBot, Perplexity-User, ClaudeBot, Claude-SearchBot, Claude-User, Google-Extended, Applebot-Extended) with the **same** rules repeated, because a bot obeys only the group that names it (Dim, 09.10.2026: open, training included). Both policies are `tools/lib/robots-policy.mjs`; `tests/robots-policy.test.ts` reads them the way a crawler does |
+| `public/robots.staging.txt` | the closed policy, ditto — names no AI bot, so they all fall under `Disallow: /` |
 | `src/data/prerendered-routes.json` | address → file for every page written (gitignored), which `next.config.ts` turns into its rewrites |
 
 813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
