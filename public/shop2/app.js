@@ -188,7 +188,7 @@
       "Шампуни": "Šampoonid", "Кондиционеры": "Palsamid", "Маски и уход": "Maskid ja hooldus",
       "Спреи": "Spreid", "Пасты и воски": "Pastad ja vahad", "Гели": "Geelid",
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
-      "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
+      "После бритья": "Pärast raseerimist", "Тонеры": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       /* per-size stock (r23): the product's own word and one size's word are
@@ -3812,7 +3812,7 @@
       "Шампуни": "Shampoos", "Кондиционеры": "Conditioners", "Маски и уход": "Masks & care",
       "Спреи": "Sprays", "Пасты и воски": "Pastes & waxes", "Гели": "Gels",
       "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
-      "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
+      "После бритья": "Aftershave", "Тонеры": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       // per-size stock (r23) — see the Estonian table for why each is whole
@@ -8297,7 +8297,7 @@
   var NAME_TAILS = {
     "шампунь": ["šampoon", "shampoo"], "кондиционер": ["palsam", "conditioner"],
     "маска": ["mask", "mask"], "сыворотка": ["seerum", "serum"],
-    "тоник": ["toonik", "toner"], "спрей": ["sprei", "spray"],
+    "тоник": ["toonik", "toner"], "тонер": ["toonik", "toner"], "спрей": ["sprei", "spray"],
     "футболка": ["T-särk", "T-shirt"], "худи": ["pusa", "hoodie"],
     "масло": ["õli", "oil"], "бальзам": ["palsam", "balm"],
     "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
@@ -8323,7 +8323,10 @@
     "футболка оверсайз": ["oversize T-särk", "oversized tee"],
     "парфюм": ["parfüüm", "perfume"],
     "гидрофильное масло": ["hüdrofiilne õli", "cleansing oil"],
-    "ручная работа": ["käsitöö", "handmade"]
+    "ручная работа": ["käsitöö", "handmade"],
+    "термозащитная пенка": ["kuumakaitsevaht", "heat protection foam"],
+    "лосьон для локонов": ["lokilosjoon", "curl lotion"],
+    "спрей-воск": ["spreivaha", "spray wax"]
   };
   /* Product names only — the fragment rules would turn an ordinary sentence
      into franglais, so this never runs outside name-bearing elements. */
@@ -12243,7 +12246,7 @@
       { id: "ge", name: "Гели", re: /гель/i }
     ],
     face: [
-      { id: "to", name: "Тоники", re: /тоник/i },
+      { id: "to", name: "Тонеры", re: /тоник|тонер/i },
       { id: "cl", name: "Очищение", re: /очища|пенка|мыло/i },
       { id: "cs", name: "Кремы и сыворотки", re: /крем|сыворотк/i },
       { id: "oi", name: "Масла", re: /масло/i }
