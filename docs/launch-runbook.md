@@ -144,3 +144,29 @@ Check: one webhook, four events, «Подключения» green.
   `docs/merchant-feed.md`).
 - 13 — Shopify orders at 12:00, 18:00 and next morning for 72 h; delete both
   `.env` files at the end of the day.
+
+## The URL move — deploying feat/shopify-urls (after 08.10.2026)
+
+The shop went live at `/shop2/…` addresses; the same night Dim decided they
+go back to Shopify's own (`docs/seo.md` § «URL move 2026-10 (Shopify
+scheme)»). The checks in step 6 above name `/shop2/` — after this deploy:
+
+- `https://rempireshop.com/` 200, `<html lang="en">`, no `x-robots-tag`;
+  `/ru` and `/et` 200; `curl -sI -H "Accept-Language: ru" https://rempireshop.com/products/system-4-bio-botanical-shampoo`
+  → 302 to `/ru/products/…` with `Vary: Accept-Language, Cookie`; the same
+  without the header → 200.
+- `/shop2/` → **one** 301 to `/ru`; `/shop2/p/<id>/` → `/ru/products/<id>`;
+  `/shop2/admin/` → `/admin`; `/products/<id>/` → 301 to the slashless page.
+- `/products/<id>`, `/collections/hair-care`, `/ru/collections/uhod-za-volosami`,
+  `/policies/refund-policy`, `/pages/contact`, `/blogs/news` → 200 with no hop.
+- A POST to `/api/payments/notify/` **and** to `/api/payments/notify` → 400,
+  never a 3xx; `/api/shipping/notify/` likewise answers without a redirect.
+- `/robots.txt` disallows `/admin`, `/checkout`, `/cart`, `/account`,
+  `/search` (+ `/ru`, `/et`), allows `/api/overrides/` and the other read-only
+  feeds; `/sitemap.xml` names only the new addresses.
+- `npm run smoke -- https://rempireshop.com` (rewritten for the new scheme).
+- Search Console: submit `sitemap.xml` again.
+- **Renat**: remove the «Админка» and «Сканер» Home Screen icons, add them again
+  from `rempireshop.com/admin` and `rempireshop.com/admin/scan`, switch the
+  notices on again (`/test` «panel-app-readd»). The old icons still open — in
+  a browser tab, through the 301.
