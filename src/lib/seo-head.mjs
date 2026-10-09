@@ -477,7 +477,7 @@ export const withOwnerStock = (list, overrides) =>
    §1A). `base` is the home page's <h1>, no longer its <title>. */
 export const T = {
   RU: {
-    base: "REMPIRE — магазин косметики в Таллинне",
+    base: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
     buy: "купить в Rempire",
     home: "Главная", catalogue: "Каталог", brands: "Бренды", all: "Все товары",
     homeIntro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. " +
@@ -517,7 +517,7 @@ export const T = {
     notFoundText: "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка."
   },
   ET: {
-    base: "REMPIRE — kosmeetikapood Tallinnas",
+    base: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas",
     buy: "osta Rempire'ist",
     home: "Avaleht", catalogue: "Kataloog", brands: "Brändid", all: "Kõik tooted",
     homeIntro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas. " +
@@ -545,7 +545,7 @@ export const T = {
     notFoundText: "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga."
   },
   EN: {
-    base: "REMPIRE — professional hair care & cosmetics in Tallinn",
+    base: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
     buy: "buy at Rempire",
     home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
     homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +

@@ -49081,7 +49081,7 @@
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
-    return { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
+    return { RU: "REMPIRE — уход за волосами, бородой и кожей в Таллинне", ET: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas", EN: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon" }[S.lang];
   }
   function setHead() {
     var base = siteTitle();
