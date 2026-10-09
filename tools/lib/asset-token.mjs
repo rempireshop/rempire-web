@@ -32,11 +32,13 @@
 
    The tags that share ONE token are the set: whatever `?v=` the app.js tag
    carries, every other tag carrying that same value is versioned with it
-   (thirteen since 09.10.2026, when admin.css left the shell for app.js to
-   fetch when the panel opens — LAZY_FILES below). A tag with a token of its
-   own — /shop/content.js?v=c2 — is deliberately not part of the set and is
-   left exactly as it is. Add an asset tag with the shared token and it joins
-   on its own.
+   (fourteen until 09.10.2026; since then only what every page needs wears a
+   tag, and the data files the shop fetches when a screen asks for one are
+   listed in LAZY_FILES below). A tag with a token of its own is deliberately
+   not part of the set and is left exactly as it is — there is none today:
+   /shop/content.js wore a hand-typed ?v=c2 until it became one of the fetched
+   files, and wears the shared token since. Add an asset tag with the shared
+   token and it joins on its own.
 
    public/shop2/chat.js is hashed too even though it has no tag: mountChat()
    in app.js adds that tag itself, on wide screens only, and copies the token
@@ -80,7 +82,12 @@ const TAGGED = /(?:href|src)="(\/[^"?\s]+)\?v=([^"'\s]*)"/g;
  * which, for a tokened address, is a year. tests/lazy-files.test.ts holds
  * this list and app.js's to the same files.
  */
-export const LAZY_FILES = ["/shop2/admin.css"];
+export const LAZY_FILES = [
+  "/shop2/admin.css",
+  "/shop/content.js", "/shop/content.ru.js", "/shop/content.et.js",
+  "/shop/legal.ru.js", "/shop/legal.et.js", "/shop/legal.en.js",
+  "/shop/shipping-data.js",
+];
 
 /** Files that carry the shared token without wearing a tag of their own. */
 const UNTAGGED = ["/shop2/chat.js", ...LAZY_FILES];

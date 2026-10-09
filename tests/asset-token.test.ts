@@ -177,9 +177,11 @@ describe("public/shop2/index.html", () => {
       .replace(/\r\n?/g, "\n");
     const token = currentToken(real);
     expect(token).not.toBe("");
-    /* Fourteen until 09.10.2026, when admin.css left the shell for app.js to
-       fetch when the panel opens (perf). */
-    const TAGS = 13;
+    /* Fourteen until 09.10.2026, when the descriptions, the policy texts, the
+       stand-in parcel lists and admin.css left the shell for app.js to fetch
+       when a screen needs one (perf): boot.js, styles.css, the three catalogue
+       scripts and app.min.js are what every page needs. */
+    const TAGS = 6;
     expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(TAGS);
     const urls = versionedAssets(real);
     // the tags, the untagged chat.js, and LAZY_FILES that wear no tag

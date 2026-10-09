@@ -892,6 +892,22 @@ export function patchShell(shell, headHtml, contentHtml, htmlLang) {
   return out;
 }
 
+/* The scripts one page needs beyond the shell's own (perf, 09.10.2026). The
+   policy texts left the shell — every visitor downloaded all four policy files
+   for a page he was not on — and app.js fetches them when a policy page is
+   drawn; a policy page's own HTML links its text instead (`legal`), in its
+   own language, so the first paint does not wait a round trip for it. The
+   tag goes in front of app.min.js and wears the shell's shared token; the
+   file is hashed into it (tools/lib/asset-token.mjs, LAZY_FILES). */
+export function pageAssets(html, { code = "EN", legal = false } = {}) {
+  const out = String(html);
+  const v = (/\/shop2\/app(?:\.min)?\.js\?v=([^"'\s]*)/.exec(out) || [])[1];
+  if (!v || !legal) return out;
+  const file = "/shop/legal." + (code === "RU" ? "ru" : code === "ET" ? "et" : "en") + ".js";
+  return out.replace(/<script src="\/shop2\/app(?:\.min)?\.js\?v=/, (tag) =>
+    '<script src="' + file + "?v=" + esc(v) + '"></script>\n' + tag);
+}
+
 /* The shell as the owner's panel and scanner are served it (/admin,
    /admin/scan): with the panel's stylesheet in its <head>. No other page
    links admin.css any more — it is 300 KB no storefront screen wears, and

@@ -239,7 +239,9 @@ describe("legal placeholders", () => {
   });
 
   it("no policy page loaded by the shop names Shopify — legal.js is the shop's own Russian pages, word for word", async () => {
-    /* public/shop/legal.js is on every page (public/shop2/index.html). Until
+    /* public/shop/legal.js was on every page (public/shop2/index.html) until
+       09.10.2026, and is still what the build reads the policy pages from
+       (tools/prerender-shop2.mjs, tools/pack-legal.mjs). Until
        27.09.2026 it was the harvested Shopify policy text, and its privacy
        policy named Shopify as the data processor 22 times (audit 27.09.2026,
        G8). It is written from legal.ru.js now; this is what keeps the two in

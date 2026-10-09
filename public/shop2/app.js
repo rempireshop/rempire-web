@@ -9696,6 +9696,8 @@
     return false;
   }
   function demoPoints(carrier, country) {
+    // fetched on demand (shipDataWant) — not there, no stand-in list
+    if (typeof SHIPPING_DATA === "undefined") return [];
     try {
       var names = SHIPPING_DATA.machines[country || S.country][carrier] || [];
       return names.map(function (n, i) {
@@ -9773,7 +9775,11 @@
       .then(function (r) {
         // 404/405/501 — no shop behind this page at all (the prototype served
         // statically), which is the one case the stand-in list is for.
-        if (r.status === 404 || r.status === 405 || r.status === 501) { done(demoPoints(carrier, cc)); return; }
+        // (shipping-data.js is fetched for exactly this case, and only now)
+        if (r.status === 404 || r.status === 405 || r.status === 501) {
+          shipDataWant().then(function () { done(demoPoints(carrier, cc)); });
+          return;
+        }
         if (!r.ok) { failed(); return; }
         return r.json().then(function (j) {
           if (j && j.ok && j.points) { apiSeen(true); done(j.points, j.truncated ? j.total : 0); }
@@ -12020,6 +12026,22 @@
                    <head> (src/lib/notfound-page.ts); a storefront page that
                    walks into the panel fetches it here, and the panel is not
                    drawn until it is in — an unstyled panel is not a panel.
+       content.js, content.ru.js, content.et.js
+                   the product descriptions (922 KB for the three). The
+                   page's own language when a product screen wants a text
+                   (descFor — until it lands, a product page shows the copy
+                   its own HTML carries); all three on the first search, whose
+                   index reads every language (srchText); all three in the
+                   panel, whose description boxes show them.
+       legal.ru.js, legal.et.js, legal.en.js
+                   a policy page's text, in the page's language. The policy
+                   pages' HTML links theirs (tools/prerender-shop2.mjs); a
+                   page that walks into one fetches it, and is drawn once it
+                   is in. legal.js — legal.ru.js word for word, the build's
+                   list of the pages — is no longer fetched by a browser.
+       shipping-data.js
+                   the carriers' stand-in machine lists, wanted only when no
+                   shop answers behind the page at all (demoPoints).
 
      A fetched file wears the token app.min.js wears, read off its tag the way
      mountChat() does, and tools/lib/asset-token.mjs hashes it into that same
@@ -12068,12 +12090,57 @@
   }
   function admCssWant() { return admCssHas() ? Promise.resolve(true) : lazyFile(ADM_CSS); }
 
+  var CONTENT_FILES = { EN: "/shop/content.js", RU: "/shop/content.ru.js", ET: "/shop/content.et.js" };
+  function contentHas(lang) {
+    return lang === "RU" ? typeof CONTENT_RU !== "undefined"
+      : lang === "ET" ? typeof CONTENT_ET !== "undefined" : typeof CONTENT !== "undefined";
+  }
+  function contentWant(lang) {
+    var file = CONTENT_FILES[lang] || CONTENT_FILES.EN;
+    if (contentHas(lang)) return Promise.resolve(true);
+    var fresh = !LAZY[file];
+    var p = lazyFile(file);
+    if (fresh) p.then(function (ok) { if (ok) contentArrived(); });
+    return p;
+  }
+  function contentWantAll() { return Promise.all([contentWant("RU"), contentWant("ET"), contentWant("EN")]); }
+  /** Is a file this language's descriptions could still come from on its way
+      — its own, or, for Russian and Estonian, the English one their missing
+      texts fall back to (descFor)? A failed file is not «on its way». */
+  function contentWaiting(lang) {
+    if (!contentHas(lang)) return !LAZY_FAILED[CONTENT_FILES[lang] || CONTENT_FILES.EN];
+    return lang !== "EN" && !contentHas("EN") && !LAZY_FAILED[CONTENT_FILES.EN];
+  }
+  /* A description file landed. The search index reads every language (each
+     blob is stale now), the product on screen may be waiting for its text,
+     and the panel's description boxes show them. */
+  function contentArrived() {
+    SRCH_GEN++; SRCH_IX = {};
+    if (bootHeld) return;
+    if (S.screen === "search" && S.query.trim()) patchSearch();
+    else if (S.screen === "product") pdpDescArrived();
+    else if (S.screen === "admin") render();
+  }
+
+  var LEGAL_FILES = { RU: "/shop/legal.ru.js", ET: "/shop/legal.et.js", EN: "/shop/legal.en.js" };
+  function legalHas(lang) {
+    return lang === "RU" ? typeof LEGAL_RU !== "undefined"
+      : lang === "ET" ? typeof LEGAL_ET !== "undefined"
+      : lang === "EN" ? typeof LEGAL_EN !== "undefined" : true;
+  }
+  function legalWant(lang) { return legalHas(lang) ? Promise.resolve(true) : lazyFile(LEGAL_FILES[lang]); }
+
+  var SHIP_DATA_FILE = "/shop/shipping-data.js";
+  function shipDataWant() { return typeof SHIPPING_DATA !== "undefined" ? Promise.resolve(true) : lazyFile(SHIP_DATA_FILE); }
+
   /** What a screen cannot be drawn without and does not have yet: a promise
       that settles once it is in, or null when nothing is missing. A file that
       failed is not waited for again. */
   function lazyHold(screen) {
     var need = [];
     if ((screen === "admin" || screen === "scan" || S.scanOpen) && !admCssHas() && !LAZY_FAILED[ADM_CSS]) need.push(admCssWant());
+    // a policy page's text and title, «Контакты»'s title included (setHead)
+    if (screen === "info" && !legalHas(S.lang) && !LAZY_FAILED[LEGAL_FILES[S.lang]]) need.push(legalWant(S.lang));
     return need.length ? Promise.all(need) : null;
   }
 
@@ -12801,6 +12868,10 @@
   function searchResults() {
     var q = S.query.trim().toLowerCase();
     if (!q) return [];
+    /* The index reads the descriptions in all three languages (srchText),
+       and they are not on the page any more: the first query fetches them,
+       and the results are drawn again as each one lands (contentArrived). */
+    contentWantAll();
     var ai = aiTermsFor(S.query);
     var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
     if (SRCH_LAST.key === key) return SRCH_LAST.res;
@@ -14891,15 +14962,62 @@
     // by hand. Present for the current language → wins; absent → the static
     // content.ru.js/content.et.js/content.js text below, same as always.
     if (p.descOv && p.descOv[S.lang]) return descOvHtml(p.descOv[S.lang]);
+    /* …which is fetched when a text is wanted, not with the page (perf,
+       09.10.2026: «the files the shop fetches when it needs them»). Until the
+       file this text comes from has landed, a product page shows the copy its
+       own HTML carries (PRE_DESC), so it reads the same before and after. */
+    if (descMissing(p)) return PRE_DESC && PRE_DESC.id === p.id && PRE_DESC.lang === S.lang ? PRE_DESC.html : "";
     if (S.lang === "RU" && typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) return CONTENT_RU[p.id];
     if (S.lang === "ET" && typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) return CONTENT_ET[p.id];
     return (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
+  }
+  /** Is the file this product's text would come from not here yet? Asked for
+      if so: the page's language, or — for a Russian or Estonian text that is
+      not there — the English one it falls back to. */
+  function descMissing(p) {
+    if (!contentHas(S.lang)) { contentWant(S.lang); return true; }
+    var own = S.lang === "RU" ? CONTENT_RU : S.lang === "ET" ? CONTENT_ET : null;
+    if (own && !own[p.id] && !contentHas("EN")) { contentWant("EN"); return true; }
+    return false;
+  }
+  /* The product screen's description, as it was last drawn (pdpDesc), and what
+     happens when its file lands: the text goes into the block in place, so an
+     accordion the shopper has opened stays open. Usually there is nothing to
+     do at all — the page's own copy was the same text. */
+  var PDP_DESC = null;
+  /** The text the product screen draws: the description, "" while its file is
+      on its way (the block is drawn empty and filled — pdpDescArrived), null
+      when there is none to wait for. */
+  function pdpDesc(p) {
+    var d = descFor(p);
+    PDP_DESC = d;
+    return d || (!(p.descOv && p.descOv[S.lang]) && contentWaiting(S.lang) ? "" : null);
+  }
+  function descNorm(html) {
+    var t = document.createElement("template");
+    t.innerHTML = html;
+    return t.innerHTML;
+  }
+  function pdpDescArrived() {
+    var p = byIdOrNull(S.productId);
+    if (!p) return;
+    var box = bodySlot.querySelector("[data-pdpdesc]");
+    var d = descFor(p);
+    if (!d) { if (box && !contentWaiting(S.lang)) render(); return; }
+    if (!box) { render(); return; }
+    if (d === PDP_DESC) return;
+    if (descNorm(box.innerHTML) !== descNorm(d)) { box.innerHTML = d; translateTree(box); }
+    PDP_DESC = d;
+    setHead();
   }
   function legalFor(slug) {
     if (S.lang === "RU" && typeof LEGAL_RU !== "undefined" && LEGAL_RU[slug]) return LEGAL_RU[slug];
     if (S.lang === "ET" && typeof LEGAL_ET !== "undefined" && LEGAL_ET[slug]) return LEGAL_ET[slug];
     if (S.lang === "EN" && typeof LEGAL_EN !== "undefined" && LEGAL_EN[slug]) return LEGAL_EN[slug];
-    return typeof LEGAL !== "undefined" ? LEGAL[slug] : null;
+    /* LEGAL (legal.js) is legal.ru.js word for word and is no longer fetched by
+       a browser; the Russian file stands in for it when it is here. */
+    if (typeof LEGAL !== "undefined") return LEGAL[slug];
+    return typeof LEGAL_RU !== "undefined" ? LEGAL_RU[slug] || null : null;
   }
 
   /* content: «Контакты» is not a policy page — it is the shop's own details,
@@ -15243,8 +15361,10 @@
              95 products); the old placeholder text only where we somehow
              don't. Its images are stripped: cdn.shopify.com dies with the
              store, and the gallery already shows the product. */
-          (descFor(p)
-            ? acc("Описание", '<div class="acc__rich">' + descFor(p) + "</div>") +
+          /* pdpDesc(): "" while the text's file is on its way — the same block,
+             empty for a moment and filled in place (pdpDescArrived) */
+          (pdpDesc(p) !== null
+            ? acc("Описание", '<div class="acc__rich" data-pdpdesc>' + PDP_DESC + "</div>") +
               (p.cat === "merch"
                 ? acc("Доставка и возврат", "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.")
                 : acc("Доставка и возврат", "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
@@ -47874,6 +47994,17 @@
      boot is one synchronous task, so nothing is ever painted twice, and if
      this script fails on the way the static page stays up instead of blanking. */
   var preRendered = document.getElementById("prerender");
+  /* …and a product page's HTML carries the product's description, the very
+     text descFor() reads out of content.<lang>.js — which is no longer on the
+     page and arrives a moment after this script (perf, 09.10.2026). That copy
+     stands in until it does, so the screen is drawn once, with its text. */
+  var PRE_DESC = null;
+  try {
+    var preRoute = shopRouteOf(location.pathname);
+    var preProd = preRoute && preRoute.rest.match(/^\/p\/([^/]+)\/$/);
+    var preBox = preProd && preRendered ? preRendered.querySelector(".pdp .acc__rich") : null;
+    if (preBox) PRE_DESC = { id: safeDecode(preProd[1]), lang: S.lang, html: preBox.innerHTML };
+  } catch (e) { PRE_DESC = null; }
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
     '<div id="ovl"></div><div id="pointslot"></div><div id="toastslot"></div><div id="cbslot"></div>');
@@ -48640,6 +48771,9 @@
     // features: real reviews and the moderation queue are fetched once each
     if (S.screen === "product") loadReviews(S.productId);
     if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
+    // the panel's description boxes show the static texts of all three
+    // languages — fetched once the panel is up (contentArrived redraws it)
+    if (S.screen === "admin") contentWantAll();
     // blog: what is on screen is checked against the API (and fetched, on a
     // cold miss) — a fresh answer or one already in flight costs nothing
     if (S.screen === "blog") blogSyncList(S.lang);
@@ -53564,7 +53698,10 @@
       S.screen = "search";
       return true;
     }
-    if ((m = p.match(/^\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
+    /* The policy pages are the five of SHOP_INFO_PATHS — the same five as the
+       keys of LEGAL (src/data/legal-slugs.json), which is no longer on the
+       page; the text itself is fetched before the screen is drawn (lazyHold). */
+    if ((m = p.match(/^\/info\/([a-z]+)$/)) && Object.prototype.hasOwnProperty.call(SHOP_INFO_PATHS, m[1])) {
       S.infoSlug = m[1]; S.screen = "info"; return true;
     }
     /* features: sets and the gift card.
@@ -54249,14 +54386,16 @@
       })));
   } catch (e) { bootWait = false; }
   /* …and the files the first screen cannot be drawn without (lazyHold). The
-     page's own HTML normally carries them — the /admin shell its stylesheet —
-     so this is null and nothing waits; it is not null for a page whose HTML
-     does not. Eight seconds at most, the same point at which boot.js gives
-     up on this script and shows the static page: past it the screen is drawn
-     without the file, and drawn again the moment it lands. */
+     page's own HTML normally carries them — the /admin shell its stylesheet,
+     a policy page its text — so this is null and nothing waits; it is not
+     null for a page whose HTML does not. Eight seconds at most, the same
+     point at which boot.js gives up on this script and shows the static
+     page: past it the screen is drawn without the file, and drawn again the
+     moment it lands. */
   var bootLazy = null;
   try {
-    bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin") : "");
+    bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin")
+      : /^\/info\//.test(String(bootPath || "")) ? "info" : "");
   } catch (e) { bootLazy = null; }
   if ((bootWait && OV_BOOT) || bootLazy) {
     bootHeld = true;
