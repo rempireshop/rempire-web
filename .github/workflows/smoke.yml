@@ -32,12 +32,17 @@
 #      shop a customer, and a suite that mails somebody 24 times a day stops
 #      being read by the second week.
 #
-#   3. `workflow_dispatch` — the button. It is also the ONLY way this workflow
-#      ever touches production: `target` defaults to staging, and the guard
-#      step below refuses the live shop unless a human chose it here. The
-#      checks are read-only either way, so the guard is not about safety so
-#      much as about honesty — a scheduled job that silently started reporting
-#      on a different shop than its name says is a job that lies.
+#   3. `workflow_dispatch` — the button, for either shop.
+#
+# Since the switch (08.10.2026, 22:55) the live shop IS what this workflow
+# watches: rempireshop.com serves the production build, and the staging name
+# rempireshop.diipsolutions.eu is only an alias of the same build with a
+# noindex header — its sitemaps name rempireshop.com, its robots.txt is the
+# production policy, so a run against it fails on those by design. A
+# production deploy and the twice-daily schedule therefore test
+# rempireshop.com; a deploy of anything else (a preview) is tested at its own
+# address when that answers, and skipped when it does not. The checks are
+# read-only GETs, the same a crawler makes.
 #
 # Secrets: none, and none is possible. The only input is a base URL, which is
 # a public hostname anybody can type into a browser; both live in e2e/env.mjs.
@@ -54,7 +59,7 @@ on:
       target:
         description: "Which deployment to smoke-test"
         required: true
-        default: staging
+        default: production
         type: choice
         options: [staging, production]
 
@@ -78,23 +83,15 @@ jobs:
       # expressions, and it runs before the checkout because it needs nothing
       # from the repository:
       #
-      #   · a manual run takes the `target` input, and that is the ONLY path to
-      #     production;
-      #   · a deploy takes the URL Vercel just reported — but only if that URL
-      #     actually answers, because Vercel protects per-deployment addresses
-      #     and they redirect a stranger to a login page; the probe below falls
-      #     back to staging, which aliases the same build;
-      #   · a scheduled run takes staging.
-      #
-      # If anything other than a manual run resolves to the live shop, the job
-      # stops here — that is the explicit-input rule, enforced rather than
-      # described. It stops by *skipping*, with a notice, rather than by
-      # failing: the day the DNS moves and Vercel starts reporting deploys of
-      # rempireshop.com, an `exit 1` here would put a red cross on every
-      # correct deploy forever, and a workflow that is always red is a workflow
-      # nobody reads. Nothing ran against production, which is the rule; the
-      # log says why; the scheduled staging run is untouched; and production is
-      # a click away on the dispatch form.
+      #   · a manual run takes the `target` input;
+      #   · a deploy to the Production environment tests rempireshop.com — the
+      #     reported per-deployment URL is behind Vercel's deployment protection
+      #     (a stranger gets its SSO page), and the live domain is the same
+      #     build;
+      #   · any other deploy (a preview) is tested at the URL Vercel reported if
+      #     that answers 200, and skipped with a notice if it does not — never
+      #     quietly swapped for a different shop;
+      #   · a scheduled run tests rempireshop.com.
       #
       # Every value that came out of an event payload is read from the
       # environment rather than interpolated into the script with ${{ }}: an
@@ -105,55 +102,31 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           DEPLOYED_URL: ${{ github.event.deployment_status.environment_url }}
+          DEPLOYED_ENV: ${{ github.event.deployment.environment }}
           CHOICE: ${{ github.event.inputs.target }}
           STAGING: https://rempireshop.diipsolutions.eu
           PRODUCTION: https://rempireshop.com
         run: |
+          RUN=yes
           if [ "$EVENT" = "workflow_dispatch" ]; then
-            [ "$CHOICE" = "production" ] && URL="$PRODUCTION" || URL="$STAGING"
-            ALLOW_PRODUCTION=yes
+            [ "$CHOICE" = "staging" ] && URL="$STAGING" || URL="$PRODUCTION"
           elif [ "$EVENT" = "deployment_status" ]; then
-            URL="${DEPLOYED_URL:-$STAGING}"
-            ALLOW_PRODUCTION=no
+            if [ "$DEPLOYED_ENV" = "Production" ]; then
+              URL="$PRODUCTION"
+            else
+              URL="${DEPLOYED_URL%/}"
+              CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL/" || echo 000)
+              if [ -z "$URL" ] || [ "$CODE" != "200" ]; then
+                RUN=no
+                echo "::notice::The $DEPLOYED_ENV deployment at $URL answered $CODE (deployment protection) — nothing to test from here."
+              fi
+            fi
           else
-            URL="$STAGING"
-            ALLOW_PRODUCTION=no
+            URL="$PRODUCTION"
           fi
           # No trailing slash, no path — e2e/env.mjs would reject one anyway,
           # but saying so here beats saying it after a browser download.
           URL="${URL%/}"
-          RUN=yes
-          if [ "$ALLOW_PRODUCTION" != "yes" ]; then
-            case "$URL" in
-              https://rempireshop.com|https://www.rempireshop.com)
-                RUN=no
-                echo "::notice::$URL is the live shop, and this run did not ask for it."
-                echo "::notice::Run this workflow by hand with target=production to smoke-test it."
-                ;;
-            esac
-          fi
-          # Vercel protects a per-deployment URL: an unauthenticated request to
-          # rempire-<hash>-rempire.vercel.app answers 302 to its SSO page, not
-          # the shop. Every deploy since this workflow was written therefore
-          # failed on the first assertion — sitemap-1.xml expected 200, got 302
-          # — and a job that is always red is a job nobody reads, on an account
-          # whose Actions minutes are already at 100 %.
-          #
-          # So the reported URL is *probed* rather than trusted. When it
-          # answers, it is tested at its own address, which was the point of
-          # using it. When it does not, the run falls back to staging — an
-          # alias of the newest deploy of this branch, so the same build, one
-          # name further away — and the log says which happened. Only the
-          # deploy path can fall back: a manual run asked for a specific shop
-          # and must not be quietly redirected to a different one.
-          if [ "$EVENT" = "deployment_status" ] && [ "$RUN" = "yes" ]; then
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL/shop2/" || echo 000)
-            if [ "$CODE" != "200" ]; then
-              echo "::notice::$URL answered $CODE, not 200 — it is behind Vercel's deployment protection."
-              echo "::notice::Smoke-testing $STAGING instead, which is an alias of the same build."
-              URL="$STAGING"
-            fi
-          fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "run=$RUN" >> "$GITHUB_OUTPUT"
           echo "Smoke target: $URL (run: $RUN)"
