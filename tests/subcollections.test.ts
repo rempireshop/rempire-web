@@ -289,12 +289,20 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
     expect(cat).toContain("'<h1 class=\"display h1\" data-notr>' + esc(subH1) + \"</h1>\"");
     // the crumb still names the section, then the chip
     expect(cat).toMatch(/subPg \? '<a href="' \+ linkHref\("cat", S\.cat\)/);
-    // a heading short enough for the display face: at most 30 characters
+    // a heading that fits the display face in at most two lines on a phone —
+    // and an honest one: the beard-balm page also holds Proraso's aftershave
+    // balms, so its heading says both (Dim, 09.10.2026), no shorter h1
     for (const [key, byLang] of Object.entries(SUB_PAGES))
       for (const L of ["RU", "ET", "EN"] as Lang[]) {
         const w = byLang[L] as { name: string; h1?: string };
-        expect((w.h1 || w.name).length, `${key} ${L}`).toBeLessThanOrEqual(30);
+        expect((w.h1 || w.name).length, `${key} ${L}`).toBeLessThanOrEqual(45);
       }
+    for (const L of ["RU", "ET", "EN"] as Lang[]) {
+      const w = SUB_PAGES["beard/ba"][L] as { name: string; h1?: string; title: string };
+      expect(w.h1, L).toBeUndefined();
+      expect(w.name, L).toMatch(/после бритья|raseerimisjärgsed|aftershave/i);
+      expect(w.title, L).toMatch(/после бритья|raseerimisjärgsed|aftershave/i);
+    }
   });
 });
 

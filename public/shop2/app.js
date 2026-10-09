@@ -48773,21 +48773,18 @@
             title: "Бальзамы для бороды и после бритья: Proraso, Captain Fawcett",
             meta: "Бальзамы для бороды Captain Fawcett и Proraso смягчают и укладывают бороду, бальзамы Proraso после бритья успокаивают кожу. Самовывоз в Таллинне.",
             name: "Бальзамы для бороды и после бритья",
-            h1: "Бальзамы для бороды",
             intro: "Бальзам для бороды ухаживает как масло, но ещё и слегка фиксирует, так что длинная борода весь день держит форму. Здесь же бальзамы Proraso после бритья — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
           },
           ET: {
-            title: "Habemepalsamid: Proraso, Captain Fawcett | REMPIRE",
+            title: "Habemepalsamid ja raseerimisjärgsed palsamid | REMPIRE",
             meta: "Captain Fawcetti ja Proraso habemepalsamid pehmendavad ja vormivad habet, Proraso raseerimisjärgsed palsamid rahustavad nahka. Järeletulek Tallinnas.",
             name: "Habemepalsamid ja raseerimisjärgsed palsamid",
-            h1: "Habemepalsamid",
             intro: "Habemepalsam hooldab nagu õli, kuid annab ka kerge fikseerimise, nii et pikem habe püsib terve päeva vormis. Siin on ka Proraso raseerimisjärgsed palsamid, nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
           },
           EN: {
             title: "Beard & Aftershave Balms: Proraso, Captain Fawcett",
             meta: "Captain Fawcett and Proraso beard balms soften and shape the beard; Proraso aftershave balms calm the skin after a shave. Pickup in Tallinn.",
             name: "Beard and aftershave balms",
-            h1: "Beard balms",
             intro: "A beard balm cares for the beard like an oil and adds a light hold, so a longer beard keeps its shape all day. Proraso's aftershave balms are here too — from the gentle White for sensitive skin to the cooling, menthol Green."
           }
         },

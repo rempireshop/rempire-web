@@ -1474,11 +1474,11 @@
         "dim"
       ],
       "status": "todo",
-      "title": "Три факта для разметки: штрихкоды, часы работы, кто платит за возврат",
-      "detail": "Штрихкоды — отсканировать в «Склад» (тогда Google сопоставит товары с каталогом производителя). Часы работы — в «Настройки → Контент» в виде ЧЧ:ММ–ЧЧ:ММ. Кто оплачивает пересылку при возврате — сейчас в тексте не сказано; ответ добавится в разметку и в Merchant Center.",
+      "title": "Два факта для разметки: штрихкоды и кто платит за возврат",
+      "detail": "Часы работы подтверждены Димом 09.10: вторник–суббота 10:00–19:00 — так они и стоят на сайте и в данных для Google. Но в Waze указаны другие (пн 10–15, сб 10–17) — их стоит поправить там, где Ренат управляет профилем. Осталось: штрихкоды — отсканировать в «Склад» (тогда Google сопоставит товары с каталогом производителя); кто оплачивает пересылку при возврате — в тексте не сказано, ответ добавится в разметку и в Merchant Center.",
       "en": {
-        "title": "Three facts for the markup: barcodes, opening hours, who pays for returns",
-        "detail": "Barcodes — scan them in «Склад» (Google then matches products to the maker's catalogue). Opening hours — in «Настройки → Контент» as HH:MM–HH:MM. Who pays the return postage — the text does not say yet; the answer goes into the markup and Merchant Center."
+        "title": "Two facts for the markup: barcodes, and who pays for returns",
+        "detail": "Opening hours confirmed by Dim on 09.10: Tuesday–Saturday 10:00–19:00 — as the site and Google’s data already state. Waze shows different ones (Mon 10–15, Sat 10–17) — worth correcting wherever Renat manages that listing. Still open: barcodes — scan them in «Склад» (Google then matches products to the maker’s catalogue); who pays the return postage — the text does not say; the answer goes into the markup and Merchant Center."
       }
     },
     {
