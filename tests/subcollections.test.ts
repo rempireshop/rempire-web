@@ -283,10 +283,20 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
     has("styling/pw", "ET", /juuksevaha/i); has("styling/pw", "RU", /воск для волос/i); has("styling/pw", "EN", /hair wax/i);
   });
 
-  it("keeps the section's heading on screen — the page's own name lives in the title, the meta and the line", () => {
+  it("heads the page with its own name — the section stays in the crumb (Dim, 09.10.2026)", () => {
     const cat = APP.slice(APP.indexOf("  function screenCatalog() {"), APP.indexOf("  /* Russian counts take three forms"));
     expect(cat).toContain("if (subPg) { ownIntro = subPg.intro; intro = esc(subPg.intro); }");
-    expect(cat).not.toMatch(/name = subPg/);
+    expect(cat).toContain("var subH1 = subPg ? subPg.h1 || subPg.name : \"\";");
+    // already in the page's language: the dictionary must not touch it
+    expect(cat).toContain("'<h1 class=\"display h1\" data-notr>' + esc(subH1) + \"</h1>\"");
+    // the crumb still names the section, then the chip
+    expect(cat).toMatch(/subPg \? '<a href="' \+ linkHref\("cat", S\.cat\)/);
+    // a heading short enough for the display face: at most 30 characters
+    for (const [key, byLang] of Object.entries(SUB_PAGES))
+      for (const L of ["RU", "ET", "EN"] as Lang[]) {
+        const w = byLang[L] as { name: string; h1?: string };
+        expect((w.h1 || w.name).length, `${key} ${L}`).toBeLessThanOrEqual(30);
+      }
   });
 });
 

@@ -1123,7 +1123,7 @@ function productPage(p, lang) {
    different texts since 09.10.2026: the description is the search snippet
    (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
    which the static page used to replace with the snippet. */
-function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }) {
+function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -1155,7 +1155,9 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
   const content = '<div class="wrap">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<section class="sec">' +
-      '<h1 class="display h1">' + esc(heading) + "</h1>" +
+      /* `h1`: a subcollection's own name, with its section in the crumb
+         above (screenCatalog() draws the same) */
+      '<h1 class="display h1">' + esc(h1 || heading) + "</h1>" +
       '<p class="sec__intro">' + esc(intro) + "</p>" +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
@@ -1197,19 +1199,19 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
 
    /et/collections/habemeolid, /collections/shampoo … (SUB_HANDLES). The
    section's listing template, exactly, and what the shop shows on tapping the
-   chip: the section's heading, the crumb Главная › section › chip, the
-   subcollection's own line under the heading, and the products the chip
-   filters, the owner's «Подраздел» included. Title, description and that line
-   are seoHead("sub")/seoSub() (src/lib/seo-copy.mjs), as setHead() and
-   screenCatalog() read them; the list's name in the ItemList is the page's
-   own, set on the spec afterwards. */
+   chip: the subcollection's own heading (Dim, 09.10.2026), the crumb Главная ›
+   section › chip, the subcollection's own line under the heading, and the
+   products the chip filters, the owner's «Подраздел» included. Title,
+   description, heading and that line are seoHead("sub")/seoSub()
+   (src/lib/seo-copy.mjs), as setHead() and screenCatalog() read them; the
+   list's name in the ItemList is the page's own, set on the spec afterwards. */
 function subcollectionPage(key, lang) {
   const [cat, sub] = key.split("/");
   const words = seoSub(key, lang.code);
   const head = seoHead("sub", key, lang.code, SEO_CTX);
   const list = ON_SALE.filter(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
   const page = listingPage({
-    lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), list,
+    lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), h1: words.h1 || words.name, list,
     rest: "/c/" + key + "/",
     desc: head.d, title: head.t,
     intro: words.intro

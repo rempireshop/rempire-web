@@ -263,9 +263,11 @@
       },
       /* A subcollection — a section's chip with a page of its own (SUB_HANDLES
          in src/lib/shop-paths.mjs, /et/collections/habemeolid): its title and
-         meta, its name in the structured data, and the line under the
-         heading (seoSub()). The heading itself stays the section's, as it
-         always was on tapping the chip (Dim, 09.10.2026). */
+         meta, its name (the page's <h1> and its name in the structured data),
+         and the line under the heading (seoSub()). The section stays one step
+         back, in the crumb. `h1`, where there is one, is a shorter heading than
+         the full name — the display face is large and set in capitals (Dim,
+         09.10.2026: the subcollection's own heading, not the section's). */
       sub: {
         "beard/oi": {
           RU: {
@@ -292,18 +294,21 @@
             title: "Бальзамы для бороды и после бритья: Proraso, Captain Fawcett",
             meta: "Бальзамы для бороды Captain Fawcett и Proraso смягчают и укладывают бороду, бальзамы Proraso после бритья успокаивают кожу. Самовывоз в Таллинне.",
             name: "Бальзамы для бороды и после бритья",
+            h1: "Бальзамы для бороды",
             intro: "Бальзам для бороды ухаживает как масло, но ещё и слегка фиксирует, так что длинная борода весь день держит форму. Здесь же бальзамы Proraso после бритья — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
           },
           ET: {
             title: "Habemepalsamid: Proraso, Captain Fawcett | REMPIRE",
             meta: "Captain Fawcetti ja Proraso habemepalsamid pehmendavad ja vormivad habet, Proraso raseerimisjärgsed palsamid rahustavad nahka. Järeletulek Tallinnas.",
             name: "Habemepalsamid ja raseerimisjärgsed palsamid",
+            h1: "Habemepalsamid",
             intro: "Habemepalsam hooldab nagu õli, kuid annab ka kerge fikseerimise, nii et pikem habe püsib terve päeva vormis. Siin on ka Proraso raseerimisjärgsed palsamid, nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
           },
           EN: {
             title: "Beard & Aftershave Balms: Proraso, Captain Fawcett",
             meta: "Captain Fawcett and Proraso beard balms soften and shape the beard; Proraso aftershave balms calm the skin after a shave. Pickup in Tallinn.",
             name: "Beard and aftershave balms",
+            h1: "Beard balms",
             intro: "A beard balm cares for the beard like an oil and adds a light hold, so a longer beard keeps its shape all day. Proraso's aftershave balms are here too — from the gentle White for sensitive skin to the cooling, menthol Green."
           }
         },
@@ -461,7 +466,7 @@
   }
 
   /**
-   * A subcollection's words in one language — { title, meta, name, intro } —
+   * A subcollection's words in one language — { title, meta, name, h1?, intro } —
    * or null for a key with none. Plain text, not HTML.
    */
   function seoSub(key, lang) {
