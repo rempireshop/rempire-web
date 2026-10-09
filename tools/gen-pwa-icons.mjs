@@ -22,6 +22,13 @@
  *   badge-96.png                           the status-bar mark on an Android push
  *   favicon.svg                            tab icon: transparent, ink; white in a dark UI
  *
+ * And two at the site root, public/, for whoever asks the root without
+ * reading the page's <link> tags — a browser opening a feed or an image
+ * directly, Bing, link previews, a browser's history that still holds
+ * Shopify's «R» (it 404'd here until 09.10.2026):
+ *   favicon.ico                            16, 32 and 48 px, PNG inside, white square
+ *   apple-touch-icon.png                   the same 180 px square as above
+ *
  * Not part of `prebuild`: the icons only need regenerating if the mark itself
  * changes, so this runs by hand, once.
  *
@@ -36,6 +43,10 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, "..");
 const APP = path.join(ROOT, "public", "shop2", "app.js");
 const OUT_DIR = path.join(ROOT, "public", "shop2", "icons");
+const ROOT_DIR = path.join(ROOT, "public");
+
+/* The sizes inside /favicon.ico — a tab, a high-density tab, Windows/Google */
+const ICO_SIZES = [16, 32, 48];
 
 /* --ink in public/shop2/styles.css — the header draws the tower in currentColor */
 const INK = "#1c1a00";
@@ -103,6 +114,27 @@ function faviconSVG({ d, vb, ratio }) {
     '</svg>\n';
 }
 
+/* An .ico is a directory of images; each may be a whole PNG file (every
+   browser since IE 11 reads that), so no BMP encoding is needed. */
+function packIco(pngs) {
+  const head = Buffer.alloc(6 + 16 * pngs.length);
+  head.writeUInt16LE(0, 0);
+  head.writeUInt16LE(1, 2);
+  head.writeUInt16LE(pngs.length, 4);
+  let offset = head.length;
+  pngs.forEach(({ size, data }, i) => {
+    const at = 6 + 16 * i;
+    head.writeUInt8(size >= 256 ? 0 : size, at);
+    head.writeUInt8(size >= 256 ? 0 : size, at + 1);
+    head.writeUInt16LE(1, at + 4);
+    head.writeUInt16LE(32, at + 6);
+    head.writeUInt32LE(data.length, at + 8);
+    head.writeUInt32LE(offset, at + 12);
+    offset += data.length;
+  });
+  return Buffer.concat([head, ...pngs.map((p) => p.data)]);
+}
+
 async function main() {
   const tower = readTower();
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -121,6 +153,19 @@ async function main() {
       });
       console.log(`gen-pwa-icons: wrote ${path.relative(ROOT, out)} (${size}x${size})`);
     }
+    /* favicon-32.png's proportions at every size of the root .ico */
+    const icoPngs = [];
+    for (const size of ICO_SIZES) {
+      await page.setViewportSize({ width: size, height: size });
+      await page.setContent(iconHTML(tower, size, 0.84, false));
+      icoPngs.push({ size, data: await page.screenshot({ type: "png", clip: { x: 0, y: 0, width: size, height: size } }) });
+    }
+    const icoOut = path.join(ROOT_DIR, "favicon.ico");
+    fs.writeFileSync(icoOut, packIco(icoPngs));
+    console.log(`gen-pwa-icons: wrote ${path.relative(ROOT, icoOut)} (${ICO_SIZES.join("/")})`);
+    const touchOut = path.join(ROOT_DIR, "apple-touch-icon.png");
+    fs.copyFileSync(path.join(OUT_DIR, "apple-touch-icon-180.png"), touchOut);
+    console.log(`gen-pwa-icons: wrote ${path.relative(ROOT, touchOut)} (180x180)`);
   } finally {
     await browser.close();
   }
