@@ -35,8 +35,10 @@ import {
   toCatalogueProduct,
   type CustomProduct,
 } from "@/lib/custom-products";
+import { feedOffers, HANDLING_DAYS, loadEans, sellCountries, shippingFor, validGtin } from "@/lib/merchant-feed";
 import { ogStamp } from "@/lib/og-card";
-import { getOverrides } from "@/lib/orders";
+import { getOverrides, type Override } from "@/lib/orders";
+import { DEFAULT_SHIPPING_RULES, loadShippingRules, type ShippingRules } from "@/lib/shipping";
 import { pickDescription } from "@/lib/product-descriptions";
 import { pickSeo } from "@/lib/product-seo";
 import {
@@ -123,10 +125,43 @@ function ogImage(base: string, row: CustomProduct): string {
 type Stock = "in" | "low" | "out";
 
 /**
+ * What the Merchant Center feed says about this one product — its items per
+ * size (feedOffers(): the feed's ids, prices, availability and `?size=`
+ * slugs, with the owner's override folded in exactly as the feed folds it),
+ * a scanned barcode per size, and the delivery and returns block every
+ * offer carries (shippingFor() over the checkout's rules, the countries the
+ * feed sells to). productOffersLD() in src/lib/seo-head.mjs turns it into
+ * the Product's `offers`. The feed is run whole, not for this row alone,
+ * because an item id that collides takes a suffix in feed order.
+ */
+function commerceFor(
+  row: CustomProduct,
+  override: Partial<Override> | null | undefined,
+  rules: ShippingRules,
+  eans: Record<string, string>,
+) {
+  const items = feedOffers({
+    overrides: override ? { [row.id]: override as Override } : {},
+    descriptions: {},
+    custom: [row],
+  })
+    .filter((o) => o.productId === row.id)
+    .map((o) => ({ ...o, gtin: validGtin(eans[o.label ?? ""]) }));
+  return {
+    offers: items,
+    shipping: (price: number) => shippingFor(price, rules),
+    handling: HANDLING_DAYS,
+    returnCountries: sellCountries(rules),
+  };
+}
+
+/**
  * The page for one row in one language. `override` is the owner's
  * product_overrides row for the id when there is one — a stock switch («нет
  * в наличии», which is what puts «Сообщить о наличии» on the page) or a
  * price the assistant wrote — so the head says what the rendered page will.
+ * `rules` (settings.shipping_rules, the defaults without one) and `eans`
+ * (stock_levels.ean by size) are for the offers' delivery and barcodes.
  */
 export function renderCustomProductPage(
   row: CustomProduct,
@@ -138,6 +173,8 @@ export function renderCustomProductPage(
       price?: number | null; stock?: string | null;
       stockByVariant?: Record<string, string> | null;
     } | null;
+    rules?: ShippingRules | null;
+    eans?: Record<string, string> | null;
   },
 ): string {
   const { base, robots } = opts;
@@ -169,6 +206,7 @@ export function renderCustomProductPage(
     body,
     image: ogImage(base, row),
     imageUrls: photos.length ? photos.map((u) => absUrl(base, u)) : [absUrl(base, OG_DEFAULT)],
+    commerce: commerceFor(row, o as Partial<Override> | null | undefined, opts.rules ?? DEFAULT_SHIPPING_RULES, opts.eans ?? {}),
   });
   const { seg, rest, core, priceText, stockText, crumbItems } = spec as unknown as {
     seg: string; rest: string; core: string; priceText: string; stockText: string; crumbItems: Array<[string, string | null]>;
@@ -287,7 +325,13 @@ export async function productPageResponse(id: string, seg: string): Promise<Resp
   } catch {
     /* the row alone is an honest page */
   }
+  /* The offers' delivery prices and barcodes. Both fail soft: no rules row is
+     the defaults the checkout bills by anyway, and no barcode is no gtin. */
+  const [rules, eans] = await Promise.all([
+    loadShippingRules().catch(() => null),
+    loadEans(id).then((all) => all[id] ?? {}, () => ({})),
+  ]);
   const base = baseFrom(process.env.PUBLIC_BASE_URL);
   const robots = robotsFor(process.env.PUBLIC_BASE_URL);
-  return html(renderCustomProductPage(row, lang, shell, { base, robots, override }), 200, PAGE_CACHE);
+  return html(renderCustomProductPage(row, lang, shell, { base, robots, override, rules, eans }), 200, PAGE_CACHE);
 }

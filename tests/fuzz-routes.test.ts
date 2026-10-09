@@ -324,9 +324,9 @@ function routes(): RouteCase[] {
        (src/lib/product-page.ts, src/app/sitemap-custom.xml/route.ts). HTML
        and XML, so no {ok,error} shape — what matters is that no id, however
        hostile, is a 5xx, a file path, or a page for a hidden row. */
-    { name: "GET /shop2/p/[id]/", path: "/shop2/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/products/[id]/route"), params: { id: "" }, jsonBody: false },
-    { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/et/products/[id]/route"), params: { id: "" }, jsonBody: false },
-    { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/products/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /ru/products/[id]", path: "/ru/products/x", method: "GET", exports: ["GET"], load: () => import("@/app/ru/products/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /et/products/[id]", path: "/et/products/x", method: "GET", exports: ["GET"], load: () => import("@/app/et/products/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /products/[id]", path: "/products/x", method: "GET", exports: ["GET"], load: () => import("@/app/products/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /sitemap-custom.xml", path: "/sitemap-custom.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-custom.xml/route"), jsonBody: false },
     /* the catalogue's product rows, served rather than written so a product
        hidden after the build leaves the sitemap with it */
@@ -340,19 +340,20 @@ function routes(): RouteCase[] {
        post, three languages — and the OG card drawn for a created product or a
        post (src/lib/og-card.ts). Same rule: hostile slugs/file names are a 404
        or a 400, never a 5xx or a file path. */
-    { name: "GET /shop2/blog/", path: "/shop2/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/route"), jsonBody: false },
-    { name: "GET /shop2/et/blog/", path: "/shop2/et/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/route"), jsonBody: false },
-    { name: "GET /shop2/en/blog/", path: "/shop2/en/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/route"), jsonBody: false },
-    { name: "GET /shop2/blog/[slug]/", path: "/shop2/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
-    { name: "GET /shop2/et/blog/[slug]/", path: "/shop2/et/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
-    { name: "GET /shop2/en/blog/[slug]/", path: "/shop2/en/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /ru/blogs/news", path: "/ru/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/route"), jsonBody: false },
+    { name: "GET /et/blogs/news", path: "/et/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/route"), jsonBody: false },
+    { name: "GET /blogs/news", path: "/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/route"), jsonBody: false },
+    { name: "GET /ru/blogs/news/[slug]", path: "/ru/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /et/blogs/news/[slug]", path: "/et/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /blogs/news/[slug]", path: "/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /shop2/og/[file]", path: "/shop2/og/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/og/[file]/route"), params: { file: "" }, jsonBody: false },
-    /* The catch-all under /shop2/ (src/lib/notfound-page.ts): everything the
+    /* The catch-all at the root of the site since the URL move of 08.10.2026
+       (src/app/[...path], src/lib/notfound-page.ts): everything the
        rewrites and the routes above did not claim. It reads nothing but the
        request path, so the hostile shapes it has to survive are addresses —
        an unfinished escape, a very long segment, a traversal attempt — none
        of which may become a 5xx or reach a file. */
-    { name: "GET /shop2/[...path]/", path: "/shop2/x/", method: "GET", exports: ["GET"], load: () => import("@/app/[...path]/route"), jsonBody: false },
+    { name: "GET /[...path]", path: "/x", method: "GET", exports: ["GET"], load: () => import("@/app/[...path]/route"), jsonBody: false },
     /* Merchant Center's «Checkout» link, /cart/<item id>:<qty>
        (src/lib/merchant-cart.ts). A redirect and nothing else: every id —
        real, stale, hostile — is a 302 into the shop, never a 5xx. */
@@ -430,7 +431,7 @@ function idCorpus(good: string): string[] {
 
 function goodIdFor(name: string): string {
   if (name.includes("/customers/")) return F.customerId;
-  if (name.includes("/blog/")) return F.postSlug;
+  if (name.includes("/blog/") || name.includes("/blogs/news")) return F.postSlug;
   if (name.includes("/shipments/")) return F.paidOrderNumber;
   if (name.includes("/shop2/") || name.includes("/products/")) return F.customId;
   if (name.includes("/newsletters/")) return F.newsletterId;
@@ -756,7 +757,7 @@ describe("API fuzzing", () => {
     const { join, sep: SEP } = await import("node:path");
     const found: string[] = [];
     /* The whole of src/app, not only /api: the product pages and the sitemap
-       are route handlers too (src/app/shop2/**, src/app/sitemap-custom.xml),
+       are route handlers too (src/app/{,ru/,et/}products/**, src/app/sitemap-custom.xml),
        and a page added tomorrow must land in the table above the same day. */
     const walk = (dir: string) => {
       for (const entry of readdirSync(dir)) {

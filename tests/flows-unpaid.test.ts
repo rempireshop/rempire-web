@@ -125,9 +125,10 @@ describe("the reminder", () => {
     /* The button goes to the screen that can pay this order again — carrying
        the order's country, because that screen draws one country's bank chips
        and a letter is opened in a browser that has never seen this shop's
-       checkout (Ренат, R-100033, 17.09.2026). */
+       checkout (Ренат, R-100033, 17.09.2026). In the order's language: the
+       receipt is /ru/checkout/done since the URL move of 08.10.2026. */
     expect(sent[0].text).toContain(
-      `/shop2/done/?n=${order.number}&s=failed&o=${order.id}&c=EE`,
+      `/ru/checkout/done?n=${order.number}&s=failed&o=${order.id}&c=EE`,
     );
     // …and it says how long THIS order really has left: cancelled on day 7,
     // reminded on day 4, so three days — not the four the settings imply

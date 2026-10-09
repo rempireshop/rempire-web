@@ -47,7 +47,10 @@ const SHAMPOO = "system-4-bio-botanical-shampoo";
 /** What «Товар» wrote until 17.09.2026 — the words AND the price, as text. */
 const oldMarker = (id: string, words = "Bio Botanical Shampoo — от 12,90 €") =>
   `<p><a data-product="${id}" href="/shop2/p/${id}/">${words}</a></p>`;
-/** …and what it writes now: the words, and a marker where the price was. */
+/** …and what it wrote from then on: the words, and a marker where the price
+    was. The href is the Russian product page as it was spelt until the URL
+    move of 08.10.2026; every sanitiser now stores and serves it at its new
+    address, /ru/products/<id> (modernShopHref, src/lib/shop-paths.mjs). */
 const liveMarker = (id: string, words = "Bio Botanical Shampoo") =>
   `<p><a data-product="${id}" data-price="live" href="/shop2/p/${id}/">${words}</a></p>`;
 /** What the ASSISTANT writes — the id and nothing else. src/lib/ai-prompts.ts
@@ -76,7 +79,7 @@ describe("sanitizeHtml: the marker may say that its price is not its own", () =>
 
       it("writes the attributes in the one order the renderers match on", () => {
         expect(clean(liveMarker(SHAMPOO))).toContain(
-          `<a data-product="${SHAMPOO}" data-price="live" href="/shop2/p/${SHAMPOO}/">`,
+          `<a data-product="${SHAMPOO}" data-price="live" href="/ru/products/${SHAMPOO}">`,
         );
       });
 
@@ -167,7 +170,10 @@ describe("fillBlogCardPrices: the price is written as the page is written", () =
 describe("fillBlogCardPrices: the assistant's bare marker comes out the same card", () => {
   const priceOf = (id: string) => (id === SHAMPOO ? "от 14,50 €" : "");
   const nameOf = (id: string) => (id === SHAMPOO ? "System 4 Bio Botanical Shampoo — шампунь" : "");
-  const fill = (html: string, seg = "") => fillBlogCardPrices(renderPostBody(html), priceOf, { seg, nameOf });
+  /* `seg` is the language's path prefix: "ru", "et", or "" for English (the
+     unprefixed one since 08.10.2026). The words below are Russian, so the
+     article is read in Russian unless a test says otherwise. */
+  const fill = (html: string, seg = "ru") => fillBlogCardPrices(renderPostBody(html), priceOf, { seg, nameOf });
 
   it("is named as a card at all — it was invisible to blogCardIds() before", () => {
     expect(blogCardIds(renderPostBody(bareMarker(SHAMPOO)))).toEqual([SHAMPOO]);
@@ -175,21 +181,21 @@ describe("fillBlogCardPrices: the assistant's bare marker comes out the same car
 
   it("gets the link, the name and the price the «Товар» button would have written", () => {
     expect(fill(bareMarker(SHAMPOO))).toBe(
-      `<p><a data-product="${SHAMPOO}" data-price="live" href="/shop2/p/${SHAMPOO}/">` +
+      `<p><a data-product="${SHAMPOO}" data-price="live" href="/ru/products/${SHAMPOO}">` +
       "System 4 Bio Botanical Shampoo — шампунь — от 14,50 €</a></p>",
     );
   });
 
   it("links to the product page of the language the article is read in", () => {
-    expect(fill(bareMarker(SHAMPOO), "et")).toContain(`href="/shop2/et/p/${SHAMPOO}/"`);
-    expect(fill(bareMarker(SHAMPOO), "en")).toContain(`href="/shop2/en/p/${SHAMPOO}/"`);
+    expect(fill(bareMarker(SHAMPOO), "et")).toContain(`href="/et/products/${SHAMPOO}"`);
+    expect(fill(bareMarker(SHAMPOO), "")).toContain(`href="/products/${SHAMPOO}"`);
   });
 
   /* The «Товар» button bakes the right language into the href when the card
      is inserted, so a card standing in the Estonian text keeps its own. */
   it("never rewrites an href a marker already carries", () => {
-    expect(fill(liveMarker(SHAMPOO), "et")).toContain(`href="/shop2/p/${SHAMPOO}/"`);
-    expect(fill(liveMarker(SHAMPOO), "et")).not.toContain("/et/p/");
+    expect(fill(liveMarker(SHAMPOO), "et")).toContain(`href="/ru/products/${SHAMPOO}"`);
+    expect(fill(liveMarker(SHAMPOO), "et")).not.toContain("/et/products/");
   });
 
   /* A hidden product is not priced, and an unpriced bare marker stays the
@@ -210,9 +216,11 @@ describe("fillBlogCardPrices: the assistant's bare marker comes out the same car
     expect(fill(liveMarker(SHAMPOO, "Proraso &amp; Co"))).toContain("Proraso &amp; Co — от 14,50 €");
   });
 
+  /* …and with no `seg` either, the link is the unprefixed one — English since
+     the URL move of 08.10.2026. */
   it("gives the price alone when the caller offers no name", () => {
     expect(fillBlogCardPrices(renderPostBody(bareMarker(SHAMPOO)), priceOf))
-      .toContain(`href="/shop2/p/${SHAMPOO}/">от 14,50 €</a>`);
+      .toContain(`href="/products/${SHAMPOO}">от 14,50 €</a>`);
   });
 
   it("still leaves a marker of the old shape byte for byte", () => {
@@ -221,8 +229,8 @@ describe("fillBlogCardPrices: the assistant's bare marker comes out the same car
   });
 
   it("works on a body the build's own sanitiser wrote", () => {
-    expect(fillBlogCardPrices(exportRenderPostBody(bareMarker(SHAMPOO)), priceOf, { seg: "", nameOf }))
-      .toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(fillBlogCardPrices(exportRenderPostBody(bareMarker(SHAMPOO)), priceOf, { seg: "ru", nameOf }))
+      .toContain(`href="/ru/products/${SHAMPOO}"`);
   });
 });
 
@@ -233,7 +241,7 @@ describe("fillBlogCardPrices: the assistant's bare marker comes out the same car
  *
  * The «Товар» button STORES its href in the body, so a card the caller could
  * not price kept that link while losing only its figure. For a hidden product
- * the link goes to `/shop2/p/<id>/`, which the middleware answers 404 noindex
+ * the link goes to `/ru/products/<id>`, which the middleware answers 404 noindex
  * (docs/seo.md) — a dead link sitting in a published article that a crawler
  * keeps coming back to.
  *
@@ -263,7 +271,7 @@ describe("fillBlogCardPrices: a card for a product that is not for sale loses it
 
   it("never takes the link off a product it could price", () => {
     expect(fillBlogCardPrices(renderPostBody(liveMarker(SHAMPOO)), () => "от 14,50 €", { seg: "", nameOf, offSale }))
-      .toContain(`href="/shop2/p/${SHAMPOO}/"`);
+      .toContain(`href="/ru/products/${SHAMPOO}"`);
   });
 
   /* The assistant's marker has no href to take, and gets none: that is the
@@ -302,14 +310,16 @@ describe("fillBlogCardPrices: a card for a product that is not for sale loses it
 
 const LIVE_BASE = "https://rempireshop.com";
 
-async function postPage(seg: "" | "et" | "en", slug: string): Promise<string> {
+/** The request-time article at its address: "ru" /ru/blogs/news/<slug>, "et"
+    /et/blogs/news/<slug>, "" the unprefixed English one. */
+async function postPage(seg: "ru" | "et" | "", slug: string): Promise<string> {
   const mod = seg === "et"
     ? await import("@/app/et/blogs/news/[slug]/route")
-    : seg === "en"
-      ? await import("@/app/blogs/news/[slug]/route")
-      : await import("@/app/ru/blogs/news/[slug]/route");
+    : seg === "ru"
+      ? await import("@/app/ru/blogs/news/[slug]/route")
+      : await import("@/app/blogs/news/[slug]/route");
   const res = await mod.GET(
-    new Request(`${LIVE_BASE}/shop2${seg ? "/" + seg : ""}/blog/${slug}/`),
+    new Request(`${LIVE_BASE}${seg ? "/" + seg : ""}/blogs/news/${slug}`),
     { params: Promise.resolve({ slug }) },
   );
   return res.text();
@@ -360,7 +370,7 @@ describe("the article as it is served: the price is the shop's, not the article'
     await repriced(21.4);
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" });
 
-    const body = articleBody(await postPage("", post.slug));
+    const body = articleBody(await postPage("ru", post.slug));
     expect(body).toContain("Bio Botanical Shampoo — 21,40 €");
     expect(body).toContain(`data-product="${SHAMPOO}"`);
   });
@@ -374,9 +384,9 @@ describe("the article as it is served: the price is the shop's, not the article'
     // a ladder of two sizes is what makes the shop say «от»
     await upsertOverride(SHAMPOO, { sizes: [{ size: "250 мл", price: 14.5 }, { size: "500 мл", price: 24 }] });
 
-    expect(articleBody(await postPage("", post.slug))).toContain("Шампунь — от 14,50 €");
+    expect(articleBody(await postPage("ru", post.slug))).toContain("Шампунь — от 14,50 €");
     expect(articleBody(await postPage("et", post.slug))).toContain("Šampoon — alates 14,50 €");
-    expect(articleBody(await postPage("en", post.slug))).toContain("Shampoo — from 14,50 €");
+    expect(articleBody(await postPage("", post.slug))).toContain("Shampoo — from 14,50 €");
   });
 
   /* The whole point of «not migrated»: an article written in September keeps
@@ -384,7 +394,7 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("leaves an article of the old shape exactly as it was published", async () => {
     const post = await publish({ RU: oldMarker(SHAMPOO), ET: "", EN: "" });
     await repriced(99);
-    const body = articleBody(await postPage("", post.slug));
+    const body = articleBody(await postPage("ru", post.slug));
     expect(body).toContain("Bio Botanical Shampoo — от 12,90 €");
     expect(body).not.toContain("99");
   });
@@ -395,7 +405,7 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("keeps the stored body in the snapshot the shop hydrates from", async () => {
     await repriced(21.4);
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" });
-    const html = await postPage("", post.slug);
+    const html = await postPage("ru", post.slug);
 
     expect(articleBody(html)).toContain("21,40 €");
     expect(String(blogpostJson(html).bodyHtml)).toContain('data-price="live"');
@@ -407,7 +417,7 @@ describe("the article as it is served: the price is the shop's, not the article'
       brand: "Acme", name: "Wax", cat: "styling", sizes: ["50 мл", "100 мл"], prices: [9, 15],
     });
     const post = await publish({ RU: liveMarker(wax.id, "Acme Wax"), ET: "", EN: "" });
-    expect(articleBody(await postPage("", post.slug))).toContain("Acme Wax — от 9 €");
+    expect(articleBody(await postPage("ru", post.slug))).toContain("Acme Wax — от 9 €");
   });
 
   /* A product the owner has switched off loses BOTH: no figure, rather than
@@ -418,10 +428,10 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("takes the price AND the link off a product that has left the shop", async () => {
     await upsertOverride(SHAMPOO, { hidden: true });
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" });
-    const body = articleBody(await postPage("", post.slug));
+    const body = articleBody(await postPage("ru", post.slug));
     expect(body).toContain("Bio Botanical Shampoo");
     expect(body).not.toContain("€");
-    expect(body).not.toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(body).not.toContain(`href="/ru/products/${SHAMPOO}"`);
     expect(body).toContain(`<a data-product="${SHAMPOO}" data-price="live">`);
   });
 
@@ -430,7 +440,7 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("takes it off in every language the article is read in", async () => {
     await upsertOverride(SHAMPOO, { hidden: true });
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: liveMarker(SHAMPOO), EN: "" });
-    expect(articleBody(await postPage("et", post.slug))).not.toContain("href=\"/shop2/p/");
+    expect(articleBody(await postPage("et", post.slug))).not.toContain("href=\"/ru/products/");
   });
 
   /* One of the owner's OWN products, switched off: src/lib/product-page.ts
@@ -442,9 +452,9 @@ describe("the article as it is served: the price is the shop's, not the article'
     });
     await setCustomProductActive(wax.id, false);
     const post = await publish({ RU: liveMarker(wax.id, "Acme Gone"), ET: "", EN: "" });
-    const body = articleBody(await postPage("", post.slug));
+    const body = articleBody(await postPage("ru", post.slug));
     expect(body).toContain("Acme Gone");
-    expect(body).not.toContain(`href="/shop2/p/${wax.id}/"`);
+    expect(body).not.toContain(`href="/ru/products/${wax.id}"`);
   });
 
   /* An article the assistant wrote, served: the card it put in the text is a
@@ -454,12 +464,12 @@ describe("the article as it is served: the price is the shop's, not the article'
     await repriced(21.4);
     const post = await publish({ RU: bareMarker(SHAMPOO), ET: bareMarker(SHAMPOO), EN: "" });
 
-    const ru = articleBody(await postPage("", post.slug));
-    expect(ru).toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    const ru = articleBody(await postPage("ru", post.slug));
+    expect(ru).toContain(`href="/ru/products/${SHAMPOO}"`);
     expect(ru).toContain("System 4 Bio Botanical Shampoo — шампунь — 21,40 €");
 
     const et = articleBody(await postPage("et", post.slug));
-    expect(et).toContain(`href="/shop2/et/p/${SHAMPOO}/"`);
+    expect(et).toContain(`href="/et/products/${SHAMPOO}"`);
     // …and the name in Estonian, as the prerendered page writes it — not «— шампунь»
     expect(et).toContain("System 4 Bio Botanical Shampoo — šampoon — 21,40 €");
     expect(et).not.toMatch(/[а-яё]/i);
@@ -470,9 +480,9 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("leaves the assistant's marker unlinked for a product that has left the shop", async () => {
     await upsertOverride(SHAMPOO, { hidden: true });
     const post = await publish({ RU: bareMarker(SHAMPOO), ET: "", EN: "" });
-    const body = articleBody(await postPage("", post.slug));
+    const body = articleBody(await postPage("ru", post.slug));
     expect(body).toContain(`data-product="${SHAMPOO}"`);
-    expect(body).not.toContain(`href="/shop2/p/${SHAMPOO}/"`);
+    expect(body).not.toContain(`href="/ru/products/${SHAMPOO}"`);
   });
 
   /* …and the stored body is untouched by any of it, so #blogpost still
@@ -480,7 +490,7 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("stores the bare marker unchanged while serving it filled in", async () => {
     await repriced(21.4);
     const post = await publish({ RU: bareMarker(SHAMPOO), ET: "", EN: "" });
-    const html = await postPage("", post.slug);
+    const html = await postPage("ru", post.slug);
     expect(String(blogpostJson(html).bodyHtml)).toBe(`<p><a data-product="${SHAMPOO}"></a></p>`);
     expect(articleBody(html)).toContain("21,40 €");
   });
@@ -491,7 +501,7 @@ describe("the article as it is served: the price is the shop's, not the article'
   it("still draws the shelf under the article, at the owner's price", async () => {
     await repriced(21.4);
     const post = await publish({ RU: liveMarker(SHAMPOO), ET: "", EN: "" }, [SHAMPOO, "no-such-product"]);
-    const html = await postPage("", post.slug);
+    const html = await postPage("ru", post.slug);
     expect(html).toContain("Товары из статьи");
     expect(html).toContain('<span class="pre__pr num">21,40 €</span>');
   });
@@ -513,10 +523,20 @@ function slice(name: string): string {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 
+/** The address helpers of app.js (shopPathFor and the tables it reads) —
+    the ES5 twin of src/lib/shop-paths.mjs, cut out as tests/shop-paths.test.ts
+    cuts it. */
+function addressRegion(): string {
+  const from = appSrc.indexOf("  var LANG_OF_SEG = ");
+  const to = appSrc.indexOf("  /** The panel and its scanner live at one address");
+  if (from < 0 || to < from) throw new Error("public/shop2/app.js lost its address region");
+  return appSrc.slice(from, to);
+}
+
 /** blogProductLinkHTML() — what «Товар» drops into the body — for one language. */
 function marker(lang: "RU" | "ET" | "EN"): string {
   const body = `
-    var SEG_OF_LANG = { RU: "", ET: "/et", EN: "/en" };
+    ${addressRegion()}
     function productsById() { return [{ id: "${SHAMPOO}", brand: "System 4", name: "Bio Botanical Shampoo", price: 12.9, priceFrom: true }]; }
     function blogProductName(p, L) { return p.brand + " " + p.name + " (" + L + ")"; }
     function blogProductPrice() { throw new Error("the editor must not write a price into the body"); }
@@ -530,10 +550,10 @@ function marker(lang: "RU" | "ET" | "EN"): string {
 describe("the «Товар» button no longer writes a price into the article", () => {
   it("writes the words, the language's product page, and the live-price marker", () => {
     expect(marker("RU")).toBe(
-      `<a data-product="${SHAMPOO}" data-price="live" href="/shop2/p/${SHAMPOO}/">System 4 Bio Botanical Shampoo (RU)</a>`,
+      `<a data-product="${SHAMPOO}" data-price="live" href="/ru/products/${SHAMPOO}">System 4 Bio Botanical Shampoo (RU)</a>`,
     );
-    expect(marker("ET")).toContain('href="/shop2/et/p/');
-    expect(marker("EN")).toContain('href="/shop2/en/p/');
+    expect(marker("ET")).toContain('href="/et/products/');
+    expect(marker("EN")).toContain('href="/products/');
   });
 
   it("writes no money at all — blogProductPrice() throws if it is reached", () => {

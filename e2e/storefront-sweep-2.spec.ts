@@ -902,7 +902,12 @@ test.describe("the newsletter tick travels with the order", () => {
 test.describe("the consent banner", () => {
   // a visitor who has never answered it — the suite's own storageState says
   // otherwise for every other test (playwright.config.ts)
-  test.use({ extraHTTPHeaders: ipHeaders(214), storageState: { cookies: [], origins: [] } });
+  /* …and an English browser: since 08.10.2026 the unprefixed address is the
+     English shop, and a first visit from the suite's ru-RU browser with no
+     saved choice is SENT to /ru by the edge (src/middleware.ts) — correctly,
+     but then «EN» would be tested in Russian. /ru and /et are never sent
+     anywhere, so the other two languages read the same either way. */
+  test.use({ extraHTTPHeaders: ipHeaders(214), storageState: { cookies: [], origins: [] }, locale: "en-US" });
 
   for (const lang of LANGS) {
     test(`«${lang.code}» — a first visit is asked, in its own language`, async ({ page }) => {

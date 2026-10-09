@@ -109,20 +109,31 @@ function linkify(text: string, uiLang: string): string {
 
 describe("the article the shop assistant points at (chat.js withBlogLinks)", () => {
   it("turns the bare path the prompt asks for into the shop's own link", () => {
-    const out = linkify("Про это есть статья. /shop2/blog/beard-in-winter/", "RU");
+    /* The prompt (src/app/api/assistant/route.ts) asks for /blogs/news/<slug>
+       since the URL move of 08.10.2026; the shopper's language decides the
+       prefix — Russian is /ru (Shopify's scheme, src/lib/shop-paths.mjs). */
+    const out = linkify("Про это есть статья. /blogs/news/beard-in-winter", "RU");
     expect(out).toContain('data-go-blog="beard-in-winter"');
-    expect(out).toContain('href="/shop2/blog/beard-in-winter/"');
-    expect(out).toContain(">/shop2/blog/beard-in-winter/</a>");
+    expect(out).toContain('href="/ru/blogs/news/beard-in-winter"');
+    expect(out).toContain(">/blogs/news/beard-in-winter</a>");
+    /* An answer still written in the old /shop2/ shape is linked to the new address. */
+    const old = linkify("Про это есть статья. /shop2/blog/beard-in-winter/", "RU");
+    expect(old).toContain('data-go-blog="beard-in-winter"');
+    expect(old).toContain('href="/ru/blogs/news/beard-in-winter"');
+    expect(old).toContain(">/shop2/blog/beard-in-winter/</a>");
   });
 
   it("sends an Estonian shopper to the Estonian address", () => {
-    expect(linkify("/shop2/blog/beard-in-winter/", "ET")).toContain('href="/shop2/et/blog/beard-in-winter/"');
-    expect(linkify("/shop2/en/blog/beard-in-winter/", "EN")).toContain('href="/shop2/en/blog/beard-in-winter/"');
+    expect(linkify("/blogs/news/beard-in-winter", "ET")).toContain('href="/et/blogs/news/beard-in-winter"');
+    expect(linkify("/blogs/news/beard-in-winter", "EN")).toContain('href="/blogs/news/beard-in-winter"');
+    expect(linkify("/shop2/blog/beard-in-winter/", "ET")).toContain('href="/et/blogs/news/beard-in-winter"');
+    expect(linkify("/shop2/en/blog/beard-in-winter/", "EN")).toContain('href="/blogs/news/beard-in-winter"');
   });
 
   it("leaves everything else alone", () => {
     const plain = "Возьмите шампунь для объёма — он в каталоге.";
     expect(linkify(plain, "RU")).toBe(plain);
+    expect(linkify("/ru/collections/uhod-za-borodoy", "RU")).toBe("/ru/collections/uhod-za-borodoy");
     expect(linkify("/shop2/c/beard/", "RU")).toBe("/shop2/c/beard/");
     // the text is already escaped when this runs — it cannot open a tag of its own
     expect(linkify("&lt;script&gt; /shop2/blog/x/", "RU")).toContain("&lt;script&gt;");

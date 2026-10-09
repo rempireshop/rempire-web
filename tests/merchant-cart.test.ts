@@ -17,9 +17,12 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { NextRequest } from "next/server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import catalogueMin from "@/data/catalogue.min.json";
+import shopifyTable from "@/data/shopify-variants.json";
 import { isCartPermalink, parseCartPermalink, segFromAcceptLanguage } from "@/lib/cart-permalink";
 import { resolveCartLink } from "@/lib/merchant-cart";
-import { buildFeed, feedOffers, idStem, type FeedInput } from "@/lib/merchant-feed";
+import { buildFeed, feedOffers, idStem, sizeSlug, type FeedInput } from "@/lib/merchant-feed";
+import { shopifyVariant, shopifyVariantId, type ShopifyVariant } from "@/lib/shopify-variants";
 import { exec, query } from "@/lib/db";
 import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
 import { setupDb, teardownDb } from "./helpers";
@@ -27,6 +30,15 @@ import { setupDb, teardownDb } from "./helpers";
 const SHAMPOO = "system-4-bio-botanical-shampoo"; // 75/250/500 мл
 const LONG = "sim-sensitive-system-4-oil-cure-scalp-treatment-o"; // 49 characters, three sizes
 const GATSBY = "mandom-gatsby-moving-rubber"; // no sizes at all
+
+/* Shopify's ids, from Merchant Center's export of its Shopify product source
+   (src/data/shopify-variants.json, tools/build-shopify-variants.mjs). */
+const ANGEL = "kevin-murphy-angel-wash"; // 40 / 250 мл
+const ANGEL_250 = "47186649547091"; // Shopify product 8561872142675
+const ANGEL_40 = "49691145797971";
+const WAX = "captain-fawcett-barberism-moustache-wax"; // one size; Shopify's handle is «barberism%C2%AE-…»
+const WAX_V = "47181433143635"; // Shopify product 8560400073043
+const SHOPIFY = shopifyTable as Record<string, ShopifyVariant>;
 
 const EMPTY: FeedInput = { overrides: {}, descriptions: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES };
 const withOverrides = (overrides: FeedInput["overrides"]): FeedInput => ({ ...EMPTY, overrides });
@@ -153,6 +165,105 @@ describe("what cannot be put in the basket", () => {
   });
 });
 
+describe("Shopify's ids — Merchant Center's Shopify product source, until our own feeds take over", () => {
+  /* Merchant Center fills {id} of the «Checkout» link with the item's id, and
+     the items of Shopify's source are `shopify_<CC>_<product>_<variant>`.
+     Until 09.10.2026 every one of them landed on the home page with an empty
+     basket. */
+  it("reads the variant out of Shopify's item id, or a bare one", () => {
+    expect(shopifyVariantId(`shopify_ZZ_8561872142675_${ANGEL_250}`)).toBe(ANGEL_250);
+    expect(shopifyVariantId(`shopify_EE_8561872142675_${ANGEL_250}`)).toBe(ANGEL_250);
+    expect(shopifyVariantId(ANGEL_250)).toBe(ANGEL_250);
+    for (const id of ["shopify_ZZ_8561872142675", "shopify_ZZZ_1_2", "shopify_ZZ_x_2", `${SHAMPOO}_250ml`, "", "12a"]) {
+      expect([id, shopifyVariantId(id)]).toEqual([id, null]);
+    }
+    expect(shopifyVariant("1")).toBeNull();
+    expect(shopifyVariant("constructor")).toBeNull();
+    expect(shopifyVariant(ANGEL_250)).toEqual({ p: ANGEL, s: "250ml" });
+  });
+
+  it("the table names only catalogue products, and only sizes today's feed sells", () => {
+    const ids = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
+    const offers = feedOffers(EMPTY);
+    const entries = Object.entries(SHOPIFY);
+    expect(entries.length).toBeGreaterThan(300);
+    for (const [vid, v] of entries) {
+      expect(/^\d+$/.test(vid), vid).toBe(true);
+      expect(ids.has(v.p), `${vid} → ${v.p}`).toBe(true);
+      const mine = offers.filter((o) => o.productId === v.p);
+      if (v.s) expect(mine.some((o) => o.slug === v.s), `${vid} → ${v.p} ${v.s}`).toBe(true);
+      /* No size: a product the shop sells in one size — every Shopify variant
+         of a product sold here in several found its size in this export. */
+      else expect(mine.length, `${vid} → ${v.p} has several sizes and no size of them`).toBeLessThanOrEqual(1);
+    }
+    expect(entries.filter(([, v]) => v.s).length).toBeGreaterThan(150);
+  });
+
+  it("a size of several: that size, into the basket — as the feed's own id would", () => {
+    const own = go(`/cart/${ANGEL}_250ml:1`);
+    expect(own).toEqual({ path: `/ru/products/${ANGEL}?size=250ml&buy=1`, reason: "buy" });
+    expect(go(`/cart/shopify_ZZ_8561872142675_${ANGEL_250}:1`)).toEqual(own);
+    expect(go(`/cart/${ANGEL_250}:1`)).toEqual(own);
+    expect(go(`/cart/shopify_ZZ_8561872142675_${ANGEL_40}:2`, EMPTY, "et"))
+      .toEqual({ path: `/et/products/${ANGEL}?size=40ml&buy=2`, reason: "buy" });
+  });
+
+  it("a product sold in one size: into the basket, with no size to name", () => {
+    expect(go(`/cart/shopify_ZZ_8560400073043_${WAX_V}:1`, EMPTY, ""))
+      .toEqual({ path: `/products/${WAX}?buy=1`, reason: "buy" });
+    expect(go(`/cart/${WAX_V}:3`, EMPTY, "")).toEqual({ path: `/products/${WAX}?buy=3`, reason: "buy" });
+  });
+
+  it("every variant of the table lands on its own product, and on its size", () => {
+    const offers = feedOffers(EMPTY);
+    for (const [vid, v] of Object.entries(SHOPIFY)) {
+      const got = resolveCartLink([{ id: `shopify_ZZ_1_${vid}`, qty: 1 }], EMPTY, "ru", offers);
+      expect([vid, got.path.split("?")[0]]).toEqual([vid, `/ru/products/${encodeURIComponent(v.p)}`]);
+      expect(["buy", "sold-out"]).toContain(got.reason);
+      if (v.s) expect(got.path, vid).toContain(`size=${encodeURIComponent(v.s)}`);
+    }
+  });
+
+  it("sold out, a size counted to zero, hidden — the same answers as our own ids", () => {
+    const out = withOverrides({ [ANGEL]: { stock: "out" } as never });
+    expect(go(`/cart/${ANGEL_250}:1`, out)).toEqual({ path: `/ru/products/${ANGEL}?size=250ml`, reason: "sold-out" });
+    const sizeOut = withOverrides({ [ANGEL]: { stockByVariant: { "250 мл": "out" } } as never });
+    expect(go(`/cart/${ANGEL_250}:1`, sizeOut).reason).toBe("sold-out");
+    expect(go(`/cart/${ANGEL_40}:1`, sizeOut).reason).toBe("buy");
+    const hidden = withOverrides({ [ANGEL]: { hidden: true } as never });
+    expect(go(`/cart/shopify_ZZ_8561872142675_${ANGEL_250}:1`, hidden)).toEqual({ path: "/ru", reason: "hidden" });
+  });
+
+  it("a size the owner has since taken off the ladder: the product's page, to choose there", () => {
+    const input = withOverrides({ [ANGEL]: { sizes: [{ size: "40 мл", price: 6 }, { size: "100 мл", price: 14 }] } as never });
+    expect(go(`/cart/${ANGEL_250}:1`, input)).toEqual({ path: `/ru/products/${ANGEL}`, reason: "product" });
+    expect(go(`/cart/${ANGEL_40}:1`, input).path).toBe(`/ru/products/${ANGEL}?size=40ml&buy=1`);
+    /* …and a one-size product the owner has given a ladder of several */
+    const wax = withOverrides({ [WAX]: { sizes: [{ size: "15 мл", price: 15 }, { size: "50 мл", price: 30 }] } as never });
+    expect(go(`/cart/${WAX_V}:1`, wax)).toEqual({ path: `/ru/products/${WAX}`, reason: "product" });
+  });
+
+  it("a product the owner has cut down to the one size: that size goes in, by its label; the other is gone", () => {
+    /* One rung is no group: the feed's item carries no size slug at all,
+       so the variant's `250ml` is found by the label's own (sizeSlug). */
+    const input = withOverrides({ [ANGEL]: { sizes: [{ size: "250 мл", price: 26 }] } as never });
+    expect(feedOffers(input).filter((o) => o.productId === ANGEL).map((o) => [o.slug, o.label])).toEqual([["", "250 мл"]]);
+    expect(sizeSlug("250 мл")).toBe("250ml");
+    expect(go(`/cart/${ANGEL_250}:1`, input)).toEqual({ path: `/ru/products/${ANGEL}?buy=1`, reason: "buy" });
+    expect(go(`/cart/${ANGEL_40}:1`, input)).toEqual({ path: `/ru/products/${ANGEL}`, reason: "product" });
+  });
+
+  it("a Shopify variant nobody mapped: the home page, as before", () => {
+    expect(go("/cart/shopify_ZZ_8561872142675_1:1")).toEqual({ path: "/ru", reason: "unknown" });
+    expect(go("/cart/99999999999999:1", EMPTY, "")).toEqual({ path: "/", reason: "unknown" });
+  });
+
+  it("the middleware's shape lets both through", () => {
+    expect(isCartPermalink(`/cart/shopify_ZZ_8561872142675_${ANGEL_250}:1`)).toBe(true);
+    expect(isCartPermalink(`/cart/${ANGEL_250}:1`)).toBe(true);
+  });
+});
+
 describe("the storefront: ?buy= puts it in the basket and opens the checkout", () => {
   const src = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
   function slice(name: string): string {
@@ -242,6 +353,18 @@ describe("the door: middleware and route", () => {
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`https://rempireshop.com/et/products/${SHAMPOO}?size=250ml&buy=1`);
     expect(res.headers.get("cache-control")).toBe("no-store");
+    expect(res.headers.get("x-rempire-cart")).toBe("buy");
+  });
+
+  it("answers Merchant Center's Shopify item id with the product, the size and the basket", async () => {
+    const { middleware } = await import("@/middleware");
+    const path = `/cart/shopify_ZZ_8561872142675_${ANGEL_250}:1`;
+    const pass = await middleware(new NextRequest(`https://rempireshop.com${path}`));
+    expect(pass.headers.get("x-middleware-next")).toBe("1");
+    const { GET } = await import("@/app/cart/[...path]/route");
+    const res = await GET(new Request(`https://rempireshop.com${path}`, { headers: { "accept-language": "en-GB,en" } }));
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`https://rempireshop.com/products/${ANGEL}?size=250ml&buy=1`);
     expect(res.headers.get("x-rempire-cart")).toBe("buy");
   });
 

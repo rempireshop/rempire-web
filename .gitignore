@@ -80,3 +80,6 @@ public/robots.staging.txt
 # Dim's own working files, not the shop
 output/
 tools/generate-use-case-assignment.py
+
+# /llms.txt — written by tools/prerender-shop2.mjs on every build (tools/lib/llms-txt.mjs)
+public/llms.txt

@@ -106,6 +106,41 @@ export function overrideRow(r) {
   };
 }
 
+/**
+ * The barcodes Renat bound to each size in «Склад» (stock_levels.ean), as
+ * `{ productId: { sizeLabel: ean } }` — '' for a product with no sizes — for
+ * the gtin of a product page's offers. The same rows and keys loadEans() in
+ * src/lib/merchant-feed.ts reads for the feed's g:gtin, and the same
+ * validGtin() decides which of them is a GTIN at all. `{}` on any failure,
+ * with one warning: a page without a gtin is what every page was before.
+ */
+export async function fetchStockEans() {
+  const url = process.env.DATABASE_URL;
+  if (!url) return {};
+  let pg;
+  try {
+    ({ default: pg } = await import("pg"));
+  } catch {
+    return {};
+  }
+  const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
+  try {
+    await client.connect();
+    const res = await client.query("select product_id, variant, ean from stock_levels where ean is not null");
+    const out = {};
+    for (const r of res.rows) {
+      if (!r.ean) continue;
+      (out[r.product_id] ??= {})[String(r.variant ?? "").trim()] = String(r.ean);
+    }
+    return out;
+  } catch (err) {
+    console.warn("! overrides-export: could not read the barcodes (" + (err && err.message) + ") — no gtin this run");
+    return {};
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
 /** `{ id: { price, sizes, hidden, stock, subcat } }` for the rows that exist. */
 export async function fetchProductOverrides() {
   const url = process.env.DATABASE_URL;

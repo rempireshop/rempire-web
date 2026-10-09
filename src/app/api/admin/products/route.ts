@@ -28,6 +28,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { createCustomProduct, CustomProductError, listCustomProducts, toCatalogueProduct } from "@/lib/custom-products";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
+import { productUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 import { writeAuditSafe } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -90,6 +92,8 @@ export async function POST(req: Request) {
       try {
         const row = await createCustomProduct(body);
         await writeAuditSafe("admin", "product.create", { id: row.id, brand: row.brand, name: row.name, cat: row.cat });
+        // a new page in the shop — the engines hear of it (live shop only, fire-and-forget)
+        if (row.active) submitIndexNow(productUrls(row.id));
         return { status: 201, body: { ok: true, product: toCatalogueProduct(row) } };
       } catch (err) {
         /* Caught rather than thrown on, so the key is released (runOnce() lets

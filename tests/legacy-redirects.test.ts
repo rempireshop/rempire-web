@@ -12,12 +12,16 @@
  * sitemap, 1 639 rows, harvested 02.09.2026), docs/redirect-map.csv (the same
  * URL space as it was exported) and the URLs Search Console recorded
  * impressions for (docs/audit/2026-09-07-seo.md). Pure functions, no database,
- * no network — src/middleware.ts is covered end to end by e2e/seo.spec.ts.
+ * no network — src/middleware.ts is covered end to end by e2e/seo.spec.ts,
+ * and here only for Merchant Center's Shopify links (its one lookup that
+ * reaches out, the hidden products, stubbed).
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { NextRequest } from "next/server";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
+import shopifyTable from "@/data/shopify-variants.json";
 import { legacyTarget, slugify } from "@/lib/legacy-redirects";
 import { isSubcollection, parseShopPath } from "@/lib/shop-paths.mjs";
 
@@ -136,7 +140,8 @@ describe("one 301 for everything that is not the page", () => {
         .toBe("/products/xerjoff-1861-naxos-eau-de-parfum-100ml");
     }
     expect(legacyTarget("/en-fi/")).toEqual({ path: "/", reason: "lang" });
-    expect(legacyTarget("/en-lv/products/touchable", "?variant=1&utm_source=google")?.path).toBe("/products/touchable");
+    /* Shopify's own parameters go; the campaign's stay (09.10.2026: they were dropped too) */
+    expect(legacyTarget("/en-lv/products/touchable", "?variant=1&utm_source=google")?.path).toBe("/products/touchable?utm_source=google");
     expect(legacyTarget("/en/products/touchable", "?size=250ml")?.path).toBe("/products/touchable?size=250ml");
     expect(legacyTarget("/en-lt/search", "?q=wax&type=product")?.path).toBe("/search?q=wax");
     expect(legacyTarget("/ET/products/maxi-wash")?.path).toBe("/et/products/maxi-wash");
@@ -216,6 +221,114 @@ describe("one 301 for everything that is not the page", () => {
   it("keeps the shopper's own words on a Shopify search and drops everything else", () => {
     expect(legacyTarget("/search", "?q=gatsby%20wax")).toBeNull();
     expect(legacyTarget("/en-fi/search", "?q=vaha&type=product")?.path).toBe("/search?q=vaha");
+    expect(legacyTarget("/en-fi/search", "?q=vaha&type=product&utm_source=google")?.path).toBe("/search?q=vaha&utm_source=google");
+  });
+});
+
+describe("Merchant Center's Shopify links: ?variant= becomes ?size=, the campaign survives", () => {
+  /* Until Merchant Center approves the shop's own feeds it serves Shopify's
+     product source, whose every link is one of these — verbatim from its
+     export of 08.10.2026. The product page reads ?size=, never ?variant=
+     (src/data/shopify-variants.json maps the one onto the other). */
+  const UTM = "utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic";
+  const ANGEL = "kevin-murphy-angel-wash"; // 40 / 250 мл; variant 47186649547091 is the 250
+  const feedQuery = (variant: string, country: string) => `?variant=${variant}&country=${country}&currency=EUR&${UTM}`;
+
+  it("a regional storefront's link: ONE 301, onto the size the feed priced, utm_* and all", () => {
+    expect(legacyTarget(`/en-fi/products/${ANGEL}`, feedQuery("47186649547091", "FI")))
+      .toEqual({ path: `/products/${ANGEL}?size=250ml&${UTM}`, reason: "lang" });
+    expect(legacyTarget(`/en-lv/products/${ANGEL}`, feedQuery("49691145797971", "LV"))?.path)
+      .toBe(`/products/${ANGEL}?size=40ml&${UTM}`);
+  });
+
+  it("an address that is already the page: a 301 of its own, only to put the size on it", () => {
+    expect(legacyTarget(`/products/${ANGEL}`, feedQuery("47186649547091", "AE")))
+      .toEqual({ path: `/products/${ANGEL}?size=250ml&${UTM}`, reason: "variant" });
+    expect(legacyTarget(`/ru/products/${ANGEL}`, feedQuery("47186649547091", "BY"))?.path)
+      .toBe(`/ru/products/${ANGEL}?size=250ml&${UTM}`);
+    /* the variant's place in the query is where the size goes */
+    expect(legacyTarget(`/products/${ANGEL}`, "?utm_source=google&variant=49691145797971")?.path)
+      .toBe(`/products/${ANGEL}?utm_source=google&size=40ml`);
+  });
+
+  it("…and no redirect at all when the variant names no size here — the page is served as it came", () => {
+    /* a product the shop sells in one size */
+    expect(legacyTarget("/products/touchable", feedQuery("46826646143315", "EE"))).toBeNull();
+    /* a variant of ANOTHER product, one nobody mapped, an empty one */
+    expect(legacyTarget(`/products/${ANGEL}`, feedQuery("47181433143635", "EE"))).toBeNull();
+    expect(legacyTarget(`/products/${ANGEL}`, "?variant=1&utm_source=google")).toBeNull();
+    expect(legacyTarget(`/products/${ANGEL}`, "?variant=")).toBeNull();
+    /* the page's own size wins over Shopify's */
+    expect(legacyTarget(`/products/${ANGEL}`, "?size=40ml&variant=47186649547091")).toBeNull();
+  });
+
+  it("Shopify's escaped handle: the product, its query carried — variant, utm_* — in the same hop", () => {
+    const wax = "captain-fawcett-barberism-moustache-wax"; // one size: its variant names none
+    expect(legacyTarget("/en-lv/products/captain-fawcett-barberism%C2%AE-moustache-wax", feedQuery("47181433143635", "LV"))?.path)
+      .toBe(`/products/${wax}?${UTM}`);
+    expect(legacyTarget(`/collections/kevin-murphy/products/${ANGEL}`, feedQuery("47186649547091", "EE")))
+      .toEqual({ path: `/products/${ANGEL}?size=250ml&${UTM}`, reason: "collection-canonical" });
+  });
+
+  it("utm_* survive every other move too — the old scheme, a slash, a product that is gone", () => {
+    expect(legacyTarget("/shop2/en/p/night-rider/", "?utm_source=newsletter&utm_campaign=oct")?.path)
+      .toBe("/products/night-rider?utm_source=newsletter&utm_campaign=oct");
+    expect(legacyTarget(`/products/${ANGEL}/`, "?variant=47186649547091&utm_source=google")?.path)
+      .toBe(`/products/${ANGEL}?size=250ml&utm_source=google`);
+    expect(legacyTarget("/products/lumin-skin-something-we-never-had", "?variant=1&country=EE&utm_source=google&gclid=abc")?.path)
+      .toBe("/collections/lumin-skin?utm_source=google&gclid=abc");
+    expect(legacyTarget("/en-lt/collections/hair-mask", "?page=2&utm_source=google")?.path).toBe("/collections/hair-care?utm_source=google");
+    // a published subcollection is a page (since 09.10.2026): its query rides along, as a section's does
+    expect(legacyTarget("/en-lt/collections/shampoo", "?page=2&utm_source=google")?.path).toBe("/collections/shampoo?page=2&utm_source=google");
+    expect(legacyTarget("/en-fi/", "?country=FI&currency=EUR")).toEqual({ path: "/", reason: "lang" });
+  });
+
+  it("every variant of the table, from either kind of link, lands on its product and size in ONE hop", () => {
+    const table = shopifyTable as Record<string, { p: string; s?: string }>;
+    expect(Object.keys(table).length).toBeGreaterThan(300);
+    for (const [variant, v] of Object.entries(table)) {
+      for (const from of [`/en-lv/products/${v.p}`, `/products/${v.p}`, `/et/products/${v.p}`]) {
+        const { path: to, hops } = resolve(from + feedQuery(variant, "LV"));
+        const lang = from.startsWith("/et/") ? "/et" : "";
+        const want = `${lang}/products/${v.p}` + (v.s ? `?size=${encodeURIComponent(v.s)}&${UTM}` : from.startsWith("/en-") ? `?${UTM}` : feedQuery(variant, "LV"));
+        expect([from, variant, to]).toEqual([from, variant, want]);
+        expect(hops).toBe(from.startsWith("/en-") || v.s ? 1 : 0);
+        if (hops) assertServable(to, from);
+      }
+    }
+  });
+});
+
+describe("the middleware answers them — ONE 301, and nothing for a page that is right", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("puts the size on, keeps the campaign, says which rule fired", async () => {
+    const { middleware } = await import("@/middleware");
+    const res = await middleware(new NextRequest(
+      "https://rempireshop.com/en-lv/products/kevin-murphy-angel-wash?variant=47186649547091&country=LV&currency=EUR&utm_source=google",
+    ));
+    expect(res.status).toBe(301);
+    expect(res.headers.get("location")).toBe("https://rempireshop.com/products/kevin-murphy-angel-wash?size=250ml&utm_source=google");
+    expect(res.headers.get("x-rempire-redirect")).toBe("lang");
+    const same = await middleware(new NextRequest(
+      "https://rempireshop.com/products/kevin-murphy-angel-wash?variant=47186649547091&utm_source=google",
+    ));
+    expect(same.status).toBe(301);
+    expect(same.headers.get("location")).toBe("https://rempireshop.com/products/kevin-murphy-angel-wash?size=250ml&utm_source=google");
+    expect(same.headers.get("x-rempire-redirect")).toBe("variant");
+  });
+
+  it("serves an address that is already right, variant and all, when the variant names no size", async () => {
+    /* the hidden-product lookup is the only thing that reaches out; it is told nothing */
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 503 }));
+    const { middleware } = await import("@/middleware");
+    const res = await middleware(new NextRequest(
+      "https://rempireshop.com/products/touchable?variant=46826646143315&country=EE&currency=EUR&utm_source=google",
+    ));
+    expect(res.headers.get("x-middleware-next")).toBe("1");
+    expect(res.headers.get("location")).toBeNull();
   });
 });
 

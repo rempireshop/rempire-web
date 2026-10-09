@@ -5,9 +5,10 @@
  *
  * Who is under which chip is ONE function, subcatsAuto() in
  * public/shop2/app.js, beside the chips that use it; tools/prerender-shop2.mjs
- * lifts it out of that file by its first and last lines (with SUBCATS,
- * SUB_PICKS and SUB_PAGES), and so does this test, the same way — so what is
- * held here is what the chips filter and what the static pages list.
+ * lifts it out of that file by its first and last lines (with SUBCATS and
+ * SUB_PICKS), and so does this test, the same way — so what is held here is
+ * what the chips filter and what the static pages list. A page's words are
+ * seoSub() / seoHead("sub") in src/lib/seo-copy.mjs.
  *
  * The rule held below: every chip keeps its label and every product it showed
  * before 09.10.2026; the only products that move are ones no chip showed, and
@@ -24,6 +25,7 @@ import { describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { legacyTarget } from "@/lib/legacy-redirects";
 import { isKnownShopPath } from "@/lib/notfound-page";
+import { seoCopy, seoHead, seoSub } from "@/lib/seo-copy.mjs";
 import { headLinks, langBySeg, sitemapUrlEntry } from "@/lib/seo-head.mjs";
 import {
   isSubcollection,
@@ -50,23 +52,24 @@ function sliceFrom(startRx: RegExp, endRx: RegExp): string | null {
   return null;
 }
 type Def = { id: string; name: string; re: RegExp };
-type Words = { name: string; title: string; desc: string; intro: string };
+type Words = { name: string; title: string; meta: string; intro: string };
 type Product = { id: string; name: string; cat: string; brand: string };
 const PIECES = [
   sliceFrom(/^ {2}var SUBCATS = \{$/, DECL_END),
   sliceFrom(/^ {2}var SUB_PICKS = \{$/, DECL_END),
-  sliceFrom(/^ {2}var SUB_PAGES = \{$/, DECL_END),
   sliceFrom(/^ {2}function subcatsAuto\(p\) \{$/, FN_END),
   sliceFrom(/^ {2}function subcatsWith\(p, own\) \{$/, FN_END),
 ];
 const ctx: Record<string, unknown> = {};
 runInNewContext(
   PIECES.join("\n") +
-    "\nthis.SUBCATS = SUBCATS; this.SUB_PAGES = SUB_PAGES; this.auto = subcatsAuto; this.withOwn = subcatsWith;",
+    "\nthis.SUBCATS = SUBCATS; this.auto = subcatsAuto; this.withOwn = subcatsWith;",
   ctx,
 );
 const SUBCATS = ctx.SUBCATS as Record<string, Def[]>;
-const SUB_PAGES = ctx.SUB_PAGES as Record<string, Record<Lang, Words>>;
+/* each published subcollection's words, by language — seoSub() */
+const SUB_PAGES = Object.fromEntries(Object.keys(SUB_HANDLES).map((k) =>
+  [k, Object.fromEntries(LANGS.map((L) => [L, seoSub(k, L) as Words]))])) as Record<string, Record<Lang, Words>>;
 const auto = ctx.auto as (p: Product) => string[];
 const withOwn = ctx.withOwn as (p: Product, own: string) => string[];
 
@@ -75,19 +78,18 @@ const withOwn = ctx.withOwn as (p: Product, own: string) => string[];
 const CATALOGUE = new Function(readFileSync(ROOT + "public/shop/catalogue2.js", "utf8") + "\nreturn CATALOGUE;")() as Product[];
 const MIN = (catalogueMin as Array<{ id: string; n: string; c: string; b: string }>).map((p) => ({ id: p.id, name: p.n, cat: p.c, brand: p.b }));
 
-/* ---- the chip row before 09.10.2026, word for word -------------------------- */
+/* ---- the chip row of main, word for word ----------------------------------- */
 const BASE: Record<string, Array<[string, string, RegExp]>> = {
   hair: [["sh", "Шампуни", /шампунь/i], ["co", "Кондиционеры", /кондиционер/i], ["ca", "Маски и уход", /маск|сыворотк|тоник|уход/i], ["sp", "Спреи", /спрей/i]],
   styling: [["pw", "Пасты и воски", /паста|воск/i], ["sp", "Спреи", /спрей/i], ["ge", "Гели", /гель/i], ["pu", "Пудры", /пудр/i]],
   beard: [["oi", "Масла", /масло/i], ["ba", "Бальзамы", /бальзам/i], ["af", "После бритья", /лосьон|после бритья/i], ["ge", "Гели", /гель/i]],
-  face: [["to", "Тоники", /тоник/i], ["cl", "Очищение", /очища|пенка|мыло/i], ["cs", "Кремы и сыворотки", /крем|сыворотк/i], ["oi", "Масла", /масло/i]],
+  face: [["to", "Тонеры", /тоник|тонер/i], ["cl", "Очищение", /очища|пенка|мыло/i], ["cs", "Кремы и сыворотки", /крем|сыворотк/i], ["oi", "Масла", /масло/i]],
 };
 const baseChips = (p: Product) => (BASE[p.cat] || []).filter(([, , re]) => re.test(p.name)).map(([id]) => id);
 
 /* Products no chip showed before, and the one chip each is under now — every
    label plainly what the product is (the maker's own words in brackets). */
 const ADDED: Record<string, string> = {
-  touchable: "sp",                                              // spray wax finishing hairspray
   "hair-resort-spray": "sp",                                    // beach texture spray
   "davines-naturaltech-nourishing-keratin-booster-100ml": "ca", // intensive repair treatment
   "kevin-murphy-night-shift-100ml": "ca",                       // overnight leave-in serum («масло»)
@@ -140,7 +142,7 @@ describe("the chip row is the one the shop had — same chips, same labels, same
 
   it("translates the labels with the dictionary entries they always had", () => {
     for (const label of ["Шампуни", "Кондиционеры", "Маски и уход", "Спреи", "Пасты и воски", "Гели", "Пудры", "Масла",
-      "Бальзамы", "После бритья", "Тоники", "Очищение", "Кремы и сыворотки"]) {
+      "Бальзамы", "После бритья", "Тонеры", "Очищение", "Кремы и сыворотки"]) {
       expect((APP.match(new RegExp('"' + label + '": "', "g")) || []).length, label).toBe(2);   // ET and EN
     }
     for (const gone of ["Кожа головы", "Корейская косметика", "Бальзамы и воски", "Бритьё"]) expect(APP).not.toContain('"' + gone + '"');
@@ -245,13 +247,18 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
   });
 
   it("has the words of every published page and of no other", () => {
-    expect(Object.keys(SUB_PAGES).sort()).toEqual(Object.keys(SUB_HANDLES).sort());
+    expect(Object.keys(seoCopy().sub).sort()).toEqual(Object.keys(SUB_HANDLES).sort());
     for (const [key, per] of Object.entries(SUB_PAGES)) {
       for (const L of LANGS) {
         const w = per[L];
         expect(w, key + " " + L).toBeTruthy();
-        expect(w.title.length, `${key} ${L} title «${w.title}»`).toBeLessThanOrEqual(60);
-        expect(w.desc.length, `${key} ${L} description`).toBeLessThanOrEqual(155);
+        const head = seoHead("sub", key, L, {});
+        expect(head.t, key + " " + L).toBe(w.title.replace(/\s*\|\s*REMPIRE$/, " — REMPIRE"));
+        expect(head.t.length, `${key} ${L} title «${head.t}»`).toBeLessThanOrEqual(60);
+        expect(head.d, key + " " + L).toBe(w.meta);
+        expect(w.meta.length, `${key} ${L} description`).toBeLessThanOrEqual(155);
+        // no link-preview pair of its own: the title and the description, never the section's
+        expect([head.ogT, head.ogD]).toEqual([head.t, head.d]);
         expect(w.name.length).toBeGreaterThan(2);
         // the slot of a section's own line: two or three sentences
         const sentences = w.intro.split(/(?<=[.!?])\s+/).filter(Boolean).length;
@@ -259,7 +266,7 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
         expect(sentences, `${key} ${L} intro`).toBeLessThanOrEqual(3);
         expect(w.intro.length, `${key} ${L} intro`).toBeLessThanOrEqual(300);
         // the page's own language, never another one's leftovers
-        if (L !== "RU") expect(/[А-Яа-яЁё]/.test(w.name + w.title + w.desc + w.intro), `${key} ${L} has Cyrillic`).toBe(false);
+        if (L !== "RU") expect(/[А-Яа-яЁё]/.test(w.name + w.title + w.meta + w.intro), `${key} ${L} has Cyrillic`).toBe(false);
         else expect(/[А-Яа-яЁё]/.test(w.name + w.intro)).toBe(true);
       }
     }
@@ -278,7 +285,7 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
 
   it("keeps the section's heading on screen — the page's own name lives in the title, the meta and the line", () => {
     const cat = APP.slice(APP.indexOf("  function screenCatalog() {"), APP.indexOf("  /* Russian counts take three forms"));
-    expect(cat).toContain("if (subPg) intro = esc(subPg.intro);");
+    expect(cat).toContain("if (subPg) { ownIntro = subPg.intro; intro = esc(subPg.intro); }");
     expect(cat).not.toMatch(/name = subPg/);
   });
 });

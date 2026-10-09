@@ -57,13 +57,31 @@
 
 /* The prerendered page is hidden from a browser that runs scripts (the
  * <style> next to this file's tag in index.html) so it never flashes before
- * the shop draws. app.js removes it on its first render. If that has not
- * happened after 8 s — app.min.js blocked, a dead connection, a script error
- * on the way — show it after all: a plain page beats a blank one.
+ * the shop draws. app.js removes it on its first render. If the shop cannot
+ * start — one of its scripts fails to load, or the page has finished loading
+ * and the first render still has not happened (a script error on the way) —
+ * show it after all: a plain page beats a blank one.
+ *
+ * Not a timer. The first version waited a fixed 8 s, and on a slow phone
+ * app.min.js alone takes 7–9 s to arrive (measured 09.10.2026 on a 1.6 Mbit/s
+ * profile), so the timer fired first and brought back exactly the flash it
+ * was meant to prevent. A failed <script> fires `error` on the element, which
+ * does not bubble — hence the capture-phase listener on window.
  */
-setTimeout(function () {
+(function () {
+  function reveal() {
+    try {
+      var pre = document.getElementById("prerender");
+      if (pre) pre.style.visibility = "visible";
+    } catch (e) { /* nothing to show */ }
+  }
   try {
-    var pre = document.getElementById("prerender");
-    if (pre) pre.style.visibility = "visible";
-  } catch (e) { /* nothing to show */ }
-}, 8000);
+    window.addEventListener("error", function (ev) {
+      var t = ev && ev.target;
+      if (t && t.tagName === "SCRIPT") reveal();
+    }, true);
+    window.addEventListener("load", function () {
+      if (!document.body || !document.body.getAttribute("data-screen")) reveal();
+    });
+  } catch (e) { /* no listeners — the noscript rule still covers a browser without scripts */ }
+})();

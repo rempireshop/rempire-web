@@ -3,7 +3,7 @@
  * prerender used to be the only source:
  *
  *   · its page at request time — src/lib/blog-page.ts behind
- *     src/app/shop2/{,et/,en/}blog/[slug]/route.ts — carries the head the
+ *     src/app/{,ru/,et/}blogs/news/[slug]/route.ts — carries the head the
  *     prerender writes (per-language Google pair with the Russian fallback,
  *     canonical, hreflang, OpenGraph with the card /shop2/og/blog-<slug>…png,
  *     BlogPosting JSON-LD), the article inside #prerender and the #blogpost /
@@ -41,20 +41,22 @@ const POST = {
 
 const ctx = (slug: string) => ({ params: Promise.resolve({ slug }) });
 
-async function postPage(seg: "" | "et" | "en", slug: string): Promise<Response> {
+/* `seg` is the language's path prefix since the URL move of 08.10.2026:
+   "ru" /ru/blogs/news…, "et" /et/blogs/news…, "" the unprefixed English one. */
+async function postPage(seg: "ru" | "et" | "", slug: string): Promise<Response> {
   const mod = seg === "et"
     ? await import("@/app/et/blogs/news/[slug]/route")
-    : seg === "en"
-      ? await import("@/app/blogs/news/[slug]/route")
-      : await import("@/app/ru/blogs/news/[slug]/route");
-  return mod.GET(new Request(`${LIVE}/shop2${seg ? "/" + seg : ""}/blog/${slug}/`), ctx(slug));
+    : seg === "ru"
+      ? await import("@/app/ru/blogs/news/[slug]/route")
+      : await import("@/app/blogs/news/[slug]/route");
+  return mod.GET(new Request(`${LIVE}${seg ? "/" + seg : ""}/blogs/news/${slug}`), ctx(slug));
 }
-async function listPage(seg: "" | "et" | "en"): Promise<Response> {
+async function listPage(seg: "ru" | "et" | ""): Promise<Response> {
   const mod = seg === "et"
     ? await import("@/app/et/blogs/news/route")
-    : seg === "en"
-      ? await import("@/app/blogs/news/route")
-      : await import("@/app/ru/blogs/news/route");
+    : seg === "ru"
+      ? await import("@/app/ru/blogs/news/route")
+      : await import("@/app/blogs/news/route");
   return mod.GET();
 }
 
@@ -107,11 +109,12 @@ describe("a post's page at request time", () => {
     expect(title(html)).toBe("Habeme talvine hooldus: kolm harjumust — REMPIRE");
     expect(meta(html, "description")).toBe("Külm kuivatab habet — kolm harjumust selle vastu.");
     expect(meta(html, "robots")).toBe("index, follow, max-image-preview:large");
-    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/et/blog/${post.slug}/`);
-    expect(link(html, 'rel="alternate" hreflang="ru"')).toBe(`${LIVE}/shop2/blog/${post.slug}/`);
-    expect(link(html, 'rel="alternate" hreflang="et"')).toBe(`${LIVE}/shop2/et/blog/${post.slug}/`);
-    expect(link(html, 'rel="alternate" hreflang="en"')).toBe(`${LIVE}/shop2/en/blog/${post.slug}/`);
-    expect(link(html, 'rel="alternate" hreflang="x-default"')).toBe(`${LIVE}/shop2/blog/${post.slug}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/et/blogs/news/${post.slug}`);
+    expect(link(html, 'rel="alternate" hreflang="ru"')).toBe(`${LIVE}/ru/blogs/news/${post.slug}`);
+    expect(link(html, 'rel="alternate" hreflang="et"')).toBe(`${LIVE}/et/blogs/news/${post.slug}`);
+    expect(link(html, 'rel="alternate" hreflang="en"')).toBe(`${LIVE}/blogs/news/${post.slug}`);
+    // x-default is the unprefixed English address — Shopify's own, and what a crawler is served
+    expect(link(html, 'rel="alternate" hreflang="x-default"')).toBe(`${LIVE}/blogs/news/${post.slug}`);
     expect(meta(html, "og:type")).toBe("article");
     expect(meta(html, "og:locale")).toBe("et_EE");
     expect(meta(html, "og:title")).toBe(title(html));
@@ -125,15 +128,15 @@ describe("a post's page at request time", () => {
     expect(article).toBeTruthy();
     expect(article.attrs).toContain('data-seo="ldjson-page"');
     expect(article.headline).toBe("Kuidas hooldada habet talvel");
-    expect(article.url).toBe(`${LIVE}/shop2/et/blog/${post.slug}/`);
-    expect(article.mainEntityOfPage["@id"]).toBe(`${LIVE}/shop2/et/blog/${post.slug}/`);
+    expect(article.url).toBe(`${LIVE}/et/blogs/news/${post.slug}`);
+    expect(article.mainEntityOfPage["@id"]).toBe(`${LIVE}/et/blogs/news/${post.slug}`);
     expect(article.image).toEqual([meta(html, "og:image")]);
     expect(article.datePublished).toBeTruthy();
     expect(article.description).toBe(meta(html, "description"));
     const crumbs = ld.find((o) => o["@type"] === "BreadcrumbList") as Record<string, unknown> & { itemListElement: Array<{ name: string; item?: string }> };
     // ET says «Blogi» — the owner's own word, settled 07.09.2026 (src/lib/seo-head.mjs T.ET.blog)
     expect(crumbs.itemListElement.map((i) => i.name)).toEqual(["Avaleht", "Blogi", "Kuidas hooldada habet talvel"]);
-    expect(crumbs.itemListElement[1].item).toBe(`${LIVE}/shop2/et/blog/`);
+    expect(crumbs.itemListElement[1].item).toBe(`${LIVE}/et/blogs/news`);
     expect(html).not.toContain('id="ldjson"');
 
     // the article itself, for a crawler that reads the body
@@ -147,15 +150,15 @@ describe("a post's page at request time", () => {
     expect(html).not.toContain("<li>борода</li>");
     // «Tooted artiklist»: the catalogue product and the owner's own, never an id nobody has
     expect(html).toContain('<h2 class="display h1 blog__h2">Tooted artiklist</h2>');
-    expect(html).toContain('href="/shop2/et/p/system-4-bio-botanical-shampoo/"');
-    expect(html).toContain(`href="/shop2/et/p/${wax.id}/"`);
+    expect(html).toContain('href="/et/products/system-4-bio-botanical-shampoo"');
+    expect(html).toContain(`href="/et/products/${wax.id}"`);
     expect(html).toContain('<span class="pre__nm">Wax</span><span class="pre__pr num">alates 9 €</span>');
-    expect(html).not.toContain('href="/shop2/et/p/no-such-product/"');
+    expect(html).not.toContain('href="/et/products/no-such-product"');
     // «Teised artiklid», and the three-language nav
     expect(html).toContain('<h2 class="display h1 blog__h2">Teised artiklid</h2>');
-    expect(html).toContain(`href="/shop2/et/blog/${other.slug}/"`);
+    expect(html).toContain(`href="/et/blogs/news/${other.slug}"`);
     expect(html).not.toContain(draft.slug);
-    expect(html).toContain(`<a href="/shop2/en/blog/${post.slug}/" hreflang="en">EN</a>`);
+    expect(html).toContain(`<a href="/blogs/news/${post.slug}" hreflang="en">EN</a>`);
 
     // the snapshots app.js adopts before its first paint — the API's own shapes
     const snap = jsonScript(html, "blogpost") as { lang: string; stamp: number; post: Record<string, unknown> };
@@ -177,7 +180,7 @@ describe("a post's page at request time", () => {
   it("EN with no English pair: the Russian pair; no pair at all: the title and the excerpt; no excerpt: the text", async () => {
     const post = await upsertPost(POST);
     await publishPost(post.id);
-    let html = await (await postPage("en", post.slug)).text();
+    let html = await (await postPage("", post.slug)).text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(title(html)).toBe("Уход за бородой зимой: три привычки — REMPIRE");
     expect(meta(html, "description")).toBe("Мороз сушит бороду — три привычки против этого.");
@@ -187,14 +190,14 @@ describe("a post's page at request time", () => {
 
     const plain = await upsertPost({ title: { RU: "Паста, воск или глина" }, excerpt: { RU: "Три банки, три разных укладки." }, body: { RU: "Текст статьи." } });
     await publishPost(plain.id);
-    html = await (await postPage("", plain.slug)).text();
+    html = await (await postPage("ru", plain.slug)).text();
     expect(title(html)).toBe("Паста, воск или глина — REMPIRE");
     expect(meta(html, "description")).toBe("Три банки, три разных укладки.");
     expect(meta(html, "og:image")).toContain(`/shop2/og/blog-${plain.slug}.png?v=`);
 
     const bare = await upsertPost({ title: { RU: "Только текст" }, body: { RU: "Первый абзац статьи.\n\nВторой." } });
     await publishPost(bare.id);
-    html = await (await postPage("", bare.slug)).text();
+    html = await (await postPage("ru", bare.slug)).text();
     expect(meta(html, "description")).toBe("Первый абзац статьи. Второй.");
   });
 
@@ -204,15 +207,15 @@ describe("a post's page at request time", () => {
     await publishPost(post.id);
     const html = await (await postPage("et", post.slug)).text();
     expect(meta(html, "robots")).toBe("noindex, nofollow");
-    expect(link(html, 'rel="canonical"')).toBe(`${STAGING}/shop2/et/blog/${post.slug}/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${STAGING}/et/blogs/news/${post.slug}`);
     expect(meta(html, "og:image")).toContain(`${STAGING}/shop2/og/blog-${post.slug}.et.png`);
   });
 
   it("a draft, an unpublished post and a slug nobody has → 404 with the noindex shell", async () => {
     const post = await upsertPost(POST);
-    for (const seg of ["", "et", "en"] as const) {
+    for (const seg of ["ru", "et", ""] as const) {
       const res = await postPage(seg, post.slug);
-      expect(res.status, seg || "ru").toBe(404);
+      expect(res.status, seg || "en").toBe(404);
       expect(res.headers.get("cache-control")).toBe("no-store");
       const html = await res.text();
       expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
@@ -224,8 +227,8 @@ describe("a post's page at request time", () => {
     const { unpublishPost } = await import("@/lib/blog");
     await unpublishPost(post.id);
     expect((await postPage("et", post.slug)).status).toBe(404);
-    expect((await postPage("", "no-such-post")).status).toBe(404);
-    expect((await postPage("", "x".repeat(200))).status).toBe(404);
+    expect((await postPage("ru", "no-such-post")).status).toBe(404);
+    expect((await postPage("ru", "x".repeat(200))).status).toBe(404);
   });
 });
 
@@ -242,7 +245,7 @@ describe("«Товары из статьи» prices the shelf the way the shop d
     await exec("truncate product_overrides restart identity cascade");
   });
 
-  async function shelfOf(products: string[], seg: "" | "et" = ""): Promise<string> {
+  async function shelfOf(products: string[], seg: "ru" | "et" = "ru"): Promise<string> {
     const row = await upsertPost({ ...POST, products });
     await publishPost(row.id);
     const html = await (await postPage(seg, row.slug)).text();
@@ -271,8 +274,8 @@ describe("«Товары из статьи» prices the shelf the way the shop d
   it("leaves out a product the owner has switched off — the /p/ link would answer 404", async () => {
     await upsertOverride(PLAIN, { hidden: true });
     const shelf = await shelfOf([SIZED, PLAIN]);
-    expect(shelf).toContain(`href="/shop2/p/${SIZED}/"`);
-    expect(shelf).not.toContain(`href="/shop2/p/${PLAIN}/"`);
+    expect(shelf).toContain(`href="/ru/products/${SIZED}"`);
+    expect(shelf).not.toContain(`href="/ru/products/${PLAIN}"`);
     expect(shelf).not.toContain("Easy.Rider");
   });
 
@@ -287,7 +290,7 @@ describe("«Товары из статьи» prices the shelf the way the shop d
     expect(et).not.toMatch(/[а-яё]/i);
     const row = await upsertPost({ ...POST, products: [SIZED] });
     await publishPost(row.id);
-    const en = await (await postPage("en", row.slug)).text();
+    const en = await (await postPage("", row.slug)).text();
     expect(en).toContain('<span class="pre__nm">Bio Botanical Shampoo — shampoo</span>');
   });
 });
@@ -356,17 +359,17 @@ describe("the listing at request time", () => {
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="et">/);
-    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/et/blog/`);
+    expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/et/blogs/news`);
     expect(meta(html, "og:type")).toBe("website");
     expect(meta(html, "og:image")).toContain(`/shop2/og/blog-${post.slug}.et.png?v=`);
     expect(html).toContain('<h1 class="display h1">Blogi</h1>');
-    expect(html).toContain(`<li><a class="pre__card blog__tile" href="/shop2/et/blog/${post.slug}/">`);
+    expect(html).toContain(`<li><a class="pre__card blog__tile" href="/et/blogs/news/${post.slug}">`);
     expect(html).toContain('<span class="pre__nm">Kuidas hooldada habet talvel</span>');
     expect(html).not.toContain("chernovik");
     const ld = ldBlocks(html);
     const items = ld.find((o) => o["@type"] === "ItemList") as Record<string, unknown> & { itemListElement: Array<{ url: string; name: string }> };
     expect(items.numberOfItems).toBe(1);
-    expect(items.itemListElement[0]).toMatchObject({ url: `${LIVE}/shop2/et/blog/${post.slug}/`, name: "Kuidas hooldada habet talvel" });
+    expect(items.itemListElement[0]).toMatchObject({ url: `${LIVE}/et/blogs/news/${post.slug}`, name: "Kuidas hooldada habet talvel" });
     const list = jsonScript(html, "blogdata") as { lang: string; posts: Array<{ slug: string; title: string }> };
     expect(list).toMatchObject({ lang: "ET", posts: [{ slug: post.slug, title: "Kuidas hooldada habet talvel" }] });
   });
@@ -381,9 +384,9 @@ describe("sitemap-custom.xml and the posts the build did not write", () => {
     const xml = await (await GET()).text();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toEqual([
-      `${LIVE}/shop2/blog/`, `${LIVE}/shop2/blog/${post.slug}/`,
-      `${LIVE}/shop2/et/blog/`, `${LIVE}/shop2/et/blog/${post.slug}/`,
-      `${LIVE}/shop2/en/blog/`, `${LIVE}/shop2/en/blog/${post.slug}/`,
+      `${LIVE}/ru/blogs/news`, `${LIVE}/ru/blogs/news/${post.slug}`,
+      `${LIVE}/et/blogs/news`, `${LIVE}/et/blogs/news/${post.slug}`,
+      `${LIVE}/blogs/news`, `${LIVE}/blogs/news/${post.slug}`,
     ]);
     expect(xml).toContain(`<lastmod>${post.updatedAt.slice(0, 10)}</lastmod>`);
     expect(xml).toContain("<priority>0.6</priority>");

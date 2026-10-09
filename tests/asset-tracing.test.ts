@@ -116,7 +116,12 @@ describe("every route that reads from public/ is traced into its function", () =
       "src/lib/giftcard-pdf.ts",
       "src/lib/og-card.ts",
     ]);
-    expect(keys.length).toBeGreaterThan(3);
+    /* Since 08.10.2026 the shop's page routes sit at the root of the site
+       (Shopify's addresses, src/lib/shop-paths.mjs), so the config has two
+       keys — the API and the root — where it had one per route family. Both
+       must be read out of the config, or the sweep below matches nothing. */
+    expect(keys).toContain("/api/**");
+    expect(keys).toContain("/**");
   });
 
   /* Who can reach a reader, following imports as far as they go. A lazy
