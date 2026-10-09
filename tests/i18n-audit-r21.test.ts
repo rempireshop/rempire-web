@@ -118,7 +118,11 @@ describe("the prerenderer can still lift the translator out of app.js", () => {
      how a one-line prototype guard nearly shipped as 542 Russian pages, so
      the tool's own anchors are read out of the tool and checked here. */
   const TOOL = fileURLToPath(new URL("../tools/prerender-shop2.mjs", import.meta.url));
-  const tool = readFileSync(TOOL, "utf8");
+  /* …and the shipping page's slices, which moved to tools/lib/delivery-lift.mjs
+     on 09.10.2026 with the rules the checkout bills from; same anchors, same
+     DECL_END/FN_END. */
+  const LIFT = fileURLToPath(new URL("../tools/lib/delivery-lift.mjs", import.meta.url));
+  const tool = readFileSync(TOOL, "utf8") + "\n" + readFileSync(LIFT, "utf8");
   const appLines = app.replace(/\r\n?/g, "\n").split("\n");
 
   function ends(name: string): RegExp {

@@ -30,20 +30,39 @@
  *     folded into the same single hop as 1 and 2.
  *
  * What is NOT here, on purpose: the query string of a Shopify product link
- * (`?variant=…&utm_…`) on an address that is already right. The page is
- * served as it is and its canonical names the clean address — no redirect is
- * needed for Google to fold them, and none is spent. Nothing under `/api/`
- * ever reaches this file (the middleware's matcher leaves it out): Montonio
- * POSTs to `/api/payments/notify/`, and a redirect loses a POST.
+ * (`?variant=…&country=…&utm_…`) on an address that is already right. The
+ * page is served as it is and its canonical names the clean address — no
+ * redirect is needed for Google to fold them, and none is spent. With one
+ * exception (4.). Nothing under `/api/` ever reaches this file (the
+ * middleware's matcher leaves it out): Montonio POSTs to
+ * `/api/payments/notify/`, and a redirect loses a POST.
+ *
+ *  4. A Shopify `?variant=<id>` that names a SIZE of the product the address
+ *     lands on (src/data/shopify-variants.json — Merchant Center's Shopify
+ *     product source links every size with it). The product page reads
+ *     `?size=`, never `variant`: without this it opens on its first size, and
+ *     Merchant Center's landing-page check reads a price the feed did not
+ *     give. So the variant becomes `size` — in the same single hop when the
+ *     address moves anyway, in a hop of its own (reason `variant`) when the
+ *     address is already the page. A variant with no size here (a product
+ *     sold in one size) still moves nothing.
+ *
+ * ---- the query a redirect carries -----------------------------------------
+ * Ours where the address was ours or names the same page (`keep`), nothing
+ * where it lands on another page (`drop`) — and, either way, a campaign's
+ * own parameters (utm_*, gclid, srsltid …) survive, so the visit keeps its
+ * source, and Shopify's storefront parameters (`variant`, `country`,
+ * `currency`) do not: nothing here reads them (carry() below).
  *
  * ---- why code, not 1 639 rules ------------------------------------------
  * A config rule can only rewrite one shape into another; this is a lookup —
  * is the handle a product? which section is `palsamid`? — and the query has to
- * be dropped per shape. `tests/legacy-redirects.test.ts` walks every row of
+ * be decided per shape. `tests/legacy-redirects.test.ts` walks every row of
  * tools/harvest/old-urls.txt and docs/redirect-map.csv through it.
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import { CAT_HANDLES, catOfHandle, legacyShopTarget, parseShopPath, publicPath } from "@/lib/shop-paths.mjs";
+import { shopifyVariant } from "@/lib/shopify-variants";
 
 /** Same rule as slugify() in src/lib/seo-head.mjs — brand slugs must match. */
 export const slugify = (s: string): string =>
@@ -176,7 +195,8 @@ export interface LegacyRedirect {
     | "screen"
     | "home"
     | "feed"
-    | "sitemap";
+    | "sitemap"
+    | "variant";
 }
 
 /** A percent-escape Google kept from Shopify («barberism%C2%AE») must not throw. */
@@ -214,7 +234,9 @@ function productShape(lang: Lang, raw: string): Shape {
     return { path: publicPath(lang, "/p/" + raw + "/"), reason: "slash", query: "keep" };
   }
   const handle = normHandle(raw);
-  if (PRODUCT_IDS.has(handle)) return { path: publicPath(lang, "/p/" + handle + "/"), reason: "slash", query: "drop" };
+  /* Shopify's spelling of the same product («barberism%C2%AE»): the same
+     page, so its query — the feed's variant and utm_* — comes along. */
+  if (PRODUCT_IDS.has(handle)) return { path: publicPath(lang, "/p/" + handle + "/"), reason: "slash", query: "keep" };
   /* Shopify's «delivery» product was a page about delivery. */
   if (handle === "delivery") return { path: publicPath(lang, "/info/shipping/"), reason: "product-info", query: "drop" };
   const alias = PRODUCT_ALIAS[handle];
@@ -247,6 +269,73 @@ function sameSitePath(v: string | null): string | null {
   return v;
 }
 
+/* ---------- the query a redirect carries ---------------------------------- */
+
+/** Shopify's storefront parameters — nothing here reads them, so no redirect carries them. */
+const SHOPIFY_PARAMS: ReadonlySet<string> = new Set(["variant", "country", "currency"]);
+
+/** A campaign's or a click's own parameters — they survive every redirect, so the visit keeps its source. */
+const TRACKING = /^(?:utm_[a-z0-9_]+|gclid|gbraid|wbraid|gad_source|gad_campaignid|srsltid|fbclid|msclkid|_gl)$/;
+
+/** The `name=value` pieces of a query, exactly as they came (nothing re-encoded). */
+function queryPieces(query: string): string[] {
+  return query.replace(/^\?/, "").split("&").filter(Boolean);
+}
+
+/** A piece's name, decoded and lower-cased. */
+function pieceName(piece: string): string {
+  const eq = piece.indexOf("=");
+  return safeDecode((eq >= 0 ? piece.slice(0, eq) : piece).replace(/\+/g, " ")).toLowerCase();
+}
+
+/** The first value of `name` in a query, decoded, or null. */
+function queryValue(query: string, name: string): string | null {
+  const piece = queryPieces(query).find((p) => pieceName(p) === name);
+  if (piece === undefined) return null;
+  const eq = piece.indexOf("=");
+  return eq >= 0 ? safeDecode(piece.slice(eq + 1).replace(/\+/g, " ")) : "";
+}
+
+/**
+ * The `?size=` a Shopify `?variant=` stands for on the page `path` — only when
+ * the variant is a size of THAT product; a variant of another product, or of
+ * one the shop sells in one size, stands for none.
+ */
+function variantSize(path: string, query: string): string | null {
+  const vid = queryValue(query, "variant");
+  if (!vid) return null;
+  const route = parseShopPath(path.split("?")[0]);
+  const product = route && /^\/p\/([^/]+)\/$/.exec(route.rest);
+  if (!product) return null;
+  const v = shopifyVariant(vid);
+  return v && v.s && v.p === safeDecode(product[1]) ? v.s : null;
+}
+
+/**
+ * The query a redirect carries, from the request's own:
+ *   keep — all of it (it is ours: ?size=, ?n=&s=, ?resume=, ?order=, ?q=);
+ *   drop — none of it;
+ *   a string — exactly that (a Shopify search keeps the shopper's words);
+ * and in every case a campaign's own parameters (TRACKING), never Shopify's
+ * storefront ones (SHOPIFY_PARAMS) — and `size=<size>` where the `variant`
+ * was, when the variant names a size of the target product (variantSize)
+ * and the query does not already carry one of its own.
+ */
+function carry(query: string, policy: Shape["query"], size: string | null): string {
+  const out = policy === "keep" || policy === "drop" ? [] : queryPieces(policy);
+  const pieces = queryPieces(query);
+  let sizeDue = size !== null && !(policy === "keep" && pieces.some((p) => pieceName(p) === "size"));
+  for (const piece of pieces) {
+    const name = pieceName(piece);
+    if (name === "variant" && sizeDue) {
+      out.push("size=" + encodeURIComponent(size!));
+      sizeDue = false;
+    } else if (SHOPIFY_PARAMS.has(name)) continue;
+    else if (policy === "keep" || TRACKING.test(name)) out.push(piece);
+  }
+  return out.length ? "?" + out.join("&") : "";
+}
+
 /**
  * Where an address has to go, or null when it is fine where it is (a page,
  * an asset, an API route, or an address the shop has no page for — which the
@@ -259,8 +348,17 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
   const raw = String(pathname || "/").split("?")[0] || "/";
   const query = search && search !== "?" ? (search.startsWith("?") ? search : "?" + search) : "";
   const out = (path: string, reason: LegacyRedirect["reason"], q: Shape["query"]): LegacyRedirect | null => {
-    const tail = q === "keep" ? query : q === "drop" ? "" : q;
-    const target = path + tail;
+    const size = variantSize(path, query);
+    if (path === raw && q === "keep") {
+      /* The address is the page: served with its query as it came — unless
+         that query is a Shopify variant naming a size of this product (4.),
+         and the page's own `?size=` is not already there. */
+      if (!size || queryValue(query, "size") !== null) return null;
+      return { path: path + carry(query, "keep", size), reason: "variant" };
+    }
+    const tail = carry(query, q, size);
+    /* `path` may carry a query of its own (a discount's ?redirect= target). */
+    const target = tail && path.includes("?") ? path + "&" + tail.slice(1) : path + tail;
     return target === raw + query ? null : { path: target, reason };
   };
 
@@ -305,10 +403,11 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
     foreignPrefix = first !== "ru" && first !== "et";
     segments.shift();
   }
-  /* What Shopify's regional storefronts carried is Shopify's query — dropped
-     (the shopper's own search words excepted); /en/… was our own (/shop2/en/),
-     and a query on it is ours. */
-  const shopifyQuery: Shape["query"] = first.startsWith("en-") ? "drop" : "keep";
+  /* A query is kept on every spelling of a page — Shopify's regional
+     storefronts' too, whose links carry the feed's utm_* and `variant`
+     (carry() turns it into a size) — but a regional storefront's search
+     keeps only the shopper's words. */
+  const regional = first.startsWith("en-");
   const normal: LegacyRedirect["reason"] = foreignPrefix ? "lang" : "slash";
   const n = segments.length;
   const kind = (segments[0] || "").toLowerCase();
@@ -327,16 +426,16 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
     if (parsed.rest === "/blog/" + rest[1] + "/" && SHOPIFY_ARTICLES.has(rest[1])) {
       return out(publicPath(lang, "/blog/"), "blog", "drop");
     }
-    const q = parsed.rest === "/search/" && shopifyQuery === "drop" ? qOnly() : shopifyQuery;
+    const q = parsed.rest === "/search/" && regional ? qOnly() : "keep";
     return out(parsed.canonical, normal, q);
   }
 
-  if (!n) return prefixed ? out(publicPath(lang, "/"), normal, shopifyQuery) : null;
+  if (!n) return prefixed ? out(publicPath(lang, "/"), normal, "keep") : null;
 
   if (kind === "products") {
     if (n === 1) return out(publicPath(lang, "/c/all/"), "collection-cat", "drop");
     const s = productShape(lang, rest[0]);
-    return out(s.path, s.reason === "slash" ? normal : s.reason, s.query === "keep" ? shopifyQuery : s.query);
+    return out(s.path, s.reason === "slash" ? normal : s.reason, s.query);
   }
 
   if (kind === "collections") {
@@ -344,9 +443,9 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
     /* `/collections/<x>/products/<handle>` — Shopify's other product URL. */
     if (n >= 4 && rest[1].toLowerCase() === "products") {
       const s = productShape(lang, rest[2]);
-      return out(s.path, s.reason === "slash" ? "collection-canonical" : s.reason, "drop");
+      return out(s.path, s.reason === "slash" ? "collection-canonical" : s.reason, s.query);
     }
-    if (n === 3 && rest[0] === "sets") return out(publicPath(lang, "/set/" + rest[1] + "/"), normal, shopifyQuery);
+    if (n === 3 && rest[0] === "sets") return out(publicPath(lang, "/set/" + rest[1] + "/"), normal, "keep");
     const handle = rest[0];
     /* The page itself: a section in any language's spelling (the canonical
        moves it to this language's), a catalogue brand, `brands`, `sets`. */
@@ -354,7 +453,7 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
       const brand = /^\/b\/([^/]+)\/$/.exec(parsed.rest);
       if (!brand || BRAND_SLUGS.has(brand[1])) {
         const own = parsed.canonical.split("/").pop() === handle;
-        return out(parsed.canonical, own ? normal : "collection-canonical", own ? shopifyQuery : "drop");
+        return out(parsed.canonical, own ? normal : "collection-canonical", own ? "keep" : "drop");
       }
     }
     /* `/collections/<handle>/<tag>` — a Shopify tag filter on a collection: the collection. */
@@ -364,7 +463,7 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
        (custom_products) — the catch-all route asks the database and answers
        the page, or «Все товары». Only the prefix and the slash are
        normalised here; the handle is left exactly as it came. */
-    if (n === 2) return out(publicPath(lang, "/b/" + handle + "/"), normal, shopifyQuery);
+    if (n === 2) return out(publicPath(lang, "/b/" + handle + "/"), normal, "keep");
     /* Deeper than a handle (`/collections/<x>/<tag>`, `/collections/collections/all`)
        and still nothing known: never an owner's brand page, which has no
        deeper addresses — «Все товары» directly, one hop. */

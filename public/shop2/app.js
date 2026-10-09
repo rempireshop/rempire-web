@@ -185,7 +185,7 @@
       "Шампуни": "Šampoonid", "Кондиционеры": "Palsamid", "Маски и уход": "Maskid ja hooldus",
       "Спреи": "Spreid", "Пасты и воски": "Pastad ja vahad", "Гели": "Geelid",
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
-      "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
+      "После бритья": "Pärast raseerimist", "Тонеры": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       /* per-size stock (r23): the product's own word and one size's word are
@@ -293,10 +293,14 @@
       "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Värske kaup: hooldus ja viimistlus, parfüümid ja uus merch.",
       "Категории": "Kategooriad",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professionaalsed tooted, millega Rempire'i meeskond salongis töötab.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire'i firmasärgid — meie kunstnike kavandid, trükime väikestes kogustes.",
-      "Ниша и классика, которые держим в наличии в Таллинне.": "Nišš ja klassika, mida hoiame Tallinnas laos.",
-      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas ise keedetud seep.",
-      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, viimistlus, habe, nägu, keha, parfüümid ja merch.",
+      "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.": "Kogu Rempire'i valik: šampoonid, viimistlus, habemehooldus, Korea nahahooldus, parfüümid ja merch.",
+      "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.": "Šampoonid, palsamid, juuksemaskid ja peanahahooldus — tooted, millega Rempire'i salong töötab.",
+      "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.": "Juuksevaha, pasta, savi, juukselakk ja puuder — viimistlustooted meie barberite valikust.",
+      "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.": "Habemeõlid, habemepalsamid, vuntsivaha ja raseerimistooted — habemehooldus meie barberite valikust.",
+      "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.": "Korea nahahooldus ja meeste näohooldus: toonikud, näopesuvahendid, seerumid, maskid ja SPF.",
+      "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.": "Tätoveeringu järelhooldus, dušigeelid ja seep — sealhulgas Rempire'i enda käsitööseep.",
+      "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.": "Nišiparfüümid ja klassika — originaaltooted, mida hoiame Tallinnas laos.",
+      "Футболки Rempire с принтами наших художников — печатаем малыми тиражами.": "Rempire'i T-särgid meie kunstnike trükistega — trükime väikestes tiraažides.",
       "Под эти фильтры ничего не подошло.": "Nende filtritega ei leidnud ühtegi toodet.",
       "Сначала дешевле": "Soodsamad ees", "Сначала дороже": "Kallimad ees",
       /* «Купить через» is followed by the Google Pay mark, not by words, so it
@@ -1791,8 +1795,6 @@
          they all follow from this one line — src/lib/seo-head.mjs carries the
          same word for the request-time blog page). */
       "Блог": "Blogi",
-      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
-        "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
       "Блог временно недоступен — попробуйте позже.": "Blogi pole ajutiselt saadaval — proovige hiljem uuesti.",
       "Другие статьи": "Teised artiklid",
@@ -3807,7 +3809,7 @@
       "Шампуни": "Shampoos", "Кондиционеры": "Conditioners", "Маски и уход": "Masks & care",
       "Спреи": "Sprays", "Пасты и воски": "Pastes & waxes", "Гели": "Gels",
       "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
-      "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
+      "После бритья": "Aftershave", "Тонеры": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       // per-size stock (r23) — see the Estonian table for why each is whole
@@ -3907,10 +3909,14 @@
       "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Fresh arrivals: care and styling, fragrance and new merch.",
       "Категории": "Categories",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professional products the Rempire team works with in the salon.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire tees — prints by our own artists, made in small runs.",
-      "Ниша и классика, которые держим в наличии в Таллинне.": "Niche and classics we keep in stock in Tallinn.",
-      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Gels, soap and body care — including our own handmade soap.",
-      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "The full Rempire range: care, styling, beard, face, body, fragrance and merch.",
+      "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.": "The whole Rempire range: shampoos, styling, beard care, Korean skincare, perfume and merch.",
+      "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.": "Shampoos, conditioners, hair masks and scalp care — what the Rempire salon works with.",
+      "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.": "Hair wax, paste, clay, hairspray and powder — the styling our barbers work with.",
+      "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.": "Beard oil, beard balm, moustache wax and shaving products — our barbers' own pick.",
+      "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.": "Korean skincare and men's face care: toners, cleansers, serums, masks and SPF.",
+      "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.": "Tattoo aftercare, body wash and soap — including Rempire's own handmade soap.",
+      "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.": "Niche and classic perfume — original fragrances in stock in Tallinn.",
+      "Футболки Rempire с принтами наших художников — печатаем малыми тиражами.": "Rempire T-shirts with prints by our own artists, made in small runs.",
       "Под эти фильтры ничего не подошло.": "Nothing matched these filters.",
       "Сначала дешевле": "Price: low to high", "Сначала дороже": "Price: high to low",
       "Поделиться": "Share", "Купить через": "Buy now with", "Другие способы оплаты": "Other payment methods",
@@ -5369,8 +5375,6 @@
         "By pressing “Place the order” you agree to the terms and the returns policy.",
       // blog
       "Блог": "Blog",
-      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
-        "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
       "Статей пока нет — загляните позже.": "No articles yet — check back soon.",
       "Блог временно недоступен — попробуйте позже.": "The blog is temporarily unavailable — please try again later.",
       "Другие статьи": "More articles",
@@ -8290,7 +8294,7 @@
   var NAME_TAILS = {
     "шампунь": ["šampoon", "shampoo"], "кондиционер": ["palsam", "conditioner"],
     "маска": ["mask", "mask"], "сыворотка": ["seerum", "serum"],
-    "тоник": ["toonik", "toner"], "спрей": ["sprei", "spray"],
+    "тоник": ["toonik", "toner"], "тонер": ["toonik", "toner"], "спрей": ["sprei", "spray"],
     "футболка": ["T-särk", "T-shirt"], "худи": ["pusa", "hoodie"],
     "масло": ["õli", "oil"], "бальзам": ["palsam", "balm"],
     "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
@@ -8316,7 +8320,10 @@
     "футболка оверсайз": ["oversize T-särk", "oversized tee"],
     "парфюм": ["parfüüm", "perfume"],
     "гидрофильное масло": ["hüdrofiilne õli", "cleansing oil"],
-    "ручная работа": ["käsitöö", "handmade"]
+    "ручная работа": ["käsitöö", "handmade"],
+    "термозащитная пенка": ["kuumakaitsevaht", "heat protection foam"],
+    "лосьон для локонов": ["lokilosjoon", "curl lotion"],
+    "спрей-воск": ["spreivaha", "spray wax"]
   };
   /* Product names only — the fragment rules would turn an ordinary sentence
      into franglais, so this never runs outside name-bearing elements. */
@@ -8538,6 +8545,17 @@
     if (g === "gift" || g === "brands") return 'data-go="' + g + '"';
     return 'data-go-cat="all"';
   }
+  /* …and the page that button opens, now that it is a link (linkHref): the
+     same choice as heroGoAttr() above, line for line, spelled as an address. */
+  function heroHref(go) {
+    var g = String(go || "");
+    if (g.indexOf("cat:") === 0) return linkHref("cat", g.slice(4));
+    if (g.indexOf("product:") === 0 && g.length > 8) return linkHref("product", g.slice(8));
+    if (g.indexOf("page:") === 0) return linkHref("page", g.slice(5));
+    if (g === "bundles") return allBundles().length ? linkHref("go", "bundles") : linkHref("cat", "all");
+    if (g === "gift" || g === "brands") return linkHref("go", g);
+    return linkHref("cat", "all");
+  }
   function heroProduct(image) {
     var v = String(image || "");
     for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === v) return CATALOGUE[i];
@@ -8560,22 +8578,31 @@
      banner fell through to CATALOGUE[0] and advertised a present with a
      picture of a shampoo. The mark is the same tower on the same shell panel
      the gift tile already uses on the home page, so the slide looks like the
-     page it opens. */
+     page it opens.
+
+     `o` (the storefront's own banner only — never the panel's thumbnails and
+     preview) draws the photograph as a real <img> (photo()): { first } is the
+     slide the page opens on. A pasted URL gets an empty alt — the slide's own
+     heading stands right beside it and says what it is about. */
   var HERO_GIFT_IMG = "gift";
-  function heroArt(image, cls) {
+  function heroArt(image, cls, o) {
     if (String(image || "") === HERO_GIFT_IMG) {
       return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
         tower("hero__giftmark") + "</span>";
     }
     var u = heroUrl(image);
     if (u) {
+      if (o) return '<span class="' + (cls || "hero__art") + '">' + photoImg(u, "", o.first) + "</span>";
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
         esc(u).replace(/'/g, "%27") + '\')"></span>';
     }
-    return media(heroProduct(image) || CATALOGUE[0], 0, cls || "hero__art");
+    var hp = heroProduct(image) || CATALOGUE[0];
+    if (o) return photo(hp, 0, cls || "hero__art", photoAlt(hp), o.first);
+    return media(hp, 0, cls || "hero__art");
   }
   /* `flat` draws the admin preview: the same markup with a dead button, so a
-     click inside the panel cannot navigate the owner out of the panel. */
+     click inside the panel cannot navigate the owner out of the panel. On the
+     shop the button is a link to the page it opens (linkHref). */
   function heroSlideHTML(s, i, cur, flat) {
     var cta = heroT(s.cta);
     return '<div class="hero__slide" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">' +
@@ -8585,9 +8612,9 @@
         '<p class="hero__sub">' + esc(heroT(s.sub)) + "</p>" +
         (cta
           ? (flat ? '<span class="btn">' + esc(cta) + "</span>"
-                  : '<button class="btn" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</button>")
+                  : '<a class="btn" href="' + heroHref(s.go) + '" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</a>")
           : "") + "</div>" +
-        heroArt(s.image) +
+        heroArt(s.image, null, flat ? null : { first: i === cur }) +
       "</div></div>";
   }
   function heroHTML() {
@@ -11954,7 +11981,7 @@
       '<div class="cbanner__acts">' +
         '<button class="btn btn--sm" data-consent="all"' + (c && c.analytics ? ' aria-current="true"' : "") + ">Принять всё</button>" +
         '<button class="btn btn--ghost btn--sm" data-consent="need"' + (c && !c.analytics ? ' aria-current="true"' : "") + ">Только необходимое</button>" +
-        '<button class="link" data-page="privacy">Конфиденциальность</button>' +
+        '<a class="link" href="' + linkHref("page", "privacy") + '" data-page="privacy">Конфиденциальность</a>' +
       "</div></div></div>";
   }
 
@@ -12410,7 +12437,7 @@
       { id: "ge", name: "Гели", re: /гель/i }
     ],
     face: [
-      { id: "to", name: "Тоники", re: /тоник/i },
+      { id: "to", name: "Тонеры", re: /тоник|тонер/i },
       { id: "cl", name: "Очищение", re: /очища|пенка|мыло/i },
       { id: "cs", name: "Кремы и сыворотки", re: /крем|сыворотк/i },
       { id: "oi", name: "Масла", re: /масло/i }
@@ -12939,6 +12966,60 @@
     return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") +
       '" style="background-image:url(\'' + esc(src) + '\')"></span>';
   }
+  /* ---------- the same photo, as a picture Google can read --------------
+     SEO, 09.10.2026: Google indexes the page as it stands after this script
+     has run, and a photo painted as a CSS background is not a picture to it —
+     the cards, the product page and the banner showed it none at all. On
+     those three the photograph is an <img> now, inside the very frame media()
+     draws (same element, same classes, so the same place, inset, ratio and
+     hover motion); styles.css fits it the way the background was fitted —
+     whole and centred, or filling the frame for a model shot — so nothing on
+     screen changes. Everywhere else (the cart, the panel) keeps media().
+
+       alt    brand + name in the page's language (photoAlt), or "" for a
+              repeat that would only say the name twice
+       first  the one picture the page opens on (the banner on screen, the
+              product's own photo): fetched first, never lazy
+       thumb  the owner's small copy of his own upload where there is one —
+              a card is a few hundred pixels wide, and one of his products
+              loaded a 1.39 MB PNG into it
+
+     width/height are the frame's square, not the file's: the frame is what
+     sizes the picture (object-fit), and it is sized before the file
+     arrives, so nothing moves while it loads. */
+  function photo(p, i, cls, alt, first, thumb) {
+    var g = gal(p), src = g.length ? g[Math.min(i || 0, g.length - 1)] : "";
+    if (!src) return media(p, i, cls);
+    return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") + '">' +
+      photoImg(thumb ? photoThumb(p, src) : src, alt, first) + "</span>";
+  }
+  function photoImg(src, alt, first) {
+    return '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '" width="600" height="600"' +
+      (first ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"') + ">";
+  }
+  /** «Kevin.Murphy Young.Again — shampoo»: the words the card itself prints
+      under the photo, in the page's language (trText, as translateTree()
+      gives the card's name). */
+  function photoAlt(p) {
+    if (!p) return "";
+    var name = trText(String(p.name || ""), S.lang, true);
+    return (p.brand ? p.brand + " " : "") + name;
+  }
+  /** The small copy of an uploaded photo — the owner's own products carry
+      it per photo ({url, thumb}), and so does a gallery he replaced on a
+      catalogue product (DEMO.gallery). The file itself where there is none. */
+  function photoThumb(p, url) {
+    var lists = [p && p.photos, p && DEMO.gallery && DEMO.gallery[p.id]];
+    for (var l = 0; l < lists.length; l++) {
+      var list = lists[l];
+      if (!Array.isArray(list)) continue;
+      for (var i = 0; i < list.length; i++) {
+        var ph = list[i];
+        if (ph && typeof ph === "object" && ph.url === url && ph.thumb) return ph.thumb;
+      }
+    }
+    return url;
+  }
 
   /* ---------- the volume a card speaks for --------------------------------
      A card used to carry its own volume picker, so a shopper could take the
@@ -13028,21 +13109,22 @@
         : p.stock === "out" ? '<span class="chip chip--out card__flag">нет в наличии</span>' : "");
     var g = gal(p);
     // card and add are siblings: a button inside a button is invalid markup
-    // and left the add link unreachable from the keyboard.
+    // and left the add link unreachable from the keyboard. The card itself is
+    // a link to the product (linkHref), its photos real pictures (photo()).
     return '<div class="card' + (g.length > 1 ? " card--dual" : "") + '">' +
-      '<button class="card__go" data-go-product="' + p.id + '">' +
+      '<a class="card__go" href="' + linkHref("product", p.id) + '" data-go-product="' + p.id + '">' +
         '<span class="card__media">' +
-          media(p, 0, "ph card__img") +
-          (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
+          photo(p, 0, "ph card__img", photoAlt(p), false, true) +
+          (g.length > 1 ? photo(p, 1, "ph card__img2", "", false, true) : "") +
           '<span class="card__wm"></span>' +
           (flags ? '<span class="card__flags">' + flags + "</span>" : "") +
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
-      "</button>" +
-      /* The foot is a sibling of the card button, not inside it: a control
-         inside a <button> is invalid markup and every tap on it would open
-         the product. Two rows — the price, «В корзину» under it — and the
+      "</a>" +
+      /* The foot is a sibling of the card link, not inside it: a control
+         inside a link (a <button> until 09.10.2026) is invalid markup and
+         every tap on it would open the product. Two rows — the price, «В корзину» under it — and the
          name above is always two lines tall, so both land on the same height
          in every card of a row. Stock and salon-price flags sit on the photo,
          not beside the price. */
@@ -13321,14 +13403,14 @@
     // here with the crossed-out sum of the parts — and «В корзину» under it,
     // so a grid that mixes sets and products keeps one rhythm
     return '<div class="card card--bundle">' +
-      '<button class="card__go" data-go-bundle="' + b.id + '">' +
+      '<a class="card__go" href="' + linkHref("bundle", b.id) + '" data-go-bundle="' + b.id + '">' +
         '<span class="card__media">' + bundleStack(b, "bstack--card") +
           (bundleSaved(b) ? '<span class="bbadge num">−' + b.pct + ' %</span>' : "") +
           (out ? '<span class="card__flags"><span class="chip chip--out card__flag">нет в наличии</span></span>' : "") +
         "</span>" +
         '<span class="card__brand">Набор</span>' +
         '<span class="card__name">' + esc(bundleTitle(b)) + "</span>" +
-      "</button>" +
+      "</a>" +
       '<div class="card__foot">' +
         '<span class="card__price num">' + eur(b.price) +
           (bundleSaved(b) ? ' <s class="bwas">' + eur(b.sum) + "</s>" : "") + "</span>" +
@@ -13354,7 +13436,7 @@
   function bundleGridHTML(list, title) {
     if (!list.length) return "";
     return '<section class="sec sec--bundles"><div class="sec__head"><h2 class="sec__title">' + title +
-      '</h2><button class="link" data-go="bundles">Все наборы</button></div>' +
+      '</h2><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></div>' +
       '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div></section>";
   }
 
@@ -13366,12 +13448,12 @@
      The gift card is NOT a set and keeps its own page either way. */
   function setsOffHTML(crumbTail) {
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + (crumbTail || "Наборы") + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + (crumbTail || "Наборы") + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Наборы сейчас недоступны</h1>' +
         '<p class="sec__intro">Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.</p>' +
-        '<div class="empty__cats"><button class="btn" data-go-cat="all">Перейти в каталог</button>' +
-        '<button class="btn btn--ghost" data-go="gift">Подарочная карта</button></div>' +
+        '<div class="empty__cats"><a class="btn" href="' + linkHref("cat", "all") + '" data-go-cat="all">Перейти в каталог</a>' +
+        '<a class="btn btn--ghost" href="' + linkHref("go", "gift") + '" data-go="gift">Подарочная карта</a></div>' +
       "</section></div>";
   }
 
@@ -13385,7 +13467,7 @@
        become «Страница не найдена» would be a promise for a tenth of a
        second. */
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Наборы</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Наборы</div>' +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Наборы</h1>' +
         '<p class="sec__intro">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p>' +
@@ -13403,11 +13485,11 @@
     if (!b) {
       return '<div class="wrap"><section class="sec"><h1 class="display h1">Набор не найден</h1>' +
         '<p class="muted">Возможно, его больше нет в продаже.</p>' +
-        '<p><button class="link" data-go="bundles">Все наборы</button></p></section></div>';
+        '<p><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></p></section></div>';
     }
     var out = bundleStock(b) === "out";
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / ' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("go", "bundles") + '" data-go="bundles">Наборы</a> / ' +
         esc(bundleTitle(b)) + "</div>" +
       '<div class="pdp">' +
         '<div><div class="pdp__stage">' + bundleStack(b, "bstack--big") + "</div></div>" +
@@ -13434,7 +13516,7 @@
             var gone = bundleItemStock(it) === "out";
             return '<div class="bitem"><span class="bitem__ph">' +
                 '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
-              '<button class="bitem__nm" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
+              '<a class="bitem__nm" href="' + linkHref("product", it.id) + '" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
                 (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") +
                 /* How many of it. expand() multiplies the part's price by qty
                    when it adds the «было» sum up, and the list beside that sum
@@ -13443,7 +13525,7 @@
                    make the parts come to. The admin's own editor has counted
                    them all along («adm-step-qty»); this is the same fact on
                    the shopper's side of the screen. */
-                (Number(it.qty) > 1 ? ' <span class="muted num">× ' + Number(it.qty) + "</span>" : "") + "</button>" +
+                (Number(it.qty) > 1 ? ' <span class="muted num">× ' + Number(it.qty) + "</span>" : "") + "</a>" +
               (gone ? '<span class="chip chip--out bitem__out" data-bitemout="' + esc(it.id) + '">нет в наличии</span>' : "") +
               '<span class="num bitem__pr">' + eur(it.price) + "</span></div>";
           }).join("") + "</div>" +
@@ -13515,7 +13597,7 @@
       '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
       '<p class="muted"><span class="num">' + esc(giftAmountsPhrase()) + "</span> " +
       "<span>— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</span></p></div>" +
-      '<button class="btn btn--ghost" data-go="gift">Выбрать сумму</button></div>';
+      '<a class="btn btn--ghost" href="' + linkHref("go", "gift") + '" data-go="gift">Выбрать сумму</a></div>';
   }
   function giftEmailBad() {
     var v = S.gift.email.trim();
@@ -13528,9 +13610,9 @@
          (Dim, 28.09.2026) — that crumb is the last visible trace of them
          anywhere in the shop, so it drops out and the card hangs straight off
          the home page. Nothing else about this screen changes. */
-      '<div class="crumbs"><button data-go="home">Главная</button>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a>' +
         (allBundles().length
-          ? ' / <button data-go="bundles">Наборы</button> / Подарочная карта</div>'
+          ? ' / <a href="' + linkHref("go", "bundles") + '" data-go="bundles">Наборы</a> / Подарочная карта</div>'
           : " / Подарочная карта</div>") +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Подарочная карта</h1>' +
@@ -14094,7 +14176,7 @@
         (l.failed ? "Блог временно недоступен — попробуйте позже." : "Статей пока нет — загляните позже.") + "</p>";
     }
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Блог</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Блог</div>' +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Блог</h1>' +
         body +
@@ -14115,7 +14197,7 @@
       (p.tags && p.tags.length ? '<div class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "");
   }
   function blogCrumbsHTML(title) {
-    return '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="blog">Блог</button>' +
+    return '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("go", "blog") + '" data-go="blog">Блог</a>' +
       (title ? " / " + esc(title) : "") + "</div>";
   }
   /* The article page. Breadcrumbs sit in the ordinary .wrap, where every
@@ -14152,7 +14234,7 @@
             ? '<p class="muted" style="margin:16px 0">Блог временно недоступен — попробуйте позже.</p>'
             : '<h1 class="display h1">Статья не найдена.</h1>') +
           // no way «back» into a blog that has nothing in it (28.09.2026)
-          (blogShown() ? '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' : "") +
+          (blogShown() ? '<p><a class="link" href="' + linkHref("go", "blog") + '" data-go="blog">Вернуться в блог</a></p>' : "") +
         "</section></div>";
     }
     var featured = productsById(post.products).slice(0, 8);
@@ -14281,12 +14363,12 @@
     var p = productsById([id])[0];
     if (!p) return "";
     var pro = proPrice(p, 0);
-    return '<button class="blog__prod" data-go-product="' + esc(p.id) + '">' +
+    return '<a class="blog__prod" href="' + linkHref("product", p.id) + '" data-go-product="' + esc(p.id) + '">' +
         media(p, 0, "ph blog__prodimg") +
         '<span class="blog__prodtx">' +
           '<span class="blog__prodname">' + esc(blogProductName(p, S.lang)) + "</span>" +
           '<span class="blog__prodprice num">' + esc(blogProductPrice(p, S.lang)) + "</span>" +
-        "</span></button>";
+        "</span></a>";
   }
   /** «Kevin.Murphy PLUMPING.WASH — шампунь» → «… — shampoo» for an EN reader.
    *  trText with allowName is exactly what a catalogue card's own name gets
@@ -14678,8 +14760,8 @@
     return '<header class="hdr">' +
       announceHTML() +
       '<div class="hdr__row">' +
-        '<button class="hdr__logo" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
-          towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+        '<a class="hdr__logo" href="' + linkHref("go", "home") + '" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
+          towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></a>' +
         '<div class="hdr__searchwrap">' +
           '<span class="hdr__searchicon">' + icon("search") + "</span>" +
           '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, паста…" aria-label="Поиск по магазину">' +
@@ -14695,19 +14777,21 @@
           '<button class="iconbtn" data-cart>' + icon("bag") + '<span class="vh">Корзина</span><span data-cartbadge></span></button>' +
         "</span>" +
       "</div>" +
+      /* Links, each to its page in the page's language (linkHref) — the
+         header is rebuilt on a language switch, so they never go stale. */
       '<nav class="hdr__nav" aria-label="Категории">' +
-        '<button data-go-cat="all">Все товары</button>' +
-        CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
-        (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
+        '<a href="' + linkHref("cat", "all") + '" data-go-cat="all">Все товары</a>' +
+        CATS.map(function (c) { return '<a href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") +
+        (allBundles().length ? '<a href="' + linkHref("go", "bundles") + '" data-go="bundles" data-nav-bundles>Наборы</a>' : "") +
         /* Dim, 07.09.2026: the gift card belongs beside «Наборы» in the
            navigation — that is where someone shopping for a present is
            already looking, and it is why the footer no longer repeats it.
            Unlike «Наборы» it is never removed: the card is not a set and
            stays on sale with sets switched off (docs/features.md). */
-        '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
-        '<button data-go="brands" data-nav-brands>Бренды</button>' +
+        '<a href="' + linkHref("go", "gift") + '" data-go="gift" data-nav-gift>Подарочная карта</a>' +
+        '<a href="' + linkHref("go", "brands") + '" data-go="brands" data-nav-brands>Бренды</a>' +
         // only while there is an article to read — blogShown(), 28.09.2026
-        (blogShown() ? '<button data-go="blog" data-nav-blog>Блог</button>' : "") +
+        (blogShown() ? '<a href="' + linkHref("go", "blog") + '" data-go="blog" data-nav-blog>Блог</a>' : "") +
       "</nav></header>";
   }
 
@@ -14751,7 +14835,8 @@
     if (nav && wantSets && !navSets) {
       // back in front of the gift card, which is where headerHTML() puts it
       var before = nav.querySelector("[data-nav-gift]") || nav.querySelector("[data-nav-brands]");
-      var btn = document.createElement("button");
+      var btn = document.createElement("a");
+      btn.setAttribute("href", linkHref("go", "bundles"));
       btn.setAttribute("data-go", "bundles");
       btn.setAttribute("data-nav-bundles", "");
       btn.textContent = "Наборы";
@@ -14766,7 +14851,8 @@
     var navBlog = nav && nav.querySelector("[data-nav-blog]");
     var wantBlog = blogShown();
     if (nav && wantBlog && !navBlog) {
-      var bb = document.createElement("button");
+      var bb = document.createElement("a");
+      bb.setAttribute("href", linkHref("go", "blog"));
       bb.setAttribute("data-go", "blog");
       bb.setAttribute("data-nav-blog", "");
       bb.textContent = "Блог";
@@ -14774,7 +14860,7 @@
     } else if (navBlog && !wantBlog) {
       navBlog.remove();
     }
-    h.querySelectorAll(".hdr__nav button").forEach(function (b) {
+    h.querySelectorAll(".hdr__nav a").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
         // «gift» used to light this one up — it has its own entry now
         b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle"));
@@ -14909,7 +14995,7 @@
          on its last word — one appended « · » and it stops matching in ET
          and EN. Same reason «Самовывоз» below keeps its own <span>. */
       ftrSec("Доставка", esc(ftrShipLine()) +
-        '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
+        '<br><a class="link" href="' + linkHref("page", "shipping") + '" data-page="shipping">Доставка и оплата</a>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
@@ -14917,10 +15003,10 @@
       ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
-      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<button class="link" data-page="contact">Контакты</button>']
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<a class="link" href="' + linkHref("page", "contact") + '" data-page="contact">Контакты</a>']
         .filter(Boolean).join(" · ")) +
-      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
-        '<button class="link" data-page="returns">Возврат товара</button> · ' +
+      ftrSec("Правовое", '<a class="link" href="' + linkHref("page", "privacy") + '" data-page="privacy">Конфиденциальность</a> · <a class="link" href="' + linkHref("page", "terms") + '" data-page="terms">Правовая информация</a> · ' +
+        '<a class="link" href="' + linkHref("page", "returns") + '" data-page="returns">Возврат товара</a> · ' +
         // the one way back to a choice that is otherwise made once and kept
         '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
@@ -14949,7 +15035,7 @@
         }).map(function (b) {
           // wordmarks only, as in the urban sample — one typographic voice,
           // no logo/text zigzag along the line
-          return '<button class="brandstrip__it" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</button>";
+          return '<a class="brandstrip__it" href="' + linkHref("brand", b.name) + '" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</a>";
         }).join("") + "</div></nav>" +
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
@@ -14969,10 +15055,10 @@
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
           var p = bannerProduct({ cat: c.id });
-          return '<button class="cattile" data-go-cat="' + c.id + '">' +
+          return '<a class="cattile" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' +
             '<span class="cattile__shot">' + media(p, 0, "ph cattile__img") + "</span>" +
             '<span class="cattile__name">' + c.name + "</span>" +
-            '<span class="cattile__n num">' + (function (n) { return n + " " + plural(n); })(CATALOGUE.filter(function (x) { return x.cat === c.id; }).length) + "</span></button>";
+            '<span class="cattile__n num">' + (function (n) { return n + " " + plural(n); })(CATALOGUE.filter(function (x) { return x.cat === c.id; }).length) + "</span></a>";
         }).join("") + "</div></section>" +
 
       "</div>";
@@ -14996,7 +15082,7 @@
 
   function rail(title, intro, list) {
     return '<section class="sec"><div class="sec__head"><h2 class="sec__title">' + title +
-      '</h2><button class="link" data-go-cat="all">Все товары</button></div>' +
+      '</h2><a class="link" href="' + linkHref("cat", "all") + '" data-go-cat="all">Все товары</a></div>' +
       '<p class="sec__intro">' + intro + "</p>" +
       '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
   }
@@ -15089,7 +15175,7 @@
       ["Реквизиты", cCompanyHTML()]
     ].filter(function (r) { return r[1]; });
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Контакты</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Контакты</div>' +
       '<section class="sec"><h1 class="display h1">Контакты</h1>' +
       (intro ? '<p class="sec__intro">' + esc(intro) + "</p>" : "") +
       '<div class="legal">' + rows.map(function (r) {
@@ -15135,13 +15221,13 @@
     var pg = legalFor(S.infoSlug);
     var own = (contentConf().legal || {})[S.infoSlug];
     var ownText = own ? cText(own) : "";
-    if (!pg && !ownText) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
+    if (!pg && !ownText) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><a class="link" href="' + linkHref("go", "home") + '" data-go="home">На главную</a></p></section></div>'; }
     var title = pg ? pg.title : "Информация";
     var body = ownText
       ? esc(ownText).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>")
       : cResolve(pg.html);
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + esc(title) + "</div>" +
       '<section class="sec"><h1 class="display h1">' + esc(title) + "</h1>" +
       '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
       // …and on the returns page, the one paragraph that is the shop's own
@@ -15167,7 +15253,7 @@
     loadPayMethods();   // one-shot; the real bank marks land with a re-render
     var c = contentConf();
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + esc(title) + "</div>" +
       '<section class="sec dlv">' +
       deliveryPageHTML({
         lang: S.lang,
@@ -15184,7 +15270,7 @@
            read settings, so it passes nothing and keeps the default — see the
            note beside its own call in tools/prerender-shop2.mjs. */
         invoiceHint: invoiceHint(),
-        link: function (slug, label) { return '<button class="link" data-page="' + slug + '">' + label + "</button>"; },
+        link: function (slug, label) { return '<a class="link" href="' + linkHref("page", slug) + '" data-page="' + slug + '">' + label + "</a>"; },
         legalHtml: legalHtml
       }) +
       "</section></div>";
@@ -15192,14 +15278,14 @@
 
   function screenBrands() {
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Бренды</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Бренды</div>' +
       '<section class="sec" style="padding-top:14px">' +
       '<h1 class="display h1">Бренды</h1>' +
       '<p class="sec__intro">Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.</p>' +
       '<div class="brandtiles">' + brands().map(function (b) {
-        return '<button class="brandtile" data-go-brand="' + esc(b.name) + '">' +
+        return '<a class="brandtile" href="' + linkHref("brand", b.name) + '" data-go-brand="' + esc(b.name) + '">' +
           '<span class="brandtile__mark">' + brandMark(b.name, "brandtile") + "</span>" +
-          '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
+          '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></a>";
       }).join("") + "</div></section></div>";
   }
 
@@ -15218,27 +15304,45 @@
       '<h1 class="display h1">Страница не найдена</h1>' +
       '<p class="sec__intro">Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.</p>' +
       '<div class="nf__acts">' +
-        '<button class="btn" data-go="home">На главную</button>' +
-        '<button class="btn btn--ghost" data-go-cat="all">В каталог</button>' +
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">На главную</a>' +
+        '<a class="btn btn--ghost" href="' + linkHref("cat", "all") + '" data-go-cat="all">В каталог</a>' +
       "</div></section></div>";
   }
 
+  /* The line under a section's heading, in Russian; translateTree() puts it
+     into ET and EN through the dictionary like every other string here.
+     Top level, one key per line, on purpose: tools/prerender-shop2.mjs lifts
+     this declaration and catIntro() below out of this file by their first
+     and last lines, so the static page carries the same line the shop draws
+     a moment later instead of a sentence of its own. */
+  var CAT_INTROS = {
+    all: "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.",
+    hair: "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.",
+    styling: "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.",
+    beard: "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.",
+    face: "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.",
+    body: "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.",
+    perfume: "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.",
+    merch: "Футболки Rempire с принтами наших художников — печатаем малыми тиражами."
+  };
+  /** The intro of a section — or of a brand page, when `brand` is given. Plain text, not HTML. */
+  function catIntro(cat, brand) {
+    if (brand) return "Всё, что есть в наличии от " + brand + " — во всех разделах магазина.";
+    return CAT_INTROS[cat] || "Профессиональные средства, которыми команда Rempire работает в салоне.";
+  }
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
-    var CAT_INTROS = {
-      merch: "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.",
-      perfume: "Ниша и классика, которые держим в наличии в Таллинне.",
-      body: "Гели, мыло и уход за телом — включая мыло собственной варки."
-    };
     var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
-    var intro = S.brand
-      ? "Всё, что есть в наличии от " + esc(S.brand) + " — во всех разделах магазина."
-      : S.cat === "all"
-        ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
-        : CAT_INTROS[S.cat] || "Профессиональные средства, которыми команда Rempire работает в салоне.";
+    /* A brand the owner has written a paragraph for shows it, in the page's
+       own language (seoBrandIntro(), src/lib/seo-copy.mjs — the prerender
+       writes the same one); every other page keeps the shop's line, which
+       translateTree() translates. `data-notr` keeps the owner's words off
+       the dictionary. */
+    var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : "";
+    var intro = esc(ownIntro || catIntro(S.cat, S.brand));
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' +
-        (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' +
+        (S.brand ? '<a href="' + linkHref("go", "brands") + '" data-go="brands">Бренды</a> / ' + esc(S.brand) : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
         /* A brand with a logo shows the logo instead of the heading — and
            until 08.10.2026 that left the page with no <h1> at all, which is
@@ -15248,7 +15352,7 @@
         (S.brand && BRAND_LOGOS[S.brand]
           ? '<div class="brandhead"><h1 class="vh">' + esc(S.brand) + "</h1>" + brandMark(S.brand, "brandhead", true) + "</div>"
           : '<h1 class="display h1">' + esc(name) + "</h1>") +
-        '<p class="sec__intro">' + intro + "</p>" +
+        '<p class="sec__intro"' + (ownIntro ? " data-notr" : "") + ">" + intro + "</p>" +
         (function () {
           var defs = subcatsFor(S.cat === "all" || S.brand ? [] : CATALOGUE.filter(function (p) { return p.cat === S.cat; }));
           if (!defs.length) return "";
@@ -15360,15 +15464,17 @@
     var prodGone = soldOut(p) || soloGone;
     var volGone = !prodGone && sizeOut(p, S.size);
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("cat", p.cat) + '" data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</a> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
         "<div>" +
           // no watermark here: the stage is far larger than the product on a
-          // desktop, so the mark floated in empty white and read as an artefact
-          '<div class="pdp__stage">' + media(p, S.gallery, "ph pdp__img") + "</div>" +
+          // desktop, so the mark floated in empty white and read as an artefact.
+          // The photo on show is the page's main picture (photo(): first);
+          // a thumbnail's own name is its button's «Фото N», so its alt is empty
+          '<div class="pdp__stage">' + photo(p, S.gallery, "ph pdp__img", photoAlt(p), true) + "</div>" +
           (g.length > 1 ? '<div class="pdp__thumbs">' + g.map(function (im, i) {
             return '<button data-gal="' + i + '" aria-label="Фото ' + (i + 1) + '" aria-current="' + (i === S.gallery) + '" class="pdp__thumb">' +
-              media(p, i, "ph") + "</button>";
+              photo(p, i, "ph", "") + "</button>";
           }).join("") + "</div>" : "") +
         "</div>" +
         "<div>" +
@@ -15376,7 +15482,7 @@
           // micro-caption with the whole row empty to its right, and sharing is
           // metadata about the product rather than a step in buying it
           '<div class="pdp__idrow">' +
-            '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
+            '<a class="card__brand pdp__brand" href="' + linkHref("brand", p.brand) + '" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</a>" +
             '<button class="pdp__share" data-share="' + p.id + '">' + icon("share") + "<span>Поделиться</span></button>" +
           "</div>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
@@ -18368,7 +18474,7 @@
         ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
         : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
           '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
-          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
+          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<a class="btn btn--ghost btn--sm" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") + "</div>" +
           // content: the contact line follows «Настройки → Контент» like the
           // footer does — this was the last place still printing the Gmail
           '<p class="muted">Напишите нам — поможем подобрать замену: ' +
@@ -44542,6 +44648,7 @@
          can hand back. */
       OV_PUB = way !== "take" && !ADM_OV.at ? r.body : null;
       adoptServer(r.body, way !== "take");
+      OV_LIVE = true;   // setHead(): the offers can now be priced from the live feed
       // (asked again only once it has answered: at boot the sign-in check has usually asked already)
       if (way === "admin") loadAdminOverrides(ADM_OV.at > 0);
       demoSave();
@@ -47816,8 +47923,8 @@
         ? donePayPickerHTML(d) +
           '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
             (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
-            '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
-        : '<div class="done__acts"><button class="btn" data-go="home">Вернуться в магазин</button></div>') +
+            '<a class="btn btn--ghost" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></div>'
+        : '<div class="done__acts"><a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></div>') +
       "</section></div>";
   }
   function screenDone() {
@@ -47852,7 +47959,7 @@
         '<h1 class="display h1">Заказ оформлен</h1>' + num +
         '<p class="muted" style="margin-bottom:22px" data-invoicedone>' + invLine +
           "<span>" + invoiceDoneNote(dn) + "</span></p>" +
-        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
     }
     /* «Платёж обрабатывается» with no way forward is what Ренат hit on
        13.09.2026: he chose the card, pressed «Отменить» at the bank, and came
@@ -47886,7 +47993,7 @@
         '<div class="done__tick done__tick--wait">…</div>' +
         '<h1 class="display h1">Платёж обрабатывается</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.</p>' +
-        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
     }
     return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
       '<div class="done__tick">' + icon("check") + "</div>" +
@@ -47897,7 +48004,7 @@
           : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
       "</p>" +
       doneGiftHTML(d.gift) +
-      '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+      '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
   }
 
   /** The paid receipt's one sentence — what happens next, and only what the
@@ -47938,7 +48045,7 @@
         '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше"' + (l.qty <= 1 ? ' aria-disabled="true"' : "") + '>−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
-    }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
+    }).join("") : '<p class="muted">Пока пусто. <a class="link" href="' + linkHref("cat", "all") + '" data-go-cat="all">К товарам</a></p>') +
       /* No bar where there is no free delivery to walk towards: threshold()
          is Infinity when the country's «Бесплатно от» is empty, and «До
          бесплатной доставки (Эстония, от Infinity €)» is not a sentence —
@@ -47992,7 +48099,7 @@
     return '<div class="upsell"><div class="upsell__t">Добавьте — и доставка бесплатно:</div>' +
       picks.map(function (p) {
         return '<div class="upsell__row"><span class="upsell__ph">' + media(p, 0, "ph") + "</span>" +
-          '<button class="upsell__nm" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</button>" +
+          '<a class="upsell__nm" href="' + linkHref("product", p.id) + '" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</a>" +
           '<span class="num">' + cardPriceText(p, cardSizeIdx(p.id)) + "</span>" +
           '<button class="btn btn--sm" data-add="' + p.id + '">+</button></div>';
       }).join("") + "</div>";
@@ -48249,7 +48356,6 @@
   function giftDescText(lang) {
     return trText(GIFT_DESC_HEAD, lang, false) + " " + giftAmountsPhrase() + " " + trText(GIFT_DESC_TAIL, lang, false);
   }
-  var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   // the sentence screenBrands() opens with, reused as that page's description
   var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
   // the sentence screenNotFound() opens with, reused as that page's description
@@ -48267,6 +48373,466 @@
        page's real value, not the screen's. */
     return (m && (m.getAttribute("data-served") || m.getAttribute("content"))) || "";
   })();
+  /* ---------- the head copy: src/lib/seo-copy.mjs, copied ------------------
+     The titles, meta descriptions and link-preview texts of the home page,
+     the sections, the brands and the blog list, and the product-title rule —
+     the SAME block the prerender and the request-time pages import, so the
+     head a crawler is served and the head it reads after this script runs
+     are one text (SEO audit 08.10.2026, W4/T2). Written by
+     `node tools/sync-seo-copy.mjs`; never edit between the markers by hand —
+     tests/seo-copy.test.ts and the prerender both refuse a drifted copy. */
+/* seo-copy:start */
+  var SEO_TITLE_MAX = 60;
+  var SEO_DESC_MAX = 155;
+
+  /** The copy itself — a function, not a var, so the shop can call it from
+      anywhere in its script whatever order the lines run in. */
+  function seoCopy() {
+    return {
+      home: {
+        EN: {
+          t: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1, Tallinn; EU-wide delivery.",
+          ogT: "REMPIRE — salon hair, beard & skin care, Tallinn",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our Tallinn salon team. Pickup at Mardi 1 or delivery across Europe."
+        },
+        ET: {
+          t: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1, tasuta tarne alates {free}.",
+          dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa.",
+          ogT: "REMPIRE — salongi juukse-, habeme- ja nahahooldus",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie Tallinna salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa."
+        },
+        RU: {
+          t: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона REMPIRE. Самовывоз на Mardi 1, доставка по Эстонии и ЕС.",
+          ogT: "REMPIRE — салонный уход для волос, бороды и кожи",
+          ogD: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона в Таллинне. Самовывоз на Mardi 1 или доставка по Европе."
+        }
+      },
+      /* [title, description] per section and language — «all» is «Все товары». */
+      cat: {
+        hair: {
+          EN: ["Hair Care: Shampoos, Conditioners, Masks & Scalp Care", "System 4, Kevin.Murphy, Davines and Paul Mitchell: shampoos, conditioners, masks and scalp treatments for oily, dry or thinning hair. Pickup in Tallinn."],
+          ET: ["Juuksehooldus: šampoonid, palsamid ja juuksemaskid", "System 4, Kevin.Murphy, Davines ja Paul Mitchell: šampoonid, palsamid, juuksemaskid ja peanahahooldus rasustele, kuivadele või hõrenevatele juustele."],
+          RU: ["Уход за волосами: шампуни, кондиционеры, маски", "System 4, Kevin.Murphy, Davines и Paul Mitchell: шампуни, кондиционеры, маски и средства для кожи головы — от жирности, сухости и выпадения."]
+        },
+        styling: {
+          EN: ["Hair Styling: Wax, Paste, Clay, Hairspray & Powder", "Kevin.Murphy, Davines, Gatsby and Paul Mitchell styling: matte paste, wax, clay, texture spray and volume powder, plus our paste-vs-wax guide."],
+          ET: ["Viimistlus: juuksevaha, pasta, savi ja juukselakk", "Kevin.Murphy, Davines, Gatsby ja Paul Mitchell: juuksevaha, matt pasta, savi, tekstuurisprei ja puuder. Pasta, vaha või savi? Vaata meie juhendit."],
+          RU: ["Стайлинг: воск, паста, глина и спреи для волос", "Kevin.Murphy, Davines, Gatsby и Paul Mitchell: воск, матовая паста, глина, текстурирующие спреи и пудра для объёма. Что выбрать — в нашем разборе."]
+        },
+        beard: {
+          EN: ["Beard Care & Shaving: Beard Oil, Balm & Aftershave", "Captain Fawcett, Proraso and Davines beard oils, balms, moustache wax, shaving gels and aftershave — the products our Tallinn barbers use. EU delivery."],
+          ET: ["Habemehooldus: habemeõli, habemepalsam, raseerimine", "Captain Fawcett, Proraso ja Davines: habemeõlid, habemepalsamid, vuntsivaha, raseerimisgeelid ja raseerimisjärgne hooldus. Järeletulek Mardi 1."],
+          RU: ["Уход за бородой: масло, бальзам, воск, бритьё", "Captain Fawcett, Proraso и Davines: масла и бальзамы для бороды, воск для усов, гели для бритья и лосьоны после бритья. Самовывоз на Mardi 1."]
+        },
+        face: {
+          EN: ["Face Care: Korean Skincare, Toners, Serums & Masks", "Anua, Cosrx, Laneige, Nature Republic and Gummy Korean skincare plus Lumin for men: toners, cleansers, serums, masks and SPF. Pickup in Tallinn."],
+          ET: ["Näohooldus: Korea kosmeetika, toonikud ja seerumid", "Anua, Cosrx, Laneige, Nature Republic, Gummy ja Lumin meestele: toonikud, puhastusvahendid, seerumid, maskid ja päikesekreem. Järeletulek Mardi 1."],
+          RU: ["Уход за лицом: корейская косметика, тонеры, сыворотки", "Anua, Cosrx, Laneige, Nature Republic, Gummy и мужская косметика Lumin: тонеры, умывалки, сыворотки, маски и SPF. Самовывоз на Mardi 1, Таллинн."]
+        },
+        body: {
+          EN: ["Body Care: Tattoo Aftercare, Handmade Soap & Body Wash", "Yumain tattoo aftercare (numbing serum, balm, cleansing foam), REMPIRE's own handmade soap and Davines and Byredo body wash. Pickup at Mardi 1, Tallinn."],
+          ET: ["Kehahooldus: tätoveeringu hooldus, käsitööseep, dušigeel", "Yumaini tätoveeringu järelhooldus (seerum, palsam, puhastusvaht), REMPIRE'i käsitööseep ning Davinesi ja Byredo dušigeelid. Järeletulek Mardi 1."],
+          RU: ["Уход за телом: уход за тату, мыло ручной работы", "Yumain для ухода за татуировкой (сыворотка, бальзам, пенка), мыло ручной работы REMPIRE, гели для душа Davines и Byredo. Самовывоз на Mardi 1."]
+        },
+        perfume: {
+          EN: ["Niche & Designer Perfume: Creed, Xerjoff, Byredo, Kilian", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 and Roja: original perfume, in stock in Tallinn. Pickup at Mardi 1."],
+          ET: ["Nišiparfüümid: Creed, Xerjoff, Byredo, Tom Ford, Kilian", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 ja Roja: originaalparfüümid, laos Tallinnas. Järeletulek Mardi 1."],
+          RU: ["Нишевая парфюмерия: Creed, Xerjoff, Byredo, Tom Ford", "Creed Aventus, Xerjoff Naxos, Byredo, Tom Ford, Kilian, MFK Baccarat Rouge 540 и Roja — оригинальная парфюмерия в наличии в Таллинне. Самовывоз на Mardi 1."]
+        },
+        merch: {
+          EN: ["REMPIRE Merch: Artist T-Shirts in Small Runs", "Oversized and deep-cut T-shirts with prints by REMPIRE's artists, in small runs — including the Siim Hanikat × REMPIRE collab. EU delivery."],
+          ET: ["REMPIRE merch: kunstnike disainiga T-särgid", "Oversized ja sügava kaelusega T-särgid REMPIRE'i kunstnike trükistega, väikestes tiraažides, sh Siim Hanikat × REMPIRE. Järeletulek Tallinnas."],
+          RU: ["Мерч REMPIRE: футболки с принтами художников", "Оверсайз-футболки и футболки с глубоким вырезом с принтами художников REMPIRE, малыми тиражами, включая коллаб Siim Hanikat × REMPIRE."]
+        },
+        all: {
+          EN: ["All Products: Hair, Beard, Skin Care & Perfume | REMPIRE", "Every product on the REMPIRE shelf: salon hair care and styling, beard care, Korean skincare, body care and niche perfume. Pickup in Tallinn, EU delivery."],
+          ET: ["Kõik tooted: juuksed, habe, nahk ja parfüümid | REMPIRE", "Kogu REMPIRE'i valik: salongi juuksehooldus ja viimistlus, habemehooldus, Korea nahahooldus, kehahooldus ja nišiparfüümid. Järeletulek Tallinnas."],
+          RU: ["Все товары: волосы, борода, кожа, парфюмерия | REMPIRE", "Весь ассортимент REMPIRE: салонный уход и стайлинг для волос, уход за бородой, корейская косметика, уход за телом и парфюмерия. Самовывоз в Таллинне."]
+        }
+      },
+      /* A brand page: its own title, meta description and the visible intro
+         under its heading, where the owner has approved them — the eight
+         below, word for word from Rempire/seo/brand-intros.json (Dim,
+         09.10.2026; the intros with the history trimmed). Every other brand
+         keeps the line it always had under its heading (catIntro() in app.js)
+         and the description it always carried (brandGeneric), under the
+         template's fallback title «{brand} in Tallinn | REMPIRE» (audit §1A).
+         The intro is the shop's own paragraph, not a snippet: seoBrandIntro(). */
+      brand: {
+        "System 4": {
+          RU: {
+            title: "System 4 (Sim Sensitive): шампуни №1–4 и сыворотка | REMPIRE",
+            meta: "System 4 (Sim Sensitive): шампуни №1–4 для жирной, сухой и чувствительной кожи головы, тоник T, маска O и сыворотка Bio Botanical. Самовывоз на Mardi 1.",
+            intro: "System 4 — финская линия Sim Sensitive для кожи головы. Номер на шампуне подсказывает тип кожи головы: №1 — жирная и склонная к перхоти, №2 — сухая с перхотью, №3 — для ежедневного ухода, №4 — очень жирная и чувствительная. К ним — тоник T, маска O и сыворотка Bio Botanical. Подобрать номер поможем в салоне на Mardi 1."
+          },
+          ET: {
+            title: "System 4 (Sim Sensitive): šampoonid ja seerum | REMPIRE",
+            meta: "Sim Sensitive'i System 4: šampoonid 1–4 rasusele, kuivale ja tundlikule peanahale, toonik T, mask O ja Bio Botanical seerum. Järeletulek Mardi 1, Tallinn.",
+            intro: "System 4 on Sim Sensitive'i Soome peanahahoolduse sari. Šampooni number näitab peanaha tüüpi: 1 – rasune ja kõõmale kalduv, 2 – kuiv ja kõõmale kalduv, 3 – igapäevaseks hoolduseks, 4 – väga rasune ja tundlik. Lisaks toonik T, mask O ja Bio Botanical seerum. Õige numbri aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "System 4 by Sim Sensitive: Scalp Shampoos & Serum | REMPIRE",
+            meta: "System 4 by Sim Sensitive: shampoos 1–4 for oily, dry or sensitive scalps, T tonic, O scalp mask and Bio Botanical serum. Pickup at Mardi 1, Tallinn.",
+            intro: "System 4 is Sim Sensitive's Finnish scalp-care range. The number on each shampoo tells you which scalp it suits: 1 for oily, dandruff-prone, 2 for dry, dandruff-prone, 3 for everyday care and 4 for very oily, sensitive scalps. Alongside them: T tonic, O scalp mask and Bio Botanical serum. We'll help you pick yours at Mardi 1."
+          }
+        },
+        "Kevin.Murphy": {
+          RU: {
+            title: "Kevin.Murphy — шампуни, маски и стайлинг | REMPIRE",
+            meta: "Kevin.Murphy в Таллинне: шампуни и маски Angel, Hydrate-Me, Repair-Me, Young.Again и стайлинг Night.Rider, Session.Spray. Самовывоз на Mardi 1.",
+            intro: "Kevin.Murphy — австралийская марка салонного ухода за волосами. У нас шампуни и маски Angel, Hydrate-Me, Repair-Me и Young.Again, стайлинг Night.Rider, Rough.Rider, Session.Spray и Anti.Gravity. Что подойдёт вашим волосам, подскажем в салоне на Mardi 1."
+          },
+          ET: {
+            title: "Kevin.Murphy juuksehooldus ja viimistlus | REMPIRE",
+            meta: "Kevin.Murphy Tallinnas: Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning Night.Rider ja Session.Spray viimistlus. Järeletulek Mardi 1.",
+            intro: "Kevin.Murphy on Austraalia salongi juuksehoolduse bränd. Meil on Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning viimistlustooted Night.Rider, Rough.Rider, Session.Spray ja Anti.Gravity. Mis sinu juustele sobib, aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "Kevin.Murphy: Shampoos, Masks & Styling | REMPIRE",
+            meta: "Kevin Murphy products in Tallinn: Angel, Hydrate-Me, Repair-Me and Young.Again care, Night.Rider and Session.Spray styling. Pickup at Mardi 1.",
+            intro: "Kevin.Murphy is an Australian salon hair-care brand. We carry Angel, Hydrate-Me, Repair-Me and Young.Again shampoos and masks, plus Night.Rider, Rough.Rider, Session.Spray and Anti.Gravity styling. We'll help you choose what suits your hair at the salon on Mardi 1."
+          }
+        },
+        "Davines": {
+          RU: {
+            title: "Davines — шампуни, маски и масло для бороды | REMPIRE",
+            meta: "Davines из Пармы: шампуни Naturaltech, маски The Circle Chronicles, масло для бороды и гели для бритья Pasta & Love. Самовывоз на Mardi 1.",
+            intro: "Davines — итальянская марка из Пармы. У нас шампуни Naturaltech для разных задач волос и кожи головы, маски The Circle Chronicles и мужская линия Pasta & Love: масло для бороды, которое подходит и перед бритьём, гели для бритья, паста и глина для укладки."
+          },
+          ET: {
+            title: "Davines: šampoonid, juuksemaskid ja habemeõli | REMPIRE",
+            meta: "Davines Itaaliast: Naturaltechi šampoonid, The Circle Chronicles maskid, Pasta & Love habemeõli ja raseerimisgeelid. Järeletulek Mardi 1, Tallinn.",
+            intro: "Davines on Itaalia bränd Parmast. Meil on Naturaltechi šampoonid juuste ja peanaha eri vajadusteks, The Circle Chronicles juuksemaskid ning meeste sari Pasta & Love: habemeõli, mis sobib ka enne raseerimist, raseerimisgeelid, viimistluspasta ja -savi."
+          },
+          EN: {
+            title: "Davines: Shampoos, Hair Masks & Beard Oil | REMPIRE",
+            meta: "Davines from Parma: Naturaltech shampoos, The Circle Chronicles masks, Pasta & Love beard oil and shaving gels. Pickup at Mardi 1, Tallinn.",
+            intro: "Davines is an Italian brand from Parma. We carry Naturaltech shampoos for different hair and scalp needs, The Circle Chronicles hair masks and the Pasta & Love men's line: a beard oil that doubles as a pre-shave oil, shaving gels, styling paste and clay."
+          }
+        },
+        "Captain Fawcett": {
+          RU: {
+            title: "Captain Fawcett: масло для бороды, бальзам и воск | REMPIRE",
+            meta: "Британский Captain Fawcett: масла и бальзамы для бороды, воск для усов серий Nebula (John Petrucci), Booze & Baccy, Barberism. Самовывоз на Mardi 1.",
+            intro: "Captain Fawcett — британская марка ухода за бородой и усами. У нас масла и бальзамы для бороды и воск для усов серий Nebula, Booze & Baccy и Barberism — у каждой серии свой аромат. Аромат и фиксацию поможем подобрать в салоне на Mardi 1."
+          },
+          ET: {
+            title: "Captain Fawcett: habemeõli, -palsam ja vuntsivaha | REMPIRE",
+            meta: "Briti Captain Fawcett: habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula (John Petrucci), Booze & Baccy ja Barberism. Järeletulek Mardi 1, Tallinn.",
+            intro: "Captain Fawcett on Briti habeme- ja vuntsihoolduse bränd. Meil on habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula, Booze & Baccy ja Barberism – igal sarjal oma lõhn. Lõhna ja hoidvuse aitame valida meie salongis Mardi 1."
+          },
+          EN: {
+            title: "Captain Fawcett: Beard Oil, Balm & Moustache Wax | REMPIRE",
+            meta: "Captain Fawcett, UK: beard oils, beard balms and moustache wax from the Nebula (John Petrucci), Booze & Baccy and Barberism series. Pickup at Mardi 1.",
+            intro: "Captain Fawcett is a British beard and moustache care brand. We carry beard oils, beard balms and moustache wax from the Nebula, Booze & Baccy and Barberism series, each with its own scent. We'll help you pick the scent and the hold at Mardi 1."
+          }
+        },
+        "Proraso": {
+          RU: {
+            title: "Proraso — масло для бороды и средства после бритья | REMPIRE",
+            meta: "Proraso из Флоренции: масла для бороды Azur Lime, Cypress & Vetyver, Wood & Spice, бальзамы и лосьоны после бритья. Самовывоз на Mardi 1, Таллинн.",
+            intro: "Proraso — итальянская марка из Флоренции, классика барбершопов. У нас бальзамы и лосьоны после бритья (зелёная линия — с эвкалиптом и ментолом), масла для бороды Azur Lime, Cypress & Vetyver и Wood & Spice и бальзам Wood & Spice для первых недель роста бороды."
+          },
+          ET: {
+            title: "Proraso: habemeõli ja raseerimisjärgne hooldus | REMPIRE",
+            meta: "Itaalia Proraso: habemeõlid Azur Lime, Cypress & Vetyver ja Wood & Spice, raseerimisjärgsed palsamid ja losjoonid. Järeletulek Mardi 1, Tallinn.",
+            intro: "Proraso on Itaalia bränd Firenzest, barbershopide klassika. Meil on raseerimisjärgsed palsamid ja losjoonid (roheline sari eukalüpti ja mentooliga), habemeõlid Azur Lime, Cypress & Vetyver ja Wood & Spice ning Wood & Spice habemepalsam habeme esimesteks kasvunädalateks."
+          },
+          EN: {
+            title: "Proraso: Beard Oil, Aftershave Balm & Lotion | REMPIRE",
+            meta: "Proraso from Florence: Azur Lime, Cypress & Vetyver and Wood & Spice beard oils, aftershave balms and lotions. Pickup at Mardi 1, Tallinn.",
+            intro: "Proraso is an Italian barbershop classic from Florence. We carry its aftershave balms and lotions (the green line with eucalyptus and menthol), Azur Lime, Cypress & Vetyver and Wood & Spice beard oils, and the Wood & Spice balm for the first weeks of beard growth."
+          }
+        },
+        "Creed": {
+          RU: {
+            title: "Creed: Aventus, Aventus Cologne и Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (бергамот, ананас, берёза), Aventus Cologne с имбирём и Original Vetiver в Таллинне. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            intro: "Creed — нишевый парфюмерный дом. У нас Creed Aventus с бергамотом, ананасом и дымной берёзой, более свежий Aventus Cologne с имбирём и Original Vetiver с лимоном, зелёными нотами и ветивером. Выбрать между ними поможем на Mardi 1."
+          },
+          ET: {
+            title: "Creed: Aventus, Aventus Cologne, Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (bergamott, ananass, kask), ingveriga Aventus Cologne ja Original Vetiver Tallinnas. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Creed on nišiparfüümide maja. Meil on Creed Aventus bergamoti, ananassi ja suitsuse kasepuuga, värskem Aventus Cologne ingveriga ning Original Vetiver sidruni, roheliste nootide ja vetiveriga. Mardi 1 poes aitame neist valida."
+          },
+          EN: {
+            title: "Creed: Aventus, Aventus Cologne & Original Vetiver | REMPIRE",
+            meta: "Creed Aventus (bergamot, pineapple, birch), the ginger-led Aventus Cologne and Original Vetiver in Tallinn. Pickup at Mardi 1, delivery across the Baltics.",
+            intro: "Creed is a niche fragrance house. We carry Creed Aventus with bergamot, pineapple and smoky birch, the brighter Aventus Cologne with ginger, and Original Vetiver with lemon, green notes and vetiver. We'll help you choose at Mardi 1."
+          }
+        },
+        "Xerjoff": {
+          RU: {
+            title: "Xerjoff (Ксерджофф): 1861 Naxos и Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos (Ксерджофф Наксос) из коллекции 1861: лаванда, мёд, табак, ваниль, а также Tony Iommi Monkey Special с ромом и кожей. Самовывоз на Mardi 1.",
+            intro: "Xerjoff (Ксерджофф) — парфюмерный дом из Турина. Xerjoff Naxos из коллекции 1861 — лаванда, бергамот, мёд, табачный лист и ваниль; Tony Iommi Monkey Special — ром, кожа, корица и карамель. Оба аромата тёплые и сладковатые, выбрать поможем на Mardi 1."
+          },
+          ET: {
+            title: "Xerjoff: 1861 Naxos ja Tony Iommi Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos kollektsioonist 1861 (lavendel, mesi, tubakas, vanill) ja Tony Iommi Monkey Special. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Xerjoff on Torino parfümeeriamaja. Kollektsiooni 1861 Xerjoff Naxos: lavendel, bergamott, mesi, tubakaleht ja vanill; Tony Iommi Monkey Special: rumm, nahk, kaneel ja karamell. Mõlemad on soojad, magusapoolsed lõhnad – valida aitame Mardi 1 poes."
+          },
+          EN: {
+            title: "Xerjoff: 1861 Naxos & Tony Iommi Monkey Special | REMPIRE",
+            meta: "Xerjoff Naxos from the 1861 collection (lavender, honey, tobacco, vanilla) and Tony Iommi Monkey Special in Tallinn. Pickup at Mardi 1, Baltic delivery.",
+            intro: "Xerjoff is a perfume house from Turin. Xerjoff Naxos from the 1861 collection: lavender, bergamot, honey, tobacco leaf and vanilla; Tony Iommi Monkey Special: rum, leather, cinnamon and caramel. Both are warm, sweet-leaning scents; we'll help you choose at Mardi 1."
+          }
+        },
+        "Byredo": {
+          RU: {
+            title: "Byredo — Blanche, Mojave Ghost и гель для душа | REMPIRE",
+            meta: "Byredo Blanche — альдегиды, роза и мускус, аромат чистого белья; гель для душа Blanche и Mojave Ghost. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            intro: "Byredo — парфюмерный дом из Стокгольма. Byredo Blanche — аромат чистого белья: альдегиды, роза, пион, мускус и сандал; к нему есть гель для душа Blanche. Mojave Ghost — амбретта, магнолия, сандал и кедр."
+          },
+          ET: {
+            title: "Byredo: Blanche, Mojave Ghost ja dušigeel | REMPIRE",
+            meta: "Byredo Blanche (aldehüüdid, roos, muskus – puhta pesu lõhn), Blanche'i dušigeel ja Mojave Ghost. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            intro: "Byredo on Stockholmi parfümeeriamaja. Byredo Blanche lõhnab nagu puhas pesu: aldehüüdid, roos, pojeng, muskus ja sandlipuu; sellele lisaks Blanche'i dušigeel. Mojave Ghost: ambretiseeme, magnoolia, sandlipuu ja seeder."
+          },
+          EN: {
+            title: "Byredo: Blanche, Mojave Ghost & Blanche Body Wash | REMPIRE",
+            meta: "Byredo Blanche (aldehydes, rose, musk: the scent of clean linen), Blanche body wash and Mojave Ghost. Pickup at Mardi 1, delivery across the Baltics.",
+            intro: "Byredo is a perfume house from Stockholm. Byredo Blanche smells of clean linen: aldehydes, rose, peony, musk and sandalwood, with a matching Blanche body wash. Mojave Ghost: ambrette, magnolia, sandalwood and cedarwood."
+          }
+        }
+      },
+      brandFallback: { EN: "{brand} in Tallinn | REMPIRE", ET: "{brand} Tallinnas | REMPIRE", RU: "{brand} в Таллинне | REMPIRE" },
+      brandGeneric: {
+        EN: "{brand} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.",
+        ET: "{brand} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.",
+        RU: "{brand} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина."
+      },
+      blog: {
+        EN: ["Hair, Beard & Skin Care Guides — REMPIRE Blog", "Practical guides from the REMPIRE salon in Tallinn: how to choose a shampoo for your scalp, paste vs wax vs clay, beard care in winter, and more."],
+        ET: ["Juukse-, habeme- ja nahahoolduse nõuanded — REMPIRE", "Praktilised juhendid REMPIRE'i salongist Tallinnas: kuidas valida šampooni peanaha järgi, pasta, vaha või savi, habemehooldus talvel ja muud."],
+        RU: ["Советы по уходу за волосами, бородой и кожей — REMPIRE", "Разборы от салона REMPIRE в Таллинне: как выбрать шампунь по типу кожи головы, паста, воск или глина, уход за бородой зимой и другое."]
+      },
+      /* The words Russians type for two products, from Search Console (audit
+         §1A): «шампунь номер 1» and «ксерджофф наксос». `tail` goes after the
+         type, `name` in brackets after the maker's name. Nothing else gets
+         one — an alias nobody searches for is a longer title for nothing. */
+      ruAlias: {
+        "system-4-special-shampoo-1": { tail: "№1" },
+        "xerjoff-1861-naxos-eau-de-parfum-100ml": { name: "Ксерджофф Наксос" }
+      },
+      from: { EN: "from ", ET: "alates ", RU: "от " }
+    };
+  }
+
+  /** «70 €» / «€70» — the shop's money, whole euros without decimals (eur() in app.js). */
+  function seoEur(n, lang) {
+    var v = (Math.round(n * 100) / 100).toFixed(2);
+    return lang === "EN" ? "€" + v.replace(".00", "") : v.replace(".", ",").replace(",00", "") + " €";
+  }
+
+  /** Cut at a word with «…», never mid-word — clip() in src/lib/seo-head.mjs. */
+  function seoClip(s, max) {
+    var t = String(s == null ? "" : s).trim();
+    if (t.length <= max) return t;
+    var cut = t.slice(0, max - 1), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
+  }
+
+  function seoFill(s, vars) {
+    return String(s).replace(/\{(\w+)\}/g, function (m, k) {
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : m;
+    });
+  }
+
+  /**
+   * The free-delivery threshold for one country, from the rules the checkout
+   * bills with: the country's own key, then the shop-wide «freeFrom» — the
+   * steps threshold() in app.js and quoteFromRules() on the server take (no
+   * Baltic country has a zone key of its own). null where delivery to it is
+   * never free.
+   */
+  function seoFreeFrom(rules, cc) {
+    var by = (rules && rules.freeFromByCountry) || {};
+    var v = Object.prototype.hasOwnProperty.call(by, cc) ? by[cc] : rules ? rules.freeFrom : null;
+    return typeof v === "number" && isFinite(v) && v >= 0 ? v : null;
+  }
+
+  /** «… | REMPIRE» in the shop's house form, «… — REMPIRE» — what fitTitle()
+      writes everywhere else, so a title ends the same way on every page. */
+  function seoHouse(t) {
+    return String(t).replace(/\s*\|\s*REMPIRE$/, " — REMPIRE");
+  }
+
+  /**
+   * The paragraph under a brand page's heading, in the page's language — or
+   * "" for a brand with no approved text, whose page keeps the shop's
+   * generic line (catIntro() in app.js). Plain text, not HTML.
+   */
+  function seoBrandIntro(brand, lang) {
+    var b = seoCopy().brand[brand];
+    return (b && b[lang] && b[lang].intro) || "";
+  }
+
+  /** «от 7,90 €» / «alates 7,90 €» / «from €7.90» — a product's price as its title prints it. */
+  function seoPriceText(price, from, lang) {
+    return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
+  }
+
+  /** «brand + name — type», with the one alias Russians type for it, if any. */
+  function seoProductCore(id, core, lang) {
+    var a = lang === "RU" ? seoCopy().ruAlias[id] : null;
+    if (!a) return core;
+    var cut = core.lastIndexOf(" — ");
+    if (a.name) return cut > 0 ? core.slice(0, cut) + " (" + a.name + ")" + core.slice(cut) : core + " (" + a.name + ")";
+    return core + " " + a.tail;
+  }
+
+  /**
+   * A product's title: brand, the maker's name and the type, with the price
+   * when it still fits — and never «— купить в Rempire» or «— REMPIRE» to
+   * fill the line (audit §1A). Too long even bare, it is cut at a word.
+   */
+  function seoProductTitle(core, priceText) {
+    var full = core + " · " + priceText;
+    if (priceText && full.length <= SEO_TITLE_MAX) return full;
+    return seoClip(core, SEO_TITLE_MAX);
+  }
+
+  /**
+   * The head of one page: { t, d, ogT, ogD } — title, meta description and the
+   * link-preview pair (the same two, except on the home page).
+   *
+   *   kind  "home" | "cat" | "brand" | "blog"
+   *   key   the section ("hair" … "all") or the brand's name; "" otherwise
+   *   lang  "RU" | "ET" | "EN"
+   *   ctx   { rules } — settings.shipping_rules as the checkout bills them
+   */
+  function seoHead(kind, key, lang, ctx) {
+    var C = seoCopy();
+    var rules = ctx && ctx.rules;
+    var t = "", d = "", ogT = "", ogD = "";
+    if (kind === "home") {
+      var h = C.home[lang] || C.home.EN;
+      var free = seoFreeFrom(rules, "EE");
+      t = h.t;
+      d = h.dNoFree && free === null ? h.dNoFree : seoFill(h.d, { free: free === null ? "" : seoEur(free, lang) });
+      ogT = h.ogT;
+      ogD = h.ogD;
+    } else if (kind === "cat") {
+      var c = (C.cat[key] || C.cat.all)[lang] || C.cat.all.EN;
+      t = c[0];
+      d = c[1];
+    } else if (kind === "brand") {
+      var b = C.brand[key] && C.brand[key][lang];
+      if (b) {
+        t = b.title;
+        d = b.meta;
+      } else {
+        t = seoFill(C.brandFallback[lang] || C.brandFallback.EN, { brand: key });
+        d = seoFill(C.brandGeneric[lang] || C.brandGeneric.EN, { brand: key });
+      }
+      /* the house's name once: a brand that IS the house (Rempire's own
+         soap and merch) needs no second one, and a long brand name keeps its
+         words rather than the suffix */
+      var bare = t.replace(/\s*\|\s*REMPIRE$/, "");
+      if (/rempire/i.test(bare) || seoHouse(t).length > SEO_TITLE_MAX) t = bare;
+    } else if (kind === "blog") {
+      var g = C.blog[lang] || C.blog.EN;
+      t = g[0];
+      d = g[1];
+    }
+    t = seoClip(seoHouse(t), SEO_TITLE_MAX);
+    d = seoClip(d, SEO_DESC_MAX);
+    return { t: t, d: d, ogT: ogT ? seoClip(ogT, SEO_TITLE_MAX) : t, ogD: ogD ? seoClip(ogD, SEO_DESC_MAX) : d };
+  }
+/* seo-copy:end */
+  /** What the copy needs to know about the shop right now: the delivery
+      rules the checkout bills with (the free-delivery threshold). */
+  function seoCtx() { return { rules: SHIP_RULES }; }
+  /* The Product block the page was SERVED with — the build's or the
+     request-time page's (productSpec() in src/lib/seo-head.mjs) — read once,
+     before setHead() first rewrites #ldjson. Its offers carry what this
+     script cannot work out for itself: each size's delivery prices
+     (shippingFor() in src/lib/merchant-feed.ts, over the checkout's rules),
+     the returns policy, the Merchant feed's item id and a scanned barcode.
+     setHead() keeps them on the offer they belong to, on the page they were
+     served for; see ldKeepServed(). */
+  var SERVED_LD = (function () {
+    try {
+      var el = document.getElementById("ldjson");
+      var ld = el ? JSON.parse(el.textContent || "null") : null;
+      if (!ld || ld["@type"] !== "Product" || !ld.offers) return null;
+      return { url: ld.url, product: ld, offers: Array.isArray(ld.offers) ? ld.offers : [ld.offers] };
+    } catch (e) { return null; }
+  })();
+  /* Has /api/overrides/ answered with the live feed? Until it has — or when
+     it cannot (a crawler that may not fetch /api/) — the prices and stock
+     words in the catalogue file are older than the served block's, which
+     the server built from the database. */
+  var OV_LIVE = false;
+  /* One Offer per size, the way the Merchant Center feed lists them
+     (feedOffers() in src/lib/merchant-feed.ts): each size at its own price
+     and stock, at the `?size=` address the feed links it to — «<slug>»,
+     «<slug>-<n>» for a twin, «v<n>» for a size with no label (sizeSlug()
+     above). A product with one size, or none, keeps the single offer at its
+     own address. */
+  function ldOffer(url, price, inStock) {
+    return {
+      "@type": "Offer", priceCurrency: "EUR",
+      price: String(price),
+      availability: "https://schema.org/" + (inStock ? "InStock" : "OutOfStock"),
+      itemCondition: "https://schema.org/NewCondition",
+      url: url,
+      seller: { "@type": "Organization", name: "REMPIRE" }
+    };
+  }
+  function ldOffers(p, pUrl, gone) {
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [], rungs = [], i;
+    for (i = 0; i < sizes.length; i++) {
+      var pr = Number(sizePrice(p, i));
+      if (isFinite(pr) && pr > 0) rungs.push({ i: i, price: pr });
+    }
+    if (rungs.length < 2) return ldOffer(pUrl, p.price, !gone);
+    var taken = {}, out = [];
+    for (i = 0; i < rungs.length; i++) {
+      var r = rungs[i], slug = sizeSlug(sizes[r.i]) || "v" + (r.i + 1);
+      if (taken[slug]) slug += "-" + (r.i + 1);
+      taken[slug] = 1;
+      out.push(ldOffer(pUrl + "?size=" + encodeURIComponent(slug), r.price, !gone && !sizeOut(p, r.i)));
+    }
+    return out;
+  }
+  /* What the served block knew, kept — on the page it was served for and
+     nowhere else. Without the live feed, its offers are the truer ones and
+     stand as they are. With it, this script's prices and stock words stand,
+     and the served block lends what does not depend on them, matched with
+     care: the item id and a barcode by the offer's address (a size), the
+     delivery by price (it depends on nothing else — a price the owner has
+     changed since gets none rather than the old price's), the returns policy
+     to every offer. */
+  function ldKeepServed(ld, pUrl) {
+    var sv = SERVED_LD && SERVED_LD.url === pUrl ? SERVED_LD : null;
+    if (!sv) return;
+    var GTIN = /^gtin(8|12|13|14)?$/, k, i, j;
+    if (!OV_LIVE) {
+      ld.offers = sv.product.offers;
+      for (k in sv.product) if (GTIN.test(k)) ld[k] = sv.product[k];
+      return;
+    }
+    var list = Array.isArray(ld.offers) ? ld.offers : [ld.offers], policy = null;
+    for (j = 0; j < sv.offers.length; j++) if (sv.offers[j].hasMerchantReturnPolicy) { policy = sv.offers[j].hasMerchantReturnPolicy; break; }
+    for (i = 0; i < list.length; i++) {
+      var o = list[i], same = null, ship = null;
+      for (j = 0; j < sv.offers.length; j++) {
+        var s = sv.offers[j];
+        if (s.url === o.url) same = s;
+        if (!ship && s.shippingDetails && Number(s.price) === Number(o.price)) ship = s.shippingDetails;
+      }
+      if (same && same.sku) o.sku = same.sku;
+      if (same) for (k in same) if (GTIN.test(k)) o[k] = same[k];
+      if (ship) o.shippingDetails = ship;
+      if (policy) o.hasMerchantReturnPolicy = policy;
+    }
+    if (!Array.isArray(ld.offers) && sv.offers.length === 1) for (k in sv.product) if (GTIN.test(k)) ld[k] = sv.product[k];
+  }
   /* The screens that need state to mean anything: robots-disallowed, never in
      a sitemap, and `noindex` in the rendered DOM too (since 08.10.2026). */
   var NOINDEX_SCREENS = { notfound: 1, search: 1, account: 1, checkout: 1, done: 1, admin: 1, scan: 1 };
@@ -48277,8 +48843,9 @@
   }
   function setHead() {
     var base = siteTitle();
-    var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
-    var t = base, d = "";
+    /* `ogT`/`ogD`: the link-preview pair, where it is not the title and the
+       description themselves — the home page's (seoHead()). */
+    var t = base, d = "", ogT = "", ogD = "";
     /* A prerendered page ships JSON-LD describing itself — a breadcrumb, a
        product list, the organisation. It is right until the shopper walks
        somewhere else, and then it is a description of a page they have left. */
@@ -48289,13 +48856,16 @@
     if (S.screen === "product") {
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
-      var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
+      var priceText = seoPriceText(p.price, p.priceFrom, S.lang);
       /* soldOut(), not `p.stock === "out"`: a product whose whole size ladder
          has been counted to zero prints «нет в наличии» on the page and has
          no buy row, so the snippet must not offer it either. */
       var pGoneSeo = soldOut(p);
       var stockText = trText(pGoneSeo ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
-      t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
+      /* Brand, the maker's name and the type, the price when it fits — no
+         «— купить в Rempire» filler (seoProductTitle(), the same rule
+         productSpec() in src/lib/seo-head.mjs writes into the static page). */
+      t = seoProductTitle(seoProductCore(p.id, core, S.lang), priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
          wrote nothing; everything else is built from the product. */
@@ -48321,26 +48891,28 @@
         category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
         sku: p.id,
         url: pUrl,
-        offers: {
-          "@type": "Offer", priceCurrency: "EUR",
-          price: String(p.price),
-          /* An offer that says InStock for something the page refuses to sell
-             is worse than no markup at all: Google drops the product from the
-             merchant surfaces and the shopper bounces. soldOut() is the same
-             question screenProduct() asks before it swaps the buy row out. */
-          availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock"),
-          itemCondition: "https://schema.org/NewCondition",
-          url: pUrl,
-          seller: { "@type": "Organization", name: "REMPIRE" }
-        }
+        /* An offer that says InStock for something the page refuses to sell
+           is worse than no markup at all: Google drops the product from the
+           merchant surfaces and the shopper bounces. soldOut() is the same
+           question screenProduct() asks before it swaps the buy row out; a
+           size counted to zero is OutOfStock on its own offer (ldOffers()). */
+        offers: ldOffers(p, pUrl, pGoneSeo)
       };
+      ldKeepServed(ld, pUrl);
       var s = document.getElementById("ldjson");
       if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldjson"; document.head.appendChild(s); }
       s.textContent = JSON.stringify(ld);
     } else {
       var s2 = document.getElementById("ldjson");
       if (s2) s2.remove();
-      if (S.screen === "catalog") t = (S.brand || trText(S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat] || "", S.lang, false)) + " — REMPIRE";
+      /* The home page, a section, a brand: the words of src/lib/seo-copy.mjs
+         (audit §1A) — the static page's own, so taking a page over no longer
+         changes its title or leaves another language's description under it.
+         A section the copy does not know (none today) reads as «all». */
+      var sh = S.screen === "home" ? seoHead("home", "", S.lang, seoCtx())
+        : S.screen === "catalog" ? (S.brand ? seoHead("brand", S.brand, S.lang, seoCtx()) : seoHead("cat", S.cat, S.lang, seoCtx()))
+          : null;
+      if (sh) { t = sh.t; d = sh.d; ogT = sh.ogT; ogD = sh.ogD; }
       /* The body of a policy page goes through translateTree(), the title did
          not: legalFor() serves Russian titles on LEGAL, so an English page
          showed «Доставка и оплата» in the tab. The four descriptions below are
@@ -48397,8 +48969,9 @@
       // dictionary); a post's are the author's own text, already in S.lang
       // from the API — never translated, only fitted to the tab.
       else if (S.screen === "blog") {
-        t = trText("Блог", S.lang, false) + " — REMPIRE";
-        d = trText(BLOG_DESC, S.lang, false).slice(0, 158);
+        var bh = seoHead("blog", "", S.lang, seoCtx());
+        t = bh.t;
+        d = bh.d;
       } else if (S.screen === "blogpost") {
         var pen = blogEntry(S.blogSlug);
         var post = pen ? pen.post : blogListItem(S.blogSlug);   // the tile's title while the body is on its way
@@ -48419,8 +48992,8 @@
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
     setAltTags();
-    setMetaProp("og:title", t);
-    if (d) setMetaProp("og:description", d);
+    setMetaProp("og:title", ogT || t);
+    if (ogD || d) setMetaProp("og:description", ogD || d);
   }
 
   /* ---------- admin: patch the DOM in place -------------------------------
@@ -48950,8 +49523,10 @@
     var ss = document.querySelector("[data-stickysum]");
     if (ss) ss.textContent = eur(unitPrice * S.qty);
     var g = gal(p);
-    var stage = document.querySelector(".pdp__img");
-    if (stage) stage.style.backgroundImage = "url('" + g[Math.min(S.gallery, g.length - 1)] + "')";
+    // the photo is an <img> in its frame now (photo()); a frame with no
+    // photograph in it carries the shop's mark and nothing to swap
+    var stage = document.querySelector(".pdp__img img");
+    if (stage) stage.src = g[Math.min(S.gallery, g.length - 1)];
     document.querySelectorAll(".pdp__thumb").forEach(function (b) {
       b.setAttribute("aria-current", String(Number(b.dataset.gal) === S.gallery));
     });
@@ -49283,6 +49858,30 @@
     if (S.screen === "blogpost" && S.blogSlug) return "/blog/" + encodeURIComponent(S.blogSlug) + "/";
     if (S.screen === "home") return "/";
     return "/" + S.screen + "/";
+  }
+  /* ---------- a link's address (SEO, 09.10.2026) ---------------------------
+     Google reads the page as it stands after this script has run, and until
+     now that page had no links in it: every card, menu entry, brand, crumb
+     and «see all» was a <button data-go-…>, so a crawler that reached the home
+     page found nowhere to go from it. They are <a href> now, and this is the
+     href — the very address pathFor() writes into the bar once the click has
+     landed (screenRoute() above, shopPathFor()), in the page's own language.
+     The click handler still catches a plain click (preventDefault, then the
+     same in-app navigation as ever); a middle-click, a Ctrl/⌘-click or a
+     long-press opens the real page. styles.css restates the button's own
+     look for these links, so nothing on screen changed.
+
+       kind  "cat" (a section id) · "brand" (its name) · "product" · "bundle"
+             (an id) · "page" (an info slug) · "go" (a screen: home, bundles,
+             gift, brands, blog — what data-go names) */
+  function linkHref(kind, v) {
+    var rest = kind === "cat" ? "/c/" + v + "/"
+      : kind === "brand" ? "/b/" + slugify(v) + "/"
+      : kind === "product" ? "/p/" + encodeURIComponent(v) + "/"
+      : kind === "bundle" ? "/set/" + encodeURIComponent(v) + "/"
+      : kind === "page" ? "/info/" + v + "/"
+      : v === "home" ? "/" : v === "bundles" ? "/sets/" : "/" + v + "/";
+    return esc(shopPathFor(S.lang, rest));
   }
   function here() { return location.pathname + location.search; }
   /* Stamp the live scroll onto the entry being left, so Back returns to the
@@ -50164,6 +50763,16 @@
     if (d.giftpdf !== undefined || d.invpdf !== undefined) return;
     if (d.payagain !== undefined) { payAgain(d.payagain); return; }
 
+    /* A link to a page (linkHref — a card, the menu, a brand, a crumb, «Все
+       товары», a policy in the footer) is a real <a href> since 09.10.2026:
+       a modified click (new tab, new window) is the browser's to open; a
+       plain one stays in the SPA and goes on exactly as the button did. */
+    if (t.tagName === "A" && t.hasAttribute("href") &&
+        (d.go !== undefined || d.goCat !== undefined || d.goBrand !== undefined ||
+         d.goProduct !== undefined || d.goBundle !== undefined || d.page !== undefined)) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+    }
     if (d.ident !== undefined) identLogo(t);
     if (d.go) { if (d.go !== "catalog") S.brand = ""; go(d.go); return; }
     if (d.goCat !== undefined) { goCat(d.goCat); return; }
@@ -54489,9 +55098,12 @@
      a policy page its text, every page its language's dictionary — so this
      is null and nothing waits; it is not null for a page whose HTML does
      not (the panel, in a language the shell cannot know). Eight seconds at
-     most, the same point at which boot.js gives up on this script and shows
-     the static page: past it the screen is drawn without the file, and drawn
-     again the moment it lands. */
+     most: past it the screen is drawn without the file, and drawn again the
+     moment it lands. A file fetched here delays the page's `load` event until
+     it is in, so boot.js — which shows the static page when `load` comes and
+     nothing has been drawn — never fires under a wait that ends in time; a
+     file that fails makes it show the static page, which this paint then
+     replaces. */
   var bootLazy = null;
   try {
     bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin")

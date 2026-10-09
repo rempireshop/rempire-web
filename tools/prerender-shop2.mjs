@@ -63,8 +63,9 @@
 
 import { readFile, writeFile, mkdir, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { register } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
@@ -75,8 +76,14 @@ import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles
    of products this file writes — an article's shelf and every grid on the
    storefront — is a set of links into /p/ addresses, and a hidden product's
    address answers 404. See tools/lib/overrides-export.mjs. */
-import { fetchProductOverrides } from "./lib/overrides-export.mjs";
+import { fetchProductOverrides, fetchStockEans } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
+/* «Доставка и оплата»: the builder and the rules the checkout bills from, lifted out of app.js. */
+import { liftDelivery } from "./lib/delivery-lift.mjs";
+/* /llms.txt, from the data this run writes the pages from. */
+import { buildLlmsTxt, deliveryFromPage } from "./lib/llms-txt.mjs";
+/* robots.txt: the production and the staging policy (see «robots» below). */
+import { robotsProduction as robotsProductionPolicy, robotsStaging as robotsStagingPolicy } from "./lib/robots-policy.mjs";
 /* The assets' ?v= token — a hash of the files it versions rather than a
    number somebody remembers to raise. tools/lib/asset-token.mjs says why the
    token exists at all and what a stale one cost. */
@@ -89,14 +96,20 @@ import { assetToken, currentToken, retokenise } from "./lib/asset-token.mjs";
    OG cards, the writing. */
 import {
   LANGS, esc, eur, stripTags, slugify, clip, fitTitle, langPath, T,
-  OG_W, OG_H, OG_DEFAULT, OG_FALLBACK,
+  OG_W, OG_H, OG_DEFAULT, OG_FALLBACK, ogShopCard, ORG_IMAGE, ORG_LOGO,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, pageAssets, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags
+  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
+  STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
 } from "../src/lib/seo-head.mjs";
 import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS } from "../src/lib/shop-paths.mjs";
+/* The titles and meta descriptions of the home page, the sections, the brands
+   and the blog list (audit §1A) — the module app.js's setHead() carries a copy
+   of, so the head written here and the head after boot are one text. */
+import { seoBrandIntro, seoHead } from "../src/lib/seo-copy.mjs";
+import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -398,6 +411,10 @@ const DECL_END = /^ {2}[}\]];$/;
 const FN_END = /^ {2}}$/;
 
 let trText = s => s;
+/* catIntro(): the line under a section's or a brand's heading, in Russian, as
+   screenCatalog() draws it — lifted with the dictionary that translates it, so
+   the static .sec__intro is the shop's own line and not a second sentence. */
+let catIntro = () => "";
 try {
   const pieces = [
     sliceFrom(/^ {2}var UI = \{$/, DECL_END),
@@ -406,10 +423,12 @@ try {
     sliceFrom(/^ {2}var NAME_FRAGS = \[$/, DECL_END),
     sliceFrom(/^ {2}var TAIL_EXACT = \{$/, DECL_END),
     sliceFrom(/^ {2}function trName\(s, lang\) \{$/, FN_END),
-    sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END)
+    sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END),
+    sliceFrom(/^ {2}var CAT_INTROS = \{$/, DECL_END),
+    sliceFrom(/^ {2}function catIntro\(cat, brand\) \{$/, FN_END)
   ];
   if (pieces.some(p => !p)) throw new Error("could not lift the translation tables out of app.js");
-  trText = new Function(pieces.join("\n") + "\nreturn trText;")();
+  ({ trText, catIntro } = new Function(pieces.join("\n") + "\nreturn { trText: trText, catIntro: catIntro };")());
   // smoke: the dictionary must actually answer, or the slices caught the wrong thing
   if (trText("Уход за волосами", "ET", false) === "Уход за волосами") {
     throw new Error("the lifted dictionary does not translate — check the app.js slices");
@@ -431,31 +450,36 @@ try {
 }
 const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s), code, !!allowName));
 
+/* The head copy (src/lib/seo-copy.mjs) and app.js's copy of it must be the
+   same block, or every page written below carries one title and the shop
+   rewrites it to another the moment it boots — the very drift that block
+   exists to end (audit W4/T2). FATAL, like the dictionary above: the fix is
+   one command. */
+{
+  const own = seoCopyBlock(await readFile(path.join(ROOT, "src", "lib", "seo-copy.mjs"), "utf8"));
+  const app = seoCopyBlock(appSrc);
+  if (own === null || app === null || own !== app) {
+    console.error("x public/shop2/app.js does not carry the current src/lib/seo-copy.mjs block");
+    console.error("x run: node tools/sync-seo-copy.mjs");
+    process.exit(1);
+  }
+}
+
 /* ---------- «Доставка и оплата»: the builder, lifted the same way ---------
 
-   deliveryPageHTML() and the five declarations it reads — SHIP_RULES (the
-   defaults the checkout bills with), MONTONIO_PRICE (what an empty box
-   charges), CARRIER_NAMES, CARRIERS_BY_COUNTRY and
-   DELIVERY_ROWS — live in app.js and only there, next to the checkout that
-   uses them. Lifted here, so the static /info/shipping/ page and the one the
-   shop draws live are the same function over the same tables; the builder
-   is written as a pure function of its `ctx` for exactly this reason (see
-   its comment in app.js). If the slices stop coming out, the page falls back
-   to the policy text and the tool says so. */
+   deliveryPageHTML() and the tables it reads — SHIP_RULES, MONTONIO_PRICE,
+   CARRIER_NAMES, CARRIERS_BY_COUNTRY, DELIVERY_ROWS — live in app.js and only
+   there, next to the checkout that uses them, and so do the functions that
+   turn the owner's stored row into the table the checkout bills from
+   (setShipRules(): shipStoredMerge() over shipRulesBase()). All of it is
+   lifted by tools/lib/delivery-lift.mjs, so the static shipping page and the
+   one the shop draws live are the same function over the same table; the
+   builder is written as a pure function of its `ctx` for exactly this reason
+   (see its comment in app.js). If the slices stop coming out, the page falls
+   back to the policy text and the tool says so. */
 let DELIVERY = null;
 try {
-  const pieces = [
-    sliceFrom(/^ {2}var SHIP_RULES = \{$/, DECL_END),
-    sliceFrom(/^ {2}var MONTONIO_PRICE = \{$/, DECL_END),
-    sliceFrom(/^ {2}var CARRIER_NAMES = \{$/, DECL_END),
-    sliceFrom(/^ {2}var CARRIERS_BY_COUNTRY = \{$/, DECL_END),
-    sliceFrom(/^ {2}var DELIVERY_ROWS = \[$/, DECL_END),
-    sliceFrom(/^ {2}function deliveryPageHTML\(ctx\) \{$/, FN_END)
-  ];
-  if (pieces.some(p => !p)) throw new Error("could not lift the delivery page (deliveryPageHTML & co) out of app.js");
-  DELIVERY = new Function(pieces.join("\n") +
-    "\nreturn { rules: SHIP_RULES, montonio: MONTONIO_PRICE, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY, rows: DELIVERY_ROWS, page: deliveryPageHTML };")();
-  if (typeof DELIVERY.page !== "function" || !DELIVERY.rules.methods) throw new Error("the lifted delivery page has the wrong shape");
+  DELIVERY = liftDelivery(appSrc);
 } catch (e) {
   console.warn("! " + e.message + "\n! /info/shipping/ is written from the policy text alone");
   DELIVERY = null;
@@ -478,46 +502,25 @@ try {
   RETURNS_ASK = null;
 }
 
-/* The live rules, when the database is there — the same merge over the
-   defaults that app.js applyShipRules() does (key by key, a bad number
-   ignored), so the page prints what the checkout will bill. Without
-   DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
-const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts"]);
-function mergeShipRules(defaults, raw) {
-  const out = JSON.parse(JSON.stringify(defaults));
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
-  if (raw.freeFrom === null || typeof raw.freeFrom === "number") out.freeFrom = raw.freeFrom;
-  if (raw.freeFromByCountry && typeof raw.freeFromByCountry === "object") out.freeFromByCountry = raw.freeFromByCountry;
-  if (raw.methods && typeof raw.methods === "object") {
-    for (const m of ["parcel", "courier", "pickup"]) {
-      if (!raw.methods[m] || typeof raw.methods[m] !== "object") continue;
-      for (const c of Object.keys(raw.methods[m])) {
-        const v = Number(raw.methods[m][c]);
-        if (Number.isFinite(v) && v >= 0) out.methods[m][c] = v;
-      }
-    }
-  }
-  /* Cell by cell, exactly as parseShippingRules() on the server and
-     applyShipRules() in app.js do it. Since 13.09.2026 the defaults hold one
-     price per carrier from Montonio's own tariffs, so an absent cell means
-     «charge what Montonio charges for this carrier» — replacing the whole
-     table with the owner's partial one would put this page back on a single
-     «Пакомат» number per country while the checkout billed per carrier. */
-  if (raw.carriers && typeof raw.carriers === "object") {
-    out.carriers = out.carriers || {};
-    for (const k of Object.keys(raw.carriers)) {
-      const row = raw.carriers[k];
-      if (!row || typeof row !== "object") continue;
-      out.carriers[k] = out.carriers[k] || {};
-      for (const c of Object.keys(row)) {
-        const v = Number(row[c]);
-        if (Number.isFinite(v) && v >= 0) out.carriers[k][c] = v;
-      }
-    }
-  }
-  return out;
-}
-const SHIP_RULES_LIVE = DELIVERY ? mergeShipRules(DELIVERY.rules, LIVE_SETTINGS.shipping_rules) : null;
+/* The rules the page prints — the table the checkout bills from. Until
+   09.10.2026 this was a merge of the build's own: the owner's stored row laid
+   over SHIP_RULES, the table of a shop with NO row, whose courier column holds
+   three home numbers (EE 10,84 €, LV and LT 9,90 €). The shop never bills
+   from that once a row exists — setShipRules() lays the row over the
+   Montonio-priced base, and parseShippingRules() on the server does the same —
+   so the static page promised a 10,84 € courier while the checkout and the bill
+   charged 6,89–7,39 €. liveRules() is the shop's own path, lifted
+   (tools/lib/delivery-lift.mjs); tests/delivery-page-prices.test.ts holds the
+   printed prices to the server's quote. No DATABASE_URL = no row = the
+   defaults, which is what src/lib/shipping.ts bills a shop with no row too. */
+/* `content` only for its opening hours, which the Organization block names
+   when the owner has filled them in (ORG_LD below). */
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts", "content"]);
+const SHIP_RULES_LIVE = DELIVERY ? DELIVERY.liveRules(LIVE_SETTINGS.shipping_rules) : null;
+/* What the head copy reads — the free-delivery threshold of the home page's
+   Estonian description — from the same rules the delivery page prints and the
+   checkout bills (seoCtx() in app.js hands it SHIP_RULES). */
+const SEO_CTX = { rules: SHIP_RULES_LIVE };
 const LOYALTY_LIVE = (() => {
   const l = LIVE_SETTINGS.pricing && LIVE_SETTINGS.pricing.loyalty;
   if (!l || typeof l !== "object") return { enabled: true, earnPct: 5 };
@@ -528,6 +531,67 @@ if (DELIVERY) {
   console.log("  delivery page: " + (LIVE_SETTINGS.shipping_rules ? "live tariffs from settings.shipping_rules" : "built-in tariff defaults") +
     " · EE parcel " + SHIP_RULES_LIVE.methods.parcel.EE + " € · free from " + SHIP_RULES_LIVE.freeFrom + " €");
 }
+/* ---------- what the Merchant Center feed says, for the structured data -----
+
+   A product page's offers — one per size, at the feed's prices and ids and
+   `?size=` links, each with its delivery prices — and the Organization's
+   shipping and returns policy are the feed's own answers, not a second copy
+   of them: src/lib/merchant-feed.ts (feedOffers(), shippingFor(),
+   shippingTerms(), sellCountries()) over src/lib/shipping.ts's own parse of
+   the stored rules. Both are TypeScript; Node strips the types itself
+   (22.18+) and tools/lib/ts-resolve.mjs resolves their `@/…` imports, the way
+   tools/render-emails.mjs runs the letters.
+
+   Not fatal when it cannot load: the product pages then carry the single
+   offer they always had and the Organization the four home countries, and
+   the run says so. A missing delivery block costs a rich result; a build
+   that refused to write the shop over it would cost the shop. */
+const STOCK_EANS = await fetchStockEans();
+let MERCHANT = null;
+try {
+  if (!process.features || !process.features.typescript) {
+    throw new Error("this Node strips no TypeScript types (22.18+ does by default)");
+  }
+  register(pathToFileURL(path.join(ROOT, "tools", "lib", "ts-resolve.mjs")).href);
+  const feed = await import(pathToFileURL(path.join(ROOT, "src", "lib", "merchant-feed.ts")).href);
+  const ship = await import(pathToFileURL(path.join(ROOT, "src", "lib", "shipping.ts")).href);
+  /* the rules exactly as loadShippingRules() reads the stored row for the feed */
+  const rules = LIVE_SETTINGS.shipping_rules ? ship.parseShippingRules(LIVE_SETTINGS.shipping_rules) : ship.DEFAULT_SHIPPING_RULES;
+  const offersById = new Map();
+  for (const o of feed.feedOffers({ overrides: PRODUCT_OVERRIDES, descriptions: {}, custom: [] })) {
+    if (!offersById.has(o.productId)) offersById.set(o.productId, []);
+    offersById.get(o.productId).push(o);
+  }
+  const shipMemo = new Map();
+  MERCHANT = {
+    offersById,
+    countries: feed.sellCountries(rules),
+    terms: feed.shippingTerms(rules),
+    handling: feed.HANDLING_DAYS,
+    shipping: price => {
+      if (!shipMemo.has(price)) shipMemo.set(price, feed.shippingFor(price, rules));
+      return shipMemo.get(price);
+    },
+    gtin: (id, label) => feed.validGtin((STOCK_EANS[id] || {})[label == null ? "" : label]),
+  };
+  console.log("  structured data: offers for " + offersById.size + " products from the Merchant feed, delivery to " +
+    MERCHANT.countries.length + " countries, " + Object.keys(STOCK_EANS).length + " products with a barcode");
+} catch (e) {
+  console.warn("! " + e.message + "\n! product JSON-LD is written with a single offer and no delivery or returns block");
+  MERCHANT = null;
+}
+
+/** What the feed says about one catalogue product — productOffersLD() in src/lib/seo-head.mjs reads it. */
+function productCommerce(p) {
+  if (!MERCHANT) return undefined;
+  return {
+    offers: (MERCHANT.offersById.get(p.id) || []).map(o => ({ ...o, gtin: MERCHANT.gtin(p.id, o.label) })),
+    shipping: MERCHANT.shipping,
+    handling: MERCHANT.handling,
+    returnCountries: MERCHANT.countries,
+  };
+}
+
 /* app.js eur(): «12,90 €» for RU/ET, «€12.90» for EN, whole euros without
    decimals — so the static English page prints the price the live one does. */
 function eurFor(n, code) {
@@ -711,6 +775,9 @@ const ORG_ID = abs("/") + "#organization";
    `Store`, not only `Organization`: there is a counter at Mardi 1 and the
    checkout offers pickup from it, so the physical shop is a fact, not a
    flourish. */
+/* The hours as the owner last saved them in «Настройки → Контент», else the
+   defaults — empty in both today, so none are published (openingHoursLD()). */
+const ORG_HOURS = openingHoursLD((LIVE_SETTINGS.content && LIVE_SETTINGS.content.hours) || SHOP_CONTENT.hours);
 const ORG_LD = {
   "@context": "https://schema.org", "@type": ["Organization", "Store"],
   "@id": ORG_ID,
@@ -718,15 +785,31 @@ const ORG_LD = {
   alternateName: ["Rempire", "Rempire Shop", "rempireshop", IDENTITY.legalName].filter(Boolean),
   legalName: IDENTITY.legalName,
   url: abs("/"),
-  logo: abs("/brand/rempire-tower.svg"),
-  image: abs(OG_FALLBACK),
+  /* the tower as a raster image, not the SVG and not a link-preview card
+     (ORG_LOGO / ORG_IMAGE, src/lib/seo-head.mjs) */
+  logo: abs(ORG_LOGO),
+  image: abs(ORG_IMAGE),
   email: IDENTITY.email || undefined,
   telephone: IDENTITY.phone || undefined,
   vatID: IDENTITY.vatNumber || undefined,
   taxID: IDENTITY.regCode || undefined,
   address: postalAddress(IDENTITY.address),
-  areaServed: ["EE", "LV", "LT", "FI"],
-  sameAs: SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean)
+  /* the pin and a map link, the hours when the owner has given them, the
+     salon's own site beside the socials (STORE_* in src/lib/seo-head.mjs) */
+  geo: STORE_GEO,
+  hasMap: STORE_MAP_URL,
+  ...(ORG_HOURS.length ? { openingHoursSpecification: ORG_HOURS } : {}),
+  /* every country the checkout delivers to — the Merchant feed's own list
+     (sellCountries() over the stored rules); the four home countries when
+     the feed could not be read this run */
+  areaServed: MERCHANT ? MERCHANT.countries : ["EE", "LV", "LT", "FI"],
+  sameAs: [...SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean), ...STORE_SAME_AS],
+  /* the shop-wide returns and delivery policy, from the same functions as
+     every offer's (src/lib/seo-head.mjs, src/lib/merchant-feed.ts) */
+  ...(MERCHANT ? {
+    hasMerchantReturnPolicy: returnPolicyLD(MERCHANT.countries, abs(langPath("", "/info/returns/"))),
+    hasShippingService: shippingServiceLD(MERCHANT.terms, MERCHANT.handling),
+  } : {})
 };
 /* JSON.stringify drops an undefined value, so an empty setting leaves the key
    out rather than publishing "" — but a reader of this file should not have to
@@ -763,8 +846,10 @@ const CATS = Object.keys(CAT_NAMES);
    promise `summary_large_image` and always state width and height. */
 
 const OGDIR = path.join(SHOP, "og");
-// OG_W × OG_H, OG_DEFAULT (tower on the ground, for pages with no product) and
-// OG_FALLBACK (shipped, 1200×630 — used when sharp is missing) are imported
+// OG_W × OG_H, ogShopCard(code) (the shop's own card per language, drawn by
+// tools/og-shop.mjs and committed — every page with no picture of its own),
+// OG_DEFAULT (tower on the ground, the last resort) and OG_FALLBACK (the
+// English card under its old name) are imported
 const OG_GROUND = { r: 0xed, g: 0xea, b: 0xe1 };
 
 let sharp = null;
@@ -928,7 +1013,9 @@ function productPage(p, lang) {
        square .webp cutout is never offered to a scraper: half of them refuse
        the format outright and the rest crop it through the middle. */
     image: ogPick(productCard(p)),
-    imageUrls: [imgUrl(p)]
+    imageUrls: [imgUrl(p)],
+    // its sizes, delivery and returns, as the Merchant feed has them
+    commerce: productCommerce(p)
   });
   const { rest, core, priceText: price, crumbItems } = spec;
 
@@ -979,7 +1066,11 @@ function productPage(p, lang) {
   };
 }
 
-function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
+/* `desc` is the meta description, `intro` the line under the heading — two
+   different texts since 09.10.2026: the description is the search snippet
+   (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
+   which the static page used to replace with the snippet. */
+function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -989,7 +1080,6 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     ...(kind === "b" ? [[t.brands, langPath(seg, "/brands/")]] : []),
     [heading, null]
   ];
-  const first = list[0];
   /* A section with nothing in it for the moment. Until 18.09.2026 `list` was
      a slice of the catalogue file and could not be empty; it is
      «Показывать в магазине» that can empty it — a brand the shop stocks one
@@ -1008,7 +1098,7 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
-      '<p class="sec__intro">' + esc(desc) + "</p>" +
+      '<p class="sec__intro">' + esc(intro) + "</p>" +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
           (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
@@ -1020,7 +1110,9 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     file: path.join(SHOP2, seg, kind, id, "index.html"),
     spec: {
       lang, seg, rest, title, desc,
-      image: ogPick(first ? productCard(first) : null, OG_FALLBACK),
+      /* the shop's card in this language (ogShopCard) — not whichever product
+         happens to sort first, which is what a shared section link used to show */
+      image: ogPick(ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
@@ -1091,7 +1183,7 @@ function brandsPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(desc, 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
@@ -1132,12 +1224,16 @@ function homePage(lang) {
     "</section>" +
     langNav(seg, rest, t) +
     "</div>";
+  /* The title, the description and the link-preview pair of the home page
+     (audit §1A) — seoHead(), the call setHead() makes once the shop boots. The
+     <h1> above stays T.base: a heading is not a search snippet. */
+  const head = seoHead("home", "", code, SEO_CTX);
   return {
     file: path.join(SHOP2, seg, "index.html"),
     spec: {
       lang, seg, rest,
-      title: t.base, desc: t.homeDesc,
-      image: ogPick(OG_FALLBACK), imageAlt: "REMPIRE", ogType: "website",
+      title: head.t, desc: head.d, ogTitle: head.ogT, ogDesc: head.ogD,
+      image: ogPick(ogShopCard(code)), imageAlt: "REMPIRE", ogType: "website",
       /* The WebSite block names the site the way a searcher types it and
          hands the publisher back to the Organization node above rather than
          repeating it — one entity, three language home pages. No
@@ -1310,7 +1406,7 @@ function infoPage(slug, lang) {
         lang, seg, rest, legal: true,
         title: fitTitle(heading, heading + " — REMPIRE"),
         desc: clip(t.infoDesc(heading), 158),
-        image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "article",
+        image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
         jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
         content: '<div class="wrap wrap--mid">' +
           crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
@@ -1341,7 +1437,7 @@ function infoPage(slug, lang) {
       lang, seg, rest, legal: true,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(t.infoDesc(heading), 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "article",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
     }
@@ -1483,7 +1579,7 @@ function setsPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — " + t.buy),
       desc: clip(t.setsDesc, 158),
-      image: ogPick(BUNDLES[0] ? "/shop/og/set-" + BUNDLES[0].id + ".jpg" : null, OG_DEFAULT),
+      image: ogPick(BUNDLES[0] ? "/shop/og/set-" + BUNDLES[0].id + ".jpg" : null, ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
@@ -1560,7 +1656,7 @@ function giftPage(lang) {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(t.giftDesc(giftAmountsPhrase(code)), 158),
-      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
+      image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "website",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
     }
@@ -1658,13 +1754,14 @@ function blogListPage(lang) {
     langNav(seg, rest, t) +
     "</div>";   // #blogdata rides on every page — fullPage()/patchedShell() add it
 
+  const head = seoHead("blog", "", code, SEO_CTX);
   return {
     file: path.join(SHOP2, seg, "blog", "index.html"),
     spec: {
       lang, seg, rest,
-      title: fitTitle(heading, heading + " — REMPIRE"),
-      desc: clip(t.blogDesc, 158),
-      image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, OG_DEFAULT),
+      title: head.t,
+      desc: head.d,
+      image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [
         ORG_LD,
@@ -1795,7 +1892,7 @@ function blogPostPage(post, lang) {
     spec: {
       lang, seg, rest,
       title: pageTitle, desc,
-      image: ogPick(blogCard1200(post)), imageAlt: title, ogType: "article",
+      image: ogPick(blogCard1200(post), ogShopCard(code)), imageAlt: title, ogType: "article",
       jsonld: [
         {
           "@context": "https://schema.org", "@type": "BlogPosting",
@@ -1806,7 +1903,7 @@ function blogPostPage(post, lang) {
           author: { "@type": "Organization", name: post.author || "Rempire" },
           publisher: {
             "@type": "Organization", name: "REMPIRE",
-            logo: { "@type": "ImageObject", url: abs("/brand/rempire-tower.svg") }
+            logo: { "@type": "ImageObject", url: abs(ORG_LOGO) }
           },
           description: desc,
           mainEntityOfPage: { "@type": "WebPage", "@id": abs(langPath(seg, rest)) },
@@ -1826,24 +1923,31 @@ for (const lang of LANGS) {
   const t = T[lang.code];
   pages.push(homePage(lang));
 
+  /* Title and description: seoHead(), as setHead() in app.js — no «— купить
+     в Rempire» filler (audit §1A). Intro: the shop's own line, catIntro(). */
   for (const c of ["all", ...CATS]) {
     const list = c === "all" ? ON_SALE : ON_SALE.filter(p => p.cat === c);
     const heading = c === "all" ? t.all : tr(CAT_NAMES[c], lang.code, false);
+    const head = seoHead("cat", c, lang.code, SEO_CTX);
     pages.push(listingPage({
       lang, kind: "c", id: c, heading, list,
       rest: "/c/" + c + "/",
-      desc: clip(t.catDesc(heading), 158),
-      title: fitTitle(heading, heading + " — " + t.buy)
+      desc: head.d, title: head.t,
+      intro: tr(catIntro(c, ""), lang.code, false)
     }));
   }
 
   for (const b of BRANDS) {
     const list = ON_SALE.filter(p => p.brand === b);
+    const head = seoHead("brand", b, lang.code, SEO_CTX);
     pages.push(listingPage({
       lang, kind: "b", id: BRAND_SLUG.get(b), heading: b, list,
       rest: "/b/" + BRAND_SLUG.get(b) + "/",
-      desc: clip(t.brandDesc(b), 158),
-      title: fitTitle(b, b + " — " + t.buy)
+      desc: head.d, title: head.t,
+      /* the owner's own paragraph where he has approved one (eight brands,
+         seoBrandIntro()), the shop's generic line everywhere else — the
+         same choice screenCatalog() makes */
+      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false)
     }));
   }
 
@@ -2038,71 +2142,61 @@ await writeFile(path.join(PUB, "sitemap.xml"),
    allowed on staging, and keeping staging out of an index is left to the
    robots meta and the header, which those bots do not act on. */
 
-/* The screens behind a basket, a login or a search box, at their addresses
-   since 08.10.2026 (src/lib/shop-paths.mjs): the panel and its scanner
-   (/admin, /admin/scan — one rule, no language), and the four state screens in
-   each language (/checkout covers the receipt at /checkout/done). These are
-   Shopify's own Disallow lines, at Shopify's own addresses. The old /shop2/…
-   addresses are deliberately NOT here: they answer with a 301 now, and a
-   crawler has to be allowed to fetch one to learn where the page went. */
-/* The three at the end are ours, not the shop's: /test is the owner's
-   acceptance list, /guide the manual written for him, /golive the launch
-   checklist. Each carries a `noindex` meta of its own, which is the
-   authoritative half — this list is what keeps them out of the crawl in the
-   first place. They were missing until 19.09.2026, and the launch list is the
-   one that mattered: audit F18. */
-const NO_INDEX_PATHS = [
-  "/admin",
-  ...["", "/ru", "/et"].flatMap(pre => ["/checkout", "/cart", "/account", "/search"].map(p => pre + p)),
-  "/api/", "/test", "/guide", "/golive"
-];
-/* …and inside /api/, the read-only answers a page is drawn from. Googlebot
-   renders the page (it reads the DOM app.js leaves, not the file), and with
-   all of /api/ disallowed its renderer could not fetch /api/overrides/: the
-   live stock, price, «Показывать в магазине» and the owner's own Google texts
-   — five products rendered InStock in their JSON-LD while sold out live (SEO
-   audit, 08.10.2026). The longest matching rule wins, so these open exactly
-   these addresses and nothing else under /api/. */
-const ALLOW_API = ["/api/overrides/", "/api/bundles/", "/api/blog/", "/api/reviews/", "/api/shipping/carriers/"];
-const CLOSED_BOTS = ["facebookexternalhit", "meta-externalagent", "WhatsApp", "Twitterbot", "LinkedInBot",
-  "TelegramBot", "Slackbot-LinkExpanding", "Slackbot", "Discordbot", "Applebot", "SkypeUriPreview", "vkShare"];
-
-const GEN = "# Generated by tools/prerender-shop2.mjs (npm run prerender) — do not edit by hand.\n" +
-  "# Which of the two policies lands in public/robots.txt is decided by\n" +
-  "# $PUBLIC_BASE_URL; see docs/seo.md.\n";
-
+/* The two policies themselves — the paths kept out of the crawl, the read-only
+   /api/ answers a renderer may fetch, the link-preview scrapers staging lets
+   in and the AI crawlers production names — are tools/lib/robots-policy.mjs. */
 /* The production policy names the live sitemap whatever base this run was
    given, so the file is never self-contradicting: it is the policy for
    rempireshop.com, and it says so. On a live run it is byte-identical to
    public/robots.txt, which is what the checker asserts. */
 const LIVE_BASE = "https://rempireshop.com";
-const robotsProduction = GEN +
-  "# REMPIRE — production policy: open, minus everything behind a basket.\n" +
-  "\nUser-agent: *\nAllow: /\n" +
-  ALLOW_API.map(p => "Allow: " + p).join("\n") + "\n" +
-  "\n# Nothing behind a cart, a payment form or a login belongs in an index.\n" +
-  NO_INDEX_PATHS.map(p => "Disallow: " + p).join("\n") + "\n" +
-  `\nSitemap: ${(LIVE ? BASE : LIVE_BASE) + "/sitemap.xml"}\n`;
-
-const robotsStaging = GEN +
-  "# REMPIRE — staging policy: closed to general crawlers, open to the link\n" +
-  "# preview scrapers so a shared URL still renders a card. Keeping staging\n" +
-  "# out of an index is done by the per-page robots meta and the X-Robots-Tag\n" +
-  "# header, both of which are authoritative and neither of which these bots\n" +
-  "# act on.\n" +
-  "\nUser-agent: *\nDisallow: /\n" +
-  "\n# --- link preview scrapers ---\n" +
-  CLOSED_BOTS.map(b => `\nUser-agent: ${b}\nAllow: /\n`).join("") +
-  "\n# --- what stays closed once the site opens ---\n" +
-  "# Listed here so the rule is written down while staging is still shut, and\n" +
-  "# so the preview bots above never wander into a cart.\n" +
-  "User-agent: *\n" +
-  NO_INDEX_PATHS.map(p => "Disallow: " + p).join("\n") + "\n" +
-  `\nSitemap: ${abs("/sitemap.xml")}\n`;
+const robotsProduction = robotsProductionPolicy((LIVE ? BASE : LIVE_BASE) + "/sitemap.xml");
+const robotsStaging = robotsStagingPolicy(abs("/sitemap.xml"));
 
 await writeFile(path.join(PUB, "robots.production.txt"), robotsProduction, "utf8");
 await writeFile(path.join(PUB, "robots.staging.txt"), robotsStaging, "utf8");
 await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsStaging, "utf8");
+
+/* ---------- llms.txt ------------------------------------------------------
+
+   The shop described for AI assistants (llmstxt.org) — tools/lib/llms-txt.mjs
+   says what goes in. Every fact comes from what this run has just written the
+   pages from: the catalogue on sale, the section and brand descriptions of
+   src/lib/seo-copy.mjs, the shipping page's own price table over the rules
+   the checkout bills with, its pickup, delivery-time and returns sentences in
+   English, the policy titles, the shop's details and the published posts. So
+   it is regenerated with every deploy and cannot drift from the pages. No
+   line for it in robots.txt: robots.txt has no convention for one. */
+{
+  const EN = s => tr(s, "EN", false);
+  /* the English shipping page, drawn exactly as /policies/shipping-policy is
+     (minus the parts llms.txt has no use for: logos, contacts, the policy) */
+  const facts = DELIVERY && SHIP_RULES_LIVE ? deliveryFromPage(DELIVERY.page({
+    lang: "EN", tr: EN, esc, eur: n => eurFor(n, "EN"), title: "",
+    rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
+    montonio: DELIVERY.montonio, address: IDENTITY.address, hoursHTML: "", phoneHTML: "", mailHTML: "",
+    logos: {}, banks: null, loyalty: LOYALTY_LIVE, link: (s, label) => esc(label), legalHtml: ""
+  }), { returnsHeading: EN("Возврат товара") }) : null;
+  const delivery = facts && facts.rows.length ? facts : null;
+  const hours = CONTENT_DAYS.filter(([key]) => SHOP_CONTENT.hours && SHOP_CONTENT.hours[key])
+    .map(([key, ru]) => EN(ru) + ": " + (SHOP_CONTENT.hours[key] === "closed" ? EN("выходной") : SHOP_CONTENT.hours[key]));
+  const llms = buildLlmsTxt({
+    base: BASE,
+    products: ON_SALE,
+    identity: IDENTITY,
+    social: SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean),
+    hours,
+    policies: LEGAL_SLUGS.map(slug => {
+      const pg = legalFor(slug, "EN");
+      return { slug, title: LEGAL_EN[slug] ? pg.title : EN((LEGAL[slug] || pg).title) };
+    }),
+    delivery,
+    returns: facts ? facts.returns : "",
+    posts: BLOG_POSTS.map(p => ({ title: pickLang(p.title, "EN") || p.slug, slug: p.slug })),
+    ctx: SEO_CTX
+  });
+  await writeFile(path.join(PUB, "llms.txt"), llms, "utf8");
+}
 
 const perLang = CATALOGUE.length + CATS.length + 1 + BRANDS.length + 1 +
   LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 + 1 +

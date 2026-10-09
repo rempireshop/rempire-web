@@ -17,6 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
+import { seoPriceText, seoProductCore, seoProductTitle } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -469,7 +470,11 @@ export const withOwnerStock = (list, overrides) =>
    later, in the same place, about the same bottle. Nothing compares the two
    tables; when you touch either, touch both.
    Mirrors the strings setHead() in app.js uses, so the tab title does not
-   change under the shopper when the script takes over. */
+   change under the shopper when the script takes over.
+   The title and the meta description of the home page, the sections, the
+   brands and the blog list are not in here any more: since 09.10.2026 they
+   are src/lib/seo-copy.mjs, which app.js carries a checked copy of (audit
+   §1A). `base` is the home page's <h1>, no longer its <title>. */
 export const T = {
   RU: {
     base: "REMPIRE — магазин косметики в Таллинне",
@@ -477,16 +482,12 @@ export const T = {
     home: "Главная", catalogue: "Каталог", brands: "Бренды", all: "Все товары",
     homeIntro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. " +
       "Доставка Omniva, SmartPosti и DPD по Эстонии, Латвии, Литве и Финляндии, самовывоз на Mardi 1.",
-    homeDesc: "Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. " +
-      "Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1.",
     catsTitle: "Разделы", brandsTitle: "Бренды",
     sizes: "Размеры", description: "Описание",
     inStock: "В наличии", low: "мало", out: "нет в наличии",
     from: "от ",
     tax: "Налоги включены. Доставка рассчитается при оформлении.",
     lang: "Язык", loading: "Загружаем магазин…",
-    catDesc: c => `${c} в магазине Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    brandDesc: b => `${b} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Магазин Rempire, Таллинн — доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
     /* What a product's own copy gets after it, when the description is cut
@@ -502,7 +503,6 @@ export const T = {
        the live head from the same two halves (giftDescText). */
     giftDesc: amounts => `Подарочная карта Rempire на ${amounts} — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.`,
     infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
-    blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
     blogEmpty: "Статей пока нет — загляните позже.",
     otherPosts: "Другие статьи",
     /* the request-time blog page (src/lib/blog-page.ts) — the prerender
@@ -522,16 +522,12 @@ export const T = {
     home: "Avaleht", catalogue: "Kataloog", brands: "Brändid", all: "Kõik tooted",
     homeIntro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas. " +
       "Tarne Omniva, SmartPosti ja DPD-ga Eestis, Lätis, Leedus ja Soomes, järeletulek Mardi 1.",
-    homeDesc: "Rempire'i pood: juukse- ja habemehooldus, viimistlus, parfüümid ja merch. " +
-      "Tarne üle Eesti ja Baltikumi, järeletulek Tallinnas Mardi 1.",
     catsTitle: "Osakonnad", brandsTitle: "Brändid",
     sizes: "Suurused", description: "Kirjeldus",
     inStock: "Laos", low: "viimased", out: "otsas",
     from: "alates ",
     tax: "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
     lang: "Keel", loading: "Laeme poodi…",
-    catDesc: c => `${c} Rempire'i poes Tallinnas. Tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     descTail: () => "tarne Eestis ja Baltikumis · järeletulek Tallinnas",
@@ -540,7 +536,6 @@ export const T = {
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     giftDesc: amounts => `Rempire'i kinkekaart ${amounts} — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.`,
     infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
-    blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
     otherPosts: "Teised artiklid",
     // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
@@ -555,16 +550,12 @@ export const T = {
     home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
     homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +
       "Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.",
-    homeDesc: "Rempire shop: hair and beard care, styling, fragrance and merch. " +
-      "Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1.",
     catsTitle: "Sections", brandsTitle: "Brands",
     sizes: "Sizes", description: "Description",
     inStock: "In stock", low: "low stock", out: "out of stock",
     from: "from ",
     tax: "Taxes included. Delivery is calculated at checkout.",
     lang: "Language", loading: "Loading the shop…",
-    catDesc: c => `${c} at Rempire, Tallinn. Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     descTail: () => "delivery across Estonia and the Baltics · pickup in Tallinn",
@@ -573,7 +564,6 @@ export const T = {
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     giftDesc: amounts => `A Rempire gift card for ${amounts} — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.`,
     infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
-    blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
     blogEmpty: "No articles yet — check back soon.",
     otherPosts: "More articles",
     blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found.",
@@ -620,8 +610,29 @@ export const catName = (cat, code) => (CAT_NAMES_I18N[cat] && (CAT_NAMES_I18N[ca
 /* A link preview is a 1 200×630 JPEG or PNG or it is nothing — see the long
    note in tools/prerender-shop2.mjs. The two shared cards are committed. */
 export const OG_W = 1200, OG_H = 630;
-export const OG_DEFAULT = "/brand/og-default.png";   // tower on the ground, for pages with no card of their own
-export const OG_FALLBACK = "/og-shop.png";           // shipped, 1200×630 — used when sharp is missing
+export const OG_DEFAULT = "/brand/og-default.png";   // tower on the ground — the last resort when no card is on disk
+export const OG_FALLBACK = "/og-shop.png";           // the shop's card in English (= og-shop-en.png), shipped
+
+/* The shop's own link-preview card, one per language — «Juuksed. Habe. Stiil.»
+   (tools/og-shop.mjs, Dim's design and line of 08.10.2026). The card of every
+   page that has no picture of its own: the home page, the sections, the
+   brands, the policy pages, the gift card, the brands landing and the 404.
+   Until 09.10.2026 the home page showed the staging poster «НОВЫЙ МАГАЗИН …
+   черновик для Рената», sections and brands whatever product sorted first,
+   and the rest the tower alone with no name (SEO audit §1A b, T15). A product,
+   a set and an article keep their own card. */
+export const ogShopCard = code => "/og-shop-" + (code === "ET" ? "et" : code === "RU" ? "ru" : "en") + ".png";
+
+/* The shop's mark in the JSON-LD — Organization/Store `logo` and `image`, and
+   an article's publisher logo: the tower, as a 512×512 PNG (the installable
+   app's own icon, public/shop2/icons/). Raster, because Google reads a logo
+   from a raster image; and not a link-preview card, which is an advertisement
+   with a product shelf on it — until 09.10.2026 `image` was the staging poster
+   (audit W7) and `logo` the SVG. The «REMPIRE TOWER» lockup and badge in
+   public/brand/ carry the studio's slogan, not the shop's name, and are
+   deliberately not used here. */
+export const ORG_LOGO = "/shop2/icons/icon-512.png";
+export const ORG_IMAGE = ORG_LOGO;
 
 /* ---------- the head ----------------------------------------------------- */
 
@@ -716,8 +727,12 @@ export const verificationMeta = () =>
    the markers in index.html and inlines it verbatim into every generated
    page; the request-time product page writes the same block. `base` is the
    absolute-URL base, `robots` the value the meta carries (robotsFor()). */
-export function headBlock({ base, robots, lang, seg, rest, title, desc, image, imageAlt, ogType, jsonld, ldMain }) {
+export function headBlock({ base, robots, lang, seg, rest, title, desc, ogTitle = "", ogDesc = "", image, imageAlt, ogType, jsonld, ldMain }) {
   const canonical = base + langPath(seg, rest);
+  /* The link-preview pair is the title and the description, except where a
+     page has one of its own — the home page (audit §1A b, seoHead()). */
+  const cardTitle = ogTitle || title;
+  const cardDesc = ogDesc || desc;
   const ld = (Array.isArray(jsonld) ? jsonld : [jsonld]).filter(Boolean);
   const isMain = o => !!ldMain && o["@type"] === "Product";
   return `<title>${esc(title)}</title>
@@ -729,16 +744,16 @@ ${headLinks(base, seg, rest)}
 <meta property="og:site_name" content="REMPIRE">
 <meta property="og:locale" content="${lang.ogLocale}" data-seo="og:locale">
 <meta property="og:url" content="${esc(canonical)}" data-seo="og:url">
-<meta property="og:title" content="${esc(title)}" data-seo="og:title">
-<meta property="og:description" content="${esc(desc)}" data-seo="og:description">
+<meta property="og:title" content="${esc(cardTitle)}" data-seo="og:title">
+<meta property="og:description" content="${esc(cardDesc)}" data-seo="og:description">
 <meta property="og:image" content="${esc(image)}" data-seo="og:image">
 <meta property="og:image:alt" content="${esc(imageAlt)}">
 <meta property="og:image:type" content="${/\.png(\?|$)/i.test(image) ? "image/png" : "image/jpeg"}">
 <meta property="og:image:width" content="${OG_W}">
 <meta property="og:image:height" content="${OG_H}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}" data-seo="twitter:title">
-<meta name="twitter:description" content="${esc(desc)}" data-seo="twitter:description">
+<meta name="twitter:title" content="${esc(cardTitle)}" data-seo="twitter:title">
+<meta name="twitter:description" content="${esc(cardDesc)}" data-seo="twitter:description">
 <meta name="twitter:image" content="${esc(image)}" data-seo="twitter:image">
 <style id="prestyle">${PRE_CSS}</style>
 ${ld.map(o => '<script type="application/ld+json"' +
@@ -780,6 +795,237 @@ export function breadcrumbLD(base, items) {
   };
 }
 
+/* ---------- what an offer costs to send, and to send back -----------------
+
+   Google's merchant listings read three things off an offer beyond its price:
+   what delivery costs and how long it takes (`shippingDetails`), and the
+   returns policy (`hasMerchantReturnPolicy`). None of the numbers is this
+   file's. The caller hands in what src/lib/merchant-feed.ts says —
+   shippingFor(price, rules), the call every g:shipping entry of the Merchant
+   Center feed is built from, its HANDLING_DAYS, sellCountries() — so the page
+   and the feed cannot quote two prices for one parcel. These functions only
+   reshape them into schema.org (docs/seo.md § «Structured data»).
+   tests/structured-data.test.ts parses the result back and holds it to
+   Google's required fields and to the feed. */
+
+const round2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+const daySpan = (span, unitCode) => ({ "@type": "QuantitativeValue", minValue: span.min, maxValue: span.max, unitCode });
+const isCountry = c => /^[A-Z]{2}$/.test(String(c));
+
+/**
+ * Offer.shippingDetails from the feed's delivery options for ONE item price
+ * (`{ country, service, price, transit }[]` — shippingFor()). Per country the
+ * cheapest option, which is the price Google shows as «delivery from» and the
+ * one the feed's cheapest g:shipping entry carries; countries that cost the
+ * same and take as long share one entry. `handling` is the shop's own days
+ * (HANDLING_DAYS); a country the feed promises no transit time for gets no
+ * deliveryTime rather than a guessed one.
+ */
+export function shippingDetailsLD(options, handling) {
+  const best = new Map();
+  for (const o of options || []) {
+    if (!o || !isCountry(o.country) || !Number.isFinite(Number(o.price))) continue;
+    const had = best.get(o.country);
+    if (!had || Number(o.price) < Number(had.price)) best.set(o.country, o);
+  }
+  const groups = new Map();
+  for (const o of best.values()) {
+    const key = round2(o.price) + "|" + (o.transit ? o.transit.min + "-" + o.transit.max : "");
+    if (!groups.has(key)) groups.set(key, { price: round2(o.price), transit: o.transit || null, countries: [] });
+    groups.get(key).countries.push(o.country);
+  }
+  return [...groups.values()].map(g => ({
+    "@type": "OfferShippingDetails",
+    shippingRate: { "@type": "MonetaryAmount", value: g.price, currency: "EUR" },
+    shippingDestination: g.countries.map(c => ({ "@type": "DefinedRegion", addressCountry: c })),
+    ...(handling && g.transit
+      ? { deliveryTime: { "@type": "ShippingDeliveryTime", handlingTime: daySpan(handling, "DAY"), transitTime: daySpan(g.transit, "DAY") } }
+      : {})
+  }));
+}
+
+/* The returns policy — what public/shop/legal.{ru,et,en}.js «returns» says,
+   and nothing it does not. tests/structured-data.test.ts quotes the
+   sentences, so an edit to the text that changes one of these facts fails a
+   test instead of leaving the markup contradicting the page it links to:
+
+     «We operate a 30-day returns policy: you may ask to return an item
+      within 30 days of receiving it.»            → a finite window, 30 days
+     «returns have to be sent to: {{address}}»   → by mail, to Estonia
+                                                    (Mardi 1, Tallinn)
+     «The shop does not issue a return label»    → the customer's label
+     «in the condition you received it in — unworn or unused, with its tags
+      on, and in its original packaging»         → new condition
+     «the money goes back automatically to the payment method you originally
+      used»                                      → a refund, not credit
+
+   Left out because the text does not say it: WHO PAYS for the parcel back
+   (`returnFees`) — an owner's answer (docs/seo.md). The exclusions have no
+   field in Google's markup and need none: the text excludes OPENED
+   cosmetics («personal-hygiene goods (such as opened cosmetics)», «Sealed
+   cosmetics that have been opened cannot be returned once unsealed»), so an
+   unopened bottle of anything the shop sells is returnable, and perishable,
+   made-to-order and hazardous goods and gift cards are not what a product
+   page offers. The 14-day statutory window is the shorter one and is
+   covered by the 30. */
+export const RETURN_POLICY = Object.freeze({ days: 30, country: "EE" });
+
+/** MerchantReturnPolicy for the countries the shop sells to (sellCountries()); `link` = the refund policy page. */
+export function returnPolicyLD(countries, link) {
+  const list = [...new Set((countries || []).filter(isCountry))];
+  if (!list.length) return null;
+  return {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: list.slice(0, 50),
+    returnPolicyCountry: RETURN_POLICY.country,
+    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+    merchantReturnDays: RETURN_POLICY.days,
+    returnMethod: "https://schema.org/ReturnByMail",
+    returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
+    itemCondition: "https://schema.org/NewCondition",
+    refundType: "https://schema.org/FullRefund",
+    ...(link ? { merchantReturnLink: link } : {})
+  };
+}
+
+/** `{ gtin13: "…" }` (or gtin8/12/14) for a code validGtin() in src/lib/merchant-feed.ts already accepted; `{}` otherwise. */
+export function gtinLD(code) {
+  const s = String(code == null ? "" : code);
+  return /^(?:\d{8}|\d{12,14})$/.test(s) ? { ["gtin" + s.length]: s } : {};
+}
+
+function offerLD({ url, sku, price, available, gtin, shippingDetails, returnPolicy }) {
+  return {
+    "@type": "Offer",
+    ...(sku ? { sku } : {}),
+    ...gtinLD(gtin),
+    priceCurrency: "EUR",
+    price: String(price),
+    availability: "https://schema.org/" + (available ? "InStock" : "OutOfStock"),
+    itemCondition: "https://schema.org/NewCondition",
+    url,
+    seller: { "@type": "Organization", name: "REMPIRE" },
+    ...(shippingDetails && shippingDetails.length ? { shippingDetails } : {}),
+    ...(returnPolicy ? { hasMerchantReturnPolicy: returnPolicy } : {})
+  };
+}
+
+/**
+ * A product's `offers`: one Offer per size the Merchant Center feed lists
+ * (`commerce.offers` — feedOffers() in src/lib/merchant-feed.ts: the feed's
+ * item id as `sku`, its price, its availability, its `?size=` link), each
+ * with its delivery and the returns policy. One size — or no feed items at
+ * all (a hidden product, a build that could not read the feed) — is the
+ * single Offer at the page's own address it always was, priced and stocked
+ * by the caller. A gtin rides the offer of its size; for a single offer the
+ * caller puts it on the Product (see productSpec()).
+ *
+ *   commerce = {
+ *     offers:   [{ id, slug, price, available, gtin }],   the feed's items
+ *     shipping: price => ShippingOption[],               shippingFor(price, rules)
+ *     handling: { min, max },                            HANDLING_DAYS
+ *     returnCountries: ["EE", …],                        sellCountries(rules)
+ *   }
+ */
+export function productOffersLD({ url, price, stock, commerce, returnLink }) {
+  const c = commerce || {};
+  const memo = new Map();
+  const ship = p => {
+    if (typeof c.shipping !== "function") return null;
+    const k = round2(p);
+    if (!memo.has(k)) memo.set(k, shippingDetailsLD(c.shipping(k), c.handling));
+    return memo.get(k);
+  };
+  const policy = returnPolicyLD(c.returnCountries, returnLink);
+  const items = feedItems(commerce);
+  if (!items.length) {
+    return offerLD({ url, price, available: stock !== "out", shippingDetails: ship(price), returnPolicy: policy });
+  }
+  const many = items.length > 1;
+  const list = items.map(o => offerLD({
+    url: o.slug ? url + "?size=" + encodeURIComponent(o.slug) : url,
+    sku: o.id, price: o.price, available: !!o.available,
+    gtin: many ? o.gtin : null,
+    shippingDetails: ship(o.price), returnPolicy: policy
+  }));
+  return many ? list : list[0];
+}
+const feedItems = commerce =>
+  (commerce && Array.isArray(commerce.offers) ? commerce.offers : []).filter(o => o && Number(o.price) > 0);
+
+/* ---------- the shop itself: where it is, how it ships -------------------- */
+
+/* The counter at Mardi 1, Tallinn — the Google Maps pin of the building
+   (SEO audit 08.10.2026 § 8), and the address the checkout's pickup and the
+   returns go to. The map link is a search for the shop by name and street:
+   the place id the audit suggested (`?cid=17186155096233197657`) opens an
+   empty place with no name on Google Maps (checked 09.10.2026), so it is not
+   one we can vouch for. */
+export const STORE_GEO = Object.freeze({ "@type": "GeoCoordinates", latitude: 59.430905, longitude: 24.759414 });
+export const STORE_MAP_URL = "https://www.google.com/maps/search/?api=1&query=REMPIRE+Mardi+1+Tallinn";
+/* The salon's own site at the same address — the other half of the same
+   name (barbershop and tattoo studio, Mardi 1). Beside the shop's socials in
+   `sameAs`. */
+export const STORE_SAME_AS = Object.freeze(["https://rempire.ee"]);
+
+const servicePeriod = span => ({ "@type": "ServicePeriod", duration: daySpan(span, "d") });
+
+/**
+ * The Organization's shop-wide shipping policy (`hasShippingService`): per
+ * country the delivery the feed lists as cheapest, free from the basket the
+ * checkout makes it free from, with the carrier's days — `terms` is
+ * shippingTerms(rules) in src/lib/merchant-feed.ts, the same shippingFor()
+ * and quoteFromRules() the feed and the checkout run. One condition per
+ * country below its threshold and one from it; a country that is never free
+ * (or always free) has one.
+ */
+export function shippingServiceLD(terms, handling) {
+  const conditions = [];
+  const rate = v => ({ "@type": "MonetaryAmount", value: round2(v), currency: "EUR" });
+  for (const t of terms || []) {
+    if (!t || !isCountry(t.country) || !Number.isFinite(Number(t.price))) continue;
+    const where = {
+      "@type": "ShippingConditions",
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: t.country },
+      ...(t.transit ? { transitTime: servicePeriod(t.transit) } : {})
+    };
+    const free = t.freeFrom == null ? null : Number(t.freeFrom);
+    if (free !== null && free > 0 && round2(t.price) > 0) {
+      conditions.push({ ...where, orderValue: { "@type": "MonetaryAmount", minValue: 0, maxValue: round2(free - 0.01), currency: "EUR" }, shippingRate: rate(t.price) });
+      conditions.push({ ...where, orderValue: { "@type": "MonetaryAmount", minValue: round2(free), currency: "EUR" }, shippingRate: rate(0) });
+    } else {
+      conditions.push({ ...where, shippingRate: rate(free === 0 ? 0 : t.price) });
+    }
+  }
+  if (!conditions.length) return null;
+  return {
+    "@type": "ShippingService",
+    fulfillmentType: "https://schema.org/FulfillmentTypeDelivery",
+    ...(handling ? { handlingTime: servicePeriod(handling) } : {}),
+    shippingConditions: conditions
+  };
+}
+
+/* The opening hours, from «Настройки → Контент» (content.hours — "10:00–19:00"
+   per day, "closed", or empty). Only a day that says when it opens and when
+   it closes becomes a line; empty today, so the shop publishes none — an
+   owner's to fill in (docs/seo.md). */
+const WEEK = [["mon", "Monday"], ["tue", "Tuesday"], ["wed", "Wednesday"], ["thu", "Thursday"],
+  ["fri", "Friday"], ["sat", "Saturday"], ["sun", "Sunday"]];
+export function openingHoursLD(hours) {
+  const h = hours && typeof hours === "object" ? hours : {};
+  const out = [];
+  for (const [key, day] of WEEK) {
+    const m = /^\s*(\d{1,2})[:.](\d{2})\s*[–—-]\s*(\d{1,2})[:.](\d{2})\s*$/.exec(String(h[key] || ""));
+    if (!m) continue;
+    out.push({
+      "@type": "OpeningHoursSpecification", dayOfWeek: "https://schema.org/" + day,
+      opens: m[1].padStart(2, "0") + ":" + m[2], closes: m[3].padStart(2, "0") + ":" + m[4]
+    });
+  }
+  return out;
+}
+
 /* ---------- one product's head ------------------------------------------
 
    The title ladder, the description, the breadcrumb and the Product JSON-LD
@@ -817,14 +1063,24 @@ export function descFrom(text, t) {
   return clip(lead, room).replace(/\.$/, "") + " · " + tail;
 }
 
-export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls }) {
+/**
+ * `commerce` (optional) is what the Merchant Center feed knows about the
+ * product — its items per size, their delivery, the countries it sells to —
+ * see productOffersLD() above. Without it the offer is the single one it
+ * always was.
+ * @param {{ base: any, lang: any, id: any, cat: any, catName: any, brand: any, name: any, price: any, priceFrom: any, stock: any, seoTitle: any, seoDesc: any, body: any, image: any, imageUrls: any, commerce?: any }} spec
+ */
+export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls, commerce }) {
   const t = T[lang.code];
   const seg = lang.seg;
   const rest = "/p/" + encodeURIComponent(id) + "/";
   const core = brand + " " + name;
-  const priceText = (priceFrom ? t.from : "") + eur(price);
-  const full = core + " — " + t.buy + " · " + priceText;
-  let title = fitTitle(core, full, core + " · " + priceText);
+  /* «от 7,90 €» / «alates 7,90 €» / «from €7.90» — in the language's own money
+     format, as app.js prints it; and the title is brand + the maker's name +
+     the type with the price when it fits, never «— купить в Rempire» (audit
+     §1A, src/lib/seo-copy.mjs — the same two calls setHead() makes). */
+  const priceText = seoPriceText(price, priceFrom, lang.code);
+  let title = seoProductTitle(seoProductCore(id, core, lang.code), priceText);
   if (seoTitle) title = fitTitle(seoTitle, "");
 
   const text = textForSnippet(body);
@@ -843,6 +1099,7 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     [core, null]
   ];
   const url = base + langPath(seg, rest);
+  const items = feedItems(commerce);
   const productLD = {
     "@context": "https://schema.org", "@type": "Product",
     name: core,
@@ -851,16 +1108,10 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     description: clip(text, 500),
     category: section,
     sku: id,
+    // one size: its barcode is the product's (several: each offer carries its own)
+    ...(items.length === 1 ? gtinLD(items[0].gtin) : {}),
     url,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "EUR",
-      price: String(price),
-      availability: "https://schema.org/" + (stock === "out" ? "OutOfStock" : "InStock"),
-      itemCondition: "https://schema.org/NewCondition",
-      url,
-      seller: { "@type": "Organization", name: "REMPIRE" }
-    }
+    offers: productOffersLD({ url, price, stock, commerce, returnLink: base + langPath(seg, "/info/returns/") })
   };
 
   return {
