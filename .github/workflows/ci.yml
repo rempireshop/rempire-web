@@ -1,9 +1,16 @@
-# CI for rempire-web. Runs on every push and pull request: install, typecheck,
-# unit tests (vitest, in-memory PGlite — no services to spin up), then the
-# Playwright e2e suite — Chromium in three shards, and the storefront once
-# more on WebKit in its own `safari` job (see docs/testing.md for the
-# tablet/mobile/webkit-local projects this same config also defines for local
-# use).
+# CI for rempire-web. Every push and pull request: install, typecheck, unit
+# tests (vitest, in-memory PGlite — no services to spin up). The Playwright
+# e2e suite — Chromium in four shards, and the storefront once more on WebKit
+# in its own `safari` job (see docs/testing.md for the tablet/mobile/
+# webkit-local projects this same config also defines for local use) — runs
+# once a week and on the «Run workflow» button, not on every push.
+#
+# Why (Dim, 09.10.2026): the repository is going private, and a private repo
+# on a free account has 2,000 Actions minutes a month. The whole suite costs
+# about 145 runner-minutes per push (the e2e jobs ~130 of them) — thirteen
+# pushes would spend the month. Typecheck + unit tests are ~15 minutes; the
+# weekly full run (~145) keeps the browser suite honest. Run it by hand from
+# the Actions tab before a risky release.
 #
 # The Chromium suite is sharded three ways: each shard is its own job with its
 # own `next dev` and its own empty PGlite database, so `workers: 1` inside a
@@ -36,6 +43,10 @@ on:
       - "docs/**"
       - "*.md"
   pull_request:
+  workflow_dispatch:
+  schedule:
+    # Mondays 03:40 UTC (06:40 in Tallinn) — the full browser suite, weekly
+    - cron: "40 3 * * 1"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -68,6 +79,8 @@ jobs:
 
   e2e:
     name: e2e (shard ${{ matrix.shard }} of 4)
+    # weekly and on the button only — see the header
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -107,6 +120,8 @@ jobs:
 
   safari:
     name: e2e (mobile Safari)
+    # weekly and on the button only — see the header
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:

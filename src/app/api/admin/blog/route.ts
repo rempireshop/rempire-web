@@ -39,6 +39,7 @@ import { refreshBlogCache } from "@/lib/blog-cache";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import { blogPostUrls } from "@/lib/indexnow.mjs";
 import { submitIndexNow } from "@/lib/indexnow-ping";
+import { requestRebuild } from "@/lib/rebuild";
 import {
   BlogError,
   deletePost,
@@ -207,6 +208,7 @@ export async function PATCH(req: Request) {
       if (!post) return bad("not_found", 404);
       refreshBlogCache();   // in, or out: every list and page changes either way
       submitIndexNow(blogPostUrls(post.slug));   // …and the engines hear it (live shop only)
+      requestRebuild(body.publish ? "blog-publish" : "blog-unpublish");   // …and the static copy follows (src/lib/rebuild.ts)
       return Response.json({ ok: true, post }, { headers: NO_STORE });
     }
 
@@ -217,6 +219,7 @@ export async function PATCH(req: Request) {
     if (post.status === "published") {
       refreshBlogCache();
       submitIndexNow(blogPostUrls(post.slug));
+      requestRebuild("blog-edit");
     }
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
@@ -239,6 +242,7 @@ export async function DELETE(req: Request) {
     // it may have been live a moment ago — the row no longer says, so assume it was
     refreshBlogCache();
     submitIndexNow(blogPostUrls(post.slug));
+    requestRebuild("blog-delete");   // the static copy leaves with the next build (src/lib/rebuild.ts)
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/blog DELETE failed", err);

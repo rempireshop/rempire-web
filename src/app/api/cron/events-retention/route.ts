@@ -16,6 +16,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { deleteOldEvents } from "@/lib/events";
+import { runRebuild } from "@/lib/rebuild";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,12 +42,17 @@ export async function GET(req: Request) {
   if (!authorized(req)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401, headers: NO_STORE });
   }
+  /* The nightly rebuild rides this daily job (the plan's cron slots are
+     taken): the static pages crawlers read first are written again from
+     today's prices, stock and articles — src/lib/rebuild.ts. Its answer is
+     reported, never a reason to fail the retention sweep. */
+  const rebuild = await runRebuild("nightly", { force: true }).catch(() => "failed" as const);
   try {
     const deleted = await deleteOldEvents(RETENTION_DAYS);
-    return Response.json({ ok: true, deleted, days: RETENTION_DAYS }, { headers: NO_STORE });
+    return Response.json({ ok: true, deleted, days: RETENTION_DAYS, rebuild }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/cron/events-retention] failed:", err);
-    return Response.json({ ok: false, error: "server_error" }, { status: 500, headers: NO_STORE });
+    return Response.json({ ok: false, error: "server_error", rebuild }, { status: 500, headers: NO_STORE });
   }
 }
 
