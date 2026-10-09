@@ -1169,16 +1169,16 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "outside": "Search Console",
       "needs": [
         "domain-dns"
       ],
       "title": "12. Search Console: карта сайта и запрос индексации",
-      "detail": "09.10.2026: карта сайта https://rempireshop.com/sitemap.xml отправлена заново после переезда адресов (в ней 849 адресов, ни одного /shop2). Запрос индексации главной и разделов — после выхода новых заголовков (лимит Google около 10 в день). Bing: карта сайта отправлена Димом, все 849 адресов переданы через IndexNow; дальше магазин сам сообщает Bing о каждом сохранении в админке.",
+      "detail": "09.10.2026: карта сайта https://rempireshop.com/sitemap.xml отправлена заново после переезда адресов (в ней 849 адресов, ни одного /shop2). Запрошена индексация главной на трёх языках и основных разделов — после того как новые заголовки вышли в эфир. Bing: карта сайта отправлена Димом, все 849 адресов переданы через IndexNow; дальше магазин сам сообщает Bing о каждом сохранении в админке.",
       "en": {
         "title": "12. Search Console: the sitemap and an indexing request",
-        "detail": "09.10.2026: the sitemap https://rempireshop.com/sitemap.xml resubmitted after the address move (849 addresses, none under /shop2). The indexing request for the home page and sections waits for the new titles to go live (Google allows about 10 a day). Bing: the sitemap was submitted by Dim, and all 849 addresses were sent through IndexNow; from now on the shop tells Bing about every save in the admin by itself."
+        "detail": "09.10.2026: the sitemap https://rempireshop.com/sitemap.xml resubmitted after the address move (849 addresses, none under /shop2). Indexing requested for the home page in three languages and the main sections — after the new titles went live. Bing: the sitemap was submitted by Dim, and all 849 addresses were sent through IndexNow; from now on the shop tells Bing about every save in the admin by itself."
       }
     },
     {
