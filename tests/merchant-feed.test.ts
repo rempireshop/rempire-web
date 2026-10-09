@@ -622,7 +622,8 @@ describe("variants and identifiers", () => {
     // a one-size product is one item too, its size named
     const touchable = byProduct(list, TOUCHABLE);
     expect(touchable.map((it) => [one(it, "id"), one(it, "title"), one(it, "size")])).toEqual([
-      [TOUCHABLE, "Kevin.Murphy Touchable, 250 ml", "250 ml"],
+      // the catalogue name carries the maker's type since 09.10.2026 («Touchable — спрей-воск»)
+      [TOUCHABLE, "Kevin.Murphy Touchable — spray wax, 250 ml", "250 ml"],
     ]);
     // the long id: shortened, hashed, the size still readable on the end
     const long = byProduct(list, LONG).map((it) => one(it, "id")!);
