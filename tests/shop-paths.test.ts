@@ -22,6 +22,7 @@ import {
   modernShopHref,
   parseShopPath,
   publicPath,
+  SUB_HANDLES,
 } from "@/lib/shop-paths.mjs";
 import { slugify } from "@/lib/legacy-redirects";
 
@@ -59,6 +60,7 @@ const RESTS = [
   ...IDS.slice(0, 40).map((id) => `/p/${id}/`),
   "/p/c-abc123/",
   ...Object.keys(CAT_HANDLES).map((c) => `/c/${c}/`),
+  ...Object.keys(SUB_HANDLES).map((k) => `/c/${k}/`),
   ...BRAND_SLUGS.map((b) => `/b/${b}/`),
   "/brands/", "/sets/", "/set/beard-start/", "/gift/",
   "/info/shipping/", "/info/returns/", "/info/privacy/", "/info/terms/", "/info/contact/",

@@ -17,8 +17,10 @@
  *     (legacyShopTarget() in shop-paths.mjs.)
  *  2. Shopify's spellings that are not our canonical: the regional English
  *     storefronts (`/en-lv`, `/en-lt`, `/en-fi`) and `/en/…` → unprefixed; a
- *     section under another collection name (`/collections/shampoo`,
- *     `/et/collections/hair-care`) → the section in that language; a product
+ *     section under another collection name (`/collections/hair-mask`,
+ *     `/et/collections/hair-care`) → the section in that language; a
+ *     subcollection's handle in another language's spelling
+ *     (`/collections/habemeolid`) → the subcollection in that language; a product
  *     handle the catalogue does not have → an alias, its brand, or «Все
  *     товары»; `/pages/right-to-return` and the other policy spellings →
  *     the five policy pages; `/blogs/blog` and the old articles → the blog;
@@ -61,7 +63,7 @@
  * tools/harvest/old-urls.txt and docs/redirect-map.csv through it.
  */
 import catalogueMin from "@/data/catalogue.min.json";
-import { CAT_HANDLES, catOfHandle, legacyShopTarget, parseShopPath, publicPath } from "@/lib/shop-paths.mjs";
+import { CAT_HANDLES, catOfHandle, legacyShopTarget, parseShopPath, publicPath, subOfHandle } from "@/lib/shop-paths.mjs";
 import { shopifyVariant } from "@/lib/shopify-variants";
 
 /** Same rule as slugify() in src/lib/seo-head.mjs — brand slugs must match. */
@@ -93,6 +95,14 @@ type Cat = keyof typeof CAT_HANDLES;
    languages' worth of spelling, onto the shop's sections. A section's own
    handle in any language (hair-care, juuksehooldus, uhod-za-volosami …) and a
    brand slug (`system-4`, `kevin-murphy`) are recognised without being listed.
+
+   Since 09.10.2026 a published subcollection (SUB_HANDLES in
+   src/lib/shop-paths.mjs — beard-oil, aftershave, shampoo, palsamid,
+   juuksevaha …) is a page of its own at its handle, and parseShopPath()
+   answers it before this table is read. Its handles stay listed here all the
+   same: they are where the address goes the day the subcollection is no
+   longer published (below SUBCOLLECTION_MIN products) — to its section, as
+   before.
 
    Two judgement calls, written down because they are guesses about what a
    2019 Shopify merchandiser meant: bare `palsamid` is read as hair
@@ -186,6 +196,7 @@ export interface LegacyRedirect {
     | "product-unknown"
     | "product-info"
     | "collection-cat"
+    | "collection-sub"
     | "collection-brand"
     | "collection-canonical"
     | "collection-unknown"
@@ -250,6 +261,9 @@ function productShape(lang: Lang, raw: string): Shape {
 function collectionShape(lang: Lang, rawHandle: string, search: string): Shape | null {
   const handle = slugify(safeDecode(rawHandle));
   if (BRAND_SLUGS.has(handle)) return { path: publicPath(lang, "/b/" + handle + "/"), reason: "collection-brand", query: "drop" };
+  /* `/collections/<subcollection>/<tag>` — the subcollection, while it is published */
+  const sub = subOfHandle(handle);
+  if (sub) return { path: publicPath(lang, "/c/" + sub + "/"), reason: "collection-sub", query: "drop" };
   const cat = COLLECTION_CAT[handle] || catOfHandle(handle);
   if (cat === "brands") return { path: publicPath(lang, "/brands/"), reason: "collection-cat", query: "drop" };
   if (cat) return { path: publicPath(lang, "/c/" + cat + "/"), reason: "collection-cat", query: "drop" };
@@ -447,8 +461,9 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
     }
     if (n === 3 && rest[0] === "sets") return out(publicPath(lang, "/set/" + rest[1] + "/"), normal, "keep");
     const handle = rest[0];
-    /* The page itself: a section in any language's spelling (the canonical
-       moves it to this language's), a catalogue brand, `brands`, `sets`. */
+    /* The page itself: a section or a published subcollection in any
+       language's spelling (the canonical moves it to this language's), a
+       catalogue brand, `brands`, `sets`. */
     if (parsed && n === 2) {
       const brand = /^\/b\/([^/]+)\/$/.exec(parsed.rest);
       if (!brand || BRAND_SLUGS.has(brand[1])) {

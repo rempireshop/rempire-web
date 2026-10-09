@@ -7,6 +7,7 @@
 
      public/shop2/{,ru/,et/}index.html            three home pages
      public/shop2/{,ru/,et/}c/<cat>/index.html    category pages
+     public/shop2/{,ru/,et/}c/<cat>/<sub>/index.html  subcollection pages
      public/shop2/{,ru/,et/}b/<brand>/index.html  brand pages
      public/shop2/{,ru/,et/}p/<id>/index.html     product pages
      public/shop2/{,ru/,et/}info/<slug>/index.html  the policy pages
@@ -104,11 +105,12 @@ import {
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
   STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
 } from "../src/lib/seo-head.mjs";
-import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS } from "../src/lib/shop-paths.mjs";
-/* The titles and meta descriptions of the home page, the sections, the brands
-   and the blog list (audit §1A) — the module app.js's setHead() carries a copy
-   of, so the head written here and the head after boot are one text. */
-import { seoBrandIntro, seoHead } from "../src/lib/seo-copy.mjs";
+import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, SUBCOLLECTION_MIN } from "../src/lib/shop-paths.mjs";
+/* The titles and meta descriptions of the home page, the sections, the
+   subcollections, the brands and the blog list (audit §1A) — the module
+   app.js's setHead() carries a copy of, so the head written here and the head
+   after boot are one text. */
+import { seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
 import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -501,6 +503,57 @@ try {
   console.warn("! " + e.message + "\n! /info/returns/ is written from the policy text alone");
   RETURNS_ASK = null;
 }
+
+/* subcollections: the chips that are pages (SUB_HANDLES in
+   src/lib/shop-paths.mjs — /et/collections/habemeolid and five more). Who is
+   under which chip (SUBCATS, SUB_PICKS, subcatsAuto/subcatsWith) lives in
+   app.js beside the chips that use it, and is lifted the way the dictionary
+   is — so a subcollection's static page lists exactly what its chip filters.
+   Each page's words in three languages are seoSub() in src/lib/seo-copy.mjs,
+   beside the sections' and the brands'. FATAL, like the dictionary: the
+   addresses are routed either way, and a page without these would carry the
+   wrong words or the wrong products. The same check holds the publishing
+   rule: a subcollection needs SUBCOLLECTION_MIN catalogue products and its
+   words in all three languages. */
+let SUBS = null;
+try {
+  const pieces = [
+    sliceFrom(/^ {2}var SUBCATS = \{$/, DECL_END),
+    sliceFrom(/^ {2}var SUB_PICKS = \{$/, DECL_END),
+    sliceFrom(/^ {2}function subcatsAuto\(p\) \{$/, FN_END),
+    sliceFrom(/^ {2}function subcatsWith\(p, own\) \{$/, FN_END)
+  ];
+  if (pieces.some(p => !p)) throw new Error("could not lift the subcollections (SUBCATS, SUB_PICKS, subcatsAuto, subcatsWith) out of app.js");
+  SUBS = new Function(pieces.join("\n") +
+    "\nreturn { cats: SUBCATS, auto: subcatsAuto, with: subcatsWith };")();
+  for (const key of Object.keys(SUB_HANDLES)) {
+    const [cat, sub] = key.split("/");
+    if (!(SUBS.cats[cat] || []).some(d => d.id === sub)) throw new Error(key + " is published (SUB_HANDLES) but app.js has no such chip");
+    for (const code of ["RU", "ET", "EN"]) {
+      const w = seoSub(key, code);
+      if (!w || !w.name || !w.title || !w.meta || !w.intro) throw new Error(key + " has no " + code + " words in seoSub() (src/lib/seo-copy.mjs)");
+    }
+    const n = CATALOGUE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;
+    if (n < SUBCOLLECTION_MIN) {
+      throw new Error(key + " holds " + n + " catalogue products, fewer than " + SUBCOLLECTION_MIN +
+        " — take it out of SUB_HANDLES (src/lib/shop-paths.mjs and app.js), or fill it");
+    }
+  }
+} catch (e) {
+  console.error("x " + e.message);
+  console.error("x refusing to write: the subcollection pages would not be the shop's own");
+  process.exit(1);
+}
+/* «Подраздел» as the owner set it in the panel — it wins over the rules, on
+   the static page as on the chip. */
+const ownSubcat = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subcat) || "";
+/* The chip's own label («Масла»), in the page's language — the dictionary
+   translates it, as translateTree() does on the shop's chip row. */
+const subChipLabel = (key, code) => {
+  const [cat, sub] = key.split("/");
+  const d = (SUBS.cats[cat] || []).find(x => x.id === sub);
+  return d ? tr(d.name, code, false) : "";
+};
 
 /* The rules the page prints — the table the checkout bills from. Until
    09.10.2026 this was a merge of the build's own: the owner's stored row laid
@@ -1076,7 +1129,12 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
     /* «Бренды» is the brands landing (/collections/brands), as it is in the
        shop's own crumb — it pointed at «Все товары» until 08.10.2026. */
     ...(kind === "b" ? [[t.brands, langPath(seg, "/brands/")]] : []),
-    [heading, null]
+    /* A subcollection ("beard/oi") sits under its section and is named by
+       its chip: Главная › Уход за бородой › Масла, here and in the
+       BreadcrumbList — the crumb the shop draws on tapping the chip. */
+    ...(kind === "c" && id.includes("/")
+      ? [[heading, langPath(seg, "/c/" + id.split("/")[0] + "/")], [subChipLabel(id, code), null]]
+      : [[heading, null]])
   ];
   /* A section with nothing in it for the moment. Until 18.09.2026 `list` was
      a slice of the catalogue file and could not be empty; it is
@@ -1131,6 +1189,32 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title, intro }
       content
     }
   };
+}
+
+/* ---------- a subcollection: a section's chip with a page of its own ------
+
+   /et/collections/habemeolid, /collections/shampoo … (SUB_HANDLES). The
+   section's listing template, exactly, and what the shop shows on tapping the
+   chip: the section's heading, the crumb Главная › section › chip, the
+   subcollection's own line under the heading, and the products the chip
+   filters, the owner's «Подраздел» included. Title, description and that line
+   are seoHead("sub")/seoSub() (src/lib/seo-copy.mjs), as setHead() and
+   screenCatalog() read them; the list's name in the ItemList is the page's
+   own, set on the spec afterwards. */
+function subcollectionPage(key, lang) {
+  const [cat, sub] = key.split("/");
+  const words = seoSub(key, lang.code);
+  const head = seoHead("sub", key, lang.code, SEO_CTX);
+  const list = ON_SALE.filter(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
+  const page = listingPage({
+    lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), list,
+    rest: "/c/" + key + "/",
+    desc: head.d, title: head.t,
+    intro: words.intro
+  });
+  page.spec.imageAlt = words.name;
+  for (const ld of page.spec.jsonld) if (ld["@type"] === "ItemList") ld.name = words.name;
+  return page;
 }
 
 /* ---------- /brands/ -----------------------------------------------------
@@ -1948,6 +2032,9 @@ for (const lang of LANGS) {
     }));
   }
 
+  // the subcollections — a section's chip with a page of its own (SUB_HANDLES)
+  for (const key of Object.keys(SUB_HANDLES)) pages.push(subcollectionPage(key, lang));
+
   for (const p of CATALOGUE) pages.push(productPage(p, lang));
 
   for (const slug of LEGAL_SLUGS) {
@@ -2052,6 +2139,9 @@ for (const lang of LANGS) {
   entries.push(urlEntry("/", lang.seg, "1.0"));
   for (const c of ["all", ...CATS]) entries.push(urlEntry("/c/" + c + "/", lang.seg, "0.8"));
   for (const b of BRANDS) entries.push(urlEntry("/b/" + BRAND_SLUG.get(b) + "/", lang.seg, "0.6"));
+  /* a subcollection is a narrower shelf of a section: below the section,
+     beside the brands */
+  for (const key of Object.keys(SUB_HANDLES)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));
   /* The product pages are NOT here. Their files are still written above —
      that is what makes the shop fast and indexable — but which of them a
      crawler is offered depends on «Показывать в магазине», a column the owner
@@ -2195,13 +2285,15 @@ await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsSt
   await writeFile(path.join(PUB, "llms.txt"), llms, "utf8");
 }
 
-const perLang = CATALOGUE.length + CATS.length + 1 + BRANDS.length + 1 +
+const SUB_COUNT = Object.keys(SUB_HANDLES).length;
+const perLang = CATALOGUE.length + CATS.length + 1 + SUB_COUNT + BRANDS.length + 1 +
   LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 + 1 +
   (BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0);
 
 console.log(
   `prerender: ${pages.length} pages (${written} written, ${same} unchanged, ${removed} stale removed)\n` +
   `           ${LANGS.length} languages × ${perLang}: ${CATALOGUE.length} products + ${CATS.length + 1} categories + ` +
+    `${SUB_COUNT} subcollections + ` +
     `${BRANDS.length} brands + 1 brands landing + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift + ` +
     `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
   /* Only when there is something to say: a run with no database hides
