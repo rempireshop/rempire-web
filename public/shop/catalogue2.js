@@ -453,7 +453,7 @@ const CATALOGUE = [
  {
   "id": "hair-resort-spray",
   "brand": "Kevin.Murphy",
-  "name": "Hair.Resort.Spray",
+  "name": "Hair.Resort.Spray — текстурирующий спрей",
   "cat": "hair",
   "price": 8,
   "priceFrom": true,
@@ -480,7 +480,7 @@ const CATALOGUE = [
  {
   "id": "rough-rider",
   "brand": "Kevin.Murphy",
-  "name": "Rough.Rider",
+  "name": "Rough.Rider — глина для укладки",
   "cat": "hair",
   "price": 11,
   "priceFrom": true,
@@ -639,7 +639,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-killer-twirls",
   "brand": "Kevin.Murphy",
-  "name": "Killer.Twirls",
+  "name": "Killer.Twirls — крем для локонов",
   "cat": "styling",
   "price": 26,
   "priceFrom": false,
@@ -659,7 +659,7 @@ const CATALOGUE = [
  {
   "id": "easy-rider",
   "brand": "Kevin.Murphy",
-  "name": "Easy.Rider",
+  "name": "Easy.Rider — крем против пушения",
   "cat": "styling",
   "price": 28,
   "priceFrom": false,
@@ -715,7 +715,7 @@ const CATALOGUE = [
  {
   "id": "killer-curls",
   "brand": "Kevin.Murphy",
-  "name": "Killer.Curls",
+  "name": "Killer.Curls — крем для кудрявых волос",
   "cat": "styling",
   "price": 33,
   "priceFrom": false,
@@ -735,7 +735,7 @@ const CATALOGUE = [
  {
   "id": "super-goo",
   "brand": "Kevin.Murphy",
-  "name": "Super.Goo",
+  "name": "Super.Goo — моделирующий гель",
   "cat": "styling",
   "price": 28,
   "priceFrom": false,
@@ -755,7 +755,7 @@ const CATALOGUE = [
  {
   "id": "body-builder",
   "brand": "Kevin.Murphy",
-  "name": "Body.Builder",
+  "name": "Body.Builder — мусс для объёма",
   "cat": "styling",
   "price": 18,
   "priceFrom": true,
@@ -882,7 +882,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-full-again",
   "brand": "Kevin.Murphy",
-  "name": "Full.Again",
+  "name": "Full.Again — уплотняющий лосьон",
   "cat": "styling",
   "price": 27,
   "priceFrom": false,
@@ -902,7 +902,7 @@ const CATALOGUE = [
  {
   "id": "hair-resort",
   "brand": "Kevin.Murphy",
-  "name": "Hair.Resort",
+  "name": "Hair.Resort — пляжный текстурайзер",
   "cat": "styling",
   "price": 26,
   "priceFrom": false,
@@ -2327,7 +2327,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-re-store",
   "brand": "Kevin.Murphy",
-  "name": "RE.STORE",
+  "name": "RE.STORE — восстанавливающий очищающий уход",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-murphy-re-store-0.webp?v=5",
@@ -2570,7 +2570,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-smooth-again",
   "brand": "Kevin.Murphy",
-  "name": "SMOOTH.AGAIN",
+  "name": "SMOOTH.AGAIN — несмываемый разглаживающий уход",
   "cat": "hair",
   "price": 34,
   "img": "/shop/img/kevin-murphy-smooth-again-0.webp?v=5",
@@ -2903,7 +2903,7 @@ const CATALOGUE = [
  {
   "id": "leave-in-repair",
   "brand": "Kevin.Murphy",
-  "name": "LEAVE-IN.REPAIR",
+  "name": "LEAVE-IN.REPAIR — несмываемый восстанавливающий уход",
   "cat": "hair",
   "price": 32,
   "img": "/shop/img/leave-in-repair-0.webp?v=5",
@@ -3385,7 +3385,7 @@ const CATALOGUE = [
  {
   "id": "anti-gravity",
   "brand": "Kevin.Murphy",
-  "name": "ANTI.GRAVITY",
+  "name": "ANTI.GRAVITY — лосьон для объёма",
   "cat": "styling",
   "price": 27,
   "img": "/shop/img/anti-gravity-0.webp?v=5",
@@ -3421,7 +3421,7 @@ const CATALOGUE = [
  {
   "id": "killer-waves",
   "brand": "Kevin.Murphy",
-  "name": "KILLER.WAVES",
+  "name": "KILLER.WAVES — спрей для локонов",
   "cat": "styling",
   "price": 33,
   "img": "/shop/img/killer-waves-0.webp?v=5",
