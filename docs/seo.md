@@ -508,6 +508,25 @@ is the product's own copy with a shouted opening heading dropped, then
 never the half that gets cut off. A pair the owner or the assistant wrote is
 used exactly as written, with nothing appended.
 
+Since 09.10.2026 (SEO pack 3) the order is: the owner's own pair → a
+**hand-written line** from `src/lib/seo-copy.mjs` `productMeta` (19 products
+people search for: all twelve System 4, Free.Hold, Night.Rider, Rough.Rider,
+the grey Gatsby Grunge Mat, Proraso Azur Lime balm, both Creed Aventus — what
+it is, who it is for, one fact from its own text, ≤ 155 characters, no tail)
+→ the description cut from the product's text. That cut is **whole
+sentences** now (`seoLead()` in the seo-copy block, which app.js carries):
+as many as fit before the delivery tail; a `BENEFITS:` / `ПРЕИМУЩЕСТВА:` /
+`KASUTAMINE:` label in capitals ends the copy; a first sentence longer than the
+room gives its longest clean clause (a colon, a semicolon, a bracket, a comma
+before «который / mis / which» or a gerund, else a dash — never a bare list
+comma); only when there is none of 30 characters, the old cut at a word with
+«…». Until then all 660 generic descriptions ended mid-sentence in «…»; now
+about one in five does. Both renderers read the same plain text
+(`seoSnippetText()`, which `textForSnippet()` is) — app.js used to read it
+through `stripTags()`, which ran a heading line into the copy.
+`tests/seo-copy.test.ts` runs app.js's own `descFromText()` against
+`productSpec()` for every catalogue product in every language.
+
 | page | JSON-LD |
 |---|---|
 | home | `Organization` (also typed `Store`, with `alternateName`, `legalName`, `email`, `telephone`, `vatID`, `taxID`, `geo`, `hasMap`, `areaServed`, `sameAs`, `hasMerchantReturnPolicy`, `hasShippingService` and an `@id` — see «Structured data and IndexNow») + `WebSite` (`alternateName`, `publisher` → that `@id`) |

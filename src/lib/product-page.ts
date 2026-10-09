@@ -203,7 +203,11 @@ export function renderCustomProductPage(
     id: row.id, cat: row.cat, catName: section, brand: row.brand, name: row.name,
     price, priceFrom: !!cp.priceFrom, stock,
     seoTitle: seo?.title ?? "", seoDesc: seo?.desc ?? "",
-    body,
+    /* The paragraphs as the page and app.js draw them (descOvHtml()), so a
+       paragraph is a sentence break in the description as well: setHead()
+       cuts the snippet from that HTML since 09.10.2026 (seoSnippetText()),
+       and the plain text ran a heading line into the copy. */
+    body: descriptionHtml(body),
     image: ogImage(base, row),
     imageUrls: photos.length ? photos.map((u) => absUrl(base, u)) : [absUrl(base, OG_DEFAULT)],
     commerce: commerceFor(row, o as Partial<Override> | null | undefined, opts.rules ?? DEFAULT_SHIPPING_RULES, opts.eans ?? {}),

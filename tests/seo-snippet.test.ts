@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 import {
   clip, descFrom, DESC_MAX, dropShout, fitTitle, LANGS, productSpec, stripTags, T, textForSnippet, unentity,
 } from "@/lib/seo-head.mjs";
+import { seoLead } from "@/lib/seo-copy.mjs";
 
 const RU = T.RU;
 const BASE = "https://rempireshop.com";
@@ -196,8 +197,12 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
     expect(T.ET.descTail()).toContain("tarne Eestis ja Baltikumis");
     expect(app).toContain('"доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics"');
     expect(T.EN.descTail()).toContain("delivery across Estonia and the Baltics");
-    /* The entity decode the SEO path used to skip. */
-    expect(app).toContain("descFromText(unentity(stripTags(descFor(p)))");
+    /* The entity decode the SEO path used to skip — and since 09.10.2026 the
+       very text the static page reads (seoSnippetText(), the seo-copy block):
+       a heading line keeps its own full stop instead of running into the copy,
+       and the old shop's English pair is cut from, not pasted in raw. */
+    expect(app).toContain('descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)), priceText, stockText, S.lang)');
+    expect(app).toContain("return seoLead(lead, room).replace(/\\.$/, \"\") + \" · \" + tail;");
     expect(app).toContain("unentity(stripTags(descFor(p))).slice(0, 500)");
     /* And the title: since 09.10.2026 the product-title rule of
        src/lib/seo-copy.mjs (audit §1A, no «— купить в Rempire» rung) —
@@ -238,5 +243,110 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
   it("clips at a word the way clip() does", () => {
     expect(clip("Шампунь поддерживает естественный баланс", 25)).toBe("Шампунь поддерживает…");
     expect(app).toContain('return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\\s.,;:·—–-]+$/, "") + "…";');
+  });
+});
+
+/* ---------------------------------------------------------------------------
+   Whole sentences, never half of one (SEO pack, 09.10.2026).
+
+   The product's share of the snippet used to be clip(text, room): the first
+   104 characters, cut at a word — «Scalp circulatory stimulating serum. Serum
+   that stimulates the superficial circulation of the… · delivery across
+   Estonia…». All 660 generic descriptions ended that way. seoLead()
+   (src/lib/seo-copy.mjs, called by descFrom() here and by descFromText() in
+   app.js) takes whole sentences instead; a label in capitals ends the copy;
+   a first sentence longer than the room gives its longest clean clause; and
+   only when there is none, the old cut at a word with «…». */
+describe("whole sentences, never half of one", () => {
+  const read = (rel: string) => readFileSync(path.join(__dirname, "..", rel), "utf8");
+  const load = (f: string, n: string) => new Function(read("public/shop/" + f) + "\nreturn " + n + ";")() as Record<string, string>;
+  const TEXTS: Record<string, Record<string, string>> = {
+    EN: load("content.js", "CONTENT"), RU: load("content.ru.js", "CONTENT_RU"), ET: load("content.et.js", "CONTENT_ET"),
+  };
+  const CATALOGUE = new Function(read("public/shop/catalogue2.js") + "\nreturn CATALOGUE;")() as Array<{ id: string; seo?: { d?: string } }>;
+  /** The body the prerender cuts a product's description from (productPage() in tools/prerender-shop2.mjs). */
+  const bodyOf = (p: { id: string; seo?: { d?: string } }, code: string) =>
+    code === "EN" && p.seo && p.seo.d ? p.seo.d : (code !== "EN" && TEXTS[code][p.id]) || TEXTS.EN[p.id] || "";
+  const tailOf = (code: "RU" | "ET" | "EN") => " · " + T[code].descTail();
+  const EN = tailOf("EN");
+
+  it("the finding: the System 4 serum's English snippet is its first sentence, not two-thirds of the second", () => {
+    const d = descFrom(textForSnippet(TEXTS.EN["system-4-bio-botanical-serum"]), T.EN);
+    expect(d).toBe("Scalp circulatory stimulating serum" + EN);
+    expect(d).not.toContain("…");
+  });
+
+  it("takes as many whole sentences as fit, and stops before the one that does not", () => {
+    expect(descFrom("Масло для бороды. Смягчает и укладывает. Пахнет кедром и цитрусом, подходит для ежедневного ухода за бородой любой длины.", RU))
+      .toBe("Масло для бороды. Смягчает и укладывает" + tailOf("RU"));
+  });
+
+  it("does not break a sentence at «pH 4.7», «e.g. after» or «№1»", () => {
+    expect(seoLead("Gentle wash at pH 4.7 for daily use. And a second sentence that is far too long to fit in here.", 40))
+      .toBe("Gentle wash at pH 4.7 for daily use.");
+    expect(seoLead("Use it e.g. after shaving. Rinse.", 100)).toBe("Use it e.g. after shaving. Rinse.");
+    expect(seoLead("Шампунь №1. Для жирной кожи головы.", 100)).toBe("Шампунь №1. Для жирной кожи головы.");
+  });
+
+  it("a label in capitals ends the copy — what follows is a list, the usage or the ingredients", () => {
+    expect(descFrom("Shampoo for an oily scalp. BENEFITS: Removes dandruff. Soothes itching.", T.EN))
+      .toBe("Shampoo for an oily scalp" + EN);
+    expect(descFrom("Тоник для жирной кожи головы. ПРЕИМУЩЕСТВА: Освежает.", RU))
+      .toBe("Тоник для жирной кожи головы" + tailOf("RU"));
+    expect(descFrom("Toonik rasusele peanahale. KASUTAMINE: Kanna peanahale.", T.ET))
+      .toBe("Toonik rasusele peanahale" + tailOf("ET"));
+    expect(descFrom("Grunge Mat for a matte look. HOW TO USE. Apply a little.", T.EN)).toBe("Grunge Mat for a matte look" + EN);
+  });
+
+  it("…and one before the copy is skipped, as a shouted heading is", () => {
+    expect(descFrom("BENEFITS: Soft hold for every day. HOW TO USE. Apply.", T.EN)).toBe("Soft hold for every day" + EN);
+    expect(descFrom("SPECIAL SHAMPOO 1 BY SYSTEM 4. Shampoo for oily and flaky scalp. BENEFITS: Less oil.", T.EN))
+      .toBe("Shampoo for oily and flaky scalp" + EN);
+  });
+
+  it("a first sentence too long for the room gives its longest clean clause", () => {
+    // before «, который» — and not «…улитки — ингредиента», one word after a dash
+    expect(seoLead("Эссенция обогащена 96,3% фильтрата секрета улитки — ингредиента, который заметно улучшает состояние кожи и дарит сияние.", 104))
+      .toBe("Эссенция обогащена 96,3% фильтрата секрета улитки");
+    // before «, which»
+    expect(seoLead("A nourishing conditioner that hydrates and strengthens deeply and evenly, which helps against breakage and keeps every curl bouncy.", 96))
+      .toBe("A nourishing conditioner that hydrates and strengthens deeply and evenly");
+    // at a colon
+    expect(seoLead("Верните к жизни уставшие волосы: с этим шампунем сухие, повреждённые, пушащиеся волосы снова становятся мягкими и послушными.", 104))
+      .toBe("Верните к жизни уставшие волосы");
+  });
+
+  it("never cuts in the middle of a list — a bare comma or «and» is not a clause", () => {
+    const lead = seoLead("Treat fine, fragile and broken hair with ANGEL.RINSE, our weightless, volumising conditioning rinse created to soothe and protect.", 96);
+    expect(lead.endsWith("…")).toBe(true);
+    expect(lead).not.toMatch(/weightless$|volumising$|fragile$/);
+  });
+
+  it("every catalogue text in every language: its own words, ending at a sentence, a clean clause — or, last, «…»", () => {
+    let total = 0, clipped = 0;
+    const bad: string[] = [];
+    const tidy = (s: string) => s.replace(/\s+/g, " ").replace(/\s+([.!?…])/g, "$1").trim();
+    for (const p of CATALOGUE) {
+      for (const code of ["RU", "ET", "EN"] as const) {
+        const text = textForSnippet(bodyOf(p, code));
+        if (!text) continue;
+        total++;
+        const d = descFrom(text, T[code]);
+        if (d.length > DESC_MAX) bad.push(`${code} ${p.id}: ${d.length} characters`);
+        const lead = d.endsWith(tailOf(code)) ? d.slice(0, -tailOf(code).length) : d;
+        if (lead.endsWith("…")) { clipped++; continue; }
+        const src = tidy(dropShout(text) || text);
+        const at = src.indexOf(tidy(lead));
+        if (at < 0) { bad.push(`${code} ${p.id}: «${lead}» is not the text's own words`); continue; }
+        const next = src.slice(at + tidy(lead).length);
+        if (!(/[.!?]$/.test(lead) || next === "" || /^(?:[.!?…]|[,;:]\s|\s[—–]\s|\s\()/.test(next))) bad.push(`${code} ${p.id}: ends mid-sentence «…${lead.slice(-30)}|${next.slice(0, 20)}»`);
+      }
+    }
+    expect(bad).toEqual([]);
+    expect(total).toBe(CATALOGUE.length * 3);
+    /* All 660 ended in «…» before. The word cut is the last resort now: a
+       first sentence with no clean clause in reach. If this climbs, the rule
+       has stopped finding the sentences. */
+    expect(clipped / total).toBeLessThan(0.3);
   });
 });

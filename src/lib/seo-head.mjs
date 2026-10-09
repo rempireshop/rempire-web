@@ -17,7 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
-import { seoPriceText, seoProductCore, seoProductTitle } from "./seo-copy.mjs";
+import { seoLead, seoPriceText, seoProductCore, seoProductMeta, seoProductTitle, seoSnippetText } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -130,23 +130,15 @@ export const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").
    be the same fault the other way round.
 
    stripTags() itself is left exactly as it is: it is the twin of the copy in
-   public/shop2/app.js, and the two must keep answering identically. */
-export const textForSnippet = h => {
-  /* A sentinel rather than a space, because a space is what the text is
-     already full of. `\u0000` is written as an escape and never as the
-     character: a raw NUL in a source file makes grep call it binary and
-     report no matches at all, which is a trap this repository has already
-     walked into once (src/lib/og-card.ts). */
-  const MARK = "\u0000";
-  return unentity(String(h || "")
-    .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : MARK))
-    .replace(/<[^>]+>/g, MARK))
-    .split(MARK)
-    .map(x => x.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .reduce((out, part) => (out ? out + (/[.!?…:;,)»—–-]$/.test(out) ? " " : ". ") + part : part), "")
-    .trim();
-};
+   public/shop2/app.js, and the two must keep answering identically.
+
+   Since 09.10.2026 the function itself lives in src/lib/seo-copy.mjs
+   (seoSnippetText()), whose block app.js carries byte for byte: the shop's
+   product head used to read the text through stripTags() instead, so the
+   static page and the page after boot cut the same description from two
+   different texts. Same rule, same answers (tests/seo-snippet.test.ts holds
+   it to every catalogue text). */
+export const textForSnippet = seoSnippetText;
 
 /* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
    SYSTEM 4 Сыворотка, стимулирующая…», «НЕВЕСОМЫЙ ЛАК ДЛЯ ВОЛОС — ОБЪЁМ И
@@ -1048,7 +1040,14 @@ export function openingHoursLD(hours) {
    So: the shouted heading goes, the product's own first words stay, and the
    three facts a shopper is actually deciding on come after them, always
    whole. The tail is budgeted first and the copy takes what is left, so the
-   price is never the half that gets cut off. */
+   price is never the half that gets cut off.
+
+   The copy's share is whole sentences since 09.10.2026 (seoLead() in
+   src/lib/seo-copy.mjs, which app.js's descFromText() calls too): as many as
+   fit, never «…the superficial circulation of the…»; a «BENEFITS:» /
+   «ПРЕИМУЩЕСТВА:» label ends the copy; a first sentence longer than the room
+   gives its longest clean clause, and only failing that a word cut with «…».
+   The tail itself is as it was. */
 export const DESC_MAX = 158;
 export function descFrom(text, t) {
   const tail = t.descTail();
@@ -1057,10 +1056,10 @@ export function descFrom(text, t) {
   const room = DESC_MAX - tail.length - 3;   // " · "
   /* A tail so long there is no room for the copy would be a snippet that says
      only the price — then the copy wins and the tail goes. */
-  if (room < 40) return clip(lead, DESC_MAX);
-  /* A full stop directly before « · » reads as a typo; clip() already drops
-     one when it has to cut, so this is the case where the copy fitted whole. */
-  return clip(lead, room).replace(/\.$/, "") + " · " + tail;
+  if (room < 40) return seoLead(lead, DESC_MAX);
+  /* A full stop directly before « · » reads as a typo; a clause or a word cut
+     never ends in one, so this is the case where whole sentences fitted. */
+  return seoLead(lead, room).replace(/\.$/, "") + " · " + tail;
 }
 
 /**
@@ -1086,12 +1085,15 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
   const text = textForSnippet(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
   /* An owner's or the assistant's own pair is deliberate and is left alone —
-     no price is appended to a sentence somebody wrote on purpose. */
+     no price is appended to a sentence somebody wrote on purpose. After it,
+     the shop's own hand-written line for the products people search for
+     (seoProductMeta(), src/lib/seo-copy.mjs — whole, no delivery line), and
+     only then a description cut from the product's text. */
   const desc = seoDesc
     ? clip(seoDesc, DESC_MAX)
-    : text
+    : seoProductMeta(id, lang.code) || (text
       ? descFrom(text, t)
-      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX);
+      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX));
 
   const crumbItems = [
     [t.home, langPath(seg, "/")],

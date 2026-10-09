@@ -48414,7 +48414,9 @@
      product's own words, then the price, the stock and the delivery line —
      what it is and why buy it here. descFrom() in src/lib/seo-head.mjs writes
      the same sentence into the static page, so the head a crawler is served
-     and the head it reads after this script runs are one text. */
+     and the head it reads after this script runs are one text. The product's
+     share is whole sentences since 09.10.2026 — seoLead(), in the seo-copy
+     block below, the same function the static page calls. */
   var DESC_MAX = 158;
   function descFromText(text, priceText, stockText, lang) {
     /* Ни цены, ни наличия — 21.09.2026. Цена уже стоит в заголовке, и в
@@ -48427,8 +48429,8 @@
     var lead = dropShout(text) || text;
     if (!lead) return clipDesc(tail, DESC_MAX);
     var room = DESC_MAX - tail.length - 3;
-    if (room < 40) return clipDesc(lead, DESC_MAX);
-    return clipDesc(lead, room).replace(/\.$/, "") + " · " + tail;
+    if (room < 40) return seoLead(lead, DESC_MAX);
+    return seoLead(lead, room).replace(/\.$/, "") + " · " + tail;
   }
   /* One page, three URLs, one cluster: canonical plus ru/et/en/x-default. The
      addresses come from the path — the route behind it, re-spelled in each
@@ -48888,6 +48890,113 @@
         "system-4-special-shampoo-1": { tail: "№1" },
         "xerjoff-1861-naxos-eau-de-parfum-100ml": { name: "Ксерджофф Наксос" }
       },
+      /* A product's meta description, written by hand (Dim, 09.10.2026) for
+         the products people actually search for: the whole System 4 range,
+         three Kevin.Murphy pastes, the grey Gatsby Grunge Mat, Proraso's Azur
+         Lime balm and both Creed Aventus. Each one says what the product is,
+         who it is for and one fact from its own text (the sizes, a key
+         ingredient, the notes) — cosmetic effects only, never a treatment.
+         Each is complete at 155 characters or less, so no delivery line is
+         added after it. The owner's own pair for the product still wins
+         (seoFor() in app.js, `seoDesc` in productSpec()); every other product
+         is described by seoLead() from its text. seoProductMeta(). */
+      productMeta: {
+        "system-4-special-shampoo-1": {
+          RU: "Шампунь System 4 №1 (Special Shampoo 1) для жирной кожи головы, склонной к перхоти. С салициловой кислотой и климбазолом, без отдушек. 75–500 мл.",
+          ET: "System 4 šampoon nr 1 (Special Shampoo 1) rasusele, kõõmale kalduvale peanahale. Salitsüülhappe ja klimbasooliga, lõhnaainevaba. 75–500 ml.",
+          EN: "System 4 Special Shampoo 1 (No. 1) for an oily, dandruff-prone scalp. With salicylic acid and climbazole, fragrance-free. 75, 250 or 500 ml."
+        },
+        "system-4-balancing-shampoo-2": {
+          RU: "Шампунь System 4 №2 (Balancing Shampoo 2) для сухой кожи головы, склонной к перхоти, и окрашенных волос. Бережёт цвет, без отдушек. 75–500 мл.",
+          ET: "System 4 šampoon nr 2 (Balancing Shampoo 2) kuivale, kõõmale kalduvale peanahale ja värvitud juustele. Kaitseb värvi, lõhnaainevaba. 75–500 ml.",
+          EN: "System 4 Balancing Shampoo 2 (No. 2) for a dry, dandruff-prone scalp and colour-treated hair. Helps protect colour, fragrance-free. 75–500 ml."
+        },
+        "system-4-mild-shampoo-3": {
+          RU: "Шампунь System 4 №3 (Mild Shampoo 3) — мягкий шампунь на каждый день: бережно очищает и предотвращает появление перхоти. Без отдушек, 75–500 мл.",
+          ET: "System 4 šampoon nr 3 (Mild Shampoo 3) – mahe šampoon igapäevaseks pesuks: puhastab õrnalt ja ennetab kõõma. Lõhnaainevaba, 75–500 ml.",
+          EN: "System 4 Mild Shampoo 3 (No. 3), a gentle everyday shampoo: cleans softly and helps keep dandruff away. Fragrance-free, 75, 250 or 500 ml."
+        },
+        "system-4-shale-oil-shampoo-4": {
+          RU: "Шампунь System 4 №4 (Shale Oil Shampoo 4) для очень жирных волос и чувствительной кожи головы. Сланцевое масло и ментол, без отдушек. 75–500 мл.",
+          ET: "System 4 šampoon nr 4 (Shale Oil Shampoo 4) väga rasustele juustele ja tundlikule peanahale. Põlevkiviõli ja mentooliga, lõhnaainevaba. 75–500 ml.",
+          EN: "System 4 Shale Oil Shampoo 4 (No. 4) for very oily hair and a sensitive scalp. With shale oil and menthol, fragrance-free. 75, 250 or 500 ml."
+        },
+        "system-4-bio-botanical-shampoo": {
+          RU: "Шампунь System 4 Bio Botanical для тонких и ослабленных волос: растительные экстракты, ментол и салициловая кислота для кожи головы. 75–500 мл.",
+          ET: "System 4 Bio Botanical šampoon peenikestele ja nõrgenenud juustele: taimeekstraktid, mentool ja salitsüülhape peanahale. 75–500 ml.",
+          EN: "System 4 Bio Botanical Shampoo for fine, weakened hair: plant extracts, menthol and salicylic acid for the scalp. 75, 250 or 500 ml."
+        },
+        "system-4-bio-botanical-serum": {
+          RU: "Несмываемая сыворотка System 4 Bio Botanical для кожи головы — уход за тонкими и ослабленными волосами. Ментол и растительные экстракты, 50–500 мл.",
+          ET: "System 4 Bio Botanical pähejäetav peanahaseerum peenikestele ja nõrgenenud juustele: mentool ja taimeekstraktid värskendavad peanahka. 50–500 ml.",
+          EN: "System 4 Bio Botanical leave-in scalp serum for fine, weakened hair. Menthol and plant extracts refresh the scalp; use daily. 50, 150 or 500 ml."
+        },
+        "system-4-bio-botanical-vital-cure": {
+          RU: "Кондиционер System 4 Bio Botanical для тонких и ослабленных волос: мягко отшелушивает кожу головы, можно оставить как маску. 150 и 500 мл.",
+          ET: "System 4 Bio Botanical palsam peenikestele ja nõrgenenud juustele: koorib õrnalt peanahka, sobib ka peanahamaskiks. 150 ja 500 ml.",
+          EN: "System 4 Bio Botanical conditioner for fine, weakened hair: gently exfoliates the scalp and can be left on as a scalp mask. 150 or 500 ml."
+        },
+        "sim-sensitive-system-4-scalp-tonic-t": {
+          RU: "Тоник System 4 T для жирной кожи головы: освежает ментолом, не смывается, подходит для ежедневного ухода между мытьём. Без отдушек, 50–500 мл.",
+          ET: "System 4 peanahatoonik T rasusele peanahale: värskendab mentooliga, ei vaja loputamist, sobib pesukordade vahele. Lõhnaainevaba, 50–500 ml.",
+          EN: "System 4 Scalp Tonic T for an oily scalp: a no-rinse menthol tonic for daily use or between washes. Fragrance-free, 50, 150 or 500 ml."
+        },
+        "sim-sensitive-system-4-oil-cure-scalp-treatment-o": {
+          RU: "Маска System 4 O для кожи головы: мягко отшелушивает, убирает перхоть, кожное сало и остатки средств. Подходит и как кондиционер. 75–500 мл.",
+          ET: "System 4 peanahamask O: koorib õrnalt peanahka, eemaldab kõõma, rasu ja hooldusvahendite jäägid, sobib ka palsamiks. 75–500 ml.",
+          EN: "System 4 scalp mask O: gently exfoliates, lifting dandruff, oil and product build-up, and doubles as a conditioner. 75, 150 or 500 ml."
+        },
+        "system-4-hydro-care-conditioner-h": {
+          RU: "Кондиционер System 4 H (Hydro Care) для сухих и окрашенных волос: увлажняет, бережёт цвет и придаёт блеск. Без отдушек, 75–500 мл.",
+          ET: "System 4 palsam H (Hydro Care) kuivadele ja värvitud juustele: niisutab, kaitseb värvi tuhmumise eest ja annab läiget. 75–500 ml.",
+          EN: "System 4 Hydro Care Conditioner H for dry, colour-treated hair: moisturises, helps keep colour from fading and adds shine. 75–500 ml."
+        },
+        "system-4-moisture-scalp-lotion-m": {
+          RU: "Лосьон System 4 M для чувствительной кожи головы, которой не хватает влаги: несмываемый, без отдушек. Подходит также для лица и шеи после бритья.",
+          ET: "System 4 losjoon M tundlikule peanahale, mis vajab niiskust: pähejäetav ja lõhnaainevaba. Sobib ka näole ja kaelale pärast raseerimist.",
+          EN: "System 4 Moisture Scalp Lotion M for a sensitive scalp that needs moisture: leave-in and fragrance-free. Also suits face and neck after shaving."
+        },
+        "sim-sensitive-system-4-chitosan-hair-repair-r": {
+          RU: "Спрей System 4 R (Chitosan Hair Repair) для сухих и повреждённых волос: хитозан и кератин, защита от УФ, не смывается. 50 и 150 мл.",
+          ET: "System 4 hooldussprei R (Chitosan Hair Repair) kuivadele ja kahjustatud juustele: kitosaan ja keratiin, UV-kaitse, ei vaja loputamist. 50 ja 150 ml.",
+          EN: "System 4 Chitosan Hair Repair R, a leave-in spray for dry, damaged hair: chitosan and keratin, with UV protection. 50 or 150 ml."
+        },
+        "free-hold": {
+          RU: "Kevin.Murphy Free.Hold — паста для укладки эластичной средней фиксации с естественным блеском, для всех типов волос. Без сульфатов, 30 и 100 г.",
+          ET: "Kevin.Murphy Free.Hold – paindliku keskmise hoiuga viimistluspasta loomuliku läikega, kõikidele juuksetüüpidele. Sulfaadivaba, 30 ja 100 g.",
+          EN: "Kevin.Murphy Free.Hold: a flexible, medium-hold styling paste with natural shine, for all hair types. Sulphate- and paraben-free, 30 or 100 g."
+        },
+        "night-rider": {
+          RU: "Kevin.Murphy Night.Rider — самая сильная из моделирующих паст бренда: выразительная матовая текстура для коротких и рваных стрижек. 30 и 100 г.",
+          ET: "Kevin.Murphy Night.Rider – brändi vormimispastadest kõige tugevam: jõuline matt tekstuur lühikestele ja astmelistele lõikustele. 30 ja 100 g.",
+          EN: "Kevin.Murphy Night.Rider, the strongest of the brand's moulding pastes: rough, matte texture for short or choppy cuts. Sulphate-free, 30 or 100 g."
+        },
+        "rough-rider": {
+          RU: "Kevin.Murphy Rough.Rider — глина для укладки сильной фиксации: плотная, слегка зернистая текстура и матовый образ, который держится долго. 30 и 100 г.",
+          ET: "Kevin.Murphy Rough.Rider – tugeva hoiuga viimistlussavi: tihke, kergelt sõmer tekstuur ja matt soeng, mis püsib kaua. 30 ja 100 g.",
+          EN: "Kevin.Murphy Rough.Rider: a strong-hold styling clay with a dense, slightly gritty texture for a matte, defined look that lasts. 30 or 100 g."
+        },
+        "gatsby-moving-rubber-grunge-mat-grey-hair-wax": {
+          RU: "Воск Gatsby Moving Rubber Grunge Mat (серый): матовая укладка без блеска, сильная фиксация, легко переуложить. Для коротких и средних волос.",
+          ET: "Gatsby Moving Rubber Grunge Mat (hall) – matt juuksevaha ilma läiketa: tugev hoid, soengut saab kergesti ümber teha. Lühikestele ja keskmistele juustele.",
+          EN: "Gatsby Moving Rubber Grunge Mat (grey) wax: a matte, no-shine finish with strong hold you can restyle any time. For very short to medium hair."
+        },
+        "proraso-azur-lime-after-shave-balm-100-ml": {
+          RU: "Бальзам после бритья Proraso Azur Lime, 100 мл: масло ши и глицерин, лёгкая нежирная текстура, быстро впитывается и успокаивает кожу.",
+          ET: "Proraso Azur Lime raseerimisjärgne palsam, 100 ml: sheavõi ja glütseriin, kerge mitterasvane tekstuur, imendub kiiresti ja rahustab nahka.",
+          EN: "Proraso Azur Lime after shave balm, 100 ml: shea butter and glycerin in a light, non-greasy balm that absorbs fast and calms the skin."
+        },
+        "creed-aventus-eau-de-parfum-for-men-50ml": {
+          RU: "Creed Aventus, мужская парфюмерная вода 50 мл: ананас, чёрная смородина и бергамот, в сердце берёза, в базе мускус, дубовый мох и ваниль.",
+          ET: "Creed Aventus, meeste parfüümvesi 50 ml: ananass, mustsõstar ja bergamott, südames kask, põhjas muskus, tammesammal ja vanill.",
+          EN: "Creed Aventus eau de parfum for men, 50 ml: pineapple, blackcurrant and bergamot over birch, with a base of musk, oakmoss and vanilla."
+        },
+        "creed-creed-aventus-cologne-50ml": {
+          RU: "Creed Aventus Cologne, унисекс-аромат 50 мл: мандарин, имбирь и розовый перец, пачули и сандал, в базе берёза, мускус и бобы тонка.",
+          ET: "Creed Aventus Cologne, unisex-lõhn 50 ml: mandariin, ingver ja roosa pipar, patšuli ja sandlipuu, põhjas kask, muskus ja tonkauba.",
+          EN: "Creed Aventus Cologne, a 50 ml unisex eau de parfum: tangerine, ginger and pink pepper, patchouli and sandalwood over birch, musk and tonka."
+        }
+      },
       from: { EN: "from ", ET: "alates ", RU: "от " }
     };
   }
@@ -48904,6 +49013,163 @@
     if (t.length <= max) return t;
     var cut = t.slice(0, max - 1), sp = cut.lastIndexOf(" ");
     return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
+  }
+
+  /* ---- a product text as a search snippet (09.10.2026) ---------------------
+
+     The meta description of a product nobody has written one for is cut from
+     its own text, and until now that cut fell wherever 104 characters ended:
+     «Scalp circulatory stimulating serum. Serum that stimulates the
+     superficial circulation of the… · delivery across Estonia…» (SEO pack,
+     09.10.2026). These three functions are the whole of the rule, here so the
+     static page (descFrom() in src/lib/seo-head.mjs) and the page after the
+     shop boots (descFromText() in app.js) cannot cut the same text two ways. */
+
+  var SEO_ENTITY = {
+    amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", "#39": "'", nbsp: " ",
+    ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", hellip: "…"
+  };
+  var SEO_INLINE = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
+
+  /**
+   * A product's HTML as plain text, every block boundary a sentence break: a
+   * heading line above the copy keeps its own full stop instead of running
+   * into the next sentence («Шампунь для редеющих волос Шампунь
+   * поддерживает…»), an inline tag inside a word leaves the word whole, and
+   * the entities are decoded once. textForSnippet() in src/lib/seo-head.mjs
+   * IS this function; app.js used to strip the tags its own way and joined the
+   * heading to the copy with a space.
+   */
+  function seoSnippetText(h) {
+    /* a sentinel, not a space — the text is full of spaces; written as an
+       escape, never as the character (a raw NUL makes grep call a file binary) */
+    var MARK = "\u0000";
+    return String(h || "")
+      .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, function (m, tag) { return SEO_INLINE.test(tag) ? "" : MARK; })
+      .replace(/<[^>]+>/g, MARK)
+      .replace(/&(amp|lt|gt|quot|apos|#39|nbsp|ndash|mdash|rsquo|lsquo|rdquo|ldquo|hellip);/g, function (m, e) { return SEO_ENTITY[e]; })
+      .replace(/&#(\d+);/g, function (m, n) { return String.fromCodePoint(Number(n)); })
+      .replace(/&#x([0-9a-f]+);/gi, function (m, n) { return String.fromCodePoint(parseInt(n, 16)); })
+      .split(MARK)
+      .map(function (x) { return x.replace(/\s+/g, " ").trim(); })
+      .filter(Boolean)
+      .reduce(function (out, part) { return out ? out + (/[.!?…:;,)»—–-]$/.test(out) ? " " : ". ") + part : part; }, "")
+      .trim();
+  }
+
+  /* The capitals of the languages the shop writes in — the same classes as
+     dropShout() in src/lib/seo-head.mjs and app.js. */
+  var SEO_UPPER = "A-ZÀ-ÖØ-ÞŠŽА-ЯЁ";
+  /* A sentence ends at . ! ? or … followed by a space and something that can
+     open one: a capital, a digit, №, an opening quote or bracket. «pH 4.7»,
+     «e.g. after» and «2–5 мин.» stay inside their sentence. */
+  var SEO_STOP = new RegExp("[.!?…]+[\"»”’)]*\\s+(?=[\"«„“(№]?[" + SEO_UPPER + "0-9])", "g");
+  /* A label in capitals — «BENEFITS:», «HOW TO USE.», «ПРЕИМУЩЕСТВА:»,
+     «СПОСОБ ПРИМЕНЕНИЯ.», «KASUTAMINE:», «SPECIAL SHAMPOO 1 BY SYSTEM 4.» */
+  var SEO_LABEL = new RegExp("^[" + SEO_UPPER + "][" + SEO_UPPER + "0-9 &/'’.+-]{1,48}[:.](?=\\s|$)");
+
+  function seoSentences(text) {
+    var s = String(text == null ? "" : text).replace(/\s+/g, " ").trim(), out = [], from = 0, m;
+    SEO_STOP.lastIndex = 0;
+    while ((m = SEO_STOP.exec(s))) {
+      out.push(s.slice(from, m.index + m[0].length).trim());
+      from = m.index + m[0].length;
+    }
+    if (from < s.length) out.push(s.slice(from).trim());
+    // «…образ» .» — a stray space before the stop
+    return out.map(function (x) { return x.replace(/\s+([.!?…]+)$/, "$1"); }).filter(Boolean);
+  }
+
+  /** Mostly capitals — a heading or a shouted label, not copy. */
+  function seoShouty(s) {
+    var letters = s.replace(new RegExp("[^" + SEO_UPPER + "a-zà-öø-ÿšžа-яё]", "g"), "");
+    var caps = letters.replace(new RegExp("[^" + SEO_UPPER + "]", "g"), "");
+    return letters.length >= 6 && caps.length >= letters.length * 0.7;
+  }
+
+  /* Where a clause can end cleanly: a colon, a semicolon, an opening bracket,
+     or a comma before a word that opens a clause of its own — который / в
+     котором / что / а, mis / et / kuid, which / while, a gerund (защищая,
+     kaitstes, leaving). A bare comma or «и / and / ja» is far more often the
+     middle of a list — «сухие, повреждённые и…», «weightless, volumising» —
+     and a cut there reads as broken, so neither counts. A dash is the weaker
+     kind: in Russian it is as often «X — это Y» as an aside, so it is used
+     only where none of the others is. */
+  var SEO_OPENS = "(?:в|во|на|с|со|из|для|при|по|к|о|об|благодаря)\\s+котор[а-яё]*|котор[а-яё]*|что|чтобы|где|когда|поэтому|благодаря|а|но|включая|" +
+    "придавая|создавая|обеспечивая|сохраняя|защищая|снижая|оставляя|делая|подчёркивая|подчеркивая|" +
+    "укрепляя|увлажняя|питая|очищая|разглаживая|предотвращая|помогая|" +
+    "созданн[а-яё]*|подходящ[а-яё]*|идеально|предназначенн[а-яё]*|разработанн[а-яё]*|обогащённ[а-яё]*|обогащенн[а-яё]*|" +
+    "mis|mille[a-zõäöü]*|kes|et|kuid|sest|[a-zõäöüšž]+des|loodud|mõeldud|rikastatud|sobib|" +
+    "which|that|while|whilst|so|but|without|including|leaving|giving|helping|making|adding|creating|keeping|providing|" +
+    "reducing|diminishing|protecting|delivering|ensuring|allowing|lending|offering|combining|" +
+    "suitable|ideal|perfect|designed|made|created|crafted|formulated|developed|enriched|infused|inspired";
+  var SEO_CUT = new RegExp("\\s?[;:]\\s|\\s\\(|,\\s(?=(?:" + SEO_OPENS + ")(?![a-zа-яёõäöüšž]))", "g");
+  var SEO_DASH = /\s[—–]\s/g;
+
+  /** The last match of `rx` in `head` at `min` or beyond, or -1. */
+  function seoLastCut(rx, head, min) {
+    var best = -1, m;
+    rx.lastIndex = 0;
+    while ((m = rx.exec(head))) if (m.index >= min) best = m.index;
+    return best;
+  }
+
+  /**
+   * One sentence too long for `room`: the longest clean clause that fits
+   * (SEO_CUT, else a dash), and only when there is none of at least thirty
+   * characters — shorter is a bare noun with nothing said about it — a cut at
+   * a word with «…» (seoClip()). A clause that would end on one word after a
+   * dash — «…секрета улитки — ингредиента» — ends at the dash instead.
+   */
+  function seoClause(s, room) {
+    s = String(s).trim();
+    if (s.length <= room) return s;
+    var min = Math.min(30, Math.floor(room / 2)), head = s.slice(0, room + 1);
+    var best = seoLastCut(SEO_CUT, head, min);
+    if (best < 0) best = seoLastCut(SEO_DASH, head, min);
+    if (best < 0) return seoClip(s, room);
+    var out = s.slice(0, best).replace(/[\s,;:—–-]+$/, "");
+    var dash = seoLastCut(SEO_DASH, out, min);
+    if (dash >= 0 && !/\s/.test(out.slice(dash + 3).trim())) out = out.slice(0, dash);
+    return out;
+  }
+
+  /**
+   * The words of a product text a snippet has room for: whole sentences from
+   * the start, as many as fit in `room`, never half of one. A shouted heading
+   * or a label in capitals before the copy is skipped; one after it ends the
+   * copy, because what follows «BENEFITS:» / «ПРЕИМУЩЕСТВА:» / «KASUTAMINE:»
+   * is a list, the usage or the ingredients. When even the first sentence is
+   * longer than the room, its longest clean clause (seoClause()). Plain text
+   * in, plain text out — the shouted run at the very start is dropShout()'s,
+   * which the callers apply first.
+   */
+  function seoLead(text, room) {
+    var parts = seoSentences(text), out = "", i, s;
+    for (i = 0; i < parts.length; i++) {
+      s = parts[i];
+      if (SEO_LABEL.test(s) || seoShouty(s)) {
+        if (out) break;
+        s = s.replace(SEO_LABEL, "").trim();
+        if (!s || seoShouty(s)) continue;
+      }
+      if (!out) {
+        if (s.length > room) return seoClause(s, room);
+        out = s;
+      } else if (out.length + 1 + s.length <= room) out += " " + s;
+      else break;
+    }
+    return out || seoClause(text, room);
+  }
+
+  /**
+   * The hand-written meta description of a product in one language, or "" —
+   * the productMeta table above. The owner's own pair wins over it, and it
+   * wins over the description cut from the product's text.
+   */
+  function seoProductMeta(id, lang) {
+    var m = seoCopy().productMeta[id];
+    return (m && m[lang]) || "";
   }
 
   function seoFill(s, vars) {
@@ -49158,13 +49424,19 @@
       var so = seoFor(p, S.lang);
       if (so && so.t) t = fitTitle(so.t, "");
       else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
-      /* A pair somebody wrote is left exactly as written; a description cut
-         from the product text gets the shouted heading dropped and the
-         delivery line added — descFrom() in src/lib/seo-head.mjs, the same
-         sentence the static page carries. */
+      /* A pair somebody wrote is left exactly as written; then the shop's
+         own hand-written line for the products people search for
+         (seoProductMeta(), src/lib/seo-copy.mjs); a description cut from the
+         product text gets the shouted heading dropped, whole sentences and
+         the delivery line — descFrom() in src/lib/seo-head.mjs, the same
+         sentence the static page carries, read from the same plain text
+         (seoSnippetText(): a heading line keeps its own full stop). The old
+         shop's English description, where the catalogue has one, is that
+         text on the English page — the body the prerender cuts it from too;
+         it used to go into the tag raw, markup and all. */
       d = so && so.d ? so.d
-        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d
-          : descFromText(unentity(stripTags(descFor(p))), priceText, stockText, S.lang);
+        : seoProductMeta(p.id, S.lang) ||
+          descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)), priceText, stockText, S.lang);
       // the page's own address, in the address's language and with no query (?size=)
       var pUrl = location.origin + shopPathFor(langFromPath(location.pathname) || "EN", "/p/" + encodeURIComponent(p.id) + "/");
       // same shape the prerendered pages carry, so taking over a static page
