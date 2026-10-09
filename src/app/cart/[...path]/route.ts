@@ -6,7 +6,9 @@
  * day rempireshop.com points at this shop, that address lands here:
  * src/middleware.ts lets exactly this shape through (every other `/cart/…`
  * is folded into `/cart`, the basket), and src/lib/merchant-cart.ts
- * turns the id back into the product and the size the feed gave it.
+ * turns the id back into the product and the size the feed gave it — or,
+ * for an item of Shopify's product source (`shopify_ZZ_<product>_<variant>`,
+ * or a bare variant id), the size that Shopify variant is here.
  *
  * A 302 to the product page with `?size=…&buy=<qty>`, which puts it in the
  * basket and opens the checkout — never cached: stock and «Показывать в
