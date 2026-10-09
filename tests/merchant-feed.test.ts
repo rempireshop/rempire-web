@@ -420,7 +420,7 @@ describe("prices and availability", () => {
     }
     const en = byProduct((await feed("en")).list, shown.id);
     expect(one(en[0], "description")).toBe("A beard balm.");
-    expect(one(en[0], "title")).toBe("Proraso Beard Balm — balm for beard, 100 ml");
+    expect(one(en[0], "title")).toBe("Proraso Beard Balm — beard balm, 100 ml");
   });
 });
 

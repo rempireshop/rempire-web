@@ -101,8 +101,8 @@ describe("the product snippet prompt asks each language in its own words", () =>
   });
 
   it("a tail the shop cannot translate is not named as the type word — the model is told to translate it", () => {
-    const { system, user } = buildSeoPrompt("ET", { ...input, name: "Face Scrub — скраб для лица" });
-    expect(user).toContain("Product name: Face Scrub — скраб для лица");
+    const { system, user } = buildSeoPrompt("ET", { ...input, name: "Face Peel — пилинг для лица" });
+    expect(user).toContain("Product name: Face Peel — пилинг для лица");
     expect(system).not.toMatch(/What this product is, in Estonian/);
     expect(system).toMatch(/translate it, never copy it/);
   });
@@ -117,9 +117,9 @@ describe("seoOffLanguage — what counts as Russian in an Estonian or English sn
   });
 
   it("the type word after « — » is not the owner's name: a tail left Russian is off, even one the shop cannot translate", () => {
-    const scrub = { name: "Face Scrub — скраб для лица", brand: "Rempire" };
-    expect(seoOffLanguage("Rempire Face Scrub — скраб для лица\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(true);
-    expect(seoOffLanguage("Rempire Face Scrub — näokoorija\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(false);
+    const scrub = { name: "Face Peel — пилинг для лица", brand: "Rempire" };
+    expect(seoOffLanguage("Rempire Face Peel — пилинг для лица\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(true);
+    expect(seoOffLanguage("Rempire Face Peel — näokoorija\nNäokoorija igapäevaseks kasutuseks.", "ET", scrub)).toBe(false);
   });
 
   it("a Russian snippet is never off — the catalogue is Russian", () => {

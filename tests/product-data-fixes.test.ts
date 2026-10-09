@@ -63,7 +63,8 @@ describe("product names", () => {
 
   it("the Kevin.Murphy names carry the maker's type, in every language", () => {
     const want: Record<string, [string, string, string]> = {
-      "free-hold": ["Free.Hold — паста для укладки", "Free.Hold — pasta soengu jaoks", "Free.Hold — paste for styling"],
+      // the natural compound since 09.10.2026 (TAIL_EXACT), not «pasta soengu jaoks» / «paste for styling»
+      "free-hold": ["Free.Hold — паста для укладки", "Free.Hold — viimistluspasta", "Free.Hold — styling paste"],
       "heated-defense": ["HEATED.DEFENSE — термозащитная пенка", "HEATED.DEFENSE — kuumakaitsevaht", "HEATED.DEFENSE — heat protection foam"],
       "kevin-murphy-motion-lotion": ["Motion.Lotion — лосьон для локонов", "Motion.Lotion — lokilosjoon", "Motion.Lotion — curl lotion"],
       touchable: ["Touchable — спрей-воск", "Touchable — spreivaha", "Touchable — spray wax"],

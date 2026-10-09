@@ -130,13 +130,13 @@ function overview(lang: Lang): string {
 describe("«Обзор → Сделать сегодня»: the products running out, named in the panel's language", () => {
   it("EN: every name of the row loses its Russian tail, not only the last one", () => {
     const nodes = translated(overview("EN"), "EN");
-    expect(nodes).toContain("Repair.Me.Wash — shampoo · Beard balm — balm for beard · BHA 2% Gentle Exfoliating Toner — toner");
+    expect(nodes).toContain("Repair.Me.Wash — shampoo · Beard balm — beard balm · BHA 2% Gentle Exfoliating Toner — toner");
     expect(nodes.filter((t) => CYR.test(t))).toEqual([]);
   });
 
   it("ET: the same row in Estonian", () => {
     const nodes = translated(overview("ET"), "ET");
-    expect(nodes).toContain("Repair.Me.Wash — šampoon · Beard balm — palsam habemele · BHA 2% Gentle Exfoliating Toner — toonik");
+    expect(nodes).toContain("Repair.Me.Wash — šampoon · Beard balm — habemepalsam · BHA 2% Gentle Exfoliating Toner — toonik");
     expect(nodes.filter((t) => CYR.test(t))).toEqual([]);
   });
 
@@ -196,7 +196,7 @@ describe("the other panel lists that print a product name", () => {
       const nodes = [...translated(stockRow(lang), lang), ...translated(custOrderRow(lang), lang)];
       expect(nodes.join("\n")).not.toMatch(/шампунь|бальзам|для бороды/);
       expect(nodes.join("\n")).toContain(lang === "EN" ? "Repair.Me.Wash — shampoo" : "Repair.Me.Wash — šampoon");
-      expect(nodes.join("\n")).toContain(lang === "EN" ? "Beard balm — balm for beard" : "Beard balm — palsam habemele");
+      expect(nodes.join("\n")).toContain(lang === "EN" ? "Beard balm — beard balm" : "Beard balm — habemepalsam");
     });
   }
 

@@ -154,8 +154,10 @@ describe("product-name — the server's copy of trName()", () => {
     expect(translateProductName("Rempire Розовое мыло Rule Nr 1 — ручная работа", "et")).toBe("Rempire Roosa seep Rule Nr 1 — käsitöö");
     expect(translateProductName("Чёрное мыло 666 — ручная работа", "ru")).toBe("Чёрное мыло 666 — ручная работа");
     expect(translateProductName("Davines OI Oil", "en")).toBe("Davines OI Oil");
-    expect(translateProductName("Face Scrub — скраб для лица", "en")).toBe("Face Scrub — скраб для лица");
-    expect(translateProductName("Wood & Spice — бальзам после бритья", "en")).toBe("Wood & Spice — balm");
+    // a head the tables do not know is left alone; «скраб для лица» itself is a whole tail since 09.10.2026
+    expect(translateProductName("Face Peel — пилинг для лица", "en")).toBe("Face Peel — пилинг для лица");
+    expect(translateProductName("Face Scrub — скраб для лица", "en")).toBe("Face Scrub — face scrub");
+    expect(translateProductName("Wood & Spice — бальзам после бритья", "en")).toBe("Wood & Spice — aftershave balm");
     expect(translateProductName("Mixed — Шампунь Для Волос", "en")).toBe("Mixed — shampoo for hair");
     // a digit is outside the tail's alphabet: the whole tail is left alone, in the browser too
     expect(translateProductName("Spray — спрей для волос 150 мл", "en")).toBe("Spray — спрей для волос 150 мл");

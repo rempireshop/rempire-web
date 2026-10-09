@@ -89,23 +89,21 @@ const baseChips = (p: Product) => (BASE[p.cat] || []).filter(([, , re]) => re.te
 
 /* Products no chip showed before, and the one chip each is under now — every
    label plainly what the product is (the maker's own words in brackets). */
+/* Since 09.10.2026 six Kevin.Murphy names carry the maker's type («Hair.Resort.Spray —
+   текстурирующий спрей», «RE.STORE / SMOOTH.AGAIN / LEAVE-IN.REPAIR — … уход», «Super.Goo —
+   моделирующий гель», «KILLER.WAVES — спрей для локонов»), so the chip they were ADDED to
+   now finds them by name like any other product; same chip, no longer listed here. */
 const ADDED: Record<string, string> = {
-  "hair-resort-spray": "sp",                                    // beach texture spray
   "davines-naturaltech-nourishing-keratin-booster-100ml": "ca", // intensive repair treatment
   "kevin-murphy-night-shift-100ml": "ca",                       // overnight leave-in serum («масло»)
-  "kevin-murphy-re-store": "ca",                                // repairing cleansing treatment
-  "kevin-murphy-smooth-again": "ca",                            // leave-in smoothing treatment
   "kevin-murphy-young-again-oil": "ca",                         // leave-in treatment oil
   "heated-defense": "ca",                                       // leave-in heat-protection treatment
-  "leave-in-repair": "ca",                                      // leave-in repair treatment
   "paul-mitchell-curl-full-circle-leave-in-cream": "ca",        // leave-in cream
   "system-4-moisture-scalp-lotion-m": "ca",                     // leave-in scalp treatment
   "gatsby-moving-rubber-wild-shake-15g": "pw",                  // Moving Rubber hair wax
   "davines-medium-hold-styling-paste": "pw",                    // styling paste
   "davines-pasta-love-strong-hold-mat-clay": "pw",              // mat clay
-  "super-goo": "ge",                                            // rubbery sculpting gel
   "paul-mitchell-clear-styling-glaze": "ge",                    // styling gel
-  "killer-waves": "sp",                                         // wave-enhancing spray
   "davines-pre-shaving-beard-oil": "oi",                        // pre-shaving & beard oil
   "cosrx-low-ph-good-morning-gel-cleanser": "cl",               // gel cleanser
   "lumin-skin-charcoal-scrub-deep-detox": "cl",                 // face scrub
