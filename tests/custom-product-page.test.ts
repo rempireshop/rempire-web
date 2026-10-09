@@ -147,7 +147,7 @@ describe("a custom product's page at request time", () => {
     expect(meta(html, "twitter:card")).toBe("summary_large_image");
 
     const ld = ldBlocks(html);
-    const product = ld.find((o) => o["@type"] === "Product") as Record<string, unknown> & { offers: Record<string, unknown>; brand: { name: string } };
+    const product = ld.find((o) => o["@type"] === "Product") as Record<string, unknown> & { offers: Array<Record<string, unknown>>; brand: { name: string } };
     expect(product).toBeTruthy();
     expect(product.attrs).toContain('id="ldjson"');
     expect(product.name).toBe("Proraso Beard Balm — бальзам для бороды");
@@ -157,10 +157,15 @@ describe("a custom product's page at request time", () => {
     expect(product.description).toBe("Habemepalsam.");
     expect(product.image).toEqual(["https://cdn.example.com/p/balm.webp"]);
     expect(product.url).toBe(`${LIVE}/et/products/${p.id}`);
-    expect(product.offers).toMatchObject({
+    // one Offer per size since feat/schema (09.10.2026), each on its own ?size= address
+    expect(Array.isArray(product.offers)).toBe(true);
+    expect(product.offers).toHaveLength(2);
+    expect(product.offers[0]).toMatchObject({
       "@type": "Offer", priceCurrency: "EUR", price: "14.9",
-      availability: "https://schema.org/InStock", url: `${LIVE}/et/products/${p.id}`,
+      availability: "https://schema.org/InStock",
     });
+    expect(String(product.offers[0].url).startsWith(`${LIVE}/et/products/${p.id}`)).toBe(true);
+    expect(product.offers[1]).toMatchObject({ price: "24.9" });
     const crumbs = ld.find((o) => o["@type"] === "BreadcrumbList") as Record<string, unknown> & { itemListElement: Array<{ name: string }> };
     expect(crumbs.attrs).toContain('data-seo="ldjson-page"');
     expect(crumbs.itemListElement.map((i) => i.name)).toEqual(["Avaleht", "Habemehooldus", "Proraso Beard Balm — бальзам для бороды"]);
@@ -219,9 +224,9 @@ describe("a custom product's page at request time", () => {
 
     await upsertOverride(p.id, { stock: "out", price: 12 });
     html = await (await pageFor("ru", p.id)).text();
-    const product = ldBlocks(html).find((o) => o["@type"] === "Product") as { offers: Record<string, unknown> };
-    expect(product.offers.availability).toBe("https://schema.org/OutOfStock");
-    expect(product.offers.price).toBe("12");
+    const product = ldBlocks(html).find((o) => o["@type"] === "Product") as { offers: Array<Record<string, unknown>> };
+    for (const o of product.offers) expect(o.availability).toBe("https://schema.org/OutOfStock");
+    expect(product.offers[0].price).toBe("12");
     expect(html).toContain('<span class="chip chip--out">нет в наличии</span>');
     expect(html).toContain("от 12 €");
   });
