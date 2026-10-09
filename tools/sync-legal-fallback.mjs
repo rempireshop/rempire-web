@@ -5,18 +5,26 @@
  *   node tools/sync-legal-fallback.mjs           # rewrite legal.js
  *   node tools/sync-legal-fallback.mjs --check   # exit 1 if it is out of step
  *
- * legal.js is `var LEGAL = {slug: {title, html}}` and three things read it:
+ * legal.js is `var LEGAL = {slug: {title, html}}` and the build reads it:
  *
- *   · the list of policy pages. public/shop2/app.js routes /shop2/info/<slug>/
- *     only when LEGAL[slug] exists; tools/prerender-shop2.mjs writes one page
- *     per key; tools/pack-legal.mjs copies the keys into
- *     src/data/legal-slugs.json for the 404 page and the middleware;
+ *   · the list of policy pages. tools/prerender-shop2.mjs writes one page per
+ *     key; tools/pack-legal.mjs copies the keys into src/data/legal-slugs.json
+ *     for the 404 page and the middleware. (public/shop2/app.js routed
+ *     /info/<slug>/ only when LEGAL[slug] existed; since 09.10.2026 it routes
+ *     the same five slugs off its SHOP_INFO_PATHS, because no browser fetches
+ *     this file any more — see below);
  *   · the Russian titles the ET/EN headings are translated from where a
  *     language file has no title of its own;
  *   · the last resort: legalFor() falls back to LEGAL when the visitor's
  *     language has no page of its own. legal.ru.js, legal.et.js and
  *     legal.en.js carry every slug, so today that is only a language code
- *     the shop does not know (a stale value in the browser's storage).
+ *     the shop does not know (a stale value in the browser's storage) — and
+ *     in the browser legal.ru.js itself stands in, being the same text.
+ *
+ * Until 09.10.2026 every page of the shop also linked it, beside the three
+ * language files: the same 70 KB twice, on every visit. A browser now fetches
+ * one policy file, in its page's language, and only for a policy page (perf;
+ * «the files the shop fetches when it needs them» in app.js).
  *
  * Until 27.09.2026 it was the policy text harvested from the old Shopify store
  * — English bodies under Russian titles, and a privacy policy naming Shopify

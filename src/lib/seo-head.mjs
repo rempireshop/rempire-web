@@ -1134,13 +1134,65 @@ export const PRE_MARK = /<!-- prerender:start -->[\s\S]*?<!-- prerender:end -->/
 
 /* Replacement functions, not strings: a description containing $& or $1 would
    otherwise be spliced by String.replace's own substitution rules. `htmlLang`
-   is optional — when it is left out the attribute stays what it was. */
+   is optional — when it is left out the attribute stays what it was, and so
+   does the interface dictionary the shell links (pageAssets). */
 export function patchShell(shell, headHtml, contentHtml, htmlLang) {
   let out = shell
     .replace(HEAD_MARK, () => "<!-- seo:start -->\n" + headHtml + "\n<!-- seo:end -->")
     .replace(PRE_MARK, () => '<!-- prerender:start --><div id="prerender">' + contentHtml + '</div><!-- prerender:end -->');
-  if (htmlLang) out = out.replace(/<html lang="[^"]*"/, () => '<html lang="' + esc(htmlLang) + '"');
+  if (htmlLang) {
+    out = out.replace(/<html lang="[^"]*"/, () => '<html lang="' + esc(htmlLang) + '"');
+    out = pageAssets(out, { code: String(htmlLang).toUpperCase() });
+  }
   return out;
+}
+
+/* The shell's scripts as one page needs them (perf, 09.10.2026).
+
+   · The interface dictionary. tools/minify-shop2.mjs lifts it out of
+     app.min.js into /shop2/ui.et.js and /shop2/ui.en.js; the shell — the
+     English home page — links the English one (the `data-ui` tag). A page in
+     Estonian links the Estonian one in its place, a Russian page none at all
+     (the templates are written in Russian), and the owner's screens
+     (`code: null`) none either: the panel's language is the owner's saved
+     choice, which only app.js knows, and it fetches that file itself.
+   · The policy texts left the shell — every visitor downloaded all four
+     policy files for a page he was not on — and app.js fetches them when a
+     policy page is drawn; a policy page's own HTML links its text instead
+     (`legal`), in its own language, so the first paint does not wait a round
+     trip for it.
+
+   Every tag wears the shell's shared token, and every file is hashed into it
+   (tools/lib/asset-token.mjs, LAZY_FILES). `code` is "RU" | "ET" | "EN". */
+const UI_TAG = /<script src="\/shop2\/ui\.(?:en|et)\.js(\?v=[^"]*)" data-ui><\/script>\n?/;
+/**
+ * @param {string} html
+ * @param {{ code?: string | null, legal?: boolean }} [opts]
+ * @returns {string}
+ */
+export function pageAssets(html, { code = "EN", legal = false } = {}) {
+  let out = String(html).replace(UI_TAG, (tag, query) =>
+    code === "EN" || code === "ET" ? '<script src="/shop2/ui.' + code.toLowerCase() + ".js" + query + '" data-ui></script>\n' : "");
+  const v = (/\/shop2\/app(?:\.min)?\.js\?v=([^"'\s]*)/.exec(out) || [])[1];
+  if (!v || !legal) return out;
+  const file = "/shop/legal." + (code === "RU" ? "ru" : code === "ET" ? "et" : "en") + ".js";
+  out = out.replace(/<script src="\/shop2\/app(?:\.min)?\.js\?v=/, (tag) =>
+    '<script src="' + file + "?v=" + esc(v) + '"></script>\n' + tag);
+  return out;
+}
+
+/* The shell as the owner's panel and scanner are served it (/admin,
+   /admin/scan): with the panel's stylesheet in its <head>. No other page
+   links admin.css any more — it is 300 KB no storefront screen wears, and
+   app.js fetches it when a storefront page walks into the panel (perf,
+   09.10.2026; lazyHold in public/shop2/app.js). Linked here, a straight
+   visit to the panel paints styled the first time, as it always did. The
+   ?v= is the shell's own shared token, read off the app.min.js tag; the
+   file is hashed into it (tools/lib/asset-token.mjs, LAZY_FILES). */
+export function ownerShell(shell) {
+  const v = (/\/shop2\/app(?:\.min)?\.js\?v=([^"'\s]*)/.exec(String(shell)) || [])[1];
+  if (!v || /\/shop2\/admin\.css\?/.test(shell)) return shell;
+  return String(shell).replace("</head>", () => '<link rel="stylesheet" href="/shop2/admin.css?v=' + esc(v) + '">\n</head>');
 }
 
 /* The viewport every page asks for — written into every generated page by

@@ -99,7 +99,7 @@ import {
   LANGS, esc, eur, stripTags, slugify, clip, fitTitle, langPath, T,
   OG_W, OG_H, OG_DEFAULT, OG_FALLBACK, ogShopCard, ORG_IMAGE, ORG_LOGO,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
-  productSpec, patchShell, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
+  productSpec, patchShell, pageAssets, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
@@ -716,6 +716,8 @@ const abs = u => BASE + u;
    built by the same code as a custom product's page at request time. */
 const headBlock = spec => sharedHeadBlock({ base: BASE, robots: ROBOTS, ...spec });
 
+/* The shell's scripts as one page needs them — a policy page links its own
+   text (`spec.legal`; pageAssets() in src/lib/seo-head.mjs says why). */
 function fullPage(spec) {
   return `<!doctype html>
 <html lang="${spec.lang.htmlLang}">
@@ -730,7 +732,7 @@ ${headBlock(spec)}
 ${headAssets}</head>
 <body>
 <div id="app"><!-- prerender:start --><div id="prerender">${spec.content}${blogDataScript(spec.lang.code)}${setsDataScript()}</div><!-- prerender:end --></div>
-${bodyScripts}</body>
+${pageAssets(bodyScripts, { code: spec.lang.code, legal: !!spec.legal })}</body>
 </html>
 `;
 }
@@ -1485,7 +1487,7 @@ function infoPage(slug, lang) {
     return {
       file: path.join(SHOP2, seg, "info", slug, "index.html"),
       spec: {
-        lang, seg, rest,
+        lang, seg, rest, legal: true,
         title: fitTitle(heading, heading + " — REMPIRE"),
         desc: clip(t.infoDesc(heading), 158),
         image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
@@ -1515,7 +1517,8 @@ function infoPage(slug, lang) {
   return {
     file: path.join(SHOP2, seg, "info", slug, "index.html"),
     spec: {
-      lang, seg, rest,
+      // the policy text the screen draws (and «Контакты»' title) comes with the page
+      lang, seg, rest, legal: true,
       title: fitTitle(heading, heading + " — REMPIRE"),
       desc: clip(t.infoDesc(heading), 158),
       image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",

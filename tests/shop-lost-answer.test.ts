@@ -277,6 +277,8 @@ function loadPointsFor(fetchStub: () => Promise<unknown>): Promise<PointsRun> {
     function pointsArrived() {}
     function apiSeen() {}
     function demoPoints(carrier, cc) { return [{ id: carrier + "-demo-0", name: "Стенд-ин" }]; }
+    // the stand-in list's file is fetched only for the 404 (perf, 09.10.2026) — here it is in
+    function shipDataWant() { return Promise.resolve(true); }
     ${slice("loadPointsFor")}
     loadPointsFor("omniva");
     return Promise.resolve().then(function () {}).then(function () {}).then(function () {}).then(function () {

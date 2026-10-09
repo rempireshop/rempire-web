@@ -317,6 +317,23 @@ const nextConfig: NextConfig = {
         source: "/shop2/admin-sw.js",
         headers: [{ key: "Service-Worker-Allowed", value: "/admin" }],
       },
+      /* The shop's scripts and stylesheets are linked with the shared ?v=
+         token — twelve hex characters of a hash of those very files
+         (tools/lib/asset-token.mjs) — so an address that carries it can never
+         answer other bytes: a changed file is a changed token, which is a new
+         address. A browser may keep such a response for a year without asking
+         again. Until 09.10.2026 every one of them went out as `public,
+         max-age=0, must-revalidate`, and a returning visitor paid one round
+         trip per file to hear «not modified» before anything could paint
+         (fourteen of them; 150 ms each on a phone, perf audit).
+         Only .js and .css under /shop/ and /shop2/, and only with the token's
+         exact shape: a picture on its own ?v=5, a file asked for without a
+         token, and every page keep the host's revalidating default. */
+      {
+        source: "/:dir(shop|shop2)/:file([^/]+\\.(?:js|css))",
+        has: [{ type: "query", key: "v", value: "^[0-9a-f]{12}$" }],
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
       /* The one page the shop frames itself: «Письма» in the admin shows the
          real templates in an <iframe>. frame-ancestors 'none' would blank it. */
       {

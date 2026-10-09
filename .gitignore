@@ -54,6 +54,10 @@ public/vendor/leaflet/
 # stale. The ?v= token is hashed off app.js, the source, so a clean checkout
 # agrees with index.html about it without this file existing.
 public/shop2/app.min.js
+# …and the interface dictionary the same tool lifts out of it, one file per
+# language (tools/lib/ui-lift.mjs) — hashed off app.js the same way.
+public/shop2/ui.et.js
+public/shop2/ui.en.js
 
 # Playwright (docs/testing.md) — run artifacts only. e2e/__screenshots__/ is
 # NOT ignored: those .png files are the committed visual-regression baselines.

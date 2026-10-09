@@ -21,6 +21,7 @@
  * random.
  */
 import { expect, type Page, test } from "@playwright/test";
+import LEGAL_SLUGS from "../src/data/legal-slugs.json";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 import { ipHeaders, LANGS, shopUrl, shopUrlRe } from "./fixtures";
 import {
@@ -317,9 +318,11 @@ for (const lang of LANGS) {
       await expect(page.locator("h1"), `${label(postCtx)} post has no heading`).toBeVisible();
       await check(page, w, postCtx);
 
-      // Every legal/info page. LEGAL is a script-level const in
-      // /shop/legal.js, reachable the same way CATALOGUE is.
-      const slugs = await page.evaluate(() => Object.keys(LEGAL as Record<string, unknown>));
+      // Every legal/info page — LEGAL's keys, as the build packed them
+      // (tools/pack-legal.mjs). Not read off the page: since 09.10.2026 no
+      // page links /shop/legal.js, and a policy page fetches only its own
+      // language's file.
+      const slugs = LEGAL_SLUGS;
       expect(slugs.length, "sweep: LEGAL should carry the policy pages").toBeGreaterThan(3);
       for (const slug of slugs) {
         const ctx: Ctx = { screen: `info:${slug}`, lang: L };
@@ -545,5 +548,3 @@ test.describe("sweep crawl — navigation invariants", () => {
     await auditScreen(page, w, back);
   });
 });
-
-declare const LEGAL: Record<string, unknown>;

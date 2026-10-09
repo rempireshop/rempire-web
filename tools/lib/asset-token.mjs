@@ -32,16 +32,20 @@
 
    The tags that share ONE token are the set: whatever `?v=` the app.js tag
    carries, every other tag carrying that same value is versioned with it
-   (thirteen of them today — two stylesheets and eleven scripts). A tag with
-   a token of its own — /shop/content.js?v=c2 — is deliberately not part of
-   the set and is left exactly as it is. Add an asset tag with the shared
-   token and it joins on its own; nothing here lists filenames.
+   (fourteen until 09.10.2026; since then only what every page needs wears a
+   tag, and the data files the shop fetches when a screen asks for one are
+   listed in LAZY_FILES below). A tag with a token of its own is deliberately
+   not part of the set and is left exactly as it is — there is none today:
+   /shop/content.js wore a hand-typed ?v=c2 until it became one of the fetched
+   files, and wears the shared token since. Add an asset tag with the shared
+   token and it joins on its own.
 
    public/shop2/chat.js is hashed too even though it has no tag: mountChat()
    in app.js adds that tag itself, on wide screens only, and copies the token
    off the app.js tag — so a chat.js that changed alone would otherwise ship
    behind a token that had not moved, which is the original bug wearing a
-   different hat.
+   different hat. The files app.js fetches only when a screen needs them —
+   LAZY_FILES below — are hashed for the same reason.
 
    One of the tags names a file no checkout holds: /shop2/app.min.js is built
    from /shop2/app.js by tools/minify-shop2.mjs and is gitignored. It is
@@ -59,6 +63,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { stripJs } from "./js-strip.mjs";
+import { liftUi } from "./ui-lift.mjs";
 
 /** How long the derived token is. Twelve hex characters of SHA-256 — far more
     than enough to never collide across the handful of builds a day this shop
@@ -68,8 +73,26 @@ const TOKEN_LEN = 12;
 /** An asset tag with a `?v=`: `href="/shop2/styles.css?v=i18n84"`. */
 const TAGGED = /(?:href|src)="(\/[^"?\s]+)\?v=([^"'\s]*)"/g;
 
+/**
+ * The files public/shop2/app.js fetches itself, when a screen needs one, with
+ * the token copied off its own tag — lazyFile() and «the files the shop
+ * fetches when it needs them» there (perf, 09.10.2026). Until then the shell
+ * linked each of them for every visitor; now no tag names them, so they are
+ * listed here or a change to one of them would never move the token and a
+ * browser would keep the old copy for as long as the cache header lets it —
+ * which, for a tokened address, is a year. tests/lazy-files.test.ts holds
+ * this list and app.js's to the same files.
+ */
+export const LAZY_FILES = [
+  "/shop2/ui.et.js", "/shop2/ui.en.js",
+  "/shop2/admin.css",
+  "/shop/content.js", "/shop/content.ru.js", "/shop/content.et.js",
+  "/shop/legal.ru.js", "/shop/legal.et.js", "/shop/legal.en.js",
+  "/shop/shipping-data.js",
+];
+
 /** Files that carry the shared token without wearing a tag of their own. */
-const UNTAGGED = ["/shop2/chat.js"];
+const UNTAGGED = ["/shop2/chat.js", ...LAZY_FILES];
 
 /**
  * A tag the shell links that no checkout contains, and the source a build
@@ -81,8 +104,21 @@ const UNTAGGED = ["/shop2/chat.js"];
  * the one thing this file exists to prevent. The working tree answers for a
  * build output by making it, in memory, with the same function the build
  * uses; a deployment answers for it by serving it. Both hash the same bytes.
+ *
+ * Since 09.10.2026 the same build also lifts the interface dictionary out of
+ * app.min.js into /shop2/ui.et.js and /shop2/ui.en.js (tools/lib/ui-lift.mjs):
+ * three outputs of one source, made here exactly as the build makes them.
  */
-const BUILT_FROM = { "/shop2/app.min.js": ["/shop2/app.js", stripJs] };
+let builtCache = { src: null, out: null };
+function built(src) {
+  if (builtCache.src !== src) builtCache = { src, out: liftUi(stripJs(src)) };
+  return builtCache.out;
+}
+const BUILT_FROM = {
+  "/shop2/app.min.js": ["/shop2/app.js", (src) => built(src).app],
+  "/shop2/ui.et.js": ["/shop2/app.js", (src) => built(src).files.ET ?? null],
+  "/shop2/ui.en.js": ["/shop2/app.js", (src) => built(src).files.EN ?? null],
+};
 
 /** The token the shell is wearing now — read off the app tag, which is the
     one tag this file's whole reason for existing is about. `.min` is

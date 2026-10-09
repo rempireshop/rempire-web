@@ -12,14 +12,11 @@
 (function () {
   "use strict";
 
-  /* admin.css is linked with media="print" (index.html) so it never holds up
-     the storefront's first paint; it is switched on here — before the first
-     render, and for every route, since the toast slot and the scanner wear
-     its classes too. A stylesheet that is still on its way applies on load. */
-  try {
-    var admCss = document.querySelector("link[data-admin-css]");
-    if (admCss) admCss.media = "all";
-  } catch (e) {}
+  /* admin.css is no longer linked by every page (it was media="print" and
+     switched on here, for every route — 300 KB that no storefront screen
+     wears). The /admin shell links it in its <head>, and a page that walks
+     into the panel fetches it before the panel paints: admCssWant() and
+     lazyHold(), «the files the shop fetches when it needs them». */
 
   var TOWER_D = "M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z";
   var VB = "292.24 171.22 265.18 409.8";
@@ -9726,6 +9723,8 @@
     return false;
   }
   function demoPoints(carrier, country) {
+    // fetched on demand (shipDataWant) — not there, no stand-in list
+    if (typeof SHIPPING_DATA === "undefined") return [];
     try {
       var names = SHIPPING_DATA.machines[country || S.country][carrier] || [];
       return names.map(function (n, i) {
@@ -9803,7 +9802,11 @@
       .then(function (r) {
         // 404/405/501 — no shop behind this page at all (the prototype served
         // statically), which is the one case the stand-in list is for.
-        if (r.status === 404 || r.status === 405 || r.status === 501) { done(demoPoints(carrier, cc)); return; }
+        // (shipping-data.js is fetched for exactly this case, and only now)
+        if (r.status === 404 || r.status === 405 || r.status === 501) {
+          shipDataWant().then(function () { done(demoPoints(carrier, cc)); });
+          return;
+        }
         if (!r.ok) { failed(); return; }
         return r.json().then(function (j) {
           if (j && j.ok && j.points) { apiSeen(true); done(j.points, j.truncated ? j.total : 0); }
@@ -10964,6 +10967,30 @@
         "; path=/; max-age=31536000; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
     } catch (e) {}
   }
+  /* The switcher's choice, applied — once its dictionary is in (the [data-lang]
+     handler waits for it; `langWanted` is the last language pressed). Full
+     render, not just the header: descriptions, legal pages and the whole
+     chrome follow the language. The persistent slots are rebuilt from their
+     Russian templates — translateTree only converts FROM Russian, so an
+     already-translated header would otherwise stick on the old language. */
+  var langWanted = "";
+  function setLang(lang) {
+    S.lang = lang; S.langOpen = false; savedHadLang = true; savedLang = lang; persist();
+    /* …and the edge is told, so the next visit to an unprefixed address
+       opens in this language before the page is served (src/middleware.ts) */
+    setLangCookie(lang);
+    /* The URL is half the answer: switching language rewrites the prefix in
+       place, so the address bar, the canonical and what is on screen never
+       disagree, and the link the shopper copies opens in the language they
+       are reading. replaceState, not push — Back should leave the shop, not
+       walk back through language changes. (The panel's address has no
+       language, so there it stays /admin.) */
+    pathLang = lang;
+    try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
+    hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
+    render();
+    blogPrefetchSoon();   // blog: the list in the new language, before it is asked for
+  }
   /* decodeURIComponent throws on a malformed escape — «/p/%E0/», a share
      link a messenger mangled, a crawler's guess — and it used to throw out of
      the router during boot: nothing was painted over the prerendered page,
@@ -12052,6 +12079,150 @@
     }
   } catch (e) {}
 
+  /* ---------- the files the shop fetches when it needs them --------------
+     Perf, 09.10.2026. Until then the shell linked every file the shop might
+     ever read, and every visitor paid for all of them before the first screen
+     could paint — the panel's own 300 KB stylesheet included, on a product
+     page. A file that only some screens use now arrives when one of them asks
+     for it:
+
+       ui.et.js, ui.en.js
+                   the interface dictionary — `var UI` below, lifted out of
+                   app.min.js by tools/minify-shop2.mjs (the source stays
+                   here). A page links its own language's (none in Russian:
+                   the templates are Russian); the switcher fetches the other
+                   one before it re-renders (setLang), and the panel, whose
+                   language is the owner's own, fetches its one.
+       admin.css   the panel and the scanner. The /admin shell links it in its
+                   <head> (src/lib/notfound-page.ts); a storefront page that
+                   walks into the panel fetches it here, and the panel is not
+                   drawn until it is in — an unstyled panel is not a panel.
+       content.js, content.ru.js, content.et.js
+                   the product descriptions (922 KB for the three). The
+                   page's own language when a product screen wants a text
+                   (descFor — until it lands, a product page shows the copy
+                   its own HTML carries); all three on the first search, whose
+                   index reads every language (srchText); all three in the
+                   panel, whose description boxes show them.
+       legal.ru.js, legal.et.js, legal.en.js
+                   a policy page's text, in the page's language. The policy
+                   pages' HTML links theirs (tools/prerender-shop2.mjs); a
+                   page that walks into one fetches it, and is drawn once it
+                   is in. legal.js — legal.ru.js word for word, the build's
+                   list of the pages — is no longer fetched by a browser.
+       shipping-data.js
+                   the carriers' stand-in machine lists, wanted only when no
+                   shop answers behind the page at all (demoPoints).
+
+     A fetched file wears the token app.min.js wears, read off its tag the way
+     mountChat() does, and tools/lib/asset-token.mjs hashes it into that same
+     token (LAZY_FILES there names every file fetched here — keep the two
+     lists in step, tests/lazy-files.test.ts compares them).
+
+     A screen that cannot be drawn without its file is held by render() until
+     the file is in (lazyHold). A file that fails is not waited for twice: the
+     screen is drawn without it, and the next want asks again after a pause. */
+  var LAZY = {}, LAZY_OK = {}, LAZY_FAILED = {};
+  function lazyToken() {
+    var app = document.querySelector('script[src*="/shop2/app"]');
+    return ((app && app.getAttribute("src")) || "").split("?")[1] || "";
+  }
+  /** One file, once: a promise of true (loaded) or false (failed) — never a rejection. */
+  function lazyFile(path) {
+    if (LAZY[path]) return LAZY[path];
+    var p = new Promise(function (resolve) {
+      try {
+        var v = lazyToken(), css = /\.css$/.test(path);
+        var el = document.createElement(css ? "link" : "script");
+        el.setAttribute("data-lazy", "");
+        el.onload = function () { LAZY_OK[path] = true; delete LAZY_FAILED[path]; resolve(true); };
+        el.onerror = function () {
+          LAZY_FAILED[path] = true;
+          if (el.parentNode) el.parentNode.removeChild(el);
+          // asked again by the next want — after a pause, so a render loop
+          // on a dead connection is not a request loop
+          setTimeout(function () { if (LAZY[path] === p) delete LAZY[path]; }, 15000);
+          resolve(false);
+        };
+        if (css) { el.rel = "stylesheet"; el.href = path + (v ? "?" + v : ""); }
+        else { el.async = true; el.src = path + (v ? "?" + v : ""); }
+        document.head.appendChild(el);
+      } catch (e) { LAZY_FAILED[path] = true; resolve(false); }
+    });
+    LAZY[path] = p;
+    return p;
+  }
+  var UI_FILES = { ET: "/shop2/ui.et.js", EN: "/shop2/ui.en.js" };
+  /** Is the interface dictionary of `lang` here? Russian needs none — and so
+      does app.js run as written, which carries its own `var UI`. */
+  function uiHas(lang) { return !UI_FILES[lang] || !!UI[lang]; }
+  function uiWant(lang) { return uiHas(lang) ? Promise.resolve(true) : lazyFile(UI_FILES[lang]); }
+
+  var ADM_CSS = "/shop2/admin.css";
+  /** Is the panel's stylesheet in — linked by the shell (and so loaded before
+      this script ran: a stylesheet in the <head> holds every script after it)
+      or fetched and arrived? */
+  function admCssHas() {
+    return !!LAZY_OK[ADM_CSS] || !!document.querySelector('link[rel="stylesheet"][href^="' + ADM_CSS + '"]:not([data-lazy])');
+  }
+  function admCssWant() { return admCssHas() ? Promise.resolve(true) : lazyFile(ADM_CSS); }
+
+  var CONTENT_FILES = { EN: "/shop/content.js", RU: "/shop/content.ru.js", ET: "/shop/content.et.js" };
+  function contentHas(lang) {
+    return lang === "RU" ? typeof CONTENT_RU !== "undefined"
+      : lang === "ET" ? typeof CONTENT_ET !== "undefined" : typeof CONTENT !== "undefined";
+  }
+  function contentWant(lang) {
+    var file = CONTENT_FILES[lang] || CONTENT_FILES.EN;
+    if (contentHas(lang)) return Promise.resolve(true);
+    var fresh = !LAZY[file];
+    var p = lazyFile(file);
+    if (fresh) p.then(function (ok) { if (ok) contentArrived(); });
+    return p;
+  }
+  function contentWantAll() { return Promise.all([contentWant("RU"), contentWant("ET"), contentWant("EN")]); }
+  /** Is a file this language's descriptions could still come from on its way
+      — its own, or, for Russian and Estonian, the English one their missing
+      texts fall back to (descFor)? A failed file is not «on its way». */
+  function contentWaiting(lang) {
+    if (!contentHas(lang)) return !LAZY_FAILED[CONTENT_FILES[lang] || CONTENT_FILES.EN];
+    return lang !== "EN" && !contentHas("EN") && !LAZY_FAILED[CONTENT_FILES.EN];
+  }
+  /* A description file landed. The search index reads every language (each
+     blob is stale now), the product on screen may be waiting for its text,
+     and the panel's description boxes show them. */
+  function contentArrived() {
+    SRCH_GEN++; SRCH_IX = {};
+    if (bootHeld) return;
+    if (S.screen === "search" && S.query.trim()) patchSearch();
+    else if (S.screen === "product") pdpDescArrived();
+    else if (S.screen === "admin") render();
+  }
+
+  var LEGAL_FILES = { RU: "/shop/legal.ru.js", ET: "/shop/legal.et.js", EN: "/shop/legal.en.js" };
+  function legalHas(lang) {
+    return lang === "RU" ? typeof LEGAL_RU !== "undefined"
+      : lang === "ET" ? typeof LEGAL_ET !== "undefined"
+      : lang === "EN" ? typeof LEGAL_EN !== "undefined" : true;
+  }
+  function legalWant(lang) { return legalHas(lang) ? Promise.resolve(true) : lazyFile(LEGAL_FILES[lang]); }
+
+  var SHIP_DATA_FILE = "/shop/shipping-data.js";
+  function shipDataWant() { return typeof SHIPPING_DATA !== "undefined" ? Promise.resolve(true) : lazyFile(SHIP_DATA_FILE); }
+
+  /** What a screen cannot be drawn without and does not have yet: a promise
+      that settles once it is in, or null when nothing is missing. A file that
+      failed is not waited for again. */
+  function lazyHold(screen) {
+    var need = [];
+    // a translated screen without its dictionary would be a Russian one
+    if (!uiHas(S.lang) && !LAZY_FAILED[UI_FILES[S.lang]]) need.push(uiWant(S.lang));
+    if ((screen === "admin" || screen === "scan" || S.scanOpen) && !admCssHas() && !LAZY_FAILED[ADM_CSS]) need.push(admCssWant());
+    // a policy page's text and title, «Контакты»'s title included (setHead)
+    if (screen === "info" && !legalHas(S.lang) && !LAZY_FAILED[LEGAL_FILES[S.lang]]) need.push(legalWant(S.lang));
+    return need.length ? Promise.all(need) : null;
+  }
+
   /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
      name="cf-beacon"> in index.html — the integrator pastes it there — and
      the beacon <script> is added from here rather than written into the
@@ -12845,6 +13016,10 @@
   function searchResults() {
     var q = S.query.trim().toLowerCase();
     if (!q) return [];
+    /* The index reads the descriptions in all three languages (srchText),
+       and they are not on the page any more: the first query fetches them,
+       and the results are drawn again as each one lands (contentArrived). */
+    contentWantAll();
     var ai = aiTermsFor(S.query);
     var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
     if (SRCH_LAST.key === key) return SRCH_LAST.res;
@@ -13731,6 +13906,22 @@
     var c = navigator.connection;
     return !!(c && c.saveData);
   }
+  /* The article bodies behind the list are fetched ahead only on a line that
+     says it is fast (perf, 09.10.2026): on a phone on a slow line, four
+     articles nobody asked for were taking the bandwidth the page's own
+     pictures were still waiting for. A browser that does not say how fast its
+     line is (Safari, Firefox) is not guessed at — it gets no bodies ahead; the
+     tile under the finger or the pointer still asks for its own one
+     (blogPrefetchPost), and the list itself is fetched as before. */
+  function blogFastNet() {
+    var c = navigator.connection;
+    if (!c || c.saveData) return false;
+    if (c.effectiveType && c.effectiveType !== "4g") return false;
+    // downlink: Mbit/s, rtt: ms — the browser's own estimates of this line
+    if (typeof c.downlink === "number" && c.downlink < 5) return false;
+    if (typeof c.rtt === "number" && c.rtt > 200) return false;
+    return true;
+  }
   /* The list for one language, page 1. Resolves once S holds the answer (or
      the failure); the screen is repainted only if what it shows differs. */
   function blogSyncList(lang) {
@@ -13821,9 +14012,10 @@
   }
   /* The bodies of the listed articles, one at a time on idle, so the tile
      the shopper eventually presses opens at once. Skipped on a metered
-     connection (Save-Data) — the bodies are small, but they are not asked for. */
+     connection (Save-Data) — the bodies are small, but they are not asked for
+     — and on a line that is not known to be fast (blogFastNet). */
   function blogPrefetchPosts(lang) {
-    if (blogSaveData()) return;
+    if (blogSaveData() || !blogFastNet()) return;
     var l = S.blogLists[lang];
     if (!l || l.failed) return;
     var queue = l.posts.map(function (p) { return p.slug; }).filter(function (slug) {
@@ -14994,15 +15186,62 @@
     // by hand. Present for the current language → wins; absent → the static
     // content.ru.js/content.et.js/content.js text below, same as always.
     if (p.descOv && p.descOv[S.lang]) return descOvHtml(p.descOv[S.lang]);
+    /* …which is fetched when a text is wanted, not with the page (perf,
+       09.10.2026: «the files the shop fetches when it needs them»). Until the
+       file this text comes from has landed, a product page shows the copy its
+       own HTML carries (PRE_DESC), so it reads the same before and after. */
+    if (descMissing(p)) return PRE_DESC && PRE_DESC.id === p.id && PRE_DESC.lang === S.lang ? PRE_DESC.html : "";
     if (S.lang === "RU" && typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) return CONTENT_RU[p.id];
     if (S.lang === "ET" && typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) return CONTENT_ET[p.id];
     return (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
+  }
+  /** Is the file this product's text would come from not here yet? Asked for
+      if so: the page's language, or — for a Russian or Estonian text that is
+      not there — the English one it falls back to. */
+  function descMissing(p) {
+    if (!contentHas(S.lang)) { contentWant(S.lang); return true; }
+    var own = S.lang === "RU" ? CONTENT_RU : S.lang === "ET" ? CONTENT_ET : null;
+    if (own && !own[p.id] && !contentHas("EN")) { contentWant("EN"); return true; }
+    return false;
+  }
+  /* The product screen's description, as it was last drawn (pdpDesc), and what
+     happens when its file lands: the text goes into the block in place, so an
+     accordion the shopper has opened stays open. Usually there is nothing to
+     do at all — the page's own copy was the same text. */
+  var PDP_DESC = null;
+  /** The text the product screen draws: the description, "" while its file is
+      on its way (the block is drawn empty and filled — pdpDescArrived), null
+      when there is none to wait for. */
+  function pdpDesc(p) {
+    var d = descFor(p);
+    PDP_DESC = d;
+    return d || (!(p.descOv && p.descOv[S.lang]) && contentWaiting(S.lang) ? "" : null);
+  }
+  function descNorm(html) {
+    var t = document.createElement("template");
+    t.innerHTML = html;
+    return t.innerHTML;
+  }
+  function pdpDescArrived() {
+    var p = byIdOrNull(S.productId);
+    if (!p) return;
+    var box = bodySlot.querySelector("[data-pdpdesc]");
+    var d = descFor(p);
+    if (!d) { if (box && !contentWaiting(S.lang)) render(); return; }
+    if (!box) { render(); return; }
+    if (d === PDP_DESC) return;
+    if (descNorm(box.innerHTML) !== descNorm(d)) { box.innerHTML = d; translateTree(box); }
+    PDP_DESC = d;
+    setHead();
   }
   function legalFor(slug) {
     if (S.lang === "RU" && typeof LEGAL_RU !== "undefined" && LEGAL_RU[slug]) return LEGAL_RU[slug];
     if (S.lang === "ET" && typeof LEGAL_ET !== "undefined" && LEGAL_ET[slug]) return LEGAL_ET[slug];
     if (S.lang === "EN" && typeof LEGAL_EN !== "undefined" && LEGAL_EN[slug]) return LEGAL_EN[slug];
-    return typeof LEGAL !== "undefined" ? LEGAL[slug] : null;
+    /* LEGAL (legal.js) is legal.ru.js word for word and is no longer fetched by
+       a browser; the Russian file stands in for it when it is here. */
+    if (typeof LEGAL !== "undefined") return LEGAL[slug];
+    return typeof LEGAL_RU !== "undefined" ? LEGAL_RU[slug] || null : null;
   }
 
   /* content: «Контакты» is not a policy page — it is the shop's own details,
@@ -15383,8 +15622,10 @@
              95 products); the old placeholder text only where we somehow
              don't. Its images are stripped: cdn.shopify.com dies with the
              store, and the gallery already shows the product. */
-          (descFor(p)
-            ? acc("Описание", '<div class="acc__rich">' + descFor(p) + "</div>") +
+          /* pdpDesc(): "" while the text's file is on its way — the same block,
+             empty for a moment and filled in place (pdpDescArrived) */
+          (pdpDesc(p) !== null
+            ? acc("Описание", '<div class="acc__rich" data-pdpdesc>' + PDP_DESC + "</div>") +
               (p.cat === "merch"
                 ? acc("Доставка и возврат", "30 дней на возврат. Футболку можно примерить и вернуть, если не подошла.")
                 : acc("Доставка и возврат", "30 дней на возврат. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
@@ -48015,6 +48256,17 @@
      boot is one synchronous task, so nothing is ever painted twice, and if
      this script fails on the way the static page stays up instead of blanking. */
   var preRendered = document.getElementById("prerender");
+  /* …and a product page's HTML carries the product's description, the very
+     text descFor() reads out of content.<lang>.js — which is no longer on the
+     page and arrives a moment after this script (perf, 09.10.2026). That copy
+     stands in until it does, so the screen is drawn once, with its text. */
+  var PRE_DESC = null;
+  try {
+    var preRoute = shopRouteOf(location.pathname);
+    var preProd = preRoute && preRoute.rest.match(/^\/p\/([^/]+)\/$/);
+    var preBox = preProd && preRendered ? preRendered.querySelector(".pdp .acc__rich") : null;
+    if (preBox) PRE_DESC = { id: safeDecode(preProd[1]), lang: S.lang, html: preBox.innerHTML };
+  } catch (e) { PRE_DESC = null; }
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
     '<div id="ovl"></div><div id="pointslot"></div><div id="toastslot"></div><div id="cbslot"></div>');
@@ -48176,7 +48428,15 @@
     setMetaProp("og:locale", { RU: "ru_RU", ET: "et_EE", EN: "en_US" }[lang]);
     // the language on screen — on every storefront page the address's own;
     // read by screen readers and by the browser's translation prompt
-    try { document.documentElement.lang = { RU: "ru", ET: "et", EN: "en" }[S.lang]; } catch (e) {}
+    htmlLang();
+  }
+  /** <html lang>, written only when it changes: renderImpl() writes it before
+      the body goes in, and an attribute written twice is a style pass twice. */
+  function htmlLang() {
+    try {
+      var want = { RU: "ru", ET: "et", EN: "en" }[S.lang];
+      if (want && document.documentElement.lang !== want) document.documentElement.lang = want;
+    } catch (e) {}
   }
   /* The three meta descriptions the info, sets and gift screens carry. They
      are dictionary keys, so ET and EN come from UI — and they are word for
@@ -49280,6 +49540,19 @@
        node-by-node diff against the DOM. One string comparison answers the same
        question. The language is part of the key because the dictionary pass
        runs on the parsed copy, not on the string. */
+    /* What <html> says about this screen is written BEFORE the new body goes
+       in (perf, 09.10.2026). paintTint() reads scrollY, and that read straight
+       after an innerHTML swap made the browser lay the whole new page out in
+       the middle of this task; read here, the layout it needs is the one the
+       last frame already did. And the root's attributes and the new body then
+       share one style pass instead of the second one invalidating the first.
+       The very first render reads nothing at all: the page is at its top, and
+       the only layout there is to read is the static page about to go. */
+    paintTint(bodySlot.dataset.painted ? undefined : 0);
+    // the root says the panel is what is on screen (the note further down)
+    document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
+    htmlLang();
+
     if (S.screen === "admin" && bodySlot.dataset.painted === "admin") {
       var paintKey = S.lang + "\n" + bodyHTML;
       if (paintKey !== admPaintedKey) {
@@ -49314,8 +49587,7 @@
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
     navSlot.hidden = S.screen === "admin" || S.screen === "scan";
-    measureHdr();
-    paintTint();
+    measureHdr();   // paintTint() ran before the body went in — see above
     patchNav();
 
     /* The overlay is re-mounted only when the *kind* of overlay changes, so an
@@ -49375,11 +49647,11 @@
        (admVvFollow, beside admBarTouch). Run here because the sheet
        opening or closing is a render, not a viewport event. */
     if (S.screen === "admin" || admVvH) admVvFollow();
-    /* …and the root says the panel is what is on screen, because that is
-       where `scroll-padding` lives: what the browser scrolls a focused field
-       to has to clear the PANEL's header and the PANEL's bar, not the shop's
-       (admin.css § «what the browser scrolls a focused field to»). */
-    document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
+    /* (…and the root says the panel is what is on screen — `adm2-on`, written
+       before the body went in, at the top — because that is where
+       `scroll-padding` lives: what the browser scrolls a focused field to has
+       to clear the PANEL's header and the PANEL's bar, not the shop's —
+       admin.css § «what the browser scrolls a focused field to».) */
     if (S.screen === "admin") { admScrollers(); admMoreScroll(); }   // which way each strip scrolls; «Ещё»
     else document.body.classList.remove("adm-typing");
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
@@ -49393,6 +49665,9 @@
     // features: real reviews and the moderation queue are fetched once each
     if (S.screen === "product") loadReviews(S.productId);
     if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
+    // the panel's description boxes show the static texts of all three
+    // languages — fetched once the panel is up (contentArrived redraws it)
+    if (S.screen === "admin") contentWantAll();
     // blog: what is on screen is checked against the API (and fetched, on a
     // cold miss) — a fresh answer or one already in flight costs nothing
     if (S.screen === "blog") blogSyncList(S.lang);
@@ -49425,7 +49700,23 @@
      avoid calling render() at all now, and this is the backstop for
      whatever still does. */
   var renderQueued = false, renderPending = false;
+  /* …and a screen whose file is still on its way is not drawn at all until it
+     lands (lazyHold, «the files the shop fetches when it needs them»): the
+     screen that is up stays up, and the one that was asked for arrives whole.
+     `lazyForce` is the first paint's way past the wait — firstPaint() has
+     already waited as long as it is going to. Nothing is drawn while the
+     first paint itself is being held (bootHeld): it draws its own screen. */
+  var lazyHeld = false, lazyForce = false;
   function render() {
+    var hold = bootHeld || lazyForce ? null : lazyHold(S.screen);
+    if (bootHeld || hold) {
+      if (hold && !lazyHeld) {
+        lazyHeld = true;
+        hold.then(function () { lazyHeld = false; render(); });
+      }
+      if (!bootHeld) admSyncHistory();
+      return;
+    }
     if (renderQueued) renderPending = true;
     else {
       renderQueued = true;
@@ -50834,26 +51125,21 @@
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
-    // full render, not just the header: descriptions, legal pages and the
-    // whole chrome follow the language. The persistent slots are rebuilt from
-    // their Russian templates — translateTree only converts FROM Russian, so
-    // an already-translated header would otherwise stick on the old language.
+    // a language from the switcher — setLang() says what changes with it
     if (d.lang) {
-      S.lang = d.lang; S.langOpen = false; savedHadLang = true; savedLang = d.lang; persist();
-      /* …and the edge is told, so the next visit to an unprefixed address
-         opens in this language before the page is served (src/middleware.ts) */
-      setLangCookie(d.lang);
-      /* The URL is half the answer: switching language rewrites the prefix in
-         place, so the address bar, the canonical and what is on screen never
-         disagree, and the link the shopper copies opens in the language they
-         are reading. replaceState, not push — Back should leave the shop, not
-         walk back through language changes. (The panel's address has no
-         language, so there it stays /admin.) */
-      pathLang = d.lang;
-      try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
-      hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
-      render();
-      blogPrefetchSoon();   // blog: the list in the new language, before it is asked for
+      /* The dictionary of a language this page was not served in is fetched
+         first (perf, 09.10.2026: ui.et.js / ui.en.js left app.min.js). The
+         menu closes at once; the switch itself happens when the file is in,
+         so the screen goes from one language straight to the other. The last
+         language pressed is the one that wins. */
+      var toLang = d.lang;
+      langWanted = toLang;
+      if (!uiHas(toLang)) {
+        S.langOpen = false; patchHeader();
+        uiWant(toLang).then(function () { if (langWanted === toLang) setLang(toLang); });
+        return;
+      }
+      setLang(toLang);
       return;
     }
     if (d.line !== undefined) {
@@ -54358,7 +54644,10 @@
       S.screen = "search";
       return true;
     }
-    if ((m = p.match(/^\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
+    /* The policy pages are the five of SHOP_INFO_PATHS — the same five as the
+       keys of LEGAL (src/data/legal-slugs.json), which is no longer on the
+       page; the text itself is fetched before the screen is drawn (lazyHold). */
+    if ((m = p.match(/^\/info\/([a-z]+)$/)) && Object.prototype.hasOwnProperty.call(SHOP_INFO_PATHS, m[1])) {
       S.infoSlug = m[1]; S.screen = "info"; return true;
     }
     /* features: sets and the gift card.
@@ -54482,14 +54771,42 @@
      flips, runs at most once per frame, and the header is measured on
      render/resize instead of on scroll. */
   var lastY = 0, hdrH = 0, tintOn = null, hideOn = null, tickQueued = false;
+  /* Perf, 09.10.2026: the header's height was read with offsetHeight right
+     after render() had written the page, which made the browser lay the whole
+     new page out there and then, inside the boot task — 0.3–0.5 s on a
+     mid-range phone, measured — and then again in the frame. A ResizeObserver
+     is told the height after the browser's own layout and before it paints,
+     so --hdrh is right in the first frame and nothing is laid out twice. It
+     follows the header for good (a language switch, a wrap, a rotation), so
+     a render only has to make sure it is watching the header that is there. */
+  var hdrRO = null, hdrWatched = null;
+  function setHdrH(v) {
+    if (v !== hdrH) { hdrH = v; document.documentElement.style.setProperty("--hdrh", v + "px"); }
+  }
   function measureHdr() {
     var h = document.querySelector(".hdr");
     if (!h) return;
-    var v = h.offsetHeight;
-    if (v !== hdrH) { hdrH = v; document.documentElement.style.setProperty("--hdrh", v + "px"); }
+    if (window.ResizeObserver) {
+      if (h === hdrWatched) return;
+      if (!hdrRO) {
+        hdrRO = new ResizeObserver(function (entries) {
+          var t = entries[entries.length - 1].target;
+          // inside the observer the layout is the browser's own, already done
+          if (t === hdrWatched) setHdrH(t.offsetHeight);
+        });
+      }
+      if (hdrWatched) hdrRO.unobserve(hdrWatched);
+      hdrWatched = h;
+      hdrRO.observe(h);
+      return;
+    }
+    setHdrH(h.offsetHeight);
   }
-  function paintTint() {
-    var y = window.scrollY;
+  /** `at` — the scroll offset when the caller knows it: the first render
+      passes 0, because reading scrollY then would lay out the hidden static
+      page that render is about to throw away (perf, 09.10.2026). */
+  function paintTint(at) {
+    var y = typeof at === "number" ? at : window.scrollY;
     var tint = S.screen === "home" && y < 340;
     if (tint !== tintOn) { tintOn = tint; document.documentElement.toggleAttribute("data-tint", tint); }
     /* The phone's chrome was eating half the screen, so the header gets the
@@ -54959,7 +55276,10 @@
     history.replaceState({ y: 0, shown: S.shown }, "", here());
     if (bootParked && S.screen === "admin") history.go(-bootParked);
   } catch (e) {}
+  // drawn now, whatever is still on its way — see bootLazy below
+  lazyForce = true;
   render();
+  lazyForce = false;
   trackNav();   // analytics agent: the very first view of this tab's session
   blogPrefetchSoon();   // blog: the list, then the articles, on idle — so «Блог» opens at once later
   /* The slots are filled now, so the static page underneath them has done its
@@ -55039,12 +55359,34 @@
         return lid.indexOf("c-") === 0 && !byIdOrNull(lid);
       })));
   } catch (e) { bootWait = false; }
-  if (bootWait && OV_BOOT) {
+  /* …and the files the first screen cannot be drawn without (lazyHold). The
+     page's own HTML normally carries them — the /admin shell its stylesheet,
+     a policy page its text, every page its language's dictionary — so this
+     is null and nothing waits; it is not null for a page whose HTML does
+     not (the panel, in a language the shell cannot know). Eight seconds at
+     most: past it the screen is drawn without the file, and drawn again the
+     moment it lands. A file fetched here delays the page's `load` event until
+     it is in, so boot.js — which shows the static page when `load` comes and
+     nothing has been drawn — never fires under a wait that ends in time; a
+     file that fails makes it show the static page, which this paint then
+     replaces. */
+  var bootLazy = null;
+  try {
+    bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin")
+      : /^\/info\//.test(String(bootPath || "")) ? "info" : "");
+  } catch (e) { bootLazy = null; }
+  if ((bootWait && OV_BOOT) || bootLazy) {
     bootHeld = true;
     var painted = false;
     var paintOnce = function () { if (painted) return; painted = true; bootHeld = false; firstPaint(); };
-    OV_BOOT.then(paintOnce, paintOnce);
-    setTimeout(paintOnce, 4000);
+    var bootWaits = [];
+    if (bootWait && OV_BOOT) bootWaits.push(OV_BOOT);
+    if (bootLazy) {
+      bootWaits.push(bootLazy);
+      bootLazy.then(function () { if (painted) render(); });
+    }
+    Promise.all(bootWaits).then(paintOnce, paintOnce);
+    setTimeout(paintOnce, bootWait && OV_BOOT ? 4000 : 8000);
   } else {
     firstPaint();
   }
