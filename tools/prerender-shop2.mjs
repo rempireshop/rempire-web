@@ -110,7 +110,7 @@ import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, 
    subcollections, the brands and the blog list (audit §1A) — the module
    app.js's setHead() carries a copy of, so the head written here and the head
    after boot are one text. */
-import { seoBrandChooserHtml, seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
+import { seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
 import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -190,7 +190,6 @@ const CATALOGUE = withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES);
    only ever see what is written here. */
 const ON_SALE = onlyForSale(CATALOGUE, PRODUCT_OVERRIDES);
 const HIDDEN_COUNT = CATALOGUE.length - ON_SALE.length;
-const ON_SALE_IDS = new Set(ON_SALE.map(p => p.id));
 
 const loadObj = async (file, name) => {
   try { return new Function(await readFile(path.join(SHOP, file), "utf8") + "\nreturn " + name + ";")(); }
@@ -1124,7 +1123,7 @@ function productPage(p, lang) {
    different texts since 09.10.2026: the description is the search snippet
    (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
    which the static page used to replace with the snippet. */
-function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro, after = "" }) {
+function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -1160,8 +1159,6 @@ function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, int
          above (screenCatalog() draws the same) */
       '<h1 class="display h1">' + esc(h1 || heading) + "</h1>" +
       '<p class="sec__intro">' + esc(intro) + "</p>" +
-      // `after`: HTML under the intro — a brand's «which one is mine» list
-      after +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
           (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
@@ -2038,13 +2035,7 @@ for (const lang of LANGS) {
       /* the owner's own paragraph where he has approved one (eight brands,
          seoBrandIntro()), the shop's generic line everywhere else — the
          same choice screenCatalog() makes */
-      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false),
-      /* «Какой System 4 выбрать?» under it (seoBrandChooserHtml(), the list
-         screenCatalog() draws): real links to the product pages in this
-         language, none to a product off sale — this page has no second
-         chance to take a dead link back */
-      after: seoBrandChooserHtml(b, lang.code, (pid) =>
-        ON_SALE_IDS.has(pid) ? ' href="' + href(lang.seg, "/p/" + encodeURIComponent(pid) + "/") + '"' : null)
+      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false)
     }));
   }
 
