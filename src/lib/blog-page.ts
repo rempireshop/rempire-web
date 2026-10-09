@@ -243,7 +243,11 @@ export function renderBlogPostPage(
   const seoTitleRaw = pickLang(post.seoTitle, code);
   // this language's tags — never a Russian chip on the Estonian page (pickTags)
   const tags = pickTags(post.tags, post.tagsI18n, code);
-  const pageTitle = fitTitle(title, (seoTitleRaw || title) + " — REMPIRE");
+  /* The owner's SEO title wins over the article's own one even when it is too
+     long to carry «— REMPIRE» — the same call setHead() in app.js makes; it
+     used to fall back to the article's title here, so the static page and the
+     shop's own tab disagreed (09.10.2026). */
+  const pageTitle = fitTitle(seoTitleRaw || title, (seoTitleRaw || title) + " — REMPIRE");
   const crumbItems: Array<[string, string | null]> = [[t.home, langPath(seg, "/")], [t.blog, langPath(seg, "/blog/")], [title, null]];
   const others = list.posts.filter((p) => p.slug !== post.slug).slice(0, 3);
   const image = ogImage(base, post, lang);

@@ -201,6 +201,18 @@ describe("a post's page at request time", () => {
     expect(meta(html, "description")).toBe("Первый абзац статьи. Второй.");
   });
 
+  it("an SEO title too long for «— REMPIRE» still wins over the article's own title (09.10.2026)", async () => {
+    const long = await upsertPost({
+      title: { RU: "Паста, воск или глина: чем они отличаются на самом деле" },
+      seoTitle: { RU: "Паста, воск или глина? Night.Rider, Rough.Rider и Free.Hold" },
+      body: { RU: "Текст статьи." },
+    });
+    await publishPost(long.id);
+    const html = await (await postPage("ru", long.slug)).text();
+    // 59 characters: no room for the house suffix, but it is still the page's title — as setHead() in app.js writes it
+    expect(title(html)).toBe("Паста, воск или глина? Night.Rider, Rough.Rider и Free.Hold");
+  });
+
   it("a staging base writes noindex and its own absolute URLs", async () => {
     process.env.PUBLIC_BASE_URL = STAGING;
     const post = await upsertPost(POST);

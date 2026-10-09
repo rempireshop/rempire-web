@@ -1919,7 +1919,9 @@ function blogPostPage(post, lang) {
   // the same ladder setHead() in app.js runs once the SPA takes the page over
   const desc = clip(pickLang(post.seoDesc, code) || excerpt || bodyText, 158);
   const seoTitleRaw = pickLang(post.seoTitle, code);
-  const pageTitle = fitTitle(title, (seoTitleRaw || title) + " — REMPIRE");
+  /* the owner's SEO title wins even when too long for «— REMPIRE», as in
+     setHead() (app.js) and src/lib/blog-page.ts */
+  const pageTitle = fitTitle(seoTitleRaw || title, (seoTitleRaw || title) + " — REMPIRE");
   const blogLabel = tr("Блог", code, false);
   const crumbItems = [[t.home, langPath(seg, "/")], [blogLabel, langPath(seg, "/blog/")], [title, null]];
 
