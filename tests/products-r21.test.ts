@@ -183,11 +183,13 @@ function cardHTML(b: Bundle): string {
     "bundleTitle",
     "esc",
     "eur",
+    "linkHref",
     `${slice("bundleSaved")}
      ${slice("bundleCardHTML")}
      return bundleCardHTML(b);`,
   ) as (...a: unknown[]) => string;
-  return run(b, () => "in", () => "<span class='bstack'></span>", (x: Bundle) => x.title.RU, esc, eur);
+  // the card is a link to the set's page since 09.10.2026 (tests/shop-links.test.ts)
+  return run(b, () => "in", () => "<span class='bstack'></span>", (x: Bundle) => x.title.RU, esc, eur, (k: string, v: string) => `/${k}/${v}`);
 }
 
 function setPageHTML(b: Bundle): string {
@@ -207,6 +209,7 @@ function setPageHTML(b: Bundle): string {
      var bundleItemStock = function () { return "in"; };
      var bundleItemName = function (it) { return it.id; };
      var pdpShipLine = function () { return "Доставка"; };
+     var linkHref = function (k, v) { return "/" + k + "/" + v; };
      ${slice("bundleSaved")}
      ${slice("screenBundle")}
      return screenBundle();`,

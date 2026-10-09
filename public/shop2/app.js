@@ -8548,6 +8548,17 @@
     if (g === "gift" || g === "brands") return 'data-go="' + g + '"';
     return 'data-go-cat="all"';
   }
+  /* …and the page that button opens, now that it is a link (linkHref): the
+     same choice as heroGoAttr() above, line for line, spelled as an address. */
+  function heroHref(go) {
+    var g = String(go || "");
+    if (g.indexOf("cat:") === 0) return linkHref("cat", g.slice(4));
+    if (g.indexOf("product:") === 0 && g.length > 8) return linkHref("product", g.slice(8));
+    if (g.indexOf("page:") === 0) return linkHref("page", g.slice(5));
+    if (g === "bundles") return allBundles().length ? linkHref("go", "bundles") : linkHref("cat", "all");
+    if (g === "gift" || g === "brands") return linkHref("go", g);
+    return linkHref("cat", "all");
+  }
   function heroProduct(image) {
     var v = String(image || "");
     for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === v) return CATALOGUE[i];
@@ -8570,22 +8581,31 @@
      banner fell through to CATALOGUE[0] and advertised a present with a
      picture of a shampoo. The mark is the same tower on the same shell panel
      the gift tile already uses on the home page, so the slide looks like the
-     page it opens. */
+     page it opens.
+
+     `o` (the storefront's own banner only — never the panel's thumbnails and
+     preview) draws the photograph as a real <img> (photo()): { first } is the
+     slide the page opens on. A pasted URL gets an empty alt — the slide's own
+     heading stands right beside it and says what it is about. */
   var HERO_GIFT_IMG = "gift";
-  function heroArt(image, cls) {
+  function heroArt(image, cls, o) {
     if (String(image || "") === HERO_GIFT_IMG) {
       return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
         tower("hero__giftmark") + "</span>";
     }
     var u = heroUrl(image);
     if (u) {
+      if (o) return '<span class="' + (cls || "hero__art") + '">' + photoImg(u, "", o.first) + "</span>";
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
         esc(u).replace(/'/g, "%27") + '\')"></span>';
     }
-    return media(heroProduct(image) || CATALOGUE[0], 0, cls || "hero__art");
+    var hp = heroProduct(image) || CATALOGUE[0];
+    if (o) return photo(hp, 0, cls || "hero__art", photoAlt(hp), o.first);
+    return media(hp, 0, cls || "hero__art");
   }
   /* `flat` draws the admin preview: the same markup with a dead button, so a
-     click inside the panel cannot navigate the owner out of the panel. */
+     click inside the panel cannot navigate the owner out of the panel. On the
+     shop the button is a link to the page it opens (linkHref). */
   function heroSlideHTML(s, i, cur, flat) {
     var cta = heroT(s.cta);
     return '<div class="hero__slide" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">' +
@@ -8595,9 +8615,9 @@
         '<p class="hero__sub">' + esc(heroT(s.sub)) + "</p>" +
         (cta
           ? (flat ? '<span class="btn">' + esc(cta) + "</span>"
-                  : '<button class="btn" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</button>")
+                  : '<a class="btn" href="' + heroHref(s.go) + '" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</a>")
           : "") + "</div>" +
-        heroArt(s.image) +
+        heroArt(s.image, null, flat ? null : { first: i === cur }) +
       "</div></div>";
   }
   function heroHTML() {
@@ -11947,7 +11967,7 @@
       '<div class="cbanner__acts">' +
         '<button class="btn btn--sm" data-consent="all"' + (c && c.analytics ? ' aria-current="true"' : "") + ">Принять всё</button>" +
         '<button class="btn btn--ghost btn--sm" data-consent="need"' + (c && !c.analytics ? ' aria-current="true"' : "") + ">Только необходимое</button>" +
-        '<button class="link" data-page="privacy">Конфиденциальность</button>' +
+        '<a class="link" href="' + linkHref("page", "privacy") + '" data-page="privacy">Конфиденциальность</a>' +
       "</div></div></div>";
   }
 
@@ -12853,6 +12873,60 @@
     return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") +
       '" style="background-image:url(\'' + esc(src) + '\')"></span>';
   }
+  /* ---------- the same photo, as a picture Google can read --------------
+     SEO, 09.10.2026: Google indexes the page as it stands after this script
+     has run, and a photo painted as a CSS background is not a picture to it —
+     the cards, the product page and the banner showed it none at all. On
+     those three the photograph is an <img> now, inside the very frame media()
+     draws (same element, same classes, so the same place, inset, ratio and
+     hover motion); styles.css fits it the way the background was fitted —
+     whole and centred, or filling the frame for a model shot — so nothing on
+     screen changes. Everywhere else (the cart, the panel) keeps media().
+
+       alt    brand + name in the page's language (photoAlt), or "" for a
+              repeat that would only say the name twice
+       first  the one picture the page opens on (the banner on screen, the
+              product's own photo): fetched first, never lazy
+       thumb  the owner's small copy of his own upload where there is one —
+              a card is a few hundred pixels wide, and one of his products
+              loaded a 1.39 MB PNG into it
+
+     width/height are the frame's square, not the file's: the frame is what
+     sizes the picture (object-fit), and it is sized before the file
+     arrives, so nothing moves while it loads. */
+  function photo(p, i, cls, alt, first, thumb) {
+    var g = gal(p), src = g.length ? g[Math.min(i || 0, g.length - 1)] : "";
+    if (!src) return media(p, i, cls);
+    return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") + '">' +
+      photoImg(thumb ? photoThumb(p, src) : src, alt, first) + "</span>";
+  }
+  function photoImg(src, alt, first) {
+    return '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '" width="600" height="600"' +
+      (first ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"') + ">";
+  }
+  /** «Kevin.Murphy Young.Again — shampoo»: the words the card itself prints
+      under the photo, in the page's language (trText, as translateTree()
+      gives the card's name). */
+  function photoAlt(p) {
+    if (!p) return "";
+    var name = trText(String(p.name || ""), S.lang, true);
+    return (p.brand ? p.brand + " " : "") + name;
+  }
+  /** The small copy of an uploaded photo — the owner's own products carry
+      it per photo ({url, thumb}), and so does a gallery he replaced on a
+      catalogue product (DEMO.gallery). The file itself where there is none. */
+  function photoThumb(p, url) {
+    var lists = [p && p.photos, p && DEMO.gallery && DEMO.gallery[p.id]];
+    for (var l = 0; l < lists.length; l++) {
+      var list = lists[l];
+      if (!Array.isArray(list)) continue;
+      for (var i = 0; i < list.length; i++) {
+        var ph = list[i];
+        if (ph && typeof ph === "object" && ph.url === url && ph.thumb) return ph.thumb;
+      }
+    }
+    return url;
+  }
 
   /* ---------- the volume a card speaks for --------------------------------
      A card used to carry its own volume picker, so a shopper could take the
@@ -12942,21 +13016,22 @@
         : p.stock === "out" ? '<span class="chip chip--out card__flag">нет в наличии</span>' : "");
     var g = gal(p);
     // card and add are siblings: a button inside a button is invalid markup
-    // and left the add link unreachable from the keyboard.
+    // and left the add link unreachable from the keyboard. The card itself is
+    // a link to the product (linkHref), its photos real pictures (photo()).
     return '<div class="card' + (g.length > 1 ? " card--dual" : "") + '">' +
-      '<button class="card__go" data-go-product="' + p.id + '">' +
+      '<a class="card__go" href="' + linkHref("product", p.id) + '" data-go-product="' + p.id + '">' +
         '<span class="card__media">' +
-          media(p, 0, "ph card__img") +
-          (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
+          photo(p, 0, "ph card__img", photoAlt(p), false, true) +
+          (g.length > 1 ? photo(p, 1, "ph card__img2", "", false, true) : "") +
           '<span class="card__wm"></span>' +
           (flags ? '<span class="card__flags">' + flags + "</span>" : "") +
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
-      "</button>" +
-      /* The foot is a sibling of the card button, not inside it: a control
-         inside a <button> is invalid markup and every tap on it would open
-         the product. Two rows — the price, «В корзину» under it — and the
+      "</a>" +
+      /* The foot is a sibling of the card link, not inside it: a control
+         inside a link (a <button> until 09.10.2026) is invalid markup and
+         every tap on it would open the product. Two rows — the price, «В корзину» under it — and the
          name above is always two lines tall, so both land on the same height
          in every card of a row. Stock and salon-price flags sit on the photo,
          not beside the price. */
@@ -13235,14 +13310,14 @@
     // here with the crossed-out sum of the parts — and «В корзину» under it,
     // so a grid that mixes sets and products keeps one rhythm
     return '<div class="card card--bundle">' +
-      '<button class="card__go" data-go-bundle="' + b.id + '">' +
+      '<a class="card__go" href="' + linkHref("bundle", b.id) + '" data-go-bundle="' + b.id + '">' +
         '<span class="card__media">' + bundleStack(b, "bstack--card") +
           (bundleSaved(b) ? '<span class="bbadge num">−' + b.pct + ' %</span>' : "") +
           (out ? '<span class="card__flags"><span class="chip chip--out card__flag">нет в наличии</span></span>' : "") +
         "</span>" +
         '<span class="card__brand">Набор</span>' +
         '<span class="card__name">' + esc(bundleTitle(b)) + "</span>" +
-      "</button>" +
+      "</a>" +
       '<div class="card__foot">' +
         '<span class="card__price num">' + eur(b.price) +
           (bundleSaved(b) ? ' <s class="bwas">' + eur(b.sum) + "</s>" : "") + "</span>" +
@@ -13268,7 +13343,7 @@
   function bundleGridHTML(list, title) {
     if (!list.length) return "";
     return '<section class="sec sec--bundles"><div class="sec__head"><h2 class="sec__title">' + title +
-      '</h2><button class="link" data-go="bundles">Все наборы</button></div>' +
+      '</h2><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></div>' +
       '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div></section>";
   }
 
@@ -13280,12 +13355,12 @@
      The gift card is NOT a set and keeps its own page either way. */
   function setsOffHTML(crumbTail) {
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + (crumbTail || "Наборы") + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + (crumbTail || "Наборы") + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Наборы сейчас недоступны</h1>' +
         '<p class="sec__intro">Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.</p>' +
-        '<div class="empty__cats"><button class="btn" data-go-cat="all">Перейти в каталог</button>' +
-        '<button class="btn btn--ghost" data-go="gift">Подарочная карта</button></div>' +
+        '<div class="empty__cats"><a class="btn" href="' + linkHref("cat", "all") + '" data-go-cat="all">Перейти в каталог</a>' +
+        '<a class="btn btn--ghost" href="' + linkHref("go", "gift") + '" data-go="gift">Подарочная карта</a></div>' +
       "</section></div>";
   }
 
@@ -13299,7 +13374,7 @@
        become «Страница не найдена» would be a promise for a tenth of a
        second. */
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Наборы</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Наборы</div>' +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Наборы</h1>' +
         '<p class="sec__intro">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p>' +
@@ -13317,11 +13392,11 @@
     if (!b) {
       return '<div class="wrap"><section class="sec"><h1 class="display h1">Набор не найден</h1>' +
         '<p class="muted">Возможно, его больше нет в продаже.</p>' +
-        '<p><button class="link" data-go="bundles">Все наборы</button></p></section></div>';
+        '<p><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></p></section></div>';
     }
     var out = bundleStock(b) === "out";
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / ' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("go", "bundles") + '" data-go="bundles">Наборы</a> / ' +
         esc(bundleTitle(b)) + "</div>" +
       '<div class="pdp">' +
         '<div><div class="pdp__stage">' + bundleStack(b, "bstack--big") + "</div></div>" +
@@ -13348,7 +13423,7 @@
             var gone = bundleItemStock(it) === "out";
             return '<div class="bitem"><span class="bitem__ph">' +
                 '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
-              '<button class="bitem__nm" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
+              '<a class="bitem__nm" href="' + linkHref("product", it.id) + '" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
                 (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") +
                 /* How many of it. expand() multiplies the part's price by qty
                    when it adds the «было» sum up, and the list beside that sum
@@ -13357,7 +13432,7 @@
                    make the parts come to. The admin's own editor has counted
                    them all along («adm-step-qty»); this is the same fact on
                    the shopper's side of the screen. */
-                (Number(it.qty) > 1 ? ' <span class="muted num">× ' + Number(it.qty) + "</span>" : "") + "</button>" +
+                (Number(it.qty) > 1 ? ' <span class="muted num">× ' + Number(it.qty) + "</span>" : "") + "</a>" +
               (gone ? '<span class="chip chip--out bitem__out" data-bitemout="' + esc(it.id) + '">нет в наличии</span>' : "") +
               '<span class="num bitem__pr">' + eur(it.price) + "</span></div>";
           }).join("") + "</div>" +
@@ -13429,7 +13504,7 @@
       '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
       '<p class="muted"><span class="num">' + esc(giftAmountsPhrase()) + "</span> " +
       "<span>— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</span></p></div>" +
-      '<button class="btn btn--ghost" data-go="gift">Выбрать сумму</button></div>';
+      '<a class="btn btn--ghost" href="' + linkHref("go", "gift") + '" data-go="gift">Выбрать сумму</a></div>';
   }
   function giftEmailBad() {
     var v = S.gift.email.trim();
@@ -13442,9 +13517,9 @@
          (Dim, 28.09.2026) — that crumb is the last visible trace of them
          anywhere in the shop, so it drops out and the card hangs straight off
          the home page. Nothing else about this screen changes. */
-      '<div class="crumbs"><button data-go="home">Главная</button>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a>' +
         (allBundles().length
-          ? ' / <button data-go="bundles">Наборы</button> / Подарочная карта</div>'
+          ? ' / <a href="' + linkHref("go", "bundles") + '" data-go="bundles">Наборы</a> / Подарочная карта</div>'
           : " / Подарочная карта</div>") +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Подарочная карта</h1>' +
@@ -13991,7 +14066,7 @@
         (l.failed ? "Блог временно недоступен — попробуйте позже." : "Статей пока нет — загляните позже.") + "</p>";
     }
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Блог</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Блог</div>' +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Блог</h1>' +
         body +
@@ -14012,7 +14087,7 @@
       (p.tags && p.tags.length ? '<div class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "");
   }
   function blogCrumbsHTML(title) {
-    return '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="blog">Блог</button>' +
+    return '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("go", "blog") + '" data-go="blog">Блог</a>' +
       (title ? " / " + esc(title) : "") + "</div>";
   }
   /* The article page. Breadcrumbs sit in the ordinary .wrap, where every
@@ -14049,7 +14124,7 @@
             ? '<p class="muted" style="margin:16px 0">Блог временно недоступен — попробуйте позже.</p>'
             : '<h1 class="display h1">Статья не найдена.</h1>') +
           // no way «back» into a blog that has nothing in it (28.09.2026)
-          (blogShown() ? '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' : "") +
+          (blogShown() ? '<p><a class="link" href="' + linkHref("go", "blog") + '" data-go="blog">Вернуться в блог</a></p>' : "") +
         "</section></div>";
     }
     var featured = productsById(post.products).slice(0, 8);
@@ -14178,12 +14253,12 @@
     var p = productsById([id])[0];
     if (!p) return "";
     var pro = proPrice(p, 0);
-    return '<button class="blog__prod" data-go-product="' + esc(p.id) + '">' +
+    return '<a class="blog__prod" href="' + linkHref("product", p.id) + '" data-go-product="' + esc(p.id) + '">' +
         media(p, 0, "ph blog__prodimg") +
         '<span class="blog__prodtx">' +
           '<span class="blog__prodname">' + esc(blogProductName(p, S.lang)) + "</span>" +
           '<span class="blog__prodprice num">' + esc(blogProductPrice(p, S.lang)) + "</span>" +
-        "</span></button>";
+        "</span></a>";
   }
   /** «Kevin.Murphy PLUMPING.WASH — шампунь» → «… — shampoo» for an EN reader.
    *  trText with allowName is exactly what a catalogue card's own name gets
@@ -14575,8 +14650,8 @@
     return '<header class="hdr">' +
       announceHTML() +
       '<div class="hdr__row">' +
-        '<button class="hdr__logo" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
-          towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+        '<a class="hdr__logo" href="' + linkHref("go", "home") + '" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
+          towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></a>' +
         '<div class="hdr__searchwrap">' +
           '<span class="hdr__searchicon">' + icon("search") + "</span>" +
           '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, паста…" aria-label="Поиск по магазину">' +
@@ -14592,19 +14667,21 @@
           '<button class="iconbtn" data-cart>' + icon("bag") + '<span class="vh">Корзина</span><span data-cartbadge></span></button>' +
         "</span>" +
       "</div>" +
+      /* Links, each to its page in the page's language (linkHref) — the
+         header is rebuilt on a language switch, so they never go stale. */
       '<nav class="hdr__nav" aria-label="Категории">' +
-        '<button data-go-cat="all">Все товары</button>' +
-        CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
-        (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
+        '<a href="' + linkHref("cat", "all") + '" data-go-cat="all">Все товары</a>' +
+        CATS.map(function (c) { return '<a href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") +
+        (allBundles().length ? '<a href="' + linkHref("go", "bundles") + '" data-go="bundles" data-nav-bundles>Наборы</a>' : "") +
         /* Dim, 07.09.2026: the gift card belongs beside «Наборы» in the
            navigation — that is where someone shopping for a present is
            already looking, and it is why the footer no longer repeats it.
            Unlike «Наборы» it is never removed: the card is not a set and
            stays on sale with sets switched off (docs/features.md). */
-        '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
-        '<button data-go="brands" data-nav-brands>Бренды</button>' +
+        '<a href="' + linkHref("go", "gift") + '" data-go="gift" data-nav-gift>Подарочная карта</a>' +
+        '<a href="' + linkHref("go", "brands") + '" data-go="brands" data-nav-brands>Бренды</a>' +
         // only while there is an article to read — blogShown(), 28.09.2026
-        (blogShown() ? '<button data-go="blog" data-nav-blog>Блог</button>' : "") +
+        (blogShown() ? '<a href="' + linkHref("go", "blog") + '" data-go="blog" data-nav-blog>Блог</a>' : "") +
       "</nav></header>";
   }
 
@@ -14648,7 +14725,8 @@
     if (nav && wantSets && !navSets) {
       // back in front of the gift card, which is where headerHTML() puts it
       var before = nav.querySelector("[data-nav-gift]") || nav.querySelector("[data-nav-brands]");
-      var btn = document.createElement("button");
+      var btn = document.createElement("a");
+      btn.setAttribute("href", linkHref("go", "bundles"));
       btn.setAttribute("data-go", "bundles");
       btn.setAttribute("data-nav-bundles", "");
       btn.textContent = "Наборы";
@@ -14663,7 +14741,8 @@
     var navBlog = nav && nav.querySelector("[data-nav-blog]");
     var wantBlog = blogShown();
     if (nav && wantBlog && !navBlog) {
-      var bb = document.createElement("button");
+      var bb = document.createElement("a");
+      bb.setAttribute("href", linkHref("go", "blog"));
       bb.setAttribute("data-go", "blog");
       bb.setAttribute("data-nav-blog", "");
       bb.textContent = "Блог";
@@ -14671,7 +14750,7 @@
     } else if (navBlog && !wantBlog) {
       navBlog.remove();
     }
-    h.querySelectorAll(".hdr__nav button").forEach(function (b) {
+    h.querySelectorAll(".hdr__nav a").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
         // «gift» used to light this one up — it has its own entry now
         b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle"));
@@ -14806,7 +14885,7 @@
          on its last word — one appended « · » and it stops matching in ET
          and EN. Same reason «Самовывоз» below keeps its own <span>. */
       ftrSec("Доставка", esc(ftrShipLine()) +
-        '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
+        '<br><a class="link" href="' + linkHref("page", "shipping") + '" data-page="shipping">Доставка и оплата</a>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
@@ -14814,10 +14893,10 @@
       ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
-      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<button class="link" data-page="contact">Контакты</button>']
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<a class="link" href="' + linkHref("page", "contact") + '" data-page="contact">Контакты</a>']
         .filter(Boolean).join(" · ")) +
-      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
-        '<button class="link" data-page="returns">Возврат товара</button> · ' +
+      ftrSec("Правовое", '<a class="link" href="' + linkHref("page", "privacy") + '" data-page="privacy">Конфиденциальность</a> · <a class="link" href="' + linkHref("page", "terms") + '" data-page="terms">Правовая информация</a> · ' +
+        '<a class="link" href="' + linkHref("page", "returns") + '" data-page="returns">Возврат товара</a> · ' +
         // the one way back to a choice that is otherwise made once and kept
         '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
@@ -14846,7 +14925,7 @@
         }).map(function (b) {
           // wordmarks only, as in the urban sample — one typographic voice,
           // no logo/text zigzag along the line
-          return '<button class="brandstrip__it" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</button>";
+          return '<a class="brandstrip__it" href="' + linkHref("brand", b.name) + '" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</a>";
         }).join("") + "</div></nav>" +
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
@@ -14866,10 +14945,10 @@
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
           var p = bannerProduct({ cat: c.id });
-          return '<button class="cattile" data-go-cat="' + c.id + '">' +
+          return '<a class="cattile" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' +
             '<span class="cattile__shot">' + media(p, 0, "ph cattile__img") + "</span>" +
             '<span class="cattile__name">' + c.name + "</span>" +
-            '<span class="cattile__n num">' + (function (n) { return n + " " + plural(n); })(CATALOGUE.filter(function (x) { return x.cat === c.id; }).length) + "</span></button>";
+            '<span class="cattile__n num">' + (function (n) { return n + " " + plural(n); })(CATALOGUE.filter(function (x) { return x.cat === c.id; }).length) + "</span></a>";
         }).join("") + "</div></section>" +
 
       "</div>";
@@ -14893,7 +14972,7 @@
 
   function rail(title, intro, list) {
     return '<section class="sec"><div class="sec__head"><h2 class="sec__title">' + title +
-      '</h2><button class="link" data-go-cat="all">Все товары</button></div>' +
+      '</h2><a class="link" href="' + linkHref("cat", "all") + '" data-go-cat="all">Все товары</a></div>' +
       '<p class="sec__intro">' + intro + "</p>" +
       '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
   }
@@ -14939,7 +15018,7 @@
       ["Реквизиты", cCompanyHTML()]
     ].filter(function (r) { return r[1]; });
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Контакты</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Контакты</div>' +
       '<section class="sec"><h1 class="display h1">Контакты</h1>' +
       (intro ? '<p class="sec__intro">' + esc(intro) + "</p>" : "") +
       '<div class="legal">' + rows.map(function (r) {
@@ -14985,13 +15064,13 @@
     var pg = legalFor(S.infoSlug);
     var own = (contentConf().legal || {})[S.infoSlug];
     var ownText = own ? cText(own) : "";
-    if (!pg && !ownText) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
+    if (!pg && !ownText) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><a class="link" href="' + linkHref("go", "home") + '" data-go="home">На главную</a></p></section></div>'; }
     var title = pg ? pg.title : "Информация";
     var body = ownText
       ? esc(ownText).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>")
       : cResolve(pg.html);
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + esc(title) + "</div>" +
       '<section class="sec"><h1 class="display h1">' + esc(title) + "</h1>" +
       '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
       // …and on the returns page, the one paragraph that is the shop's own
@@ -15017,7 +15096,7 @@
     loadPayMethods();   // one-shot; the real bank marks land with a re-render
     var c = contentConf();
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' + esc(title) + "</div>" +
       '<section class="sec dlv">' +
       deliveryPageHTML({
         lang: S.lang,
@@ -15034,7 +15113,7 @@
            read settings, so it passes nothing and keeps the default — see the
            note beside its own call in tools/prerender-shop2.mjs. */
         invoiceHint: invoiceHint(),
-        link: function (slug, label) { return '<button class="link" data-page="' + slug + '">' + label + "</button>"; },
+        link: function (slug, label) { return '<a class="link" href="' + linkHref("page", slug) + '" data-page="' + slug + '">' + label + "</a>"; },
         legalHtml: legalHtml
       }) +
       "</section></div>";
@@ -15042,14 +15121,14 @@
 
   function screenBrands() {
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / Бренды</div>' +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / Бренды</div>' +
       '<section class="sec" style="padding-top:14px">' +
       '<h1 class="display h1">Бренды</h1>' +
       '<p class="sec__intro">Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.</p>' +
       '<div class="brandtiles">' + brands().map(function (b) {
-        return '<button class="brandtile" data-go-brand="' + esc(b.name) + '">' +
+        return '<a class="brandtile" href="' + linkHref("brand", b.name) + '" data-go-brand="' + esc(b.name) + '">' +
           '<span class="brandtile__mark">' + brandMark(b.name, "brandtile") + "</span>" +
-          '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
+          '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></a>";
       }).join("") + "</div></section></div>";
   }
 
@@ -15068,8 +15147,8 @@
       '<h1 class="display h1">Страница не найдена</h1>' +
       '<p class="sec__intro">Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.</p>' +
       '<div class="nf__acts">' +
-        '<button class="btn" data-go="home">На главную</button>' +
-        '<button class="btn btn--ghost" data-go-cat="all">В каталог</button>' +
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">На главную</a>' +
+        '<a class="btn btn--ghost" href="' + linkHref("cat", "all") + '" data-go-cat="all">В каталог</a>' +
       "</div></section></div>";
   }
 
@@ -15112,9 +15191,9 @@
     var subPg = subPage();
     if (subPg) { ownIntro = subPg.intro; intro = esc(subPg.intro); }
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' +
-        (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand)
-          : subPg ? '<button data-go-cat="' + S.cat + '">' + name + "</button> / " + subChipName() : name) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' +
+        (S.brand ? '<a href="' + linkHref("go", "brands") + '" data-go="brands">Бренды</a> / ' + esc(S.brand)
+          : subPg ? '<a href="' + linkHref("cat", S.cat) + '" data-go-cat="' + S.cat + '">' + name + "</a> / " + subChipName() : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
         /* A brand with a logo shows the logo instead of the heading — and
            until 08.10.2026 that left the page with no <h1> at all, which is
@@ -15245,15 +15324,17 @@
     var prodGone = soldOut(p) || soloGone;
     var volGone = !prodGone && sizeOut(p, S.size);
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
+      '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / <a href="' + linkHref("cat", p.cat) + '" data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</a> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
         "<div>" +
           // no watermark here: the stage is far larger than the product on a
-          // desktop, so the mark floated in empty white and read as an artefact
-          '<div class="pdp__stage">' + media(p, S.gallery, "ph pdp__img") + "</div>" +
+          // desktop, so the mark floated in empty white and read as an artefact.
+          // The photo on show is the page's main picture (photo(): first);
+          // a thumbnail's own name is its button's «Фото N», so its alt is empty
+          '<div class="pdp__stage">' + photo(p, S.gallery, "ph pdp__img", photoAlt(p), true) + "</div>" +
           (g.length > 1 ? '<div class="pdp__thumbs">' + g.map(function (im, i) {
             return '<button data-gal="' + i + '" aria-label="Фото ' + (i + 1) + '" aria-current="' + (i === S.gallery) + '" class="pdp__thumb">' +
-              media(p, i, "ph") + "</button>";
+              photo(p, i, "ph", "") + "</button>";
           }).join("") + "</div>" : "") +
         "</div>" +
         "<div>" +
@@ -15261,7 +15342,7 @@
           // micro-caption with the whole row empty to its right, and sharing is
           // metadata about the product rather than a step in buying it
           '<div class="pdp__idrow">' +
-            '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
+            '<a class="card__brand pdp__brand" href="' + linkHref("brand", p.brand) + '" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</a>" +
             '<button class="pdp__share" data-share="' + p.id + '">' + icon("share") + "<span>Поделиться</span></button>" +
           "</div>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
@@ -18251,7 +18332,7 @@
         ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
         : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
           '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
-          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
+          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<a class="btn btn--ghost btn--sm" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") + "</div>" +
           // content: the contact line follows «Настройки → Контент» like the
           // footer does — this was the last place still printing the Gmail
           '<p class="muted">Напишите нам — поможем подобрать замену: ' +
@@ -47700,8 +47781,8 @@
         ? donePayPickerHTML(d) +
           '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
             (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
-            '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
-        : '<div class="done__acts"><button class="btn" data-go="home">Вернуться в магазин</button></div>') +
+            '<a class="btn btn--ghost" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></div>'
+        : '<div class="done__acts"><a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></div>') +
       "</section></div>";
   }
   function screenDone() {
@@ -47736,7 +47817,7 @@
         '<h1 class="display h1">Заказ оформлен</h1>' + num +
         '<p class="muted" style="margin-bottom:22px" data-invoicedone>' + invLine +
           "<span>" + invoiceDoneNote(dn) + "</span></p>" +
-        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
     }
     /* «Платёж обрабатывается» with no way forward is what Ренат hit on
        13.09.2026: he chose the card, pressed «Отменить» at the bank, and came
@@ -47770,7 +47851,7 @@
         '<div class="done__tick done__tick--wait">…</div>' +
         '<h1 class="display h1">Платёж обрабатывается</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.</p>' +
-        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+        '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
     }
     return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
       '<div class="done__tick">' + icon("check") + "</div>" +
@@ -47781,7 +47862,7 @@
           : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
       "</p>" +
       doneGiftHTML(d.gift) +
-      '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+      '<a class="btn" href="' + linkHref("go", "home") + '" data-go="home">Вернуться в магазин</a></section></div>';
   }
 
   /** The paid receipt's one sentence — what happens next, and only what the
@@ -47822,7 +47903,7 @@
         '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше"' + (l.qty <= 1 ? ' aria-disabled="true"' : "") + '>−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
-    }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
+    }).join("") : '<p class="muted">Пока пусто. <a class="link" href="' + linkHref("cat", "all") + '" data-go-cat="all">К товарам</a></p>') +
       /* No bar where there is no free delivery to walk towards: threshold()
          is Infinity when the country's «Бесплатно от» is empty, and «До
          бесплатной доставки (Эстония, от Infinity €)» is not a sentence —
@@ -47876,7 +47957,7 @@
     return '<div class="upsell"><div class="upsell__t">Добавьте — и доставка бесплатно:</div>' +
       picks.map(function (p) {
         return '<div class="upsell__row"><span class="upsell__ph">' + media(p, 0, "ph") + "</span>" +
-          '<button class="upsell__nm" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</button>" +
+          '<a class="upsell__nm" href="' + linkHref("product", p.id) + '" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</a>" +
           '<span class="num">' + cardPriceText(p, cardSizeIdx(p.id)) + "</span>" +
           '<button class="btn btn--sm" data-add="' + p.id + '">+</button></div>';
       }).join("") + "</div>";
@@ -49396,8 +49477,10 @@
     var ss = document.querySelector("[data-stickysum]");
     if (ss) ss.textContent = eur(unitPrice * S.qty);
     var g = gal(p);
-    var stage = document.querySelector(".pdp__img");
-    if (stage) stage.style.backgroundImage = "url('" + g[Math.min(S.gallery, g.length - 1)] + "')";
+    // the photo is an <img> in its frame now (photo()); a frame with no
+    // photograph in it carries the shop's mark and nothing to swap
+    var stage = document.querySelector(".pdp__img img");
+    if (stage) stage.src = g[Math.min(S.gallery, g.length - 1)];
     document.querySelectorAll(".pdp__thumb").forEach(function (b) {
       b.setAttribute("aria-current", String(Number(b.dataset.gal) === S.gallery));
     });
@@ -49732,6 +49815,30 @@
     if (S.screen === "blogpost" && S.blogSlug) return "/blog/" + encodeURIComponent(S.blogSlug) + "/";
     if (S.screen === "home") return "/";
     return "/" + S.screen + "/";
+  }
+  /* ---------- a link's address (SEO, 09.10.2026) ---------------------------
+     Google reads the page as it stands after this script has run, and until
+     now that page had no links in it: every card, menu entry, brand, crumb
+     and «see all» was a <button data-go-…>, so a crawler that reached the home
+     page found nowhere to go from it. They are <a href> now, and this is the
+     href — the very address pathFor() writes into the bar once the click has
+     landed (screenRoute() above, shopPathFor()), in the page's own language.
+     The click handler still catches a plain click (preventDefault, then the
+     same in-app navigation as ever); a middle-click, a Ctrl/⌘-click or a
+     long-press opens the real page. styles.css restates the button's own
+     look for these links, so nothing on screen changed.
+
+       kind  "cat" (a section id) · "brand" (its name) · "product" · "bundle"
+             (an id) · "page" (an info slug) · "go" (a screen: home, bundles,
+             gift, brands, blog — what data-go names) */
+  function linkHref(kind, v) {
+    var rest = kind === "cat" ? "/c/" + v + "/"
+      : kind === "brand" ? "/b/" + slugify(v) + "/"
+      : kind === "product" ? "/p/" + encodeURIComponent(v) + "/"
+      : kind === "bundle" ? "/set/" + encodeURIComponent(v) + "/"
+      : kind === "page" ? "/info/" + v + "/"
+      : v === "home" ? "/" : v === "bundles" ? "/sets/" : "/" + v + "/";
+    return esc(shopPathFor(S.lang, rest));
   }
   function here() { return location.pathname + location.search; }
   /* Stamp the live scroll onto the entry being left, so Back returns to the
@@ -50613,6 +50720,18 @@
     if (d.giftpdf !== undefined || d.invpdf !== undefined) return;
     if (d.payagain !== undefined) { payAgain(d.payagain); return; }
 
+    /* A link to a page (linkHref — a card, the menu, a brand, a crumb, «Все
+       товары», a policy in the footer, a subcollection's chip and «Все» on
+       the chip row) is a real <a href> since 09.10.2026: a modified click
+       (new tab, new window) is the browser's to open; a plain one stays in
+       the SPA and goes on exactly as the button did. */
+    if (t.tagName === "A" && t.hasAttribute("href") &&
+        (d.go !== undefined || d.goCat !== undefined || d.goBrand !== undefined ||
+         d.goProduct !== undefined || d.goBundle !== undefined || d.page !== undefined ||
+         d.subcat !== undefined)) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+    }
     if (d.ident !== undefined) identLogo(t);
     if (d.go) { if (d.go !== "catalog") S.brand = ""; go(d.go); return; }
     if (d.goCat !== undefined) { goCat(d.goCat); return; }
@@ -50682,13 +50801,11 @@
     }
     if (d.page !== undefined) { S.infoSlug = d.page; go("info"); return; }
     if (d.subcat !== undefined) {
-      /* A chip that is a link (a subcollection, «Все»): a tap with a
-         modifier, or the middle button, is the browser's — a new tab at that
-         address. A plain tap filters in place, as every chip always has, and
-         writes the address of what is now on screen (navTo: the
-         subcollection's own, or the section's for a chip with no page). */
-      if (t.tagName === "A" && (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button)) return;
-      if (t.tagName === "A") e.preventDefault();
+      /* A plain tap on a chip filters in place, as every chip always has
+         (a chip that is a link — a subcollection, «Все» — has already had a
+         modified click handed to the browser above), and writes the address
+         of what is now on screen (navTo: the subcollection's own, or the
+         section's for a chip with no page). */
       S.subcat = d.subcat; S.shown = 12;
       if (pathFor() !== here()) navTo(false);
       render();

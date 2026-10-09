@@ -138,6 +138,19 @@ h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.15; }
 
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
+/* The shop's links to its own pages were <button>s until 09.10.2026 — a card,
+   the menu, a brand, a crumb, «Все товары», a policy in the footer — and a
+   crawler follows an <a href>, never a button, so they are links now
+   (linkHref() in app.js). A button wears a few things of the browser's own
+   that a link does not: it is an inline-block, its text is centred, and it
+   takes no letter-spacing, word-spacing, capitals, indent or shadow from
+   around it. Restated here at zero specificity (:where), so every class rule
+   below still wins over them exactly as it won over the button's defaults,
+   and each link looks the way its button did. */
+:where(a[data-go], a[data-go-cat], a[data-go-brand], a[data-go-product], a[data-go-bundle], a[data-page]) {
+  display: inline-block; text-align: center;
+  letter-spacing: normal; word-spacing: normal; text-transform: none; text-indent: 0; text-shadow: none;
+}
 
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
@@ -166,6 +179,14 @@ img { max-width: 100%; display: block; }
 .ph {
   position: absolute; inset: 7%;
   background-size: contain; background-position: center; background-repeat: no-repeat;
+}
+/* …and the photo as a real <img> in that frame (photo() in app.js — the
+   cards, the product page, the banner; 09.10.2026, so Google can read it):
+   filling the frame and fitted exactly as the background is — whole and
+   centred, or covering it for a model shot (.ph--cover below). */
+.ph > img, .hero__art > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: contain; object-position: center;
 }
 
 /* ---------- buttons ---------- */
@@ -313,13 +334,13 @@ img { max-width: 100%; display: block; }
 }
 @media (min-width: 900px) { .hdr__nav { -webkit-mask-image: none; mask-image: none; } }
 .hdr__nav::-webkit-scrollbar { display: none; }
-.hdr__nav button {
+.hdr__nav button, .hdr__nav a {
   border: none; background: none; padding: 11px 0; cursor: pointer;
   border-bottom: 2px solid transparent; color: var(--muted);
   transition: color .18s var(--ease); min-height: 44px;
 }
-.hdr__nav button:hover { color: var(--ink); }
-.hdr__nav button[aria-current="true"] { border-bottom-color: var(--ink); color: var(--ink); }
+.hdr__nav button:hover, .hdr__nav a:hover { color: var(--ink); }
+.hdr__nav button[aria-current="true"], .hdr__nav a[aria-current="true"] { border-bottom-color: var(--ink); color: var(--ink); }
 
 /* Phone: search gets its own full-bleed row. It is separated by one hairline
    that runs the whole width — the field itself carries no border, so no stray
@@ -436,7 +457,8 @@ body:has(.stickybar) .ftr {
 @media (min-width: 1100px) { .sec .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* The add link used to be a <span> inside the card <button> — invalid nesting
-   and unreachable by keyboard. Card and add are now sibling buttons. */
+   and unreachable by keyboard. Card and add are now siblings: the card a link
+   to the product (since 09.10.2026), the add a button. */
 .card { display: flex; flex-direction: column; height: 100%; min-width: 0; }
 .card__name, .card__brand { overflow-wrap: anywhere; }
 .card__go {
@@ -690,6 +712,8 @@ body:has(.stickybar) .ftr {
   flex: 0 1 36%; align-self: stretch; min-height: 210px;
   background-size: contain; background-position: center; background-repeat: no-repeat;
   pointer-events: none;
+  /* the frame of its <img> (.hero__art > img, under .ph above) */
+  position: relative;
 }
 /* The gift card is the one banner target with no product photo behind it
    (heroArt() in app.js): the slide shows the same tower on the same shell
@@ -1510,8 +1534,8 @@ body.is-locked .sbot { display: none; }
 
 /* ---------- misc ---------- */
 .crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
-.crumbs button { border: none; background: none; padding: 0; cursor: pointer; color: inherit; }
-.crumbs button:hover { text-decoration: underline; }
+.crumbs button, .crumbs a { border: none; background: none; padding: 0; cursor: pointer; color: inherit; }
+.crumbs button:hover, .crumbs a:hover { text-decoration: underline; }
 
 .spinner {
   width: 22px; height: 22px; border: 2px solid var(--rule); border-top-color: var(--ink);
@@ -1597,6 +1621,7 @@ body:has(.drawer) #rempire-feedback { display: none; }
 
 /* cover fill last: merch is a model shot, it fills its frame */
 .ph--cover { inset: 0; background-size: cover; }
+.ph--cover > img { object-fit: cover; }
 /* media: a product with no photograph yet — the owner has just created it, or
    its one photo row carries no usable url. The shop's own mark instead of an
    empty square (media(), app.js): a name and a price over nothing reads as a
@@ -1736,7 +1761,9 @@ a.scchip { display: inline-flex; align-items: center; }
 .ftr__acc[open] summary::after { content: "−"; }
 .ftr__acc > div { padding: 0 0 14px; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
 .ftr__acc a { color: inherit; }
-.ftr__acc a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* not the .link ones (the policy pages, since 09.10.2026 links rather than
+   buttons): they keep their own hover, the underline they already draw */
+.ftr__acc a:not(.link):hover { text-decoration: underline; text-underline-offset: 3px; }
 .ftr__acc .socials { display: inline-flex; gap: 10px; margin-left: 12px; vertical-align: middle; }
 .ftr__pay { display: block; margin-top: 8px; }
 /* two columns of accordions where there is room; one on a phone */
@@ -2428,8 +2455,9 @@ button, a, summary, label { touch-action: manipulation; }
 }
 /* A product named inside the text: the «Товар» button leaves an <a
    data-product> marker, and blogBodyHTML() in app.js swaps it for this. It
-   is a <button>, so it is valid where the marker stood — inside a sentence's
-   own <p> — which a full product card (a <div> of buttons) would not be. */
+   is one phrasing element (a link to the product since 09.10.2026, a
+   <button> before), so it is valid where the marker stood — inside a
+   sentence's own <p> — which a full product card (a <div>) would not be. */
 .blog__prod {
   display: flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%;
   margin: 16px 0; padding: 8px 16px 8px 8px; text-align: left;

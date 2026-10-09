@@ -1464,6 +1464,51 @@
       }
     },
     {
+      "id": "shop-links-new-tab",
+      "area": "shop",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Карточки, меню и бренды открываются в новой вкладке",
+      "steps": [
+        "На компьютере открыть rempireshop.com/ru.",
+        "Ctrl-клик (на Mac ⌘-клик) по карточке товара.",
+        "Средний клик (колёсиком мыши) по пункту меню, бренду в ленте и «Все товары».",
+        "На странице товара Ctrl-клик по «Главная» в строке над фото и по бренду.",
+        "Обычный клик по карточке и по пункту меню."
+      ],
+      "expect": [
+        "Каждая такая ссылка открыла свою страницу в новой вкладке.",
+        "Текущая вкладка осталась на месте.",
+        "В новой вкладке адрес на русском: /ru/products/… или /ru/collections/….",
+        "Обычный клик открывает страницу сразу, как раньше, без перезагрузки.",
+        "Магазин выглядит точно так же, как до изменения."
+      ],
+      "why": "Ссылки стали настоящими, чтобы Google видел связи между страницами и фото товаров.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-09T00:40:41.237Z",
+      "en": {
+        "title": "Cards, menu and brands open in a new tab",
+        "steps": [
+          "On a computer open rempireshop.com/ru.",
+          "Ctrl-click (⌘-click on a Mac) a product card.",
+          "Middle-click (the mouse wheel) a menu entry, a brand in the strip and «Все товары».",
+          "On a product page Ctrl-click «Главная» in the line above the photo, and the brand.",
+          "Plain-click a card and a menu entry."
+        ],
+        "expect": [
+          "Each such link opened its page in a new tab.",
+          "The current tab stayed where it was.",
+          "The new tab's address is the Russian one: /ru/products/… or /ru/collections/….",
+          "A plain click opens the page at once, as before, with no reload.",
+          "The shop looks exactly as it did before the change."
+        ],
+        "why": "The links are real links now, so Google sees how pages and product photos connect."
+      }
+    },
+    {
       "id": "panel-login",
       "area": "panel",
       "who": "renat",
