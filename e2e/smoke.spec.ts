@@ -973,6 +973,8 @@ test.describe(`deployed shop — ${BASE}`, () => {
       ["/shop2/admin/", "/admin", 301],
       [`/products/${id}/`, `/products/${id}`, 301],
       [`/en-lv/products/${id}`, `/products/${id}`, 301],
+      /* …and a Merchant Center link to it keeps its campaign, minus Shopify's own parameters */
+      [`/en-lv/products/${id}?country=LV&currency=EUR&utm_source=google`, `/products/${id}?utm_source=google`, 301],
       /* The names a human types for the hand-written pages (next.config.ts).
          Dim asked for the checklist as /tests twice, from his phone, and got
          a 404 both times — a page whose whole job is to be opened from a chat
