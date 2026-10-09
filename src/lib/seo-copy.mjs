@@ -54,7 +54,8 @@
       home: {
         EN: {
           t: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
-          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1, Tallinn; EU-wide delivery.",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1; free Baltic delivery from {free}.",
+          dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1, Tallinn; EU-wide delivery.",
           ogT: "REMPIRE — salon hair, beard & skin care, Tallinn",
           ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our Tallinn salon team. Pickup at Mardi 1 or delivery across Europe."
         },
@@ -67,7 +68,8 @@
         },
         RU: {
           t: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
-          d: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона REMPIRE. Самовывоз на Mardi 1, доставка по Эстонии и ЕС.",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона. Самовывоз на Mardi 1, бесплатная доставка по Балтии от {free}.",
+          dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона REMPIRE. Самовывоз на Mardi 1, доставка по Эстонии и ЕС.",
           ogT: "REMPIRE — салонный уход для волос, бороды и кожи",
           ogD: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона в Таллинне. Самовывоз на Mardi 1 или доставка по Европе."
         }

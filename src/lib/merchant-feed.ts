@@ -379,6 +379,14 @@ export type DaySpan = { min: number; max: number };
 export const HANDLING_DAYS: DaySpan = { min: 0, max: 1 };
 
 /**
+ * The highest free-delivery threshold the feed states as
+ * g:free_shipping_threshold — 70 € in the Baltics is listed, 200 € for
+ * Finland and the rest of the EU is not: a basket that size is rare, and the
+ * entries are paid for in feed size (see buildFeed()).
+ */
+export const FREE_THRESHOLD_LISTED_UPTO = 100;
+
+/**
  * How long the carrier takes, in business days, from hand-over to the
  * customer — by a country's own row, else by the zone the checkout prices by
  * (shippingZone()). These are the times the shop already promises, and no
@@ -756,6 +764,21 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     return xml;
   };
 
+  /* The basket from which delivery is free, country by country — 70 € in the
+     Baltics, 200 € beyond (settings.shipping_rules, the checkout's own
+     threshold through shippingTerms()). The g:shipping prices above are a
+     basket of this one item; this tells Google the rest, so a listing can
+     say «free delivery over 70 €» (Dim, 09.10.2026). Only thresholds a normal
+     basket reaches (FREE_THRESHOLD_LISTED_UPTO): one entry per country per
+     item for all 25 countries would add ~1.1 MB and push the Russian feed
+     past the 4.5 MB a Vercel Function may answer with (HANDLING_DAYS above). */
+  const freeXml = shippingTerms(rules)
+    .filter((s) => s.freeFrom !== null && Number.isFinite(s.freeFrom) && (s.freeFrom as number) <= FREE_THRESHOLD_LISTED_UPTO)
+    .map((s) =>
+      `<g:free_shipping_threshold><g:country>${s.country}</g:country>` +
+      `<g:price_threshold>${eurText(s.freeFrom as number)}</g:price_threshold></g:free_shipping_threshold>`)
+    .join("\n    ");
+
   const items: string[] = [];
   const products = [...catalogueProducts(opts.descriptions), ...customProducts(opts.custom)];
   /* Which products, which sizes and which ids — planFeed(), the pass the
@@ -851,6 +874,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
       f.push(el("g:min_handling_time", HANDLING_DAYS.min));
       f.push(el("g:max_handling_time", HANDLING_DAYS.max));
       f.push(shippingXml(r.price));
+      if (freeXml) f.push(freeXml);
       items.push("  <item>\n    " + f.join("\n    ") + "\n  </item>");
       stats.items++;
     });

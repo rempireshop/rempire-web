@@ -40,6 +40,7 @@ import {
   feedBase,
   feedLangOf,
   HANDLING_DAYS,
+  FREE_THRESHOLD_LISTED_UPTO,
   idStem,
   MAX_ID,
   merchantId,
@@ -564,6 +565,26 @@ describe("delivery times", () => {
       });
       expect(Buffer.byteLength(xml, "utf8"), lang).toBeLessThan(4_500_000);
     }
+  });
+
+  /* Dim, 09.10.2026: tell Google the basket from which delivery is free, so a
+     listing can say so — the thresholds a normal basket reaches only
+     (FREE_THRESHOLD_LISTED_UPTO), from the same rules the checkout bills. */
+  it("states the free-delivery threshold for the Baltics on every item, not the 200 € ones", () => {
+    const rules = { ...DEFAULT_SHIPPING_RULES, freeFrom: 70, freeFromByCountry: { EU: 200, FI: 200 } };
+    const { xml } = buildFeed({ lang: "RU", base: LIVE, overrides: {}, descriptions: {}, custom: [], eans: {}, rules });
+    const items = xml.split("<item>").slice(1);
+    expect(items.length).toBeGreaterThan(100);
+    const entry = (c: string, p: string) =>
+      `<g:free_shipping_threshold><g:country>${c}</g:country><g:price_threshold>${p}</g:price_threshold></g:free_shipping_threshold>`;
+    for (const it_ of items) {
+      for (const c of ["EE", "LV", "LT"]) expect(it_, c).toContain(entry(c, "70.00 EUR"));
+      expect(it_).not.toContain("<g:country>FI</g:country><g:price_threshold>");
+      expect(it_).not.toContain("<g:country>DE</g:country><g:price_threshold>");
+      expect(it_.match(/<g:free_shipping_threshold>/g)?.length).toBe(3);
+    }
+    expect(FREE_THRESHOLD_LISTED_UPTO).toBeLessThan(200);
+    expect(Buffer.byteLength(xml, "utf8")).toBeLessThan(4_500_000);
   });
 });
 
