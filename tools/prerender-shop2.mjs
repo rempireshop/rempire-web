@@ -480,8 +480,8 @@ try {
 }
 
 /* subcollections: the chips that are pages (SUB_HANDLES in
-   src/lib/shop-paths.mjs — /et/collections/habemeolid and seven more). Who is
-   in which subtype (SUBCATS, SUB_PICKS, subcatsAuto/subcatsWith) and each
+   src/lib/shop-paths.mjs — /et/collections/habemeolid and five more). Who is
+   under which chip (SUBCATS, SUB_PICKS, subcatsAuto/subcatsWith) and each
    page's words in three languages (SUB_PAGES) live in app.js beside the chips
    that use them, and are lifted the way the dictionary is — so a
    subcollection's static page lists exactly what its chip filters, under the
@@ -507,7 +507,7 @@ try {
     if (!(SUBS.cats[cat] || []).some(d => d.id === sub)) throw new Error(key + " is published (SUB_HANDLES) but app.js has no such chip");
     for (const code of ["RU", "ET", "EN"]) {
       const w = SUBS.pages[key] && SUBS.pages[key][code];
-      if (!w || !w.h1 || !w.title || !w.desc || !w.intro) throw new Error(key + " has no " + code + " words in SUB_PAGES (app.js)");
+      if (!w || !w.name || !w.title || !w.desc || !w.intro) throw new Error(key + " has no " + code + " words in SUB_PAGES (app.js)");
     }
     const n = CATALOGUE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;
     if (n < SUBCOLLECTION_MIN) {
@@ -523,6 +523,13 @@ try {
 /* «Подраздел» as the owner set it in the panel — it wins over the rules, on
    the static page as on the chip. */
 const ownSubcat = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subcat) || "";
+/* The chip's own label («Масла»), in the page's language — the dictionary
+   translates it, as translateTree() does on the shop's chip row. */
+const subChipLabel = (key, code) => {
+  const [cat, sub] = key.split("/");
+  const d = (SUBS.cats[cat] || []).find(x => x.id === sub);
+  return d ? tr(d.name, code, false) : "";
+};
 
 /* The live rules, when the database is there — the same merge over the
    defaults that app.js applyShipRules() does (key by key, a bad number
@@ -1031,11 +1038,12 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     /* «Бренды» is the brands landing (/collections/brands), as it is in the
        shop's own crumb — it pointed at «Все товары» until 08.10.2026. */
     ...(kind === "b" ? [[t.brands, langPath(seg, "/brands/")]] : []),
-    /* A subcollection ("beard/oi") sits under its section: Главная ›
-       Уход за бородой › Масло для бороды, here and in the BreadcrumbList. */
+    /* A subcollection ("beard/oi") sits under its section and is named by
+       its chip: Главная › Уход за бородой › Масла, here and in the
+       BreadcrumbList — the crumb the shop draws on tapping the chip. */
     ...(kind === "c" && id.includes("/")
-      ? [[tr(CAT_NAMES[id.split("/")[0]], code, false), langPath(seg, "/c/" + id.split("/")[0] + "/")]] : []),
-    [heading, null]
+      ? [[heading, langPath(seg, "/c/" + id.split("/")[0] + "/")], [subChipLabel(id, code), null]]
+      : [[heading, null]])
   ];
   const first = list[0];
   /* A section with nothing in it for the moment. Until 18.09.2026 `list` was
@@ -1094,24 +1102,26 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
 /* ---------- a subcollection: a section's chip with a page of its own ------
 
    /et/collections/habemeolid, /collections/shampoo … (SUB_HANDLES). The
-   section's listing template, exactly — crumbs (with the section between the
-   home page and this one), heading, the line under it, the grid, the
-   BreadcrumbList and the ItemList — with its own words from SUB_PAGES and the
-   products its chip filters, the owner's «Подраздел» included. Both `desc`
-   and `intro` carry the line under the heading, whichever of the two
-   listingPage() prints there; the search snippet is the head's own, set on
-   the spec afterwards. */
+   section's listing template, exactly, and what the shop shows on tapping the
+   chip: the section's heading, the crumb Главная › section › chip, the
+   subcollection's own line under the heading (SUB_PAGES), and the products
+   the chip filters, the owner's «Подраздел» included. Both `desc` and `intro`
+   carry that line, whichever of the two listingPage() prints there; the
+   search snippet and the list's name in the ItemList are the page's own,
+   set on the spec afterwards. */
 function subcollectionPage(key, lang) {
   const [cat, sub] = key.split("/");
   const words = SUBS.pages[key][lang.code];
   const list = ON_SALE.filter(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
   const page = listingPage({
-    lang, kind: "c", id: key, heading: words.h1, list,
+    lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), list,
     rest: "/c/" + key + "/",
     desc: words.intro, intro: words.intro,
     title: words.title
   });
   page.spec.desc = words.desc;
+  page.spec.imageAlt = words.name;
+  for (const ld of page.spec.jsonld) if (ld["@type"] === "ItemList") ld.name = words.name;
   return page;
 }
 

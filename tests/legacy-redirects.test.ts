@@ -158,11 +158,10 @@ describe("one 301 for everything that is not the page", () => {
 
   it("moves every other collection spelling to its section, in the same language", () => {
     /* a published subcollection is a page of its own since 09.10.2026
-       (tests/subcollections.test.ts); a subtype with none goes to its section */
+       (tests/subcollections.test.ts); every other one goes to its section */
     expect(legacyTarget("/et/collections/habemeolid")).toBeNull();
-    expect(legacyTarget("/collections/korean-cosmetics")).toBeNull();
+    expect(legacyTarget("/collections/korean-cosmetics")?.path).toBe("/collections/face-care");
     expect(legacyTarget("/et/collections/juuksemaskid")?.path).toBe("/et/collections/juuksehooldus");
-    expect(legacyTarget("/collections/face-sheet-masks")?.path).toBe("/collections/face-care");
     expect(legacyTarget("/collections/vse-tovary")?.path).toBe("/collections/all-products");
     expect(legacyTarget("/ru/collections/all")?.path).toBe("/ru/collections/vse-tovary");
     expect(legacyTarget("/ru/collections/hair-care")?.path).toBe("/ru/collections/uhod-za-volosami");

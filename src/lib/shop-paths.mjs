@@ -26,8 +26,8 @@
    ---- one vocabulary, two spellings --------------------------------------
    Everything that builds or reads an address inside the shop still speaks the
    short internal ROUTE the /shop2/ scheme had — "/p/<id>/", "/c/hair/",
-   "/c/beard/oi/" (a subcollection, since 09.10.2026), "/b/<brand>/", "/info/shipping/", "/sets/", "/set/<id>/", "/gift/",
-   "/brands/", "/blog/", "/blog/<slug>/", "/search/", "/account/",
+   "/c/beard/oi/" (a subcollection, since 09.10.2026), "/b/<brand>/",
+   "/info/shipping/", "/sets/", "/set/<id>/", "/gift/", "/brands/", "/blog/", "/blog/<slug>/", "/search/", "/account/",
    "/checkout/", "/done/", "/cart/", "/admin/", "/scan/", "/" — and this file
    is the one place that turns a route into the public address
    (publicPath) and back (parseShopPath). The prerender, the request-time
@@ -73,22 +73,22 @@ export const CAT_HANDLES = Object.freeze({
    history Google keeps for those addresses carries over. Keyed by the
    internal route's "<section>/<subtype>" (route "/c/beard/oi/"); the subtype
    ids are the chips' own (SUBCATS in public/shop2/app.js, which also holds
-   who belongs where and each page's words). A subtype listed here is
-   PUBLISHED: it needs at least SUBCOLLECTION_MIN products and an intro in all
-   three languages — tests/subcollections.test.ts holds both, and the
-   prerender refuses to run without them. A subtype that is not listed stays a
-   filter chip and its old Shopify handles go to the section
-   (src/lib/legacy-redirects.ts). Every handle below is in Shopify's sitemap
-   (tools/harvest/old-urls.txt); `korean-cosmetics` was the same in all three. */
+   who belongs where and each page's words); only an existing chip has a page,
+   and the chip row itself does not change (Dim, 09.10.2026). A chip listed
+   here is PUBLISHED: it needs at least SUBCOLLECTION_MIN products and its
+   words in all three languages — tests/subcollections.test.ts holds both, and
+   the prerender refuses to run without them. A chip that is not listed stays
+   a filter on the section's address, and every Shopify handle without a page
+   goes to the section (src/lib/legacy-redirects.ts). Every handle below is in
+   Shopify's sitemap (tools/harvest/old-urls.txt); «После бритья» has
+   Shopify's `aftershave` collection, whose content it is. */
 export const SUB_HANDLES = Object.freeze({
   "beard/oi": Object.freeze({ EN: "beard-oil", ET: "habemeolid", RU: "maslo-dlya-borody" }),
   "beard/ba": Object.freeze({ EN: "beard-balm", ET: "habemepalsamid", RU: "balzam-dlya-borody" }),
-  "beard/af": Object.freeze({ EN: "shaving", ET: "raseerimine", RU: "sredstva-dlya-britya" }),
+  "beard/af": Object.freeze({ EN: "aftershave", ET: "raseerimisjargne-hooldus", RU: "losony-posle-britya" }),
   "hair/sh": Object.freeze({ EN: "shampoo", ET: "shampoonid", RU: "shampuni-dlya-volos" }),
   "hair/co": Object.freeze({ EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" }),
-  "hair/sc": Object.freeze({ EN: "scalp-treatment", ET: "peanaha-hooldus", RU: "skraby-dlya-golovy" }),
   "styling/pw": Object.freeze({ EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }),
-  "face/kr": Object.freeze({ EN: "korean-cosmetics", ET: "korean-cosmetics", RU: "korean-cosmetics" }),
 });
 
 /** The fewest products a subcollection may have and still be a page. */

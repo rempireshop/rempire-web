@@ -20,9 +20,7 @@
  *     section under another collection name (`/collections/hair-mask`,
  *     `/et/collections/hair-care`) → the section in that language; a
  *     subcollection's handle in another language's spelling
- *     (`/collections/habemeolid`) → the subcollection, and the Shopify
- *     collections a published subcollection now holds (`/collections/aftershave`
- *     → shaving) → that subcollection, in that language; a product
+ *     (`/collections/habemeolid`) → the subcollection in that language; a product
  *     handle the catalogue does not have → an alias, its brand, or «Все
  *     товары»; `/pages/right-to-return` and the other policy spellings →
  *     the five policy pages; `/blogs/blog` and the old articles → the blog;
@@ -47,15 +45,7 @@
  * tools/harvest/old-urls.txt and docs/redirect-map.csv through it.
  */
 import catalogueMin from "@/data/catalogue.min.json";
-import {
-  CAT_HANDLES,
-  catOfHandle,
-  isSubcollection,
-  legacyShopTarget,
-  parseShopPath,
-  publicPath,
-  subOfHandle,
-} from "@/lib/shop-paths.mjs";
+import { CAT_HANDLES, catOfHandle, legacyShopTarget, parseShopPath, publicPath, subOfHandle } from "@/lib/shop-paths.mjs";
 
 /** Same rule as slugify() in src/lib/seo-head.mjs — brand slugs must match. */
 export const slugify = (s: string): string =>
@@ -88,8 +78,8 @@ type Cat = keyof typeof CAT_HANDLES;
    brand slug (`system-4`, `kevin-murphy`) are recognised without being listed.
 
    Since 09.10.2026 a published subcollection (SUB_HANDLES in
-   src/lib/shop-paths.mjs — beard-oil, shampoo, palsamid, juuksevaha,
-   korean-cosmetics …) is a page of its own at its handle, and parseShopPath()
+   src/lib/shop-paths.mjs — beard-oil, aftershave, shampoo, palsamid,
+   juuksevaha …) is a page of its own at its handle, and parseShopPath()
    answers it before this table is read. Its handles stay listed here all the
    same: they are where the address goes the day the subcollection is no
    longer published (below SUBCOLLECTION_MIN products) — to its section, as
@@ -99,8 +89,8 @@ type Cat = keyof typeof CAT_HANDLES;
    2019 Shopify merchandiser meant: bare `palsamid` is read as hair
    conditioners (Estonian «palsam» on its own is a hair conditioner;
    `habemepalsamid` is the beard one and is listed separately), and the
-   shaving handles (`shaving`, `raseerimine`, `aftershave`, …) belong to
-   «Уход за бородой», which is where the shop keeps Proraso. */
+   shaving handles (`shaving`, `raseerimine`, `aftershave`, …) go to «Уход за
+   бородой», which is where the shop keeps Proraso. */
 const COLLECTION_CAT: Readonly<Record<string, Cat | "brands">> = {
   /* hair */
   shampoo: "hair", shampoonid: "hair", "shampuni-dlya-volos": "hair",
@@ -138,31 +128,6 @@ const COLLECTION_CAT: Readonly<Record<string, Cat | "brands">> = {
   /* the brands hub */
   "top-brands": "brands", "top-brandid": "brands", "top-brendy": "brands",
 };
-
-/* Shopify collections that were not a subcollection's own handle but whose
-   products a published subcollection now holds — one hop to it rather than to
-   the whole section, while it is published:
-   · aftershave — the shaving page carries Proraso's aftershave balms and
-     lotions (Shopify's `shaving` and `aftershave` were two collections; the
-     shop has one shelf for both);
-   · moustache wax — three Captain Fawcett waxes, too few for a page of their
-     own (the audit's threshold is four), so they sit on the beard-balm page,
-     which says so in its title. `/ru/collections/vosk-dlya-borody-i-usov` had
-     16 impressions at 14 (Search Console, 29.08–06.10.2026). */
-const COLLECTION_SUB: Readonly<Record<string, string>> = {
-  aftershave: "beard/af", "raseerimisjargne-hooldus": "beard/af", "losony-posle-britya": "beard/af",
-  "beard-and-mustache-wax": "beard/ba", "habeme-vuntsivahad": "beard/ba", "vosk-dlya-borody-i-usov": "beard/ba",
-};
-
-/** The published subcollection a collection handle stands for, or null. */
-function subOfCollection(handle: string): string | null {
-  const own = subOfHandle(handle);
-  if (own) return own;
-  const held = COLLECTION_SUB[handle];
-  if (!held) return null;
-  const [cat, sub] = held.split("/");
-  return isSubcollection(cat, sub) ? held : null;
-}
 
 /** `/pages/<slug>` and `/policies/<slug>` spellings that are not the page's own address. */
 const INFO_SLUG: Readonly<Record<string, string>> = {
@@ -274,7 +239,8 @@ function productShape(lang: Lang, raw: string): Shape {
 function collectionShape(lang: Lang, rawHandle: string, search: string): Shape | null {
   const handle = slugify(safeDecode(rawHandle));
   if (BRAND_SLUGS.has(handle)) return { path: publicPath(lang, "/b/" + handle + "/"), reason: "collection-brand", query: "drop" };
-  const sub = subOfCollection(handle);
+  /* `/collections/<subcollection>/<tag>` — the subcollection, while it is published */
+  const sub = subOfHandle(handle);
   if (sub) return { path: publicPath(lang, "/c/" + sub + "/"), reason: "collection-sub", query: "drop" };
   const cat = COLLECTION_CAT[handle] || catOfHandle(handle);
   if (cat === "brands") return { path: publicPath(lang, "/brands/"), reason: "collection-cat", query: "drop" };

@@ -1426,22 +1426,22 @@
         "Нажать в ряду под заголовком «Масла».",
         "Нажать «Назад» в браузере.",
         "Нажать в том же ряду «Гели».",
-        "Открыть старую ссылку rempireshop.com/ru/collections/vosk-dlya-borody-i-usov.",
+        "Открыть старую ссылку rempireshop.com/ru/collections/losony-posle-britya.",
         "Открыть rempireshop.com/et/collections/habemeolid."
       ],
       "expect": [
-        "Ряд под заголовком выглядит и листается как раньше.",
-        "После «Масла» адрес стал /ru/collections/maslo-dlya-borody, заголовок «Масло для бороды».",
+        "Ряд под заголовком выглядит и листается как раньше, надписи те же.",
+        "После «Масла» адрес стал /ru/collections/maslo-dlya-borody, заголовок «Уход за бородой» остался.",
         "«Назад» вернул весь раздел и его адрес.",
         "«Гели» фильтруют на месте, адрес раздела не меняется.",
-        "Старая ссылка открыла «Бальзам для бороды и воск для усов».",
-        "Эстонская страница: заголовок «Habemeõlid», под ним только масла для бороды."
+        "Старая ссылка открыла раздел с выбранным «После бритья» — только бальзамы и лосьоны.",
+        "Эстонская страница: заголовок «Habemehooldus», выбрано «Õlid», под ним масла для бороды."
       ],
       "why": "Google годами показывал эти адреса Shopify — теперь это снова страницы, а не переход на весь раздел.",
       "risk": "med",
       "writes": false,
       "mark": "new",
-      "markedAt": "2026-10-08T23:05:00.000Z",
+      "markedAt": "2026-10-08T23:50:00.000Z",
       "en": {
         "title": "Subsections with addresses of their own",
         "steps": [
@@ -1449,16 +1449,16 @@
           "In the row under the heading, press «Масла».",
           "Press the browser's Back.",
           "In the same row, press «Гели».",
-          "Open the old link rempireshop.com/ru/collections/vosk-dlya-borody-i-usov.",
+          "Open the old link rempireshop.com/ru/collections/losony-posle-britya.",
           "Open rempireshop.com/et/collections/habemeolid."
         ],
         "expect": [
-          "The row under the heading looks and scrolls as before.",
-          "After «Масла» the address is /ru/collections/maslo-dlya-borody, the heading «Масло для бороды».",
+          "The row under the heading looks and scrolls as before, same words.",
+          "After «Масла» the address is /ru/collections/maslo-dlya-borody, the heading «Уход за бородой» stays.",
           "Back brought the whole section and its address back.",
           "«Гели» filters in place, the section's address stays.",
-          "The old link opened «Бальзам для бороды и воск для усов».",
-          "The Estonian page: heading «Habemeõlid», only beard oils under it."
+          "The old link opened the section with «После бритья» picked — only balms and lotions.",
+          "The Estonian page: heading «Habemehooldus», «Õlid» picked, beard oils under it."
         ],
         "why": "Google showed these Shopify addresses for years — now they are pages again, not a jump to the whole section."
       }
