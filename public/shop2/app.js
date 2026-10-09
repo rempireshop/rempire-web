@@ -12,14 +12,11 @@
 (function () {
   "use strict";
 
-  /* admin.css is linked with media="print" (index.html) so it never holds up
-     the storefront's first paint; it is switched on here — before the first
-     render, and for every route, since the toast slot and the scanner wear
-     its classes too. A stylesheet that is still on its way applies on load. */
-  try {
-    var admCss = document.querySelector("link[data-admin-css]");
-    if (admCss) admCss.media = "all";
-  } catch (e) {}
+  /* admin.css is no longer linked by every page (it was media="print" and
+     switched on here, for every route — 300 KB that no storefront screen
+     wears). The /admin shell links it in its <head>, and a page that walks
+     into the panel fetches it before the panel paints: admCssWant() and
+     lazyHold(), «the files the shop fetches when it needs them». */
 
   var TOWER_D = "M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z";
   var VB = "292.24 171.22 265.18 409.8";
@@ -12011,6 +12008,74 @@
       else if (chatMq.addListener) chatMq.addListener(onChatMq);
     }
   } catch (e) {}
+
+  /* ---------- the files the shop fetches when it needs them --------------
+     Perf, 09.10.2026. Until then the shell linked every file the shop might
+     ever read, and every visitor paid for all of them before the first screen
+     could paint — the panel's own 300 KB stylesheet included, on a product
+     page. A file that only some screens use now arrives when one of them asks
+     for it:
+
+       admin.css   the panel and the scanner. The /admin shell links it in its
+                   <head> (src/lib/notfound-page.ts); a storefront page that
+                   walks into the panel fetches it here, and the panel is not
+                   drawn until it is in — an unstyled panel is not a panel.
+
+     A fetched file wears the token app.min.js wears, read off its tag the way
+     mountChat() does, and tools/lib/asset-token.mjs hashes it into that same
+     token (LAZY_FILES there names every file fetched here — keep the two
+     lists in step, tests/lazy-files.test.ts compares them).
+
+     A screen that cannot be drawn without its file is held by render() until
+     the file is in (lazyHold). A file that fails is not waited for twice: the
+     screen is drawn without it, and the next want asks again after a pause. */
+  var LAZY = {}, LAZY_OK = {}, LAZY_FAILED = {};
+  function lazyToken() {
+    var app = document.querySelector('script[src*="/shop2/app"]');
+    return ((app && app.getAttribute("src")) || "").split("?")[1] || "";
+  }
+  /** One file, once: a promise of true (loaded) or false (failed) — never a rejection. */
+  function lazyFile(path) {
+    if (LAZY[path]) return LAZY[path];
+    var p = new Promise(function (resolve) {
+      try {
+        var v = lazyToken(), css = /\.css$/.test(path);
+        var el = document.createElement(css ? "link" : "script");
+        el.setAttribute("data-lazy", "");
+        el.onload = function () { LAZY_OK[path] = true; delete LAZY_FAILED[path]; resolve(true); };
+        el.onerror = function () {
+          LAZY_FAILED[path] = true;
+          if (el.parentNode) el.parentNode.removeChild(el);
+          // asked again by the next want — after a pause, so a render loop
+          // on a dead connection is not a request loop
+          setTimeout(function () { if (LAZY[path] === p) delete LAZY[path]; }, 15000);
+          resolve(false);
+        };
+        if (css) { el.rel = "stylesheet"; el.href = path + (v ? "?" + v : ""); }
+        else { el.async = true; el.src = path + (v ? "?" + v : ""); }
+        document.head.appendChild(el);
+      } catch (e) { LAZY_FAILED[path] = true; resolve(false); }
+    });
+    LAZY[path] = p;
+    return p;
+  }
+  var ADM_CSS = "/shop2/admin.css";
+  /** Is the panel's stylesheet in — linked by the shell (and so loaded before
+      this script ran: a stylesheet in the <head> holds every script after it)
+      or fetched and arrived? */
+  function admCssHas() {
+    return !!LAZY_OK[ADM_CSS] || !!document.querySelector('link[rel="stylesheet"][href^="' + ADM_CSS + '"]:not([data-lazy])');
+  }
+  function admCssWant() { return admCssHas() ? Promise.resolve(true) : lazyFile(ADM_CSS); }
+
+  /** What a screen cannot be drawn without and does not have yet: a promise
+      that settles once it is in, or null when nothing is missing. A file that
+      failed is not waited for again. */
+  function lazyHold(screen) {
+    var need = [];
+    if ((screen === "admin" || screen === "scan" || S.scanOpen) && !admCssHas() && !LAZY_FAILED[ADM_CSS]) need.push(admCssWant());
+    return need.length ? Promise.all(need) : null;
+  }
 
   /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
      name="cf-beacon"> in index.html — the integrator pastes it there — and
@@ -48607,7 +48672,23 @@
      avoid calling render() at all now, and this is the backstop for
      whatever still does. */
   var renderQueued = false, renderPending = false;
+  /* …and a screen whose file is still on its way is not drawn at all until it
+     lands (lazyHold, «the files the shop fetches when it needs them»): the
+     screen that is up stays up, and the one that was asked for arrives whole.
+     `lazyForce` is the first paint's way past the wait — firstPaint() has
+     already waited as long as it is going to. Nothing is drawn while the
+     first paint itself is being held (bootHeld): it draws its own screen. */
+  var lazyHeld = false, lazyForce = false;
   function render() {
+    var hold = bootHeld || lazyForce ? null : lazyHold(S.screen);
+    if (bootHeld || hold) {
+      if (hold && !lazyHeld) {
+        lazyHeld = true;
+        hold.then(function () { lazyHeld = false; render(); });
+      }
+      if (!bootHeld) admSyncHistory();
+      return;
+    }
     if (renderQueued) renderPending = true;
     else {
       renderQueued = true;
@@ -54084,7 +54165,10 @@
     history.replaceState({ y: 0, shown: S.shown }, "", here());
     if (bootParked && S.screen === "admin") history.go(-bootParked);
   } catch (e) {}
+  // drawn now, whatever is still on its way — see bootLazy below
+  lazyForce = true;
   render();
+  lazyForce = false;
   trackNav();   // analytics agent: the very first view of this tab's session
   blogPrefetchSoon();   // blog: the list, then the articles, on idle — so «Блог» opens at once later
   /* The slots are filled now, so the static page underneath them has done its
@@ -54164,12 +54248,28 @@
         return lid.indexOf("c-") === 0 && !byIdOrNull(lid);
       })));
   } catch (e) { bootWait = false; }
-  if (bootWait && OV_BOOT) {
+  /* …and the files the first screen cannot be drawn without (lazyHold). The
+     page's own HTML normally carries them — the /admin shell its stylesheet —
+     so this is null and nothing waits; it is not null for a page whose HTML
+     does not. Eight seconds at most, the same point at which boot.js gives
+     up on this script and shows the static page: past it the screen is drawn
+     without the file, and drawn again the moment it lands. */
+  var bootLazy = null;
+  try {
+    bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin") : "");
+  } catch (e) { bootLazy = null; }
+  if ((bootWait && OV_BOOT) || bootLazy) {
     bootHeld = true;
     var painted = false;
     var paintOnce = function () { if (painted) return; painted = true; bootHeld = false; firstPaint(); };
-    OV_BOOT.then(paintOnce, paintOnce);
-    setTimeout(paintOnce, 4000);
+    var bootWaits = [];
+    if (bootWait && OV_BOOT) bootWaits.push(OV_BOOT);
+    if (bootLazy) {
+      bootWaits.push(bootLazy);
+      bootLazy.then(function () { if (painted) render(); });
+    }
+    Promise.all(bootWaits).then(paintOnce, paintOnce);
+    setTimeout(paintOnce, bootWait && OV_BOOT ? 4000 : 8000);
   } else {
     firstPaint();
   }

@@ -22,7 +22,7 @@ import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { assetToken, currentToken, retokenise, versionedAssets } from "../tools/lib/asset-token.mjs";
+import { assetToken, currentToken, LAZY_FILES, retokenise, versionedAssets } from "../tools/lib/asset-token.mjs";
 import { stripJs } from "../tools/lib/js-strip.mjs";
 
 /* ---------- a shell of our own, with files we can edit -------------------- */
@@ -36,7 +36,7 @@ function shell(token: string): string {
     `<link rel="stylesheet" href="/shop2/admin.css?v=${token}" media="print" data-admin-css>`,
     "</head><body>",
     "<div id=\"app\"><!-- prerender:start --><div id=\"prerender\">home</div><!-- prerender:end --></div>",
-    "<script src=\"/shop/content.js?v=c2\"></script>",
+    "<script src=\"/shop/own.js?v=c2\"></script>",
     `<script src="/shop/legal.js?v=${token}"></script>`,
     `<script src="/shop2/app.js?v=${token}"></script>`,
     "</body></html>",
@@ -50,7 +50,7 @@ const FILES: Record<string, string> = {
   "shop2/app.js": "(function(){ /* the shop */ })();\n",
   "shop2/chat.js": "(function(){ /* the assistant */ })();\n",
   "shop/legal.js": "var LEGAL = {};\n",
-  "shop/content.js": "var CONTENT = {};\n",
+  "shop/own.js": "var OWN = {};\n",
 };
 
 let PUB = "";
@@ -69,7 +69,7 @@ afterAll(() => {
 /* ---------- which files the token covers ---------------------------------- */
 
 describe("the set of versioned assets", () => {
-  it("is the tags sharing the app.js token, plus chat.js, and never a tag with its own", () => {
+  it("is the tags sharing the app.js token, plus chat.js and the files app.js fetches, and never a tag with its own", () => {
     const urls = versionedAssets(shell("i18n84"));
     expect(urls).toEqual([
       "/shop2/styles.css",
@@ -77,9 +77,12 @@ describe("the set of versioned assets", () => {
       "/shop/legal.js",
       "/shop2/app.js",
       "/shop2/chat.js",
+      // the files app.js fetches when a screen needs one (LAZY_FILES), once
+      // each — admin.css is in the list already, through its tag
+      ...LAZY_FILES.filter((f) => f !== "/shop2/admin.css"),
     ]);
-    // /shop/content.js?v=c2 keeps a token of its own on purpose
-    expect(urls).not.toContain("/shop/content.js");
+    // a tag with a token of its own keeps it, on purpose
+    expect(urls).not.toContain("/shop/own.js");
   });
 
   it("reads the current token off the app.js tag", () => {
@@ -123,9 +126,9 @@ describe("the token", () => {
 
   it("does not move when a file that is not versioned changes", async () => {
     const before = await assetToken(shell("i18n84"), PUB);
-    write("shop/content.js", FILES["shop/content.js"] + "// its own ?v=c2\n");
+    write("shop/own.js", FILES["shop/own.js"] + "// its own ?v=c2\n");
     expect(await assetToken(shell("i18n84"), PUB)).toBe(before);
-    write("shop/content.js", FILES["shop/content.js"]);
+    write("shop/own.js", FILES["shop/own.js"]);
   });
 
   it("ignores the line endings the working tree happens to have", async () => {
@@ -154,7 +157,7 @@ describe("retokenise()", () => {
     const after = retokenise(before, "abc123def456");
     expect(after).toContain('href="/shop2/styles.css?v=abc123def456"');
     expect(after).toContain('src="/shop2/app.js?v=abc123def456"');
-    expect(after).toContain('src="/shop/content.js?v=c2"');
+    expect(after).toContain('src="/shop/own.js?v=c2"');
     expect(after).not.toContain("i18n84");
     // byte for byte apart from the token itself
     expect(after.split("abc123def456").join("i18n84")).toBe(before);
@@ -169,14 +172,19 @@ describe("retokenise()", () => {
 /* ---------- the real index.html ------------------------------------------- */
 
 describe("public/shop2/index.html", () => {
-  it("versions fourteen tags with one token, and the token covers chat.js too", async () => {
+  it("versions what every page needs with one token, and the token covers chat.js and the fetched files too", async () => {
     const real = (await readFile(path.join(process.cwd(), "public", "shop2", "index.html"), "utf8"))
       .replace(/\r\n?/g, "\n");
     const token = currentToken(real);
     expect(token).not.toBe("");
-    expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(14);
+    /* Fourteen until 09.10.2026, when admin.css left the shell for app.js to
+       fetch when the panel opens (perf). */
+    const TAGS = 13;
+    expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(TAGS);
     const urls = versionedAssets(real);
-    expect(urls).toHaveLength(15); // the fourteen tags + the untagged chat.js
+    // the tags, the untagged chat.js, and LAZY_FILES that wear no tag
+    expect(urls).toHaveLength(TAGS + 1 + LAZY_FILES.filter((f) => !urls.slice(0, TAGS).includes(f)).length);
+    for (const file of LAZY_FILES) expect(urls).toContain(file);
     // the shell links the built file, not the source it is stripped from
     expect(urls).toContain("/shop2/app.min.js");
     expect(urls).not.toContain("/shop2/app.js");

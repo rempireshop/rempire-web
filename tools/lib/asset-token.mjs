@@ -32,16 +32,18 @@
 
    The tags that share ONE token are the set: whatever `?v=` the app.js tag
    carries, every other tag carrying that same value is versioned with it
-   (thirteen of them today — two stylesheets and eleven scripts). A tag with
-   a token of its own — /shop/content.js?v=c2 — is deliberately not part of
-   the set and is left exactly as it is. Add an asset tag with the shared
-   token and it joins on its own; nothing here lists filenames.
+   (thirteen since 09.10.2026, when admin.css left the shell for app.js to
+   fetch when the panel opens — LAZY_FILES below). A tag with a token of its
+   own — /shop/content.js?v=c2 — is deliberately not part of the set and is
+   left exactly as it is. Add an asset tag with the shared token and it joins
+   on its own.
 
    public/shop2/chat.js is hashed too even though it has no tag: mountChat()
    in app.js adds that tag itself, on wide screens only, and copies the token
    off the app.js tag — so a chat.js that changed alone would otherwise ship
    behind a token that had not moved, which is the original bug wearing a
-   different hat.
+   different hat. The files app.js fetches only when a screen needs them —
+   LAZY_FILES below — are hashed for the same reason.
 
    One of the tags names a file no checkout holds: /shop2/app.min.js is built
    from /shop2/app.js by tools/minify-shop2.mjs and is gitignored. It is
@@ -68,8 +70,20 @@ const TOKEN_LEN = 12;
 /** An asset tag with a `?v=`: `href="/shop2/styles.css?v=i18n84"`. */
 const TAGGED = /(?:href|src)="(\/[^"?\s]+)\?v=([^"'\s]*)"/g;
 
+/**
+ * The files public/shop2/app.js fetches itself, when a screen needs one, with
+ * the token copied off its own tag — lazyFile() and «the files the shop
+ * fetches when it needs them» there (perf, 09.10.2026). Until then the shell
+ * linked each of them for every visitor; now no tag names them, so they are
+ * listed here or a change to one of them would never move the token and a
+ * browser would keep the old copy for as long as the cache header lets it —
+ * which, for a tokened address, is a year. tests/lazy-files.test.ts holds
+ * this list and app.js's to the same files.
+ */
+export const LAZY_FILES = ["/shop2/admin.css"];
+
 /** Files that carry the shared token without wearing a tag of their own. */
-const UNTAGGED = ["/shop2/chat.js"];
+const UNTAGGED = ["/shop2/chat.js", ...LAZY_FILES];
 
 /**
  * A tag the shell links that no checkout contains, and the source a build

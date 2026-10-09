@@ -892,6 +892,20 @@ export function patchShell(shell, headHtml, contentHtml, htmlLang) {
   return out;
 }
 
+/* The shell as the owner's panel and scanner are served it (/admin,
+   /admin/scan): with the panel's stylesheet in its <head>. No other page
+   links admin.css any more — it is 300 KB no storefront screen wears, and
+   app.js fetches it when a storefront page walks into the panel (perf,
+   09.10.2026; lazyHold in public/shop2/app.js). Linked here, a straight
+   visit to the panel paints styled the first time, as it always did. The
+   ?v= is the shell's own shared token, read off the app.min.js tag; the
+   file is hashed into it (tools/lib/asset-token.mjs, LAZY_FILES). */
+export function ownerShell(shell) {
+  const v = (/\/shop2\/app(?:\.min)?\.js\?v=([^"'\s]*)/.exec(String(shell)) || [])[1];
+  if (!v || /\/shop2\/admin\.css\?/.test(shell)) return shell;
+  return String(shell).replace("</head>", () => '<link rel="stylesheet" href="/shop2/admin.css?v=' + esc(v) + '">\n</head>');
+}
+
 /* The viewport every page asks for — written into every generated page by
    tools/prerender-shop2.mjs and patched into the shell's hand-maintained
    head by the same run (reviewport below), checked by tools/check-prerender;

@@ -49,6 +49,7 @@ import {
   langNav,
   langPath,
   OG_DEFAULT,
+  ownerShell,
   patchShell,
   ROBOTS_CLOSED,
   slugify,
@@ -155,6 +156,8 @@ const CLIENT_SCREENS = new Set(["search", "brands", "account", "checkout", "done
    robots value rides along in data-served, which app.js restores the moment
    the shopper walks on to a real page (SEO audit, 09.10.2026). */
 const STATE_SCREENS = new Set(["search", "account", "checkout", "done", "admin", "scan", "cart"]);
+/* The owner's two screens — the only ones that wear admin.css. */
+const OWNER_SCREENS = new Set(["admin", "scan"]);
 
 export function stateShell(shell: string): string {
   const served = (shell.match(/<meta name="robots" content="([^"]*)">/) || [])[1] ?? "";
@@ -426,7 +429,10 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
   if (parsed.shape && isKnownShopPath(parsed.segs)) {
     const state = parsed.segs.length === 1 && STATE_SCREENS.has(parsed.segs[0]);
-    return html(withSessionIdentity(state ? stateShell(shell) : shell, req), 200);
+    // the panel and the scanner paint with their own stylesheet (ownerShell)
+    const owner = parsed.segs.length === 1 && OWNER_SCREENS.has(parsed.segs[0]);
+    const served = state ? stateShell(shell) : shell;
+    return html(withSessionIdentity(owner ? ownerShell(served) : served, req), 200);
   }
   /* The two shapes whose ids only the database knows, asked only once the
      closed lists above have said no. A brand slug reaches Postgres only when
