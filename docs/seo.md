@@ -357,8 +357,9 @@ one of those tags names the file it writes.
 | `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-products.xml` and `sitemap-custom.xml`**, which are not files but routes — see "The sitemaps the app serves" and "Custom products" below |
 | `public/sitemap-1.xml` | the 153 URLs the database cannot hide, with `xhtml:link` alternates |
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
-| `public/robots.production.txt` | the open policy, for reading and diffing |
-| `public/robots.staging.txt` | the closed policy, ditto |
+| `public/robots.production.txt` | the open policy, for reading and diffing — `*`, plus one group naming the AI search, assistant and training crawlers (OAI-SearchBot, ChatGPT-User, GPTBot, PerplexityBot, Perplexity-User, ClaudeBot, Claude-SearchBot, Claude-User, Google-Extended, Applebot-Extended) with the **same** rules repeated, because a bot obeys only the group that names it (Dim, 09.10.2026: open, training included). Both policies are `tools/lib/robots-policy.mjs`; `tests/robots-policy.test.ts` reads them the way a crawler does |
+| `public/robots.staging.txt` | the closed policy, ditto — names no AI bot, so they all fall under `Disallow: /` |
+| `public/llms.txt` | the shop described for AI assistants (llmstxt.org, gitignored): what REMPIRE is, the URL scheme, every section and brand with its three addresses, the shipping page's own price table and pickup/returns sentences in English, contact, policies, guides — `tools/lib/llms-txt.mjs`, from this run's data, so it cannot go stale; not named in robots.txt (no convention for that) |
 | `src/data/prerendered-routes.json` | address → file for every page written (gitignored), which `next.config.ts` turns into its rewrites |
 
 813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
@@ -451,11 +452,22 @@ on the `#edeae1` ground with the tower mark at +56/+48, no text — the title
 and the price travel as OG text fields and each platform sets those in its own
 type). A set gets its three items in a row on the same ground.
 
-The chain, first hit wins: the page's own card → for a listing, the first
-product's card → `/brand/og-default.png` (the tower alone, for the policy
-pages and the gift card) → `/og-shop.png`. The last is the safety net for a
-run where sharp could not load: it is committed, it is 1 200×630, and it keeps
-the invariant true rather than falling back to a `.webp` no scraper reads.
+The chain, first hit wins: the page's own card (a product, a set, an article)
+→ the shop's card in the page's language, `/og-shop-{en,et,ru}.png`
+(`ogShopCard()`) → `/brand/og-default.png` (the tower alone) → `/og-shop.png`.
+Since 09.10.2026 the language card is what the home page, the sections, the
+brands, the brands landing, the policy pages, the gift card and the 404 show —
+until then the home page showed the staging poster «НОВЫЙ МАГАЗИН … черновик
+для Рената», a section or brand whichever product sorted first, and the policy
+pages the tower with no name (SEO audit §1A b, T15). The three cards are drawn
+by `node tools/og-shop.mjs` (Playwright, the shop's own fonts; Dim's design
+and line «JUUKSED. HABE. STIIL.») and committed; `/og-shop.png` is a copy of
+the English one, kept for every scraper that cached the old name. The
+`Organization` block's `logo` and `image` (and an article's publisher logo)
+are the tower as a raster PNG — `/shop2/icons/icon-512.png`, `ORG_LOGO` /
+`ORG_IMAGE` — not the SVG Google may not take as a logo and not a link-preview
+card. The «REMPIRE TOWER» lockup and badge in `public/brand/` carry the
+studio's slogan rather than the shop's name and are not used for it.
 
 ### index.html is the shell *and* the English home page
 
@@ -1097,6 +1109,31 @@ title/description pair **per language** (below), the assistant can propose one
 with `set_seo`, and a pair somebody wrote is used exactly as written with
 nothing appended. The three t-shirts are where to start, because they are the
 only case where the shop actively tells Google that three pages are the same.
+
+## Titles and descriptions: one copy, three renderers (09.10.2026)
+
+The `<title>`, the meta description and the link-preview pair of the home
+page, the eight sections («Все товары» included), every brand page and the blog
+list, and the rule a product title is built by, live in
+**`src/lib/seo-copy.mjs`** — the words of the SEO audit's §1A, approved by Dim
+on 08.10.2026. The prerender and the request-time pages import it; app.js
+cannot import anything, so it carries a copy of the block between the
+`seo-copy:start` / `seo-copy:end` markers, written by
+`node tools/sync-seo-copy.mjs`. The prerender refuses to write a page while the
+two differ, and `tests/seo-copy.test.ts` runs both copies over every page of
+every kind in all three languages and wants the same head — which is what
+ended the static «Habemehooldus — osta Rempire'ist» / rendered «Habemehooldus —
+REMPIRE» pair (audit W4/T2).
+
+Rules the module holds: titles ≤ 60, descriptions ≤ 155; no «— купить в
+Rempire / osta Rempire'ist / buy at Rempire» filler (a product title is brand +
+the maker's name + the type, with the price when it fits); a trailing «| REMPIRE»
+in the house form «— REMPIRE»; the one figure the copy quotes — the free-delivery
+threshold in the Estonian home description — comes from `settings.shipping_rules`
+(`seoCtx()` in app.js, `SEO_CTX` in the prerender) and drops out when delivery
+is never free; Russian aliases only where Search Console shows them
+(«шампунь №1», «Ксерджофф Наксос»). The home page's `<h1>` is still `T.base`:
+a heading is not a search snippet.
 
 ## Title and description per language (admin override)
 

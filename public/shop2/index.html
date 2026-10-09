@@ -97,7 +97,7 @@
      and is not possible: /shop2/* is served under script-src 'self'
      (next.config.ts), which is the rule that makes this shop's innerHTML safe
      and is not worth loosening for 400 bytes. -->
-<script src="/shop2/boot.js?v=443451caa4f8" async></script>
+<script src="/shop2/boot.js?v=f5d2e2aa739e" async></script>
 <!-- The prerendered page (#prerender) is for search engines and for a browser
      that runs no scripts. Dim, 08.10.2026: on a reload it showed for a moment
      — a different, plainer page — before app.js drew the shop over it, because
@@ -164,34 +164,34 @@
      on every build, so it is stale in exactly the cases where nothing
      changed. /shop/content.js keeps a token of its own on purpose and is not
      part of the set. -->
-<link rel="stylesheet" href="/shop2/styles.css?v=443451caa4f8">
+<link rel="stylesheet" href="/shop2/styles.css?v=f5d2e2aa739e">
 <!-- the admin design system (docs/design/admin-handoff-README.md): tokens
      and components for /shop2/admin/, all scoped to .adm2 / adm-*.
      media="print" so it does not hold up the storefront's first paint; app.js
      flips it to "all" the moment it runs (top of the file), before anything
      that wears its classes is rendered. -->
-<link rel="stylesheet" href="/shop2/admin.css?v=443451caa4f8" media="print" data-admin-css>
+<link rel="stylesheet" href="/shop2/admin.css?v=f5d2e2aa739e" media="print" data-admin-css>
 </head>
 <body>
 <div id="app"><!-- prerender:start --><div id="prerender"><div class="wrap"><section class="sec"><h1 class="display h1">REMPIRE — professional hair care &amp; cosmetics in Tallinn</h1><p class="sec__intro">Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.</p><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Sections</h2><ul class="pre__list"><li><a href="/collections/all-products">All products</a></li><li><a href="/collections/hair-care">Hair care</a></li><li><a href="/collections/hair-styling">Styling</a></li><li><a href="/collections/beard-care">Beard care</a></li><li><a href="/collections/face-care">Face care</a></li><li><a href="/collections/body-care">Body care</a></li><li><a href="/collections/perfume">Fragrance</a></li><li><a href="/collections/merch">Merch</a></li></ul><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Brands</h2><ul class="pre__list"><li><a href="/collections/anua">Anua</a></li><li><a href="/collections/byredo">Byredo</a></li><li><a href="/collections/captain-fawcett">Captain Fawcett</a></li><li><a href="/collections/cbd-daily-haircare">CBD Daily</a></li><li><a href="/collections/christian-dior">Christian Dior</a></li><li><a href="/collections/cosrx">Cosrx</a></li><li><a href="/collections/creed">Creed</a></li><li><a href="/collections/davines">Davines</a></li><li><a href="/collections/gatsby">Gatsby</a></li><li><a href="/collections/guerlain">Guerlain</a></li><li><a href="/collections/gummy">Gummy</a></li><li><a href="/collections/kevin-murphy">Kevin.Murphy</a></li><li><a href="/collections/kilian">Kilian</a></li><li><a href="/collections/laneige">LANEIGE</a></li><li><a href="/collections/lumin-skin">Lumin Skin</a></li><li><a href="/collections/maison-francis-kurkdjian">Maison Francis Kurkdjian</a></li><li><a href="/collections/nature-republic">Nature Republic</a></li><li><a href="/collections/paul-mitchell">Paul Mitchell</a></li><li><a href="/collections/proraso">Proraso</a></li><li><a href="/collections/rempire">Rempire</a></li><li><a href="/collections/roja">Roja</a></li><li><a href="/collections/system-4">System 4</a></li><li><a href="/collections/tom-ford">Tom Ford</a></li><li><a href="/collections/versace">Versace</a></li><li><a href="/collections/xerjoff">Xerjoff</a></li><li><a href="/collections/yumain">Yumain</a></li></ul><ul class="grid" style="list-style:none;padding:0"><li><a class="pre__card" href="/products/system-4-bio-botanical-shampoo"><img class="pre__img" src="/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5" alt="System 4 Bio Botanical Shampoo — shampoo" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Shampoo — shampoo</span><span class="pre__pr num">from 9 €</span></a></li><li><a class="pre__card" href="/products/system-4-bio-botanical-serum"><img class="pre__img" src="/shop/img/system-4-bio-botanical-serum-0.webp?v=5" alt="System 4 Bio Botanical Serum — serum for scalp" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Bio Botanical Serum — serum for scalp</span><span class="pre__pr num">from 8 €</span></a></li><li><a class="pre__card" href="/products/sim-sensitive-system-4-oil-cure-scalp-treatment-o"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=5" alt="System 4 Oil Cure Scalp Treatment O — mask for scalp" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Oil Cure Scalp Treatment O — mask for scalp</span><span class="pre__pr num">from 7,90 €</span></a></li><li><a class="pre__card" href="/products/touchable"><img class="pre__img" src="/shop/img/touchable-0.webp?v=5" alt="Kevin.Murphy Touchable" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Touchable</span><span class="pre__pr num">27 €</span></a></li><li><a class="pre__card" href="/products/repair-me-wash"><img class="pre__img" src="/shop/img/repair-me-wash-0.webp?v=5" alt="Kevin.Murphy Repair-Me.Wash — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Repair-Me.Wash — shampoo</span><span class="pre__pr num">from 7 €</span></a></li><li><a class="pre__card" href="/products/kevin-murphy-un-tangled-spray"><img class="pre__img" src="/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=5" alt="Kevin.Murphy Un.Tangled Spray — spray for hair" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Un.Tangled Spray — spray for hair</span><span class="pre__pr num">from 8 €</span></a></li><li><a class="pre__card" href="/products/night-rider"><img class="pre__img" src="/shop/img/night-rider-0.webp?v=5" alt="Kevin.Murphy Night.Rider — paste for styling" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Night.Rider — paste for styling</span><span class="pre__pr num">from 11 €</span></a></li><li><a class="pre__card" href="/products/free-hold"><img class="pre__img" src="/shop/img/free-hold-0.webp?v=5" alt="Kevin.Murphy Free.Hold" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Free.Hold</span><span class="pre__pr num">from 11 €</span></a></li><li><a class="pre__card" href="/products/killer-curls-rinse"><img class="pre__img" src="/shop/img/killer-curls-rinse-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Rinse — conditioner" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Rinse — conditioner</span><span class="pre__pr num">from 6 €</span></a></li><li><a class="pre__card" href="/products/killer-curls-wash"><img class="pre__img" src="/shop/img/killer-curls-wash-0.webp?v=5" alt="Kevin.Murphy Killer.Curls Wash — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">Kevin.Murphy</span><span class="pre__nm">Killer.Curls Wash — shampoo</span><span class="pre__pr num">from 6 €</span></a></li><li><a class="pre__card" href="/products/system-4-mild-shampoo-3"><img class="pre__img" src="/shop/img/system-4-mild-shampoo-3-0.webp?v=5" alt="System 4 Mild Shampoo 3 — shampoo" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Mild Shampoo 3 — shampoo</span><span class="pre__pr num">from 7,90 €</span></a></li><li><a class="pre__card" href="/products/sim-sensitive-system-4-scalp-tonic-t"><img class="pre__img" src="/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=5" alt="System 4 Scalp Tonic T — toner for scalp" loading="lazy" width="400" height="400"><span class="pre__brand">System 4</span><span class="pre__nm">Scalp Tonic T — toner for scalp</span><span class="pre__pr num">from 7,90 €</span></a></li></ul></section><nav class="pre__langs" aria-label="Language"><a href="/ru" hreflang="ru">RU</a><a href="/et" hreflang="et">ET</a><a href="/" hreflang="en" aria-current="true">EN</a></nav></div><script type="application/json" id="setsdata">["beard-start","shave-smooth","tattoo-care","styling-duo","gift-rempire","hair-young-again","face-basic","barberism"]</script></div><!-- prerender:end --></div>
-<script src="/shop/catalogue2.js?v=443451caa4f8"></script>
+<script src="/shop/catalogue2.js?v=f5d2e2aa739e"></script>
 <!-- curated sets, generated by tools/build-bundles.mjs — optional: without it
      the shop simply has no «Наборы» -->
-<script src="/shop/bundles.js?v=443451caa4f8"></script>
-<script src="/shop/paylogos.js?v=443451caa4f8"></script>
-<script src="/shop/shipping-data.js?v=443451caa4f8"></script>
+<script src="/shop/bundles.js?v=f5d2e2aa739e"></script>
+<script src="/shop/paylogos.js?v=f5d2e2aa739e"></script>
+<script src="/shop/shipping-data.js?v=f5d2e2aa739e"></script>
 <script src="/shop/content.js?v=c2"></script>
-<script src="/shop/legal.js?v=443451caa4f8"></script>
-<script src="/shop/content.ru.js?v=443451caa4f8"></script>
-<script src="/shop/content.et.js?v=443451caa4f8"></script>
-<script src="/shop/legal.ru.js?v=443451caa4f8"></script>
-<script src="/shop/legal.et.js?v=443451caa4f8"></script>
-<script src="/shop/legal.en.js?v=443451caa4f8"></script>
+<script src="/shop/legal.js?v=f5d2e2aa739e"></script>
+<script src="/shop/content.ru.js?v=f5d2e2aa739e"></script>
+<script src="/shop/content.et.js?v=f5d2e2aa739e"></script>
+<script src="/shop/legal.ru.js?v=f5d2e2aa739e"></script>
+<script src="/shop/legal.et.js?v=f5d2e2aa739e"></script>
+<script src="/shop/legal.en.js?v=f5d2e2aa739e"></script>
 <!-- app.min.js, not app.js: same program, comments and indentation out, 38 %
      smaller over the wire — and this is the one script standing between a
      visitor and any screen at all. Built by tools/minify-shop2.mjs, which
      says why; edit public/shop2/app.js. -->
-<script src="/shop2/app.min.js?v=443451caa4f8"></script>
+<script src="/shop2/app.min.js?v=f5d2e2aa739e"></script>
 <!-- The shop assistant (/shop2/chat.js) is NOT listed here on purpose: it is
      wanted on a wide screen, in the shop, outside the checkout, and never on
      a phone (Dim, 07.09.2026). app.js adds the tag itself when the screen and

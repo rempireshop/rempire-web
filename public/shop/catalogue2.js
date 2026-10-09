@@ -105,7 +105,7 @@ const CATALOGUE = [
  {
   "id": "touchable",
   "brand": "Kevin.Murphy",
-  "name": "Touchable",
+  "name": "Touchable — спрей-воск",
   "cat": "hair",
   "price": 27,
   "priceFrom": false,
@@ -206,7 +206,7 @@ const CATALOGUE = [
  {
   "id": "free-hold",
   "brand": "Kevin.Murphy",
-  "name": "Free.Hold",
+  "name": "Free.Hold — паста для укладки",
   "cat": "hair",
   "price": 11,
   "priceFrom": true,
@@ -379,7 +379,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-motion-lotion",
   "brand": "Kevin.Murphy",
-  "name": "Motion.Lotion",
+  "name": "Motion.Lotion — лосьон для локонов",
   "cat": "hair",
   "price": 26,
   "priceFrom": false,
@@ -1219,7 +1219,7 @@ const CATALOGUE = [
  {
   "id": "cosrx-full-fit-propolis-synergy-toner",
   "brand": "Cosrx",
-  "name": "Full Fit Propolis Synergy Toner — тоник",
+  "name": "Full Fit Propolis Synergy Toner — тонер",
   "cat": "face",
   "price": 16.75,
   "priceFrom": false,
@@ -1251,7 +1251,7 @@ const CATALOGUE = [
  {
   "id": "cosrx-aha-bha-clarifying-treatment-toner",
   "brand": "Cosrx",
-  "name": "AHA/BHA Clarifying Treatment Toner — тоник",
+  "name": "AHA/BHA Clarifying Treatment Toner — тонер",
   "cat": "face",
   "price": 16.75,
   "priceFrom": false,
@@ -1283,7 +1283,7 @@ const CATALOGUE = [
  {
   "id": "anua-bha-2-gentle-exfoliating-toner-150ml",
   "brand": "Anua",
-  "name": "BHA 2% Gentle Exfoliating Toner — тоник",
+  "name": "BHA 2% Gentle Exfoliating Toner — тонер",
   "cat": "face",
   "price": 21.39,
   "priceFrom": false,
@@ -1492,7 +1492,7 @@ const CATALOGUE = [
  {
   "id": "anua-heartleaf-77-soothing-toner",
   "brand": "Anua",
-  "name": "Heartleaf 77% Soothing Toner — тоник",
+  "name": "Heartleaf 77% Soothing Toner — тонер",
   "cat": "face",
   "price": 6.99,
   "priceFrom": false,
@@ -2867,7 +2867,7 @@ const CATALOGUE = [
  {
   "id": "heated-defense",
   "brand": "Kevin.Murphy",
-  "name": "HEATED.DEFENSE",
+  "name": "HEATED.DEFENSE — термозащитная пенка",
   "cat": "hair",
   "price": 28,
   "img": "/shop/img/heated-defense-0.webp?v=5",
@@ -3620,7 +3620,7 @@ const CATALOGUE = [
  {
   "id": "laneige-cica-sleeping-mask",
   "brand": "LANEIGE",
-  "name": "Cica Sleeping Mask — маска",
+  "name": "Cica Sleeping Mask mini 10 ml — маска",
   "cat": "face",
   "price": 4.99,
   "img": "/shop/img/laneige-cica-sleeping-mask-0.webp?v=5",
@@ -3705,7 +3705,7 @@ const CATALOGUE = [
  {
   "id": "baccarat-rouge-540-eau-de-parfum-70ml",
   "brand": "Maison Francis Kurkdjian",
-  "name": "Baccarat Rouge 540 Unisex 2.4oz Extrait De Parfum Spray — спрей",
+  "name": "Baccarat Rouge 540 Eau de Parfum 70 ml — парфюм",
   "cat": "perfume",
   "price": 330,
   "img": "/shop/img/baccarat-rouge-540-eau-de-parfum-70ml-0.webp?v=5",
