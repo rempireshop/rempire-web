@@ -8,10 +8,12 @@
  * else (no auth, no geo):
  *
  * 1. **Moves an address that is not the page** — the old `/shop2/…` and
- *    `/shop/…` scheme, Shopify's other spellings, a trailing slash — with
- *    ONE 301 to the page (src/lib/legacy-redirects.ts). Merchant Center's
+ *    `/shop/…` scheme, Shopify's other spellings, a trailing slash, a Shopify
+ *    `?variant=` the shop knows the size of — with ONE 301 to the page, the
+ *    campaign's utm_* kept (src/lib/legacy-redirects.ts). Merchant Center's
  *    «Checkout» link, `/cart/<item id>:<qty>`, is the one `/cart/…` shape let
- *    through to its own route (src/lib/cart-permalink.ts).
+ *    through to its own route (src/lib/cart-permalink.ts) — our item ids and
+ *    Shopify's alike (src/lib/merchant-cart.ts).
  * 2. **Picks the language of an unprefixed page** for a browser that asked
  *    for another one: the switcher's saved choice (the `rempire_lang`
  *    cookie), else the first of ru/et/en in Accept-Language — a 302 to the

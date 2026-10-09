@@ -63,7 +63,8 @@ test.describe("pwa manifests", () => {
   test("every app's icons resolve and its splash and status bar are white", async ({ page, request }) => {
     const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     for (const name of ["manifest", "admin", "scanner"]) {
-      const m = await (await request.get(shopUrl("", `/${name}.webmanifest`))).json();
+      // an asset — it stayed under /shop2/ when the pages moved (08.10.2026)
+      const m = await (await request.get(`/shop2/${name}.webmanifest`)).json();
       expect(m.background_color, `${name}: splash`).toBe("#ffffff");
       expect(m.theme_color, `${name}: status bar`).toBe("#ffffff");
       const icons = m.icons as Array<{ src: string; sizes: string; type: string; purpose?: string }>;

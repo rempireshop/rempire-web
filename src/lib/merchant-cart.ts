@@ -30,12 +30,20 @@
  *   · anything else — an unknown id, a hidden product → the shop's home page.
  *     A hidden product's own address is a 404 (src/middleware.ts), which is
  *     no place to land somebody who came to buy.
+ *
+ * Shopify's ids too, for as long as Merchant Center serves Shopify's product
+ * source (until it approves the shop's own feeds): `shopify_<CC>_<product>_
+ * <variant>`, and the bare variant id of Shopify's own permalink. The variant
+ * is looked up in src/data/shopify-variants.json (src/lib/shopify-variants.ts)
+ * — the product, and the size where the shop sells several — and answered
+ * exactly as the feed's own id for that product and size would be.
  */
 import { createHash } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import type { CartLinkLine } from "@/lib/cart-permalink";
-import { feedOffers, type FeedInput, type FeedOffer } from "@/lib/merchant-feed";
+import { feedOffers, sizeSlug, type FeedInput, type FeedOffer } from "@/lib/merchant-feed";
 import { langPath } from "@/lib/seo-head.mjs";
+import { shopifyVariant, shopifyVariantId, type ShopifyVariant } from "@/lib/shopify-variants";
 
 const hash8 = (s: string) => createHash("sha1").update(s).digest("hex").slice(0, 8);
 
@@ -85,20 +93,55 @@ export function resolveCartLink(
   if (!line) return { path: langPath(seg, "/"), reason: "unknown" };
 
   const offer = offers.find((o) => o.id === line.id);
-  if (offer) {
-    const size = offer.slug ? "size=" + encodeURIComponent(offer.slug) : "";
-    if (!offer.available) return { path: productPath(seg, offer.productId, size), reason: "sold-out" };
-    return {
-      path: productPath(seg, offer.productId, (size ? size + "&" : "") + "buy=" + line.qty),
-      reason: "buy",
-    };
-  }
+  if (offer) return offerTarget(offer, line.qty, seg);
+
+  const known = [...CATALOGUE_IDS, ...input.custom.map((c) => c.id)];
+
+  /* One of Shopify's ids, from the product source Merchant Center still has. */
+  const variant = shopifyVariant(shopifyVariantId(line.id));
+  if (variant) return shopifyTarget(variant, line.qty, offers, known, seg);
 
   /* Not an item of today's feed. Google keeps an item for a day or so after
      it leaves the feed, so this is a product the owner has since hidden, a
      size he has taken off the ladder, or an id nobody ever issued. */
-  const productId = productOfStaleId(line.id, [...CATALOGUE_IDS, ...input.custom.map((c) => c.id)]);
+  const productId = productOfStaleId(line.id, known);
   if (!productId) return { path: langPath(seg, "/"), reason: "unknown" };
   if (!offers.some((o) => o.productId === productId)) return { path: langPath(seg, "/"), reason: "hidden" };
   return { path: productPath(seg, productId, ""), reason: "product" };
+}
+
+/** An item of today's feed: its page on its size, and into the basket unless it is sold out. */
+function offerTarget(offer: FeedOffer, qty: number, seg: string): CartLinkTarget {
+  const size = offer.slug ? "size=" + encodeURIComponent(offer.slug) : "";
+  if (!offer.available) return { path: productPath(seg, offer.productId, size), reason: "sold-out" };
+  return {
+    path: productPath(seg, offer.productId, (size ? size + "&" : "") + "buy=" + qty),
+    reason: "buy",
+  };
+}
+
+/**
+ * A Shopify variant → the item of today's feed that is the same product in
+ * the same size, answered as that item's own id would be. Where the table
+ * names no size, the product's one item, if it is sold in one size; where the
+ * size is not on the ladder any more (or the owner has given the product a
+ * ladder of several since), its page, to choose there.
+ */
+function shopifyTarget(
+  variant: ShopifyVariant,
+  qty: number,
+  offers: FeedOffer[],
+  known: string[],
+  seg: string,
+): CartLinkTarget {
+  if (!known.includes(variant.p)) return { path: langPath(seg, "/"), reason: "unknown" };
+  const mine = offers.filter((o) => o.productId === variant.p);
+  if (!mine.length) return { path: langPath(seg, "/"), reason: "hidden" };
+  const offer = variant.s
+    ? mine.find((o) => o.slug === variant.s) ?? mine.find((o) => o.label != null && sizeSlug(o.label) === variant.s)
+    : mine.length === 1
+      ? mine[0]
+      : undefined;
+  if (!offer) return { path: productPath(seg, variant.p, ""), reason: "product" };
+  return offerTarget(offer, qty, seg);
 }

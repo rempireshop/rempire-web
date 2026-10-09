@@ -10,14 +10,14 @@
  *
  *   · app.js: «Наборы» / «Блог» in the header (drawn once, then patched), the
  *     home and category rows, the gift card's crumb, a banner aimed at sets,
- *     and /shop2/sets/, /shop2/set/<id>/, /shop2/blog/ becoming the ordinary
+ *     and /collections/sets, /collections/sets/<id>, /blogs/news becoming the ordinary
  *     404 screen once the shop KNOWS the shelf is empty — never in the tenth
  *     of a second before the answer lands;
  *   · app.js again: public/shop/bundles.js, the file the table was seeded
  *     from, is still on every page, and every set in it is one the owner
  *     called made up — so before /api/bundles/ answers, only the sets the
  *     BUILD saw on sale (#setsdata) may be shown;
- *   · the server: /shop2/blog/ and /shop2/sets/ answer 404 while empty, and
+ *   · the server: /blogs/news and /collections/sets answer 404 while empty, and
  *     an empty `bundles` table no longer falls back to the file at the till;
  *   · the prerender: which sets get pages is the table's answer, not the
  *     file's (liveBundles()).
@@ -440,11 +440,12 @@ describe("the server, with an empty blog and no sets", () => {
   beforeAll(setupDb);
   afterAll(teardownDb);
 
-  it("answers /shop2/blog/ with the ordinary 404 page while there is no article", async () => {
+  it("answers /blogs/news with the ordinary 404 page while there is no article", async () => {
     await exec("delete from posts");
-    for (const [seg, lang] of [["", "ru"], ["et", "et"], ["en", "en"]] as const) {
+    // the language prefixes since the URL move of 08.10.2026: "ru", "et", and "" for English
+    for (const [seg, lang] of [["ru", "ru"], ["et", "et"], ["", "en"]] as const) {
       const res = await blogListPageResponse(seg);
-      expect(res.status, seg || "ru").toBe(404);
+      expect(res.status, seg || "en").toBe(404);
       expect(res.headers.get("cache-control")).toBe("no-store");
       const html = await res.text();
       expect(html).toContain(`<html lang="${lang}"`);
@@ -466,17 +467,17 @@ describe("the server, with an empty blog and no sets", () => {
     expect((await blogListPageResponse("")).status).toBe(404);
   });
 
-  it("answers /shop2/sets/ with the 404 page while no set is on sale, and the shell once one is", async () => {
+  it("answers /collections/sets with the 404 page while no set is on sale, and the shell once one is", async () => {
     // the seeded sets (120_bundles.sql) are on sale: the page exists
-    expect((await notFoundPageResponse("/shop2/sets/")).status).toBe(200);
+    expect((await notFoundPageResponse("/ru/collections/sets")).status).toBe(200);
     await exec("update bundles set active = false");
-    for (const p of ["/shop2/sets/", "/shop2/et/sets/", "/shop2/en/sets/"]) {
+    for (const p of ["/ru/collections/sets", "/et/collections/sets", "/collections/sets"]) {
       const res = await notFoundPageResponse(p);
       expect(res.status, p).toBe(404);
       expect(await res.text()).toContain('<meta name="robots" content="noindex, nofollow">');
     }
     await exec("update bundles set active = true where id = 'beard-start'");
-    expect((await notFoundPageResponse("/shop2/sets/")).status).toBe(200);
+    expect((await notFoundPageResponse("/ru/collections/sets")).status).toBe(200);
   });
 
   it("does not sell the file's sets from an EMPTY table — only from an unreadable one", async () => {
@@ -496,7 +497,7 @@ describe("the server, with an empty blog and no sets", () => {
     expect(err.code).toBe("bundle_unknown");
     // and an ordinary product still sells
     await expect(order(plain.id)).resolves.toBeTruthy();
-    expect((await notFoundPageResponse("/shop2/sets/")).status).toBe(404);
-    expect((await notFoundPageResponse("/shop2/set/beard-start/")).status).toBe(404);
+    expect((await notFoundPageResponse("/ru/collections/sets")).status).toBe(404);
+    expect((await notFoundPageResponse("/ru/collections/sets/beard-start")).status).toBe(404);
   });
 });

@@ -34,7 +34,7 @@
 export const NAME_TAILS: Readonly<Record<string, readonly [string, string]>> = {
   "шампунь": ["šampoon", "shampoo"], "кондиционер": ["palsam", "conditioner"],
   "маска": ["mask", "mask"], "сыворотка": ["seerum", "serum"],
-  "тоник": ["toonik", "toner"], "спрей": ["sprei", "spray"],
+  "тоник": ["toonik", "toner"], "тонер": ["toonik", "toner"], "спрей": ["sprei", "spray"],
   "футболка": ["T-särk", "T-shirt"], "худи": ["pusa", "hoodie"],
   "масло": ["õli", "oil"], "бальзам": ["palsam", "balm"],
   "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
@@ -61,6 +61,9 @@ export const TAIL_EXACT: Readonly<Record<string, readonly [string, string]>> = {
   "парфюм": ["parfüüm", "perfume"],
   "гидрофильное масло": ["hüdrofiilne õli", "cleansing oil"],
   "ручная работа": ["käsitöö", "handmade"],
+  "термозащитная пенка": ["kuumakaitsevaht", "heat protection foam"],
+  "лосьон для локонов": ["lokilosjoon", "curl lotion"],
+  "спрей-воск": ["spreivaha", "spray wax"],
 };
 
 /**

@@ -32,6 +32,8 @@ import {
 } from "@/lib/product-descriptions";
 import { getSeoOverrides, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 import { listCustomProducts, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
+import { productUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 
 type OverrideOut = Override & { description?: DescriptionOverride | null; seo?: SeoOverride | null };
 
@@ -209,6 +211,8 @@ export async function PUT(req: Request) {
   }
 
   const saved: Record<string, OverrideOut> = {};
+  /* the ids whose PAGE changed — anything but the salon price, which only the panel shows */
+  const onPage: string[] = [];
   try {
     for (const raw0 of list) {
       const raw = raw0 as Record<string, unknown>;
@@ -248,6 +252,9 @@ export async function PUT(req: Request) {
         await writeAuditSafe("admin", "override.seo", { id });
       }
       saved[id] = row;
+      if (Object.keys(patch).some((k) => k !== "proPrice") || "description" in raw || "descriptions" in raw || "seo" in raw) {
+        onPage.push(id);
+      }
       // «Вернуть» on audit row N from the journal: that row reads «возвращено» everywhere
       const undoOf = Number.isInteger(raw.undoOf) && (raw.undoOf as number) > 0 ? (raw.undoOf as number) : 0;
       await writeAuditSafe("admin", "override.set", undoOf ? { id, patch, undoOf } : { id, patch }, before);
@@ -258,5 +265,9 @@ export async function PUT(req: Request) {
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
   }
 
+  /* A price, a stock word, a text, a photo, «Показывать в магазине»: the
+     product's page changed, so the engines hear about it (fire-and-forget,
+     the live shop only — src/lib/indexnow-ping.ts). */
+  submitIndexNow(onPage.flatMap((id) => productUrls(id)));
   return Response.json({ ok: true, overrides: saved }, { headers: { "cache-control": "no-store" } });
 }

@@ -128,10 +128,12 @@ function hasDatabase(): boolean {
   return !!process.env.DATABASE_URL || process.env.DB_DRIVER === "pglite";
 }
 
-async function loadEans(): Promise<Record<string, Record<string, string>>> {
-  const rows = await query<{ product_id: string; variant: string | null; ean: string | null }>(
-    "select product_id, variant, ean from stock_levels where ean is not null",
-  );
+/** stock_levels.ean by product and size label — every product's, or one product's (its page's JSON-LD, src/lib/product-page.ts). */
+export async function loadEans(productId?: string): Promise<Record<string, Record<string, string>>> {
+  type EanRow = { product_id: string; variant: string | null; ean: string | null };
+  const rows = productId === undefined
+    ? await query<EanRow>("select product_id, variant, ean from stock_levels where ean is not null")
+    : await query<EanRow>("select product_id, variant, ean from stock_levels where ean is not null and product_id = $1", [productId]);
   const out: Record<string, Record<string, string>> = {};
   for (const r of rows) {
     if (!r.ean) continue;
@@ -464,6 +466,33 @@ export function shippingFor(price: number, rules: ShippingRules): ShippingOption
     });
   }
   return out;
+}
+
+/** One country's delivery terms for the whole shop — see shippingTerms(). */
+export type ShippingTerms = { country: string; price: number; freeFrom: number | null; transit: DaySpan | null };
+
+/**
+ * The shop-wide delivery terms, country by country — what the
+ * Organization's shipping policy in the structured data states
+ * (shippingServiceLD() in src/lib/seo-head.mjs, tools/prerender-shop2.mjs):
+ * the cheapest delivery this feed lists for the country (shippingFor() over
+ * an empty basket), the basket from which the checkout makes it free
+ * (quoteFromRules()'s own threshold — null where it never is), and the
+ * carrier's days. The same two calls the g:shipping entries and the
+ * checkout's bill come from, so the policy and the items cannot disagree.
+ */
+export function shippingTerms(rules: ShippingRules): ShippingTerms[] {
+  const cheapest = new Map<string, ShippingOption>();
+  for (const o of shippingFor(0, rules)) {
+    const had = cheapest.get(o.country);
+    if (!had || o.price < had.price) cheapest.set(o.country, o);
+  }
+  return [...cheapest.values()].map((o) => ({
+    country: o.country,
+    price: o.price,
+    freeFrom: quoteFromRules(rules, { country: o.country, method: o.service, subtotal: 0 }).freeFrom,
+    transit: o.transit,
+  }));
 }
 
 /* ---------- one product, as the feed sees it ----------------------------- */

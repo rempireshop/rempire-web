@@ -27,6 +27,7 @@ import {
   upsertPost,
 } from "@/lib/blog";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
+import { modernShopHref } from "@/lib/shop-paths.mjs";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 /* ---------- markdown → safe HTML ------------------------------------------ */
@@ -61,7 +62,10 @@ describe("markdownToHtml — the safe subset", () => {
   });
 
   it("accepts a same-site relative link without target=_blank", () => {
-    expect(markdownToHtml("[тут](/shop2/c/beard/)")).toBe('<p><a href="/shop2/c/beard/">тут</a></p>');
+    expect(markdownToHtml("[тут](/ru/collections/uhod-za-borodoy)")).toBe('<p><a href="/ru/collections/uhod-za-borodoy">тут</a></p>');
+    /* …and one written before the URL move of 08.10.2026 points at the page's
+       address now, not at a redirect (modernShopHref, src/lib/shop-paths.mjs). */
+    expect(markdownToHtml("[тут](/shop2/c/beard/)")).toBe('<p><a href="/ru/collections/uhod-za-borodoy">тут</a></p>');
   });
 
   /* ---- the XSS cases ------------------------------------------------------ */
@@ -169,8 +173,11 @@ describe("sanitizeHtml — what a body written in the editor is allowed to be", 
   it("keeps an outside link with rel=noopener, and a same-site one without a target", () => {
     expect(sanitizeHtml('<p><a href="https://example.com/a">x</a></p>'))
       .toBe('<p><a href="https://example.com/a" target="_blank" rel="noopener noreferrer">x</a></p>');
+    expect(sanitizeHtml('<p><a href="/ru/products/night-rider">x</a></p>'))
+      .toBe('<p><a href="/ru/products/night-rider">x</a></p>');
+    // a link stored before the URL move of 08.10.2026 comes out at its new address
     expect(sanitizeHtml('<p><a href="/shop2/p/night-rider/">x</a></p>'))
-      .toBe('<p><a href="/shop2/p/night-rider/">x</a></p>');
+      .toBe('<p><a href="/ru/products/night-rider">x</a></p>');
   });
 
   it("takes an image only from https or from this shop's own path", () => {
@@ -181,8 +188,10 @@ describe("sanitizeHtml — what a body written in the editor is allowed to be", 
   });
 
   it("keeps the «Товар» marker, but only when its id could be a catalogue id", () => {
+    expect(sanitizeHtml('<p><a data-product="night-rider" href="/ru/products/night-rider">Night.Rider</a></p>'))
+      .toBe('<p><a data-product="night-rider" href="/ru/products/night-rider">Night.Rider</a></p>');
     expect(sanitizeHtml('<p><a data-product="night-rider" href="/shop2/p/night-rider/">Night.Rider</a></p>'))
-      .toBe('<p><a data-product="night-rider" href="/shop2/p/night-rider/">Night.Rider</a></p>');
+      .toBe('<p><a data-product="night-rider" href="/ru/products/night-rider">Night.Rider</a></p>');
     expect(sanitizeHtml('<p><a data-product="../../etc/passwd">x</a></p>')).toBe("<p>x</p>");
     expect(sanitizeHtml('<p><a data-product="<script>">x</a></p>')).toBe("<p>x</p>");
   });
@@ -969,7 +978,12 @@ describe("sample posts", () => {
       for (const l of LANGS) {
         const body = post!.body[l];
         expect(looksLikeHtmlBody(body)).toBe(true);
-        expect(renderPostBody(body), `${slug} ${l} does not survive the allowlist`).toBe(body);
+        /* The samples were seeded (db/migrations/071) with the /shop2/ links of
+           their day, and the sanitiser moves a stored link to its address since
+           08.10.2026 (modernShopHref). Nothing else may change. */
+        const moved = body.replace(/ href="([^"]*)"/g, (_m, h: string) => ` href="${modernShopHref(h)}"`);
+        expect(renderPostBody(body), `${slug} ${l} does not survive the allowlist`).toBe(moved);
+        expect(renderPostBody(body)).not.toContain('href="/shop2/');
         expect(body).toContain("<h2>");
         expect(body).toContain("<ul>");
         expect(body).toMatch(/<a data-product="[a-z0-9-]+"/);
