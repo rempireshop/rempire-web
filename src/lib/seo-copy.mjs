@@ -518,6 +518,56 @@
           EN: "Creed Aventus Cologne, a 50 ml unisex eau de parfum: tangerine, ginger and pink pepper, patchouli and sandalwood over birch, musk and tonka."
         }
       },
+      /* A short «which one is mine» list under a brand page's intro — one line
+         per need, each naming the real products for it (Dim, 09.10.2026; the
+         one visible change of SEO pack 3). System 4 only: its numbers are
+         exactly the question people bring to the shop. Every need and every
+         word about a product comes from that product's own text
+         (public/shop/content*.js): №1 «для жирной и шелушащейся кожи
+         головы», №2 «для сухой кожи головы и окрашенных волос», №3 «мягкий
+         шампунь для ежедневного применения … предотвращает появление
+         перхоти», №4 «для очень жирных волос и чувствительной кожи головы»,
+         H «для окрашенных и сухих волос», Bio Botanical «для редеющих волос»
+         (in the owner's cosmetic words), T «тоник для жирной кожи головы …
+         можно использовать ежедневно, а также между мытьём волос», M
+         «успокаивает чувствительную … кожу головы … где требуется
+         дополнительное увлажнение», O «мягко отшелушивает кожу головы,
+         удаляя перхоть, кожное сало и остатки средств для волос».
+         Rows: [need, [[product id, link text], …]]. seoBrandChooserHtml(). */
+      brandChooser: {
+        "System 4": {
+          RU: ["Какой System 4 выбрать?", [
+            ["Жирная кожа головы, склонная к перхоти", [["system-4-special-shampoo-1", "шампунь №1"]]],
+            ["Сухая кожа головы с перхотью, окрашенные волосы", [["system-4-balancing-shampoo-2", "шампунь №2"], ["system-4-hydro-care-conditioner-h", "кондиционер H"]]],
+            ["Мягкое мытьё каждый день, профилактика перхоти", [["system-4-mild-shampoo-3", "шампунь №3"]]],
+            ["Очень жирные волосы, чувствительная кожа головы", [["system-4-shale-oil-shampoo-4", "шампунь №4"]]],
+            ["Тонкие и ослабленные волосы", [["system-4-bio-botanical-shampoo", "шампунь Bio Botanical"], ["system-4-bio-botanical-serum", "сыворотка"], ["system-4-bio-botanical-vital-cure", "кондиционер"]]],
+            ["Жирная кожа головы между мытьём", [["sim-sensitive-system-4-scalp-tonic-t", "тоник T"]]],
+            ["Чувствительная кожа головы, которой не хватает влаги", [["system-4-moisture-scalp-lotion-m", "лосьон M"]]],
+            ["Отшелушить кожу головы: перхоть, кожное сало, остатки средств", [["sim-sensitive-system-4-oil-cure-scalp-treatment-o", "маска O"]]]
+          ]],
+          ET: ["Millist System 4 valida?", [
+            ["Rasune, kõõmale kalduv peanahk", [["system-4-special-shampoo-1", "šampoon nr 1"]]],
+            ["Kuiv, kõõmale kalduv peanahk, värvitud juuksed", [["system-4-balancing-shampoo-2", "šampoon nr 2"], ["system-4-hydro-care-conditioner-h", "palsam H"]]],
+            ["Mahe igapäevane pesu, kõõma ennetamine", [["system-4-mild-shampoo-3", "šampoon nr 3"]]],
+            ["Väga rasused juuksed, tundlik peanahk", [["system-4-shale-oil-shampoo-4", "šampoon nr 4"]]],
+            ["Peenikesed ja nõrgenenud juuksed", [["system-4-bio-botanical-shampoo", "Bio Botanical šampoon"], ["system-4-bio-botanical-serum", "seerum"], ["system-4-bio-botanical-vital-cure", "palsam"]]],
+            ["Rasune peanahk pesukordade vahel", [["sim-sensitive-system-4-scalp-tonic-t", "toonik T"]]],
+            ["Tundlik peanahk, mis vajab niiskust", [["system-4-moisture-scalp-lotion-m", "losjoon M"]]],
+            ["Peanaha koorimine: kõõm, rasu, hooldusvahendite jäägid", [["sim-sensitive-system-4-oil-cure-scalp-treatment-o", "mask O"]]]
+          ]],
+          EN: ["Which System 4 is right for you?", [
+            ["Oily, dandruff-prone scalp", [["system-4-special-shampoo-1", "shampoo 1"]]],
+            ["Dry, dandruff-prone scalp, colour-treated hair", [["system-4-balancing-shampoo-2", "shampoo 2"], ["system-4-hydro-care-conditioner-h", "conditioner H"]]],
+            ["Gentle everyday washing that keeps dandruff away", [["system-4-mild-shampoo-3", "shampoo 3"]]],
+            ["Very oily hair, sensitive scalp", [["system-4-shale-oil-shampoo-4", "shampoo 4"]]],
+            ["Fine, weakened hair", [["system-4-bio-botanical-shampoo", "Bio Botanical shampoo"], ["system-4-bio-botanical-serum", "serum"], ["system-4-bio-botanical-vital-cure", "conditioner"]]],
+            ["Oily scalp between washes", [["sim-sensitive-system-4-scalp-tonic-t", "tonic T"]]],
+            ["Sensitive scalp that needs moisture", [["system-4-moisture-scalp-lotion-m", "lotion M"]]],
+            ["Exfoliating the scalp: dandruff, oil, product build-up", [["sim-sensitive-system-4-oil-cure-scalp-treatment-o", "mask O"]]]
+          ]]
+        }
+      },
       from: { EN: "from ", ET: "alates ", RU: "от " }
     };
   }
@@ -728,6 +778,41 @@
     return (b && b[lang] && b[lang].intro) || "";
   }
 
+  /** Text for HTML, the five characters both renderers escape. */
+  function seoEsc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  /**
+   * The «which one is mine» list under a brand page's intro, as HTML, or ""
+   * for a brand with none (brandChooser above). The shop's own rich-text
+   * dress — a product description's .acc__body.acc__rich, its <h2> and <ul>
+   * — and the shop's .link for the product names, so nothing new is drawn.
+   * `attrs(id)` is the renderer's own link: the attributes of the <a> for
+   * that product (« href="…"», plus the shop's click hook in app.js), or
+   * null for a product it must not link to — one taken off sale. A line
+   * whose products are all gone goes with them. `data-notr`: already in the
+   * page's language, so the shop's dictionary keeps off it.
+   */
+  function seoBrandChooserHtml(brand, lang, attrs) {
+    var c = seoCopy().brandChooser[brand];
+    var b = c && c[lang];
+    if (!b) return "";
+    var rows = [];
+    for (var i = 0; i < b[1].length; i++) {
+      var links = [];
+      for (var j = 0; j < b[1][i][1].length; j++) {
+        var a = attrs(b[1][i][1][j][0]);
+        if (a) links.push('<a class="link"' + a + ">" + seoEsc(b[1][i][1][j][1]) + "</a>");
+      }
+      // a no-break space before the dash: it never opens a line
+      if (links.length) rows.push("<li>" + seoEsc(b[1][i][0]) + " — " + links.join(", ") + "</li>");
+    }
+    if (!rows.length) return "";
+    return '<div class="acc__body acc__rich" data-notr data-chooser><h2>' + seoEsc(b[0]) + "</h2><ul>" + rows.join("") + "</ul></div>";
+  }
+
   /**
    * A subcollection's words in one language — { title, meta, name, h1?, intro } —
    * or null for a key with none. Plain text, not HTML.
@@ -821,5 +906,5 @@
 export {
   SEO_TITLE_MAX, SEO_DESC_MAX,
   seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoHead,
-  seoSnippetText, seoLead, seoProductMeta,
+  seoSnippetText, seoLead, seoProductMeta, seoBrandChooserHtml,
 };

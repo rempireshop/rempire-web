@@ -1244,6 +1244,22 @@ is never free; Russian aliases only where Search Console shows them
 («шампунь №1», «Ксерджофф Наксос»). The home page's `<h1>` is still `T.base`:
 a heading is not a search snippet.
 
+**«Какой System 4 выбрать?»** (09.10.2026, approved by Dim as the one visible
+change of SEO pack 3). Under the System 4 brand page's intro, on all three
+languages' pages, a short list: one line per need (№1 oily and dandruff-prone,
+№2 dry with dandruff and colour-treated hair, №3 gentle everyday, №4 very oily
+and sensitive, Bio Botanical for fine and weakened hair, T between washes, M
+for a scalp short of moisture, O to exfoliate), each linking to the product
+pages in the page's language. The words are `brandChooser` in the seo-copy
+block, every need taken from the product's own text; `seoBrandChooserHtml()`
+writes the HTML for both the static brand page (`listingPage({ after })` in the
+prerender) and `screenCatalog()` in app.js. It is dressed in a product
+description's classes (`.acc__body.acc__rich`, its `h2`/`ul`, `.link`), so it
+adds no CSS; it carries `data-notr` because it is already translated; a product
+off sale loses its link (and a line left with none goes) on both sides. Other
+brands draw nothing. `tests/brand-chooser.test.ts`; /test check
+`shop-system4-chooser`.
+
 ## Title and description per language (admin override)
 
 The product editor's «Google» tab holds a title/description pair for each

@@ -330,6 +330,53 @@
       }
     },
     {
+      "id": "shop-system4-chooser",
+      "area": "shop",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«Какой System 4 выбрать?» на странице бренда",
+      "steps": [
+        "Открыть «Бренды» → System 4.",
+        "Пролистать до списка «Какой System 4 выбрать?» под текстом о бренде.",
+        "Нажать «шампунь №1».",
+        "Вернуться назад и переключить язык на Eesti, потом на English.",
+        "Открыть любой другой бренд, например Davines."
+      ],
+      "expect": [
+        "Под текстом о бренде — заголовок и восемь строк: нужда, затем ссылки на товары.",
+        "Список выглядит как описание товара: тот же шрифт, ссылки подчёркнуты.",
+        "«шампунь №1» открывает страницу Special Shampoo 1 на том же языке.",
+        "На Eesti и English список на этом языке, и ссылки открывают страницы на нём.",
+        "У других брендов такого списка нет — только текст и товары.",
+        "На телефоне строки переносятся аккуратно, страница не уезжает вбок."
+      ],
+      "why": "Люди ищут «System 4 номер 1» и не знают, какой номер их. Список отвечает сразу и ведёт к нужному товару.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-09T09:00:41.695Z",
+      "en": {
+        "title": "«Which System 4 is right for you?» on the brand page",
+        "steps": [
+          "Open «Бренды» (brands) → System 4.",
+          "Scroll to the list «Какой System 4 выбрать?» under the brand text.",
+          "Tap «шампунь №1».",
+          "Go back and switch the language to Eesti, then to English.",
+          "Open any other brand, for example Davines."
+        ],
+        "expect": [
+          "Under the brand text: a heading and eight lines, a need then links to products.",
+          "The list looks like a product description: same type, underlined links.",
+          "«шампунь №1» opens the Special Shampoo 1 page in the same language.",
+          "In Eesti and English the list is in that language, and so are the pages.",
+          "Other brands have no such list — just their text and products.",
+          "On a phone the lines wrap neatly; the page does not slide sideways."
+        ],
+        "why": "People search «System 4 number 1» without knowing which number is theirs. The list answers that and leads to the product."
+      }
+    },
+    {
       "id": "shop-card-price",
       "area": "shop",
       "who": "renat",
