@@ -180,8 +180,9 @@ describe("public/shop2/index.html", () => {
     /* Fourteen until 09.10.2026, when the descriptions, the policy texts, the
        stand-in parcel lists and admin.css left the shell for app.js to fetch
        when a screen needs one (perf): boot.js, styles.css, the three catalogue
-       scripts and app.min.js are what every page needs. */
-    const TAGS = 6;
+       scripts, the interface dictionary of the shell's language (English —
+       the shell is the English home page) and app.min.js. */
+    const TAGS = 7;
     expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(TAGS);
     const urls = versionedAssets(real);
     // the tags, the untagged chat.js, and LAZY_FILES that wear no tag

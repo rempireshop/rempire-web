@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * public/shop2/app.js → public/shop2/app.min.js — the file the shop links.
+ * public/shop2/app.js → public/shop2/app.min.js — the file the shop links —
+ * and, since 09.10.2026, its interface dictionary beside it as
+ * public/shop2/ui.et.js and ui.en.js (tools/lib/ui-lift.mjs, at the end).
  * `node tools/minify-shop2.mjs`, and automatically from `prebuild`, `predev`
  * and tools/e2e-build.mjs.
  *
@@ -53,6 +55,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { literals, stripJs } from "./lib/js-strip.mjs";
+import { liftUi, UI_GLOBAL } from "./lib/ui-lift.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "public", "shop2", "app.js");
@@ -81,7 +84,42 @@ if (was.length !== now.length || was.some((v, i) => v !== now[i])) {
   process.exit(1);
 }
 
-await writeFile(OUT, built, "utf8");
+/* ---- the interface dictionary, into a file per language ----------------
+   `var UI = {…}` — every phrase the shop and the panel print, in Estonian and
+   in English, about a third of the stripped file — goes into
+   public/shop2/ui.et.js and ui.en.js; tools/lib/ui-lift.mjs says why and how.
+   Same rule as above: nothing is written unless the lifted file parses and
+   the two dictionaries, evaluated the way a browser evaluates them, are the
+   very object app.js declares. */
+const lifted = liftUi(built);
+if (!lifted.ui || !lifted.files.ET || !lifted.files.EN) {
+  console.error("minify-shop2: no `var UI = { ET: {…}, EN: {…} }` found in app.js — the dictionary files cannot be written.");
+  console.error("public/shop2/app.min.js NOT written.");
+  process.exit(1);
+}
+try {
+  new vm.Script(lifted.app, { filename: "app.min.js" });
+} catch (e) {
+  console.error("minify-shop2: app.min.js without its dictionary does not parse — " + e.message);
+  process.exit(1);
+}
+{
+  const sandbox = { window: {} };
+  vm.createContext(sandbox);
+  for (const lang of Object.keys(lifted.files)) vm.runInContext(lifted.files[lang], sandbox, { filename: "ui." + lang.toLowerCase() + ".js" });
+  const got = sandbox.window[UI_GLOBAL] || {};
+  for (const lang of Object.keys(lifted.ui)) {
+    if (JSON.stringify(got[lang]) !== JSON.stringify(lifted.ui[lang])) {
+      console.error(`minify-shop2: ui.${lang.toLowerCase()}.js does not reproduce UI.${lang} — nothing written.`);
+      process.exit(1);
+    }
+  }
+}
+
+await writeFile(OUT, lifted.app, "utf8");
+for (const lang of Object.keys(lifted.files)) {
+  await writeFile(path.join(ROOT, "public", "shop2", "ui." + lang.toLowerCase() + ".js"), lifted.files[lang], "utf8");
+}
 
 /* Brotli at -q11 is what a static CDN stores; it is the number worth printing
    because it is the one a shopper's phone actually pulls down. */
@@ -92,6 +130,8 @@ const br = (b) =>
 const kb = (n) => (n / 1024).toFixed(1) + " KB";
 const from = String(source).replace(/\r\n?/g, "\n");
 console.log(
-  `minify-shop2: app.js ${kb(Buffer.byteLength(from))} → app.min.js ${kb(Buffer.byteLength(built))}` +
-    `   (brotli ${kb(br(from))} → ${kb(br(built))}, −${Math.round((1 - br(built) / br(from)) * 100)}%)`,
+  `minify-shop2: app.js ${kb(Buffer.byteLength(from))} → app.min.js ${kb(Buffer.byteLength(lifted.app))}` +
+    `   (brotli ${kb(br(from))} → ${kb(br(lifted.app))}, −${Math.round((1 - br(lifted.app) / br(from)) * 100)}%)` +
+    "\n              + " + Object.keys(lifted.files).map((l) =>
+      `ui.${l.toLowerCase()}.js ${kb(Buffer.byteLength(lifted.files[l]))} (brotli ${kb(br(lifted.files[l]))})`).join(", "),
 );

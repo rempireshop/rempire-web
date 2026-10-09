@@ -10927,6 +10927,30 @@
         "; path=/; max-age=31536000; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
     } catch (e) {}
   }
+  /* The switcher's choice, applied — once its dictionary is in (the [data-lang]
+     handler waits for it; `langWanted` is the last language pressed). Full
+     render, not just the header: descriptions, legal pages and the whole
+     chrome follow the language. The persistent slots are rebuilt from their
+     Russian templates — translateTree only converts FROM Russian, so an
+     already-translated header would otherwise stick on the old language. */
+  var langWanted = "";
+  function setLang(lang) {
+    S.lang = lang; S.langOpen = false; savedHadLang = true; savedLang = lang; persist();
+    /* …and the edge is told, so the next visit to an unprefixed address
+       opens in this language before the page is served (src/middleware.ts) */
+    setLangCookie(lang);
+    /* The URL is half the answer: switching language rewrites the prefix in
+       place, so the address bar, the canonical and what is on screen never
+       disagree, and the link the shopper copies opens in the language they
+       are reading. replaceState, not push — Back should leave the shop, not
+       walk back through language changes. (The panel's address has no
+       language, so there it stays /admin.) */
+    pathLang = lang;
+    try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
+    hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
+    render();
+    blogPrefetchSoon();   // blog: the list in the new language, before it is asked for
+  }
   /* decodeURIComponent throws on a malformed escape — «/p/%E0/», a share
      link a messenger mangled, a crawler's guess — and it used to throw out of
      the router during boot: nothing was painted over the prerendered page,
@@ -12022,6 +12046,13 @@
      page. A file that only some screens use now arrives when one of them asks
      for it:
 
+       ui.et.js, ui.en.js
+                   the interface dictionary — `var UI` below, lifted out of
+                   app.min.js by tools/minify-shop2.mjs (the source stays
+                   here). A page links its own language's (none in Russian:
+                   the templates are Russian); the switcher fetches the other
+                   one before it re-renders (setLang), and the panel, whose
+                   language is the owner's own, fetches its one.
        admin.css   the panel and the scanner. The /admin shell links it in its
                    <head> (src/lib/notfound-page.ts); a storefront page that
                    walks into the panel fetches it here, and the panel is not
@@ -12081,6 +12112,12 @@
     LAZY[path] = p;
     return p;
   }
+  var UI_FILES = { ET: "/shop2/ui.et.js", EN: "/shop2/ui.en.js" };
+  /** Is the interface dictionary of `lang` here? Russian needs none — and so
+      does app.js run as written, which carries its own `var UI`. */
+  function uiHas(lang) { return !UI_FILES[lang] || !!UI[lang]; }
+  function uiWant(lang) { return uiHas(lang) ? Promise.resolve(true) : lazyFile(UI_FILES[lang]); }
+
   var ADM_CSS = "/shop2/admin.css";
   /** Is the panel's stylesheet in — linked by the shell (and so loaded before
       this script ran: a stylesheet in the <head> holds every script after it)
@@ -12138,6 +12175,8 @@
       failed is not waited for again. */
   function lazyHold(screen) {
     var need = [];
+    // a translated screen without its dictionary would be a Russian one
+    if (!uiHas(S.lang) && !LAZY_FAILED[UI_FILES[S.lang]]) need.push(uiWant(S.lang));
     if ((screen === "admin" || screen === "scan" || S.scanOpen) && !admCssHas() && !LAZY_FAILED[ADM_CSS]) need.push(admCssWant());
     // a policy page's text and title, «Контакты»'s title included (setHead)
     if (screen === "info" && !legalHas(S.lang) && !LAZY_FAILED[LEGAL_FILES[S.lang]]) need.push(legalWant(S.lang));
@@ -50184,26 +50223,21 @@
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
-    // full render, not just the header: descriptions, legal pages and the
-    // whole chrome follow the language. The persistent slots are rebuilt from
-    // their Russian templates — translateTree only converts FROM Russian, so
-    // an already-translated header would otherwise stick on the old language.
+    // a language from the switcher — setLang() says what changes with it
     if (d.lang) {
-      S.lang = d.lang; S.langOpen = false; savedHadLang = true; savedLang = d.lang; persist();
-      /* …and the edge is told, so the next visit to an unprefixed address
-         opens in this language before the page is served (src/middleware.ts) */
-      setLangCookie(d.lang);
-      /* The URL is half the answer: switching language rewrites the prefix in
-         place, so the address bar, the canonical and what is on screen never
-         disagree, and the link the shopper copies opens in the language they
-         are reading. replaceState, not push — Back should leave the shop, not
-         walk back through language changes. (The panel's address has no
-         language, so there it stays /admin.) */
-      pathLang = d.lang;
-      try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
-      hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
-      render();
-      blogPrefetchSoon();   // blog: the list in the new language, before it is asked for
+      /* The dictionary of a language this page was not served in is fetched
+         first (perf, 09.10.2026: ui.et.js / ui.en.js left app.min.js). The
+         menu closes at once; the switch itself happens when the file is in,
+         so the screen goes from one language straight to the other. The last
+         language pressed is the one that wins. */
+      var toLang = d.lang;
+      langWanted = toLang;
+      if (!uiHas(toLang)) {
+        S.langOpen = false; patchHeader();
+        uiWant(toLang).then(function () { if (langWanted === toLang) setLang(toLang); });
+        return;
+      }
+      setLang(toLang);
       return;
     }
     if (d.line !== undefined) {
@@ -54387,11 +54421,12 @@
   } catch (e) { bootWait = false; }
   /* …and the files the first screen cannot be drawn without (lazyHold). The
      page's own HTML normally carries them — the /admin shell its stylesheet,
-     a policy page its text — so this is null and nothing waits; it is not
-     null for a page whose HTML does not. Eight seconds at most, the same
-     point at which boot.js gives up on this script and shows the static
-     page: past it the screen is drawn without the file, and drawn again the
-     moment it lands. */
+     a policy page its text, every page its language's dictionary — so this
+     is null and nothing waits; it is not null for a page whose HTML does
+     not (the panel, in a language the shell cannot know). Eight seconds at
+     most, the same point at which boot.js gives up on this script and shows
+     the static page: past it the screen is drawn without the file, and drawn
+     again the moment it lands. */
   var bootLazy = null;
   try {
     bootLazy = lazyHold(ownerBoot ? (bootPath === "/scan/" ? "scan" : "admin")

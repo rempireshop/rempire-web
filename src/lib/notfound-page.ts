@@ -50,6 +50,7 @@ import {
   langPath,
   OG_DEFAULT,
   ownerShell,
+  pageAssets,
   patchShell,
   ROBOTS_CLOSED,
   slugify,
@@ -427,12 +428,18 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
   const shell = readShell();
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
+  /* The shell as a page of this address's language is served it: its own
+     interface dictionary, or none for Russian (pageAssets). The 404 below is
+     patched through patchShell(), which does the same. */
+  const langShell = pageAssets(shell, { code: lang.code });
   if (parsed.shape && isKnownShopPath(parsed.segs)) {
     const state = parsed.segs.length === 1 && STATE_SCREENS.has(parsed.segs[0]);
-    // the panel and the scanner paint with their own stylesheet (ownerShell)
+    /* The panel and the scanner paint with their own stylesheet, and with no
+       dictionary of the shell's: theirs is the owner's saved language, which
+       app.js fetches (ownerShell, pageAssets with no language). */
     const owner = parsed.segs.length === 1 && OWNER_SCREENS.has(parsed.segs[0]);
-    const served = state ? stateShell(shell) : shell;
-    return html(withSessionIdentity(owner ? ownerShell(served) : served, req), 200);
+    const served = owner ? ownerShell(pageAssets(stateShell(shell), { code: null })) : state ? stateShell(langShell) : langShell;
+    return html(withSessionIdentity(served, req), 200);
   }
   /* The two shapes whose ids only the database knows, asked only once the
      closed lists above have said no. A brand slug reaches Postgres only when
@@ -442,7 +449,7 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
   if (parsed.shape && parsed.segs.length === 2) {
     const [kind, id] = parsed.segs;
     if (kind === "b") {
-      if (await isCustomBrand(id)) return html(shell, 200);
+      if (await isCustomBrand(id)) return html(langShell, 200);
       /* A collection the shop has never had — Shopify's, most likely, under a
          handle nobody mapped: «Все товары» in the same language, as every
          unknown Shopify collection has been answered since 07.09.2026
@@ -458,11 +465,11 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
         },
       });
     }
-    if (kind === "set" && (await isPublishedSet(id))) return html(shell, 200);
+    if (kind === "set" && (await isPublishedSet(id))) return html(langShell, 200);
   }
   // «Наборы» while there is a set on sale — see hasPublishedSets()
   if (parsed.shape && parsed.segs.length === 1 && parsed.segs[0] === "sets" && (await hasPublishedSets())) {
-    return html(withSessionIdentity(shell, req), 200);
+    return html(withSessionIdentity(langShell, req), 200);
   }
 
   /* The canonical is the address that was asked for, normalised the way the

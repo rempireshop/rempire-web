@@ -63,6 +63,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { stripJs } from "./js-strip.mjs";
+import { liftUi } from "./ui-lift.mjs";
 
 /** How long the derived token is. Twelve hex characters of SHA-256 — far more
     than enough to never collide across the handful of builds a day this shop
@@ -83,6 +84,7 @@ const TAGGED = /(?:href|src)="(\/[^"?\s]+)\?v=([^"'\s]*)"/g;
  * this list and app.js's to the same files.
  */
 export const LAZY_FILES = [
+  "/shop2/ui.et.js", "/shop2/ui.en.js",
   "/shop2/admin.css",
   "/shop/content.js", "/shop/content.ru.js", "/shop/content.et.js",
   "/shop/legal.ru.js", "/shop/legal.et.js", "/shop/legal.en.js",
@@ -102,8 +104,21 @@ const UNTAGGED = ["/shop2/chat.js", ...LAZY_FILES];
  * the one thing this file exists to prevent. The working tree answers for a
  * build output by making it, in memory, with the same function the build
  * uses; a deployment answers for it by serving it. Both hash the same bytes.
+ *
+ * Since 09.10.2026 the same build also lifts the interface dictionary out of
+ * app.min.js into /shop2/ui.et.js and /shop2/ui.en.js (tools/lib/ui-lift.mjs):
+ * three outputs of one source, made here exactly as the build makes them.
  */
-const BUILT_FROM = { "/shop2/app.min.js": ["/shop2/app.js", stripJs] };
+let builtCache = { src: null, out: null };
+function built(src) {
+  if (builtCache.src !== src) builtCache = { src, out: liftUi(stripJs(src)) };
+  return builtCache.out;
+}
+const BUILT_FROM = {
+  "/shop2/app.min.js": ["/shop2/app.js", (src) => built(src).app],
+  "/shop2/ui.et.js": ["/shop2/app.js", (src) => built(src).files.ET ?? null],
+  "/shop2/ui.en.js": ["/shop2/app.js", (src) => built(src).files.EN ?? null],
+};
 
 /** The token the shell is wearing now — read off the app tag, which is the
     one tag this file's whole reason for existing is about. `.min` is
