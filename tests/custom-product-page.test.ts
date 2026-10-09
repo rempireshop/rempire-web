@@ -23,6 +23,8 @@ import { addStockAlert, cartSnapshot, productsForAlerts } from "@/lib/customers"
 import { exec, query } from "@/lib/db";
 import { runBackInStock, sweepBackInStock } from "@/lib/flows";
 import { createOrder, upsertOverride } from "@/lib/orders";
+import { descriptionHtml } from "@/lib/product-page";
+import { descFrom, T, textForSnippet } from "@/lib/seo-head.mjs";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 const LIVE = "https://rempireshop.com";
@@ -241,6 +243,22 @@ describe("a custom product's page at request time", () => {
     // no photo yet: the JSON-LD points at the shop's card rather than at an SVG placeholder Google cannot read
     expect(product.image).toEqual([`${LIVE}/brand/og-default.png`]);
     expect(html).not.toContain('class="acc__rich"');
+  });
+
+  /* 09.10.2026: the description is whole sentences (seoLead()), and the
+     request-time page reads the owner's paragraphs as the shop does — a
+     heading paragraph with no full stop is a sentence of its own, not the
+     first words of the next one. Same text on all three renderers. */
+  it("a long supplier-style text: whole sentences, the same text the static page and app.js write", async () => {
+    const RU_TEXT = "SPECIAL SHAMPOO 1 ОТ SYSTEM 4\n\nШампунь для жирной кожи головы\n\n" +
+      "Специальный эффективный шампунь, который устраняет перхоть и предотвращает её повторное появление.\n\nПРЕИМУЩЕСТВА: Без отдушек.";
+    const p = await createCustomProduct({ brand: "Acme", name: "Shampoo — шампунь", cat: "hair", price: 9, description: { RU: RU_TEXT } });
+    const html = await (await pageFor("ru", p.id)).text();
+    const d = meta(html, "description");
+    expect(d).toBe("Шампунь для жирной кожи головы · доставка по Эстонии и Балтии · самовывоз в Таллинне");
+    // productSpec() over the same paragraphs — what setHead() computes from descOvHtml()
+    expect(d).toBe(descFrom(textForSnippet(descriptionHtml(RU_TEXT)), T.RU));
+    expect(d).not.toContain("…");
   });
 
   it("a staging base writes noindex and its own absolute URLs — the one switch docs/seo.md describes", async () => {

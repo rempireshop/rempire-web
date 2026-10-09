@@ -461,8 +461,21 @@ that promise between builds. Both are answered by a route instead:
 The **pages** are still prerendered — one static file per product per
 language, which is what makes the shop fast and indexable. Only the rows that
 offer them to a crawler moved. `lastmod` for a product is the owner's own edit
-(`product_overrides.updated_at`) when he has made one and today otherwise;
-priority is 0.7, or 0.4 for a product that is out of stock. A product with
+(`product_overrides.updated_at`) when he has made one, and **absent**
+otherwise; priority is 0.7, or 0.4 for a product that is out of stock.
+
+`lastmod` means a real edit or nothing (09.10.2026). Until then the route
+filled the gap with today — 477 of 660 product rows said «changed today»
+every day — and the static sitemap stamped the build's day on every row at
+every deploy. Google trusts the field only while it keeps proving true, so a
+date that is always today teaches it to ignore the rows where it is. Now:
+a catalogue product carries its override's day, a custom product its own
+`updated_at`, an article its last edit (else its publication), the blog
+listing the newest article; the home pages, sections, brands, policy pages,
+sets and the gift card carry none, and neither do the rows of the
+`sitemapindex`. `sitemapUrlEntry()` omits the element for an empty value;
+`tools/check-prerender.mjs` fails a static row that dates anything but the
+blog. A product with
 nothing on the shelf stays listed and stays indexable: its page still answers
 the question the searcher asked, still carries «Сообщить о наличии», and
 dropping it would throw away a ranking that has to be earned again when the
@@ -494,6 +507,25 @@ is the product's own copy with a shouted opening heading dropped, then
 `price · stock · delivery` — and the tail is budgeted **first**, so the price is
 never the half that gets cut off. A pair the owner or the assistant wrote is
 used exactly as written, with nothing appended.
+
+Since 09.10.2026 (SEO pack 3) the order is: the owner's own pair → a
+**hand-written line** from `src/lib/seo-copy.mjs` `productMeta` (19 products
+people search for: all twelve System 4, Free.Hold, Night.Rider, Rough.Rider,
+the grey Gatsby Grunge Mat, Proraso Azur Lime balm, both Creed Aventus — what
+it is, who it is for, one fact from its own text, ≤ 155 characters, no tail)
+→ the description cut from the product's text. That cut is **whole
+sentences** now (`seoLead()` in the seo-copy block, which app.js carries):
+as many as fit before the delivery tail; a `BENEFITS:` / `ПРЕИМУЩЕСТВА:` /
+`KASUTAMINE:` label in capitals ends the copy; a first sentence longer than the
+room gives its longest clean clause (a colon, a semicolon, a bracket, a comma
+before «который / mis / which» or a gerund, else a dash — never a bare list
+comma); only when there is none of 30 characters, the old cut at a word with
+«…». Until then all 660 generic descriptions ended mid-sentence in «…»; now
+about one in five does. Both renderers read the same plain text
+(`seoSnippetText()`, which `textForSnippet()` is) — app.js used to read it
+through `stripTags()`, which ran a heading line into the copy.
+`tests/seo-copy.test.ts` runs app.js's own `descFromText()` against
+`productSpec()` for every catalogue product in every language.
 
 | page | JSON-LD |
 |---|---|
@@ -1211,6 +1243,22 @@ threshold in the Estonian home description — comes from `settings.shipping_rul
 is never free; Russian aliases only where Search Console shows them
 («шампунь №1», «Ксерджофф Наксос»). The home page's `<h1>` is still `T.base`:
 a heading is not a search snippet.
+
+**«Какой System 4 выбрать?»** (09.10.2026, approved by Dim as the one visible
+change of SEO pack 3). Under the System 4 brand page's intro, on all three
+languages' pages, a short list: one line per need (№1 oily and dandruff-prone,
+№2 dry with dandruff and colour-treated hair, №3 gentle everyday, №4 very oily
+and sensitive, Bio Botanical for fine and weakened hair, T between washes, M
+for a scalp short of moisture, O to exfoliate), each linking to the product
+pages in the page's language. The words are `brandChooser` in the seo-copy
+block, every need taken from the product's own text; `seoBrandChooserHtml()`
+writes the HTML for both the static brand page (`listingPage({ after })` in the
+prerender) and `screenCatalog()` in app.js. It is dressed in a product
+description's classes (`.acc__body.acc__rich`, its `h2`/`ul`, `.link`), so it
+adds no CSS; it carries `data-notr` because it is already translated; a product
+off sale loses its link (and a line left with none goes) on both sides. Other
+brands draw nothing. `tests/brand-chooser.test.ts`; /test check
+`shop-system4-chooser`.
 
 ## Title and description per language (admin override)
 

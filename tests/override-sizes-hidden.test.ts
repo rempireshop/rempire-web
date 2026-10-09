@@ -283,6 +283,26 @@ describe("a hidden catalogue product, without a rebuild", () => {
     expect(await locs()).toHaveLength(CATALOGUE.length * 3);
   });
 
+  /* `lastmod` is the owner's edit or nothing (09.10.2026): the route used to
+     fill the gap with today, so 477 of 660 rows said «changed today» every
+     day. The expected day is read back from the row itself, not from a clock. */
+  it("dates a product only by the owner's own edit — no row says today by default", async () => {
+    const { GET } = await import("@/app/sitemap-products.xml/route");
+    const rowOf = (xml: string, id: string) => xml.split("<url>").find((u) => u.includes(`/ru/products/${id}<`))!;
+
+    const untouched = await (await GET()).text();
+    expect(untouched).not.toContain("<lastmod>");
+
+    await upsertOverride(plain.id, { price: 1.5 });
+    const day = (await getOverrides())[plain.id].updatedAt!.slice(0, 10);
+    const xml = await (await GET()).text();
+    expect(rowOf(xml, plain.id)).toContain(`<lastmod>${day}</lastmod>`);
+    // the neighbour nobody touched still says nothing
+    expect(rowOf(xml, sized.id)).not.toContain("<lastmod>");
+    // one dated product, three languages
+    expect((xml.match(/<lastmod>/g) || []).length).toBe(3);
+  });
+
   it("is a valid sitemap: xhtml namespace, four alternates per url, priority following the shelf", async () => {
     const { GET } = await import("@/app/sitemap-products.xml/route");
     const res = await GET();

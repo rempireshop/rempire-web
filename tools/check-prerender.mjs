@@ -426,6 +426,9 @@ else {
      either. */
   const ROUTED = ["sitemap-products.xml", "sitemap-custom.xml"];
   if (/<sitemapindex/.test(sm)) {
+    /* No date on the index's rows: the build's own day is not when a file
+       changed, and of the two routes it cannot know one at all (09.10.2026). */
+    if (/<lastmod>/.test(sm)) { failed++; console.error("FAIL sitemapindex dates its rows — the build cannot know when a sitemap changed"); }
     const chunks = all(/<loc>([^<]+)<\/loc>/g, sm).map((u) => u.replace(/^https?:\/\/[^/]+\//, ""));
     for (const r of ROUTED) {
       if (!chunks.includes(r)) { failed++; console.error(`FAIL sitemapindex does not name ${r} (a sitemap the app serves)`); }
@@ -457,6 +460,18 @@ else {
   if (xh !== locs.length * 4) { failed++; console.error(`FAIL sitemap has ${xh} xhtml:link, expected ${locs.length * 4}`); }
   if (!/xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/.test(sm)) { failed++; console.error("FAIL sitemap does not declare the xhtml namespace"); }
   for (const l of locs.slice(0, 5)) if (!/^https?:\/\//.test(l)) { failed++; console.error(`FAIL sitemap <loc> is not absolute: ${l}`); }
+  /* A <lastmod> only where the build knows a page's own day — an article and
+     the blog listing (src/lib/seo-head.mjs postDay()/newestPostDay()) — and
+     always a real date. The day of the build stamped on every row, which is
+     what this replaced on 09.10.2026, would fail here on its first page. */
+  for (const row of sm.split("<url>").slice(1)) {
+    const lm = (/<lastmod>([^<]*)<\/lastmod>/.exec(row) || [])[1];
+    if (lm === undefined) continue;
+    const loc = (/<loc>([^<]+)<\/loc>/.exec(row) || [])[1] || "";
+    const route = parseShopPath(loc.replace(/^https?:\/\/[^/]+/, ""));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(lm)) { failed++; console.error(`FAIL sitemap row ${loc} has a lastmod that is not a date: ${lm}`); }
+    if (!route || !route.rest.startsWith("/blog/")) { failed++; console.error(`FAIL sitemap dates ${loc}, a page with no day of its own`); }
+  }
   // every prerendered page must be in it, and only those
   const paths = new Set(locs.map((l) => l.replace(/^https?:\/\/[^/]+/, "")));
   for (const [lang] of LANGS) {

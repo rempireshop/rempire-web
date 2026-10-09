@@ -100,7 +100,7 @@ import {
   OG_W, OG_H, OG_DEFAULT, OG_FALLBACK, ogShopCard, ORG_IMAGE, ORG_LOGO,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, pageAssets, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
-  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
+  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS, postDay, newestPostDay,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
   STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
@@ -110,7 +110,7 @@ import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, 
    subcollections, the brands and the blog list (audit §1A) — the module
    app.js's setHead() carries a copy of, so the head written here and the head
    after boot are one text. */
-import { seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
+import { seoBrandChooserHtml, seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
 import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -190,6 +190,7 @@ const CATALOGUE = withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES);
    only ever see what is written here. */
 const ON_SALE = onlyForSale(CATALOGUE, PRODUCT_OVERRIDES);
 const HIDDEN_COUNT = CATALOGUE.length - ON_SALE.length;
+const ON_SALE_IDS = new Set(ON_SALE.map(p => p.id));
 
 const loadObj = async (file, name) => {
   try { return new Function(await readFile(path.join(SHOP, file), "utf8") + "\nreturn " + name + ";")(); }
@@ -1123,7 +1124,7 @@ function productPage(p, lang) {
    different texts since 09.10.2026: the description is the search snippet
    (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
    which the static page used to replace with the snippet. */
-function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro }) {
+function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro, after = "" }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -1159,6 +1160,8 @@ function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, int
          above (screenCatalog() draws the same) */
       '<h1 class="display h1">' + esc(h1 || heading) + "</h1>" +
       '<p class="sec__intro">' + esc(intro) + "</p>" +
+      // `after`: HTML under the intro — a brand's «which one is mine» list
+      after +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
           (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
@@ -2035,7 +2038,13 @@ for (const lang of LANGS) {
       /* the owner's own paragraph where he has approved one (eight brands,
          seoBrandIntro()), the shop's generic line everywhere else — the
          same choice screenCatalog() makes */
-      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false)
+      intro: seoBrandIntro(b, lang.code) || tr(catIntro("", b), lang.code, false),
+      /* «Какой System 4 выбрать?» under it (seoBrandChooserHtml(), the list
+         screenCatalog() draws): real links to the product pages in this
+         language, none to a product off sale — this page has no second
+         chance to take a dead link back */
+      after: seoBrandChooserHtml(b, lang.code, (pid) =>
+        ON_SALE_IDS.has(pid) ? ' href="' + href(lang.seg, "/p/" + encodeURIComponent(pid) + "/") + '"' : null)
     }));
   }
 
@@ -2126,14 +2135,21 @@ await writeFile(path.join(ROOT, "src", "data", "prerendered-routes.json"),
 
 /* ---------- sitemap ----------------------------------------------------- */
 
-const today = new Date().toISOString().slice(0, 10);
-
 /* Every language of a page is its own <url>, and each one lists the whole
    cluster — that is what the protocol asks for, and it is what lets Google
    swap in the Estonian result for an Estonian searcher. sitemapUrlEntry()
    in src/lib/seo-head.mjs is the row; the custom products' sitemap route
-   writes the same one. */
-const urlEntry = (rest, seg, priority) => sitemapUrlEntry(BASE, rest, seg, priority, today);
+   writes the same one.
+
+   `lastmod` only where this run knows when a page changed (09.10.2026). Until
+   then every row said the day of the build, every deploy — a date Google
+   learns to ignore, and then it ignores the true ones too. An article knows
+   its own day (its last edit, else its publication) and the blog listing the
+   newest of them; the home pages, sections, brands, policy pages, sets and
+   the gift card carry no date of their own, so their rows say nothing rather
+   than something untrue. Priority stays as it was. */
+const urlEntry = (rest, seg, priority, lastmod = "") => sitemapUrlEntry(BASE, rest, seg, priority, lastmod);
+const BLOG_DAY = newestPostDay(BLOG_POSTS);
 
 /* The sitemap is exactly the set of pages written above — nothing that only
    exists client-side, and in particular nothing behind a basket. Asking
@@ -2168,8 +2184,8 @@ for (const lang of LANGS) {
   entries.push(urlEntry("/brands/", lang.seg, "0.5"));
   entries.push(urlEntry("/gift/", lang.seg, "0.6"));
   if (BLOG_POSTS.length) {
-    entries.push(urlEntry("/blog/", lang.seg, "0.7"));
-    for (const post of BLOG_POSTS) entries.push(urlEntry("/blog/" + encodeURIComponent(post.slug) + "/", lang.seg, "0.6"));
+    entries.push(urlEntry("/blog/", lang.seg, "0.7", BLOG_DAY));
+    for (const post of BLOG_POSTS) entries.push(urlEntry("/blog/" + encodeURIComponent(post.slug) + "/", lang.seg, "0.6", postDay(post)));
   }
 }
 
@@ -2210,11 +2226,14 @@ for (let i = sitemapFiles.length + 1; i <= 20; i++) {
    (custom_products, ids `c-…`) and the posts published after the build. Both
    are things this run cannot know, and an index is the one shape that lets a
    static file point at a dynamic one. It used to be a plain urlset below
-   1 000 URLs; robots.txt names only the index, so nothing else moved. */
+   1 000 URLs; robots.txt names only the index, so nothing else moved.
+   No <lastmod> on its rows (09.10.2026): the build's day said «changed» of
+   every file at every deploy, and of the two routes this run cannot know it
+   at all — the field is optional, and Google fetches a sitemap without it. */
 await writeFile(path.join(PUB, "sitemap.xml"),
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  [...sitemapFiles, SITEMAP_PRODUCTS, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
+  [...sitemapFiles, SITEMAP_PRODUCTS, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc></sitemap>`).join("\n") +
   "\n</sitemapindex>\n", "utf8");
 
 /* ---------- robots ------------------------------------------------------

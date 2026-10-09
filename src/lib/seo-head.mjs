@@ -17,7 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
-import { seoPriceText, seoProductCore, seoProductTitle } from "./seo-copy.mjs";
+import { seoLead, seoPriceText, seoProductCore, seoProductMeta, seoProductTitle, seoSnippetText } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -130,23 +130,15 @@ export const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").
    be the same fault the other way round.
 
    stripTags() itself is left exactly as it is: it is the twin of the copy in
-   public/shop2/app.js, and the two must keep answering identically. */
-export const textForSnippet = h => {
-  /* A sentinel rather than a space, because a space is what the text is
-     already full of. `\u0000` is written as an escape and never as the
-     character: a raw NUL in a source file makes grep call it binary and
-     report no matches at all, which is a trap this repository has already
-     walked into once (src/lib/og-card.ts). */
-  const MARK = "\u0000";
-  return unentity(String(h || "")
-    .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : MARK))
-    .replace(/<[^>]+>/g, MARK))
-    .split(MARK)
-    .map(x => x.replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .reduce((out, part) => (out ? out + (/[.!?…:;,)»—–-]$/.test(out) ? " " : ". ") + part : part), "")
-    .trim();
-};
+   public/shop2/app.js, and the two must keep answering identically.
+
+   Since 09.10.2026 the function itself lives in src/lib/seo-copy.mjs
+   (seoSnippetText()), whose block app.js carries byte for byte: the shop's
+   product head used to read the text through stripTags() instead, so the
+   static page and the page after boot cut the same description from two
+   different texts. Same rule, same answers (tests/seo-snippet.test.ts holds
+   it to every catalogue text). */
+export const textForSnippet = seoSnippetText;
 
 /* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
    SYSTEM 4 Сыворотка, стимулирующая…», «НЕВЕСОМЫЙ ЛАК ДЛЯ ВОЛОС — ОБЪЁМ И
@@ -1048,7 +1040,14 @@ export function openingHoursLD(hours) {
    So: the shouted heading goes, the product's own first words stay, and the
    three facts a shopper is actually deciding on come after them, always
    whole. The tail is budgeted first and the copy takes what is left, so the
-   price is never the half that gets cut off. */
+   price is never the half that gets cut off.
+
+   The copy's share is whole sentences since 09.10.2026 (seoLead() in
+   src/lib/seo-copy.mjs, which app.js's descFromText() calls too): as many as
+   fit, never «…the superficial circulation of the…»; a «BENEFITS:» /
+   «ПРЕИМУЩЕСТВА:» label ends the copy; a first sentence longer than the room
+   gives its longest clean clause, and only failing that a word cut with «…».
+   The tail itself is as it was. */
 export const DESC_MAX = 158;
 export function descFrom(text, t) {
   const tail = t.descTail();
@@ -1057,10 +1056,10 @@ export function descFrom(text, t) {
   const room = DESC_MAX - tail.length - 3;   // " · "
   /* A tail so long there is no room for the copy would be a snippet that says
      only the price — then the copy wins and the tail goes. */
-  if (room < 40) return clip(lead, DESC_MAX);
-  /* A full stop directly before « · » reads as a typo; clip() already drops
-     one when it has to cut, so this is the case where the copy fitted whole. */
-  return clip(lead, room).replace(/\.$/, "") + " · " + tail;
+  if (room < 40) return seoLead(lead, DESC_MAX);
+  /* A full stop directly before « · » reads as a typo; a clause or a word cut
+     never ends in one, so this is the case where whole sentences fitted. */
+  return seoLead(lead, room).replace(/\.$/, "") + " · " + tail;
 }
 
 /**
@@ -1086,12 +1085,15 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
   const text = textForSnippet(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
   /* An owner's or the assistant's own pair is deliberate and is left alone —
-     no price is appended to a sentence somebody wrote on purpose. */
+     no price is appended to a sentence somebody wrote on purpose. After it,
+     the shop's own hand-written line for the products people search for
+     (seoProductMeta(), src/lib/seo-copy.mjs — whole, no delivery line), and
+     only then a description cut from the product's text. */
   const desc = seoDesc
     ? clip(seoDesc, DESC_MAX)
-    : text
+    : seoProductMeta(id, lang.code) || (text
       ? descFrom(text, t)
-      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX);
+      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX));
 
   const crumbItems = [
     [t.home, langPath(seg, "/")],
@@ -1228,7 +1230,15 @@ export const SITEMAP_CLOSE = "</urlset>\n";
 
 /* Every language of a page is its own <url>, and each one lists the whole
    cluster — that is what the protocol asks for, and it is what lets Google
-   swap in the Estonian result for an Estonian searcher. */
+   swap in the Estonian result for an Estonian searcher.
+
+   `lastmod` is optional, and empty means the row says nothing about it
+   (09.10.2026). Google uses the field only while it keeps proving true: a
+   sitemap that stamped the day of the build on every page — and the products'
+   route stamped today on the 477 of 660 product rows nobody had edited, every
+   day — teaches it that the field is noise, and then the one row that really
+   did change is not believed either. So a row carries the day of a real edit
+   (sitemapDay() below) or no date at all. */
 export function sitemapUrlEntry(base, rest, seg, priority, lastmod) {
   const abs = u => base + u;
   const alts = LANGS.map(l =>
@@ -1237,10 +1247,27 @@ export function sitemapUrlEntry(base, rest, seg, priority, lastmod) {
   return "  <url>\n" +
     `    <loc>${esc(abs(langPath(seg, rest)))}</loc>\n` +
     alts.join("\n") + "\n" +
-    `    <lastmod>${lastmod}</lastmod>\n` +
+    (lastmod ? `    <lastmod>${esc(lastmod)}</lastmod>\n` : "") +
     `    <priority>${priority}</priority>\n` +
     "  </url>";
 }
+
+/** The YYYY-MM-DD of an edit stamp — an ISO string as the database helpers
+    hand it over, or a Date — or "" when there is none or it is not a date.
+    An ISO string keeps its own day (no time-zone shift), exactly as the
+    `.slice(0, 10)` the routes used to write. */
+export function sitemapDay(stamp) {
+  if (!stamp) return "";
+  if (stamp instanceof Date) return isNaN(stamp.getTime()) ? "" : stamp.toISOString().slice(0, 10);
+  const s = String(stamp);
+  return /^\d{4}-\d{2}-\d{2}/.test(s) && !isNaN(Date.parse(s.slice(0, 10))) ? s.slice(0, 10) : "";
+}
+
+/** An article's day: its last edit, else the day it was published. */
+export const postDay = post => sitemapDay(post && (post.updatedAt || post.publishedAt));
+
+/** The blog listing changes when an article does: the newest of their days, or "". */
+export const newestPostDay = posts => (posts || []).map(postDay).filter(Boolean).sort().pop() || "";
 
 /** The custom products' sitemap the app serves — named once, here, for the prerender's index and the route. */
 export const SITEMAP_CUSTOM = "sitemap-custom.xml";

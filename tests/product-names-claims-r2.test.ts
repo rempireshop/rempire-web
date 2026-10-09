@@ -19,6 +19,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { TAIL_EXACT, translateProductName } from "@/lib/product-name";
+import { CLAIMS, withoutMakerNames } from "./claim-words";
 
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
 type P = { id: string; brand: string; name: string };
@@ -125,12 +126,8 @@ describe("type tails read as people write them", () => {
 });
 
 describe("product texts make no disease or treatment claims", () => {
-  const CLAIMS = [
-    /\bacne\b|acne-prone|\beczema|dermatitis|psoria/i, /anti-?inflammat|\binflammation\b/i, /\bheal(s|ing|ed)?\b|\bcures?\b/i,
-    /therapeut|\bhair loss\b|prone to falling out|antisept|antimicrob|anti-?bacter|breakouts?/i,
-    /акне|экзем|дерматит|псориаз|противовоспал|воспален|заживл|лечеб|лечит|терапевт|выпаден|антисепт|антимикроб|антибактер|высыпан/i,
-    /\bakne|ekseem|dermatiit|psoriaas|põletik|ravitoime|terapeut|väljalangemi|antisept|antimikroob|antibakter|vistrik|paranemis|paraneb/i,
-  ];
+  /* the word list is shared with the shop's own meta descriptions
+     (tests/claim-words.ts, tests/product-meta.test.ts) */
   /* Left as they are, on purpose:
      · the NUMB serum numbs the skin for a tattoo session — that is what the
        product is; whether the shop sells and words it so is the owner's call;
@@ -138,7 +135,7 @@ describe("product texts make no disease or treatment claims", () => {
        loss (HairToStay) — a charity note, not a claim about the product;
      · «Vital Cure» / «Oil Cure» are the maker's product names. */
   const ALLOWED = new Set(["yumain-numb-serum-instant-pain-relief-for-tattoos", "kevin-murphy-body-mass"]);
-  const plain = (h: string) => String(h || "").replace(/<[^>]+>/g, " ").replace(/\b(?:Vital|Oil) Cure\b/gi, "").replace(/\s+/g, " ");
+  const plain = withoutMakerNames;
 
   it("in any language, for any product", () => {
     const bad: string[] = [];

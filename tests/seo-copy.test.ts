@@ -72,6 +72,39 @@ const trText = runInNewContext([
   sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END),
 ].join("\n") + "\ntrText;") as (s: string, lang: string, allowName: boolean) => string;
 const trName = (name: string, lang: string) => (lang === "RU" ? name : trText(name, lang, true));
+
+/** One line of app.js, found by its start. */
+const appLine = (start: RegExp): string => {
+  const l = appLines.find((x) => start.test(x));
+  if (!l) throw new Error("app.js has no line matching " + start);
+  return l;
+};
+/** setHead()'s product description as the BROWSER computes it: the block,
+    the dictionary trText() reads the delivery line from, and descFromText()
+    with the helpers it calls — all lifted out of app.js, run in a bare VM. */
+const browserDesc = runInNewContext([
+  sliceFrom(/^ {2}var UI = \{$/, DECL_END),
+  sliceFrom(/^ {2}var UI_RX = \[$/, DECL_END),
+  sliceFrom(/^ {2}var NAME_TAILS = \{$/, DECL_END),
+  sliceFrom(/^ {2}var NAME_FRAGS = \[$/, DECL_END),
+  sliceFrom(/^ {2}var TAIL_EXACT = \{$/, DECL_END),
+  sliceFrom(/^ {2}function trName\(s, lang\) \{$/, FN_END),
+  sliceFrom(/^ {2}function trText\(s, lang, allowName\) \{$/, FN_END),
+  seoCopyBlock(APP),
+  appLine(/^ {2}var SHOUT_RX = /),
+  appLine(/^ {2}function dropShout\(s\) \{ .* \}$/),
+  sliceFrom(/^ {2}function clipDesc\(s, max\) \{$/, FN_END),
+  appLine(/^ {2}var DESC_MAX = 158;$/),
+  sliceFrom(/^ {2}function descFromText\(text, priceText, stockText, lang\) \{$/, FN_END),
+].join("\n") + "\n({ descFromText: descFromText, seoSnippetText: seoSnippetText, seoProductMeta: seoProductMeta });") as {
+  descFromText: (text: string, priceText: string, stockText: string, lang: string) => string;
+  seoSnippetText: (html: string) => string;
+  seoProductMeta: (id: string, lang: string) => string;
+};
+const loadTexts = (f: string, n: string) => new Function(read("../public/shop/" + f) + "\nreturn " + n + ";")() as Record<string, string>;
+const TEXTS: Record<string, Record<string, string>> = {
+  EN: loadTexts("content.js", "CONTENT"), RU: loadTexts("content.ru.js", "CONTENT_RU"), ET: loadTexts("content.et.js", "CONTENT_ET"),
+};
 /** Code without its comments — a comment may quote the very words a check forbids. */
 const uncommented = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
@@ -126,6 +159,33 @@ describe("static head == rendered head", () => {
         expect(staticTitle.length, p.id).toBeLessThanOrEqual(SEO_TITLE_MAX);
         expect(staticTitle, p.id).not.toMatch(/купить в Rempire|osta Rempire'ist|buy at Rempire|— REMPIRE$/);
       }
+    });
+
+    /* The meta description, since 09.10.2026: the hand-written line where
+       there is one (seoProductMeta()), else whole sentences of the product's
+       text (seoLead()) read from the same plain text (seoSnippetText()) — the
+       static page through productSpec(), the page after boot through
+       setHead()'s own descFromText(). They used to cut the same text two
+       ways: the shop read it through stripTags(), which runs a heading line
+       into the copy. */
+    it(`every catalogue product's description in ${code} — productSpec() against setHead()`, () => {
+      const lang = LANGS.find((l) => l.code === code)!;
+      const seo = CATALOGUE as Array<(typeof CATALOGUE)[number] & { seo?: { d?: string } }>;
+      let compared = 0;
+      for (const p of seo) {
+        // the body the prerender writes the description from (productPage())
+        const html = code === "EN" && p.seo && p.seo.d ? p.seo.d : (code !== "EN" && TEXTS[code][p.id]) || TEXTS.EN[p.id] || "";
+        if (!browserDesc.seoSnippetText(html)) continue;
+        const staticDesc = productSpec({
+          base: "https://rempireshop.com", lang, id: p.id, cat: p.cat, catName: "x", brand: p.brand, name: trName(p.name, code),
+          price: p.price, priceFrom: !!p.priceFrom, stock: "in", seoTitle: "", seoDesc: "", body: html, image: "", imageUrls: [],
+        }).desc;
+        const rendered = browserDesc.seoProductMeta(p.id, code) ||
+          browserDesc.descFromText(browserDesc.seoSnippetText(html), "", "", code);
+        expect(rendered, p.id).toBe(staticDesc);
+        compared++;
+      }
+      expect(compared).toBe(CATALOGUE.length);
     });
   }
 });
