@@ -1228,7 +1228,15 @@ export const SITEMAP_CLOSE = "</urlset>\n";
 
 /* Every language of a page is its own <url>, and each one lists the whole
    cluster — that is what the protocol asks for, and it is what lets Google
-   swap in the Estonian result for an Estonian searcher. */
+   swap in the Estonian result for an Estonian searcher.
+
+   `lastmod` is optional, and empty means the row says nothing about it
+   (09.10.2026). Google uses the field only while it keeps proving true: a
+   sitemap that stamped the day of the build on every page — and the products'
+   route stamped today on the 477 of 660 product rows nobody had edited, every
+   day — teaches it that the field is noise, and then the one row that really
+   did change is not believed either. So a row carries the day of a real edit
+   (sitemapDay() below) or no date at all. */
 export function sitemapUrlEntry(base, rest, seg, priority, lastmod) {
   const abs = u => base + u;
   const alts = LANGS.map(l =>
@@ -1237,10 +1245,27 @@ export function sitemapUrlEntry(base, rest, seg, priority, lastmod) {
   return "  <url>\n" +
     `    <loc>${esc(abs(langPath(seg, rest)))}</loc>\n` +
     alts.join("\n") + "\n" +
-    `    <lastmod>${lastmod}</lastmod>\n` +
+    (lastmod ? `    <lastmod>${esc(lastmod)}</lastmod>\n` : "") +
     `    <priority>${priority}</priority>\n` +
     "  </url>";
 }
+
+/** The YYYY-MM-DD of an edit stamp — an ISO string as the database helpers
+    hand it over, or a Date — or "" when there is none or it is not a date.
+    An ISO string keeps its own day (no time-zone shift), exactly as the
+    `.slice(0, 10)` the routes used to write. */
+export function sitemapDay(stamp) {
+  if (!stamp) return "";
+  if (stamp instanceof Date) return isNaN(stamp.getTime()) ? "" : stamp.toISOString().slice(0, 10);
+  const s = String(stamp);
+  return /^\d{4}-\d{2}-\d{2}/.test(s) && !isNaN(Date.parse(s.slice(0, 10))) ? s.slice(0, 10) : "";
+}
+
+/** An article's day: its last edit, else the day it was published. */
+export const postDay = post => sitemapDay(post && (post.updatedAt || post.publishedAt));
+
+/** The blog listing changes when an article does: the newest of their days, or "". */
+export const newestPostDay = posts => (posts || []).map(postDay).filter(Boolean).sort().pop() || "";
 
 /** The custom products' sitemap the app serves — named once, here, for the prerender's index and the route. */
 export const SITEMAP_CUSTOM = "sitemap-custom.xml";

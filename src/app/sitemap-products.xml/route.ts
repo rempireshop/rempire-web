@@ -25,10 +25,12 @@
  * priority 0.7 for a product on the shelf and 0.4 for one that is out (a
  * sold-out product keeps its page and its ranking, it just stops asking for
  * the crawler's time — the reasoning is in the prerender, beside the rows
- * this replaces). `lastmod` is the owner's own edit when he has made one, and
- * today otherwise: the catalogue file carries no dates, and a build that used
- * to stamp its own day on every product is exactly what the override's
- * `updated_at` improves on.
+ * this replaces). `lastmod` is the owner's own edit when he has made one
+ * (`product_overrides.updated_at`), and absent otherwise. The catalogue file
+ * carries no dates, and until 09.10.2026 the gap was filled with today — 477
+ * of the 660 rows said «changed today» every day, which teaches Google to
+ * ignore the field on the rows where it is true. No date is the honest answer
+ * for a page nobody has touched (sitemapUrlEntry()).
  *
  * public/sitemap.xml is a sitemapindex naming this route beside its own static
  * chunks and sitemap-custom.xml, so Google reaches all of them through the one
@@ -37,7 +39,7 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import { getOverrides } from "@/lib/orders";
-import { baseFrom, forSale, LANGS, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapUrlEntry } from "@/lib/seo-head.mjs";
+import { baseFrom, forSale, LANGS, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapDay, sitemapUrlEntry } from "@/lib/seo-head.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +69,6 @@ async function overrides(): Promise<Record<string, Override>> {
 export async function GET(): Promise<Response> {
   const base = baseFrom(process.env.PUBLIC_BASE_URL);
   const all = await overrides();
-  const today = new Date().toISOString().slice(0, 10);
 
   const entries: string[] = [];
   for (const lang of LANGS as Array<{ seg: string }>) {
@@ -78,7 +79,8 @@ export async function GET(): Promise<Response> {
          build may still link to it — that pair was the leak of 18.09.2026. */
       if (!forSale(o)) continue;
       const stock = o?.stock || p.s;
-      const lastmod = o?.updatedAt ? String(o.updatedAt).slice(0, 10) : today;
+      // the owner's edit, or no date at all — never today (see above)
+      const lastmod = sitemapDay(o?.updatedAt);
       entries.push(sitemapUrlEntry(base, "/p/" + encodeURIComponent(p.id) + "/", lang.seg, stock === "out" ? "0.4" : "0.7", lastmod));
     }
   }

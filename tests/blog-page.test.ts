@@ -401,6 +401,11 @@ describe("sitemap-custom.xml and the posts the build did not write", () => {
       `${LIVE}/blogs/news`, `${LIVE}/blogs/news/${post.slug}`,
     ]);
     expect(xml).toContain(`<lastmod>${post.updatedAt.slice(0, 10)}</lastmod>`);
+    /* every row dated by the article itself — the listing by its newest one,
+       never by the day the sitemap was asked (09.10.2026) */
+    const days = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+    expect(days).toHaveLength(6);
+    expect(new Set(days).size).toBe(1);
     expect(xml).toContain("<priority>0.6</priority>");
     expect(xml).not.toContain("chernovik");
     expect((xml.match(/<xhtml:link/g) || []).length).toBe(24);

@@ -100,7 +100,7 @@ import {
   OG_W, OG_H, OG_DEFAULT, OG_FALLBACK, ogShopCard, ORG_IMAGE, ORG_LOGO,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, pageAssets, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
-  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
+  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS, postDay, newestPostDay,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
   STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
@@ -2126,14 +2126,21 @@ await writeFile(path.join(ROOT, "src", "data", "prerendered-routes.json"),
 
 /* ---------- sitemap ----------------------------------------------------- */
 
-const today = new Date().toISOString().slice(0, 10);
-
 /* Every language of a page is its own <url>, and each one lists the whole
    cluster — that is what the protocol asks for, and it is what lets Google
    swap in the Estonian result for an Estonian searcher. sitemapUrlEntry()
    in src/lib/seo-head.mjs is the row; the custom products' sitemap route
-   writes the same one. */
-const urlEntry = (rest, seg, priority) => sitemapUrlEntry(BASE, rest, seg, priority, today);
+   writes the same one.
+
+   `lastmod` only where this run knows when a page changed (09.10.2026). Until
+   then every row said the day of the build, every deploy — a date Google
+   learns to ignore, and then it ignores the true ones too. An article knows
+   its own day (its last edit, else its publication) and the blog listing the
+   newest of them; the home pages, sections, brands, policy pages, sets and
+   the gift card carry no date of their own, so their rows say nothing rather
+   than something untrue. Priority stays as it was. */
+const urlEntry = (rest, seg, priority, lastmod = "") => sitemapUrlEntry(BASE, rest, seg, priority, lastmod);
+const BLOG_DAY = newestPostDay(BLOG_POSTS);
 
 /* The sitemap is exactly the set of pages written above — nothing that only
    exists client-side, and in particular nothing behind a basket. Asking
@@ -2168,8 +2175,8 @@ for (const lang of LANGS) {
   entries.push(urlEntry("/brands/", lang.seg, "0.5"));
   entries.push(urlEntry("/gift/", lang.seg, "0.6"));
   if (BLOG_POSTS.length) {
-    entries.push(urlEntry("/blog/", lang.seg, "0.7"));
-    for (const post of BLOG_POSTS) entries.push(urlEntry("/blog/" + encodeURIComponent(post.slug) + "/", lang.seg, "0.6"));
+    entries.push(urlEntry("/blog/", lang.seg, "0.7", BLOG_DAY));
+    for (const post of BLOG_POSTS) entries.push(urlEntry("/blog/" + encodeURIComponent(post.slug) + "/", lang.seg, "0.6", postDay(post)));
   }
 }
 
@@ -2210,11 +2217,14 @@ for (let i = sitemapFiles.length + 1; i <= 20; i++) {
    (custom_products, ids `c-…`) and the posts published after the build. Both
    are things this run cannot know, and an index is the one shape that lets a
    static file point at a dynamic one. It used to be a plain urlset below
-   1 000 URLs; robots.txt names only the index, so nothing else moved. */
+   1 000 URLs; robots.txt names only the index, so nothing else moved.
+   No <lastmod> on its rows (09.10.2026): the build's day said «changed» of
+   every file at every deploy, and of the two routes this run cannot know it
+   at all — the field is optional, and Google fetches a sitemap without it. */
 await writeFile(path.join(PUB, "sitemap.xml"),
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  [...sitemapFiles, SITEMAP_PRODUCTS, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
+  [...sitemapFiles, SITEMAP_PRODUCTS, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc></sitemap>`).join("\n") +
   "\n</sitemapindex>\n", "utf8");
 
 /* ---------- robots ------------------------------------------------------

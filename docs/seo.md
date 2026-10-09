@@ -461,8 +461,21 @@ that promise between builds. Both are answered by a route instead:
 The **pages** are still prerendered — one static file per product per
 language, which is what makes the shop fast and indexable. Only the rows that
 offer them to a crawler moved. `lastmod` for a product is the owner's own edit
-(`product_overrides.updated_at`) when he has made one and today otherwise;
-priority is 0.7, or 0.4 for a product that is out of stock. A product with
+(`product_overrides.updated_at`) when he has made one, and **absent**
+otherwise; priority is 0.7, or 0.4 for a product that is out of stock.
+
+`lastmod` means a real edit or nothing (09.10.2026). Until then the route
+filled the gap with today — 477 of 660 product rows said «changed today»
+every day — and the static sitemap stamped the build's day on every row at
+every deploy. Google trusts the field only while it keeps proving true, so a
+date that is always today teaches it to ignore the rows where it is. Now:
+a catalogue product carries its override's day, a custom product its own
+`updated_at`, an article its last edit (else its publication), the blog
+listing the newest article; the home pages, sections, brands, policy pages,
+sets and the gift card carry none, and neither do the rows of the
+`sitemapindex`. `sitemapUrlEntry()` omits the element for an empty value;
+`tools/check-prerender.mjs` fails a static row that dates anything but the
+blog. A product with
 nothing on the shelf stays listed and stays indexable: its page still answers
 the question the searcher asked, still carries «Сообщить о наличии», and
 dropping it would throw away a ranking that has to be earned again when the

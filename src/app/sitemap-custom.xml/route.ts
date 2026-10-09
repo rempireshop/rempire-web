@@ -32,7 +32,7 @@ import prerendered from "@/data/blog.prerendered.json";
 import { listPublished, type PostSummary } from "@/lib/blog";
 import { postsNotPrerendered } from "@/lib/blog-page";
 import { listCustomSitemapRows } from "@/lib/custom-products";
-import { baseFrom, LANGS, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapUrlEntry } from "@/lib/seo-head.mjs";
+import { baseFrom, LANGS, newestPostDay, postDay, SITEMAP_CLOSE, SITEMAP_OPEN, sitemapDay, sitemapUrlEntry } from "@/lib/seo-head.mjs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,15 +61,18 @@ export async function GET() {
     // the products alone are still an honest sitemap
     console.error("[sitemap-custom] posts unavailable:", err);
   }
-  const today = new Date().toISOString().slice(0, 10);
+  /* A date only where there is one (sitemapUrlEntry()): a product its own
+     edit, an article its own, the listing the newest article on it — never
+     the day this was asked. */
+  const listDay = newestPostDay(posts);
   const entries: string[] = [];
   for (const lang of LANGS as Array<{ seg: string }>) {
     for (const r of rows) {
-      entries.push(sitemapUrlEntry(base, "/p/" + encodeURIComponent(r.id) + "/", lang.seg, "0.7", r.updatedAt.slice(0, 10)));
+      entries.push(sitemapUrlEntry(base, "/p/" + encodeURIComponent(r.id) + "/", lang.seg, "0.7", sitemapDay(r.updatedAt)));
     }
-    if (posts.length && !prerendered.slugs.length) entries.push(sitemapUrlEntry(base, "/blog/", lang.seg, "0.7", today));
+    if (posts.length && !prerendered.slugs.length) entries.push(sitemapUrlEntry(base, "/blog/", lang.seg, "0.7", listDay));
     for (const p of posts) {
-      entries.push(sitemapUrlEntry(base, "/blog/" + encodeURIComponent(p.slug) + "/", lang.seg, "0.6", (p.updatedAt || p.publishedAt || today).slice(0, 10)));
+      entries.push(sitemapUrlEntry(base, "/blog/" + encodeURIComponent(p.slug) + "/", lang.seg, "0.6", postDay(p)));
     }
   }
   return xml(
