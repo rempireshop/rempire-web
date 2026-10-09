@@ -3,7 +3,7 @@
  * (docs/audit/2026-09-07-storefront.md). The browser halves are in
  * e2e/storefront-sweep-2.spec.ts; these are the ones with no screen:
  *
- *   · which /shop2/ addresses answer 404 and which still answer the shell,
+ *   · which /ru addresses answer 404 and which still answer the shell,
  *     and what the 404 page carries;
  *   · a gift-card denomination the owner switched off is refused at the till,
  *     not merely hidden in the window;
@@ -25,14 +25,21 @@ import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 describe("404 — the address the shop has no page for", () => {
   it("reads the language prefix off the path and leaves the rest alone", () => {
-    expect(shopPath("/shop2/")).toEqual({ seg: "", segs: [] });
-    expect(shopPath("/shop2/et/")).toEqual({ seg: "et", segs: [] });
-    expect(shopPath("/shop2/en/c/hair/")).toEqual({ seg: "en", segs: ["c", "hair"] });
-    // /shop2/ru/… is 301'd by next.config.ts, but a hand-typed one still parses
-    expect(shopPath("/shop2/ru/gift/")).toEqual({ seg: "", segs: ["gift"] });
-    expect(shopPath("/anything-else/")).toBeNull();
+    /* Shopify's addresses since 08.10.2026: "" is English, "ru", "et"; the
+       segments are the internal route, and `shape` says the address is one
+       of the shop's at all */
+    expect(shopPath("/ru")).toEqual({ seg: "ru", segs: [], shape: true });
+    expect(shopPath("/et")).toEqual({ seg: "et", segs: [], shape: true });
+    expect(shopPath("/")).toEqual({ seg: "", segs: [], shape: true });
+    expect(shopPath("/collections/hair-care")).toEqual({ seg: "", segs: ["c", "hair"], shape: true });
+    expect(shopPath("/et/collections/juuksehooldus")).toEqual({ seg: "et", segs: ["c", "hair"], shape: true });
+    expect(shopPath("/ru/products/gift-card")).toEqual({ seg: "ru", segs: ["gift"], shape: true });
+    // not a shop shape: a 404 in the prefix's language
+    expect(shopPath("/ru/anything-else")).toEqual({ seg: "ru", segs: ["anything-else"], shape: false });
+    // not a page address at all: the API and Next's own files never get the shop's 404
+    expect(shopPath("/api/nothing")).toBeNull();
     // a mangled percent-encoding is text, never a throw (safeDecode in app.js)
-    expect(shopPath("/shop2/p/%E0/")?.segs).toHaveLength(2);
+    expect(shopPath("/ru/products/%E0")?.segs).toHaveLength(2);
   });
 
   it("keeps every screen the shop really has, and only those", () => {
@@ -73,12 +80,13 @@ describe("404 — the address the shop has no page for", () => {
     expect(isKnownShopPath(["info", "no-such-policy"])).toBe(false);
     // and everything else
     expect(isKnownShopPath(["wat"])).toBe(false);
-    expect(isKnownShopPath(["cart"])).toBe(false);
+    // the basket is a drawer, and /cart its door (Shopify's basket page) since 08.10.2026
+    expect(isKnownShopPath(["cart"])).toBe(true);
     expect(isKnownShopPath(["c", "hair", "extra"])).toBe(false);
   });
 
   it("answers 404 with the shop's own page, noindex, in the path's language", async () => {
-    const res = await notFoundPageResponse("/shop2/et/no-such-page/");
+    const res = await notFoundPageResponse("/et/no-such-page");
     expect(res.status).toBe(404);
     expect(res.headers.get("content-type")).toContain("text/html");
     const html = await res.text();
@@ -86,19 +94,19 @@ describe("404 — the address the shop has no page for", () => {
     expect(html).toContain("<title>Lehte ei leitud — REMPIRE</title>");
     expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
     /* The canonical is this address, not the home page's — a soft 404 used to
-       tell Google that /shop2/anything/ WAS /shop2/. */
-    expect(html).toMatch(/<link rel="canonical" href="[^"]*\/shop2\/et\/no-such-page\/"/);
+       tell Google that /ru/anything WAS /ru/. */
+    expect(html).toMatch(/<link rel="canonical" href="[^"]*\/et\/no-such-page"/);
     // …and a way out, in the page's own language
-    expect(html).toContain('href="/shop2/et/c/all/"');
+    expect(html).toContain('href="/et/collections/koik-tooted"');
   });
 
   it("hands the plain shell, at 200, to a screen that only lives in the browser", async () => {
     /* Untouched, not merely 200: the shell is whatever the prerender wrote
        (its robots meta follows PUBLIC_BASE_URL, so THAT proves nothing here)
        — what matters is that no 404 page was built over it. */
-    const shell = await (await notFoundPageResponse("/shop2/definitely-not-a-page/does-not-matter/extra/")).text();
+    const shell = await (await notFoundPageResponse("/ru/definitely-not-a-page/does-not-matter/extra")).text();
     expect(shell).toContain("Страница не найдена");   // the sanity check for the check below
-    for (const path of ["/shop2/search/", "/shop2/en/account/", "/shop2/brands/"]) {
+    for (const path of ["/ru/search", "/account", "/ru/collections/brands"]) {
       const res = await notFoundPageResponse(path);
       expect(res.status, path).toBe(200);
       const html = await res.text();
@@ -118,24 +126,24 @@ describe("404 — a set is asked of the `bundles` table", () => {
   afterAll(teardownDb);
 
   it("hands the shell, at 200, to a set the shop really sells", async () => {
-    const res = await notFoundPageResponse("/shop2/set/beard-start/");
+    const res = await notFoundPageResponse("/ru/collections/sets/beard-start");
     expect(res.status).toBe(200);
     expect(await res.text()).not.toContain("Страница не найдена");
   });
 
   it("hands the shell, at 200, to «Наборы» while a set is on sale", async () => {
-    const res = await notFoundPageResponse("/shop2/sets/");
+    const res = await notFoundPageResponse("/ru/collections/sets");
     expect(res.status).toBe(200);
     expect(await res.text()).not.toContain("Страница не найдена");
   });
 
   it("answers 404 with the shop's own page for an id nobody has", async () => {
-    const res = await notFoundPageResponse("/shop2/en/set/no-such-set-8f2c1/");
+    const res = await notFoundPageResponse("/collections/sets/no-such-set-8f2c1");
     expect(res.status).toBe(404);
     const html = await res.text();
     expect(html).toContain('<html lang="en"');
     expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
-    expect(html).toMatch(/<link rel="canonical" href="[^"]*\/shop2\/en\/set\/no-such-set-8f2c1\/"/);
+    expect(html).toMatch(/<link rel="canonical" href="[^"]*\/collections\/sets\/no-such-set-8f2c1"/);
   });
 
   /* «active» is what /api/bundles/ filters on, so a set the owner switched off
@@ -143,11 +151,11 @@ describe("404 — a set is asked of the `bundles` table", () => {
   it("answers 404 for a set the owner switched off", async () => {
     await exec("update bundles set active = false where id = 'shave-smooth'");
     try {
-      expect((await notFoundPageResponse("/shop2/set/shave-smooth/")).status).toBe(404);
+      expect((await notFoundPageResponse("/ru/collections/sets/shave-smooth")).status).toBe(404);
     } finally {
       await exec("update bundles set active = true where id = 'shave-smooth'");
     }
-    expect((await notFoundPageResponse("/shop2/set/shave-smooth/")).status).toBe(200);
+    expect((await notFoundPageResponse("/ru/collections/sets/shave-smooth")).status).toBe(200);
   });
 });
 

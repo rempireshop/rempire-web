@@ -18,6 +18,8 @@ import {
   toCatalogueProduct,
   updateCustomProduct,
 } from "@/lib/custom-products";
+import { productUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 import { writeAuditSafe } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -71,6 +73,8 @@ export async function PUT(req: Request, ctx: Ctx) {
       await writeAuditSafe("admin", active ? "product.show" : "product.hide", { id });
     }
     if (Object.keys(fields).length) await writeAuditSafe("admin", "product.update", { id, keys: Object.keys(fields) });
+    // its page changed, appeared or went (live shop only, fire-and-forget)
+    if (Object.keys(fields).length || typeof active === "boolean") submitIndexNow(productUrls(id));
     return Response.json({ ok: true, product: toCatalogueProduct(row) }, { headers: NO_STORE });
   } catch (err) {
     if (err instanceof CustomProductError) {
@@ -90,6 +94,8 @@ export async function DELETE(req: Request, ctx: Ctx) {
     const row = await setCustomProductActive(id, false);
     if (!row) return notFound();
     await writeAuditSafe("admin", "product.hide", { id });
+    // its page now answers 404 — the engines hear that too
+    submitIndexNow(productUrls(id));
     return Response.json({ ok: true, product: toCatalogueProduct(row) }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/products/:id] hide failed:", err);

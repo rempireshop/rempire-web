@@ -224,7 +224,7 @@ describe("a paid order: the log says why the shop's letter did or did not go", (
     expect(res.notified).toBe(true);
     expect(resend).toHaveLength(1);
     expect(resend[0].text ?? "", "the shop's letter has no way into the order").toContain(
-      `Открыть в панели: ${BASE}/shop2/admin/?order=R-100099`,
+      `Открыть в панели: ${BASE}/admin?order=R-100099`,
     );
   });
 

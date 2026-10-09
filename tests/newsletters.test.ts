@@ -203,12 +203,12 @@ describe("renderNewsletter", () => {
     // an attribute value: the `&` between the two parameters is written as &amp;
     expect(mail.html).toContain(`href="${unsubscribe.replace("&", "&amp;")}"`);
     expect(mail.html).toContain("Отписаться");
-    expect(mail.html).toContain(`${BASE}/shop2/p/${PRODUCT}/`);
+    expect(mail.html).toContain(`${BASE}/ru/products/${PRODUCT}`);
     expect(mail.html).toContain(`${BASE}/shop/img/${PRODUCT}-0.webp`);
     expect(mail.html).toContain("от&nbsp;9&nbsp;€");
     expect(mail.text).toContain(unsubscribe);
     expect(mail.text).toContain("- Шампунь");
-    expect(mail.text).toContain(`System 4 Bio Botanical Shampoo — шампунь — от 9 €: ${BASE}/shop2/p/${PRODUCT}/`);
+    expect(mail.text).toContain(`System 4 Bio Botanical Shampoo — шампунь — от 9 €: ${BASE}/ru/products/${PRODUCT}`);
     expect(mail.text).not.toMatch(/<[a-z]/i);
     for (const part of [mail.html, mail.text, mail.subject]) {
       expect(part).not.toMatch(/undefined|NaN|\[object Object\]/);
@@ -216,10 +216,10 @@ describe("renderNewsletter", () => {
   });
 
   it("draws a placed card in the text and translates the name for an Estonian reader", () => {
-    const body = `<p>Soovitame:</p><p><a data-product="${PRODUCT}" href="/shop2/p/${PRODUCT}/">System 4 — 9 €</a>&nbsp;</p><p>Head!</p>`;
+    const body = `<p>Soovitame:</p><p><a data-product="${PRODUCT}" href="/ru/products/${PRODUCT}">System 4 — 9 €</a>&nbsp;</p><p>Head!</p>`;
     const mail = renderNewsletter({ subject: "Uudised", body, products: cards }, "et");
     expect(mail.html).toContain("Bio Botanical Shampoo — šampoon");
-    expect(mail.html).toContain(`${BASE}/shop2/et/p/${PRODUCT}/`);
+    expect(mail.html).toContain(`${BASE}/et/products/${PRODUCT}`);
     expect(mail.html).toContain("Loobu"); // the ET «Отписаться»
     expect(mail.html).not.toContain("System 4 — 9 €"); // the marker's own words are not printed twice
     // the card stood in the text, so it is not repeated under it

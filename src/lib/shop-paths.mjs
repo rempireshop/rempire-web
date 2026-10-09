@@ -288,6 +288,24 @@ export function modernShopHref(href) {
 }
 
 /**
+ * Every link into one of the shop's own pages inside a piece of stored HTML
+ * (a policy text, an article), spelled in `lang` — so a policy page read in
+ * Estonian links to the Estonian refund policy, whichever language the text
+ * was written with. External links, assets and the panel are left alone; an
+ * old /shop2/ link is first moved to the page it became.
+ */
+export function respellShopLinks(html, lang) {
+  return String(html == null ? "" : html).replace(/href="([^"]*)"/g, (whole, href) => {
+    const moved = modernShopHref(href);
+    if (!moved.startsWith("/") || moved.startsWith("//")) return moved === href ? whole : 'href="' + moved + '"';
+    const cut = moved.search(/[?#]/);
+    const route = parseShopPath(cut >= 0 ? moved.slice(0, cut) : moved);
+    if (!route || isOwnerRest(route.rest)) return moved === href ? whole : 'href="' + moved + '"';
+    return 'href="' + publicPath(lang, route.rest) + (cut >= 0 ? moved.slice(cut) : "") + '"';
+  });
+}
+
+/**
  * The new address of a /shop2/… or /shop/… page, without its query; null for
  * anything else, and for an asset under those folders (a file name with an
  * extension), which never moves.

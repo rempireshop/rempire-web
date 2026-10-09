@@ -145,6 +145,25 @@ function decodeSafe(s: string): string {
    `scan` and `admin` are the owner's, and answering 404 for them would be a
    lie about a page that does exist. */
 const CLIENT_SCREENS = new Set(["search", "brands", "account", "checkout", "done", "admin", "scan", "cart"]);
+
+/* The ones among them that need a basket, an order or a login to mean
+   anything. robots.txt keeps crawlers out; this is the same answer for one
+   that comes anyway: the shell is the HOME page's (its canonical says «/»),
+   and a screen that is not the home page must not claim to be it. So the
+   shell is served `noindex, nofollow` with no canonical, no hreflang and no
+   og:url — app.js writes a self-canonical on boot — and the deploy's own
+   robots value rides along in data-served, which app.js restores the moment
+   the shopper walks on to a real page (SEO audit, 09.10.2026). */
+const STATE_SCREENS = new Set(["search", "account", "checkout", "done", "admin", "scan", "cart"]);
+
+export function stateShell(shell: string): string {
+  const served = (shell.match(/<meta name="robots" content="([^"]*)">/) || [])[1] ?? "";
+  return shell
+    .replace(/<meta name="robots" content="[^"]*">/, () =>
+      '<meta name="robots" content="' + ROBOTS_CLOSED + '" data-served="' + esc(served) + '">')
+    .replace(/<link rel="(?:canonical|alternate)"[^>]*data-seo="(?:canonical|alt-[a-z-]+)">\r?\n?/g, "")
+    .replace(/<meta property="og:url"[^>]*>\r?\n?/, "");
+}
 /* The single pages the prerender writes. Listed so a tree that has not been
    prerendered still serves them — the same reason next.config.ts lists them
    off disk rather than assuming. `sets` is no longer one of them: since
@@ -406,7 +425,10 @@ export async function notFoundPageResponse(pathname: string, req?: Request): Pro
   const shell = readShell();
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
-  if (parsed.shape && isKnownShopPath(parsed.segs)) return html(withSessionIdentity(shell, req), 200);
+  if (parsed.shape && isKnownShopPath(parsed.segs)) {
+    const state = parsed.segs.length === 1 && STATE_SCREENS.has(parsed.segs[0]);
+    return html(withSessionIdentity(state ? stateShell(shell) : shell, req), 200);
+  }
   /* The two shapes whose ids only the database knows, asked only once the
      closed lists above have said no. A brand slug reaches Postgres only when
      the catalogue has never heard of it; a set id reaches it whenever the

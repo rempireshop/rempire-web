@@ -218,7 +218,9 @@ fewer Shopify orders to write off by hand (step 13).
    domain. **No orders on staging from here** — Montonio's notice and return
    addresses already name rempireshop.com, which is still Shopify.
 6. **DNS at once**: `A @` and `CNAME www` to Vercel's values, «DNS only» (grey
-   cloud); nothing else touched. Verify: `https://rempireshop.com/shop2/` 200
+   cloud); nothing else touched. Verify (the addresses of the night; since the
+   URL move they are `/` and `/products/…` — `docs/launch-runbook.md` § «The URL
+   move»): `https://rempireshop.com/shop2/` 200
    with no `x-robots-tag`; `www` → 308 → apex; `/robots.txt` and `/sitemap.xml`
    on rempireshop.com; one `/products/…` → 301; `/feed/google-en.xml` 200; a
    POST to `/api/payments/notify/` answers **400, not 308**.
@@ -252,6 +254,12 @@ register the staging address again.
 ---
 
 ## Stage 5 — after the switch
+
+**The URL move (08–09.10.2026).** The shop answers at Shopify's own
+addresses now — English unprefixed, `/ru`, `/et`, `/admin`; every `/shop2/…`
+address is one 301. What to check after deploying it, and what Renat has to
+redo on his phone: `docs/launch-runbook.md` § «The URL move»; the decisions:
+`docs/seo.md` § «URL move 2026-10 (Shopify scheme)».
 
 | | | status |
 |---|---|---|

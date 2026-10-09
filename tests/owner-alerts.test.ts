@@ -234,7 +234,7 @@ describe("sent through the journal, once", () => {
     expect(push.sent).toHaveLength(1);
     expect(push.sent[0]).toMatchObject({
       title: "⚠️ Возврат ещё не дошёл: R-100050",
-      url: "/shop2/admin/?order=R-100050",
+      url: "/admin?order=R-100050",
       tag: "alert:refund_stuck:rf-10:INSUFFICIENT_FUNDS",
     });
     // never the paid order's own line, which it would replace
@@ -290,7 +290,7 @@ describe("sent through the journal, once", () => {
     const tg = calls.find((c) => c.url.includes("api.telegram.org"));
     const mail = calls.find((c) => c.url.includes("api.resend.com"));
     expect(String(tg?.body.text)).toContain("⚠️ Оплату нашла ночная проверка: R-100050");
-    expect(String(tg?.body.text)).toContain("Открыть в панели: https://test.rempireshop.com/shop2/admin/?order=R-100050");
+    expect(String(tg?.body.text)).toContain("Открыть в панели: https://test.rempireshop.com/admin?order=R-100050");
     expect(mail?.body.subject).toBe("REMPIRE — Оплату нашла ночная проверка: R-100050");
     expect((await alertRows())[0].delivered).toBe(true);
   });

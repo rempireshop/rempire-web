@@ -45,7 +45,7 @@ afterEach(() => setMailTextsOverride(null));
 describe("the paid receipt of a self-pickup order", () => {
   it("the receipt URL says so — on a paid receipt only", () => {
     expect(receiptUrl("https://x", { number: "R-100083", state: "paid", total: 9, pickup: true }))
-      .toBe("https://x/shop2/done/?n=R-100083&s=paid&t=9.00&d=pickup");
+      .toBe("https://x/checkout/done?n=R-100083&s=paid&t=9.00&d=pickup");
     expect(receiptUrl("https://x", { number: "R-100083", state: "paid", total: 9 })).not.toContain("d=");
     expect(receiptUrl("https://x", { number: "R-100083", state: "failed", pickup: true, orderId: "o" })).not.toContain("d=");
     expect(isPickupOrder({ shipping: { method: "pickup" } })).toBe(true);

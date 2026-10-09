@@ -13,7 +13,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { headBlock, LANGS, OG_FALLBACK, OG_H, OG_W, ogShopCard, ORG_IMAGE, ROBOTS_OPEN } from "@/lib/seo-head.mjs";
+import { headBlock, LANGS, OG_FALLBACK, OG_H, OG_W, ogShopCard, ORG_IMAGE, ORG_LOGO, ROBOTS_OPEN } from "@/lib/seo-head.mjs";
 
 const file = (rel: string) => fileURLToPath(new URL("../public" + rel, import.meta.url));
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
@@ -43,11 +43,20 @@ describe("the cards on disk", () => {
     expect(tool).toContain('head: ["Волосы. Борода.", "Стиль."]');
   });
 
-  it("the Organization's picture is the logo, a file that exists — not a link-preview card", () => {
-    expect(ORG_IMAGE).toMatch(/^\/brand\/.+\.svg$/);
-    expect(existsSync(file(ORG_IMAGE))).toBe(true);
+  it("the Organization's logo and picture are the tower as a raster image — not an SVG, not a link-preview card", () => {
+    for (const rel of [ORG_LOGO, ORG_IMAGE]) {
+      expect(rel).toMatch(/\.png$/);
+      expect(existsSync(file(rel)), rel).toBe(true);
+      const [w, h] = pngSize(readFileSync(file(rel)));
+      expect(Math.min(w, h), rel).toBeGreaterThanOrEqual(112);
+    }
+    expect(ORG_IMAGE).not.toMatch(/og-shop/);
+    expect(PRERENDER).toContain("logo: abs(ORG_LOGO),");
     expect(PRERENDER).toContain("image: abs(ORG_IMAGE),");
+    expect(PRERENDER).toContain('logo: { "@type": "ImageObject", url: abs(ORG_LOGO) }');
     expect(PRERENDER).not.toContain("image: abs(OG_FALLBACK)");
+    expect(PRERENDER).not.toMatch(/logo: abs\("[^"]+\.svg"\)/);
+    expect(read("../src/lib/blog-page.ts")).toContain("url: base + ORG_LOGO }");
   });
 });
 

@@ -426,7 +426,8 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect(html).toContain("Письма о заказах будут приходить как прежде.");
     expect(html).toContain("s***@example.com");
     expect(html).not.toContain(EMAIL);
-    expect(html).toContain(`href="${BASE}/shop2/"`);
+    // the shop's home in the letter's language — Russian is /ru since the URL move of 08.10.2026
+    expect(html).toContain(`href="${BASE}/ru"`);
 
     const row = await customerRow(EMAIL);
     expect(row?.marketing).toBe(false);
@@ -449,7 +450,7 @@ describe("GET|POST /api/mail/unsubscribe/", () => {
     expect(et.status).toBe(200);
     const html = await et.text();
     expect(html).toContain("Olete loobunud");
-    expect(html).toContain(`href="${BASE}/shop2/et/"`);
+    expect(html).toContain(`href="${BASE}/et"`);
     expect(html).toContain('lang="et"');
     // no customers row was invented for the guest — only the stop-list row
     expect(await getCustomer(OTHER)).toBeNull();
@@ -621,7 +622,7 @@ describe("the stop list and the three letters", () => {
     const url = unsubscribeUrl(OTHER, "RU", "marketing");
     expect(sent[0].text).toContain(url);
     expect(sent[0].html).toContain(`href="${url.replace(/&/g, "&amp;")}"`);
-    expect(sent[0].text).not.toContain("/shop2/account/");
+    expect(sent[0].text).not.toContain("/ru/account");
     expect(sent[0].headers).toEqual(unsubscribeHeaders(OTHER, "RU", "marketing"));
     expect(sent[0].headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
   });

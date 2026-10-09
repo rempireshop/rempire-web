@@ -338,7 +338,7 @@ describe("one administrator, several phones", () => {
     await subscribe(ANDROID, "Samsung");
     await subscribe(MAC, "Mac на стойке");
 
-    const res = await sendPush({ title: "💶 Оплачен заказ R-100042", body: "81,50 € · Мария Тамм", url: "/shop2/admin/?order=R-100042", tag: "order:1" });
+    const res = await sendPush({ title: "💶 Оплачен заказ R-100042", body: "81,50 € · Мария Тамм", url: "/admin?order=R-100042", tag: "order:1" });
 
     expect(res).toMatchObject({ ok: true, devices: 3, sent: 3, failed: 0, gone: 0 });
     expect(wp.sent.map((s) => s.endpoint).sort()).toEqual([ANDROID, IPHONE, MAC].sort());
@@ -348,7 +348,7 @@ describe("one administrator, several phones", () => {
     expect(payload).toEqual({
       title: "💶 Оплачен заказ R-100042",
       body: "81,50 € · Мария Тамм",
-      url: "/shop2/admin/?order=R-100042",
+      url: "/admin?order=R-100042",
       tag: "order:1",
     });
     /* The two options the worker cannot set for itself. A day, not the
@@ -434,7 +434,7 @@ describe("a paid order", () => {
     expect(payload.body).toContain("+1");
     /* A path, never an absolute URL — the worker resolves it against its own
        origin, so the stand's notification opens the stand's panel. */
-    expect(payload.url).toBe(`/shop2/admin/?order=${encodeURIComponent("R-100042")}`);
+    expect(payload.url).toBe(`/admin?order=${encodeURIComponent("R-100042")}`);
     expect(payload.tag).toBe(`order:${ORDER.id}`);
 
     /* No Telegram token and no RESEND_TO here, so `notified` can only be true

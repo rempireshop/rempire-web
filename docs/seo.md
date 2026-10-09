@@ -420,9 +420,9 @@ used exactly as written, with nothing appended.
 
 | page | JSON-LD |
 |---|---|
-| home | `Organization` (also typed `Store`, with `alternateName`, `legalName`, `email`, `telephone`, `vatID`, `taxID`, `areaServed`, `sameAs` and an `@id`) + `WebSite` (`alternateName`, `publisher` → that `@id`) |
+| home | `Organization` (also typed `Store`, with `alternateName`, `legalName`, `email`, `telephone`, `vatID`, `taxID`, `geo`, `hasMap`, `areaServed`, `sameAs`, `hasMerchantReturnPolicy`, `hasShippingService` and an `@id` — see «Structured data and IndexNow») + `WebSite` (`alternateName`, `publisher` → that `@id`) |
 | category, brand | `BreadcrumbList` + `ItemList` |
-| product | `Product` with `offers` (price, `EUR`, availability) + `BreadcrumbList` |
+| product | `Product` with `offers` — one `Offer` per size, each with `shippingDetails` and `hasMerchantReturnPolicy` (see «Structured data and IndexNow») + `BreadcrumbList` |
 | set | `Product` with `offers` and `isRelatedTo` (the items) + `Organization` + `BreadcrumbList` |
 | sets landing | `Organization` + `BreadcrumbList` + `ItemList` |
 | policy page, gift card | `Organization` + `BreadcrumbList` |
@@ -463,8 +463,11 @@ pages the tower with no name (SEO audit §1A b, T15). The three cards are drawn
 by `node tools/og-shop.mjs` (Playwright, the shop's own fonts; Dim's design
 and line «JUUKSED. HABE. STIIL.») and committed; `/og-shop.png` is a copy of
 the English one, kept for every scraper that cached the old name. The
-`Organization` block's `image` is the logo lockup
-(`/brand/rempire-lockup-dark.svg`, `ORG_IMAGE`), not a link-preview card.
+`Organization` block's `logo` and `image` (and an article's publisher logo)
+are the tower as a raster PNG — `/shop2/icons/icon-512.png`, `ORG_LOGO` /
+`ORG_IMAGE` — not the SVG Google may not take as a logo and not a link-preview
+card. The «REMPIRE TOWER» lockup and badge in `public/brand/` carry the
+studio's slogan rather than the shop's name and are not used for it.
 
 ### index.html is the shell *and* the English home page
 
@@ -902,6 +905,94 @@ over. The old hand-run `tools/build-merchant-feed.mjs` and its static
 `public/feed/google-shopping.xml` (staging links, file stock only) were
 removed on 23.09.2026; `docs/merchant-feed.md` has the owner's steps.
 
+## Structured data and IndexNow
+
+Added 09.10.2026 (SEO audit of 08.10.2026, T8/T9). **The rule: the page says
+what the Merchant Center feed says.** Nothing below is a number typed for the
+structured data — every one comes from `src/lib/merchant-feed.ts`, the
+functions the feed's items are built from, and `src/lib/seo-head.mjs` only
+reshapes them into schema.org. `tests/structured-data.test.ts` parses the
+JSON-LD back and holds it to Google's required fields and to the feed.
+
+**Product** (`productSpec()` → `productOffersLD()` in `seo-head.mjs`):
+
+- **One `Offer` per size** — the feed's items (`feedOffers()`): the same price,
+  availability (a size counted to zero is `OutOfStock` on its own offer), the
+  feed's item id as `sku`, and the feed's `?size=<slug>` link as `url`. A
+  product sold in one size keeps the single `Offer` at the page's own address.
+  The `Product`'s own `url` is the canonical (no query).
+- **`shippingDetails`** per offer: `shippingFor(price, rules)` — the call every
+  `g:shipping` entry is built from, over the checkout's own rules, so a free
+  threshold applies exactly as it does to a basket holding that item. Per
+  country the cheapest delivery the feed lists; countries with the same price
+  and days share one entry. `handlingTime` 0–1 business days (`HANDLING_DAYS`),
+  `transitTime` per zone (`TRANSIT_DAYS`: EE 1–3, LV/LT/FI 2–5, rest of the EU
+  3–8). Only the countries the checkout delivers to (`sellCountries()`).
+- **`hasMerchantReturnPolicy`** per offer (`returnPolicyLD()`): what
+  `public/shop/legal.{ru,et,en}.js` «returns» states, and nothing else — a
+  30-day finite window from receipt, by mail, back to Estonia (Mardi 1), the
+  customer's label («The shop does not issue a return label»), the item in the
+  condition it was received in, the money back to the original payment method;
+  `applicableCountry` = the delivery countries; `merchantReturnLink` = the
+  refund policy in the page's language. **No `returnFees`**: the text does not
+  say who pays for the parcel back (owner TODO). The text excludes *opened*
+  cosmetics only, which has no field and needs none.
+- **`gtin8/12/13/14`** only for a barcode Renat bound to the size in «Склад»
+  (`stock_levels.ean`) that passes `validGtin()` — on the offer of its size, or
+  on the `Product` when it is sold in one size.
+
+Who writes it: the prerender for the catalogue (it runs the TypeScript feed
+module through Node's own type stripping — `tools/lib/ts-resolve.mjs` resolves
+the `@/…` imports — and, if that cannot load, writes the single offer it
+always did and says so); `src/lib/product-page.ts` for the owner's `c-…`
+products at request time; and `setHead()` in `app.js`, which rebuilds the
+offers per size from the live feed and keeps from the block the page was
+**served** with what it cannot work out itself (`ldKeepServed()`): the item id
+and barcode by address, the delivery by price (a price changed since the build
+gets none rather than the old one's), the returns policy. When the live feed
+has not answered — a crawler that may not fetch `/api/` — the served offers
+stand as they are.
+
+**Organization** (`ORG_LD` in the prerender): `geo` 59.430905, 24.759414 (the
+pin of Mardi 1), `hasMap` (a Maps search for «REMPIRE Mardi 1 Tallinn» — the
+place id `?cid=17186155096233197657` opens an empty place with no name, so it
+is not used), `sameAs` + `https://rempire.ee`, `areaServed` = every delivery
+country (`sellCountries()` over the stored rules), the address as the site
+prints it (`Mardi 1`, `10145`, `Tallinn`), the shop-wide
+`hasMerchantReturnPolicy` and `hasShippingService` (`shippingServiceLD()` over
+`shippingTerms()`: per country the cheapest delivery below the free threshold
+and 0 from it). `openingHoursSpecification` only when «Настройки → Контент»
+has hours in `HH:MM–HH:MM` form — empty today, so none (owner TODO).
+
+**BreadcrumbList** on product (home › section › product), section, brand
+(home › «Бренды» on `/collections/brands` › brand) and article (home › blog ›
+article) pages, on the new addresses, the same items the static crumb prints.
+
+### IndexNow
+
+Bing, Yandex, Seznam, Naver and the others take one POST to
+`https://api.indexnow.org/indexnow` naming the pages that changed. The key is
+public by design: `164a851b1f1b4b40060d4102b1aff9e8`, served as the whole
+content of `https://rempireshop.com/164a851b1f1b4b40060d4102b1aff9e8.txt`
+(`public/164a851b1f1b4b40060d4102b1aff9e8.txt`; the constant is in
+`src/lib/indexnow.mjs`).
+
+- **Day to day**, the panel does it: saving a product's override (price,
+  stock, texts, photos, «Показывать в магазине» — not the salon price),
+  creating, editing or hiding an own product, publishing, unpublishing,
+  editing a live article or deleting one, and saving, switching or deleting a
+  set call `submitIndexNow()` (`src/lib/indexnow-ping.ts`) with that page in
+  three languages (plus the blog listing / sets landing). Fire-and-forget
+  through `after()`: it never delays or fails the save. Only the production
+  shop sends anything (`NODE_ENV=production`, `PUBLIC_BASE_URL` on
+  rempireshop.com, `VERCEL_ENV` production when set); the same address is not
+  sent twice within ten minutes (the panel autosaves).
+- **Once after a deploy that moved pages** (as on 08.10.2026):
+  `node tools/indexnow-submit.mjs --dry-run` reads the production sitemap
+  index, lists every page it would send and checks the key file is live;
+  `node tools/indexnow-submit.mjs` sends them (batches of 10 000).
+  `--sitemap <url>` reads another sitemap.
+
 ## Known gaps
 
 - **Product cards the assistant writes into an article have no `href`.**
@@ -932,16 +1023,14 @@ removed on 23.09.2026; `docs/merchant-feed.md` has the owner's steps.
   `descFrom()` cuts the description from that copy without the product's own
   name, so the three pages are indistinguishable to a search engine. Fixing it
   is a content decision — see the note at the end of this section.
-- **Two fields are missing from every `Offer` on purpose**, and both would put
-  an extra line under a search result. `hasMerchantReturnPolicy` («Free 30-day
-  returns») cannot be published while the refund text promises a 30-day window
-  and then excludes "personal care goods (such as beauty products)", which is
-  most of the catalogue — structured data must not contradict the policy page
-  it points at. `shippingDetails` («Free delivery») needs one number per
-  carrier per country and a wrong one is a Merchant Center suspension. Both are
-  questions 5 and 6 of `docs/audit/2026-09-07-seo.md`. `priceValidUntil` is left
-  off too: it is a promise with a date on it, and a past one reads as an expired
-  offer.
+- ~~**Two fields are missing from every `Offer` on purpose.**~~ **Closed
+  09.10.2026** («Structured data and IndexNow» below). The refund text that
+  excluded "personal care goods (such as beauty products)" was rewritten
+  (`public/shop/legal.*.js`): it now excludes only *opened* cosmetics, so
+  `hasMerchantReturnPolicy` no longer contradicts the page it links to; and
+  `shippingDetails` is not a number typed here but the Merchant feed's own
+  `shippingFor()`, per item, per country. `priceValidUntil` is still left off:
+  it is a promise with a date on it, and a past one reads as an expired offer.
 - **The shop is shown almost entirely outside the countries it delivers to.**
   2 667 of 3 002 impressions in the week of 29.08–05.09.2026 were in countries
   the checkout cannot ship to. Where it *can* sell, its CTR is 5.7 %. That is a

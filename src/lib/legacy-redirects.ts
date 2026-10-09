@@ -282,7 +282,14 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
   if (/^(?:\/[a-z-]{2,5})?\/(?:collections|blogs)\/.+\.atom$/i.test(raw)) {
     const page = raw.slice(0, -".atom".length);
     const hit = legacyTarget(page, "");
-    return out(hit ? hit.path.split("?")[0] : page, "feed", "drop");
+    let to = hit ? hit.path.split("?")[0] : page;
+    /* A collection nobody mapped would be answered by the catch-all route —
+       a brand of the owner's own products, else «Все товары». A feed is never
+       a custom brand's, so it goes to «Все товары» directly: one hop. */
+    const route = parseShopPath(to);
+    const brand = route && /^\/b\/([^/]+)\/$/.exec(route.rest);
+    if (brand && !BRAND_SLUGS.has(brand[1])) to = publicPath(route!.lang, "/c/all/");
+    return out(to, "feed", "drop");
   }
 
   const segments = raw.split("/").filter(Boolean);
@@ -357,9 +364,11 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
        (custom_products) — the catch-all route asks the database and answers
        the page, or «Все товары». Only the prefix and the slash are
        normalised here; the handle is left exactly as it came. */
-    const want = publicPath(lang, "/b/" + handle + "/");
-    if (n === 2) return out(want, normal, shopifyQuery);
-    return out(want, "collection-unknown", "drop");
+    if (n === 2) return out(publicPath(lang, "/b/" + handle + "/"), normal, shopifyQuery);
+    /* Deeper than a handle (`/collections/<x>/<tag>`, `/collections/collections/all`)
+       and still nothing known: never an owner's brand page, which has no
+       deeper addresses — «Все товары» directly, one hop. */
+    return out(publicPath(lang, "/c/all/"), "collection-unknown", "drop");
   }
 
   if (kind === "pages" || kind === "policies") {

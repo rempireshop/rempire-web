@@ -44326,6 +44326,7 @@
          can hand back. */
       OV_PUB = way !== "take" && !ADM_OV.at ? r.body : null;
       adoptServer(r.body, way !== "take");
+      OV_LIVE = true;   // setHead(): the offers can now be priced from the live feed
       // (asked again only once it has answered: at boot the sign-in check has usually asked already)
       if (way === "admin") loadAdminOverrides(ADM_OV.at > 0);
       demoSave();
@@ -48025,7 +48026,11 @@
      it. Read at boot, before setHead() has ever run. */
   var SERVED_ROBOTS = (function () {
     var m = document.querySelector('meta[name="robots"]');
-    return (m && m.getAttribute("content")) || "";
+    /* A screen behind a basket or a login is served `noindex` with the
+       deploy's own value kept beside it (data-served — src/lib/notfound-page.ts
+       stateShell()), so a shopper who walks on from it to a page carries the
+       page's real value, not the screen's. */
+    return (m && (m.getAttribute("data-served") || m.getAttribute("content"))) || "";
   })();
   /* ---------- the head copy: src/lib/seo-copy.mjs, copied ------------------
      The titles, meta descriptions and link-preview texts of the home page,
@@ -48401,6 +48406,95 @@
   /** What the copy needs to know about the shop right now: the delivery
       rules the checkout bills with (the free-delivery threshold). */
   function seoCtx() { return { rules: SHIP_RULES }; }
+  /* The Product block the page was SERVED with — the build's or the
+     request-time page's (productSpec() in src/lib/seo-head.mjs) — read once,
+     before setHead() first rewrites #ldjson. Its offers carry what this
+     script cannot work out for itself: each size's delivery prices
+     (shippingFor() in src/lib/merchant-feed.ts, over the checkout's rules),
+     the returns policy, the Merchant feed's item id and a scanned barcode.
+     setHead() keeps them on the offer they belong to, on the page they were
+     served for; see ldKeepServed(). */
+  var SERVED_LD = (function () {
+    try {
+      var el = document.getElementById("ldjson");
+      var ld = el ? JSON.parse(el.textContent || "null") : null;
+      if (!ld || ld["@type"] !== "Product" || !ld.offers) return null;
+      return { url: ld.url, product: ld, offers: Array.isArray(ld.offers) ? ld.offers : [ld.offers] };
+    } catch (e) { return null; }
+  })();
+  /* Has /api/overrides/ answered with the live feed? Until it has — or when
+     it cannot (a crawler that may not fetch /api/) — the prices and stock
+     words in the catalogue file are older than the served block's, which
+     the server built from the database. */
+  var OV_LIVE = false;
+  /* One Offer per size, the way the Merchant Center feed lists them
+     (feedOffers() in src/lib/merchant-feed.ts): each size at its own price
+     and stock, at the `?size=` address the feed links it to — «<slug>»,
+     «<slug>-<n>» for a twin, «v<n>» for a size with no label (sizeSlug()
+     above). A product with one size, or none, keeps the single offer at its
+     own address. */
+  function ldOffer(url, price, inStock) {
+    return {
+      "@type": "Offer", priceCurrency: "EUR",
+      price: String(price),
+      availability: "https://schema.org/" + (inStock ? "InStock" : "OutOfStock"),
+      itemCondition: "https://schema.org/NewCondition",
+      url: url,
+      seller: { "@type": "Organization", name: "REMPIRE" }
+    };
+  }
+  function ldOffers(p, pUrl, gone) {
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [], rungs = [], i;
+    for (i = 0; i < sizes.length; i++) {
+      var pr = Number(sizePrice(p, i));
+      if (isFinite(pr) && pr > 0) rungs.push({ i: i, price: pr });
+    }
+    if (rungs.length < 2) return ldOffer(pUrl, p.price, !gone);
+    var taken = {}, out = [];
+    for (i = 0; i < rungs.length; i++) {
+      var r = rungs[i], slug = sizeSlug(sizes[r.i]) || "v" + (r.i + 1);
+      if (taken[slug]) slug += "-" + (r.i + 1);
+      taken[slug] = 1;
+      out.push(ldOffer(pUrl + "?size=" + encodeURIComponent(slug), r.price, !gone && !sizeOut(p, r.i)));
+    }
+    return out;
+  }
+  /* What the served block knew, kept — on the page it was served for and
+     nowhere else. Without the live feed, its offers are the truer ones and
+     stand as they are. With it, this script's prices and stock words stand,
+     and the served block lends what does not depend on them, matched with
+     care: the item id and a barcode by the offer's address (a size), the
+     delivery by price (it depends on nothing else — a price the owner has
+     changed since gets none rather than the old price's), the returns policy
+     to every offer. */
+  function ldKeepServed(ld, pUrl) {
+    var sv = SERVED_LD && SERVED_LD.url === pUrl ? SERVED_LD : null;
+    if (!sv) return;
+    var GTIN = /^gtin(8|12|13|14)?$/, k, i, j;
+    if (!OV_LIVE) {
+      ld.offers = sv.product.offers;
+      for (k in sv.product) if (GTIN.test(k)) ld[k] = sv.product[k];
+      return;
+    }
+    var list = Array.isArray(ld.offers) ? ld.offers : [ld.offers], policy = null;
+    for (j = 0; j < sv.offers.length; j++) if (sv.offers[j].hasMerchantReturnPolicy) { policy = sv.offers[j].hasMerchantReturnPolicy; break; }
+    for (i = 0; i < list.length; i++) {
+      var o = list[i], same = null, ship = null;
+      for (j = 0; j < sv.offers.length; j++) {
+        var s = sv.offers[j];
+        if (s.url === o.url) same = s;
+        if (!ship && s.shippingDetails && Number(s.price) === Number(o.price)) ship = s.shippingDetails;
+      }
+      if (same && same.sku) o.sku = same.sku;
+      if (same) for (k in same) if (GTIN.test(k)) o[k] = same[k];
+      if (ship) o.shippingDetails = ship;
+      if (policy) o.hasMerchantReturnPolicy = policy;
+    }
+    if (!Array.isArray(ld.offers) && sv.offers.length === 1) for (k in sv.product) if (GTIN.test(k)) ld[k] = sv.product[k];
+  }
+  /* The screens that need state to mean anything: robots-disallowed, never in
+     a sitemap, and `noindex` in the rendered DOM too (since 08.10.2026). */
+  var NOINDEX_SCREENS = { notfound: 1, search: 1, account: 1, checkout: 1, done: 1, admin: 1, scan: 1 };
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -48456,19 +48550,14 @@
         category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
         sku: p.id,
         url: pUrl,
-        offers: {
-          "@type": "Offer", priceCurrency: "EUR",
-          price: String(p.price),
-          /* An offer that says InStock for something the page refuses to sell
-             is worse than no markup at all: Google drops the product from the
-             merchant surfaces and the shopper bounces. soldOut() is the same
-             question screenProduct() asks before it swaps the buy row out. */
-          availability: "https://schema.org/" + (pGoneSeo ? "OutOfStock" : "InStock"),
-          itemCondition: "https://schema.org/NewCondition",
-          url: pUrl,
-          seller: { "@type": "Organization", name: "REMPIRE" }
-        }
+        /* An offer that says InStock for something the page refuses to sell
+           is worse than no markup at all: Google drops the product from the
+           merchant surfaces and the shopper bounces. soldOut() is the same
+           question screenProduct() asks before it swaps the buy row out; a
+           size counted to zero is OutOfStock on its own offer (ldOffers()). */
+        offers: ldOffers(p, pUrl, pGoneSeo)
       };
+      ldKeepServed(ld, pUrl);
       var s = document.getElementById("ldjson");
       if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldjson"; document.head.appendChild(s); }
       s.textContent = JSON.stringify(ld);
@@ -48557,7 +48646,7 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
-    if (SERVED_ROBOTS) setMetaTag("robots", S.screen === "notfound" ? "noindex, nofollow" : SERVED_ROBOTS);
+    if (SERVED_ROBOTS) setMetaTag("robots", NOINDEX_SCREENS[S.screen] ? "noindex, nofollow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
