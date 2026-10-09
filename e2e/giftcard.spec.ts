@@ -283,7 +283,8 @@ test.describe("the gift card as a banner slide", () => {
       await waitForScreen(shop, "home");
       const slide = shop.locator('.hero__slide[data-on="1"]');
       await expect(slide.locator(".hero__art--gift")).toHaveCount(1);
-      await slide.getByRole("button", { name: "Выбрать сумму" }).click();
+      // a link to the page it opens since 09.10.2026 (heroHref in app.js)
+      await slide.getByRole("link", { name: "Выбрать сумму" }).click();
       await waitForScreen(shop, "gift");
       await expect(shop).toHaveURL(/\/ru\/products\/gift-card$/);
       await ctx.close();

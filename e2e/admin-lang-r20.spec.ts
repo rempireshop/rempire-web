@@ -148,11 +148,14 @@ test.describe("a product with no photograph of its own shows the shop's mark, ne
       await expect(media).toBeVisible();
       const style = (await media.getAttribute("style")) ?? "";
       const cls = (await media.getAttribute("class")) ?? "";
+      // a card's photo is an <img> in the frame since 09.10.2026 (photo() in app.js)
+      const src = await media.evaluate((el) => el.querySelector("img")?.getAttribute("src") ?? "");
       const name = await cards.nth(i).locator(".card__name").innerText();
       // either a real photo, or the shop's own mark — never url('undefined')
       expect(style, `«${name}» paints a broken background`).not.toContain("undefined");
+      expect(src, `«${name}» shows a broken picture`).not.toContain("undefined");
       expect(
-        /background-image:url\('.+'\)/.test(style) || cls.includes("ph--mark"),
+        /background-image:url\('.+'\)/.test(style) || !!src || cls.includes("ph--mark"),
         `«${name}» has a name and a price and no picture at all`,
       ).toBe(true);
     }

@@ -19,13 +19,15 @@ for (const lang of LANGS) {
       const thumbs = page.locator(".pdp__thumbs [data-gal]");
       await expect(thumbs).toHaveCount(3); // catalogue2.js ships 3 photos for PRODUCT
 
-      const stage = page.locator(".pdp__stage .pdp__img").first();
-      const before = await stage.getAttribute("style");
+      // the photo is an <img> in the frame since 09.10.2026 (photo() in app.js)
+      const stage = page.locator(".pdp__stage .pdp__img img").first();
+      const before = await stage.getAttribute("src");
+      expect(before).toBeTruthy();
 
       await thumbs.nth(1).click();
       await expect(thumbs.nth(1)).toHaveAttribute("aria-current", "true");
       await expect(async () => {
-        expect(await stage.getAttribute("style")).not.toBe(before);
+        expect(await stage.getAttribute("src")).not.toBe(before);
       }).toPass({ timeout: 5_000 });
     });
 
