@@ -135,7 +135,7 @@
           ET: {
             title: "System 4 (Sim Sensitive): šampoonid ja seerum | REMPIRE",
             meta: "Sim Sensitive'i System 4: šampoonid 1–4 rasusele, kuivale ja tundlikule peanahale, toonik T, mask O ja Bio Botanical seerum. Järeletulek Mardi 1, Tallinn.",
-            intro: "System 4 on Sim Sensitive'i Soome peanahahoolduse sari. Šampooni number näitab peanaha tüüpi: 1 – rasune ja kõõmale kalduv, 2 – kuiv ja kõõmale kalduv, 3 – igapäevaseks hoolduseks, 4 – väga rasune ja tundlik. Lisaks toonik T, mask O ja Bio Botanical seerum. Õige numbri aitame valida meie salongis Mardi 1."
+            intro: "System 4 on Sim Sensitive'i Soome peanahahoolduse sari. Šampooni number näitab peanaha tüüpi: 1 – rasune ja kõõmale kalduv, 2 – kuiv ja kõõmale kalduv, 3 – igapäevaseks hoolduseks, 4 – väga rasune ja tundlik. Lisaks toonik T, mask O ja Bio Botanical seerum. Õige numbri aitame valida meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "System 4 by Sim Sensitive: Scalp Shampoos & Serum | REMPIRE",
@@ -152,7 +152,7 @@
           ET: {
             title: "Kevin.Murphy juuksehooldus ja viimistlus | REMPIRE",
             meta: "Kevin.Murphy Tallinnas: Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning Night.Rider ja Session.Spray viimistlus. Järeletulek Mardi 1.",
-            intro: "Kevin.Murphy on Austraalia salongi juuksehoolduse bränd. Meil on Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning viimistlustooted Night.Rider, Rough.Rider, Session.Spray ja Anti.Gravity. Mis sinu juustele sobib, aitame valida meie salongis Mardi 1."
+            intro: "Kevin.Murphy on Austraalia salongi juuksehoolduse bränd. Meil on Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning viimistlustooted Night.Rider, Rough.Rider, Session.Spray ja Anti.Gravity. Aitame valida, mis sinu juustele sobib — meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "Kevin.Murphy: Shampoos, Masks & Styling | REMPIRE",
@@ -186,7 +186,7 @@
           ET: {
             title: "Captain Fawcett: habemeõli, -palsam ja vuntsivaha | REMPIRE",
             meta: "Briti Captain Fawcett: habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula (John Petrucci), Booze & Baccy ja Barberism. Järeletulek Mardi 1, Tallinn.",
-            intro: "Captain Fawcett on Briti habeme- ja vuntsihoolduse bränd. Meil on habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula, Booze & Baccy ja Barberism – igal sarjal oma lõhn. Lõhna ja hoidvuse aitame valida meie salongis Mardi 1."
+            intro: "Captain Fawcett on Briti habeme- ja vuntsihoolduse bränd. Meil on habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula, Booze & Baccy ja Barberism – igal sarjal oma lõhn. Lõhna ja hoidvuse aitame valida meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "Captain Fawcett: Beard Oil, Balm & Moustache Wax | REMPIRE",
@@ -362,9 +362,9 @@
             intro: "Кондиционер — второй шаг после шампуня: он разглаживает волосы, облегчает расчёсывание и помогает цвету держаться дольше. У большинства наших шампуней есть кондиционер из той же линии — Kevin.Murphy, Paul Mitchell, System 4 и другие."
           },
           ET: {
-            title: "Palsamid: Kevin.Murphy, Paul Mitchell, System 4 | REMPIRE",
-            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin ja CBD Daily: palsamid kuivadele, värvitud, lokkis ja õhukestele juustele. Järeletulek Tallinnas.",
-            name: "Palsamid",
+            title: "Juuksepalsamid: Kevin.Murphy, Paul Mitchell, System 4",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin ja CBD Daily: juuksepalsamid kuivadele, värvitud, lokkis ja õhukestele juustele. Järeletulek Tallinnas.",
+            name: "Juuksepalsamid",
             intro: "Juuksepalsam on šampooni järel teine samm: see silub juukseid, teeb need kergesti kammitavaks ja aitab värvil kauem püsida. Enamikule meie šampoonidest leiab samast sarjast sobiva palsami — Kevin.Murphy, Paul Mitchell, System 4 ja teised."
           },
           EN: {
@@ -383,7 +383,7 @@
           },
           ET: {
             title: "Juuksevaha, pasta ja savi: Gatsby, Davines | REMPIRE",
-            meta: "Gatsby Moving Rubber juuksevahad, Davinesi Pasta&Love pasta ja matt savi ning Paul Mitchell MITCH pasta — fikseerimine ja tekstuur lühikestele soengutele.",
+            meta: "Gatsby Moving Rubber juuksevahad, Davinesi Pasta&Love pasta ja matt savi ning Paul Mitchelli MITCH pasta — fikseerimine ja tekstuur lühikestele soengutele.",
             name: "Juuksevaha, pasta ja savi",
             intro: "Juuksevaha annab läike ja fikseerimise, mida saab päeva jooksul ümber sättida, pasta pehmema ja loomulikuma tulemuse, savi tugeva ja mati fikseerimise koos tekstuuriga. Jaapani Gatsby vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH katavad kõik kolm."
           },
