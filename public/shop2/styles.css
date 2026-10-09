@@ -1731,6 +1731,10 @@ body:has(.drawer) #rempire-feedback { display: none; }
   font-family: inherit; font-size: 13px; color: var(--ink); white-space: nowrap;
   transition: border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
 }
+/* a chip with a page of its own is an <a href> (app.js screenCatalog) — laid
+   out the way the button chips lay themselves out: its one inner <span> sits
+   centred in the 40px, exactly as a button centres its content */
+a.scchip { display: inline-flex; align-items: center; }
 .scchip .num { font-size: 11.5px; color: var(--muted); }
 .scchip:hover { border-color: var(--ink); }
 .scchip[aria-current="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }

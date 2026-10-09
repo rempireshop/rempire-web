@@ -99,6 +99,10 @@ export function overrideRow(r) {
        zero still only reaches the page when app.js boots. Read from
        19.09.2026 — audit F31. */
     stock: r.stock === "in" || r.stock === "low" || r.stock === "out" ? r.stock : null,
+    /* «Подраздел» as he set it — one subtype id, or nothing for «Авто». A
+       subcollection's static page lists what its chip filters, and the chip
+       reads this same column (DEMO.subcat in app.js). Read from 09.10.2026. */
+    subcat: typeof r.subcat === "string" && r.subcat ? r.subcat : null,
   };
 }
 
@@ -137,7 +141,7 @@ export async function fetchStockEans() {
   }
 }
 
-/** `{ id: { price, sizes, hidden, stock } }` for the rows that exist. */
+/** `{ id: { price, sizes, hidden, stock, subcat } }` for the rows that exist. */
 export async function fetchProductOverrides() {
   const url = process.env.DATABASE_URL;
   if (!url) return {};
@@ -153,7 +157,7 @@ export async function fetchProductOverrides() {
   const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
   try {
     await client.connect();
-    const res = await client.query("select product_id, price, sizes, hidden, stock from product_overrides");
+    const res = await client.query("select product_id, price, sizes, hidden, stock, subcat from product_overrides");
     const out = {};
     for (const r of res.rows) out[r.product_id] = overrideRow(r);
     return out;

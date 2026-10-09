@@ -23,7 +23,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import shopifyTable from "@/data/shopify-variants.json";
 import { legacyTarget, slugify } from "@/lib/legacy-redirects";
-import { parseShopPath } from "@/lib/shop-paths.mjs";
+import { isSubcollection, parseShopPath } from "@/lib/shop-paths.mjs";
 
 const ROOT = path.join(__dirname, "..");
 const IDS = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
@@ -49,6 +49,7 @@ function assertServable(target: string, from: string) {
   if ((m = /^\/p\/([^/]+)\/$/.exec(rest))) ok = IDS.has(decodeURIComponent(m[1]));
   else if ((m = /^\/b\/([^/]+)\/$/.exec(rest))) ok = BRANDS.has(m[1]);
   else if ((m = /^\/info\/([^/]+)\/$/.exec(rest))) ok = LEGAL.includes(m[1]);
+  else if ((m = /^\/c\/([^/]+)\/([^/]+)\/$/.exec(rest))) ok = isSubcollection(m[1], m[2]);
   expect(ok, `${from} → ${target} names a page the shop does not have`).toBe(true);
 }
 
@@ -161,8 +162,11 @@ describe("one 301 for everything that is not the page", () => {
   });
 
   it("moves every other collection spelling to its section, in the same language", () => {
-    expect(legacyTarget("/et/collections/habemeolid")?.path).toBe("/et/collections/habemehooldus");
+    /* a published subcollection is a page of its own since 09.10.2026
+       (tests/subcollections.test.ts); every other one goes to its section */
+    expect(legacyTarget("/et/collections/habemeolid")).toBeNull();
     expect(legacyTarget("/collections/korean-cosmetics")?.path).toBe("/collections/face-care");
+    expect(legacyTarget("/et/collections/juuksemaskid")?.path).toBe("/et/collections/juuksehooldus");
     expect(legacyTarget("/collections/vse-tovary")?.path).toBe("/collections/all-products");
     expect(legacyTarget("/ru/collections/all")?.path).toBe("/ru/collections/vse-tovary");
     expect(legacyTarget("/ru/collections/hair-care")?.path).toBe("/ru/collections/uhod-za-volosami");
@@ -201,7 +205,8 @@ describe("one 301 for everything that is not the page", () => {
     expect(legacyTarget("/checkouts/cn/abc")?.path).toBe("/account");
     expect(legacyTarget("/62123456789/orders/abc123")?.path).toBe("/account");
     expect(legacyTarget("/62123456789/checkouts/abc/recover")?.path).toBe("/account");
-    expect(legacyTarget("/discount/WELCOME10", "?redirect=/collections/shampoo")?.path).toBe("/collections/hair-care");
+    expect(legacyTarget("/discount/WELCOME10", "?redirect=/collections/shampoo")?.path).toBe("/collections/shampoo");
+    expect(legacyTarget("/discount/WELCOME10", "?redirect=/collections/hair-mask")?.path).toBe("/collections/hair-care");
     expect(legacyTarget("/discount/WELCOME10", "?redirect=/products/night-rider")?.path).toBe("/products/night-rider");
     expect(legacyTarget("/discount/WELCOME10", "?redirect=https://evil.example/")?.path).toBe("/");
     expect(legacyTarget("/ru/discount/X")?.path).toBe("/ru");
@@ -272,7 +277,9 @@ describe("Merchant Center's Shopify links: ?variant= becomes ?size=, the campaig
       .toBe(`/products/${ANGEL}?size=250ml&utm_source=google`);
     expect(legacyTarget("/products/lumin-skin-something-we-never-had", "?variant=1&country=EE&utm_source=google&gclid=abc")?.path)
       .toBe("/collections/lumin-skin?utm_source=google&gclid=abc");
-    expect(legacyTarget("/en-lt/collections/shampoo", "?page=2&utm_source=google")?.path).toBe("/collections/hair-care?utm_source=google");
+    expect(legacyTarget("/en-lt/collections/hair-mask", "?page=2&utm_source=google")?.path).toBe("/collections/hair-care?utm_source=google");
+    // a published subcollection is a page (since 09.10.2026): its query rides along, as a section's does
+    expect(legacyTarget("/en-lt/collections/shampoo", "?page=2&utm_source=google")?.path).toBe("/collections/shampoo?page=2&utm_source=google");
     expect(legacyTarget("/en-fi/", "?country=FI&currency=EUR")).toEqual({ path: "/", reason: "lang" });
   });
 
@@ -392,7 +399,8 @@ describe("the URLs Search Console has impressions for", () => {
     ["/ru/products/system-4-bio-botanical-serum", "/ru/products/system-4-bio-botanical-serum"],
     ["/collections/system-4", "/collections/system-4"],
     ["/collections/lumin-skin", "/collections/lumin-skin"],
-    ["/et/collections/habemeolid", "/et/collections/habemehooldus"],
+    // its own page again since 09.10.2026 — 66 impressions at 50 (SEO audit §6.2)
+    ["/et/collections/habemeolid", "/et/collections/habemeolid"],
     ["/et", "/et"],
     ["/ru", "/ru"],
     ["/", "/"],

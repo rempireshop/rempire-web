@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-10-08",
+  "asOf": "2026-10-09",
   "phases": [
     {
       "id": "a",
@@ -111,6 +111,16 @@
       "en": {
         "name": "After the switch — the first days and weeks",
         "note": "What cannot be proved anywhere but on the live shop, and what is done once it is running."
+      }
+    },
+    {
+      "id": "search",
+      "phase": "b",
+      "name": "Поиск — после переезда адресов, 09.10.2026",
+      "note": "Что сделано ночью 08→09.10 без изменения вида магазина, и что осталось Диму и Ренату. Подробности — docs/seo.md и Rempire/seo/ (аудит конкурентов).",
+      "en": {
+        "name": "Search — after the address move, 09.10.2026",
+        "note": "What was done on the night of 08→09.10 without changing how the shop looks, and what is left for Dim and Renat. Details: docs/seo.md and Rempire/seo/ (the competitor audit)."
       }
     }
   ],
@@ -1140,17 +1150,17 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "outside": "Merchant Center",
       "needs": [
         "domain-dns",
         "google-feed"
       ],
       "title": "11. Merchant Center: три наших фида рядом с Shopify",
-      "detail": "docs/merchant-feed.md, шаг B: добавить https://rempireshop.com/feed/google-en.xml, google-et.xml и google-ru.xml рядом с шестью источниками Shopify. Источники Shopify и его домен не трогать: номера товаров в наших фидах новые, Google проверяет каждый 1–3 дня.",
+      "detail": "Сделано 09.10.2026 ночью. Добавлены два наших источника рядом с шестью Shopify: «rempireshop.com feed EN (new shop)» — google-en.xml, английский, 24 страны доставки (Словении в списке Merchant Center нет), метка REMPIRE-EN; и русский — google-ru.xml для Эстонии, Латвии и Литвы, метка REMPIRE-RU. Эстонского языка у фидов Merchant Center нет совсем, поэтому эстонского источника нет — эстонские покупатели видят английские карточки, как и раньше у Shopify. Первая загрузка: 323 товара, ошибок файла нет; товары проходят обычную проверку Google (1–3 дня). Добавлена политика возврата на уровне аккаунта: 30 дней, только новые товары, почтой, ярлык — за покупателем, без платы за возврат на склад (проверка Google — до 10 дней). Источники Shopify не тронуты.",
       "en": {
         "title": "11. Merchant Center: our three feeds beside Shopify's",
-        "detail": "docs/merchant-feed.md, step B: add https://rempireshop.com/feed/google-en.xml, google-et.xml and google-ru.xml beside the six Shopify sources. Leave Shopify's sources and its domain alone: our feed ids are new, and Google reviews every item in 1–3 days."
+        "detail": "Done on the night of 09.10.2026. Two sources of ours added beside Shopify's six: «rempireshop.com feed EN (new shop)» — google-en.xml, English, 24 delivery countries (Merchant Center does not list Slovenia), label REMPIRE-EN; and a Russian one — google-ru.xml for Estonia, Latvia and Lithuania, label REMPIRE-RU. Merchant Center offers no Estonian feed language at all, so there is no Estonian source — Estonian shoppers see the English listings, as they did with Shopify. First fetch: 323 products, no file errors; the items are in Google's normal review (1–3 days). An account-level return policy is added: 30 days, new items only, by mail, the label is the customer's, no restocking fee (Google reviews it within 10 days). Shopify's sources are untouched."
       }
     },
     {
@@ -1165,10 +1175,10 @@
         "domain-dns"
       ],
       "title": "12. Search Console: карта сайта и запрос индексации",
-      "detail": "Свойство sc-domain:rempireshop.com (подтверждено TXT-записью, она остаётся): отправить https://rempireshop.com/sitemap.xml и запросить индексацию главной и двух-трёх разделов.",
+      "detail": "09.10.2026: карта сайта https://rempireshop.com/sitemap.xml отправлена заново после переезда адресов (в ней 849 адресов, ни одного /shop2). Запрос индексации главной и разделов — после выхода новых заголовков (лимит Google около 10 в день). Bing: карта сайта отправлена Димом, все 849 адресов переданы через IndexNow; дальше магазин сам сообщает Bing о каждом сохранении в админке.",
       "en": {
         "title": "12. Search Console: the sitemap and an indexing request",
-        "detail": "The property sc-domain:rempireshop.com (verified by the TXT record, which stays): submit https://rempireshop.com/sitemap.xml and request indexing for the home page and two or three sections."
+        "detail": "09.10.2026: the sitemap https://rempireshop.com/sitemap.xml resubmitted after the address move (849 addresses, none under /shop2). The indexing request for the home page and sections waits for the new titles to go live (Google allows about 10 a day). Bing: the sitemap was submitted by Dim, and all 849 addresses were sent through IndexNow; from now on the shop tells Bing about every save in the admin by itself."
       }
     },
     {
@@ -1317,6 +1327,174 @@
       "en": {
         "title": "Hand the services' billing over to Renat — in the first month",
         "detail": "docs/renat-services.md. Railway: the company card instead of Dim's — the most important one: an unpaid Railway bill stops the database and the shop with it (Dim's card stays until the switch). OpenAI: move to the shop's account (rempireshopinfo@), the company card, a monthly limit of about $10, the new key into Vercel OPENAI_API_KEY and Redeploy. Zone.ee: the domain's renewal date, and the registrant — Rempire Store OÜ. Montonio: invoices to the company, parcel-delay e-mails to a mailbox Renat reads. Shopify: export the orders and customers, then cancel the plan. The Telegram bot @rempireshop_bot: running, orders reach the group. Transfer ownership through BotFather — Telegram allows it only a week after Dim switched on two-step verification. The services list (docs/renat-services.md) has not been sent to Renat yet."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-urls",
+      "who": [
+        "claude"
+      ],
+      "status": "done",
+      "title": "Адреса — точно как были у Shopify (09.10, 02:25)",
+      "detail": "rempireshop.com/ — английский, /ru/…, /et/…, /products/…, /collections/…, /pages/contact, /policies/…, /blogs/news/…, без косой черты в конце. Все старые адреса Shopify (1 639 из карты сайта) и все адреса из отчётов Search Console проверены на живом сайте: каждый открывается сам или одним переходом; старые /shop2/… — тоже одним переходом. Вход в панель — rempireshop.com/admin, сканер — /admin/scan.",
+      "en": {
+        "title": "Addresses — exactly as Shopify's were (09.10, 02:25)",
+        "detail": "rempireshop.com/ is English, then /ru/…, /et/…, /products/…, /collections/…, /pages/contact, /policies/…, /blogs/news/…, with no trailing slash. Every old Shopify address (1,639 from its sitemap) and every address in Search Console's reports was checked on the live site: each opens directly or after one redirect; the old /shop2/… ones too. The panel is at rempireshop.com/admin, the scanner at /admin/scan."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-structured",
+      "who": [
+        "claude"
+      ],
+      "status": "done",
+      "title": "Данные для Google на страницах товаров (09.10, 02:56)",
+      "detail": "У каждого размера своя цена в разметке, с доставкой по странам и сроками (как в фиде Merchant Center) и политикой возврата 30 дней. Магазин в разметке — с адресом Mardi 1, координатами, ссылками на Instagram, Facebook, TikTok, YouTube и rempire.ee. Bing получает адреса через IndexNow.",
+      "en": {
+        "title": "Data for Google on product pages (09.10, 02:56)",
+        "detail": "Each size carries its own price in the markup, with delivery per country and delivery times (as in the Merchant Center feed) and the 30-day return policy. The shop itself is described with the Mardi 1 address, coordinates, and links to Instagram, Facebook, TikTok, YouTube and rempire.ee. Bing receives addresses through IndexNow."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-texts",
+      "who": [
+        "claude"
+      ],
+      "status": "done",
+      "title": "Заголовки, описания, карточки для ссылок, тексты брендов",
+      "detail": "Утверждённые заголовки и описания из аудита (главная: «REMPIRE — уход за волосами, бородой и кожей в Таллинне» и т. д.), новая карточка для ссылок «Волосы. Борода. Стиль.» на трёх языках, вводные тексты восьми брендов (без истории марок, по решению Дима), слова разделов, которые ищут («масло для бороды», «тонеры»…), исправленные названия товаров, убраны медицинские обещания, исправлены цены курьера на странице доставки. /llms.txt для ИИ-поиска; роботы ChatGPT, Perplexity, Claude, Gemini допущены.",
+      "en": {
+        "title": "Titles, descriptions, link cards, brand texts",
+        "detail": "The approved titles and descriptions from the audit (home: «REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon», etc.), the new link card «Hair. Beard. Style.» in three languages, intro texts for eight brands (no brand history, as Dim decided), section words people search for («beard oil», «toners»…), corrected product names, medical claims removed, the courier prices on the delivery page fixed. /llms.txt for AI search; ChatGPT, Perplexity, Claude and Gemini crawlers allowed."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-subcollections",
+      "who": [
+        "claude"
+      ],
+      "status": "done",
+      "title": "Свои адреса у подразделов — по старым адресам Shopify",
+      "detail": "Шесть существующих кнопок получили свои страницы с коротким текстом, на тех же адресах, что были у Shopify: «Масла» и «Бальзамы» в уходе за бородой, «После бритья», «Шампуни», «Кондиционеры», «Пасты и воски» (например rempireshop.com/ru/collections/maslo-dlya-borody). Ряд кнопок выглядит как раньше; при нажатии меняются адрес, заголовок вкладки, строка под заголовком и появляется третья «крошка». 21 товар, который раньше не попадал ни под одну кнопку, теперь стоит под подходящей — поэтому у некоторых кнопок числа выросли.",
+      "en": {
+        "title": "Subcollections get their own addresses — Shopify's old ones",
+        "detail": "Six existing buttons got pages of their own with a short text, at the addresses Shopify had: «Oils» and «Balms» in beard care, «Aftershave», «Shampoos», «Conditioners», «Pastes and waxes» (e.g. rempireshop.com/collections/beard-oil). The button row looks as before; a tap changes the address, the tab title and the line under the heading, and adds a third crumb. 21 products that sat under no button now sit under the one that fits, so some button counts went up."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-links-speed",
+      "who": [
+        "claude"
+      ],
+      "status": "todo",
+      "title": "Настоящие ссылки и картинки, скорость — без изменения вида",
+      "detail": "Карточки, меню, бренды и крошки — обычные ссылки (Google проходит по ним, Ctrl-клик открывает новую вкладку), фото товаров — обычные картинки с подписью. Быстрее первая загрузка: кэш файлов, панель администратора не грузится покупателям.",
+      "en": {
+        "title": "Real links and images, speed — no change in look",
+        "detail": "Cards, the menu, brands and crumbs are ordinary links (Google follows them, Ctrl-click opens a new tab); product photos are ordinary images with a caption. A faster first load: file caching, and the admin panel is no longer loaded for shoppers."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-blog-drafts",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "todo",
+      "title": "Три статьи в блоге — черновики, прочитать и опубликовать",
+      "detail": "В админке → «Блог» лежат черновики: гид по шампуням System 4, гид по маслу для бороды, AHA/BHA-тонеры. Нужны обложки; опубликовать — кнопкой в админке. Раздел про Kevin.Murphy для статьи «паста, воск или глина» лежит файлом (Rempire/seo/blog-drafts) — правка опубликованной статьи сразу видна покупателям.",
+      "en": {
+        "title": "Three blog articles — drafts to read and publish",
+        "detail": "The admin → «Блог» holds three drafts: a System 4 shampoo guide, a beard-oil guide, AHA/BHA toners. They need covers; publish with the button in the admin. The Kevin.Murphy section for the «paste, wax or clay» article is a file (Rempire/seo/blog-drafts) — editing a published article goes live at once."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-et-review",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Прочитать новые эстонские тексты",
+      "detail": "Вводные строки разделов и подразделов, слова типов товаров (kuumakaitsevaht, lokilosjoon, spreivaha…) и тексты брендов на эстонском писал Клод — их стоит прочитать носителю.",
+      "en": {
+        "title": "Read the new Estonian texts",
+        "detail": "The section and subcollection intro lines, the product-type words (kuumakaitsevaht, lokilosjoon, spreivaha…) and the brand texts in Estonian were written by Claude — a native speaker should read them."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-chips-proposal",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Решить: две новые кнопки подразделов",
+      "detail": "Предложение, не сделано: «Кожа головы» в уходе за волосами (16 товаров, адрес Shopify scalp-treatment) и «Корейская косметика» в уходе за лицом (15 товаров, korean-cosmetics). Обе — с поисковым спросом; меняют вид ряда кнопок, поэтому ждут решения Дима.",
+      "en": {
+        "title": "Decide: two new subcollection buttons",
+        "detail": "A proposal, not done: «Scalp care» in hair care (16 products, Shopify's scalp-treatment address) and «Korean cosmetics» in face care (15 products, korean-cosmetics). Both have search demand; they change the button row, so they wait for Dim."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-renat-gbp",
+      "who": [
+        "renat"
+      ],
+      "status": "todo",
+      "title": "Профиль Google Maps: доступ для магазина",
+      "detail": "Ренат добавляет rempireshopinfo@gmail.com менеджером профиля «REMPIRE» в Google Maps — тогда можно добавить категорию магазина, товары и ссылку на rempireshop.com, без второго профиля.",
+      "en": {
+        "title": "Google Maps profile: access for the shop",
+        "detail": "Renat adds rempireshopinfo@gmail.com as a manager of the «REMPIRE» profile on Google Maps — then the shop category, products and a link to rempireshop.com can be added, without a second profile."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-owner-facts",
+      "who": [
+        "renat",
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Три факта для разметки: штрихкоды, часы работы, кто платит за возврат",
+      "detail": "Штрихкоды — отсканировать в «Склад» (тогда Google сопоставит товары с каталогом производителя). Часы работы — в «Настройки → Контент» в виде ЧЧ:ММ–ЧЧ:ММ. Кто оплачивает пересылку при возврате — сейчас в тексте не сказано; ответ добавится в разметку и в Merchant Center.",
+      "en": {
+        "title": "Three facts for the markup: barcodes, opening hours, who pays for returns",
+        "detail": "Barcodes — scan them in «Склад» (Google then matches products to the maker's catalogue). Opening hours — in «Настройки → Контент» as HH:MM–HH:MM. Who pays the return postage — the text does not say yet; the answer goes into the markup and Merchant Center."
+      }
+    },
+    {
+      "area": "search",
+      "blocking": false,
+      "id": "seo-ai-shopping",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "title": "ИИ-покупки: ChatGPT и Microsoft",
+      "detail": "Заявка в ChatGPT (chatgpt.com/merchants) отправлена Димом 09.10. Когда OpenAI одобрит (письмо), Клод делает их файл товаров и ежедневную выгрузку — показ товаров в ChatGPT, оплата остаётся у нас. Microsoft Merchant Center (Bing/Copilot) — нужен аккаунт Microsoft Advertising Дима и копии фото в JPEG. Perplexity требует доставку в США — пропускаем.",
+      "en": {
+        "title": "AI shopping: ChatGPT and Microsoft",
+        "detail": "Dim sent the ChatGPT application (chatgpt.com/merchants) on 09.10. When OpenAI approves (an e-mail), Claude builds their product file and a daily upload — products shown in ChatGPT, payment stays with us. Microsoft Merchant Center (Bing/Copilot) needs Dim's Microsoft Advertising account and JPEG copies of the photos. Perplexity requires US delivery — skipped."
       }
     }
   ]

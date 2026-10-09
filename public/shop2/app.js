@@ -10856,6 +10856,16 @@
     merch: { EN: "merch", ET: "merch", RU: "merch" },
     all: { EN: "all-products", ET: "koik-tooted", RU: "vse-tovary" }
   };
+  /* The published subcollections (SUB_HANDLES in src/lib/shop-paths.mjs):
+     route "/c/beard/oi/" ↔ /et/collections/habemeolid. */
+  var SHOP_SUB_HANDLES = {
+    "beard/oi": { EN: "beard-oil", ET: "habemeolid", RU: "maslo-dlya-borody" },
+    "beard/ba": { EN: "beard-balm", ET: "habemepalsamid", RU: "balzam-dlya-borody" },
+    "beard/af": { EN: "aftershave", ET: "raseerimisjargne-hooldus", RU: "losony-posle-britya" },
+    "hair/sh": { EN: "shampoo", ET: "shampoonid", RU: "shampuni-dlya-volos" },
+    "hair/co": { EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" },
+    "styling/pw": { EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }
+  };
   var SHOP_BRAND_HANDLES = { "cbd-daily": "cbd-daily-haircare" };
   var SHOP_INFO_PATHS = {
     shipping: "/policies/shipping-policy",
@@ -10864,10 +10874,11 @@
     terms: "/policies/terms-of-service",
     contact: "/pages/contact"
   };
-  var SHOP_CAT_OF_HANDLE = {}, SHOP_BRAND_OF_HANDLE = {}, SHOP_INFO_OF_PATH = {};
+  var SHOP_CAT_OF_HANDLE = {}, SHOP_SUB_OF_HANDLE = {}, SHOP_BRAND_OF_HANDLE = {}, SHOP_INFO_OF_PATH = {};
   (function () {
     var k, l;
     for (k in SHOP_CAT_HANDLES) for (l in SHOP_CAT_HANDLES[k]) SHOP_CAT_OF_HANDLE[SHOP_CAT_HANDLES[k][l]] = k;
+    for (k in SHOP_SUB_HANDLES) for (l in SHOP_SUB_HANDLES[k]) SHOP_SUB_OF_HANDLE[SHOP_SUB_HANDLES[k][l]] = k;
     for (k in SHOP_BRAND_HANDLES) SHOP_BRAND_OF_HANDLE[SHOP_BRAND_HANDLES[k]] = k;
     for (k in SHOP_INFO_PATHS) SHOP_INFO_OF_PATH[SHOP_INFO_PATHS[k]] = k;
   })();
@@ -10883,6 +10894,7 @@
     if (!n) p = "";
     else if (kind === "p" && n === 2) p = "/products/" + id;
     else if (kind === "c" && n === 2) p = "/collections/" + ((SHOP_CAT_HANDLES[id] && SHOP_CAT_HANDLES[id][L]) || id);
+    else if (kind === "c" && n === 3 && Object.prototype.hasOwnProperty.call(SHOP_SUB_HANDLES, id + "/" + segs[2])) p = "/collections/" + SHOP_SUB_HANDLES[id + "/" + segs[2]][L];
     else if (kind === "b" && n === 2) p = "/collections/" + (SHOP_BRAND_HANDLES[id] || id);
     else if (kind === "brands" && n === 1) p = "/collections/brands";
     else if (kind === "sets" && n === 1) p = "/collections/sets";
@@ -10911,6 +10923,7 @@
       if (a === "brands") rest = "/brands/";
       else if (a === "sets") rest = "/sets/";
       else if (SHOP_CAT_OF_HANDLE[a]) rest = "/c/" + SHOP_CAT_OF_HANDLE[a] + "/";
+      else if (SHOP_SUB_OF_HANDLE[a]) rest = "/c/" + SHOP_SUB_OF_HANDLE[a] + "/";
       else rest = "/b/" + (SHOP_BRAND_OF_HANDLE[a] || a) + "/";
     } else if (k === "collections" && n === 3 && a === "sets") rest = "/set/" + segs[2] + "/";
     else if ((k === "policies" || k === "pages") && n === 2) {
@@ -12412,46 +12425,115 @@
     });
     return out.sort(function (a, b) { return b.n - a.n || a.name.localeCompare(b.name); });
   }
-  /* Subcategories are read out of the product names, so a chip never claims
-     a shelf the data cannot fill — chips render only with a non-zero count.
+  /* Subcategories are read out of the products, so a chip never claims a
+     shelf the data cannot fill — chips render only with a non-zero count.
      A second scrollable chip row, not a dropdown: the category bar already
      scrolls sideways on a phone, and a dropdown hanging off a moving bar is
-     exactly the interaction Renat flagged as awkward. */
+     exactly the interaction Renat flagged as awkward.
+
+     Since 09.10.2026 (SEO audit 08.10, §6.2 / T6) six of them are also a PAGE
+     — a subcollection at the handle Shopify had for it
+     (/et/collections/habemeolid; SUB_HANDLES in src/lib/shop-paths.mjs and
+     SHOP_SUB_HANDLES below). Their chip is an <a href> to that address, drawn
+     exactly like the others, and tools/prerender-shop2.mjs writes the page
+     from these very tables and subcatsAuto(): it lifts SUBCATS, SUB_PICKS and
+     the two functions below out of this file by their first and last lines,
+     the way it lifts the dictionary — so keep each at the top level, closing
+     on a line of its own. A page's words (title, meta, the line under the
+     heading) are seoSub() in src/lib/seo-copy.mjs, the block this file
+     carries a copy of. tests/subcollections.test.ts holds every catalogue
+     product to the chips it should be under.
+
+     The chips and their labels are the owner's (Dim, 09.10.2026: pages for
+     the existing chips, nothing on the row may change), so `re` is each
+     chip's rule exactly as it always was — the product's Russian name — and
+     a product it puts under a chip stays there. `more` is only for a product
+     NONE of a section's chips took (the name carries no Russian type, or a
+     word `re` never knew): it reads the name and the id, Shopify's English
+     handle («davines-medium-hold-styling-paste»), and SUB_PICKS sorts the
+     few whose name says nothing at all. The chip order is the order on
+     screen. */
   var SUBCATS = {
     hair: [
       { id: "sh", name: "Шампуни", re: /шампунь/i },
       { id: "co", name: "Кондиционеры", re: /кондиционер/i },
-      { id: "ca", name: "Маски и уход", re: /маск|сыворотк|тоник|уход/i },
-      { id: "sp", name: "Спреи", re: /спрей/i }
+      { id: "ca", name: "Маски и уход", re: /маск|сыворотк|тоник|уход/i, more: /масло|\boil\b|booster|leave-in|scalp/i },
+      { id: "sp", name: "Спреи", re: /спрей/i, more: /spray/i }
     ],
     styling: [
-      { id: "pw", name: "Пасты и воски", re: /паста|воск/i },
+      { id: "pw", name: "Пасты и воски", re: /паста|воск/i, more: /\bpaste\b|\bclay\b|\bwax\b/i },
       { id: "sp", name: "Спреи", re: /спрей/i },
-      { id: "ge", name: "Гели", re: /гель/i },
+      { id: "ge", name: "Гели", re: /гель/i, more: /глазур|glaze|\bgel\b/i },
       { id: "pu", name: "Пудры", re: /пудр/i }
     ],
     beard: [
-      { id: "oi", name: "Масла", re: /масло/i },
+      { id: "oi", name: "Масла", re: /масло/i, more: /\boil\b/i },
       { id: "ba", name: "Бальзамы", re: /бальзам/i },
       { id: "af", name: "После бритья", re: /лосьон|после бритья/i },
       { id: "ge", name: "Гели", re: /гель/i }
     ],
     face: [
       { id: "to", name: "Тонеры", re: /тоник|тонер/i },
-      { id: "cl", name: "Очищение", re: /очища|пенка|мыло/i },
-      { id: "cs", name: "Кремы и сыворотки", re: /крем|сыворотк/i },
+      { id: "cl", name: "Очищение", re: /очища|пенка|мыло/i, more: /cleans|умыван|скраб|scrub|\bwash\b/i },
+      { id: "cs", name: "Кремы и сыворотки", re: /крем|сыворотк/i, more: /эссенц|essence/i },
       { id: "oi", name: "Масла", re: /масло/i }
     ]
   };
-  /** Which subsection a product sits in: the owner's override first, then —
+  /* The products none of the rules can place — the maker's own word for it is
+     the whole name («RE.STORE», «Super.Goo») — sorted by hand, from the
+     maker's description; each one was under no chip before. The owner's own
+     choice in the panel still wins over this. */
+  var SUB_PICKS = {
+    "kevin-murphy-re-store": ["ca"],
+    "kevin-murphy-smooth-again": ["ca"],
+    "heated-defense": ["ca"],
+    "gatsby-moving-rubber-wild-shake-15g": ["pw"],
+    "super-goo": ["ge"],
+    "killer-waves": ["sp"]
+  };
+  /** The chips a product is under by what it is — `p` is {id, name, cat,
+      brand}, nothing else is read. Pure: the prerender and the tests call
+      this very function, lifted out of this file. */
+  function subcatsAuto(p) {
+    var defs = SUBCATS[p.cat] || [];
+    var name = String(p.name || "");
+    var had = defs.filter(function (d) { return d.re.test(name); });
+    if (had.length) return had.map(function (d) { return d.id; });
+    if (Object.prototype.hasOwnProperty.call(SUB_PICKS, p.id)) {
+      return SUB_PICKS[p.id].filter(function (id) { return defs.some(function (d) { return d.id === id; }); });
+    }
+    var text = name + " " + String(p.id || "").replace(/-/g, " ");
+    return defs.filter(function (d) { return d.more && d.more.test(text); }).map(function (d) { return d.id; });
+  }
+  /** …and with the owner's own choice («Подраздел» in the panel: one chip,
+      or "" for «Авто — по названию»), which wins outright, as it always has. */
+  function subcatsWith(p, own) {
+    return own ? [own] : subcatsAuto(p);
+  }
+  /** Which subsection the owner put a product in: his override first, then —
       product creation — the subsection a custom row was saved with; "" means
-      «авто — по названию», the regex above decides. */
+      «авто — по названию», subcatsAuto() decides. */
   function subcatOf(p) { return DEMO.subcat[p.id] || p.subcatBase || ""; }
+  /** Is the product under this chip, all said and done? */
+  function inSubcat(p, id) { return subcatsWith(p, subcatOf(p)).indexOf(id) >= 0; }
+  /** A published subcollection (a page of its own) — section and chip. */
+  function subPublished(cat, id) { return !!(id && SHOP_SUB_HANDLES[cat + "/" + id]); }
+  /** The words of the subcollection on screen, in its language, or null on any other catalogue view. */
+  function subPage() {
+    if (S.screen !== "catalog" || S.brand || !subPublished(S.cat, S.subcat)) return null;
+    var key = S.cat + "/" + S.subcat;
+    return seoSub(key, S.lang) || seoSub(key, "EN");
+  }
+  /** The label of the chip that is lit, in Russian (translateTree() does the rest). */
+  function subChipName() {
+    var d = (SUBCATS[S.cat] || []).filter(function (x) { return x.id === S.subcat; })[0];
+    return d ? d.name : "";
+  }
   function subcatsFor(list) {
     var defs = !S.brand && SUBCATS[S.cat];
     if (!defs) return [];
     return defs.map(function (d) {
-      return { id: d.id, name: d.name, n: list.filter(function (p) { return subcatOf(p) ? subcatOf(p) === d.id : d.re.test(p.name); }).length, re: d.re };
+      return { id: d.id, name: d.name, n: list.filter(function (p) { return inSubcat(p, d.id); }).length, re: d.re };
     }).filter(function (d) { return d.n > 0; });
   }
 
@@ -12480,7 +12562,7 @@
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
     if (S.subcat) {
       var sdef = (SUBCATS[S.cat] || []).filter(function (d) { return d.id === S.subcat; })[0];
-      if (sdef) list = list.filter(function (p) { return subcatOf(p) ? subcatOf(p) === sdef.id : sdef.re.test(p.name); });
+      if (sdef) list = list.filter(function (p) { return inSubcat(p, sdef.id); });
     }
     if (S.onlyInStock) list = list.filter(function (p) { return p.stock !== "out"; });
     if (S.brandFilter.length) list = list.filter(function (p) { return S.brandFilter.indexOf(p.brand) >= 0; });
@@ -15340,9 +15422,17 @@
        the dictionary. */
     var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : "";
     var intro = esc(ownIntro || catIntro(S.cat, S.brand));
+    /* A published subcollection (/et/collections/habemeolid): the heading
+       stays the section's, as it always was on tapping the chip; the line
+       under it is the subcollection's own, already in the page's language
+       (seoSub(), src/lib/seo-copy.mjs — the static page carries the same),
+       and the crumb names the chip after the section. */
+    var subPg = subPage();
+    if (subPg) { ownIntro = subPg.intro; intro = esc(subPg.intro); }
     return '<div class="wrap">' +
       '<div class="crumbs"><a href="' + linkHref("go", "home") + '" data-go="home">Главная</a> / ' +
-        (S.brand ? '<a href="' + linkHref("go", "brands") + '" data-go="brands">Бренды</a> / ' + esc(S.brand) : name) + "</div>" +
+        (S.brand ? '<a href="' + linkHref("go", "brands") + '" data-go="brands">Бренды</a> / ' + esc(S.brand)
+          : subPg ? '<a href="' + linkHref("cat", S.cat) + '" data-go-cat="' + S.cat + '">' + name + "</a> / " + subChipName() : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
         /* A brand with a logo shows the logo instead of the heading — and
            until 08.10.2026 that left the page with no <h1> at all, which is
@@ -15356,11 +15446,20 @@
         (function () {
           var defs = subcatsFor(S.cat === "all" || S.brand ? [] : CATALOGUE.filter(function (p) { return p.cat === S.cat; }));
           if (!defs.length) return "";
+          /* A chip whose subtype is a page of its own — and «Все», which is
+             the section — is a real link to that address (crawlable, opens
+             in a new tab), drawn exactly like the button chips: the click
+             handler filters in place and pushes the address, as before. */
+          var chipLink = function (id) {
+            return ' href="' + esc(shopPathFor(S.lang, "/c/" + S.cat + "/" + (id ? id + "/" : ""))) + '"';
+          };
           return '<div class="subcats" role="group" aria-label="Подкатегории">' +
-            '<button class="scchip" data-subcat="" aria-current="' + (!S.subcat) + '">Все</button>' +
+            '<a class="scchip"' + chipLink("") + ' data-subcat="" aria-current="' + (!S.subcat) + '"><span>Все</span></a>' +
             defs.map(function (d) {
-              return '<button class="scchip" data-subcat="' + d.id + '" aria-current="' + (S.subcat === d.id) + '">' +
-                d.name + ' <span class="num">' + d.n + "</span></button>";
+              var inner = d.name + ' <span class="num">' + d.n + "</span>";
+              return subPublished(S.cat, d.id)
+                ? '<a class="scchip"' + chipLink(d.id) + ' data-subcat="' + d.id + '" aria-current="' + (S.subcat === d.id) + '"><span>' + inner + "</span></a>"
+                : '<button class="scchip" data-subcat="' + d.id + '" aria-current="' + (S.subcat === d.id) + '">' + inner + "</button>";
             }).join("") + "</div>";
         })() +
         '<div class="toolbar">' +
@@ -48599,6 +48698,133 @@
           }
         }
       },
+      /* A subcollection — a section's chip with a page of its own (SUB_HANDLES
+         in src/lib/shop-paths.mjs, /et/collections/habemeolid): its title and
+         meta, its name in the structured data, and the line under the
+         heading (seoSub()). The heading itself stays the section's, as it
+         always was on tapping the chip (Dim, 09.10.2026). */
+      sub: {
+        "beard/oi": {
+          RU: {
+            title: "Масло для бороды: Proraso, Captain Fawcett, Davines",
+            meta: "Масло для бороды Proraso, Captain Fawcett и Davines: пара капель в день делает бороду мягкой и ухаживает за кожей под ней. Самовывоз в Таллинне.",
+            name: "Масло для бороды",
+            intro: "Масло для бороды — ежедневный шаг ухода: пара капель после мытья смягчает волоски, помогает уложить бороду и ухаживает за кожей под ней. Этими маслами работают наши барберы — Proraso и Captain Fawcett в разных ароматах и масло Davines, которое подходит и перед бритьём."
+          },
+          ET: {
+            title: "Habemeõlid: Proraso, Captain Fawcett, Davines | REMPIRE",
+            meta: "Proraso, Captain Fawcetti ja Davinesi habemeõlid: paar tilka päevas teeb habeme pehmeks ja hooldab ka nahka selle all. Järeletulek Tallinnas.",
+            name: "Habemeõlid",
+            intro: "Habemeõli on habemehoolduse igapäevane samm: paar tilka pärast pesu teeb habeme pehmeks ja kergesti kammitavaks ning hooldab ka nahka selle all. Neid õlisid kasutavad meie barberid — Proraso ja Captain Fawcett mitmes lõhnas ning Davinesi õli, mis sobib ka enne raseerimist."
+          },
+          EN: {
+            title: "Beard Oil: Proraso, Captain Fawcett, Davines | REMPIRE",
+            meta: "Beard oils by Proraso, Captain Fawcett and Davines: a few drops a day keep the beard soft and care for the skin beneath it. Pickup in Tallinn, EU delivery.",
+            name: "Beard oil",
+            intro: "Beard oil is the everyday step of beard care: a few drops after washing soften the beard, make it easier to shape and care for the skin beneath it. These are the oils our barbers use — Proraso and Captain Fawcett in several scents, and a Davines oil that also works as a pre-shave."
+          }
+        },
+        "beard/ba": {
+          RU: {
+            title: "Бальзамы для бороды и после бритья: Proraso, Captain Fawcett",
+            meta: "Бальзамы для бороды Captain Fawcett и Proraso смягчают и укладывают бороду, бальзамы Proraso после бритья успокаивают кожу. Самовывоз в Таллинне.",
+            name: "Бальзамы для бороды и после бритья",
+            intro: "Бальзам для бороды ухаживает как масло, но ещё и слегка фиксирует, так что длинная борода весь день держит форму. Здесь же бальзамы Proraso после бритья — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
+          },
+          ET: {
+            title: "Habemepalsamid: Proraso, Captain Fawcett | REMPIRE",
+            meta: "Captain Fawcetti ja Proraso habemepalsamid pehmendavad ja vormivad habet, Proraso raseerimisjärgsed palsamid rahustavad nahka. Järeletulek Tallinnas.",
+            name: "Habemepalsamid ja raseerimisjärgsed palsamid",
+            intro: "Habemepalsam hooldab nagu õli, kuid annab ka kerge fikseerimise, nii et pikem habe püsib terve päeva vormis. Siin on ka Proraso raseerimisjärgsed palsamid, nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
+          },
+          EN: {
+            title: "Beard & Aftershave Balms: Proraso, Captain Fawcett",
+            meta: "Captain Fawcett and Proraso beard balms soften and shape the beard; Proraso aftershave balms calm the skin after a shave. Pickup in Tallinn.",
+            name: "Beard and aftershave balms",
+            intro: "A beard balm cares for the beard like an oil and adds a light hold, so a longer beard keeps its shape all day. Proraso's aftershave balms are here too — from the gentle White for sensitive skin to the cooling, menthol Green."
+          }
+        },
+        "beard/af": {
+          RU: {
+            title: "Средства после бритья: бальзамы и лосьоны Proraso | REMPIRE",
+            meta: "Бальзамы и лосьоны после бритья Proraso: мягкий White для чувствительной кожи, освежающий Green с ментолом, Azur Lime, Blue и Red. Самовывоз в Таллинне.",
+            name: "Средства после бритья",
+            intro: "После бритья коже нужен уход: бальзам смягчает и успокаивает, лосьон освежает. Здесь бальзамы и лосьоны Proraso, которыми работают наши барберы, — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
+          },
+          ET: {
+            title: "Raseerimisjärgne hooldus: Proraso palsamid ja losjoonid",
+            meta: "Proraso raseerimisjärgsed palsamid ja losjoonid: õrn White tundlikule nahale, värskendav mentooliga Green, Azur Lime, Blue ja Red. Järeletulek Tallinnas.",
+            name: "Raseerimisjärgne hooldus",
+            intro: "Pärast raseerimist vajab nahk hoolt: palsam pehmendab ja rahustab, losjoon värskendab. Siin on Proraso palsamid ja losjoonid, mida kasutavad meie barberid — nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
+          },
+          EN: {
+            title: "Aftershave Balms & Lotions: Proraso | REMPIRE",
+            meta: "Proraso aftershave balms and lotions: gentle White for sensitive skin, refreshing menthol Green, Azur Lime, Blue and Red. Pickup in Tallinn, EU delivery.",
+            name: "Aftershave",
+            intro: "After a shave the skin needs care: a balm softens and calms, a lotion refreshes. These are the Proraso balms and lotions our barbers use — from the gentle White for sensitive skin to the cooling, menthol Green."
+          }
+        },
+        "hair/sh": {
+          RU: {
+            title: "Шампуни: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 и Paul Mitchell: салонные шампуни для сухих, жирных, окрашенных, кудрявых и тонких волос. Самовывоз в Таллинне.",
+            name: "Шампуни для волос",
+            intro: "Шампунь подбирают и под кожу головы, и под волосы: жирные корни, сухость, окрашенные или кудрявые волосы требуют разного шампуня. Здесь салонные шампуни, которые выбрала наша команда, — Kevin.Murphy, Davines, System 4 и Paul Mitchell."
+          },
+          ET: {
+            title: "Šampoonid: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 ja Paul Mitchell: salongišampoonid kuivadele, rasustele, värvitud, lokkis või õhukestele juustele. Järeletulek Tallinnas.",
+            name: "Šampoonid",
+            intro: "Šampoon valitakse nii peanaha kui ka juuste järgi: rasused juuksejuured, kuivus, värvitud juuksed ja lokid vajavad igaüks erinevat šampooni. Siin on salongišampoonid, mille on valinud meie meeskond — Kevin.Murphy, Davines, System 4 ja Paul Mitchell."
+          },
+          EN: {
+            title: "Shampoo: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 and Paul Mitchell: salon shampoos for dry, oily, coloured, curly or fine hair. Pickup in Tallinn, EU delivery.",
+            name: "Shampoo",
+            intro: "A shampoo is chosen for the scalp as much as for the hair: oily roots, dryness, colour and curls each want a different one. These are the salon shampoos our team has picked — Kevin.Murphy, Davines, System 4 and Paul Mitchell."
+          }
+        },
+        "hair/co": {
+          RU: {
+            title: "Кондиционеры: Kevin.Murphy, Paul Mitchell, System 4",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin и CBD Daily: кондиционеры для сухих, окрашенных, кудрявых и тонких волос. Самовывоз в Таллинне.",
+            name: "Кондиционеры для волос",
+            intro: "Кондиционер — второй шаг после шампуня: он разглаживает волосы, облегчает расчёсывание и помогает цвету держаться дольше. У большинства наших шампуней есть кондиционер из той же линии — Kevin.Murphy, Paul Mitchell, System 4 и другие."
+          },
+          ET: {
+            title: "Palsamid: Kevin.Murphy, Paul Mitchell, System 4 | REMPIRE",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin ja CBD Daily: palsamid kuivadele, värvitud, lokkis ja õhukestele juustele. Järeletulek Tallinnas.",
+            name: "Palsamid",
+            intro: "Juuksepalsam on šampooni järel teine samm: see silub juukseid, teeb need kergesti kammitavaks ja aitab värvil kauem püsida. Enamikule meie šampoonidest leiab samast sarjast sobiva palsami — Kevin.Murphy, Paul Mitchell, System 4 ja teised."
+          },
+          EN: {
+            title: "Conditioner: Kevin.Murphy, Paul Mitchell, System 4",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin and CBD Daily conditioners for dry, coloured, curly or fine hair — the step after shampoo. Pickup in Tallinn.",
+            name: "Conditioner",
+            intro: "Conditioner is the second step after shampoo: it smooths the hair, makes it easier to comb and helps colour last longer. Most of our shampoos have a matching conditioner from the same line — Kevin.Murphy, Paul Mitchell, System 4 and more."
+          }
+        },
+        "styling/pw": {
+          RU: {
+            title: "Воск для волос, паста и глина: Gatsby, Davines | REMPIRE",
+            meta: "Воск Gatsby Moving Rubber, паста и глина Davines Pasta&Love, паста MITCH от Paul Mitchell — фиксация и текстура для коротких стрижек. Самовывоз в Таллинне.",
+            name: "Воск, паста и глина для волос",
+            intro: "Воск даёт блеск и фиксацию, которую можно поправить в течение дня, паста — более мягкий и естественный результат, глина — сильную матовую фиксацию с текстурой. Японские воски Gatsby, Davines Pasta&Love и MITCH от Paul Mitchell закрывают все три варианта."
+          },
+          ET: {
+            title: "Juuksevaha, pasta ja savi: Gatsby, Davines | REMPIRE",
+            meta: "Gatsby Moving Rubber juuksevahad, Davinesi Pasta&Love pasta ja matt savi ning Paul Mitchell MITCH pasta — fikseerimine ja tekstuur lühikestele soengutele.",
+            name: "Juuksevaha, pasta ja savi",
+            intro: "Juuksevaha annab läike ja fikseerimise, mida saab päeva jooksul ümber sättida, pasta pehmema ja loomulikuma tulemuse, savi tugeva ja mati fikseerimise koos tekstuuriga. Jaapani Gatsby vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH katavad kõik kolm."
+          },
+          EN: {
+            title: "Hair Wax, Paste & Clay: Gatsby, Davines, Paul Mitchell",
+            meta: "Gatsby Moving Rubber waxes, Davines Pasta&Love paste and matte clay, Paul Mitchell MITCH paste — hold and texture for short styles. Pickup in Tallinn.",
+            name: "Hair wax, paste & clay",
+            intro: "Wax gives shine and a hold you can rework through the day, paste a softer, more natural finish, and clay a strong matte hold with texture. Gatsby's Japanese waxes, Davines Pasta&Love and Paul Mitchell's MITCH cover all three."
+          }
+        }
+      },
       brandFallback: { EN: "{brand} in Tallinn | REMPIRE", ET: "{brand} Tallinnas | REMPIRE", RU: "{brand} в Таллинне | REMPIRE" },
       brandGeneric: {
         EN: "{brand} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.",
@@ -48671,6 +48897,15 @@
     return (b && b[lang] && b[lang].intro) || "";
   }
 
+  /**
+   * A subcollection's words in one language — { title, meta, name, intro } —
+   * or null for a key with none. Plain text, not HTML.
+   */
+  function seoSub(key, lang) {
+    var s = seoCopy().sub[key];
+    return (s && s[lang]) || null;
+  }
+
   /** «от 7,90 €» / «alates 7,90 €» / «from €7.90» — a product's price as its title prints it. */
   function seoPriceText(price, from, lang) {
     return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
@@ -48700,8 +48935,9 @@
    * The head of one page: { t, d, ogT, ogD } — title, meta description and the
    * link-preview pair (the same two, except on the home page).
    *
-   *   kind  "home" | "cat" | "brand" | "blog"
-   *   key   the section ("hair" … "all") or the brand's name; "" otherwise
+   *   kind  "home" | "cat" | "brand" | "sub" | "blog"
+   *   key   the section ("hair" … "all"), the brand's name, the subcollection
+   *         ("beard/oi"); "" otherwise
    *   lang  "RU" | "ET" | "EN"
    *   ctx   { rules } — settings.shipping_rules as the checkout bills them
    */
@@ -48734,6 +48970,12 @@
          words rather than the suffix */
       var bare = t.replace(/\s*\|\s*REMPIRE$/, "");
       if (/rempire/i.test(bare) || seoHouse(t).length > SEO_TITLE_MAX) t = bare;
+    } else if (kind === "sub") {
+      var u = seoSub(key, lang) || seoSub(key, "EN");
+      if (u) {
+        t = u.title;
+        d = u.meta;
+      }
     } else if (kind === "blog") {
       var g = C.blog[lang] || C.blog.EN;
       t = g[0];
@@ -48912,6 +49154,9 @@
       var sh = S.screen === "home" ? seoHead("home", "", S.lang, seoCtx())
         : S.screen === "catalog" ? (S.brand ? seoHead("brand", S.brand, S.lang, seoCtx()) : seoHead("cat", S.cat, S.lang, seoCtx()))
           : null;
+      /* …and a published subcollection (/et/collections/habemeolid) its own
+         pair — the link-preview pair with it, never the section's */
+      if (subPage()) sh = seoHead("sub", S.cat + "/" + S.subcat, S.lang, seoCtx());
       if (sh) { t = sh.t; d = sh.d; ogT = sh.ogT; ogD = sh.ogD; }
       /* The body of a policy page goes through translateTree(), the title did
          not: legalFor() serves Russian titles on LEGAL, so an English page
@@ -49848,7 +50093,10 @@
   /** The internal route of the screen on show — "/p/<id>/", "/c/hair/", "/". */
   function screenRoute() {
     if (S.screen === "product" && S.productId) return "/p/" + encodeURIComponent(S.productId) + "/";
-    if (S.screen === "catalog") return S.brand ? "/b/" + slugify(S.brand) + "/" : "/c/" + S.cat + "/";
+    if (S.screen === "catalog") {
+      return S.brand ? "/b/" + slugify(S.brand) + "/"
+        : "/c/" + S.cat + "/" + (subPublished(S.cat, S.subcat) ? S.subcat + "/" : "");
+    }
     if (S.screen === "search") return "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
     if (S.screen === "info" && S.infoSlug) return "/info/" + S.infoSlug + "/";
     // features: /collections/sets is the list, /collections/sets/<id> one set
@@ -50764,12 +51012,14 @@
     if (d.payagain !== undefined) { payAgain(d.payagain); return; }
 
     /* A link to a page (linkHref — a card, the menu, a brand, a crumb, «Все
-       товары», a policy in the footer) is a real <a href> since 09.10.2026:
-       a modified click (new tab, new window) is the browser's to open; a
-       plain one stays in the SPA and goes on exactly as the button did. */
+       товары», a policy in the footer, a subcollection's chip and «Все» on
+       the chip row) is a real <a href> since 09.10.2026: a modified click
+       (new tab, new window) is the browser's to open; a plain one stays in
+       the SPA and goes on exactly as the button did. */
     if (t.tagName === "A" && t.hasAttribute("href") &&
         (d.go !== undefined || d.goCat !== undefined || d.goBrand !== undefined ||
-         d.goProduct !== undefined || d.goBundle !== undefined || d.page !== undefined)) {
+         d.goProduct !== undefined || d.goBundle !== undefined || d.page !== undefined ||
+         d.subcat !== undefined)) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
     }
@@ -50842,7 +51092,13 @@
     }
     if (d.page !== undefined) { S.infoSlug = d.page; go("info"); return; }
     if (d.subcat !== undefined) {
+      /* A plain tap on a chip filters in place, as every chip always has
+         (a chip that is a link — a subcollection, «Все» — has already had a
+         modified click handed to the browser above), and writes the address
+         of what is now on screen (navTo: the subcollection's own, or the
+         section's for a chip with no page). */
       S.subcat = d.subcat; S.shown = 12;
+      if (pathFor() !== here()) navTo(false);
       render();
       refocus('[data-subcat="' + d.subcat + '"]');
       /* Tapping a chip while scrolled deep left the shopper below the now
@@ -54365,7 +54621,17 @@
       }
     }
     if ((m = p.match(/^\/c\/([^/]+)$/)) && (m[1] === "all" || CAT_NAMES[m[1]])) {
+      /* The section itself. A chip that has no page of its own (Гели,
+         Пудры…) is a filter on this address and survives a Back onto it; a
+         subcollection's chip is its own address, so landing here clears it,
+         and so does another section. */
+      if (m[1] !== S.cat || subPublished(S.cat, S.subcat)) S.subcat = "";
       S.brand = ""; S.cat = m[1]; S.shown = 12; S.screen = "catalog";
+      return true;
+    }
+    /* A subcollection — /et/collections/habemeolid is "/c/beard/oi/". */
+    if ((m = p.match(/^\/c\/([^/]+)\/([^/]+)$/)) && subPublished(m[1], m[2])) {
+      S.brand = ""; S.cat = m[1]; S.subcat = m[2]; S.shown = 12; S.screen = "catalog";
       return true;
     }
     if ((m = p.match(/^\/b\/([^/]+)$/)) && BRAND_BY_SLUG[safeDecode(m[1])]) {

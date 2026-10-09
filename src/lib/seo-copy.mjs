@@ -261,6 +261,133 @@
           }
         }
       },
+      /* A subcollection — a section's chip with a page of its own (SUB_HANDLES
+         in src/lib/shop-paths.mjs, /et/collections/habemeolid): its title and
+         meta, its name in the structured data, and the line under the
+         heading (seoSub()). The heading itself stays the section's, as it
+         always was on tapping the chip (Dim, 09.10.2026). */
+      sub: {
+        "beard/oi": {
+          RU: {
+            title: "Масло для бороды: Proraso, Captain Fawcett, Davines",
+            meta: "Масло для бороды Proraso, Captain Fawcett и Davines: пара капель в день делает бороду мягкой и ухаживает за кожей под ней. Самовывоз в Таллинне.",
+            name: "Масло для бороды",
+            intro: "Масло для бороды — ежедневный шаг ухода: пара капель после мытья смягчает волоски, помогает уложить бороду и ухаживает за кожей под ней. Этими маслами работают наши барберы — Proraso и Captain Fawcett в разных ароматах и масло Davines, которое подходит и перед бритьём."
+          },
+          ET: {
+            title: "Habemeõlid: Proraso, Captain Fawcett, Davines | REMPIRE",
+            meta: "Proraso, Captain Fawcetti ja Davinesi habemeõlid: paar tilka päevas teeb habeme pehmeks ja hooldab ka nahka selle all. Järeletulek Tallinnas.",
+            name: "Habemeõlid",
+            intro: "Habemeõli on habemehoolduse igapäevane samm: paar tilka pärast pesu teeb habeme pehmeks ja kergesti kammitavaks ning hooldab ka nahka selle all. Neid õlisid kasutavad meie barberid — Proraso ja Captain Fawcett mitmes lõhnas ning Davinesi õli, mis sobib ka enne raseerimist."
+          },
+          EN: {
+            title: "Beard Oil: Proraso, Captain Fawcett, Davines | REMPIRE",
+            meta: "Beard oils by Proraso, Captain Fawcett and Davines: a few drops a day keep the beard soft and care for the skin beneath it. Pickup in Tallinn, EU delivery.",
+            name: "Beard oil",
+            intro: "Beard oil is the everyday step of beard care: a few drops after washing soften the beard, make it easier to shape and care for the skin beneath it. These are the oils our barbers use — Proraso and Captain Fawcett in several scents, and a Davines oil that also works as a pre-shave."
+          }
+        },
+        "beard/ba": {
+          RU: {
+            title: "Бальзамы для бороды и после бритья: Proraso, Captain Fawcett",
+            meta: "Бальзамы для бороды Captain Fawcett и Proraso смягчают и укладывают бороду, бальзамы Proraso после бритья успокаивают кожу. Самовывоз в Таллинне.",
+            name: "Бальзамы для бороды и после бритья",
+            intro: "Бальзам для бороды ухаживает как масло, но ещё и слегка фиксирует, так что длинная борода весь день держит форму. Здесь же бальзамы Proraso после бритья — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
+          },
+          ET: {
+            title: "Habemepalsamid: Proraso, Captain Fawcett | REMPIRE",
+            meta: "Captain Fawcetti ja Proraso habemepalsamid pehmendavad ja vormivad habet, Proraso raseerimisjärgsed palsamid rahustavad nahka. Järeletulek Tallinnas.",
+            name: "Habemepalsamid ja raseerimisjärgsed palsamid",
+            intro: "Habemepalsam hooldab nagu õli, kuid annab ka kerge fikseerimise, nii et pikem habe püsib terve päeva vormis. Siin on ka Proraso raseerimisjärgsed palsamid, nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
+          },
+          EN: {
+            title: "Beard & Aftershave Balms: Proraso, Captain Fawcett",
+            meta: "Captain Fawcett and Proraso beard balms soften and shape the beard; Proraso aftershave balms calm the skin after a shave. Pickup in Tallinn.",
+            name: "Beard and aftershave balms",
+            intro: "A beard balm cares for the beard like an oil and adds a light hold, so a longer beard keeps its shape all day. Proraso's aftershave balms are here too — from the gentle White for sensitive skin to the cooling, menthol Green."
+          }
+        },
+        "beard/af": {
+          RU: {
+            title: "Средства после бритья: бальзамы и лосьоны Proraso | REMPIRE",
+            meta: "Бальзамы и лосьоны после бритья Proraso: мягкий White для чувствительной кожи, освежающий Green с ментолом, Azur Lime, Blue и Red. Самовывоз в Таллинне.",
+            name: "Средства после бритья",
+            intro: "После бритья коже нужен уход: бальзам смягчает и успокаивает, лосьон освежает. Здесь бальзамы и лосьоны Proraso, которыми работают наши барберы, — от мягкого White для чувствительной кожи до освежающего Green с ментолом."
+          },
+          ET: {
+            title: "Raseerimisjärgne hooldus: Proraso palsamid ja losjoonid",
+            meta: "Proraso raseerimisjärgsed palsamid ja losjoonid: õrn White tundlikule nahale, värskendav mentooliga Green, Azur Lime, Blue ja Red. Järeletulek Tallinnas.",
+            name: "Raseerimisjärgne hooldus",
+            intro: "Pärast raseerimist vajab nahk hoolt: palsam pehmendab ja rahustab, losjoon värskendab. Siin on Proraso palsamid ja losjoonid, mida kasutavad meie barberid — nii tundlikule nahale mõeldud kui ka jahutava mentooliga."
+          },
+          EN: {
+            title: "Aftershave Balms & Lotions: Proraso | REMPIRE",
+            meta: "Proraso aftershave balms and lotions: gentle White for sensitive skin, refreshing menthol Green, Azur Lime, Blue and Red. Pickup in Tallinn, EU delivery.",
+            name: "Aftershave",
+            intro: "After a shave the skin needs care: a balm softens and calms, a lotion refreshes. These are the Proraso balms and lotions our barbers use — from the gentle White for sensitive skin to the cooling, menthol Green."
+          }
+        },
+        "hair/sh": {
+          RU: {
+            title: "Шампуни: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 и Paul Mitchell: салонные шампуни для сухих, жирных, окрашенных, кудрявых и тонких волос. Самовывоз в Таллинне.",
+            name: "Шампуни для волос",
+            intro: "Шампунь подбирают и под кожу головы, и под волосы: жирные корни, сухость, окрашенные или кудрявые волосы требуют разного шампуня. Здесь салонные шампуни, которые выбрала наша команда, — Kevin.Murphy, Davines, System 4 и Paul Mitchell."
+          },
+          ET: {
+            title: "Šampoonid: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 ja Paul Mitchell: salongišampoonid kuivadele, rasustele, värvitud, lokkis või õhukestele juustele. Järeletulek Tallinnas.",
+            name: "Šampoonid",
+            intro: "Šampoon valitakse nii peanaha kui ka juuste järgi: rasused juuksejuured, kuivus, värvitud juuksed ja lokid vajavad igaüks erinevat šampooni. Siin on salongišampoonid, mille on valinud meie meeskond — Kevin.Murphy, Davines, System 4 ja Paul Mitchell."
+          },
+          EN: {
+            title: "Shampoo: Kevin.Murphy, Davines, System 4, Paul Mitchell",
+            meta: "Kevin.Murphy, Davines, System 4 and Paul Mitchell: salon shampoos for dry, oily, coloured, curly or fine hair. Pickup in Tallinn, EU delivery.",
+            name: "Shampoo",
+            intro: "A shampoo is chosen for the scalp as much as for the hair: oily roots, dryness, colour and curls each want a different one. These are the salon shampoos our team has picked — Kevin.Murphy, Davines, System 4 and Paul Mitchell."
+          }
+        },
+        "hair/co": {
+          RU: {
+            title: "Кондиционеры: Kevin.Murphy, Paul Mitchell, System 4",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin и CBD Daily: кондиционеры для сухих, окрашенных, кудрявых и тонких волос. Самовывоз в Таллинне.",
+            name: "Кондиционеры для волос",
+            intro: "Кондиционер — второй шаг после шампуня: он разглаживает волосы, облегчает расчёсывание и помогает цвету держаться дольше. У большинства наших шампуней есть кондиционер из той же линии — Kevin.Murphy, Paul Mitchell, System 4 и другие."
+          },
+          ET: {
+            title: "Palsamid: Kevin.Murphy, Paul Mitchell, System 4 | REMPIRE",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin ja CBD Daily: palsamid kuivadele, värvitud, lokkis ja õhukestele juustele. Järeletulek Tallinnas.",
+            name: "Palsamid",
+            intro: "Juuksepalsam on šampooni järel teine samm: see silub juukseid, teeb need kergesti kammitavaks ja aitab värvil kauem püsida. Enamikule meie šampoonidest leiab samast sarjast sobiva palsami — Kevin.Murphy, Paul Mitchell, System 4 ja teised."
+          },
+          EN: {
+            title: "Conditioner: Kevin.Murphy, Paul Mitchell, System 4",
+            meta: "Kevin.Murphy, Paul Mitchell, System 4, Lumin and CBD Daily conditioners for dry, coloured, curly or fine hair — the step after shampoo. Pickup in Tallinn.",
+            name: "Conditioner",
+            intro: "Conditioner is the second step after shampoo: it smooths the hair, makes it easier to comb and helps colour last longer. Most of our shampoos have a matching conditioner from the same line — Kevin.Murphy, Paul Mitchell, System 4 and more."
+          }
+        },
+        "styling/pw": {
+          RU: {
+            title: "Воск для волос, паста и глина: Gatsby, Davines | REMPIRE",
+            meta: "Воск Gatsby Moving Rubber, паста и глина Davines Pasta&Love, паста MITCH от Paul Mitchell — фиксация и текстура для коротких стрижек. Самовывоз в Таллинне.",
+            name: "Воск, паста и глина для волос",
+            intro: "Воск даёт блеск и фиксацию, которую можно поправить в течение дня, паста — более мягкий и естественный результат, глина — сильную матовую фиксацию с текстурой. Японские воски Gatsby, Davines Pasta&Love и MITCH от Paul Mitchell закрывают все три варианта."
+          },
+          ET: {
+            title: "Juuksevaha, pasta ja savi: Gatsby, Davines | REMPIRE",
+            meta: "Gatsby Moving Rubber juuksevahad, Davinesi Pasta&Love pasta ja matt savi ning Paul Mitchell MITCH pasta — fikseerimine ja tekstuur lühikestele soengutele.",
+            name: "Juuksevaha, pasta ja savi",
+            intro: "Juuksevaha annab läike ja fikseerimise, mida saab päeva jooksul ümber sättida, pasta pehmema ja loomulikuma tulemuse, savi tugeva ja mati fikseerimise koos tekstuuriga. Jaapani Gatsby vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH katavad kõik kolm."
+          },
+          EN: {
+            title: "Hair Wax, Paste & Clay: Gatsby, Davines, Paul Mitchell",
+            meta: "Gatsby Moving Rubber waxes, Davines Pasta&Love paste and matte clay, Paul Mitchell MITCH paste — hold and texture for short styles. Pickup in Tallinn.",
+            name: "Hair wax, paste & clay",
+            intro: "Wax gives shine and a hold you can rework through the day, paste a softer, more natural finish, and clay a strong matte hold with texture. Gatsby's Japanese waxes, Davines Pasta&Love and Paul Mitchell's MITCH cover all three."
+          }
+        }
+      },
       brandFallback: { EN: "{brand} in Tallinn | REMPIRE", ET: "{brand} Tallinnas | REMPIRE", RU: "{brand} в Таллинне | REMPIRE" },
       brandGeneric: {
         EN: "{brand} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.",
@@ -333,6 +460,15 @@
     return (b && b[lang] && b[lang].intro) || "";
   }
 
+  /**
+   * A subcollection's words in one language — { title, meta, name, intro } —
+   * or null for a key with none. Plain text, not HTML.
+   */
+  function seoSub(key, lang) {
+    var s = seoCopy().sub[key];
+    return (s && s[lang]) || null;
+  }
+
   /** «от 7,90 €» / «alates 7,90 €» / «from €7.90» — a product's price as its title prints it. */
   function seoPriceText(price, from, lang) {
     return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
@@ -362,8 +498,9 @@
    * The head of one page: { t, d, ogT, ogD } — title, meta description and the
    * link-preview pair (the same two, except on the home page).
    *
-   *   kind  "home" | "cat" | "brand" | "blog"
-   *   key   the section ("hair" … "all") or the brand's name; "" otherwise
+   *   kind  "home" | "cat" | "brand" | "sub" | "blog"
+   *   key   the section ("hair" … "all"), the brand's name, the subcollection
+   *         ("beard/oi"); "" otherwise
    *   lang  "RU" | "ET" | "EN"
    *   ctx   { rules } — settings.shipping_rules as the checkout bills them
    */
@@ -396,6 +533,12 @@
          words rather than the suffix */
       var bare = t.replace(/\s*\|\s*REMPIRE$/, "");
       if (/rempire/i.test(bare) || seoHouse(t).length > SEO_TITLE_MAX) t = bare;
+    } else if (kind === "sub") {
+      var u = seoSub(key, lang) || seoSub(key, "EN");
+      if (u) {
+        t = u.title;
+        d = u.meta;
+      }
     } else if (kind === "blog") {
       var g = C.blog[lang] || C.blog.EN;
       t = g[0];
@@ -409,5 +552,5 @@
 
 export {
   SEO_TITLE_MAX, SEO_DESC_MAX,
-  seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoPriceText, seoProductCore, seoProductTitle, seoHead,
+  seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoHead,
 };

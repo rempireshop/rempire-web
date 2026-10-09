@@ -14,7 +14,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assetToken, currentToken } from "./lib/asset-token.mjs";
 import { VIEWPORT_META } from "../src/lib/seo-head.mjs";
-import { parseShopPath, publicPath, STATE_RESTS } from "../src/lib/shop-paths.mjs";
+import { parseShopPath, publicPath, STATE_RESTS, SUB_HANDLES } from "../src/lib/shop-paths.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -299,6 +299,10 @@ for (const [lang, seg] of LANGS) {
         "written without translation. Re-run `npm run prerender` and check its output for `x `.");
     }
   }
+  // the subcollections (SUB_HANDLES) — /et/collections/habemeolid is shop2/et/c/beard/oi/
+  for (const key of Object.keys(SUB_HANDLES)) {
+    await checkPage(path.join(SHOP2, seg, "c", ...key.split("/"), "index.html"), { lang, rest: `/c/${key}/` });
+  }
   for (const b of BRANDS) {
     await checkPage(path.join(SHOP2, seg, "b", b, "index.html"), { lang, rest: `/b/${b}/` });
   }
@@ -437,12 +441,13 @@ else {
   } else { failed++; console.error("FAIL public/sitemap.xml is not a sitemapindex — the prerender always writes one now"); }
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
   SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
-  /* home + /c/all/ + the categories + the brand pages + the brands landing +
-     the policy pages + the sets + the gift card + the blog. NOT the products:
-     their pages are still written, but the rows that offer them to a crawler
-     are served by src/app/sitemap-products.xml/route.ts, because whether a
-     product is hidden is a question only the database can answer. */
-  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + 1 +
+  /* home + /c/all/ + the categories + the subcollections + the brand pages +
+     the brands landing + the policy pages + the sets + the gift card + the
+     blog. NOT the products: their pages are still written, but the rows that
+     offer them to a crawler are served by src/app/sitemap-products.xml/route.ts,
+     because whether a product is hidden is a question only the database can
+     answer. */
+  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + Object.keys(SUB_HANDLES).length + BRANDS.length + 1 +
     LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
     (BLOG_SLUGS ? BLOG_SLUGS.size + 1 : 0);
   const expected = LANGS.length * perLang;
@@ -458,6 +463,7 @@ else {
     const at = (rest) => publicPath(lang, rest);
     const want = [
       // no product row here — src/app/sitemap-products.xml/route.ts serves those
+      ...Object.keys(SUB_HANDLES).map((k) => at("/c/" + k + "/")),
       ...LEGAL_SLUGS.map((s) => at("/info/" + s + "/")),
       ...(BUNDLES.length ? [at("/sets/"), ...BUNDLES.map((x) => at("/set/" + x.id + "/"))] : []),
       at("/gift/"),

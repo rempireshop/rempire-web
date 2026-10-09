@@ -9,6 +9,7 @@
      home         /                     /ru                  /et
      product      /products/<id>        /ru/products/<id>    /et/products/<id>
      section      /collections/hair-care  /ru/collections/uhod-za-volosami  /et/collections/juuksehooldus
+     subcollection /collections/beard-oil /ru/collections/maslo-dlya-borody /et/collections/habemeolid
      brand        /collections/<brand>  (the same handle in every language)
      policy       /policies/shipping-policy · refund-policy · privacy-policy · terms-of-service
      contact      /pages/contact
@@ -25,8 +26,8 @@
    ---- one vocabulary, two spellings --------------------------------------
    Everything that builds or reads an address inside the shop still speaks the
    short internal ROUTE the /shop2/ scheme had — "/p/<id>/", "/c/hair/",
-   "/b/<brand>/", "/info/shipping/", "/sets/", "/set/<id>/", "/gift/",
-   "/brands/", "/blog/", "/blog/<slug>/", "/search/", "/account/",
+   "/c/beard/oi/" (a subcollection, since 09.10.2026), "/b/<brand>/",
+   "/info/shipping/", "/sets/", "/set/<id>/", "/gift/", "/brands/", "/blog/", "/blog/<slug>/", "/search/", "/account/",
    "/checkout/", "/done/", "/cart/", "/admin/", "/scan/", "/" — and this file
    is the one place that turns a route into the public address
    (publicPath) and back (parseShopPath). The prerender, the request-time
@@ -66,6 +67,33 @@ export const CAT_HANDLES = Object.freeze({
   all: Object.freeze({ EN: "all-products", ET: "koik-tooted", RU: "vse-tovary" }),
 });
 
+/* The subcollections that have a page of their own (Dim, 09.10.2026 — SEO
+   audit 08.10, §7.1 and T6): a section's subtype — the chip under the
+   section's heading — at the handle Shopify had for it, per language, so the
+   history Google keeps for those addresses carries over. Keyed by the
+   internal route's "<section>/<subtype>" (route "/c/beard/oi/"); the subtype
+   ids are the chips' own (SUBCATS in public/shop2/app.js, which also holds
+   who belongs where and each page's words); only an existing chip has a page,
+   and the chip row itself does not change (Dim, 09.10.2026). A chip listed
+   here is PUBLISHED: it needs at least SUBCOLLECTION_MIN products and its
+   words in all three languages — tests/subcollections.test.ts holds both, and
+   the prerender refuses to run without them. A chip that is not listed stays
+   a filter on the section's address, and every Shopify handle without a page
+   goes to the section (src/lib/legacy-redirects.ts). Every handle below is in
+   Shopify's sitemap (tools/harvest/old-urls.txt); «После бритья» has
+   Shopify's `aftershave` collection, whose content it is. */
+export const SUB_HANDLES = Object.freeze({
+  "beard/oi": Object.freeze({ EN: "beard-oil", ET: "habemeolid", RU: "maslo-dlya-borody" }),
+  "beard/ba": Object.freeze({ EN: "beard-balm", ET: "habemepalsamid", RU: "balzam-dlya-borody" }),
+  "beard/af": Object.freeze({ EN: "aftershave", ET: "raseerimisjargne-hooldus", RU: "losony-posle-britya" }),
+  "hair/sh": Object.freeze({ EN: "shampoo", ET: "shampoonid", RU: "shampuni-dlya-volos" }),
+  "hair/co": Object.freeze({ EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" }),
+  "styling/pw": Object.freeze({ EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }),
+});
+
+/** The fewest products a subcollection may have and still be a page. */
+export const SUBCOLLECTION_MIN = 6;
+
 /* A brand whose Shopify collection was not spelled like the brand's own slug.
    Every other brand page is /collections/<slugify(brand)>, in all languages. */
 export const BRAND_HANDLES = Object.freeze({ "cbd-daily": "cbd-daily-haircare" });
@@ -95,6 +123,11 @@ const CAT_OF_HANDLE = (() => {
   for (const cat of Object.keys(CAT_HANDLES)) for (const h of Object.values(CAT_HANDLES[cat])) out[h] = cat;
   return out;
 })();
+const SUB_OF_HANDLE = (() => {
+  const out = Object.create(null);
+  for (const key of Object.keys(SUB_HANDLES)) for (const h of Object.values(SUB_HANDLES[key])) out[h] = key;
+  return out;
+})();
 const BRAND_OF_HANDLE = (() => {
   const out = Object.create(null);
   for (const [slug, h] of Object.entries(BRAND_HANDLES)) out[h] = slug;
@@ -117,6 +150,16 @@ export function catOfHandle(handle) {
   return CAT_OF_HANDLE[String(handle || "")] || null;
 }
 
+/** The published subcollection behind a collection handle, in any language — "beard/oi" — or null. */
+export function subOfHandle(handle) {
+  return SUB_OF_HANDLE[String(handle || "")] || null;
+}
+
+/** Is "/c/<cat>/<sub>/" a page — a published subcollection? */
+export function isSubcollection(cat, sub) {
+  return Object.prototype.hasOwnProperty.call(SUB_HANDLES, cat + "/" + sub);
+}
+
 /** The collection handle of a brand page — Shopify's own where it differed. */
 export function brandHandle(slug) {
   return BRAND_HANDLES[slug] || slug;
@@ -132,6 +175,7 @@ export function brandOfHandle(handle) {
  *
  *   publicPath("RU", "/p/x/")       → "/ru/products/x"
  *   publicPath("EN", "/c/hair/")    → "/collections/hair-care"
+ *   publicPath("ET", "/c/beard/oi/")→ "/et/collections/habemeolid"   (SUB_HANDLES)
  *   publicPath("ET", "/")           → "/et"
  *   publicPath("EN", "/")           → "/"
  *   publicPath("RU", "/admin/")     → "/admin"            (the owner's: no prefix)
@@ -155,6 +199,7 @@ export function publicPath(lang, rest) {
   if (!n) p = "";
   else if (kind === "p" && n === 2) p = "/products/" + id;
   else if (kind === "c" && n === 2) p = "/collections/" + ((CAT_HANDLES[id] && CAT_HANDLES[id][L]) || id);
+  else if (kind === "c" && n === 3 && isSubcollection(id, segs[2])) p = "/collections/" + SUB_HANDLES[id + "/" + segs[2]][L];
   else if (kind === "b" && n === 2) p = "/collections/" + brandHandle(id);
   else if (kind === "brands" && n === 1) p = "/collections/brands";
   else if (kind === "sets" && n === 1) p = "/collections/sets";
@@ -179,7 +224,8 @@ export function publicPath(lang, rest) {
  *   "/collections/kevin-murphy"        → { lang: "EN", prefixed: false, rest: "/b/kevin-murphy/" }
  *   "/et/products/gift-card"           → { lang: "ET", prefixed: true,  rest: "/gift/" }
  *
- * A collection handle that is neither a section, `brands` nor `sets` comes
+ * A collection handle that is neither a section, a published subcollection
+ * (`/et/collections/habemeolid` → "/c/beard/oi/"), `brands` nor `sets` comes
  * back as a brand route — whether that brand exists is the caller's question
  * (the catalogue, or the owner's own products). A section handle spelled in
  * another language's form is still the section: `canonical` (publicPath of
@@ -207,6 +253,7 @@ export function parseShopPath(pathname) {
     if (a === "brands") rest = "/brands/";
     else if (a === "sets") rest = "/sets/";
     else if (CAT_OF_HANDLE[a]) rest = "/c/" + CAT_OF_HANDLE[a] + "/";
+    else if (SUB_OF_HANDLE[a]) rest = "/c/" + SUB_OF_HANDLE[a] + "/";
     else rest = "/b/" + brandOfHandle(a) + "/";
   } else if (k === "collections" && n === 3 && a === "sets") rest = "/set/" + segs[2] + "/";
   else if ((k === "policies" || k === "pages") && n === 2) {
