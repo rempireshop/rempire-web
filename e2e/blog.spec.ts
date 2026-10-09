@@ -186,6 +186,16 @@ test("every card under an article keeps its foot in the card and its add text wh
 for (const lang of LANGS) {
   test(`home → Blog paints the articles at once while /api/blog/ takes 4 s — ${lang.code}`, async ({ page }) => {
     test.setTimeout(60_000);
+    /* The articles are fetched ahead only on a line the browser reports as
+       fast (blogFastNet in app.js, perf 09.10.2026), and a headless browser on
+       localhost reports the defaults of a line it has never measured. This
+       shopper is on a fast one. */
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "connection", {
+        configurable: true,
+        get: () => ({ effectiveType: "4g", downlink: 10, rtt: 50, saveData: false }),
+      });
+    });
     // the waits are armed before the page loads: the idle prefetch can land
     // before a later waitForResponse would start listening
     const listPrefetched = page.waitForResponse((r) => /\/api\/blog\/\?lang=/.test(r.url()) && r.status() === 200);

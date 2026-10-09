@@ -13742,6 +13742,22 @@
     var c = navigator.connection;
     return !!(c && c.saveData);
   }
+  /* The article bodies behind the list are fetched ahead only on a line that
+     says it is fast (perf, 09.10.2026): on a phone on a slow line, four
+     articles nobody asked for were taking the bandwidth the page's own
+     pictures were still waiting for. A browser that does not say how fast its
+     line is (Safari, Firefox) is not guessed at — it gets no bodies ahead; the
+     tile under the finger or the pointer still asks for its own one
+     (blogPrefetchPost), and the list itself is fetched as before. */
+  function blogFastNet() {
+    var c = navigator.connection;
+    if (!c || c.saveData) return false;
+    if (c.effectiveType && c.effectiveType !== "4g") return false;
+    // downlink: Mbit/s, rtt: ms — the browser's own estimates of this line
+    if (typeof c.downlink === "number" && c.downlink < 5) return false;
+    if (typeof c.rtt === "number" && c.rtt > 200) return false;
+    return true;
+  }
   /* The list for one language, page 1. Resolves once S holds the answer (or
      the failure); the screen is repainted only if what it shows differs. */
   function blogSyncList(lang) {
@@ -13832,9 +13848,10 @@
   }
   /* The bodies of the listed articles, one at a time on idle, so the tile
      the shopper eventually presses opens at once. Skipped on a metered
-     connection (Save-Data) — the bodies are small, but they are not asked for. */
+     connection (Save-Data) — the bodies are small, but they are not asked for
+     — and on a line that is not known to be fast (blogFastNet). */
   function blogPrefetchPosts(lang) {
-    if (blogSaveData()) return;
+    if (blogSaveData() || !blogFastNet()) return;
     var l = S.blogLists[lang];
     if (!l || l.failed) return;
     var queue = l.posts.map(function (p) { return p.slug; }).filter(function (slug) {
@@ -48205,7 +48222,15 @@
     setMetaProp("og:locale", { RU: "ru_RU", ET: "et_EE", EN: "en_US" }[lang]);
     // the language on screen — on every storefront page the address's own;
     // read by screen readers and by the browser's translation prompt
-    try { document.documentElement.lang = { RU: "ru", ET: "et", EN: "en" }[S.lang]; } catch (e) {}
+    htmlLang();
+  }
+  /** <html lang>, written only when it changes: renderImpl() writes it before
+      the body goes in, and an attribute written twice is a style pass twice. */
+  function htmlLang() {
+    try {
+      var want = { RU: "ru", ET: "et", EN: "en" }[S.lang];
+      if (want && document.documentElement.lang !== want) document.documentElement.lang = want;
+    } catch (e) {}
   }
   /* The three meta descriptions the info, sets and gift screens carry. They
      are dictionary keys, so ET and EN come from UI — and they are word for
@@ -48697,6 +48722,19 @@
        node-by-node diff against the DOM. One string comparison answers the same
        question. The language is part of the key because the dictionary pass
        runs on the parsed copy, not on the string. */
+    /* What <html> says about this screen is written BEFORE the new body goes
+       in (perf, 09.10.2026). paintTint() reads scrollY, and that read straight
+       after an innerHTML swap made the browser lay the whole new page out in
+       the middle of this task; read here, the layout it needs is the one the
+       last frame already did. And the root's attributes and the new body then
+       share one style pass instead of the second one invalidating the first.
+       The very first render reads nothing at all: the page is at its top, and
+       the only layout there is to read is the static page about to go. */
+    paintTint(bodySlot.dataset.painted ? undefined : 0);
+    // the root says the panel is what is on screen (the note further down)
+    document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
+    htmlLang();
+
     if (S.screen === "admin" && bodySlot.dataset.painted === "admin") {
       var paintKey = S.lang + "\n" + bodyHTML;
       if (paintKey !== admPaintedKey) {
@@ -48731,8 +48769,7 @@
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
     navSlot.hidden = S.screen === "admin" || S.screen === "scan";
-    measureHdr();
-    paintTint();
+    measureHdr();   // paintTint() ran before the body went in — see above
     patchNav();
 
     /* The overlay is re-mounted only when the *kind* of overlay changes, so an
@@ -48792,11 +48829,11 @@
        (admVvFollow, beside admBarTouch). Run here because the sheet
        opening or closing is a render, not a viewport event. */
     if (S.screen === "admin" || admVvH) admVvFollow();
-    /* …and the root says the panel is what is on screen, because that is
-       where `scroll-padding` lives: what the browser scrolls a focused field
-       to has to clear the PANEL's header and the PANEL's bar, not the shop's
-       (admin.css § «what the browser scrolls a focused field to»). */
-    document.documentElement.classList.toggle("adm2-on", S.screen === "admin");
+    /* (…and the root says the panel is what is on screen — `adm2-on`, written
+       before the body went in, at the top — because that is where
+       `scroll-padding` lives: what the browser scrolls a focused field to has
+       to clear the PANEL's header and the PANEL's bar, not the shop's —
+       admin.css § «what the browser scrolls a focused field to».) */
     if (S.screen === "admin") { admScrollers(); admMoreScroll(); }   // which way each strip scrolls; «Ещё»
     else document.body.classList.remove("adm-typing");
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
@@ -53859,14 +53896,42 @@
      flips, runs at most once per frame, and the header is measured on
      render/resize instead of on scroll. */
   var lastY = 0, hdrH = 0, tintOn = null, hideOn = null, tickQueued = false;
+  /* Perf, 09.10.2026: the header's height was read with offsetHeight right
+     after render() had written the page, which made the browser lay the whole
+     new page out there and then, inside the boot task — 0.3–0.5 s on a
+     mid-range phone, measured — and then again in the frame. A ResizeObserver
+     is told the height after the browser's own layout and before it paints,
+     so --hdrh is right in the first frame and nothing is laid out twice. It
+     follows the header for good (a language switch, a wrap, a rotation), so
+     a render only has to make sure it is watching the header that is there. */
+  var hdrRO = null, hdrWatched = null;
+  function setHdrH(v) {
+    if (v !== hdrH) { hdrH = v; document.documentElement.style.setProperty("--hdrh", v + "px"); }
+  }
   function measureHdr() {
     var h = document.querySelector(".hdr");
     if (!h) return;
-    var v = h.offsetHeight;
-    if (v !== hdrH) { hdrH = v; document.documentElement.style.setProperty("--hdrh", v + "px"); }
+    if (window.ResizeObserver) {
+      if (h === hdrWatched) return;
+      if (!hdrRO) {
+        hdrRO = new ResizeObserver(function (entries) {
+          var t = entries[entries.length - 1].target;
+          // inside the observer the layout is the browser's own, already done
+          if (t === hdrWatched) setHdrH(t.offsetHeight);
+        });
+      }
+      if (hdrWatched) hdrRO.unobserve(hdrWatched);
+      hdrWatched = h;
+      hdrRO.observe(h);
+      return;
+    }
+    setHdrH(h.offsetHeight);
   }
-  function paintTint() {
-    var y = window.scrollY;
+  /** `at` — the scroll offset when the caller knows it: the first render
+      passes 0, because reading scrollY then would lay out the hidden static
+      page that render is about to throw away (perf, 09.10.2026). */
+  function paintTint(at) {
+    var y = typeof at === "number" ? at : window.scrollY;
     var tint = S.screen === "home" && y < 340;
     if (tint !== tintOn) { tintOn = tint; document.documentElement.toggleAttribute("data-tint", tint); }
     /* The phone's chrome was eating half the screen, so the header gets the
