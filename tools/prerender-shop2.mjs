@@ -103,7 +103,7 @@ import {
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS, postDay, newestPostDay,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
   fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
-  STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD
+  STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD, productOffersLD
 } from "../src/lib/seo-head.mjs";
 import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, SUBCOLLECTION_MIN } from "../src/lib/shop-paths.mjs";
 /* The titles and meta descriptions of the home page, the sections, the
@@ -1611,15 +1611,7 @@ function setPage(b, lang) {
             "@type": "Product", name: (it.brand + " " + it.name).trim(),
             url: abs(langPath(seg, "/p/" + encodeURIComponent(it.id) + "/"))
           })),
-          offers: {
-            "@type": "Offer",
-            priceCurrency: "EUR",
-            price: String(b.price),
-            availability: "https://schema.org/" + (b.stock === "out" ? "OutOfStock" : "InStock"),
-            itemCondition: "https://schema.org/NewCondition",
-            url: abs(langPath(seg, rest)),
-            seller: { "@type": "Organization", name: "REMPIRE" }
-          }
+          offers: setOfferLD(b, abs(langPath(seg, rest)), abs(langPath(seg, "/info/returns/")))
         },
         ORG_LD,
         breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))
@@ -1627,6 +1619,27 @@ function setPage(b, lang) {
       content
     }
   };
+}
+
+/* A set's one Offer, with the delivery and the returns policy every product
+   offer carries (productOffersLD() with no feed items: the single offer at
+   the page's own address) — Search Console listed the set pages under
+   «Missing field "hasMerchantReturnPolicy"» / «"shippingDetails"» on
+   10.10.2026. A build that could not read the feed writes the bare offer. */
+function setOfferLD(b, url, returnLink) {
+  const stock = b.stock === "out" ? "out" : "in";
+  if (!MERCHANT) {
+    return {
+      "@type": "Offer", priceCurrency: "EUR", price: String(b.price),
+      availability: "https://schema.org/" + (stock === "out" ? "OutOfStock" : "InStock"),
+      itemCondition: "https://schema.org/NewCondition", url,
+      seller: { "@type": "Organization", name: "REMPIRE" }
+    };
+  }
+  return productOffersLD({
+    url, price: b.price, stock, returnLink,
+    commerce: { offers: [], shipping: MERCHANT.shipping, handling: MERCHANT.handling, returnCountries: MERCHANT.countries },
+  });
 }
 
 function setsPage(lang) {
