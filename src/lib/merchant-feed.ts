@@ -300,6 +300,12 @@ const GOOGLE_CATEGORY: Record<string, string> = {
 };
 const APPAREL_CATEGORY = "Apparel & Accessories > Clothing";
 
+/** The g:google_product_category of a product in section `cat` sold in these size labels; undefined for a section Google's taxonomy has no row for. */
+export function googleCategory(cat: string, labels: Array<string | null | undefined>): string | undefined {
+  const apparel = cat === "merch" && labels.some((l) => l && apparelOf(l));
+  return apparel ? APPAREL_CATEGORY : GOOGLE_CATEGORY[cat];
+}
+
 const CLOTHING_SIZE = /^(XXS|XS|S|M|L|XL|XXL|XXXL)(-(XXS|XS|S|M|L|XL|XXL|XXXL))?$/i;
 
 /** A merch size as colour and size: «white / S», «yellow-1» (a colour), «S-M». Null for anything else. */
@@ -680,6 +686,8 @@ export type FeedOffer = {
   id: string;
   /** The product's id in Merchant Center, ≤ 50 characters: the g:item_group_id of a product in several sizes, the g:id of one in a single size. */
   stem: string;
+  /** The product's g:google_product_category path (googleCategory()), the same on every size; undefined when the taxonomy has no row for its section. */
+  category?: string;
   productId: string;
   /** The size label («250 мл»), null for a product sold in one size. */
   label: string | null;
@@ -697,11 +705,13 @@ export function feedOffers(input: Pick<FeedInput, "overrides" | "descriptions" |
   const out: FeedOffer[] = [];
   for (const pp of planFeed(products, input.overrides).products) {
     const word = (pp.o?.stock ?? pp.p.fileStock) as StockState;
+    const category = googleCategory(pp.p.cat, pp.rungs.map((r) => r.label));
     pp.rungs.forEach((r, i) => {
       const sizeOut = pp.o?.stockByVariant?.[r.label ?? ""] === "out";
       out.push({
         id: pp.ids[i],
         stem: pp.stem,
+        ...(category ? { category } : {}),
         productId: pp.p.id,
         label: r.label,
         index: r.index,
@@ -807,7 +817,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     const link = base + langPath(seg, "/p/" + encodeURIComponent(p.id) + "/");
     const word: StockState = (o?.stock ?? p.fileStock) as StockState;
     const apparel = p.cat === "merch" && rungs.some((r) => r.label && apparelOf(r.label));
-    const category = apparel ? APPAREL_CATEGORY : GOOGLE_CATEGORY[p.cat];
+    const category = googleCategory(p.cat, rungs.map((r) => r.label));
     const own = OWN_BRANDS.has(p.brand.trim().toLowerCase());
     if (group) stats.groups++;
 

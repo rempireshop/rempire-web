@@ -1048,6 +1048,13 @@ JSON-LD back and holds it to Google's required fields and to the feed.
   the policy says so in all three languages («Returns are free: we refund what
   you paid to post the parcel back…»). The text excludes *opened*
   cosmetics only, which has no field and needs none.
+- **`sku`** and **`category`** on the `Product` (10.10.2026, Search Console):
+  `sku` is the Merchant feed's id for it (≤ 50 characters — `productSku()`),
+  `category` the feed's `g:google_product_category` as a `CategoryCode`
+  (`productCategory()`), not the section's name in the page's language. The
+  storefront script rewrites `#ldjson` after load and Google reads that
+  rewritten block, so `ldKeepServed()` in `public/shop2/app.js` keeps the
+  served `sku`, `category` and (when its own is empty) `description`.
 - **`gtin8/12/13/14`** only for a barcode Renat bound to the size in «Склад»
   (`stock_levels.ean`) that passes `validGtin()` — on the offer of its size, or
   on the `Product` when it is sold in one size.

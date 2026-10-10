@@ -49364,6 +49364,13 @@
     var sv = SERVED_LD && SERVED_LD.url === pUrl ? SERVED_LD : null;
     if (!sv) return;
     var GTIN = /^gtin(8|12|13|14)?$/, k, i, j;
+    /* What Google reads is this block, after the script has run — so the
+       product's own fields the server got right stay: the feed's id as the
+       sku, Google's category, and the description when the lazy text has
+       not arrived yet (Search Console, 10.10.2026). */
+    if (sv.product.sku) ld.sku = sv.product.sku;
+    if (sv.product.category) ld.category = sv.product.category;
+    if (!ld.description && sv.product.description) ld.description = sv.product.description;
     if (!OV_LIVE) {
       ld.offers = sv.product.offers;
       for (k in sv.product) if (GTIN.test(k)) ld[k] = sv.product[k];
@@ -49446,8 +49453,10 @@
         name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
         image: [ldImage(p.img)],
         description: unentity(stripTags(descFor(p))).slice(0, 500),
-        category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
-        sku: p.id,
+        /* Google takes a sku of at most 50 characters; the served block's
+           (the Merchant feed's id) and its `category` (Google's taxonomy as
+           a CategoryCode) replace these in ldKeepServed(). */
+        sku: p.id.length <= 50 ? p.id : undefined,
         url: pUrl,
         /* An offer that says InStock for something the page refuses to sell
            is worse than no markup at all: Google drops the product from the

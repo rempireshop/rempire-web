@@ -175,6 +175,10 @@ describe("Product JSON-LD: one Offer per size, the feed's", () => {
       expect(productProblems(ld), id).toEqual([]);
       // the feed's g:item_group_id for several sizes, its g:id for one
       expect(ld.sku, id).toBe(items.length > 1 ? items[0].stem : items[0].id);
+      // Google's taxonomy, as the feed's g:google_product_category, never the section's local name
+      expect(ld.category, id).toEqual(items[0].category
+        ? { "@type": "CategoryCode", inCodeSet: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", codeValue: items[0].category }
+        : undefined);
       // one size and an id that fits: the id itself (several sizes may cut a
       // 49-character id to leave room for «_250ml» — the group id then)
       if (items.length === 1 && id.length <= 50) expect(ld.sku, id).toBe(id);

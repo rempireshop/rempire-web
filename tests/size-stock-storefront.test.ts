@@ -435,6 +435,30 @@ describe("the offer the head publishes", () => {
     expect(sold({ id: "x", stock: "low", sizes: SIZES, stockVar: null })).toBe(false);
   });
 
+  /* Search Console, 10.10.2026: the block Google reads is this rewritten
+     one, so a sku over 50 characters, a category in the page's language and
+     an empty description written here outlived the served block's fixes. */
+  it("keeps the served block's sku, category and description on the page they were served for", () => {
+    const keep = new Function(
+      "SERVED_LD", "OV_LIVE", "ld", "pUrl",
+      `${slice("ldKeepServed")}
+       ldKeepServed(ld, pUrl); return ld;`,
+    ) as (sv: unknown, live: boolean, ld: Record<string, unknown>, url: string) => Record<string, unknown>;
+    const url = "https://rempireshop.com/ru/products/x";
+    const category = { "@type": "CategoryCode", codeValue: "Health & Beauty > Personal Care > Hair Care" };
+    const served = { url, product: { url, sku: "captain-fawcett-expedition-reserve-matt-s-adfb2b8c", category, description: "Served.", offers: [] }, offers: [] };
+    const out = keep(served, true, { description: "", offers: [] }, url);
+    expect(out).toMatchObject({ sku: served.product.sku, category, description: "Served." });
+    // the script's own description wins when it has one
+    expect(keep(served, true, { description: "Own.", offers: [] }, url).description).toBe("Own.");
+    // another page's block lends nothing
+    expect(keep(served, true, { description: "", offers: [] }, url + "-other")).toEqual({ description: "", offers: [] });
+    // and the script never writes a sku Google refuses, nor the section's local name
+    const head = slice("setHead");
+    expect(head).toContain("sku: p.id.length <= 50 ? p.id : undefined");
+    expect(head).not.toContain("category: trText(CAT_NAMES");
+  });
+
   it("setHead() publishes that answer, not p.stock, in the offer and the snippet", () => {
     const head = slice("setHead");
     expect(head).toContain("var pGoneSeo = soldOut(p);");

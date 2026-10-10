@@ -955,6 +955,18 @@ const feedItems = commerce =>
    whenever that fits and a cut id with a hash when it does not — so the page
    and the feed name the product alike. No feed items and an id too long:
    no sku, rather than one Google rejects. */
+/* `category`: the Merchant feed's g:google_product_category, as the
+   CategoryCode Google's merchant-listing documentation shows — the
+   taxonomy path in its English code set. The section's own name in the
+   page's language («Парфюмерия», «Juuksehooldus») was the plain-text form,
+   and Search Console called it «Invalid value in field "category"» on the
+   Russian and Estonian pages (10.10.2026). No feed items: no category. */
+export const GPC_CODE_SET = "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt";
+export function productCategory(items) {
+  const path = ((items || [])[0] || {}).category;
+  return path ? { category: { "@type": "CategoryCode", inCodeSet: GPC_CODE_SET, codeValue: path } } : {};
+}
+
 export const MAX_SKU = 50;
 export function productSku(id, items) {
   const first = (items || [])[0];
@@ -1125,7 +1137,7 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     brand: { "@type": "Brand", name: brand },
     image: imageUrls,
     description: clip(text, 500),
-    category: section,
+    ...productCategory(items),
     ...productSku(id, items),
     // one size: its barcode is the product's (several: each offer carries its own)
     ...(items.length === 1 ? gtinLD(items[0].gtin) : {}),

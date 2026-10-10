@@ -155,7 +155,7 @@ describe("a custom product's page at request time", () => {
     expect(product.name).toBe("Proraso Beard Balm — бальзам для бороды");
     expect(product.brand.name).toBe("Proraso");
     expect(product.sku).toBe(p.id);
-    expect(product.category).toBe("Habemehooldus");
+    expect(product.category).toEqual({ "@type": "CategoryCode", inCodeSet: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", codeValue: "Health & Beauty > Personal Care > Shaving & Grooming" }); // Google’s taxonomy, not the section’s name
     expect(product.description).toBe("Habemepalsam.");
     expect(product.image).toEqual(["https://cdn.example.com/p/balm.webp"]);
     expect(product.url).toBe(`${LIVE}/et/products/${p.id}`);
@@ -194,7 +194,7 @@ describe("a custom product's page at request time", () => {
     expect(meta(html, "og:locale")).toBe("en_US");
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/products/${p.id}`);
     const product = ldBlocks(html).find((o) => o["@type"] === "Product") as Record<string, unknown>;
-    expect(product.category).toBe("Beard care");
+    expect(product.category).toEqual({ "@type": "CategoryCode", inCodeSet: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt", codeValue: "Health & Beauty > Personal Care > Shaving & Grooming" }); // Google’s taxonomy, not the section’s name
     expect(product.description).toBe("Бальзам для бороды. Смягчает и укладывает.");
     // the English page's own money format, as the shop prints it (seoPriceText(), src/lib/seo-copy.mjs)
     expect(html).toContain("from €14.90");
