@@ -850,10 +850,20 @@ export function shippingDetailsLD(options, handling) {
       on, and in its original packaging»         → new condition
      «the money goes back automatically to the payment method you originally
       used»                                      → a refund, not credit
-     «Returns are free: we refund what you paid to post the parcel back»
-                                                 → free returns (Dim, 10.10.2026,
-                                                   after Search Console asked
-                                                   for `returnFees`)
+     «Returns are free, except for orders delivered by Nova Post»
+                                                 → free returns where Nova Post
+                                                   is never offered, the
+                                                   customer's cost elsewhere
+
+   WHO PAYS for the parcel back (Dim, 10.10.2026, after Search Console asked
+   for `returnFees`): the shop, except on a Nova Post order. Google's markup
+   knows countries, not carriers, so the promise is made per country:
+   FreeReturn in FREE_RETURN_COUNTRIES — the Baltics, where the checkout
+   never offers Nova Post (NO_NOVAPOST_COUNTRIES in
+   src/lib/shipping/country-prices.ts; tests/structured-data.test.ts holds
+   the two lists together) — and ReturnFeesCustomerResponsibility in every
+   other country, where a shopper may have picked Nova Post. That says less
+   than the text does for a DPD order from Spain, never more.
 
    The exclusions have no
    field in Google's markup and need none: the text excludes OPENED
@@ -865,23 +875,38 @@ export function shippingDetailsLD(options, handling) {
    covered by the 30. */
 export const RETURN_POLICY = Object.freeze({ days: 30, country: "EE" });
 
-/** MerchantReturnPolicy for the countries the shop sells to (sellCountries()); `link` = the refund policy page. */
+/** Where every return is free: the countries the checkout never offers Nova Post in. */
+export const FREE_RETURN_COUNTRIES = Object.freeze(["EE", "LV", "LT"]);
+
+/**
+ * MerchantReturnPolicy for the countries the shop sells to (sellCountries());
+ * `link` = the refund policy page. Two policies when the shop sells both
+ * inside and outside FREE_RETURN_COUNTRIES (Google: «one or more instances of
+ * MerchantReturnPolicy under the Offer»), one when it sells on one side only.
+ */
 export function returnPolicyLD(countries, link) {
   const list = [...new Set((countries || []).filter(isCountry))];
   if (!list.length) return null;
-  return {
+  const policy = (applicableCountry, returnFees) => ({
     "@type": "MerchantReturnPolicy",
-    applicableCountry: list.slice(0, 50),
+    applicableCountry: applicableCountry.slice(0, 50),
     returnPolicyCountry: RETURN_POLICY.country,
     returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
     merchantReturnDays: RETURN_POLICY.days,
     returnMethod: "https://schema.org/ReturnByMail",
     returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
-    returnFees: "https://schema.org/FreeReturn",
+    returnFees,
     itemCondition: "https://schema.org/NewCondition",
     refundType: "https://schema.org/FullRefund",
     ...(link ? { merchantReturnLink: link } : {})
-  };
+  });
+  const free = list.filter(c => FREE_RETURN_COUNTRIES.includes(c));
+  const paid = list.filter(c => !FREE_RETURN_COUNTRIES.includes(c));
+  const out = [
+    ...(free.length ? [policy(free, "https://schema.org/FreeReturn")] : []),
+    ...(paid.length ? [policy(paid, "https://schema.org/ReturnFeesCustomerResponsibility")] : []),
+  ];
+  return out.length === 1 ? out[0] : out;
 }
 
 /** `{ gtin13: "…" }` (or gtin8/12/14) for a code validGtin() in src/lib/merchant-feed.ts already accepted; `{}` otherwise. */

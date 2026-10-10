@@ -28,6 +28,7 @@ import {
   ldJson,
   openingHoursLD,
   productSpec,
+  FREE_RETURN_COUNTRIES,
   RETURN_POLICY,
   returnPolicyLD,
   shippingDetailsLD,
@@ -46,6 +47,7 @@ import {
   validGtin,
 } from "@/lib/merchant-feed";
 import { DEFAULT_SHIPPING_RULES, quoteFromRules } from "@/lib/shipping";
+import { NO_NOVAPOST_COUNTRIES } from "@/lib/shipping/country-prices";
 
 type Json = Record<string, unknown>;
 type Offer = Json & {
@@ -98,11 +100,17 @@ function productProblems(ld: Json): string[] {
         }
       }
     }
-    const r = o.hasMerchantReturnPolicy as Json | undefined;
-    if (r) {
+    const policies = ([] as Json[]).concat((o.hasMerchantReturnPolicy as Json | Json[] | undefined) ?? []);
+    const seen = new Set<string>();
+    for (const r of policies) {
       if (r["@type"] !== "MerchantReturnPolicy") out.push(at + "return type");
       if (!Array.isArray(r.applicableCountry) || !(r.applicableCountry as unknown[]).length || (r.applicableCountry as unknown[]).length > 50) out.push(at + "applicableCountry");
+      for (const c of (r.applicableCountry as string[]) ?? []) {
+        if (seen.has(c)) out.push(at + "two return policies for " + c);
+        seen.add(c);
+      }
       if (r.returnPolicyCategory === "https://schema.org/MerchantReturnFiniteReturnWindow" && !(Number(r.merchantReturnDays) > 0)) out.push(at + "merchantReturnDays");
+      if (!/^https:\/\/schema\.org\/(FreeReturn|ReturnFeesCustomerResponsibility)$/.test(String(r.returnFees))) out.push(at + "returnFees " + r.returnFees);
     }
   });
   return out;
@@ -266,10 +274,17 @@ describe("hasMerchantReturnPolicy: only what the returns policy says", () => {
     expect(legal("et")).toContain("Meil kehtib 30-päevane tagastuspoliitika");
   });
 
-  it("says returns are free, in all three languages — the markup's returnFees (Dim, 10.10.2026)", () => {
-    expect(legal("en")).toContain("Returns are free: we refund what you paid to post the parcel back, together with the price of the item");
-    expect(legal("et")).toContain("Tagastamine on tasuta: hüvitame paki tagasisaatmise postikulu koos kauba hinnaga");
-    expect(legal("ru")).toContain("Возврат бесплатный: стоимость обратной пересылки мы возмещаем вместе с ценой товара");
+  it("says returns are free except a Nova Post order's, in all three languages — the markup's returnFees (Dim, 10.10.2026)", () => {
+    expect(legal("en")).toContain("Returns are free, except for orders delivered by Nova Post: we refund what you paid to post the parcel back, together with the price of the item");
+    expect(legal("en")).toContain("Sending back an order delivered by Nova Post is at your own cost.");
+    expect(legal("et")).toContain("Tagastamine on tasuta, välja arvatud Nova Posti kaudu kohale toimetatud tellimused: hüvitame paki tagasisaatmise postikulu koos kauba hinnaga");
+    expect(legal("et")).toContain("Nova Posti kaudu kohale toimetatud tellimuse tagasisaatmise kulud kannad ise.");
+    expect(legal("ru")).toContain("Возврат бесплатный, кроме заказов, доставленных через Nova Post: стоимость обратной пересылки мы возмещаем вместе с ценой товара");
+    expect(legal("ru")).toContain("Пересылку заказа, доставленного через Nova Post, при возврате оплачиваете вы.");
+  });
+
+  it("promises free returns only where the checkout never offers Nova Post", () => {
+    expect([...FREE_RETURN_COUNTRIES]).toEqual([...NO_NOVAPOST_COUNTRIES]);
   });
 
   it("excludes OPENED cosmetics only — an unopened bottle is returnable, so the policy applies to every product", () => {
@@ -280,26 +295,38 @@ describe("hasMerchantReturnPolicy: only what the returns policy says", () => {
 
   it("is a finite 30-day window by mail to Estonia, for the countries the feed sells to, with nothing the text does not say", () => {
     const countries = sellCountries(RULES);
-    const r = roundTrip(returnPolicyLD(countries, BASE + "/policies/refund-policy"));
-    expect(r).toEqual({
+    const r = roundTrip(returnPolicyLD(countries, BASE + "/policies/refund-policy")) as unknown as Json[];
+    const same = {
       "@type": "MerchantReturnPolicy",
-      applicableCountry: countries,
       returnPolicyCountry: "EE",
       returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
       merchantReturnDays: 30,
       returnMethod: "https://schema.org/ReturnByMail",
       returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
-      returnFees: "https://schema.org/FreeReturn",
       itemCondition: "https://schema.org/NewCondition",
       refundType: "https://schema.org/FullRefund",
       merchantReturnLink: BASE + "/policies/refund-policy",
-    });
+    };
+    const baltic = countries.filter((c) => ["EE", "LV", "LT"].includes(c));
+    const rest = countries.filter((c) => !["EE", "LV", "LT"].includes(c));
+    expect(baltic.length).toBe(3);
+    expect(rest.length).toBeGreaterThan(0);
+    // free where Nova Post is never offered; the customer's cost wherever a shopper may have picked it
+    expect(r).toEqual([
+      { ...same, applicableCountry: baltic, returnFees: "https://schema.org/FreeReturn" },
+      { ...same, applicableCountry: rest, returnFees: "https://schema.org/ReturnFeesCustomerResponsibility" },
+    ]);
+    // a shop selling on one side only carries the one policy, not a list
+    expect(roundTrip(returnPolicyLD(["EE", "LV"], null))).toMatchObject({ applicableCountry: ["EE", "LV"], returnFees: "https://schema.org/FreeReturn" });
+    expect(roundTrip(returnPolicyLD(["FI"], null))).toMatchObject({ applicableCountry: ["FI"], returnFees: "https://schema.org/ReturnFeesCustomerResponsibility" });
   });
 
   it("rides every offer, linked to the refund policy in the page's language", () => {
     const offers = roundTrip(shampooSpec("ET", shampooCommerce()).jsonld[0]).offers as Offer[];
     for (const o of offers) {
-      expect(o.hasMerchantReturnPolicy).toMatchObject({ merchantReturnDays: 30, merchantReturnLink: BASE + "/et/policies/refund-policy" });
+      for (const p of ([] as Json[]).concat(o.hasMerchantReturnPolicy ?? [])) {
+        expect(p).toMatchObject({ merchantReturnDays: 30, merchantReturnLink: BASE + "/et/policies/refund-policy" });
+      }
     }
   });
 });

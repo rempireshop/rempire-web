@@ -1043,10 +1043,14 @@ JSON-LD back and holds it to Google's required fields and to the feed.
   customer's label («The shop does not issue a return label»), the item in the
   condition it was received in, the money back to the original payment method;
   `applicableCountry` = the delivery countries; `merchantReturnLink` = the
-  refund policy in the page's language. `returnFees` = `FreeReturn`: Dim chose
-  free returns on 10.10.2026 when Search Console flagged the missing field, and
-  the policy says so in all three languages («Returns are free: we refund what
-  you paid to post the parcel back…»). The text excludes *opened*
+  refund policy in the page's language. `returnFees`: Dim chose free returns
+  except Nova Post orders on 10.10.2026 when Search Console flagged the missing
+  field, and the policy says so in all three languages («Returns are free,
+  except for orders delivered by Nova Post…»). The markup knows countries,
+  not carriers, so there are two policies: `FreeReturn` for EE/LV/LT
+  (`FREE_RETURN_COUNTRIES` = `NO_NOVAPOST_COUNTRIES`: the checkout never
+  offers Nova Post there) and `ReturnFeesCustomerResponsibility` for every
+  other country, where a shopper may have picked it. The text excludes *opened*
   cosmetics only, which has no field and needs none.
 - **`sku`** and **`category`** on the `Product` (10.10.2026, Search Console):
   `sku` is the Merchant feed's id for it (≤ 50 characters — `productSku()`),

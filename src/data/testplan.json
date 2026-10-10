@@ -1514,34 +1514,34 @@
       "who": "dim",
       "device": "any",
       "lang": "any",
-      "title": "Бесплатный возврат на странице возврата",
+      "title": "Бесплатный возврат, кроме Nova Post",
       "steps": [
         "Открыть rempireshop.com/ru/policies/refund-policy.",
         "То же на /et/policies/refund-policy и /policies/refund-policy."
       ],
       "expect": [
-        "В разделе о пересылке сказано, что возврат бесплатный.",
-        "Сказано, что стоимость обратной пересылки возмещается вместе с ценой товара.",
-        "Просьба сохранить чек за отправку — на всех трёх языках."
+        "Сказано: возврат бесплатный, кроме заказов Nova Post.",
+        "Пересылка возмещается вместе с ценой товара; чек нужно сохранить.",
+        "Пересылку заказа Nova Post при возврате оплачивает покупатель — на всех трёх языках."
       ],
-      "why": "Google показывает «бесплатный возврат» по разметке страниц товаров, и текст должен говорить то же самое.",
+      "why": "Google показывает «бесплатный возврат» в Эстонии, Латвии и Литве (там нет Nova Post), и текст должен говорить то же самое.",
       "risk": "med",
       "writes": false,
       "en": {
-        "title": "Free returns on the returns page",
+        "title": "Free returns, except Nova Post",
         "steps": [
           "Open rempireshop.com/ru/policies/refund-policy.",
           "The same on /et/policies/refund-policy and /policies/refund-policy."
         ],
         "expect": [
-          "The part about posting the parcel says returns are free.",
-          "It says the return postage is refunded together with the price of the item.",
-          "It asks to keep the postage receipt — in all three languages."
+          "It says returns are free, except Nova Post orders.",
+          "Return postage is refunded with the item’s price; keep the receipt.",
+          "Sending back a Nova Post order is the customer’s cost — in all three languages."
         ],
-        "why": "Google shows «free returns» from the product pages' markup, so the text has to say the same."
+        "why": "Google shows «free returns» in Estonia, Latvia and Lithuania (no Nova Post there), so the text has to say the same."
       },
       "mark": "new",
-      "markedAt": "2026-10-10T11:51:08.813Z"
+      "markedAt": "2026-10-10T15:52:11.275Z"
     },
     {
       "id": "panel-login",
