@@ -850,9 +850,12 @@ export function shippingDetailsLD(options, handling) {
       on, and in its original packaging»         → new condition
      «the money goes back automatically to the payment method you originally
       used»                                      → a refund, not credit
+     «Returns are free: we refund what you paid to post the parcel back»
+                                                 → free returns (Dim, 10.10.2026,
+                                                   after Search Console asked
+                                                   for `returnFees`)
 
-   Left out because the text does not say it: WHO PAYS for the parcel back
-   (`returnFees`) — an owner's answer (docs/seo.md). The exclusions have no
+   The exclusions have no
    field in Google's markup and need none: the text excludes OPENED
    cosmetics («personal-hygiene goods (such as opened cosmetics)», «Sealed
    cosmetics that have been opened cannot be returned once unsealed»), so an
@@ -874,6 +877,7 @@ export function returnPolicyLD(countries, link) {
     merchantReturnDays: RETURN_POLICY.days,
     returnMethod: "https://schema.org/ReturnByMail",
     returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
+    returnFees: "https://schema.org/FreeReturn",
     itemCondition: "https://schema.org/NewCondition",
     refundType: "https://schema.org/FullRefund",
     ...(link ? { merchantReturnLink: link } : {})
@@ -944,6 +948,19 @@ export function productOffersLD({ url, price, stock, commerce, returnLink }) {
 }
 const feedItems = commerce =>
   (commerce && Array.isArray(commerce.offers) ? commerce.offers : []).filter(o => o && Number(o.price) > 0);
+
+/* Google takes a `sku` of at most 50 characters (Search Console flagged 23
+   product ids longer than that on 10.10.2026). The Product's sku is the id
+   Merchant Center knows it by — the feed's stem, which is the product id
+   whenever that fits and a cut id with a hash when it does not — so the page
+   and the feed name the product alike. No feed items and an id too long:
+   no sku, rather than one Google rejects. */
+export const MAX_SKU = 50;
+export function productSku(id, items) {
+  const first = (items || [])[0];
+  const sku = first ? first.stem || (items.length === 1 ? first.id : "") : String(id || "");
+  return sku && sku.length <= MAX_SKU ? { sku } : {};
+}
 
 /* ---------- the shop itself: where it is, how it ships -------------------- */
 
@@ -1109,7 +1126,7 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
     image: imageUrls,
     description: clip(text, 500),
     category: section,
-    sku: id,
+    ...productSku(id, items),
     // one size: its barcode is the product's (several: each offer carries its own)
     ...(items.length === 1 ? gtinLD(items[0].gtin) : {}),
     url,

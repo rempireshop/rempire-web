@@ -678,6 +678,8 @@ function planFeed(products: FeedProduct[], overrides: Record<string, Override>):
 export type FeedOffer = {
   /** The Merchant Center id — g:id. */
   id: string;
+  /** The product's id in Merchant Center, ≤ 50 characters: the g:item_group_id of a product in several sizes, the g:id of one in a single size. */
+  stem: string;
   productId: string;
   /** The size label («250 мл»), null for a product sold in one size. */
   label: string | null;
@@ -699,6 +701,7 @@ export function feedOffers(input: Pick<FeedInput, "overrides" | "descriptions" |
       const sizeOut = pp.o?.stockByVariant?.[r.label ?? ""] === "out";
       out.push({
         id: pp.ids[i],
+        stem: pp.stem,
         productId: pp.p.id,
         label: r.label,
         index: r.index,

@@ -1509,6 +1509,41 @@
       }
     },
     {
+      "id": "shop-returns-free",
+      "area": "shop",
+      "who": "dim",
+      "device": "any",
+      "lang": "any",
+      "title": "Бесплатный возврат на странице возврата",
+      "steps": [
+        "Открыть rempireshop.com/ru/policies/refund-policy.",
+        "То же на /et/policies/refund-policy и /policies/refund-policy."
+      ],
+      "expect": [
+        "В разделе о пересылке сказано, что возврат бесплатный.",
+        "Сказано, что стоимость обратной пересылки возмещается вместе с ценой товара.",
+        "Просьба сохранить чек за отправку — на всех трёх языках."
+      ],
+      "why": "Google показывает «бесплатный возврат» по разметке страниц товаров, и текст должен говорить то же самое.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "Free returns on the returns page",
+        "steps": [
+          "Open rempireshop.com/ru/policies/refund-policy.",
+          "The same on /et/policies/refund-policy and /policies/refund-policy."
+        ],
+        "expect": [
+          "The part about posting the parcel says returns are free.",
+          "It says the return postage is refunded together with the price of the item.",
+          "It asks to keep the postage receipt — in all three languages."
+        ],
+        "why": "Google shows «free returns» from the product pages' markup, so the text has to say the same."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-10T11:51:08.813Z"
+    },
+    {
       "id": "panel-login",
       "area": "panel",
       "who": "renat",

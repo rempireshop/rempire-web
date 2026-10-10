@@ -1043,8 +1043,10 @@ JSON-LD back and holds it to Google's required fields and to the feed.
   customer's label («The shop does not issue a return label»), the item in the
   condition it was received in, the money back to the original payment method;
   `applicableCountry` = the delivery countries; `merchantReturnLink` = the
-  refund policy in the page's language. **No `returnFees`**: the text does not
-  say who pays for the parcel back (owner TODO). The text excludes *opened*
+  refund policy in the page's language. `returnFees` = `FreeReturn`: Dim chose
+  free returns on 10.10.2026 when Search Console flagged the missing field, and
+  the policy says so in all three languages («Returns are free: we refund what
+  you paid to post the parcel back…»). The text excludes *opened*
   cosmetics only, which has no field and needs none.
 - **`gtin8/12/13/14`** only for a barcode Renat bound to the size in «Склад»
   (`stock_levels.ean`) that passes `validGtin()` — on the offer of its size, or

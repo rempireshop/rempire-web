@@ -134,7 +134,10 @@ describe("owner-typed text on a custom product's page", () => {
       Record<string, unknown> & { brand: { name: string } };
     expect(product.name).toBe(`${p.brand} ${p.name}`);
     expect(product.brand.name).toBe(p.brand);
-    expect(product.sku).toBe(p.id);
+    // the sku is the feed's id for it: this 66-character id cut to 50 with a hash (productSku())
+    expect(String(product.sku)).toMatch(/^[a-z0-9-]+-[0-9a-f]{8}$/);
+    expect(String(product.sku).length).toBeLessThanOrEqual(50);
+    expect(p.id.startsWith(String(product.sku).replace(/-[0-9a-f]{8}$/, ""))).toBe(true);
   });
 
   it("headBlock() escapes the JSON-LD for its own context — «</script>», «<!--», the two line separators — losslessly", () => {

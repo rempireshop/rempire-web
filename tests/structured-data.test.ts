@@ -72,6 +72,8 @@ function productProblems(ld: Json): string[] {
   if (ld["@type"] !== "Product") out.push("not a Product");
   if (!ld.name) out.push("no name");
   if (!Array.isArray(ld.image) || !(ld.image as unknown[]).length) out.push("no image");
+  // Search Console «Invalid string length in field "sku"» (10.10.2026): at most 50
+  if (ld.sku !== undefined && !(typeof ld.sku === "string" && ld.sku.length >= 1 && ld.sku.length <= 50)) out.push("sku " + ld.sku);
   const offers = (Array.isArray(ld.offers) ? ld.offers : [ld.offers]) as Offer[];
   if (!offers.length || !offers[0]) out.push("no offers");
   offers.forEach((o, i) => {
@@ -79,6 +81,7 @@ function productProblems(ld: Json): string[] {
     if (o["@type"] !== "Offer") out.push(at + "not an Offer");
     if (!(Number(o.price) > 0) || !/^\d+(\.\d{1,2})?$/.test(String(o.price))) out.push(at + "price " + o.price);
     if (o.priceCurrency !== "EUR") out.push(at + "currency " + o.priceCurrency);
+    if (o.sku !== undefined && !(o.sku.length >= 1 && o.sku.length <= 50)) out.push(at + "sku " + o.sku);
     if (!/^https:\/\/schema\.org\/(InStock|OutOfStock)$/.test(o.availability)) out.push(at + "availability " + o.availability);
     if (o.itemCondition !== "https://schema.org/NewCondition") out.push(at + "itemCondition");
     if (!/^https:\/\//.test(o.url)) out.push(at + "url " + o.url);
@@ -156,6 +159,35 @@ describe("Product JSON-LD: one Offer per size, the feed's", () => {
     expect(offers.map((o) => o.availability.replace("https://schema.org/", ""))).toEqual(["InStock", "OutOfStock", "InStock"]);
   });
 
+  it("names the product by its Merchant Center id, never by an id over 50 characters", () => {
+    const all = feedOffers({ overrides: {}, descriptions: {}, custom: [] });
+    const byProduct = new Map<string, typeof all>();
+    for (const o of all) byProduct.set(o.productId, [...(byProduct.get(o.productId) ?? []), o]);
+    const long = [...byProduct.keys()].filter((id) => id.length > 50);
+    expect(long.length).toBeGreaterThan(0);
+    for (const [id, items] of byProduct) {
+      const ld = roundTrip(productSpec({
+        base: BASE, lang: langByCode("EN"), id, cat: "hair", catName: "Hair care",
+        brand: "B", name: "N", price: items[0].price, priceFrom: items.length > 1, stock: "in",
+        seoTitle: "", seoDesc: "", body: "", image: BASE + "/og.png", imageUrls: [BASE + "/x.webp"],
+        commerce: { offers: items, shipping: (p: number) => shippingFor(p, RULES), handling: HANDLING_DAYS, returnCountries: sellCountries(RULES) },
+      }).jsonld[0] as Json);
+      expect(productProblems(ld), id).toEqual([]);
+      // the feed's g:item_group_id for several sizes, its g:id for one
+      expect(ld.sku, id).toBe(items.length > 1 ? items[0].stem : items[0].id);
+      // one size and an id that fits: the id itself (several sizes may cut a
+      // 49-character id to leave room for «_250ml» — the group id then)
+      if (items.length === 1 && id.length <= 50) expect(ld.sku, id).toBe(id);
+    }
+    // no feed items: the id when it fits, no sku when it does not
+    const bare = (id: string) => roundTrip(productSpec({
+      base: BASE, lang: langByCode("EN"), id, cat: "hair", catName: "Hair care", brand: "B", name: "N",
+      price: 9, priceFrom: false, stock: "in", seoTitle: "", seoDesc: "", body: "", image: BASE + "/og.png", imageUrls: [BASE + "/x.webp"],
+    }).jsonld[0] as Json);
+    expect(bare(SHAMPOO).sku).toBe(SHAMPOO);
+    expect(bare(long[0]).sku).toBeUndefined();
+  });
+
   it("keeps the single Offer it always had when the page has no feed items", () => {
     const ld = roundTrip(shampooSpec("EN").jsonld[0]);
     expect(Array.isArray(ld.offers)).toBe(false);
@@ -230,6 +262,12 @@ describe("hasMerchantReturnPolicy: only what the returns policy says", () => {
     expect(legal("et")).toContain("Meil kehtib 30-päevane tagastuspoliitika");
   });
 
+  it("says returns are free, in all three languages — the markup's returnFees (Dim, 10.10.2026)", () => {
+    expect(legal("en")).toContain("Returns are free: we refund what you paid to post the parcel back, together with the price of the item");
+    expect(legal("et")).toContain("Tagastamine on tasuta: hüvitame paki tagasisaatmise postikulu koos kauba hinnaga");
+    expect(legal("ru")).toContain("Возврат бесплатный: стоимость обратной пересылки мы возмещаем вместе с ценой товара");
+  });
+
   it("excludes OPENED cosmetics only — an unopened bottle is returnable, so the policy applies to every product", () => {
     expect(legal("en")).toContain("personal-hygiene goods (such as opened cosmetics)");
     expect(legal("en")).toContain("Sealed cosmetics that have been opened cannot be returned once unsealed, for reasons of hygiene.");
@@ -247,12 +285,11 @@ describe("hasMerchantReturnPolicy: only what the returns policy says", () => {
       merchantReturnDays: 30,
       returnMethod: "https://schema.org/ReturnByMail",
       returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
+      returnFees: "https://schema.org/FreeReturn",
       itemCondition: "https://schema.org/NewCondition",
       refundType: "https://schema.org/FullRefund",
       merchantReturnLink: BASE + "/policies/refund-policy",
     });
-    // who pays for the parcel back is not in the text — so neither is returnFees
-    expect(r).not.toHaveProperty("returnFees");
   });
 
   it("rides every offer, linked to the refund policy in the page's language", () => {
