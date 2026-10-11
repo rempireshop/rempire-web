@@ -49357,17 +49357,31 @@
      stand as they are. With it, this script's prices and stock words stand,
      and the served block lends what does not depend on them, matched with
      care: the item id and a barcode by the offer's address (a size), the
-     delivery by price (it depends on nothing else — a price the owner has
-     changed since gets none rather than the old price's), the returns policy
-     to every offer. */
+     delivery by price (it depends on nothing else), the returns policy to
+     every offer. A price the owner has changed since the build borrows the
+     delivery of a served price it cannot be told apart from — shipTwin() —
+     and gets none across a «free from» threshold: Search Console failed 91
+     product pages on «Missing field "shippingDetails"» on 11.10.2026, prices
+     changed between two builds. */
+  function shipTwin(a, b) {
+    var ts = [SHIP_RULES.freeFrom], by = SHIP_RULES.freeFromByCountry || {}, k, i;
+    for (k in by) if (Object.prototype.hasOwnProperty.call(by, k)) ts.push(by[k]);
+    for (i = 0; i < ts.length; i++) {
+      var t = ts[i];
+      if (typeof t === "number" && t >= 0 && (a >= t) !== (b >= t)) return false;
+    }
+    return true;
+  }
   function ldKeepServed(ld, pUrl) {
     var sv = SERVED_LD && SERVED_LD.url === pUrl ? SERVED_LD : null;
     if (!sv) return;
     var GTIN = /^gtin(8|12|13|14)?$/, k, i, j;
     /* What Google reads is this block, after the script has run — so the
-       product's own fields the server got right stay: the feed's id as the
-       sku, Google's category, and the description when the lazy text has
-       not arrived yet (Search Console, 10.10.2026). */
+       product's own fields the server got right stay: the name in the
+       page's language, the feed's id as the sku, Google's category, and the
+       description when the lazy text has not arrived yet (Search Console,
+       10.10–11.10.2026). */
+    if (sv.product.name) ld.name = sv.product.name;
     if (sv.product.sku) ld.sku = sv.product.sku;
     if (sv.product.category) ld.category = sv.product.category;
     if (!ld.description && sv.product.description) ld.description = sv.product.description;
@@ -49384,6 +49398,10 @@
         var s = sv.offers[j];
         if (s.url === o.url) same = s;
         if (!ship && s.shippingDetails && Number(s.price) === Number(o.price)) ship = s.shippingDetails;
+      }
+      for (j = 0; !ship && j < sv.offers.length; j++) {
+        var tw = sv.offers[j];
+        if (tw.shippingDetails && shipTwin(Number(tw.price), Number(o.price))) ship = tw.shippingDetails;
       }
       if (same && same.sku) o.sku = same.sku;
       if (same) for (k in same) if (GTIN.test(k)) o[k] = same[k];
@@ -49450,7 +49468,8 @@
       // does not quietly thin out its structured data
       var ld = {
         "@context": "https://schema.org", "@type": "Product",
-        name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
+        // in the page's language — p.name is the Russian one (Search Console listed English pages as «… — шампунь»)
+        name: core, brand: { "@type": "Brand", name: p.brand },
         image: [ldImage(p.img)],
         description: unentity(stripTags(descFor(p))).slice(0, 500),
         /* Google takes a sku of at most 50 characters; the served block's

@@ -446,9 +446,9 @@ describe("the offer the head publishes", () => {
     ) as (sv: unknown, live: boolean, ld: Record<string, unknown>, url: string) => Record<string, unknown>;
     const url = "https://rempireshop.com/ru/products/x";
     const category = { "@type": "CategoryCode", codeValue: "Health & Beauty > Personal Care > Hair Care" };
-    const served = { url, product: { url, sku: "captain-fawcett-expedition-reserve-matt-s-adfb2b8c", category, description: "Served.", offers: [] }, offers: [] };
-    const out = keep(served, true, { description: "", offers: [] }, url);
-    expect(out).toMatchObject({ sku: served.product.sku, category, description: "Served." });
+    const served = { url, product: { url, name: "Paul Mitchell Tea Tree Special Shampoo — shampoo", sku: "captain-fawcett-expedition-reserve-matt-s-adfb2b8c", category, description: "Served.", offers: [] }, offers: [] };
+    const out = keep(served, true, { name: "Paul Mitchell Tea Tree Special Shampoo — шампунь", description: "", offers: [] }, url);
+    expect(out).toMatchObject({ name: served.product.name, sku: served.product.sku, category, description: "Served." });
     // the script's own description wins when it has one
     expect(keep(served, true, { description: "Own.", offers: [] }, url).description).toBe("Own.");
     // another page's block lends nothing
@@ -457,6 +457,29 @@ describe("the offer the head publishes", () => {
     const head = slice("setHead");
     expect(head).toContain("sku: p.id.length <= 50 ? p.id : undefined");
     expect(head).not.toContain("category: trText(CAT_NAMES");
+    // the name in the page's language, never the Russian p.name
+    expect(head).toContain("name: core, brand:");
+  });
+
+  /* Search Console, 11.10.2026: 91 product pages failed «Missing field
+     "shippingDetails"» — the live price had moved since the build, and an
+     offer whose price matched no served one got no delivery at all. */
+  it("lends the delivery to a changed price on the same side of every «free from» threshold, and not across one", () => {
+    const keep = new Function(
+      "SERVED_LD", "OV_LIVE", "SHIP_RULES", "ld", "pUrl",
+      `${slice("shipTwin")}
+       ${slice("ldKeepServed")}
+       ldKeepServed(ld, pUrl); return ld;`,
+    ) as (sv: unknown, live: boolean, rules: unknown, ld: Record<string, unknown>, url: string) => { offers: Array<Record<string, unknown>> };
+    const url = "https://rempireshop.com/products/x";
+    const ship = [{ "@type": "OfferShippingDetails", shippingRate: { value: 2.59 } }];
+    const served = { url, product: { url, offers: [] }, offers: [{ url, price: "23", shippingDetails: ship }] };
+    const rules = { freeFrom: 59, freeFromByCountry: { EU: 200, GR: null } };
+    const at = (price: string) => keep(served, true, rules, { offers: [{ url, price }] }, url).offers[0];
+    expect(at("23").shippingDetails).toBe(ship); // the same price
+    expect(at("25").shippingDetails).toBe(ship); // moved, still under 59 €
+    expect(at("65").shippingDetails).toBeUndefined(); // now free in the Baltics: the old price's delivery would lie
+    expect(slice("shipTwin")).toContain("(a >= t) !== (b >= t)");
   });
 
   it("setHead() publishes that answer, not p.stock, in the offer and the snippet", () => {
