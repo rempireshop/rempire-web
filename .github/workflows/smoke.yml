@@ -162,7 +162,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: smoke-report
-          path: |
-            playwright-report-smoke/
-            test-results-smoke/
-          retention-days: 14
+          path: playwright-report-smoke/
+          retention-days: 3

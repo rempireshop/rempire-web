@@ -12,6 +12,15 @@
 # weekly full run (~145) keeps the browser suite honest. Run it by hand from
 # the Actions tab before a risky release.
 #
+# Storage (11.10.2026): a private repo on a free account also has 500 MB of
+# Actions storage, and the failure reports below are what fills it — 49 of
+# them, 1 GB, from the night of 08→09.10 when every push still ran the whole
+# suite (one shard's report reached 98 MB). So a report is uploaded on
+# failure only, as the HTML report alone (it already holds every trace,
+# screenshot and video; test-results/ was the same files twice), and kept 2
+# days — long enough to open it, short enough that a failing weekly run
+# (~200 MB) is gone again before it counts for much.
+#
 # The Chromium suite is sharded three ways: each shard is its own job with its
 # own `next dev` and its own empty PGlite database, so `workers: 1` inside a
 # shard (playwright.config.ts — every test shares one database) still holds,
@@ -113,10 +122,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-shard-${{ matrix.shard }}
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
+          # the HTML report already carries every trace, screenshot and video;
+          # test-results/ is the same files again (see the header on storage)
+          path: playwright-report/
+          retention-days: 2
 
   safari:
     name: e2e (mobile Safari)
@@ -149,7 +158,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-safari
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
+          # the HTML report already carries every trace, screenshot and video;
+          # test-results/ is the same files again (see the header on storage)
+          path: playwright-report/
+          retention-days: 2
