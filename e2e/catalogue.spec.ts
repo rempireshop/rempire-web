@@ -383,11 +383,10 @@ test.describe("product card — layout", () => {
       await expect(page.locator("#catgrid .card").first()).toBeVisible();
 
       const report = await page.evaluate(async () => {
-        const grid = document.getElementById("catgrid")!;
-        /* Hold the nodes before scrolling: the scroll below reaches the
+        /* Count the cards before scrolling: the scroll below reaches the
            infinite-scroll sentinel and patchCatalog() may append a further
            twelve behind our back — those are not what was measured. */
-        const cards = Array.from(grid.querySelectorAll<HTMLElement>(".card"));
+        const before = document.querySelectorAll("#catgrid .card").length;
         /* styles.css gives every card `content-visibility: auto` with a
            `contain-intrinsic-size` of 340px, so a card that has never been
            near the viewport reports that placeholder instead of its real
@@ -400,6 +399,14 @@ test.describe("product card — layout", () => {
         }
         window.scrollTo(0, 0);
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        /* …and measure the cards that are on the page NOW, the first `before`
+           of them. Nodes held from before the scroll are not those: a render()
+           that lands meanwhile (an answer the page was still waiting for)
+           draws the grid anew, and a card taken out of the document measures
+           0×0 at the top — every card «one height», all in «one row». That is
+           how the weekly run of 12.10.2026 failed on a phone and passed on
+           the retry. */
+        const cards = Array.from(document.querySelectorAll<HTMLElement>("#catgrid .card")).slice(0, before);
 
         const escaped: string[] = [];
         const heights = new Set<number>();

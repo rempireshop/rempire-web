@@ -369,6 +369,13 @@ test.describe("sweep — the content card", () => {
     try {
       await openFold(page, "content:company");
       await expect(page.locator('[data-contentf="company.phone"]')).toBeVisible();
+      /* What the box shows before it is touched: the stored phone, or — on a
+         database that never saved this card — the shop's own default
+         (CONTENT_DEFAULT). Since 1a (8275a042) a field that saves itself
+         stores the card as it is shown, so the legal name below can store
+         that default phone for the first time. It used to pass only when an
+         earlier spec in the same server run had saved the card already. */
+      const phoneShown = await page.locator('[data-contentf="company.phone"]').inputValue();
 
       await page.locator('[data-contentf="company.phone"]').fill("abc");
       await page.locator('[data-contentf="company.email"]').fill("x@");
@@ -391,7 +398,9 @@ test.describe("sweep — the content card", () => {
       // …and what is fine went on its own: the name, script tag and all
       await expect.poll(async () => (await company()).legalName,
         { timeout: 20_000, message: "the legal name never saved itself" }).toContain("Rempire <script>");
-      expect((await company()).phone ?? "", "«abc» reached the server as a phone").toBe(phoneWas);
+      const phoneNow = (await company()).phone ?? "";
+      expect(phoneNow, "«abc» reached the server as a phone").not.toBe("abc");
+      expect([phoneWas, phoneShown], "the stored phone is one nobody typed or saw").toContain(phoneNow);
 
       const shop = await freshShop(browser);
       await shop.page.goto(shopUrl("", "/"));
