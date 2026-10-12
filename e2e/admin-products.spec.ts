@@ -110,7 +110,8 @@ async function seeInShop(browser: Browser, id: string, opts: { brand: string; br
     await waitForScreen(p, "product");
     await expect(p.locator("[data-price]")).toHaveText(eur(opts.price, lang.code));
     await expect(p.locator(".pdp")).toContainText(opts.brand);
-    expect(await p.locator(".pdp__img").getAttribute("style"), `${lang.code}: the product page shows another photo`).toContain(opts.photo);
+    // the photo is an <img> in the frame since 09.10.2026 (9abd0d7f), not the frame's background
+    expect(await p.locator(".pdp__img img").first().getAttribute("src"), `${lang.code}: the product page shows another photo`).toContain(opts.photo);
     // …into the cart, and the checkout quotes the same price
     await p.locator(`.pdp__add[data-add="${id}"]`).click();
     await expect(p.getByRole("status")).toBeVisible();

@@ -158,7 +158,10 @@ const SHOPIFY: Array<[string, string, number, string]> = [
   ["/et/products/hair-resort-spray", "/et/products/hair-resort-spray", 0, "/et stays Estonian"],
   ["/en-lv/products/xerjoff-1861-naxos-eau-de-parfum-100ml", "/products/xerjoff-1861-naxos-eau-de-parfum-100ml", 1, "the en-* storefronts fold onto the unprefixed English page"],
   ["/collections/system-4", "/collections/system-4", 0, "a collection that is a brand"],
-  ["/et/collections/habemeolid", "/et/collections/habemehooldus", 1, "an Estonian sub-collection → its section"],
+  // a published subcollection is a page of its own at Shopify's handle since 09.10.2026 (8943f498)…
+  ["/et/collections/habemeolid", "/et/collections/habemeolid", 0, "an Estonian sub-collection with a page"],
+  // …and one that is not still moves to its section
+  ["/et/collections/naomaskid", "/et/collections/naohooldus", 1, "an Estonian sub-collection → its section"],
   ["/ru/collections/uhod-za-volosami", "/ru/collections/uhod-za-volosami", 0, "a section under its own Russian handle"],
   ["/policies/shipping-policy", "/policies/shipping-policy", 0, "Shopify's own policy page"],
   ["/pages/right-to-return", "/policies/refund-policy", 1, "a hand-made Shopify page → the policy"],

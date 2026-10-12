@@ -108,6 +108,7 @@ test.describe("admin — speed", () => {
     // leave the pane as the suite found it — it is remembered in localStorage
     await page.locator(".adm-asst__fold").click();
     await expect(page.locator(".adm-asst")).toHaveCount(0);
-    expect(shopUrl("", "/admin/")).toContain("/admin/");
+    // …on the panel's own address, which has no trailing slash since 09.10.2026 (81cc4725)
+    expect(new URL(page.url()).pathname).toBe(shopUrl("", "/admin/"));
   });
 });

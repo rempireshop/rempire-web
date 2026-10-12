@@ -412,14 +412,24 @@ for (const lang of LANGS) {
       await expectScreen(page, "notfound", { screen: "unknown-product", lang: L });
       await check(page, w, { screen: "unknown-product", lang: L });
 
-      // …and a cold load of one carries the status a crawler reads
-      for (const path of ["/nope/", "/p/no-such-product-12345/"]) {
+      /* …and a cold load of one carries the status a crawler reads. Since the
+         move to Shopify's addresses (09.10.2026, 81cc4725) a catalogue
+         product's address is /products/<handle>, and a handle the shop does
+         not know is one Google may still hold from Shopify: it moves with ONE
+         301 to «Все товары» (src/lib/legacy-redirects.ts, productShape), on
+         purpose. The address that has to answer 404 is the owner's own
+         product (`c-…`) that does not exist — src/lib/product-page.ts. */
+      for (const path of ["/nope/", "/p/c-no-such-product-12345/"]) {
         const res = await page.request.get(shopUrl(lang.seg, path));
         expect(res.status(), `${label({ screen: "unknown:cold", lang: L })} ${path}`).toBe(404);
       }
+      const moved = await page.request.get(shopUrl(lang.seg, "/p/no-such-product-12345/"), { maxRedirects: 0 });
+      expect(moved.status(), `${label({ screen: "unknown:cold", lang: L })} a Shopify handle the shop does not know`).toBe(301);
+      expect(new URL(moved.headers().location, page.url()).pathname).toBe(shopUrl(lang.seg, "/c/all/"));
+      expect(moved.headers()["x-rempire-redirect"]).toBe("product-unknown");
       await coldVisit(page, shopUrl(lang.seg, "/nope/"), "notfound");
       await check(page, w, { screen: "unknown-url:cold", lang: L });
-      await coldVisit(page, shopUrl(lang.seg, "/p/no-such-product-12345/"), "notfound");
+      await coldVisit(page, shopUrl(lang.seg, "/p/c-no-such-product-12345/"), "notfound");
       await check(page, w, { screen: "unknown-product:cold", lang: L });
 
       // Empty cart drawer.

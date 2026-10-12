@@ -58,6 +58,7 @@ import {
   tr,
   waitForScreen,
 } from "./fixtures";
+import { seoCopy } from "../src/lib/seo-copy.mjs";
 
 test.beforeEach(async ({}, testInfo) => {
   test.skip(
@@ -822,12 +823,17 @@ test.describe("the Estonian blog is «Blogi»", () => {
 
   /* home.spec.ts already walks the nav, the footer, the crumbs and the <h1>
      through tr("Блог", …); what it does not read is the tab, which is
-     setHead()'s own string and the one a shopper sees in their history. */
+     setHead()'s own string and the one a shopper sees in their history.
+     Since SEO pack 1 (09.10.2026, c430838a) the tab is no longer the bare
+     section word: it is the approved title for the blog from
+     src/lib/seo-copy.mjs, the one the server-rendered page carries too. The
+     section word still names the blog in the nav and in the crumbs. */
   test("the tab and the breadcrumb say «Blogi» too", async ({ page }) => {
     await page.goto(shopUrl("/et", "/blog/"));
     await waitForScreen(page, "blog");
-    expect(await page.title()).toBe("Blogi — REMPIRE");
+    expect(await page.title()).toBe(seoCopy().blog.ET[0]);
     await expect(page.locator("[data-nav-blog]")).toHaveText("Blogi");
+    await expect(page.locator(".crumbs")).toContainText("Blogi");
     // the old label must not survive anywhere on the page
     expect(await page.evaluate(() => document.body.innerText)).not.toMatch(/\bBlog\b(?!i)/);
   });
