@@ -91,7 +91,12 @@ jobs:
     # weekly and on the button only — see the header
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # Not 40 any more (12.10.2026): the shards are balanced by test count and
+    # skipped tests count too, so shard 1 carries most of the real work — 37
+    # minutes of Playwright in the weekly run, and the dispatch after it was
+    # cut off at 40 with the tests still going. A green run costs the same
+    # either way; only a hang costs the extra twenty.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
