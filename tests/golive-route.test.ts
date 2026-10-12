@@ -84,10 +84,10 @@ beforeEach(async () => {
 });
 
 describe("src/data/golive.json — the shape the page and the route agree on", () => {
-  it("has two phases, areas that belong to one of them, and items with a real area", () => {
+  it("has three phases (launch A, B and the handover C), areas that belong to one of them, and items with a real area", () => {
     expect(PLAN.version).toBe(1);
     expect(PLAN.source).toBe("docs/go-live.md");
-    expect(PLAN.phases.length).toBe(2);
+    expect(PLAN.phases.map((p) => p.id)).toEqual(["a", "b", "c"]);
     const phases = new Set(PLAN.phases.map((p) => p.id));
     for (const area of PLAN.areas) expect(phases.has(area.phase), `area "${area.id}" → phase "${area.phase}"`).toBe(true);
     const areas = new Set(PLAN.areas.map((a) => a.id));

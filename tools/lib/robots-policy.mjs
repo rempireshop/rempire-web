@@ -22,7 +22,7 @@
 export const NO_INDEX_PATHS = [
   "/admin",
   ...["", "/ru", "/et"].flatMap(pre => ["/checkout", "/cart", "/account", "/search"].map(p => pre + p)),
-  "/api/", "/test", "/guide", "/golive"
+  "/api/", "/test", "/guide", "/golive", "/handover"
 ];
 /* …and inside /api/, the read-only answers a page is drawn from. Googlebot
    renders the page (it reads the DOM app.js leaves, not the file), and with
