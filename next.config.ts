@@ -28,7 +28,7 @@ import type { NextConfig } from "next";
  * and at build — restart `next dev` after `npm run prerender`.
  */
 function prerenderedRewrites() {
-  const out: { source: string; destination: string }[] = [];
+  const out: { source: string; destination: string; has?: { type: "host"; value: string }[] }[] = [];
   let pages: Array<[string, string]> = [];
   try {
     const file = path.join(process.cwd(), "src", "data", "prerendered-routes.json");
@@ -97,6 +97,14 @@ function prerenderedRewrites() {
     if (existsSync(path.join(PUBLIC, page, "index.html"))) {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
     }
+  }
+  /* /handover — the go-live page showing phase C alone, Dim's handover of the
+     shop to Renat (09.11.2026). On Dim's own address ONLY: «do not make it on
+     rempireshop.com» (Dim, 12.10.2026). rempireshop.diipsolutions.eu is an
+     alias of this same deployment, so the line is the host; the route behind
+     the page hands phase C only to that host too (src/lib/golive.ts). */
+  if (existsSync(path.join(PUBLIC, "golive", "index.html"))) {
+    out.push({ source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], destination: "/golive/index.html" });
   }
   return out;
 }
@@ -291,6 +299,7 @@ const nextConfig: NextConfig = {
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
       { source: "/:page(test|guide|cards|golive)", headers: LOOSE_HEADERS },
       { source: "/:page(test|guide|cards|golive)/:path*", headers: LOOSE_HEADERS },
+      { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
       /* Keep search engines out of everything that is not the shop's own
          domain. `missing` inverts the host test into an ALLOWLIST: the header
          is sent unless the host is rempireshop.com or www.rempireshop.com, so

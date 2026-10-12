@@ -48,7 +48,9 @@
  */
 import { clientIp, isAdmin, rateLimit, requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
-import { cleanStates, gate, getGoliveStates, phaseOfId, PLAN, saveGoliveStates } from "@/lib/golive";
+import {
+  cleanStates, gate, getGoliveStates, HANDOVER_IDS, isHandoverHost, phaseOfId, planFor, requestHost, saveGoliveStates, statesFor,
+} from "@/lib/golive";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,10 +74,12 @@ export async function GET(req: Request) {
       { status: 401, headers: NO_STORE },
     );
   }
+  /* Phase C (the handover) travels only to Dim's own address — src/lib/golive.ts. */
+  const host = requestHost(req);
   try {
     const states = await getGoliveStates();
     return Response.json(
-      { ok: true, plan: PLAN, signedIn: true, states, gate: gate(states) },
+      { ok: true, plan: planFor(host), signedIn: true, states: statesFor(host, states), gate: gate(states) },
       { headers: NO_STORE },
     );
   } catch (err) {
@@ -85,7 +89,7 @@ export async function GET(req: Request) {
        tell them apart, because the second one is the case where the lock on
        screen is not the lock on the server. */
     return Response.json(
-      { ok: false, error: "db_unavailable", plan: PLAN, signedIn: true, states: null, gate: gate({}) },
+      { ok: false, error: "db_unavailable", plan: planFor(host), signedIn: true, states: null, gate: gate({}) },
       { status: 503, headers: NO_STORE },
     );
   }
@@ -133,6 +137,14 @@ export async function PUT(req: Request) {
        a terminal and stays open on the page. */
     return Response.json({ ok: false, error: "unknown_item", detail: unknown }, { status: 400, headers: NO_STORE });
   }
+  /* A phase-C row does not exist on the shop's own address. */
+  const host = requestHost(req);
+  if (!isHandoverHost(host)) {
+    const offList = Object.keys(states).filter((id) => HANDOVER_IDS.has(id));
+    if (offList.length) {
+      return Response.json({ ok: false, error: "unknown_item", detail: offList }, { status: 400, headers: NO_STORE });
+    }
+  }
 
   try {
     /* The owner's rule, applied where it binds every caller and not only the
@@ -166,7 +178,7 @@ export async function PUT(req: Request) {
       locked: after.locked,
       blockers: after.blockers.length,
     });
-    return Response.json({ ok: true, states: merged, gate: after }, { headers: NO_STORE });
+    return Response.json({ ok: true, states: statesFor(host, merged), gate: after }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/golive] write failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });

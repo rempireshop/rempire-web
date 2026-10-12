@@ -311,8 +311,11 @@ describe("the security headers over the shop's pages", () => {
       .map((r) => r.source);
     expect(inlineScript).toEqual([
       "/api/:path*", "/shop/:path*", "/:page(test|guide|cards|golive)", "/:page(test|guide|cards|golive)/:path*",
+      "/handover",
       "/api/admin/mail/preview/:path*",
     ]);
+    // …and /handover (the go-live page's phase C) on Dim's own address only, never rempireshop.com
+    expect(rules.find((r) => r.source === "/handover")?.has).toEqual([{ type: "host", value: "rempireshop.diipsolutions.eu" }]);
     // 'unsafe-eval' exists nowhere at all. It used to be granted to
     // /prototypes/*, the design archive that compiled its own JSX in the
     // browser; that archive was deleted on 07.09 with the rest of the

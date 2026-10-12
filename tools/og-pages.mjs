@@ -52,7 +52,10 @@ const catalogue = JSON.parse(await readFile(path.join(ROOT, "src/data/catalogue.
 const golive = JSON.parse(await readFile(path.join(ROOT, "src/data/golive.json"), "utf8"));
 const CHECKS = plan.items.length;
 const PRODUCTS = (Array.isArray(catalogue) ? catalogue : catalogue.items).length;
-const LAUNCH = golive.items.length;
+/* the launch items only — phase C (Dim's handover) lives on his own address,
+   never on the shop's card (src/lib/golive.ts HANDOVER_PHASE) */
+const HANDOVER_AREAS = new Set(golive.areas.filter((a) => a.phase === "c").map((a) => a.id));
+const LAUNCH = golive.items.filter((i) => !HANDOVER_AREAS.has(i.area)).length;
 
 /** Russian plural for a count: 164 пункта, 1 пункт, 5 пунктов. */
 function plural(n, one, few, many) {

@@ -121,6 +121,54 @@ export function phaseOf(item: GoliveItem): string {
   return PHASE_OF_AREA.get(item.area) || "";
 }
 
+/* ---------- the handover (phase C) — Dim's address only ------------------ */
+
+/**
+ * Phase C is Dim's handover of the shop to Renat (09.11.2026), and it lives
+ * on Dim's own address, never on the shop's: «do not make it on
+ * rempireshop.com» (Dim, 12.10.2026). The deployment is one and the same —
+ * rempireshop.diipsolutions.eu is an alias of this Vercel project — so the
+ * line is drawn by host: /handover is rewritten only there (next.config.ts),
+ * and this route hands phase C's rows and marks only to a request for that
+ * host. rempireshop.com/golive gets phases A and B and nothing else, and a
+ * mark on a phase-C row sent there is refused as an unknown item.
+ */
+export const HANDOVER_PHASE = "c";
+export const HANDOVER_HOSTS: ReadonlySet<string> = new Set(["rempireshop.diipsolutions.eu"]);
+
+const HANDOVER_AREAS: ReadonlySet<string> = new Set(PLAN.areas.filter((a) => a.phase === HANDOVER_PHASE).map((a) => a.id));
+export const HANDOVER_IDS: ReadonlySet<string> = new Set(PLAN.items.filter((i) => HANDOVER_AREAS.has(i.area)).map((i) => i.id));
+
+/** The host a request was made to, lower-case, no port. */
+export function requestHost(req: Request): string {
+  const raw = req.headers.get("x-forwarded-host") || req.headers.get("host") || new URL(req.url).host;
+  return raw.split(",")[0].trim().toLowerCase().replace(/:\d+$/, "");
+}
+
+export function isHandoverHost(host: string): boolean {
+  return HANDOVER_HOSTS.has(host);
+}
+
+const PLAN_WITHOUT_HANDOVER: GolivePlan = {
+  ...PLAN,
+  phases: PLAN.phases.filter((p) => p.id !== HANDOVER_PHASE),
+  areas: PLAN.areas.filter((a) => !HANDOVER_AREAS.has(a.id)),
+  items: PLAN.items.filter((i) => !HANDOVER_IDS.has(i.id)),
+};
+
+/** The list a request for `host` is given: everything on Dim's address, phases A and B anywhere else. */
+export function planFor(host: string): GolivePlan {
+  return isHandoverHost(host) ? PLAN : PLAN_WITHOUT_HANDOVER;
+}
+
+/** The marks a request for `host` is given — phase C's only on Dim's address. */
+export function statesFor(host: string, states: StateMap): StateMap {
+  if (isHandoverHost(host)) return states;
+  const out: StateMap = {};
+  for (const [id, mark] of Object.entries(states)) if (!HANDOVER_IDS.has(id)) out[id] = mark;
+  return out;
+}
+
 /* ---------- the marks ---------------------------------------------------- */
 
 export const STATES_KEY = "golive_states";

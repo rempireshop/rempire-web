@@ -354,6 +354,12 @@
   var LS_WHO = "rempire-golive-who";
   var LS_LANG = "rempire-golive-lang";
 
+  /* /handover (Dim, 12.10.2026) is this same page showing phase C alone — the
+     handover to Renat on 09.11.2026. One list, one store, one sign-in: the
+     site rewrites /handover to this file (next.config.ts) and the script reads
+     the address. Empty on /golive, which keeps showing every phase. */
+  var VIEW_PHASE = /^\/handover\/?$/.test(location.pathname) ? "c" : "";
+
   /* The four states as *values*, kept apart from the words for them: this is
      what a stored mark is checked against when it is read back, and that check
      must give the same result whichever language the page is showing. */
@@ -550,10 +556,40 @@
     }
   };
 
+  /* What /handover says instead — the header, the progress line, the report
+     and the footer. Everything else (buttons, states, errors) is the same page
+     and the same words. */
+  var HANDOVER_TEXT = {
+    ru: {
+      title: "Передача магазина Ренату · REMPIRE",
+      kicker: "REMPIRE · передача",
+      h1: "Передача Ренату — до 09.11.2026",
+      lede1: ["Магазин работает с 09.10. Месяц смотрим и улучшаем, ", { b: "09.11" }, " всё переходит к Ренату: аккаунты, карты фирмы, документы. Дим после этого — платная поддержка."],
+      lede2: "У каждого пункта есть хозяин. Пункты Клода он отмечает сам; пароли на этой странице не пишем никогда.",
+      howto4: "Долгие вещи — домен, карты, OpenAI — начинаем сразу. Документы Клод пишет в последнюю неделю. С 01.11 — только исправления.",
+      footer: ["Тот же список, что и запуск: ", { a: "/golive", href: "/golive" }, " · приёмка: ", { a: "/test", href: "/test" }, " · сам магазин: ", { a: "/", href: "/" }],
+      progA: "Передача: сделано ",
+      reportHead: "REMPIRE — передача Ренату, "
+    },
+    en: {
+      title: "Handing the shop to Renat · REMPIRE",
+      kicker: "REMPIRE · handover",
+      h1: "Handover to Renat — by 09.11.2026",
+      lede1: ["The shop has run since 09.10. One month of watching and improving, then on ", { b: "09.11" }, " everything goes to Renat: accounts, the company's cards, the documents. After that Dim is paid support."],
+      lede2: "Every item has an owner. Claude marks its own items; passwords are never written on this page.",
+      howto4: "The slow things — the domain, the cards, OpenAI — start now. Claude writes the documents in the last week. From 01.11 — fixes only.",
+      footer: ["The same list as the launch: ", { a: "/golive", href: "/golive" }, " · acceptance: ", { a: "/test", href: "/test" }, " · the shop itself: ", { a: "/", href: "/" }],
+      progA: "Handover: done ",
+      reportHead: "REMPIRE — handover to Renat, "
+    }
+  };
+
   /** One string in the language now on screen. Dotted keys reach into the
       small maps (`who.dim`), so a word used both on a chip and on a badge is
       written once. */
   function t(key) {
+    var over = VIEW_PHASE ? HANDOVER_TEXT[state.lang] || HANDOVER_TEXT.ru : null;
+    if (over && Object.prototype.hasOwnProperty.call(over, key)) return over[key];
     var node = TEXT[state.lang] || TEXT.ru;
     var parts = key.split(".");
     for (var i = 0; i < parts.length && node !== undefined; i++) node = node[parts[i]];
@@ -854,10 +890,12 @@
 
     for (i = 0; i < phases.length; i++) {
       var phase = phases[i];
-      /* Everything after the first phase is behind the gate. There are two
-         phases today and the rule is about the first one — «all items done in
-         the diipsolution environment» — so a third phase added later would be
-         shut by it too, which is the safe direction. */
+      if (VIEW_PHASE && phase.id !== VIEW_PHASE) continue;
+      /* Everything after the first phase is behind the gate. The rule is about
+         the first one — «all items done in the diipsolution environment» — so
+         the third phase (the handover, added 12.10.2026) is shut by it too,
+         which is the safe direction; the lock panel itself sits over phase B
+         only. */
       var isB = i > 0;
       var said = say(phase);
       var sec = el("section", {
@@ -871,7 +909,7 @@
       ]);
 
       /* The lock, before anything it locks. */
-      if (isB) sec.appendChild(lockPanel(blockers));
+      if (i === 1 && !VIEW_PHASE) sec.appendChild(lockPanel(blockers));
 
       var body = el("div");
       var drew = false;
@@ -974,8 +1012,8 @@
       return;
     }
     var phases = state.plan.phases || [];
-    var a = countPhase(phases[0] ? phases[0].id : "a");
-    var b = phases[1] ? countPhase(phases[1].id) : null;
+    var a = countPhase(VIEW_PHASE || (phases[0] ? phases[0].id : "a"));
+    var b = !VIEW_PHASE && phases[1] ? countPhase(phases[1].id) : null;
     if (!a.total) { node.textContent = t("empty"); $("[data-gl-track]").style.width = "0"; return; }
 
     /* The bar counts phase A, because phase A is the only thing anybody can
@@ -1226,8 +1264,10 @@
     var plan = state.plan || { phases: [], areas: [], items: [] };
     var out = [t("reportHead") + when(new Date().toISOString())];
     out.push($("[data-gl-progress]").textContent);
-    var blockers = gate();
-    if (blockers.length) {
+    var blockers = VIEW_PHASE ? [] : gate();
+    if (VIEW_PHASE) {
+      /* The handover has no lock to report. */
+    } else if (blockers.length) {
       /* Named, not counted. This text is pasted into a chat, and «держат: 4»
          makes the person reading it ask which four — which is the question the
          page exists to answer. */
@@ -1245,6 +1285,7 @@
        left it out would be the filter bug of 18.09 all over again. */
     var phases = plan.phases || [], areas = state.areas, items = plan.items || [], i, j, k;
     for (i = 0; i < phases.length; i++) {
+      if (VIEW_PHASE && phases[i].id !== VIEW_PHASE) continue;
       var head = [];
       for (j = 0; j < areas.length; j++) {
         if (areas[j].phase !== phases[i].id) continue;
@@ -1300,6 +1341,9 @@
     fill($("[data-t-lede]"), t("lede1"));
     fill($("[data-t-howto5]"), t("howto5"));
     fill($("[data-t-footer]"), t("footer"));
+    /* «Только то, что держит шаг B» means nothing on the handover */
+    var blocksChip = $("[data-gl-blocks]");
+    if (blocksChip) blocksChip.hidden = !!VIEW_PHASE;
     document.title = t("title");
     document.documentElement.setAttribute("lang", state.lang);
   }

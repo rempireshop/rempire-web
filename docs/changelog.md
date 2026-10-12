@@ -39,4 +39,4 @@ where it becomes the «what was done» summary.*
 
 **12.10**
 - Search Console «Page with redirect»: the sitemap Google had was read on 08.10, before the move; resubmitted. Every current sitemap address answers 200.
-- Handover plan for 09.11 started — kept off the shop's own site (Dim, 12.10); logins sheet template for Renat (kept outside the repository). A `/handover` page went live on rempireshop.com for a few minutes and was reverted at Dim's request.
+- Handover plan for 09.11: phase C of the go-live list, at `rempireshop.diipsolutions.eu/handover` — Dim's own address only; rempireshop.com never serves the page or phase C's rows (host-gated rewrite and route). It went live on rempireshop.com for a few minutes first and was reverted at Dim's request. Logins sheet template for Renat kept outside the repository.

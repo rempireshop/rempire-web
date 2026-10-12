@@ -23,6 +23,7 @@ import {
   cleanStates,
   gate,
   getGoliveStates,
+  HANDOVER_IDS,
   holdUps,
   MAX_STATES,
   mergeStates,
@@ -84,10 +85,10 @@ beforeEach(async () => {
 });
 
 describe("src/data/golive.json — the shape the page and the route agree on", () => {
-  it("has two phases, areas that belong to one of them, and items with a real area", () => {
+  it("has three phases (launch A, B and the handover C), areas that belong to one of them, and items with a real area", () => {
     expect(PLAN.version).toBe(1);
     expect(PLAN.source).toBe("docs/go-live.md");
-    expect(PLAN.phases.length).toBe(2);
+    expect(PLAN.phases.map((p) => p.id)).toEqual(["a", "b", "c"]);
     const phases = new Set(PLAN.phases.map((p) => p.id));
     for (const area of PLAN.areas) expect(phases.has(area.phase), `area "${area.id}" → phase "${area.phase}"`).toBe(true);
     const areas = new Set(PLAN.areas.map((a) => a.id));
@@ -527,5 +528,62 @@ describe("PUT /api/golive/", () => {
       cleanStates({ [FIRST.id]: { status: "done", note: "снова", at: "2026-09-17T10:00:00.000Z", by: "dim" } }).states,
     );
     expect(merged[FIRST.id].note).toBe("снова");
+  });
+});
+
+/* Phase C is Dim's handover of the shop to Renat (09.11.2026), and it lives on
+   his own address only — «do not make it on rempireshop.com» (Dim, 12.10.2026).
+   Same deployment, so the line is the host: src/lib/golive.ts. */
+describe("phase C — only on rempireshop.diipsolutions.eu", () => {
+  const DIIP = "https://rempireshop.diipsolutions.eu";
+  const C_ID = [...HANDOVER_IDS][0];
+  const mark = (id: string) => ({ states: { [id]: { status: "doing", note: "", at: "2026-10-12T10:00:00.000Z", by: "dim" } } });
+  const route = () => import("@/app/api/golive/route");
+  const putTo = (origin: string, body: unknown) =>
+    new Request(`${origin}/api/golive/`, { method: "PUT", headers: { "content-type": "application/json", cookie: admin }, body: JSON.stringify(body) });
+
+  it("has handover rows to keep apart", () => {
+    expect(HANDOVER_IDS.size).toBeGreaterThan(0);
+    expect(C_ID).toBeTruthy();
+  });
+
+  it("the shop's own address gets phases A and B and none of phase C's rows or marks", async () => {
+    expect((await (await route()).PUT(putTo(DIIP, mark(C_ID)))).status).toBe(200);
+    const body = await (await (await route()).GET(get(admin))).json();
+    expect(body.plan.phases.map((p: { id: string }) => p.id)).toEqual(["a", "b"]);
+    expect(body.plan.items.some((i: { id: string }) => HANDOVER_IDS.has(i.id))).toBe(false);
+    expect(body.plan.areas.some((a: { phase: string }) => a.phase === "c")).toBe(false);
+    expect(Object.keys(body.states).some((id) => HANDOVER_IDS.has(id))).toBe(false);
+    expect(JSON.stringify(body)).not.toContain("Ренат —");
+  });
+
+  it("Dim's address gets all three, with the marks", async () => {
+    await (await route()).PUT(putTo(DIIP, mark(C_ID)));
+    const body = await (await (await route()).GET(new Request(`${DIIP}/api/golive/`, { headers: { cookie: admin } }))).json();
+    expect(body.plan.phases.map((p: { id: string }) => p.id)).toEqual(["a", "b", "c"]);
+    expect(body.states[C_ID]).toMatchObject({ status: "doing" });
+  });
+
+  it("refuses a phase-C mark sent to the shop's own address", async () => {
+    const res = await (await route()).PUT(put(mark(C_ID), admin));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: "unknown_item", detail: [C_ID] });
+    expect((await getGoliveStates())[C_ID]).toBeUndefined();
+  });
+
+  it("a forwarded host counts as the host", async () => {
+    const req = new Request(`${ORIGIN}/api/golive/`, { headers: { cookie: admin, "x-forwarded-host": "rempireshop.diipsolutions.eu" } });
+    const body = await (await (await route()).GET(req)).json();
+    expect(body.plan.phases.map((p: { id: string }) => p.id)).toContain("c");
+  });
+});
+
+describe("/handover — rewritten on Dim's address only", () => {
+  it("has a host condition, so rempireshop.com/handover is not the page", async () => {
+    const { default: nextConfig } = await import("../next.config");
+    type Rule = { source: string; destination: string; has?: Array<{ type: string; value: string }> };
+    const cfg = nextConfig as unknown as { rewrites: () => Promise<{ afterFiles: Rule[] }> };
+    const rules = (await cfg.rewrites()).afterFiles.filter((r) => r.source === "/handover");
+    expect(rules).toEqual([{ source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], destination: "/golive/index.html" }]);
   });
 });
