@@ -230,7 +230,12 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
        name is clipped text inside the button, not an aria-label; see the
        comment on admSwitch for why. */
     await expect(backstock.locator(".vh")).toHaveText("Товар снова в наличии");
-    const flows = await (await page.request.get("/api/overrides/")).json();
+    /* «Письма» has just asked for its four routes, and on a cold `next dev`
+       the first of them compiles for seconds (CI, 12.10.2026: 11.2 s for the
+       four) while every other request waits behind it — past the 10-second
+       default on the first attempt of two runs in a row, green on the retry
+       with the routes warm. Nothing about production needs this. */
+    const flows = await (await page.request.get("/api/overrides/", { timeout: 30_000 })).json();
     expect(flows.settings.flows.backstock, "the shop's own default disagrees with the switch").toBe(false);
 
     /* …and the birthday row names what really happens: the daily job, and a
