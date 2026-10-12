@@ -180,12 +180,13 @@ describe("the panel keeps one tag set per language", () => {
       seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" }, tagsText: "лето", tagsI18n: { ET: "", EN: "" }, products: [],
     };
     const translate = new Function(
-      "apiSend", "productsById", "blogCardsOut", "blogFigsOut", "blogFigsIn", "blogCardsIn", "blogCleanHtml", "blogTags", "txt", "blogGenErrText",
+      "apiSend", "productsById", "blogCardsOut", "blogFigsOut", "blogFigsIn", "blogCardsIn", "blogCleanHtml", "blogTags", "txt", "blogGenErrText", "uiWant",
       `${slice("blogGenTranslate")}\nreturn blogGenTranslate;`,
     )(
       async () => ({ status: 200, body: { ok: true, text: { title: "Suvine välimus", body: "<p>y</p>", tags: ["suvi", "stiil"] } } }),
       () => [], (h: string) => ({ html: h, cards: [] }), (h: string) => ({ html: h, figs: [] }), (h: string) => h, (h: string) => h, (h: string) => h,
       () => ["лето"], (v: unknown) => (typeof v === "string" ? v : ""), () => "x",
+      async () => true,   // the language's dictionary (tests/blog-card-words-lazy-ui.test.ts)
     ) as (d: unknown, L: string) => Promise<void>;
     await translate(d, "ET");
     expect(d.title.ET).toBe("Suvine välimus");

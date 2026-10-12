@@ -386,6 +386,8 @@ function blogTranslate(answer: (text: string) => Answer): BlogOut {
     function blogCardsIn(h) { return h; }
     function blogCleanHtml(h) { return h; }
     function apiSend(url, method, payload) { return Promise.resolve(ANSWER(payload.input.text)); }
+    // the ET/EN dictionaries the cards are written with — here already (tests/blog-card-words-lazy-ui.test.ts)
+    function uiWantAll() { return Promise.resolve([true, true]); }
     /* 1a: a draft asks nothing before the assistant writes (blogAiAsks is
        for a published article), and a translation saves itself */
     function blogTextLen(h) { return String(h || "").length; }

@@ -12195,6 +12195,15 @@
       does app.js run as written, which carries its own `var UI`. */
   function uiHas(lang) { return !UI_FILES[lang] || !!UI[lang]; }
   function uiWant(lang) { return uiHas(lang) ? Promise.resolve(true) : lazyFile(UI_FILES[lang]); }
+  /** Both of them, for the panel's article editor. The panel is drawn in the
+      owner's language and fetches that one only (lazyHold), but an article
+      is written in three: a product card put into its Estonian or English
+      text carries that language's words (blogProductLinkHTML → trText), and
+      trText has nothing to translate with until the file is in — it hands
+      the Russian back, and «… — шампунь» is saved into the Estonian article
+      (from 09.10.2026, when the dictionary left app.min.js, until this). The
+      blog tab fetches them (renderImpl); the paths that write a card wait. */
+  function uiWantAll() { return Promise.all([uiWant("ET"), uiWant("EN")]); }
 
   var ADM_CSS = "/shop2/admin.css";
   /** Is the panel's stylesheet in — linked by the shell (and so loaded before
@@ -17278,9 +17287,12 @@
     return '<a data-product="' + esc(p.id) + '" data-price="live" href="' + esc(href) + '">' +
       esc(blogProductName(p, L)) + "</a>";
   }
-  function blogInsertProduct(id) {
+  function blogInsertProduct(id, waited) {
     var rd = richDraft();
     var L = rd ? rd.lang : (S.adminBlogLang || "RU");
+    /* the card's words are the text's language: its dictionary first
+       (uiWantAll), once — a file that failed does not hold the card back */
+    if (!uiHas(L) && !waited) { uiWant(L).then(function () { blogInsertProduct(id, true); }); return; }
     var a = blogProductLinkHTML(id, L);
     if (!a) return;
     blogToolClose();
@@ -18073,13 +18085,15 @@
     var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
     var src = blogCardsOut(d.body.RU);
     var figs = blogFigsOut(src.html);
-    return apiSend("/api/admin/ai/text/", "POST", {
+    // …the cards come back in L's words, so L's dictionary is waited for too (uiWantAll)
+    return Promise.all([apiSend("/api/admin/ai/text/", "POST", {
       task: "post_translate", lang: L,
       input: {
         sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: figs.html,
         tags: blogTags(d), seoTitle: d.seoTitle.RU, seoDescription: d.seoDesc.RU, keepNames: keep
       }
-    }).then(function (r) {
+    }), uiWant(L)]).then(function (got) {
+      var r = got[0];
       var tx = r.status === 200 && r.body.ok && r.body.text;
       if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
       if (txt(tx.title)) d.title[L] = txt(tx.title).slice(0, 200);
@@ -50018,6 +50032,8 @@
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
     // …with the editor open too: on a desktop the list stands beside it (1a, screen 16)
     if (S.screen === "admin" && S.adminTab === "blog") loadAdminBlog(false);
+    // …and the other two languages' words for the cards an article carries (uiWantAll)
+    if (S.screen === "admin" && S.adminTab === "blog") uiWantAll();
     /* The parcel-point sheet lives in #pointslot, outside everything this
        render() just rewrote — it is mounted or unmounted here only when what
        should show changed (a navigation closed it, say), never rebuilt. So
@@ -53597,12 +53613,15 @@
         { field: "tags", text: srcLang === "RU" ? bdTr.tagsText : (bdTr.tagsI18n && bdTr.tagsI18n[srcLang]) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
-      Promise.all(jobs.map(function (j) {
+      /* …and the dictionaries of the languages the cards land in, before
+         blogCardsIn() writes their words (uiWantAll) */
+      Promise.all([Promise.all(jobs.map(function (j) {
         return apiSend("/api/admin/ai/text/", "POST", {
           task: "translate", lang: srcLang,
           input: { text: j.text, sourceLang: srcLang, targetLangs: targets },
         }).then(function (r) { return { field: j.field, r: r }; });
-      })).then(function (results) {
+      })), uiWantAll()]).then(function (got) {
+        var results = got[0];
         tbtn.disabled = false; tbtn.textContent = tlabel;
         /* Title, excerpt and body are three separate requests, and any one of
            them can come back 502 or rate-limited on its own. Counted per
