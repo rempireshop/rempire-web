@@ -98,11 +98,6 @@ function prerenderedRewrites() {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
     }
   }
-  /* /handover is the go-live page showing its phase C alone — the handover to
-     Renat on 09.11.2026; the page reads its own address (Dim, 12.10.2026). */
-  if (existsSync(path.join(PUBLIC, "golive", "index.html"))) {
-    out.push({ source: "/handover", destination: "/golive/index.html" });
-  }
   return out;
 }
 
@@ -294,8 +289,8 @@ const nextConfig: NextConfig = {
          hand-written pages: see the note above. */
       { source: "/api/:path*", headers: LOOSE_HEADERS },
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
-      { source: "/:page(test|guide|cards|golive|handover)", headers: LOOSE_HEADERS },
-      { source: "/:page(test|guide|cards|golive|handover)/:path*", headers: LOOSE_HEADERS },
+      { source: "/:page(test|guide|cards|golive)", headers: LOOSE_HEADERS },
+      { source: "/:page(test|guide|cards|golive)/:path*", headers: LOOSE_HEADERS },
       /* Keep search engines out of everything that is not the shop's own
          domain. `missing` inverts the host test into an ALLOWLIST: the header
          is sent unless the host is rempireshop.com or www.rempireshop.com, so

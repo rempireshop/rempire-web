@@ -310,7 +310,7 @@ describe("the security headers over the shop's pages", () => {
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
     expect(inlineScript).toEqual([
-      "/api/:path*", "/shop/:path*", "/:page(test|guide|cards|golive|handover)", "/:page(test|guide|cards|golive|handover)/:path*",
+      "/api/:path*", "/shop/:path*", "/:page(test|guide|cards|golive)", "/:page(test|guide|cards|golive)/:path*",
       "/api/admin/mail/preview/:path*",
     ]);
     // 'unsafe-eval' exists nowhere at all. It used to be granted to

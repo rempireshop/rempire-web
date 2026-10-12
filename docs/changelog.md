@@ -2,8 +2,8 @@
 
 *Live on rempireshop.com since Thursday 08.10.2026, 22:55 (first full day 09.10).
 One line per change that a shopper, Renat, Google or a future developer would
-notice; the commit says how. Kept weekly until the handover on 09.11.2026
-(`/handover`), where it becomes the «what was done» summary.*
+notice; the commit says how. Kept weekly until the handover on 09.11.2026,
+where it becomes the «what was done» summary.*
 
 ## Week 1 — 08.10 → 11.10
 
@@ -39,4 +39,4 @@ notice; the commit says how. Kept weekly until the handover on 09.11.2026
 
 **12.10**
 - Search Console «Page with redirect»: the sitemap Google had was read on 08.10, before the move; resubmitted. Every current sitemap address answers 200.
-- Handover plan: phase C on the go-live list, shown alone at `/handover`; logins sheet template for Renat (kept outside the repository).
+- Handover plan for 09.11 started — kept off the shop's own site (Dim, 12.10); logins sheet template for Renat (kept outside the repository). A `/handover` page went live on rempireshop.com for a few minutes and was reverted at Dim's request.

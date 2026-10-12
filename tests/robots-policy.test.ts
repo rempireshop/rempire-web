@@ -51,7 +51,7 @@ function allowed(txt: string, ua: string, path: string): boolean {
 const PATHS = [
   "/", "/ru", "/et/collections/habemehooldus", "/products/night-rider", "/blogs/news/x", "/llms.txt", "/sitemap.xml",
   "/api/overrides/", "/api/blog/x", "/api/shipping/carriers/", "/api/admin/settings", "/api/payments/create",
-  "/checkout", "/checkout/done", "/cart", "/ru/cart", "/et/account", "/search?q=x", "/admin", "/admin/scan", "/golive", "/handover",
+  "/checkout", "/checkout/done", "/cart", "/ru/cart", "/et/account", "/search?q=x", "/admin", "/admin/scan", "/golive",
 ];
 
 describe("production", () => {
@@ -86,7 +86,7 @@ describe("production", () => {
       "Disallow: /admin\nDisallow: /checkout\nDisallow: /cart\nDisallow: /account\nDisallow: /search\n" +
       "Disallow: /ru/checkout\nDisallow: /ru/cart\nDisallow: /ru/account\nDisallow: /ru/search\n" +
       "Disallow: /et/checkout\nDisallow: /et/cart\nDisallow: /et/account\nDisallow: /et/search\n" +
-      "Disallow: /api/\nDisallow: /test\nDisallow: /guide\nDisallow: /golive\nDisallow: /handover\n",
+      "Disallow: /api/\nDisallow: /test\nDisallow: /guide\nDisallow: /golive\n",
     );
     expect(PROD.trimEnd().endsWith("Sitemap: " + SITEMAP)).toBe(true);
   });
