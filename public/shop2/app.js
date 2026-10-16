@@ -48916,22 +48916,22 @@
          is described by seoLead() from its text. seoProductMeta(). */
       productMeta: {
         "system-4-special-shampoo-1": {
-          RU: "Шампунь System 4 №1 (Special Shampoo 1) для жирной кожи головы, склонной к перхоти. С салициловой кислотой и климбазолом, без отдушек. 75–500 мл.",
+          RU: "Шампунь System 4 номер 1 (Special Shampoo 1) для жирной кожи головы, склонной к перхоти. С салициловой кислотой и климбазолом, без отдушек. 75–500 мл.",
           ET: "System 4 šampoon nr 1 (Special Shampoo 1) rasusele, kõõmale kalduvale peanahale. Salitsüülhappe ja klimbasooliga, lõhnaainevaba. 75–500 ml.",
           EN: "System 4 Special Shampoo 1 (No. 1) for an oily, dandruff-prone scalp. With salicylic acid and climbazole, fragrance-free. 75, 250 or 500 ml."
         },
         "system-4-balancing-shampoo-2": {
-          RU: "Шампунь System 4 №2 (Balancing Shampoo 2) для сухой кожи головы, склонной к перхоти, и окрашенных волос. Бережёт цвет, без отдушек. 75–500 мл.",
+          RU: "Шампунь System 4 номер 2 (Balancing Shampoo 2) для сухой кожи головы, склонной к перхоти, и окрашенных волос. Бережёт цвет, без отдушек. 75–500 мл.",
           ET: "System 4 šampoon nr 2 (Balancing Shampoo 2) kuivale, kõõmale kalduvale peanahale ja värvitud juustele. Kaitseb värvi, lõhnaainevaba. 75–500 ml.",
           EN: "System 4 Balancing Shampoo 2 (No. 2) for a dry, dandruff-prone scalp and colour-treated hair. Helps protect colour, fragrance-free. 75–500 ml."
         },
         "system-4-mild-shampoo-3": {
-          RU: "Шампунь System 4 №3 (Mild Shampoo 3) — мягкий шампунь на каждый день: бережно очищает и предотвращает появление перхоти. Без отдушек, 75–500 мл.",
+          RU: "Шампунь System 4 номер 3 (Mild Shampoo 3) — мягкий шампунь на каждый день: бережно очищает и предотвращает появление перхоти. Без отдушек, 75–500 мл.",
           ET: "System 4 šampoon nr 3 (Mild Shampoo 3) – mahe šampoon igapäevaseks pesuks: puhastab õrnalt ja ennetab kõõma. Lõhnaainevaba, 75–500 ml.",
           EN: "System 4 Mild Shampoo 3 (No. 3), a gentle everyday shampoo: cleans softly and helps keep dandruff away. Fragrance-free, 75, 250 or 500 ml."
         },
         "system-4-shale-oil-shampoo-4": {
-          RU: "Шампунь System 4 №4 (Shale Oil Shampoo 4) для очень жирных волос и чувствительной кожи головы. Сланцевое масло и ментол, без отдушек. 75–500 мл.",
+          RU: "Шампунь System 4 номер 4 (Shale Oil Shampoo 4) для очень жирных волос и чувствительной кожи головы. Сланцевое масло и ментол, без отдушек. 75–500 мл.",
           ET: "System 4 šampoon nr 4 (Shale Oil Shampoo 4) väga rasustele juustele ja tundlikule peanahale. Põlevkiviõli ja mentooliga, lõhnaainevaba. 75–500 ml.",
           EN: "System 4 Shale Oil Shampoo 4 (No. 4) for very oily hair and a sensitive scalp. With shale oil and menthol, fragrance-free. 75, 250 or 500 ml."
         },

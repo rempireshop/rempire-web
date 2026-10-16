@@ -107,7 +107,9 @@ describe("the table", () => {
       "system-4-shale-oil-shampoo-4": { n: "4", ru: /очень жирных волос и чувствительной кожи головы/, et: /väga rasustele juustele ja tundlikule peanahale/, en: /very oily hair and a sensitive scalp/ },
     };
     for (const [id, w] of Object.entries(WANT)) {
-      expect(META[id].RU, id).toContain("Шампунь System 4 №" + w.n);
+      // «номер 1», as people type it (Search Console 15.10.2026: «шампунь номер 1», «system 4 шампунь 1»);
+      // the page title keeps «шампунь №1»
+      expect(META[id].RU, id).toContain("Шампунь System 4 номер " + w.n);
       expect(META[id].ET, id).toContain("System 4 šampoon nr " + w.n);
       expect(META[id].EN, id).toContain("(No. " + w.n + ")");
       expect(META[id].RU, id).toMatch(w.ru);
