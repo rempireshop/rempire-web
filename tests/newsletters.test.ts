@@ -612,7 +612,7 @@ describe("the newsletter AI task", () => {
     vi.stubGlobal("fetch", async () =>
       new Response(
         JSON.stringify({
-          model: "gpt-4.1-mini",
+          model: "gpt-6-luna",
           choices: [{
             message: {
               content: JSON.stringify({

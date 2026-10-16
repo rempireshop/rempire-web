@@ -366,7 +366,7 @@ export function installFetchStub(): void {
     // one an answer; the public media host serves the «original» photo
     if (url.includes("api.openai.com/v1/images/")) return json({ data: [{ b64_json: TINY_PNG.toString("base64") }] });
     if (url.includes("api.openai.com")) {
-      return json({ model: "gpt-4.1-mini", choices: [{ message: { content: OPENAI_REPLY } }], usage: {} });
+      return json({ model: "gpt-6-luna", choices: [{ message: { content: OPENAI_REPLY } }], usage: {} });
     }
     if (url.startsWith(FUZZ_ENV.R2_PUBLIC_BASE + "/")) return new Response(new Uint8Array(TINY_PNG), { status: 200 });
     if (url.includes("api.resend.com")) return json({ id: "re_fuzz_1" });

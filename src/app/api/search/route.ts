@@ -27,6 +27,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { extractJsonObject } from "@/lib/ai-json";
+import { chatParams, openaiModel } from "@/lib/openai-chat";
 import {
   buildSearchTermsPrompt,
   cachedTerms,
@@ -40,7 +41,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+const MODEL = openaiModel(); // src/lib/openai-chat.ts
 /** Eight two-word terms in a JSON list — 120 is generous. */
 const MAX_TOKENS = 120;
 const NO_STORE = { "cache-control": "no-store" } as const;
@@ -119,9 +120,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        temperature: 0,
+        ...chatParams(MODEL, { maxTokens: MAX_TOKENS, temperature: 0 }),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },

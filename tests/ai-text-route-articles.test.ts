@@ -28,7 +28,7 @@ function req(body: unknown, cookie: string) {
 /** A chat completion whose message is `content` (a string as the model wrote it). */
 function completion(content: string, finish = "stop") {
   return new Response(
-    JSON.stringify({ model: "gpt-4.1-mini", choices: [{ message: { content }, finish_reason: finish }], usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }),
+    JSON.stringify({ model: "gpt-6-luna", choices: [{ message: { content }, finish_reason: finish }], usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }),
     { status: 200, headers: { "content-type": "application/json" } },
   );
 }
@@ -77,7 +77,7 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     // the request: room for a whole article, and beard products offered for a beard topic
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     const payload = JSON.parse(String((init as RequestInit).body));
-    expect(payload.max_tokens).toBe(4500);
+    expect(payload.max_completion_tokens).toBe(4500);
     expect(payload.response_format).toEqual({ type: "json_object" });
     const userMsg = payload.messages[1].content as string;
     expect(userMsg).toContain("Topic: уход за бородой зимой");
@@ -330,7 +330,7 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(t.tags).toEqual(["habe", "talv"]);
     expect(t).not.toHaveProperty("products");
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(JSON.parse(String((init as RequestInit).body)).max_tokens).toBe(4500);
+    expect(JSON.parse(String((init as RequestInit).body)).max_completion_tokens).toBe(4500);
   });
 
   it("post_translate: refuses the source language as the target", async () => {
@@ -353,7 +353,7 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(t.sub).toBe("Масла и бальзамы.");
     expect(t.cta).toBe("Смотреть");
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(JSON.parse(String((init as RequestInit).body)).max_tokens).toBe(400);
+    expect(JSON.parse(String((init as RequestInit).body)).max_completion_tokens).toBe(400);
   });
 
   it("copy: an unknown kind is refused before the model is called", async () => {
@@ -404,6 +404,6 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     const { POST } = await import("@/app/api/admin/ai/text/route");
     await POST(req({ task: "blog_outline", lang: "RU", input: { topic: "x" } }, admin));
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(JSON.parse(String((init as RequestInit).body)).max_tokens).toBe(900);
+    expect(JSON.parse(String((init as RequestInit).body)).max_completion_tokens).toBe(900);
   });
 });

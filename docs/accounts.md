@@ -64,7 +64,7 @@ Values are never written here. Names only, grouped by what stops working without
 | Name | Needed for | Who sets it | Status 03.09 |
 |---|---|---|---|
 | OPENAI_API_KEY | customer chat + admin assistant | Dim (key from platform.openai.com, shop account) | ✅ set |
-| OPENAI_MODEL | model choice, default `gpt-4.1-mini` when unset | Dim | optional |
+| OPENAI_MODEL | model for the shop chat, admin assistant, text generation and AI search; default `gpt-6-luna` when unset (`src/lib/openai-chat.ts`, since 16.10.2026). **If it is set to `gpt-4.1-mini` or any gpt-4o / gpt-4.1 model, delete it or set `gpt-6-luna`** — those shut down in the API on 14.01.2027. Check: `GET https://rempireshop.com/api/search/` echoes the model in use | Dim | optional |
 | RESEND_API_KEY | all customer e-mails + order pings | Dim (Resend → API keys) | ✅ set |
 | RESEND_FROM / MAIL_REPLY_TO | sender «Rempire <shop@rempireshop.com>», reply-to info@rempireshop.com (forwards to the shop Gmail via Cloudflare Email Routing) | Dim | ✅ MAIL_REPLY_TO=info@rempireshop.com (03.09) |
 | RESEND_TO | **where the owner's own pings go** — the «new order» letter (src/lib/notify.ts, called from src/lib/mail-hooks.ts). **Value: `shop@rempireshop.com`** — Dim's answer 07.09; Cloudflare Email Routing already forwards that address to the shop's Gmail (see the Cloudflare section below), so nothing else has to be set up for it. **There is no default any more**: unset, the ping is simply not sent and `[notify] RESEND_TO is not set …` goes to the Vercel log. Nothing else in the shop reads it — customer letters go to the customer, from RESEND_FROM | Dim (in Vercel) | ⬜ **not set** — no owner pings until it is |

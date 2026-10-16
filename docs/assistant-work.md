@@ -391,18 +391,20 @@ Everything below runs on OpenAI (тот же движок, что и обычн�
 
 ### Стоимость одного вызова
 
-Модель — `OPENAI_MODEL` (по умолчанию `gpt-4.1-mini`, тот же, что у обычного
-чата), `temperature: 0.4`, `max_tokens` — по задаче (`MAX_TOKENS` в роуте):
+Модель — `OPENAI_MODEL` (по умолчанию `gpt-6-luna` с 16.10.2026, тот же, что у
+обычного чата; выбирается в `src/lib/openai-chat.ts`, gpt-4.1-mini отключают
+14.01.2027), `reasoning_effort: "none"`, `temperature: 0.4`,
+`max_completion_tokens` — по задаче (`MAX_TOKENS` в роуте):
 900 у коротких задач, как и было; 4500 у `post_full` и `post_translate`
 (статья в 600–900 русских слов в HTML — около 2500 токенов, плюс поля
 вокруг); 400 у `copy`. Расход токенов кладётся в `admin_audit`
 на каждый вызов (`action: "ai.text"`, payload: `{task, lang, model,
 promptTokens, completionTokens, totalTokens}`) — историю расходов видно через
-`GET /api/admin/audit`. Порядок величины на mini-модели: `describe`/`seo`
+`GET /api/admin/audit`. Порядок величины (замерено на gpt-4.1-mini): `describe`/`seo`
 ≈ 400–700 токенов всего, `translate` и `blog_outline` ближе к потолку в 900;
 «Написать статью целиком» — три вызова (RU, ET, EN) по 3–5 тысяч токенов
-каждый, то есть порядка 10–15 тысяч токенов на статью — на mini-модели это
-единицы центов.
+каждый, то есть порядка 10–15 тысяч токенов на статью — на mini это единицы
+центов, gpt-6-luna в 4 раза дешевле на входе и в 3,2 раза на выходе.
 
 ### Что решено намеренно не делать (и почему)
 

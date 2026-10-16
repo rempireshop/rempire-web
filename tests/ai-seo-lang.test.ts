@@ -142,7 +142,7 @@ function stubModel(answer: (a: Asked) => { title: string; description: string })
     const a = { lang, system, user };
     asked.push(a);
     return new Response(JSON.stringify({
-      model: "gpt-4.1-mini",
+      model: "gpt-6-luna",
       choices: [{ message: { content: JSON.stringify(answer(a)) } }],
       usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
     }), { status: 200, headers: { "content-type": "application/json" } });

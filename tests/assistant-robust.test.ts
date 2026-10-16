@@ -29,11 +29,11 @@ function req(body: unknown, cookie: string) {
 
 /** Records what the route sends to OpenAI and answers with `content` as the model wrote it. */
 function stubOpenAI(content: string, finish = "stop") {
-  const sent: Array<{ max_tokens: number; messages: Array<{ role: string; content: string }> }> = [];
+  const sent: Array<{ max_completion_tokens: number; reasoning_effort?: string; messages: Array<{ role: string; content: string }> }> = [];
   vi.stubGlobal("fetch", vi.fn(async (_url: unknown, init: RequestInit) => {
     sent.push(JSON.parse(String(init.body)));
     return new Response(
-      JSON.stringify({ model: "gpt-4.1-mini", choices: [{ message: { content }, finish_reason: finish }] }),
+      JSON.stringify({ model: "gpt-6-luna", choices: [{ message: { content }, finish_reason: finish }] }),
       { status: 200, headers: { "content-type": "application/json" } },
     );
   }));
@@ -236,11 +236,12 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const sentAdmin = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "" }));
     const { POST } = await import("@/app/api/assistant/route");
     await POST(req({ mode: "admin", messages: [{ role: "user", content: "привет" }] }, admin));
-    expect(sentAdmin[0].max_tokens).toBe(1500);
+    expect(sentAdmin[0].max_completion_tokens).toBe(1500);
+    expect(sentAdmin[0].reasoning_effort).toBe("none");
     vi.unstubAllGlobals();
     const sentShop = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [] }));
     await POST(req({ messages: [{ role: "user", content: "привет" }] }, ""));
-    expect(sentShop[0].max_tokens).toBe(400);
+    expect(sentShop[0].max_completion_tokens).toBe(400);
   });
 
   it("the prompt asks for a topic, not an article — and says the panel writes the rest", async () => {

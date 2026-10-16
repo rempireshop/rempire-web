@@ -54,7 +54,7 @@ custom sitemap; 57 files in `src/lib`; 21 SQL migrations; 74 vitest files
 | Railway Postgres | the database | `DATABASE_URL`, `DATABASE_POOL_MAX`, `DATABASE_SSL_CA`, `DATABASE_SSL_NO_VERIFY` |
 | Montonio Stargate (sandbox now) | bank links, cards, wallets; **and** shipping labels, pickup points, tariffs | `PAYMENT_PROVIDER`, `MONTONIO_ACCESS_KEY`, `MONTONIO_SECRET_KEY`, `MONTONIO_ENV`, `PUBLIC_BASE_URL` |
 | Resend | every e-mail | `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_REPLY_TO`, `RESEND_TO`, `MAIL_PENDING_PAYMENT`, `MAIL_RETRY_DELAY_MS` |
-| OpenAI | shop chat, admin assistant, text generation, photo cut-out | `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`), `PHOTO_CUTOUT`, `PHOTO_CUTOUT_TIMEOUT_MS` |
+| OpenAI | shop chat, admin assistant, text generation, photo cut-out | `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-6-luna`, `src/lib/openai-chat.ts`), `PHOTO_CUTOUT`, `PHOTO_CUTOUT_TIMEOUT_MS` |
 | Cloudflare R2 | uploaded photos, videos, gift-card PDFs | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE` |
 | Cloudflare DNS + Email Routing | `rempireshop.com` DNS (moved 03.09), `info@`/`shop@` → Gmail | — |
 | Google Search Console | admin «Аналитика» block (not configured yet) | `GSC_SERVICE_ACCOUNT_JSON`, `GSC_SITE_URL` |
@@ -974,17 +974,25 @@ languages, drafts customer replies.
 Dim pays the OpenAI bill.
 
 **How it works.**
-- **Model/env**: OpenAI chat completions, `OPENAI_MODEL ?? "gpt-4.1-mini"`,
-  `temperature 0.4`, JSON mode; key `OPENAI_API_KEY` (currently Dim's account,
-  to move to the shop account at launch — `docs/accounts.md`). Cost order of
-  magnitude on mini: a description/SEO call 400–700 tokens, a whole article
-  10–15 k tokens (≈ cents); every text call is logged to `admin_audit` as
+- **Model/env**: OpenAI chat completions; the model is chosen in one place,
+  `src/lib/openai-chat.ts`: `OPENAI_MODEL`, default `gpt-6-luna` since
+  16.10.2026 (gpt-4.1-mini shuts down in the API on 14.01.2027; luna is
+  OpenAI's named replacement). Luna is a reasoning model, so it is sent
+  `reasoning_effort: "none"` — no thinking billed, the whole cap left for the
+  answer, `temperature` still accepted; a gpt-4 model pinned in
+  `OPENAI_MODEL` gets no such field. The cap travels as
+  `max_completion_tokens`. `temperature 0.4` (search 0), JSON mode; key
+  `OPENAI_API_KEY` (currently Dim's account, to move to the shop account at
+  launch — `docs/accounts.md`). Cost order of magnitude: a description/SEO
+  call 400–700 tokens, a whole article 10–15 k tokens (≈ cents; luna costs
+  $0.10/$0.50 per 1M input/output tokens, mini $0.40/$1.60); every text call
+  is logged to `admin_audit` as
   `ai.text` with token counts — visible only in the database.
 - **Assistant** `POST /api/assistant/` (`src/app/api/assistant/route.ts`,
-  `PROMPT_V 19`): shop mode public (same-origin, 10 msg/min/IP, `max_tokens`
-  400, catalogue slice `src/lib/catalogue-slice.ts`, blog links, actions
+  `PROMPT_V 19`): shop mode public (same-origin, 10 msg/min/IP,
+  `max_completion_tokens` 400, catalogue slice `src/lib/catalogue-slice.ts`, blog links, actions
   `add_to_cart|open_product|open_category|open_cart|checkout`); admin mode
-  requires the admin cookie **and** an `Origin` header, `max_tokens` 1500, the
+  requires the admin cookie **and** an `Origin` header, `max_completion_tokens` 1500, the
   whole catalogue + custom products + low stock + (on keywords) customers and
   posts + attached photo keys. `src/app/api/assistant/actions.ts`
   `sanitizeAction()` whitelists 30 types, admin ones: `set_price`, `set_stock`,
@@ -1027,7 +1035,7 @@ Dim pays the OpenAI bill.
   page intro, the e-mail signature, the promo note, the new-product name («✨
   Подобрать название»).
 - **Photo cut-out** `POST /api/admin/upload/cutout/` → `src/lib/photo-cutout.ts`,
-  OpenAI `gpt-image-1` images/edits with transparent background, only when
+  OpenAI `gpt-image-2.5-sunburst` images/edits with transparent background, only when
   `PHOTO_CUTOUT=openai`; the «✂ Убрать фон» button appears only then.
 
 **How to test it.** `tests/ai-prompts.test.ts`, `tests/ai-prompts-articles.
@@ -1035,7 +1043,7 @@ test.ts`, `tests/ai-json.test.ts`, `tests/ai-text-route.test.ts`, `tests/ai-text
 route-articles.test.ts`, `tests/assistant-actions.test.ts`, `tests/assistant-
 prompt.test.ts`, `tests/assistant-robust.test.ts`, `tests/assistant-photos.
 test.ts`, `tests/assistant-admin-auth.test.ts`, `tests/security-assistant.
-test.ts`, `tests/photo-cutout.test.ts`; e2e (all with the model stubbed or
+test.ts`, `tests/openai-chat.test.ts`, `tests/photo-cutout.test.ts`; e2e (all with the model stubbed or
 absent) `admin-blog.spec.ts`, `admin-shell.spec.ts` (assistant, JSON-looking
 answers, photo attachment), `admin-products.spec.ts` (`create_product`),
 `chatbot.spec.ts`, `security.spec.ts`, `sweep-admin.spec.ts` (prompt

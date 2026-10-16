@@ -39,7 +39,7 @@ const adminBody = { mode: "admin", messages: [{ role: "user", content: "прив
 function fakeCompletion() {
   return new Response(
     JSON.stringify({
-      model: "gpt-4.1-mini",
+      model: "gpt-6-luna",
       choices: [{ message: { content: JSON.stringify({ reply: "ок" }) } }],
     }),
     { status: 200, headers: { "content-type": "application/json" } },

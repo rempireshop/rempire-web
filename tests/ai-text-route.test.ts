@@ -22,7 +22,7 @@ function req(body: unknown, opts: { cookie?: string } = {}) {
 function fakeCompletion(content: unknown, usage = { prompt_tokens: 120, completion_tokens: 80, total_tokens: 200 }) {
   return new Response(
     JSON.stringify({
-      model: "gpt-4.1-mini",
+      model: "gpt-6-luna",
       choices: [{ message: { content: JSON.stringify(content) } }],
       usage,
     }),
@@ -96,7 +96,7 @@ describe("POST /api/admin/ai/text", () => {
     expect(res.status).toBe(400);
   });
 
-  it("calls OpenAI with the fixed model/temperature/max_tokens and json_object format", async () => {
+  it("calls OpenAI with gpt-6-luna at no reasoning, the fixed temperature/token cap and json_object format", async () => {
     const fetchMock = vi.fn(async () => fakeCompletion({ description: "d", bullets: ["a", "b", "c"] }));
     vi.stubGlobal("fetch", fetchMock);
     const { POST } = await import("@/app/api/admin/ai/text/route");
@@ -106,7 +106,10 @@ describe("POST /api/admin/ai/text", () => {
     const [url, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(url).toBe("https://api.openai.com/v1/chat/completions");
     const payload = JSON.parse(String((init as RequestInit).body));
-    expect(payload.max_tokens).toBe(900);
+    expect(payload.model).toBe("gpt-6-luna");
+    expect(payload.reasoning_effort).toBe("none");
+    expect(payload.max_completion_tokens).toBe(900);
+    expect(payload).not.toHaveProperty("max_tokens");
     expect(payload.temperature).toBe(0.4);
     expect(payload.response_format).toEqual({ type: "json_object" });
     expect(payload.messages[0].role).toBe("system");
@@ -196,7 +199,7 @@ describe("POST /api/admin/ai/text", () => {
     const { POST } = await import("@/app/api/admin/ai/text/route");
     await POST(req({ task: "translate", lang: "RU", input: { text: "Русский текст", targetLangs: ["ET", "EN"] } }, { cookie: admin }));
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(JSON.parse(String((init as RequestInit).body)).max_tokens).toBe(4500);
+    expect(JSON.parse(String((init as RequestInit).body)).max_completion_tokens).toBe(4500);
   });
 
   it("translate: a cut answer is refused, never written into the draft half-done", async () => {
@@ -206,7 +209,7 @@ describe("POST /api/admin/ai/text", () => {
     });
     vi.stubGlobal("fetch", vi.fn(async () => new Response(
       JSON.stringify({
-        model: "gpt-4.1-mini",
+        model: "gpt-6-luna",
         choices: [{ message: { content: whole.slice(0, whole.indexOf("toasoojus")) }, finish_reason: "length" }],
       }),
       { status: 200, headers: { "content-type": "application/json" } },

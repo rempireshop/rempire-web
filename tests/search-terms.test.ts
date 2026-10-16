@@ -260,9 +260,11 @@ describe("POST /api/search", () => {
     expect(url).toBe("https://api.openai.com/v1/chat/completions");
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer sk-test-dummy");
     const sent = JSON.parse(String(init.body));
+    expect(sent.model).toBe("gpt-6-luna");
+    expect(sent.reasoning_effort).toBe("none"); // a reasoning model would spend the 120 tokens thinking
     expect(sent.temperature).toBe(0);
     expect(sent.response_format).toEqual({ type: "json_object" });
-    expect(sent.max_tokens).toBeLessThanOrEqual(200);
+    expect(sent.max_completion_tokens).toBeLessThanOrEqual(200);
     expect(sent.messages).toHaveLength(2);
     expect(JSON.stringify(sent)).not.toContain("sk-test-dummy"); // the key travels in the header only
   });

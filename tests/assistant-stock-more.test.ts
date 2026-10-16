@@ -24,7 +24,7 @@ function stubOpenAI() {
   vi.stubGlobal("fetch", vi.fn(async (_url: unknown, init: RequestInit) => {
     sent.push(JSON.parse(String(init.body)));
     return new Response(
-      JSON.stringify({ model: "gpt-4.1-mini", choices: [{ message: { content: JSON.stringify({ reply: "ok", product_ids: [], tab: "", action: null }) } }] }),
+      JSON.stringify({ model: "gpt-6-luna", choices: [{ message: { content: JSON.stringify({ reply: "ok", product_ids: [], tab: "", action: null }) } }] }),
       { status: 200, headers: { "content-type": "application/json" } },
     );
   }));

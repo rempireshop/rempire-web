@@ -37,9 +37,10 @@
  * button in the panel (banner slide, announcement strip, contact page,
  * letter footer, promo note, product name) — one task, one `kind`.
  *
- * Same model/env as src/app/api/assistant/route.ts (OPENAI_MODEL, a plain
- * fetch to the chat-completions endpoint, `response_format: json_object`),
- * temperature 0.4. max_tokens is per task (MAX_TOKENS below): 900 for the
+ * Same model/env as src/app/api/assistant/route.ts (src/lib/openai-chat.ts:
+ * OPENAI_MODEL, default gpt-6-luna; a plain fetch to the chat-completions
+ * endpoint, `response_format: json_object`), temperature 0.4. The token cap
+ * is per task (MAX_TOKENS below): 900 for the
  * short ones, enough for a whole article for post_full/post_translate. The
  * answer is read through src/lib/ai-json.ts, so a fenced or a cut document
  * is still an answer — a cut article, though, is refused as `truncated`
@@ -65,6 +66,7 @@ import {
   AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, seoOffLanguage, seoProductName, type AiTask, type Lang3,
 } from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
+import { chatParams, openaiModel } from "@/lib/openai-chat";
 import { catalogueRow, relevantProducts } from "@/lib/catalogue-slice";
 import { sanitizeHtml } from "@/lib/blog";
 /* A Google title never carries the shop's name: every page appends it itself
@@ -75,10 +77,10 @@ import { placeArticleCards, readCardPicks, type CardCandidate, type CardPick } f
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+const MODEL = openaiModel();
 /* Per task: 900 was the one number every task shared, and it is still what
    the short ones get. A whole article is 600–900 words of HTML in Russian —
-   about 2 500 tokens as gpt-4.1-mini counts them — so post_full and its
+   about 2 500 tokens as gpt-4.1-mini counted them — so post_full and its
    translation get room for that plus the fields around it, and are refused
    as `truncated` (never saved half-written) if they still run out. */
 const MAX_TOKENS: Record<AiTask, number> = {
@@ -379,9 +381,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS[task],
-        temperature: TEMPERATURE,
+        ...chatParams(MODEL, { maxTokens: MAX_TOKENS[task], temperature: TEMPERATURE }),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: prompt.system },

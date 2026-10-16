@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { briefContent, mergeContent } from "@/lib/content";
 import { listAllPosts, listPublished } from "@/lib/blog";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
+import { chatParams, openaiModel } from "@/lib/openai-chat";
 import { catalogueLines, relevantProducts, rowLine, type CatRow } from "@/lib/catalogue-slice";
 import {
   briefAnalytics,
@@ -41,7 +42,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    admin cookie AND an Origin header, because it inlines the whole catalogue
    and hands back panel actions. See the check in POST(). */
 
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+const MODEL = openaiModel(); // src/lib/openai-chat.ts
 const PROMPT_V = 28; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
@@ -779,9 +780,7 @@ export async function POST(req: NextRequest) {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: MODEL,
-      max_tokens: isAdmin ? MAX_TOKENS_ADMIN : MAX_TOKENS_SHOP,
-      temperature: 0.4,
+      ...chatParams(MODEL, { maxTokens: isAdmin ? MAX_TOKENS_ADMIN : MAX_TOKENS_SHOP, temperature: 0.4 }),
       response_format: { type: "json_object" },
       messages: [{ role: "system", content: system }, ...history],
     }),
