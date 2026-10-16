@@ -72,11 +72,16 @@ describe("section intros", () => {
     has("face", "EN", ["korean skincare", "toners"]);
   });
 
+  /* 16.10.2026: the Estonian beard and hair lines were rewritten longer, in the
+     words Search Console shows Estonians typing (Dim approved both texts as
+     they stand) — two sentences each; every other line stays one line long */
+  const LONGER: Record<string, number> = { "beard ET": 280, "hair ET": 260 };
+
   it("stay the length of a line under a heading — one or two sentences, about what they were", () => {
     for (const cat of SECTIONS) {
       for (const lang of ["RU", "ET", "EN"] as const) {
         const t = intro(cat, lang);
-        expect(t.length, `${cat} ${lang}: ${t}`).toBeLessThanOrEqual(105);
+        expect(t.length, `${cat} ${lang}: ${t}`).toBeLessThanOrEqual(LONGER[`${cat} ${lang}`] ?? 105);
         expect((t.match(/[.!?](\s|$)/g) || []).length, `${cat} ${lang}`).toBeLessThanOrEqual(2);
       }
     }

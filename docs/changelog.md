@@ -54,4 +54,6 @@ where it becomes the «what was done» summary.*
 - Hand-written Google descriptions (RU/ET/EN) for the twelve most-shown Kevin.Murphy products; Estonian intros of «Habemehooldus» and «Juuksehooldus» rewritten in the words people search (Dim approved both).
 - Merchant Center return policy re-created after Dim removed the old one: the same 24 EU countries, 30 days, by mail, return postage the customer's (Google's «free return» needs a label the shop provides, which it does not) — status Verified.
 - Photo cut-out moved to gpt-image-2.5-sunburst — gpt-image-1 shuts down on 23.10.2026; the feature stays off in production (43fa2d2f).
+- Shop chat, admin text generation and AI search moved to gpt-6-luna (no reasoning, same caps and wording) — gpt-4.1-mini shuts down on 14.01.2027; about 70 % cheaper per call; `OPENAI_MODEL` in Vercel still overrides (b2572d9f).
+- CI was red since d2ce0c07: the section-intro test still held the two longer Estonian lines to one line's length; it now knows they are approved.
 - Google Business Profile: the Maps profile «REMPIRE» (tattoo salon, 222 reviews) links only to rempire.ee and is managed by another account; Renat asked to add the shop account as manager. rempire.ee has no link to the shop yet.
