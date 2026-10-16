@@ -4,7 +4,7 @@
  * The network is stubbed at fetch: the bucket, the original photo and OpenAI
  * all answer from here, so nothing leaves the machine. What is pinned: with
  * PHOTO_CUTOUT="openai" the route fetches the original, asks the image edit
- * endpoint for gpt-image-1 with a transparent background and stores the PNG
+ * endpoint for gpt-image-2.5-sunburst with a transparent background and stores the PNG
  * (plus its thumbnail) NEXT TO the original under a `-cutout` name; without
  * the switch it says so and calls nothing; when the model fails nothing is
  * written and the answer is a plain 502 — the original stays.
@@ -96,7 +96,7 @@ describe("photo cutout", () => {
     expect(cutoutKey("products/touchable/1-a-cutout.png")).toBe("products/touchable/1-a-cutout.png");
   });
 
-  it("success: fetches the original, asks gpt-image-1 for a transparent background, stores the PNG and its thumb", async () => {
+  it("success: fetches the original, asks gpt-image-2.5-sunburst for a transparent background, stores the PNG and its thumb", async () => {
     const { POST } = await import("@/app/api/admin/upload/cutout/route");
     const calls = stubNet();
     const res = await POST(post({ key: KEY }));
@@ -116,7 +116,7 @@ describe("photo cutout", () => {
     const ai = calls.find((c) => c.url === CUTOUT_ENDPOINT)!;
     expect(ai.method).toBe("POST");
     const form = ai.body as FormData;
-    expect(form.get("model")).toBe("gpt-image-1");
+    expect(form.get("model")).toBe("gpt-image-2.5-sunburst");
     expect(form.get("background")).toBe("transparent");
     expect(String(form.get("prompt"))).toMatch(/exactly as it is photographed/);
     expect(String(form.get("prompt"))).toMatch(/remove the background/);

@@ -5,7 +5,7 @@
  * plus the OPENAI_API_KEY the assistant already uses. With it on, the admin's
  * media tab offers a per-photo button (GET /api/admin/upload reports
  * `cutout: true`), and POST /api/admin/upload/cutout sends the picture to
- * OpenAI's image edit endpoint (model gpt-image-1, background "transparent")
+ * OpenAI's image edit endpoint (model gpt-image-2.5-sunburst, background "transparent")
  * with a prompt that asks for the product exactly as photographed, minus the
  * background. The answer is a PNG with alpha, stored NEXT TO the original —
  * the original is never touched, so a bad cut costs one click, not a photo.
@@ -15,7 +15,9 @@
  */
 import { sniffImage } from "@/lib/images";
 
-export const CUTOUT_MODEL = "gpt-image-1";
+/* gpt-image-1 shuts down on 23.10.2026 (OpenAI deprecations, 2026-04-22);
+   gpt-image-2.5-sunburst is OpenAI's pick where editing precision matters */
+export const CUTOUT_MODEL = "gpt-image-2.5-sunburst";
 export const CUTOUT_ENDPOINT = "https://api.openai.com/v1/images/edits";
 export const CUTOUT_PROMPT =
   "Keep the product exactly as it is photographed — the same object, angle, colours, labels, lighting and " +
