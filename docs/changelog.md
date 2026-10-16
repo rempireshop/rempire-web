@@ -52,4 +52,6 @@ where it becomes the «what was done» summary.*
 - Merchant Center: our EN and RU feeds 607 of 629 items approved (the rest are policy cases such as CBD); Shopify's six data sources deleted by Dim — Google Shopping now runs on rempireshop.com's own feeds.
 - Russian Google descriptions of System 4 shampoos №1–4 say «номер N», as people search (543d1ade).
 - Hand-written Google descriptions (RU/ET/EN) for the twelve most-shown Kevin.Murphy products; Estonian intros of «Habemehooldus» and «Juuksehooldus» rewritten in the words people search (Dim approved both).
+- Merchant Center return policy re-created after Dim removed the old one: the same 24 EU countries, 30 days, by mail, return postage the customer's (Google's «free return» needs a label the shop provides, which it does not) — status Verified.
+- Photo cut-out moved to gpt-image-2.5-sunburst — gpt-image-1 shuts down on 23.10.2026; the feature stays off in production (43fa2d2f).
 - Google Business Profile: the Maps profile «REMPIRE» (tattoo salon, 222 reviews) links only to rempire.ee and is managed by another account; Renat asked to add the shop account as manager. rempire.ee has no link to the shop yet.
