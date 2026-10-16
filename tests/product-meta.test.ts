@@ -35,6 +35,11 @@ const NAMED = [
   "gatsby-moving-rubber-grunge-mat-grey-hair-wax",
   "proraso-azur-lime-after-shave-balm-100-ml",
   "creed-aventus-eau-de-parfum-for-men-50ml", "creed-creed-aventus-cologne-50ml",
+  /* 16.10.2026: the twelve most-shown Kevin.Murphy products in Search Console
+     with no line of their own yet — approved by Dim the same day */
+  "kevin-murphy-hydrate-me-masque", "heated-defense", "touchable", "repair-me-wash", "super-goo",
+  "kevin-murphy-un-tangled-spray", "bedroom-hair", "kevin-murphy-motion-lotion", "anti-gravity-spray",
+  "hair-resort-spray", "powder-puff", "kevin-murphy-angel-wash",
 ];
 const SYSTEM_4 = CATALOGUE.filter((p) => p.brand === "System 4").map((p) => p.id);
 

@@ -497,6 +497,68 @@
           ET: "Kevin.Murphy Rough.Rider – tugeva hoiuga viimistlussavi: tihke, kergelt sõmer tekstuur ja matt soeng, mis püsib kaua. 30 ja 100 g.",
           EN: "Kevin.Murphy Rough.Rider: a strong-hold styling clay with a dense, slightly gritty texture for a matte, defined look that lasts. 30 or 100 g."
         },
+        /* Kevin.Murphy — the twelve most-shown products in Search Console with no line of
+           their own yet (16.10.2026, approved by Dim the same day) */
+        "kevin-murphy-hydrate-me-masque": {
+          RU: "Маска Kevin.Murphy Hydrate-Me.Masque для сухих волос: интенсивно увлажняет, делает волосы мягкими и блестящими. Нанести после шампуня, смыть. 40 и 200 мл.",
+          ET: "Kevin.Murphy Hydrate-Me.Masque – niisutav mask kuivadele juustele: teeb juuksed pehmeks ja läikivaks. Kanna peale pärast šampooni, loputa. 40 ja 200 ml.",
+          EN: "Kevin.Murphy Hydrate-Me.Masque: an intensive moisture mask for dry, thirsty hair that leaves it soft and shiny. Apply after shampoo, rinse. 40 or 200 ml."
+        },
+        "heated-defense": {
+          RU: "Термозащитная пенка Kevin.Murphy Heated.Defense: невесомая, не смывается, защищает волосы от нагрева до 232 °C. Разглаживает и облегчает расчёсывание.",
+          ET: "Kevin.Murphy Heated.Defense – kerge pähejäetav kuumakaitsevaht, mis kaitseb juukseid kuni 232 °C kuumuse eest. Silub ja teeb kammimise lihtsaks.",
+          EN: "Kevin.Murphy Heated.Defense: a weightless leave-in foam that protects hair from heat up to 232 °C. Smooths and detangles, for all hair types."
+        },
+        "touchable": {
+          RU: "Kevin.Murphy Touchable — спрей-воск: эффект воска с лёгкостью спрея. Подвижная фиксация, сатиновый блеск, не липнет. 250 мл.",
+          ET: "Kevin.Murphy Touchable – vahasprei, mis annab vaha viimistluse sprei kergusega. Painduv fikseerimine, satiinjas läige, ei kleebi. 250 ml.",
+          EN: "Kevin.Murphy Touchable: a spray wax with the finish of a wax and the lightness of a spray. Flexible hold, satin sheen, never sticky. 250 ml."
+        },
+        "repair-me-wash": {
+          RU: "Шампунь Kevin.Murphy Repair-Me.Wash для сухих, ломких и повреждённых волос: протеины и аминокислоты помогают их укрепить. Без сульфатов. 40 и 250 мл.",
+          ET: "Kevin.Murphy Repair-Me.Wash – tugevdav šampoon kuivadele, rabedatele ja kahjustatud juustele, proteiinide ja aminohapetega. Sulfaadivaba. 40 ja 250 ml.",
+          EN: "Kevin.Murphy Repair-Me.Wash: a strengthening shampoo for dry, brittle or damaged hair, with proteins and amino acids. Sulphate-free. 40 or 250 ml."
+        },
+        "super-goo": {
+          RU: "Гель Kevin.Murphy Super.Goo: эластичный моделирующий гель с сильной, но гибкой фиксацией и гладким естественным финишем. Не шелушится. 100 г.",
+          ET: "Kevin.Murphy Super.Goo – elastne modelleerimisgeel: tugev, kuid painduv fikseerimine ja sile loomulik viimistlus. Ei jäta helbeid, pestav veega. 100 g.",
+          EN: "Kevin.Murphy Super.Goo: a rubbery sculpting gel with firm but flexible hold and a slick, natural finish. No flakes, washes out with water. 100 g."
+        },
+        "kevin-murphy-un-tangled-spray": {
+          RU: "Спрей Kevin.Murphy Un.Tangled — несмываемый кондиционер для лёгкого расчёсывания, с экстрактами австралийских фруктов и термозащитой. 40 и 150 мл.",
+          ET: "Kevin.Murphy Un.Tangled – pähejäetav palsamsprei kergemaks kammimiseks, Austraalia puuviljaekstraktide ja kuumakaitsega. 40 ja 150 ml.",
+          EN: "Kevin.Murphy Un.Tangled: a leave-in detangling spray with Australian fruit extracts and heat protection. Spray on wet hair and comb. 40 or 150 ml."
+        },
+        "bedroom-hair": {
+          RU: "Kevin.Murphy Bedroom.Hair — лёгкий текстурирующий лак: небрежная текстура и подвижная фиксация на весь день, волосы остаются мягкими. 100 и 250 мл.",
+          ET: "Kevin.Murphy Bedroom.Hair – kerge tekstuuri andev juukselakk sassis soenguks: painduv fikseerimine terveks päevaks, juuksed jäävad pehmeks. 100 ja 250 ml.",
+          EN: "Kevin.Murphy Bedroom.Hair: a lightweight texturising hairspray for touchable, tousled hair, with a flexible hold that lasts all day. 100 or 250 ml."
+        },
+        "kevin-murphy-motion-lotion": {
+          RU: "Лосьон Kevin.Murphy Motion.Lotion для локонов на тонких и длинных волосах: подчёркивает кудри, убирает пушистость, даёт гибкую фиксацию. 150 мл.",
+          ET: "Kevin.Murphy Motion.Lotion – lokke esile toov losjoon peenikestele ja pikkadele juustele: vähendab kahusust, annab painduva fikseerimise ja läike. 150 ml.",
+          EN: "Kevin.Murphy Motion.Lotion: a curl-enhancing lotion for fine or long hair that defines curls, tames frizz and adds flexible hold and shine. 150 ml."
+        },
+        "anti-gravity-spray": {
+          RU: "Kevin.Murphy Anti.Gravity.Spray — невесомый лак без аэрозоля для объёма и блеска без жирности, дольше держит укладку. 40 и 150 мл.",
+          ET: "Kevin.Murphy Anti.Gravity.Spray – kaalutu aerosoolivaba juukselakk kohevuse ja läike jaoks, hoiab soengut kauem. 40 ja 150 ml.",
+          EN: "Kevin.Murphy Anti.Gravity.Spray: a weightless non-aerosol hairspray for volume and oil-free shine that holds your style for longer. 40 or 150 ml."
+        },
+        "hair-resort-spray": {
+          RU: "Kevin.Murphy Hair.Resort.Spray — текстурирующий спрей для пляжных локонов: мёд и цитрусы, лёгкая фиксация, термозащита до 220 °C. 40 и 150 мл.",
+          ET: "Kevin.Murphy Hair.Resort.Spray – rannasoengu tekstuurisprei mee ja tsitrusega: kerge fikseerimine, kuumakaitse kuni 220 °C. 40 ja 150 ml.",
+          EN: "Kevin.Murphy Hair.Resort.Spray: a beach-texture spray with honey and citrus for tousled, surfer-style hair. Heat protection to 220 °C. 40 or 150 ml."
+        },
+        "powder-puff": {
+          RU: "Пудра Kevin.Murphy Powder.Puff для объёма тонких и плоских волос: мгновенный прикорневой объём, сухая матовая текстура, стойкая фиксация. 14 г.",
+          ET: "Kevin.Murphy Powder.Puff – kohevust andev juuksepuuder peenikestele ja lamedatele juustele: kohene kohevus juurtel, kuiv matt tekstuur. 14 g.",
+          EN: "Kevin.Murphy Powder.Puff: a volumising powder for fine or flat hair with instant root lift, a dry matte texture and lasting hold. 14 g."
+        },
+        "kevin-murphy-angel-wash": {
+          RU: "Шампунь Kevin.Murphy Angel.Wash для тонких окрашенных волос: мягко очищает, придаёт объём, помогает сохранить цвет. Без сульфатов. 40 и 250 мл.",
+          ET: "Kevin.Murphy Angel.Wash – õrn kohevust andev šampoon peenikestele värvitud juustele, aitab värvi säilitada. Sulfaadivaba. 40 ja 250 ml.",
+          EN: "Kevin.Murphy Angel.Wash: a gentle volumising shampoo for fine, colour-treated hair that helps keep colour and reduce breakage. Sulphate-free. 40 or 250 ml."
+        },
         "gatsby-moving-rubber-grunge-mat-grey-hair-wax": {
           RU: "Воск Gatsby Moving Rubber Grunge Mat (серый): матовая укладка без блеска, сильная фиксация, легко переуложить. Для коротких и средних волос.",
           ET: "Gatsby Moving Rubber Grunge Mat (hall) – matt juuksevaha ilma läiketa: tugev hoid, soengut saab kergesti ümber teha. Lühikestele ja keskmistele juustele.",

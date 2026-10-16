@@ -40,3 +40,16 @@ where it becomes the «what was done» summary.*
 **12.10**
 - Search Console «Page with redirect»: the sitemap Google had was read on 08.10, before the move; resubmitted. Every current sitemap address answers 200.
 - Handover plan for 09.11: phase C of the go-live list, at `rempireshop.diipsolutions.eu/handover` — Dim's own address only; rempireshop.com never serves the page or phase C's rows (host-gated rewrite and route). It went live on rempireshop.com for a few minutes first and was reverted at Dim's request. Logins sheet template for Renat kept outside the repository.
+- Weekly e2e run fixed (separate session): nine specs followed the launch-night changes; one real bug — the blog translator left a product card in Russian in the Estonian and English text (e314a329); e2e shards get 60 minutes (7008909d).
+- Search Console indexing requests: 11 Russian section and brand pages that Google had crawled but not indexed (most English and Estonian pages already were).
+
+**13.10–15.10**
+- Abandoned-cart mails to `@storebotmail.joonix.net` checked: Google StoreBot's checkout tests (one cart per address, language of the page) — not a bug.
+- «Blocked by robots.txt» mail: only old Shopify cart/account addresses; none of the 849 sitemap addresses is blocked.
+- Search Console indexing requests: 9 more Russian brand pages.
+
+**16.10**
+- Merchant Center: our EN and RU feeds 607 of 629 items approved (the rest are policy cases such as CBD); Shopify's six data sources deleted by Dim — Google Shopping now runs on rempireshop.com's own feeds.
+- Russian Google descriptions of System 4 shampoos №1–4 say «номер N», as people search (543d1ade).
+- Hand-written Google descriptions (RU/ET/EN) for the twelve most-shown Kevin.Murphy products; Estonian intros of «Habemehooldus» and «Juuksehooldus» rewritten in the words people search (Dim approved both).
+- Google Business Profile: the Maps profile «REMPIRE» (tattoo salon, 222 reviews) links only to rempire.ee and is managed by another account; Renat asked to add the shop account as manager. rempire.ee has no link to the shop yet.
