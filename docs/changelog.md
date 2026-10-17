@@ -57,3 +57,6 @@ where it becomes the «what was done» summary.*
 - Shop chat, admin text generation and AI search moved to gpt-6-luna (no reasoning, same caps and wording) — gpt-4.1-mini shuts down on 14.01.2027; about 70 % cheaper per call (b2572d9f). Dim removed the old `OPENAI_MODEL=gpt-4.1-mini` from Vercel and redeployed; live search and shop chat checked on gpt-6-luna. Photo cut-out is on in production (`PHOTO_CUTOUT=openai`) — its first live run on the new image model is still to do.
 - CI was red since d2ce0c07: the section-intro test still held the two longer Estonian lines to one line's length; it now knows they are approved.
 - Google Business Profile: the Maps profile «REMPIRE» (tattoo salon, 222 reviews) links only to rempire.ee and is managed by another account; Renat asked to add the shop account as manager. rempire.ee has no link to the shop yet.
+
+**17.10**
+- Search Console indexing requests (the daily quota): the Estonian «Juuksehooldus» section, the four Russian System 4 shampoo pages, and six Kevin.Murphy products with new descriptions — Super Goo was not in Google's index at all.
