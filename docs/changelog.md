@@ -60,3 +60,6 @@ where it becomes the «what was done» summary.*
 
 **17.10**
 - Search Console indexing requests (the daily quota): the Estonian «Juuksehooldus» section, the four Russian System 4 shampoo pages, and six Kevin.Murphy products with new descriptions — Super Goo was not in Google's index at all.
+
+**18.10**
+- Search Console indexing requests: the other six Kevin.Murphy products with new descriptions, System 4 shampoo №2 (RU) again, and the Russian pages of Super Goo, Hydrate-Me Masque, Heated Defense and Touchable — Russian Heated Defense and Repair-Me Wash were not indexed yet.
