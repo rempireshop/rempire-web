@@ -10,6 +10,8 @@
  * code, a wrong verifier, a changed admin password, a published article.
  */
 import { createHash, randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { hashPassword, resetLoginDelays, resetRateLimits, setLoginSleeper } from "@/lib/auth";
 import { exec, query } from "@/lib/db";
@@ -242,6 +244,7 @@ describe("the connector, end to end", () => {
     const one = JSON.parse((await tool(t.access_token, "get_product", { id: "kevin-murphy-angel-wash" })).text);
     expect(one.names.RU).toContain("ANGEL.WASH");
     expect(one.sizes.length).toBeGreaterThan(0);
+    expect(Array.isArray(one.photos)).toBe(true);
     expect((await tool(t.access_token, "get_product", { id: "made-up" })).isError).toBe(true);
     const sections = JSON.parse((await tool(t.access_token, "list_sections", {})).text);
     expect(sections.sections.map((s: { id: string }) => s.id)).toContain("beard");
@@ -298,6 +301,31 @@ describe("the connector, end to end", () => {
     expect((await getPostBySlug(made.slug))!.title.RU).toBe("Черновик");
   });
 
+  it("takes the shop's own product photos as the cover and in the text, and nothing else; all three languages at once", async () => {
+    const t = await tokens();
+    const prod = JSON.parse((await tool(t.access_token, "get_product", { id: "kevin-murphy-angel-wash" })).text);
+    expect(prod.photos.length).toBeGreaterThan(0);
+    const photo = prod.photos[0] as string;
+    expect(photo).toMatch(/^https:\/\/rempireshop\.com\//);
+    const out = JSON.parse((await tool(t.access_token, "save_draft", {
+      cover: "kevin-murphy-angel-wash",
+      ru: { title: "Фото", body: `<p>Текст.</p><figure data-fig="half-right"><img src="${photo}" alt="Angel.Wash"></figure><figure data-fig="full"><img src="https://stock.example/x.jpg" alt=""></figure>` },
+      et: { title: "Foto", body: '<p>Proovi <a href="product:kevin-murphy-angel-wash">Angel.Wash</a>.</p><p><a data-product="kevin-murphy-angel-wash"></a></p>' },
+      en: { title: "Photo", body: '<p>Try <a href="https://rempireshop.com/products/kevin-murphy-angel-wash">Angel.Wash</a>.</p>' },
+    })).text);
+    expect(out).toMatchObject({ saved: "created", languages: ["RU", "ET", "EN"], cover: "set" });
+    const p = await getPostBySlug(out.slug);
+    expect(p!.coverUrl).toBe(photo);
+    expect(p!.body.RU).toContain(`<figure data-fig="half-right"><img src="${photo}" alt="Angel.Wash"`);
+    expect(p!.body.RU).not.toContain("stock.example");
+    expect(p!.body.RU).not.toContain('<figure data-fig="full">');
+    expect(p!.body.ET).toContain('<a href="/et/products/kevin-murphy-angel-wash">Angel.Wash</a>');
+    expect(p!.body.ET).toMatch(/<a data-product="kevin-murphy-angel-wash" data-price="live" href="\/et\/products\/kevin-murphy-angel-wash">/);
+    expect(p!.body.EN).toContain('<a href="/products/kevin-murphy-angel-wash">Angel.Wash</a>');
+    const bad = await tool(t.access_token, "save_draft", { cover: "https://stock.example/x.jpg", ru: { title: "x", body: "<p>y</p>" } });
+    expect(bad.isError).toBe(true);
+  });
+
   it("reads an article back in the language asked for", async () => {
     const t = await tokens();
     const made = await upsertPost({ title: { RU: "Борода зимой", ET: "Habe talvel" }, body: { RU: "<p>Масло.</p>", ET: "<p>Õli.</p>" } });
@@ -324,5 +352,65 @@ describe("shopBody and searchProducts", () => {
     const found = searchProducts(list, "kevin murphy шампунь", 25).map((p) => p.id);
     expect(found).toContain("kevin-murphy-angel-wash");
     expect(searchProducts(list, "", 5)).toEqual([]);
+  });
+});
+
+/* The admin's «Блог» list — a draft Claude saved shows without a reload
+   (Dim, testing the connector, 20.10.2026: «the draft did not appear
+   instantly»). loadAdminBlog() cut out of app.js and run against stubs. */
+describe("the admin blog list refreshes itself", () => {
+  const APP = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+  const src = (() => {
+    const at = APP.indexOf("function loadAdminBlog(force)");
+    let depth = 0;
+    for (let i = APP.indexOf("{", at); i < APP.length; i++) {
+      if (APP[i] === "{") depth++;
+      else if (APP[i] === "}" && --depth === 0) return APP.slice(at, i + 1);
+    }
+    throw new Error("no loadAdminBlog");
+  })();
+  function panel(S: Record<string, unknown>, answer: unknown) {
+    const calls: string[] = [];
+    let renders = 0;
+    const run = new Function("S", "SRV", "apiJson", "render", `${src}\nreturn loadAdminBlog;`)(
+      S, {},
+      (u: string) => { calls.push(u); return answer === "throw" ? Promise.reject(new Error("x")) : Promise.resolve(answer); },
+      () => { renders++; },
+    ) as (force: boolean) => void;
+    return { run, calls, renders: () => renders };
+  }
+  const tick = () => new Promise((r) => setTimeout(r, 0));
+  const posts = (...slugs: string[]) => slugs.map((s) => ({ slug: s, status: "draft", updatedAt: "t" }));
+
+  it("asks again once the list is half a minute old, and draws only what changed", async () => {
+    const S: Record<string, unknown> = { screen: "admin", adminTab: "blog", adminBlog: posts("a"), adminBlogAt: Date.now() - 31_000 };
+    const p = panel(S, { status: 200, body: { ok: true, posts: posts("claude-draft", "a") } });
+    p.run(false);
+    await tick();
+    expect(p.calls).toEqual(["/api/admin/blog/"]);
+    expect((S.adminBlog as Array<{ slug: string }>).map((x) => x.slug)).toEqual(["claude-draft", "a"]);
+    expect(p.renders()).toBe(1);
+  });
+
+  it("does not ask while the list is fresh, and never redraws over an open article", async () => {
+    const fresh: Record<string, unknown> = { screen: "admin", adminTab: "blog", adminBlog: posts("a"), adminBlogAt: Date.now() };
+    const p1 = panel(fresh, { status: 200, body: { ok: true, posts: posts("a") } });
+    p1.run(false);
+    expect(p1.calls).toEqual([]);
+    const editing: Record<string, unknown> = { screen: "admin", adminTab: "blog", adminBlog: posts("a"), adminBlogAt: 0, adminBlogEdit: {} };
+    const p2 = panel(editing, { status: 200, body: { ok: true, posts: posts("b", "a") } });
+    p2.run(false);
+    await tick();
+    expect(p2.calls).toHaveLength(1);
+    expect(p2.renders()).toBe(0);
+  });
+
+  it("a background refresh that fails keeps the list and says nothing", async () => {
+    const S: Record<string, unknown> = { screen: "admin", adminTab: "blog", adminBlog: posts("a"), adminBlogAt: 0 };
+    const p = panel(S, "throw");
+    p.run(false);
+    await tick();
+    expect(S.adminBlogListErr).toBeUndefined();
+    expect(S.adminBlog).toEqual(posts("a"));
   });
 });

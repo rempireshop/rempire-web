@@ -20,7 +20,12 @@ he checks it in Админка → Блог and publishes it there.*
 * В новом чате: «Напиши статью для блога Rempire про шампуни Kevin.Murphy — с товарами из магазина».
   Claude сам найдёт товары, их цены и ссылки.
 * Поправить: «сократи второй раздел», «добавь Angel.Rinse» — как обычно.
-* Сохранить: «**Сохрани в блог как черновик**». Статья появится в Админке → «Блог» черновиком.
+* Картинки: «поставь обложкой фото Angel.Wash», «добавь в текст фото товаров» — Claude берёт
+  **фото товаров из магазина**. Свои фотографии из салона он передать не может — их добавляют
+  в редакторе статьи (обложка или «Фото» в тексте).
+* Сразу на трёх языках: «сохрани на русском, эстонском и английском» — Claude переведёт сам.
+* Сохранить: «**Сохрани в блог как черновик**». Статья появится в Админке → «Блог» черновиком
+  (список обновляется сам в течение полуминуты).
 * Там: проверить, поставить обложку, при необходимости «Перевести на ET и EN» — и «Опубликовать».
   Или сразу попросить Claude: «сохрани и переведи на эстонский и английский».
 
@@ -76,6 +81,10 @@ admin login already needs.
   the shop does not sell the id;
 * `<a data-product="ID"></a>` becomes the editor's own «Товар» marker (name in that language,
   `data-price="live"`), so the card shows and can be removed in the editor;
+* pictures are the shop's own product photos only (`get_product` → `photos`): `cover` takes a
+  product id or one of those addresses (anything else is refused, nothing saved); an `<img>` in
+  the text with any other address is dropped, an emptied `<figure>` with it. The owner's own
+  photos cannot travel from a Claude chat into a tool call — they are added in the editor;
 * the products it names go into «Товары в статье» (up to 40);
 * without `slug` — a new draft; with a draft's slug — the languages sent replace theirs, the rest
   (cover, other languages, tags unless sent) stays; a **published** article is refused.

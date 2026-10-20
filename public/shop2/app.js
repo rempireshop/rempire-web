@@ -16563,14 +16563,33 @@
      screen already has survives a failed refresh, exactly as
      loadAdminReviews() and loadOverview() do it; the flag is what «Блог»
      draws the «Повторить» line from. */
+  /* Articles arrive from outside the panel now — Renat's Claude saves drafts
+     through the «Rempire» connector (src/lib/mcp/tools.ts, 20.10.2026) — and a
+     list fetched once per page load showed one only after a reload (Dim,
+     testing it: «the draft did not appear instantly»). So the list is fetched
+     again when it is older than half a minute and «Блог» is drawn, and when
+     the tab comes back into view. Such a refresh is quiet: it redraws only
+     when the list actually changed, never over an open article, and a failed
+     one leaves the list and says nothing. */
   function loadAdminBlog(force) {
-    if (S.adminBlog && !force) return;
+    var FRESH_MS = 30000;
+    var sig = function (list) {
+      return (list || []).map(function (p) { return p.slug + "|" + p.status + "|" + p.updatedAt; }).join(",");
+    };
+    var stale = !!S.adminBlog && Date.now() - (S.adminBlogAt || 0) > FRESH_MS;
+    if (S.adminBlog && !force && !stale) return;
+    if (S.adminBlogLoading && !force) return;
+    var quiet = !!S.adminBlog && !force;
+    S.adminBlogLoading = true;
     var failed = function () {
+      S.adminBlogLoading = false; S.adminBlogAt = Date.now();
+      if (quiet) return;
       S.adminBlogListErr = true;
       if (!S.adminBlog) S.adminBlog = [];
       if (S.screen === "admin" && S.adminTab === "blog") render();
     };
     apiJson("/api/admin/blog/").then(function (r) {
+      S.adminBlogLoading = false; S.adminBlogAt = Date.now();
       /* An expired cookie is not an outage. Every other loader in the panel
          answers a 401 by dropping back to the sign-in card (loadAdminPromos,
          loadOverview, loadAdminGiftCards, … — and the editor's own fetch two
@@ -16578,11 +16597,15 @@
          a button that can never work. */
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
+        var same = quiet && sig(S.adminBlog) === sig(r.body.posts);
         S.adminBlog = r.body.posts; S.adminBlogListErr = false;
-        if (S.screen === "admin" && S.adminTab === "blog") render();
+        if (S.screen === "admin" && S.adminTab === "blog" && !same && !(quiet && S.adminBlogEdit)) render();
       } else failed();
     }).catch(failed);
   }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && S.screen === "admin" && S.adminTab === "blog") loadAdminBlog(false);
+  });
 
   // A Latin slug out of a Cyrillic or Estonian title — mirrors slugify() in
   // src/lib/blog.ts (see that file for why this is a deliberate duplicate,

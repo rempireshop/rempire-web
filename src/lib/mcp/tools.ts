@@ -102,7 +102,15 @@ const CARD = /<a data-product="([^"]*)"[^>]*>[\s\S]*?<\/a>/g;
  * this language, `data-price="live"` for the price), or dropped.
  * Answers the HTML and the ids it now names, cards first, in their order.
  */
-export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>): { html: string; ids: string[] } {
+const IMG = /<img\b[^>]*>/g;
+const IMG_SRC = /\bsrc="([^"]*)"/;
+
+/** Every photo of every product the shop shows — the only pictures an article from Claude may carry. */
+export function shopPhotos(list: ShopProduct[]): Set<string> {
+  return new Set(list.flatMap((p) => p.photos));
+}
+
+export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>, photos: Set<string> = new Set()): { html: string; ids: string[] } {
   const src = String(raw || "").trim();
   if (!src) return { html: "", ids: [] };
   const ids: string[] = [];
@@ -122,7 +130,16 @@ export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>):
     const words = `${p.brand} ${p.names[lang]}`.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     return `<a data-product="${id}" data-price="live" href="${publicPath(lang, "/p/" + id)}">${words}</a>`;
   });
-  return { html: sanitizeHtml(carded).replace(/<p>\s*<\/p>/g, ""), ids };
+  /* Pictures: the shop's own product photos only (get_product lists them) —
+     anything else, a stock photo or a picture from another site, is not
+     something this shop may show, and goes; a figure left empty goes with it. */
+  const pictured = carded
+    .replace(IMG, (tag) => {
+      const src = (IMG_SRC.exec(tag) || [])[1] || "";
+      return photos.has(src.replace(/&amp;/g, "&")) ? tag : "";
+    })
+    .replace(/<figure[^>]*>\s*<\/figure>/g, "");
+  return { html: sanitizeHtml(pictured).replace(/<p>\s*<\/p>/g, ""), ids };
 }
 
 /* ---------- the tools ---------- */
@@ -153,7 +170,8 @@ export const TOOLS: ToolDef[] = [
     name: "get_product",
     title: "Товар целиком",
     description:
-      "One product of the shop by its id: names in RU/ET/EN, brand, section, every size with its price, stock, photo, " +
+      "One product of the shop by its id: names in RU/ET/EN, brand, section, every size with its price, stock, its photos " +
+      "(addresses an article may use as its cover or as a picture in the text), " +
       "the page address in each language and the shop's own description texts — the facts to write from. Never invent " +
       "ingredients or effects the description does not state.",
     inputSchema: {
@@ -204,7 +222,9 @@ export const TOOLS: ToolDef[] = [
       "`body` is HTML using only <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <br>, <a> (markdown is accepted too). " +
       "Link a product with the page address search_products gave for that language; put a product card on a line of its own as " +
       '<p><a data-product="ID"></a></p> right after the paragraph that recommends it. Links and cards for products the shop ' +
-      "does not sell are dropped.",
+      "does not sell are dropped. Pictures: only the shop's own product photos (get_product → photos) — as `cover` (a product id " +
+      'or one of its photo addresses), or in the text as <figure data-fig="full"><img src="PHOTO" alt="what it shows"></figure> ' +
+      '(data-fig: full, half-left, half-right or small). Any other picture is dropped; the owner adds his own photos in the editor.',
     inputSchema: {
       type: "object",
       properties: {
@@ -213,6 +233,7 @@ export const TOOLS: ToolDef[] = [
         et: { $ref: "#/$defs/lang" },
         en: { $ref: "#/$defs/lang" },
         tags: { type: "array", items: { type: "string" }, maxItems: 5, description: "3–5 short Russian tags." },
+        cover: { type: "string", description: "The cover picture: a product id (its first photo) or one of the photo addresses get_product gave." },
         seo_title: { type: "string", maxLength: 70, description: "Russian Google title, at most 60 characters." },
         seo_description: { type: "string", maxLength: 170, description: "Russian Google description, at most 155 characters." },
       },
@@ -272,7 +293,7 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       section: { RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
       sizes: p.sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
       stock: stockWord(p.stock),
-      photo: p.photo,
+      photos: p.photos,
       url: productUrls(base, p.id),
       description: Object.fromEntries(Object.entries(p.texts).map(([l, t]) => [l, plain(String(t)).slice(0, 1500)])),
     });
@@ -353,12 +374,26 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
 
   const { base, list } = await productsNow();
   const byId = new Map(list.map((p) => [p.id, p]));
+  const photos = shopPhotos(list);
+  /* The cover: a product's first photo by its id, or one of the shop's own
+     photo addresses; anything else is refused rather than quietly dropped, so
+     Claude can tell the owner the picture did not go in. */
+  let coverUrl: string | null = was?.coverUrl ?? null;
+  let coverNew = false;
+  const coverAsk = typeof args.cover === "string" ? args.cover.trim() : "";
+  if (coverAsk) {
+    const byProduct = byId.get(coverAsk.toLowerCase())?.photo ?? null;
+    const url = byProduct ?? (photos.has(coverAsk) ? coverAsk : null);
+    if (!url) return no(`The cover must be a product id or one of the photo addresses get_product gave — «${coverAsk.slice(0, 120)}» is neither. Nothing was saved.`);
+    coverNew = url !== coverUrl;
+    coverUrl = url;
+  }
   const title = { RU: "", ET: "", EN: "" }, excerpt = { RU: "", ET: "", EN: "" }, body = { RU: "", ET: "", EN: "" };
   const named: string[] = [];
   for (const l of LANGS3) {
     const g = given[l];
     if (g && text(g.title, 200) && text(g.body, BODY_MAX * 2)) {
-      const shaped = shopBody(text(g.body, BODY_MAX * 2), l, byId);
+      const shaped = shopBody(text(g.body, BODY_MAX * 2), l, byId, photos);
       if (shaped.html.length > BODY_MAX) return no(`The ${l} text is too long for the shop (${shaped.html.length} characters, at most ${BODY_MAX}). Shorten it.`);
       title[l] = text(g.title, 200);
       excerpt[l] = text(g.excerpt, 500);
@@ -384,9 +419,10 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
     saved = await upsertPost({
       ...(was ? { id: was.id, slug: was.slug } : {}),
       title, excerpt, body, products, tags, seoTitle, seoDesc,
-      coverUrl: was?.coverUrl ?? null,
+      coverUrl,
       coverAlt: was?.coverAlt,
-      coverFocus: was?.coverFocus ?? null,
+      // a new picture starts from the middle; the point chosen for the old one belonged to it
+      coverFocus: coverNew ? null : was?.coverFocus ?? null,
       tagsI18n: was?.tagsI18n,
       author: was?.author ?? "Rempire",
     }, { onlyDraft: true }); // held in the write too: published in the admin meanwhile is still refused
@@ -404,10 +440,12 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
     status: "draft",
     slug: saved.slug,
     languages: LANGS3.filter((l) => body[l]),
+    cover: coverUrl ? "set" : "none — the owner adds one in the editor",
     products: products.map((id) => byId.get(id) ? `${byId.get(id)!.brand} ${byId.get(id)!.names.RU}` : id),
     ...(dropped.length ? { not_saved: dropped } : {}),
     admin: base + "/admin",
-    next: "The draft is in Админка → Блог. The owner opens it, checks it, adds a cover photo and presses «Опубликовать»" +
+    next: "The draft is in Админка → Блог (the list refreshes within half a minute). The owner opens it, checks it" +
+      (coverUrl ? "" : ", adds a cover photo") + " and presses «Опубликовать»" +
       (body.ET && body.EN ? "." : "; the missing languages are one button there: «Перевести на ET и EN»."),
   });
 }

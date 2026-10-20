@@ -696,6 +696,8 @@ export type ShopProduct = {
   sizes: Array<{ label: string | null; price: number }>;
   stock: StockState;
   photo: string | null;
+  /** Every photo the product page shows, absolute — what an article may use as a cover or a picture. */
+  photos: string[];
   texts: Partial<Record<FeedLang, string>>;
 };
 
@@ -708,7 +710,7 @@ export function shopProducts(input: Pick<FeedInput, "overrides" | "descriptions"
     const ladder = rungsOf(p, o);
     const sizes = ladder.filter((r) => Number.isFinite(r.price) && r.price > 0);
     if (!sizes.length) continue;
-    const photo = photosOf(p, o, ladder.length).photos.filter(usableImage)[0];
+    const photos = photosOf(p, o, ladder.length).photos.filter(usableImage).map((u) => absUrl(base, u));
     const texts: Partial<Record<FeedLang, string>> = {};
     for (const lang of ["RU", "ET", "EN"] as const) {
       const own = p.descOv?.[lang]?.trim();
@@ -722,7 +724,8 @@ export function shopProducts(input: Pick<FeedInput, "overrides" | "descriptions"
       names: { RU: p.name, ET: feedName(p.name, "ET"), EN: feedName(p.name, "EN") },
       sizes: sizes.map((r) => ({ label: r.label, price: r.price })),
       stock: (o?.stock ?? p.fileStock) as StockState,
-      photo: photo ? absUrl(base, photo) : null,
+      photo: photos[0] ?? null,
+      photos,
       texts,
     });
   }
