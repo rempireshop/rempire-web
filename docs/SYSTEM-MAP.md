@@ -999,7 +999,10 @@ Dim pays the OpenAI bill.
   `set_seo`, `toggle_flow`, `toggle_chatbot`, `toggle_bundles`, `set_hero`,
   `create_promo`, `toggle_promo`, `set_shipping_rules`, `set_content`,
   `set_pricing`, `adjust_points`, `stock_adjust`, `stock_set`, `draft_post`,
-  `publish_post`, `set_post_cover`, `add_product_photo`, `create_product`,
+  `publish_post`, `edit_post` (20.10.2026: the article open in the editor,
+  changed as the owner asked — `post_edit` in the AI text route, product
+  names linked to the shop's own pages; docs/blog.md), `set_post_cover`,
+  `add_product_photo`, `create_product`,
   `update_product`, `export_report`, and — 07.09.2026, Dim: «assistant needs
   to be able to help there as well» — `propose_bundle` (products and a name
   for a set that does not exist; NO price and no id, applying it opens the

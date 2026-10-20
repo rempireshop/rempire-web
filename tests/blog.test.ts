@@ -603,10 +603,12 @@ describe("blog storage", () => {
     const post = await upsertPost({
       title: { RU: "Заголовок" },
       tags: Array.from({ length: 20 }, (_, i) => `тег${i % 5}`), // 4 duplicates x5
-      products: Array.from({ length: 20 }, (_, i) => `product-${i}`),
+      products: Array.from({ length: 60 }, (_, i) => `product-${i}`),
     });
     expect(post.tags).toHaveLength(5);
-    expect(post.products).toHaveLength(12);
+    // forty since 20.10.2026 (twelve before) — the shelf under the article still shows only the first eight
+    expect(post.products).toHaveLength(40);
+    expect(post.products[39]).toBe("product-39");
   });
 });
 

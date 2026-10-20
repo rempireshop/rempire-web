@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(28);   // r28: a promo code's date and cap only when the owner names them
+    expect(body.v).toBe(29);   // r29: edit_post — the article open in the editor, changed as the owner asked
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];

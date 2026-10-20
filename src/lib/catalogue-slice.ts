@@ -65,6 +65,39 @@ export function relevantProducts(text: string, opts: { limit?: number; fill?: nu
   return top;
 }
 
+/* The products a text names, in the order it names them — the list an
+   article edit may link (post_edit, src/app/api/admin/ai/text/route.ts).
+   relevantProducts() scores a topic and an article about one brand ties
+   every product of that brand; this looks for each product's own name — the
+   part before « — » — with dots, hyphens and case not counting, so
+   «Angel.Wash», «ANGEL.WASH» and «Angel Wash» are the same product, and a
+   comma or a bracket after a name does not hide it. Where two names overlap
+   («Blonde.Angel.Wash» contains «Angel.Wash») the longer one owns those
+   words, and the shorter counts only where it stands alone. */
+const mentionKey = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}&]+/gu, " ").trim();
+
+export function mentionedProducts(text: string, max = 40): CatRow[] {
+  const hay = " " + mentionKey(String(text || "").replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&")) + " ";
+  const rows = CAT.map((p) => ({ p, key: mentionKey(p.n.split(" — ")[0]) }))
+    .filter((r) => r.key.length >= 4)
+    .sort((a, b) => b.key.length - a.key.length);
+  const taken: Array<[number, number]> = [];
+  const found: Array<[number, CatRow]> = [];
+  for (const { p, key } of rows) {
+    const needle = " " + key + " ";
+    let first = -1;
+    for (let at = hay.indexOf(needle); at >= 0; at = hay.indexOf(needle, at + 1)) {
+      // the words themselves, not the spaces around them: two names side by side share a space
+      const start = at + 1, end = at + needle.length - 1;
+      if (taken.some(([s, e]) => start < e && end > s)) continue;
+      taken.push([start, end]);
+      if (first < 0) first = start;
+    }
+    if (first >= 0) found.push([first, p]);
+  }
+  return found.sort((a, b) => a[0] - b[0]).slice(0, max).map(([, p]) => p);
+}
+
 /** The slice as prompt lines — what the shop chat inlines. */
 export function relevantLines(text: string): string {
   return relevantProducts(text).map(rowLine).join("\n");

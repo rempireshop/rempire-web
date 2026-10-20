@@ -12,6 +12,7 @@ import {
   briefHero,
   briefOpenPost,
   draftPostWithAsk,
+  editPostWithAsk,
   promoAsAsked,
   sanitizeAction,
   type AttachmentBrief,
@@ -43,7 +44,7 @@ import { answerLang, type Lang3 } from "./reply-lang";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = openaiModel(); // src/lib/openai-chat.ts
-const PROMPT_V = 28; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 29; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -481,7 +482,7 @@ ${blogLines}
 ` : ""}${openPost ? `
 THE ARTICLE THE OWNER IS LOOKING AT RIGHT NOW — it is open in the blog editor on his screen while he types to you:
 ${openPost.slug}|${openPost.status}|${openPost.title || openPost.slug}
-This is what «эта статья», «она», «сюда», «в неё» mean, and what a message with no article named at all is about. Every action below that takes a post slug MUST use «${openPost.slug}» unless the owner clearly names a different article from the BLOG POSTS list. NEVER answer a request about this article with draft_post: draft_post makes a NEW article, and a second draft of something he is already reading is the mistake he complains about most. There is no action that rewrites the text of an article that exists — when he asks to shorten it, lengthen it, change the title or fix a paragraph, say plainly that you cannot rewrite it from here and that the text is edited in the blog editor he already has open (its «Написать статью целиком» rewrites the whole thing from a topic). Do not promise an edit and do not send an action for one.
+This is what «эта статья», «она», «сюда», «в неё» mean, and what a message with no article named at all is about. Every action below that takes a post slug MUST use «${openPost.slug}» unless the owner clearly names a different article from the BLOG POSTS list. NEVER answer a request about this article with draft_post: draft_post makes a NEW article, and a second draft of something he is already reading is the mistake he complains about most. A request to change THIS article's text — make its products links to the shop, fix or rewrite a paragraph, shorten or lengthen a part, change the title, add a sentence — is edit_post, described below.
 ` : ""}${bundleLines ? `
 SETS («наборы») as they are right now (id|Russian title|price|shown-or-hidden|the products inside). set_bundle may only use an id from this list; propose_bundle is for a set that does not exist yet:
 ${bundleLines}
@@ -534,7 +535,9 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
   {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a NEW blog article written, one that does not exist yet: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Only ever for a new article — never to change, shorten, extend, retitle or illustrate one that is already there, and never twice in one conversation about the same article: a second draft_post is a second article in the owner's list, which is the thing he has to clean up by hand. Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. The topic is the owner's OWN subject: his words, translated faithfully into Russian, his key words kept — asked for «cool vibes», the topic is «Cool vibes: …», never swapped for another or a more generic subject such as «уход за волосами и укладка». Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
-  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${attachments.length ? `
+  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${openPost ? `
+  {"type":"edit_post","what":"<one short Russian line: what will change>"} — change the TEXT of the article he has open («${openPost.slug}»): «сделай товары ссылками на магазин», «добавь ссылки на товары», «исправь второй абзац», «перепиши вступление короче», «поменяй заголовок на …», «добавь абзац про …». His own words go to the article editor, which changes exactly that in every language the article is written in and saves it; «Вернуть» on the message below puts the old text back. A product becomes a link only to the shop's own product page. One edit_post per request; in the reply say in one sentence what will change and that he can read it in the editor. Never for a new article (that is draft_post) and never for a photo or a cover (add_post_photo, set_post_cover).` : `
+  (Changing the TEXT of an article that exists — links to products, a paragraph, the title — is an action that works only on the article the owner has OPEN in the blog editor, and none is open now. When he asks for such a change, ask him to open that article in «Блог» and ask again, and send no action.)`}${attachments.length ? `
   {"type":"add_product_photo","id":"<catalogue id>","key":"<a key from PHOTOS above>","main":true|false} — put one of the attached PHOTOS onto a product's page («вот фото для Bio Botanical Shampoo, сделай главным» → main:true; «добавь это фото к маслу Proraso» → main:false). One photo per action; several photos are several replies.
   {"type":"set_post_cover","slug":"<post slug from BLOG POSTS${openPost ? `, or «${openPost.slug}» — the article he has open` : ""}>","key":"<a key from PHOTOS above>"} — make one of the attached PHOTOS a blog post's COVER, the picture above the title and in the blog list («это обложка для статьи про бороду», «поставь сюда обложку»).
   {"type":"add_post_photo","slug":"<post slug${openPost ? `, «${openPost.slug}» unless he names another` : " from BLOG POSTS"}>","key":"<a key from PHOTOS above>"} — put one of the attached PHOTOS INSIDE the article's text («добавь это фото в статью», «вставь фото в текст»). It goes at the END of the article, in every language it is written in, and the owner moves it with the arrows on the picture's own bar in the editor. Say exactly that — «поставлю в конец статьи, передвинуть можно в редакторе» — and never claim a place you did not choose. One photo per action.
@@ -860,11 +863,13 @@ export async function POST(req: NextRequest) {
   /* draft_post leaves with the owner's own words on it — the topic line is
      the model's, and a model «tidied» «cool vibes» into another subject
      (draftPostWithAsk in ./actions). */
-  let action = draftPostWithAsk(sanitizeAction(rawAction, known, isAdmin, {
+  /* edit_post the same way: what changes in the article is what he said
+     (editPostWithAsk), the model's `what` is only the card's caption. */
+  let action = editPostWithAsk(draftPostWithAsk(sanitizeAction(rawAction, known, isAdmin, {
     attachedKeys: new Set(attachments.map((a) => a.key)),
     openPostSlug: openPost?.slug ?? "",
     postSlugs,
-  }), lastUser);
+  }), lastUser), lastUser);
   /* …and a promo code leaves with the date and the cap the owner named, and
      no others (promoAsAsked in ./actions): «на 10 %» came back «до 30.09.2026
      · 100 использований», the prompt's own example copied in. His last three

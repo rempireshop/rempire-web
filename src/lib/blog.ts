@@ -418,6 +418,13 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 /* ---------- writes ----------------------------------------------------------- */
 
+/* The article's own products — «Товары в статье» in the editor. Twelve until
+   20.10.2026 (Dim: an article may name more products than that — a
+   Kevin.Murphy shampoo guide names most of the range); the shelf under the
+   article still shows only the first few of them (SHELF_MAX in
+   src/lib/blog-page.ts, the same count app.js and the prerender draw). */
+export const BLOG_PRODUCTS_MAX = 40;
+
 /** Create (no `id`) or edit the fields of an existing post. Never touches status. */
 export async function upsertPost(input: PostInput): Promise<Post> {
   const title = trilingual(input.title, 200);
@@ -428,7 +435,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
   const seoDesc = trilingual(input.seoDesc, 170);
   const tags = cleanList(input.tags, 12, 30);
   const tagsI18n = cleanTagsI18n(input.tagsI18n);
-  const products = cleanList(input.products, 12, 80);
+  const products = cleanList(input.products, BLOG_PRODUCTS_MAX, 80);
   const coverUrl = cleanUrl(input.coverUrl);
   /* Deliberately not `undefined`-aware, unlike the title check below: a save
      that carries no coverFocus is the panel saying «nothing chosen», and the

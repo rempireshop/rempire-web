@@ -630,6 +630,29 @@ export function draftPostWithAsk<T>(action: T, lastUser: string): T {
   return ask ? ({ ...(action as object), ask } as T) : action;
 }
 
+/* edit_post — the article the owner has OPEN in the blog editor, changed the
+   way he asked (Dim, 20.10.2026). Only that one: the panel edits the text in
+   its own editor (applyEditPost in public/shop2/app.js), so a slug that is not
+   on his screen has nothing to edit and is refused here. `what` is the
+   model's one-line description for the confirm card; the request itself
+   travels as `ask`, the owner's own words, put on by the route and never
+   taken from the model (editPostWithAsk below) — what gets changed is what
+   he said, not the model's retelling of it. */
+const EDIT_ASK_MAX = 500;
+export function sanitizeEditPost(raw: unknown, openPostSlug: string): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw) || !openPostSlug) return null;
+  const x = raw as Record<string, unknown>;
+  const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : openPostSlug;
+  if (slug && slug !== openPostSlug) return null;
+  return { slug: openPostSlug, what: oneLine(x.what, 200) };
+}
+export function editPostWithAsk<T>(action: T, lastUser: string): T {
+  if (!action || typeof action !== "object" || (action as { type?: unknown }).type !== "edit_post") return action;
+  const ask = oneLine(lastUser, EDIT_ASK_MAX);
+  // no words of his, nothing to do: a card that would change the article on the model's say-so is not offered
+  return (ask ? ({ ...(action as object), ask } as T) : (null as T));
+}
+
 /** A post the assistant cannot even name in Russian is not a draft. */
 export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
@@ -1161,6 +1184,11 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   if (t === "publish_post") {
     const pub = sanitizePublishPost(x);
     return pub ? { type: t, ...pub } : null;
+  }
+  // …and the article open on the owner's screen, changed as he asked — that one only
+  if (t === "edit_post") {
+    const edit = sanitizeEditPost(x, openPostSlug);
+    return edit ? { type: t, ...edit } : null;
   }
   /* photos attached in the chat: filed onto a product's gallery (the
      panel's own set_gallery write, journalled and undoable) or onto a

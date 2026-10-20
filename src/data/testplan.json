@@ -8257,6 +8257,43 @@
       "markedAt": "2026-09-25T12:34:46.779Z"
     },
     {
+      "id": "blog-products-40",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "В статье больше 12 товаров",
+      "steps": [
+        "«Блог» → открыть черновик статьи.",
+        "В «Товары в статье» нажимать «+ Товар» и добавить 13 товаров.",
+        "Опубликовать статью и открыть её на сайте."
+      ],
+      "expect": [
+        "Тринадцатый товар добавляется — запрета на 12 больше нет.",
+        "Над списком написано, что внизу покажем первые 8.",
+        "Внизу статьи — первые 8 товаров из списка."
+      ],
+      "why": "Статья про целую линейку называет больше двенадцати товаров, а список не давал добавить тринадцатый.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-20T15:13:26.492Z",
+      "en": {
+        "title": "An article with more than 12 products",
+        "steps": [
+          "«Блог» → open a draft article.",
+          "Under «Товары в статье» press «+ Товар» and add 13 products.",
+          "Publish the article and open it on the site."
+        ],
+        "expect": [
+          "The thirteenth product goes in — the limit of 12 is gone.",
+          "Above the list it says the first 8 are shown at the bottom.",
+          "The bottom of the article shows the first 8 products of the list."
+        ],
+        "why": "An article about a whole range names more than twelve products, and the list would not take a thirteenth."
+      }
+    },
+    {
       "id": "blog-product-remove",
       "area": "goods",
       "who": "renat",
@@ -9027,22 +9064,20 @@
         "Не выходя из редактора, открыть помощника и спросить: «добавь фото».",
         "Прикрепить фотографию кнопкой «Фото» и попросить: «это обложка».",
         "Подтвердить «Применить» и посмотреть на обложку статьи.",
-        "Тем же фото попросить: «а теперь добавь фото в текст статьи», подтвердить.",
-        "Спросить «сделай статью короче» и прочитать ответ."
+        "Тем же фото попросить: «а теперь добавь фото в текст статьи», подтвердить."
       ],
       "expect": [
         "Без прикреплённого фото помощник говорит, что ничего не добавил, и просит прикрепить снимок.",
         "В карточке подтверждения названа та самая статья, что открыта, а не другая.",
         "Обложка встаёт у открытой статьи; новой статьи в списке не появляется.",
         "Фото в текст встаёт в конец статьи — карточка предупреждает об этом заранее.",
-        "На «сделай короче» помощник честно отвечает: текст правят в редакторе, не в чате.",
         "После всех просьб статья в списке по-прежнему одна."
       ],
       "why": "Помощник отвечал «добавил фото» и не добавлял, а каждая следующая просьба заводила ещё один черновик. Фраза, которой верят, хуже отказа: вы идёте дальше, а сделано ничего.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-09-18T17:40:00.000Z",
+      "mark": "reworded",
+      "markedAt": "2026-10-20T14:56:29.494Z",
       "en": {
         "title": "The assistant puts a photo into the article you have open",
         "steps": [
@@ -9050,18 +9085,65 @@
           "Without leaving the editor, open the assistant and ask «добавь фото».",
           "Attach a photo with the «Фото» button and ask «это обложка».",
           "Confirm with «Применить» and look at the article's cover.",
-          "With the same photo ask «а теперь добавь фото в текст статьи» and confirm.",
-          "Ask «сделай статью короче» and read the answer."
+          "With the same photo ask «а теперь добавь фото в текст статьи» and confirm."
         ],
         "expect": [
           "With no photo attached the assistant says it added nothing and asks for the photo.",
           "The confirm card names the article you have open, not another one.",
           "The cover lands on the open article; no new article appears in the list.",
           "The in-text photo goes at the end of the article — the card says so beforehand.",
-          "For «сделай короче» it says it cannot rewrite the text here, and points at the editor.",
           "After all of it there is still exactly one article in the list."
         ],
         "why": "The assistant answered «photo added» and added nothing, and every follow-up started another draft. A sentence you believe is worse than a refusal: you move on and nothing was done."
+      }
+    },
+    {
+      "id": "ai-blog-edit",
+      "area": "ai",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Помощник исправляет статью, которая открыта",
+      "steps": [
+        "«Блог» → открыть черновик, в тексте которого названы товары магазина.",
+        "Не выходя из редактора, попросить помощника: «сделай товары в статье ссылками на магазин».",
+        "Прочитать карточку и нажать «Применить».",
+        "Дождаться конца строки «Исправляю … текст» и прочитать статью на RU, ET и EN.",
+        "Нажать «Вернуть» в сообщении внизу, пока оно видно.",
+        "Закрыть статью и попросить помощника «исправь статью»."
+      ],
+      "expect": [
+        "Карточка называет открытую статью и говорит, что изменятся все её языки.",
+        "Названия товаров стали ссылками; остальной текст прежний.",
+        "На ET и EN ссылки тоже есть.",
+        "Новой статьи в списке не появилось.",
+        "«Вернуть» возвращает статью такой, какой она была.",
+        "Без открытой статьи помощник просит её открыть и ничего не меняет."
+      ],
+      "why": "Статью, написанную в другом месте, нельзя было поправить через помощника: товары в ней оставались просто словами, без ссылок на магазин.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-20T14:56:29.494Z",
+      "en": {
+        "title": "The assistant fixes the article you have open",
+        "steps": [
+          "«Блог» → open a draft whose text names products the shop sells.",
+          "Without leaving the editor, ask the assistant «сделай товары в статье ссылками на магазин».",
+          "Read the card and press «Применить».",
+          "Wait for the «Исправляю … текст» line to finish and read the article in RU, ET and EN.",
+          "Press «Вернуть» in the message at the bottom while it is there.",
+          "Close the article and ask the assistant «исправь статью»."
+        ],
+        "expect": [
+          "The card names the open article and says all its languages will change.",
+          "Product names became links; the rest of the text is unchanged.",
+          "ET and EN have the links too.",
+          "No new article appeared in the list.",
+          "«Вернуть» puts the article back exactly as it was.",
+          "With no article open the assistant asks you to open it and changes nothing."
+        ],
+        "why": "An article written elsewhere could not be fixed through the assistant: its products stayed plain words, with no links into the shop."
       }
     },
     {

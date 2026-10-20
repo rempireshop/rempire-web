@@ -1863,7 +1863,8 @@
       "Пусто — покажем русский": "Tühi — näitame venekeelset",
       "Две строки — видно в списке статей и в поиске": "Kaks rida — näha artiklite loendis ja otsingus",
       "Товары в статье — покажем карточками внизу": "Artikli tooted — näitame all kaartidena",
-      "В статье уже 12 товаров — больше не поместится.": "Artiklis on juba 12 toodet — rohkem ei mahu.",
+      "Товары в статье — внизу покажем карточками первые 8": "Artikli tooted — all näitame kaartidena esimesed 8",
+      "В статье уже 40 товаров — больше не поместится.": "Artiklis on juba 40 toodet — rohkem ei mahu.",
       "✨ Помощник напишет статью": "✨ Assistent kirjutab artikli",
       "по-русски, потом на ET и EN": "vene keeles, siis ET ja EN",
       "Адрес статьи": "Artikli aadress",
@@ -2836,6 +2837,19 @@
       "Перевожу на эстонский…": "Tõlgin eesti keelde…",
       "Перевожу на английский…": "Tõlgin inglise keelde…",
       "Сохраняю черновик…": "Salvestan mustandi…",
+      // the assistant's edit_post (applyEditPost)
+      "Исправляю русский текст…": "Parandan venekeelset teksti…",
+      "Исправляю эстонский текст…": "Parandan eestikeelset teksti…",
+      "Исправляю английский текст…": "Parandan ingliskeelset teksti…",
+      "Помощник потерял часть текста — статья не изменена, попробуйте ещё раз": "Abiline kaotas osa tekstist — artiklit ei muudetud, proovi uuesti",
+      "Статья длинная — ответ не поместился, статья не изменена": "Artikkel on pikk — vastus ei mahtunud ära, artiklit ei muudetud",
+      "Откройте эту статью в «Блоге» и попросите ещё раз": "Ava see artikkel «Blogis» ja palu uuesti",
+      "В статье ещё нет текста": "Artiklis pole veel teksti",
+      "Ничего не изменилось — уточните, что исправить": "Midagi ei muutunud — täpsusta, mida parandada",
+      "Статья исправлена — проверьте текст ✓": "Artikkel parandatud — vaata tekst üle ✓",
+      "Вернул статью как было": "Artikkel on tagasi endisel kujul",
+      "На всех языках, на которых она написана. Сохранится сразу — «Вернуть» в сообщении внизу вернёт как было.":
+        "Kõigis keeltes, milles see on kirjutatud. Salvestub kohe — all teates olev «Taasta» toob endise tagasi.",
       "Статья не дописалась до конца — попробуйте ещё раз": "Artikkel jäi lõpuni kirjutamata — proovi uuesti",
       "Помощник не подключён — нужен ключ OpenAI на сервере.": "Abiline pole ühendatud — serveris on vaja OpenAI võtit.",
       "Подождите — статья ещё пишется": "Oota — artikkel on veel kirjutamisel",
@@ -5443,7 +5457,8 @@
       "Пусто — покажем русский": "Empty — the Russian one is shown",
       "Две строки — видно в списке статей и в поиске": "Two lines — seen in the article list and in search",
       "Товары в статье — покажем карточками внизу": "Products in the article — shown as cards at the bottom",
-      "В статье уже 12 товаров — больше не поместится.": "The article already has 12 products — no more fit.",
+      "Товары в статье — внизу покажем карточками первые 8": "Products in the article — the first 8 are shown as cards at the bottom",
+      "В статье уже 40 товаров — больше не поместится.": "The article already has 40 products — no more fit.",
       "✨ Помощник напишет статью": "✨ The assistant writes the article",
       "по-русски, потом на ET и EN": "in Russian, then ET and EN",
       "Адрес статьи": "Article address",
@@ -6411,6 +6426,19 @@
       "Перевожу на эстонский…": "Translating into Estonian…",
       "Перевожу на английский…": "Translating into English…",
       "Сохраняю черновик…": "Saving the draft…",
+      // the assistant's edit_post (applyEditPost)
+      "Исправляю русский текст…": "Fixing the Russian text…",
+      "Исправляю эстонский текст…": "Fixing the Estonian text…",
+      "Исправляю английский текст…": "Fixing the English text…",
+      "Помощник потерял часть текста — статья не изменена, попробуйте ещё раз": "The assistant lost part of the text — the article is unchanged, try again",
+      "Статья длинная — ответ не поместился, статья не изменена": "The article is long — the answer did not fit, the article is unchanged",
+      "Откройте эту статью в «Блоге» и попросите ещё раз": "Open this article in “Blog” and ask again",
+      "В статье ещё нет текста": "The article has no text yet",
+      "Ничего не изменилось — уточните, что исправить": "Nothing changed — say more precisely what to fix",
+      "Статья исправлена — проверьте текст ✓": "Article fixed — check the text ✓",
+      "Вернул статью как было": "The article is back as it was",
+      "На всех языках, на которых она написана. Сохранится сразу — «Вернуть» в сообщении внизу вернёт как было.":
+        "In every language it is written in. It saves at once — “Restore” in the message below puts it back as it was.",
       "Статья не дописалась до конца — попробуйте ещё раз": "The article was cut short — try again",
       "Помощник не подключён — нужен ключ OpenAI на сервере.": "The assistant is not connected — the server needs an OpenAI key.",
       "Подождите — статья ещё пишется": "Hold on — the article is still being written",
@@ -8273,6 +8301,8 @@
        appeared in the list (Renat, 18.09.2026). */
     [/^Новая статья целиком на тему «(.+)»(.*)$/,
       { ET: "Uus terve artikkel teemal «$1»$2", EN: "A new whole article on “$1”$2" }],
+    // edit_post: the article the owner has open, changed as he asked
+    [/^Исправить статью «(.+)»(.*)$/, { ET: "Parandada artiklit «$1»$2", EN: "Fix the article “$1”$2" }],
     [/^Новый товар «(.+)» · (.+)$/, { ET: "Uus toode «$1» · $2", EN: "A new product “$1” · $2" }],
     [/^бренд: (.+)$/, { ET: "kaubamärk: $1", EN: "brand: $1" }],
     [/^название: (.+)$/, { ET: "nimi: $1", EN: "name: $1" }],
@@ -17995,7 +18025,11 @@
      saved as a draft post, so nothing written is lost to a closed tab — the
      owner reads, fixes and publishes. A failure stops where it is, says so
      in plain words under the button, and keeps what was already written. */
-  var BLOGGEN_STEPS = { ru: "Пишу по-русски…", et: "Перевожу на эстонский…", en: "Перевожу на английский…", save: "Сохраняю черновик…" };
+  var BLOGGEN_STEPS = {
+    ru: "Пишу по-русски…", et: "Перевожу на эстонский…", en: "Перевожу на английский…", save: "Сохраняю черновик…",
+    // the assistant's edit_post, one language at a time (applyEditPost)
+    editRU: "Исправляю русский текст…", editET: "Исправляю эстонский текст…", editEN: "Исправляю английский текст…"
+  };
   function blogGenText(d) {
     var g = S.adminBlogGen;
     if (!g || (d && g.d !== d)) return "";
@@ -18061,7 +18095,7 @@
     // in the text is a product the article is about, «Товары в статье» or not
     (Array.isArray(tx.products) ? tx.products : []).concat(wrote.cards).forEach(function (id) {
       // only a product this panel knows — the route filtered against its slice, this is the second door
-      if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
+      if (d.products.indexOf(id) < 0 && d.products.length < BLOG_PRODUCTS_MAX && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
     });
     if (tx.seo && txt(tx.seo.title)) d.seoTitle.RU = txt(tx.seo.title).slice(0, 70);
     if (tx.seo && txt(tx.seo.description)) d.seoDesc.RU = txt(tx.seo.description).slice(0, 170);
@@ -27790,21 +27824,25 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
     }).join("") + "</div>";
   }
-  /** «Товары в статье» — the cards under the article: a row each with ×, and
-      «+ Товар» that opens the search. Twelve is what the server keeps
-      (src/lib/blog.ts), so the thirteenth is not offered rather than dropped
-      in silence. */
-  var BLOG_PRODUCTS_MAX = 12;
+  /** «Товары в статье» — the article's products: a row each with ×, and
+      «+ Товар» that opens the search. Forty is what the server keeps
+      (BLOG_PRODUCTS_MAX in src/lib/blog.ts — twelve until 20.10.2026), so the
+      forty-first is not offered rather than dropped in silence; the shelf
+      under the article shows the first BLOG_SHELF_MAX of them. */
+  var BLOG_PRODUCTS_MAX = 40;
+  var BLOG_SHELF_MAX = 8;
   function admBlogProductsHTML(d, picked, matches) {
     var full = d.products.length >= BLOG_PRODUCTS_MAX;
     return '<div class="adm-bprods">' +
-      '<div class="adm-bprods__h">Товары в статье — покажем карточками внизу</div>' +
+      '<div class="adm-bprods__h">' + (d.products.length > BLOG_SHELF_MAX
+        ? "Товары в статье — внизу покажем карточками первые 8"
+        : "Товары в статье — покажем карточками внизу") + "</div>" +
       picked.map(function (p) {
         return '<div class="adm-bprod"><span class="adm-bprod__n">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
           '<button class="adm-bprod__x" type="button" data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">×</button></div>';
       }).join("") +
       (full
-        ? '<p class="adm-hint">В статье уже 12 товаров — больше не поместится.</p>'
+        ? '<p class="adm-hint">В статье уже 40 товаров — больше не поместится.</p>'
         : S.adminBlogProdOpen || S.adminBlogQ
           ? admSearchHTML('<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" aria-label="Найти товар по названию">') +
             '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div>"
@@ -46620,6 +46658,12 @@
     if (a.type === "publish_post") {
       return "Статья «" + a.slug + "»: " + (a.publish ? "опубликовать" : "снять с публикации");
     }
+    // …and the article open in the editor, changed as the owner asked (applyEditPost)
+    if (a.type === "edit_post") {
+      var eTitle = S.adminBlogEdit && S.adminBlogEdit.slug === a.slug ? txt(S.adminBlogEdit.title.RU) || a.slug : a.slug;
+      return "Исправить статью «" + eTitle + "»" + (txt(a.what) ? ": " + txt(a.what) : "") +
+        "\nНа всех языках, на которых она написана. Сохранится сразу — «Вернуть» в сообщении внизу вернёт как было.";
+    }
     // wholesale/loyalty
     if (a.type === "set_pricing") {
       var pv = a.value || {}, plo = pv.loyalty || {}, bits = [];
@@ -47649,6 +47693,106 @@
         render();
       });
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
+  }
+
+  /* The assistant's «исправь статью» (edit_post; Dim, 20.10.2026 — the first
+     case a Kevin.Murphy article whose products were plain words, not links
+     into the shop). The article open in the editor, changed in every language
+     it is written in, one POST /api/admin/ai/text/ post_edit per language —
+     cards and pictures lifted out and put back by hand, exactly as a
+     translation does it (blogCardsOut / blogFigsOut), so the model never
+     touches either. A product link it writes arrives as an ordinary link to
+     the product's page: the route turned href="product:ID" into the address,
+     and dropped any id it had not offered.
+
+     All or nothing: a language that fails puts every language back as it was,
+     so the article never stands half-edited. Then it saves itself, like every
+     other change in the editor (1a), and the toast holds «Вернуть» for twenty
+     seconds — the owner reads the result, and one tap puts the old text back
+     and saves that. */
+  function blogEditErrText(r) {
+    var code = (r && r.body && r.body.error) || "";
+    if (code === "lost_text") return "Помощник потерял часть текста — статья не изменена, попробуйте ещё раз";
+    if (code === "truncated") return "Статья длинная — ответ не поместился, статья не изменена";
+    return blogGenErrText(r || {});
+  }
+  function blogEditLang(d, L, ask) {
+    var src = blogCardsOut(d.body[L]);
+    var figs = blogFigsOut(src.html);
+    return Promise.all([apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_edit", lang: L,
+      input: { ask: ask, title: d.title[L], excerpt: d.excerpt[L], body: figs.html }
+    }), uiWant(L)]).then(function (got) {
+      var r = got[0];
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !txt(tx.body)) throw new Error(blogEditErrText(r));
+      // the cards it kept come back from their tokens, then every card — kept or new — is rebuilt in L's words
+      var kept = blogCardsIn(blogFigsIn(txt(tx.body), figs.figs), src.cards, L);
+      var wrote = blogCardsOut(kept);
+      d.body[L] = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, L));
+      if (txt(tx.title)) d.title[L] = txt(tx.title).slice(0, 200);
+      if (txt(tx.excerpt)) d.excerpt[L] = txt(tx.excerpt).slice(0, 500);
+      /* …and the products it linked in the words: they are the article's
+         products too, so «Товары в статье» lists them (and the shelf under the
+         article shows the first of them) — in the order the text names them */
+      var linked = [], rx = /href="(?:\/(?:ru|et))?\/products\/([a-z0-9][a-z0-9._-]*)"/g, m;
+      while ((m = rx.exec(d.body[L]))) linked.push(m[1]);
+      wrote.cards.concat(linked).forEach(function (id) {
+        if (d.products.indexOf(id) < 0 && d.products.length < BLOG_PRODUCTS_MAX && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
+      });
+    });
+  }
+  function blogEditSnapshot(d) {
+    var keep = function (o) { return { RU: o.RU, ET: o.ET, EN: o.EN }; };
+    return { title: keep(d.title), excerpt: keep(d.excerpt), body: keep(d.body), products: d.products.slice() };
+  }
+  function blogEditRestore(d, was) {
+    ["title", "excerpt", "body"].forEach(function (f) { d[f].RU = was[f].RU; d[f].ET = was[f].ET; d[f].EN = was[f].EN; });
+    d.products = was.products.slice();
+  }
+  function applyEditPost(a) {
+    var d = S.adminBlogEdit;
+    if (!d || d.slug !== a.slug || S.adminTab !== "blog") { toast("Откройте эту статью в «Блоге» и попросите ещё раз"); return; }
+    if (S.adminBlogGen && !S.adminBlogGen.err) { toast("Подождите — статья ещё пишется"); return; }
+    blogReadForm();
+    var ask = txt(a.ask) || txt(a.what);
+    var langs = ["RU", "ET", "EN"].filter(function (L) { return String(d.body[L] || "").trim(); });
+    if (!ask || !langs.length) { toast("В статье ещё нет текста"); return; }
+    var was = blogEditSnapshot(d);
+    var paint = function () { if (S.adminBlogEdit === d) render(); };
+    if (!ADM_FOLD["blog-ai"]) admFoldToggle("blog-ai");
+    var chain = Promise.resolve();
+    langs.forEach(function (L) {
+      chain = chain.then(function () {
+        S.adminBlogGen = { d: d, step: "edit" + L, err: "" };
+        paint();
+        return blogEditLang(d, L, ask);
+      });
+    });
+    chain.then(function () {
+      S.adminBlogGen = null;
+      var same = langs.every(function (L) { return d.body[L] === was.body[L]; }) &&
+        langs.every(function (L) { return d.title[L] === was.title[L] && d.excerpt[L] === was.excerpt[L]; });
+      if (same) { paint(); toast("Ничего не изменилось — уточните, что исправить"); return; }
+      blogAutosave("change");
+      paint();
+      toast("Статья исправлена — проверьте текст ✓", {
+        prev: true, ms: 20000,
+        undo: function () {
+          if (S.adminBlogEdit !== d) return;
+          blogEditRestore(d, was);
+          blogAutosave("change");
+          toast("Вернул статью как было");
+          paint();
+        }
+      });
+    }).catch(function (e) {
+      blogEditRestore(d, was);
+      var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
+      S.adminBlogGen = { d: d, step: "error", err: msg };
+      toast(msg);
+      paint();
+    });
   }
 
   /** The post read whole and written back with the one field changed — a PATCH here replaces every field it carries. */
@@ -52511,6 +52655,8 @@
         if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
         // …and the same photo inside the text rather than above the title
         if (pa.type === "add_post_photo") { applyPostPhoto(pa); return; }
+        // …and the open article's own text changed as asked — no journal, «Вернуть» on the toast
+        if (pa.type === "edit_post") { applyEditPost(pa); return; }
         /* «Наборы»: the proposal opens the editor (no price is set for the
            owner), the change goes straight to POST /api/admin/bundles */
         if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }

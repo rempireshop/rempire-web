@@ -81,7 +81,7 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(28);   // r28: a promo code's date and cap only when the owner names them
+    expect(body.v).toBe(29);   // r29: edit_post — the article open in the editor, changed as the owner asked
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);
@@ -391,8 +391,38 @@ describe("assistant — the article the owner has open", () => {
     const system = sent[0].messages[0].content;
     expect(system).toContain("uhod-za-borodoy|draft|Уход за бородой");
     expect(system).toMatch(/NEVER answer a request about this article with draft_post/);
-    // …and it is honest about the one thing it cannot do from the chat
-    expect(system).toMatch(/There is no action that rewrites the text of an article that exists/);
+    /* …and a change to its text is edit_post now (20.10.2026), offered for
+       this article by name — it used to say no action could rewrite one */
+    expect(system).not.toMatch(/There is no action that rewrites the text of an article that exists/);
+    expect(system).toMatch(/A request to change THIS article's text .* is edit_post/);
+    expect(system).toContain('{"type":"edit_post","what":"<one short Russian line: what will change>"} — change the TEXT of the article he has open («uhod-za-borodoy»)');
+  });
+
+  it("without an open article, offers no edit and asks the owner to open one", async () => {
+    const sent = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "blog" }));
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(req({ mode: "admin", messages: [{ role: "user", content: "сделай товары в статье ссылками" }] }, admin));
+    const system = sent[0].messages[0].content;
+    expect(system).not.toContain('{"type":"edit_post"');
+    expect(system).toContain("ask him to open that article in «Блог» and ask again, and send no action");
+  });
+
+  it("an edit_post leaves with the owner's own words on it", async () => {
+    stubOpenAI(JSON.stringify({
+      reply: "Сделаю товары ссылками на магазин — подтвердите.", product_ids: [], tab: "blog",
+      action: { type: "edit_post", what: "ссылки на товары" },
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    const res = await POST(req({
+      mode: "admin",
+      messages: [{ role: "user", content: "сделай все товары в статье ссылками на магазин" }],
+      post: { slug: "kevin-murphy-shampuni", title: "Kevin.Murphy: какой выбрать шампунь", status: "draft" },
+    }, admin));
+    const body = await res.json();
+    expect(body.action).toEqual({
+      type: "edit_post", slug: "kevin-murphy-shampuni", what: "ссылки на товары",
+      ask: "сделай все товары в статье ссылками на магазин",
+    });
   });
 
   it("puts a cover on the open article when the model named no slug", async () => {

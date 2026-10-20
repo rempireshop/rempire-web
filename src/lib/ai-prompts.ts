@@ -13,7 +13,7 @@
 import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
 import { CAT_NAMES_I18N } from "@/lib/seo-head.mjs";
 
-export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "copy", "newsletter"] as const;
+export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "post_edit", "copy", "newsletter"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
 export const LANGS3 = ["RU", "ET", "EN"] as const;
@@ -634,7 +634,7 @@ export const POST_PRODUCTS_MAX = 12;
 export const POST_CARDS_MIN = 2;
 export const POST_CARDS_MAX = 4;
 
-function cleanProductRefs(raw: unknown): PostProductRef[] {
+function cleanProductRefs(raw: unknown, max: number = POST_PRODUCTS_MAX): PostProductRef[] {
   if (!Array.isArray(raw)) return [];
   const out: PostProductRef[] = [];
   const seen = new Set<string>();
@@ -644,7 +644,7 @@ function cleanProductRefs(raw: unknown): PostProductRef[] {
     if (!/^[a-z0-9][a-z0-9-]*$/.test(id) || seen.has(id)) continue;
     seen.add(id);
     out.push({ id, brand: line(o.brand, 60), name: line(o.name, 140), category: line(o.category, 40) });
-    if (out.length >= POST_PRODUCTS_MAX) break;
+    if (out.length >= max) break;
   }
   return out;
 }
@@ -728,7 +728,8 @@ function cleanPostTranslateInput(raw: unknown, lang: Lang3) {
     tags: listOf(src.tags, 12, 30),
     seoTitle: line(src.seoTitle, 70),
     seoDescription: line(src.seoDescription, 170),
-    keepNames: listOf(src.keepNames, 20, 80),
+    // every product of the article — up to forty since 20.10.2026 (BLOG_PRODUCTS_MAX in src/lib/blog.ts)
+    keepNames: listOf(src.keepNames, 40, 80),
   };
 }
 
@@ -756,6 +757,83 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt
     input.seoDescription ? `seoDescription: ${input.seoDescription}` : "",
     input.body ? `body:\n${input.body}` : "",
   ].filter(Boolean).join("\n");
+  return { system, user };
+}
+
+/* ---------- post_edit ---------------------------------------------------------
+ * An article that already exists, changed the way the owner asked — and
+ * nothing else. The chat assistant's edit_post (Dim, 20.10.2026: the
+ * assistant has to be able to fix an article that is already there; the
+ * first case was a Kevin.Murphy shampoo article whose products were plain
+ * words, not links into the shop). One call per language the article is
+ * written in; the panel puts the answer into the open editor, unsaved, and
+ * the owner reads it and presses «Сохранить» himself.
+ *
+ * A product link is asked for as href="product:ID", never as an address:
+ * the route turns it into the product's own page in this language, or drops
+ * it when ID was not offered (linkProductRefs in the route), so nothing the
+ * model writes can send a reader anywhere the shop does not sell. */
+
+export interface PostEditInput {
+  /** The owner's request, word for word. */
+  ask: string;
+  title: string;
+  excerpt?: string;
+  /** The article as it stands in the editor, HTML. */
+  body: string;
+  /** The products a link may point at — the route fills these in. */
+  products?: PostProductRef[];
+}
+
+export const POST_EDIT_ASK_MAX = 600;
+/* An article about one brand names a dozen of its products and more: the
+   list has to hold every one the text mentions, not the 12 a new article
+   chooses its cards from. */
+export const POST_EDIT_PRODUCTS_MAX = 40;
+
+function cleanPostEditInput(raw: unknown) {
+  const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const ask = para(src.ask, POST_EDIT_ASK_MAX);
+  if (!ask) throw new AiInputError("missing_ask");
+  const title = line(src.title, 200);
+  const body = para(src.body, POST_BODY_MAX);
+  if (!body) throw new AiInputError("missing_text");
+  return {
+    ask,
+    title,
+    excerpt: line(src.excerpt, 500),
+    body,
+    products: cleanProductRefs(src.products, POST_EDIT_PRODUCTS_MAX),
+  };
+}
+
+export function buildPostEditPrompt(lang: Lang3, rawInput: unknown): PromptResult {
+  const input = cleanPostEditInput(rawInput);
+  const products = input.products.length
+    ? `PRODUCTS from the shop a link may point at (id | brand | name) — these and no others:\n${input.products
+        .map((p) => `${p.id} | ${p.brand || "-"} | ${p.name || "-"}`)
+        .join("\n")}`
+    : "PRODUCTS: none — this article names nothing the shop sells, so add no product links and no product cards.";
+
+  const system = `${HOUSE_VOICE}
+
+TASK: the owner wants a change made to an article of the shop's blog that is already written, in ${LANG_NAME[lang]}. Make exactly the change he asks for under OWNER'S REQUEST — and nothing else.
+- Everything the request does not touch stays word for word: the same sentences, the same headings, the same order, the same HTML tags. Do not polish, shorten, summarise, translate, re-order or «improve» anything he did not ask about. A request about one paragraph changes that paragraph; a request about the products changes only how the products appear. Text you are asked to write goes in ${LANG_NAME[lang]}, in the voice above.
+- "body" is HTML. Use only <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <br> and <a>, and keep every tag the article already has where it is: an <img> or a <figure> with its attributes, every existing product card <p><a data-product="ID"></a></p> and every existing link stay character for character.
+- PRODUCT LINKS — when the request asks for products to become links, to be clickable or to lead to the shop, and in any sentence you are asked to write that names one of the PRODUCTS: make the product's name in the text a link, written exactly as <a href="product:ID">the words already in the text</a>, where ID is copied character for character from PRODUCTS. Link the first mention of each product in the article (later mentions stay plain text), never inside a heading, never twice in one sentence, and never change the words you link. A product, brand or name that is not in PRODUCTS gets no link — leave its words as they are. Never write a web address of your own.
+- PRODUCT CARDS — only when the request asks for product cards (карточки, блоки товаров): put <p><a data-product="ID"></a></p> on a line of its own right after the paragraph that recommends that product, ID from PRODUCTS, nothing inside the tag; never two cards one after another, never inside a list or a heading.
+- "title" and "excerpt": exactly as they are, unless the request is about them.
+- "summary": one short sentence in Russian telling the owner what you changed («Сделал ссылками на магазин 9 товаров»). When the request cannot be done with this article — it asks about something the article does not contain — change nothing and say so in "summary".
+Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "...", "summary": "..."}`;
+
+  const user = [
+    `OWNER'S REQUEST, word for word: «${input.ask}»`,
+    products,
+    `THE ARTICLE (${LANG_NAME[lang]}):`,
+    `title: ${input.title}`,
+    input.excerpt ? `excerpt: ${input.excerpt}` : "",
+    `body:\n${input.body}`,
+  ].filter(Boolean).join("\n\n");
   return { system, user };
 }
 
@@ -945,6 +1023,7 @@ export function buildPrompt(task: AiTask, lang: Lang3, input: unknown): PromptRe
   if (task === "blog_outline") return buildBlogOutlinePrompt(lang, input);
   if (task === "post_full") return buildPostFullPrompt(lang, input);
   if (task === "post_translate") return buildPostTranslatePrompt(lang, input);
+  if (task === "post_edit") return buildPostEditPrompt(lang, input);
   if (task === "copy") return buildCopyPrompt(lang, input);
   if (task === "newsletter") return buildNewsletterPrompt(lang, input);
   throw new AiInputError("unknown_task");

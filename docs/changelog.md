@@ -68,3 +68,5 @@ where it becomes the «what was done» summary.*
 
 **20.10**
 - Search Console indexing requests: Russian Repair-Me Wash (not indexed yet) and the other seven Russian Kevin.Murphy pages with new descriptions — all twelve now asked for in English and Russian — plus Estonian Super Goo, Heated Defense and Repair-Me Wash.
+- The admin assistant can now fix the article open in the blog editor («сделай товары ссылками на магазин», «исправь второй абзац»): every language changed, product names linked only to the shop's own pages, saved with «Вернуть» on the message. First case: a Kevin.Murphy shampoo article whose products were plain words.
+- An article's «Товары в статье» list holds up to 40 products (was 12); products the assistant links in an edit join it. The shelf under the article still shows the first 8.

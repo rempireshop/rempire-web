@@ -63,16 +63,18 @@ import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
 import {
-  AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, seoOffLanguage, seoProductName, type AiTask, type Lang3,
+  AiInputError, buildPrompt, isAiTask, LANGS3, POST_EDIT_PRODUCTS_MAX, POST_PRODUCTS_MAX, seoOffLanguage, seoProductName,
+  type AiTask, type Lang3,
 } from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
 import { chatParams, openaiModel } from "@/lib/openai-chat";
-import { catalogueRow, relevantProducts } from "@/lib/catalogue-slice";
+import { catalogueRow, mentionedProducts, relevantProducts } from "@/lib/catalogue-slice";
 import { sanitizeHtml } from "@/lib/blog";
+import { publicPath } from "@/lib/shop-paths.mjs";
 /* A Google title never carries the shop's name: every page appends it itself
    (fitTitle), so one the model wrote in anyway would stand there twice. */
 import { dropBrand } from "@/lib/seo-head.mjs";
-import { placeArticleCards, readCardPicks, type CardCandidate, type CardPick } from "@/lib/blog-cards";
+import { cardIds, placeArticleCards, readCardPicks, type CardCandidate, type CardPick } from "@/lib/blog-cards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -94,6 +96,9 @@ const MAX_TOKENS: Record<AiTask, number> = {
      article tasks, and refused the same way below when even that runs out. */
   translate: 4500,
   post_full: 4500, post_translate: 4500, copy: 400,
+  /* post_edit answers with the whole article again, links put in — the
+     owner's own pieces run longer than the 600–900 words post_full writes */
+  post_edit: 6000,
   // «Рассылка»: a subject line and 90–220 words of HTML (src/lib/ai-prompts.ts)
   newsletter: 1500,
 };
@@ -155,8 +160,25 @@ function tagInLang(tag: string, lang: Lang3): boolean {
 }
 
 /** Model JSON → the shape this task promises, nothing the model wrote left unbounded. */
-function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unknown; texts?: unknown } {
+function shapeNonReply(task: string, lang: Lang3, parsed: unknown, edit: PostEditRefs | null = null): { text?: unknown; texts?: unknown } {
   const p = (parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {}) as Record<string, unknown>;
+  if (task === "post_edit") {
+    /* The links first — href="product:ID" becomes this language's product
+       page or nothing (linkProductRefs) — then the blog's own allowlist, then
+       the cards held to the products that may carry one. Never a body that
+       skipped the sanitiser: without `edit` there is nothing it may link. */
+    const links = edit?.links ?? new Set<string>();
+    const cards = edit?.cards ?? new Set<string>();
+    const html = sanitizeHtml(linkProductRefs(str(p.body, 24_000), links, lang));
+    return {
+      text: {
+        title: str(p.title, 200),
+        excerpt: str(p.excerpt, 500),
+        body: keepKnownCards(html, cards),
+        summary: str(p.summary, 300),
+      },
+    };
+  }
   if (task === "describe") {
     const bullets = Array.isArray(p.bullets)
       ? p.bullets.map((b) => str(b, 160)).filter(Boolean).slice(0, 3)
@@ -313,6 +335,73 @@ function newsletterAllowed(raw: unknown): Set<string> {
   return out;
 }
 
+/* post_edit: the products an edited article may link — the ones its own
+   text names (mentionedProducts, in the order it names them), the cards it
+   already carries, and a few that fit its title and the owner's request.
+   Hidden ones («Показывать в магазине» off) are not offered at all; one that
+   has run out may still be linked — its page is there and says so — but
+   gets no new card, the same rule a new article's cards keep. A card the
+   article already had stays whatever its stock: the owner put it there. */
+type PostEditRefs = { input: Record<string, unknown>; links: Set<string>; cards: Set<string>; before: string; ask: string };
+async function postEditInput(raw: unknown): Promise<PostEditRefs> {
+  const src = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const title = typeof src.title === "string" ? src.title : "";
+  const ask = typeof src.ask === "string" ? src.ask : "";
+  const before = sanitizeHtml(typeof src.body === "string" ? src.body.slice(0, 24_000) : "");
+  const had = cardIds(before);
+  const refs: CardCandidate[] = [];
+  const seen = new Set<string>();
+  const add = (id: string, brand = "", name = "", category = "") => {
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    refs.push({ id, brand, name, category });
+  };
+  for (const p of mentionedProducts(`${title}\n${before}`, POST_EDIT_PRODUCTS_MAX)) add(p.id, p.b, p.n, p.c);
+  for (const id of had) {
+    const row = catalogueRow(id);
+    add(id, row?.b ?? "", row?.n ?? "", row?.c ?? "");
+  }
+  for (const p of relevantProducts(`${title} ${ask}`, { limit: 8, fill: 0 })) add(p.id, p.b, p.n, p.c);
+  let over: Record<string, Override> = {};
+  try {
+    over = await getOverrides(refs.map((r) => r.id));
+  } catch (err) {
+    console.error("[admin/ai/text] overrides lookup failed, the catalogue's own stock stands", err);
+  }
+  const offered = refs.filter((r) => !over[r.id]?.hidden || had.includes(r.id)).slice(0, POST_EDIT_PRODUCTS_MAX);
+  const cards = new Set(had);
+  for (const r of offered) {
+    const stock = over[r.id]?.stock ?? catalogueRow(r.id)?.s ?? "in";
+    if (stock !== "out") cards.add(r.id);
+  }
+  return {
+    input: { ...src, products: offered },
+    links: new Set(offered.map((r) => r.id)),
+    cards,
+    before,
+    ask,
+  };
+}
+
+/* The model writes a product link as href="product:ID" (buildPostEditPrompt):
+   an ID the route offered becomes that product's page in the article's own
+   language; anything else loses the address, and the sanitiser run after
+   this unwraps the bare <a> and keeps its words. Runs over the model's raw
+   answer, before the sanitiser — whose safeUrl() would drop the made-up
+   scheme on its own, and with it every link the owner asked for. */
+function linkProductRefs(html: string, allowed: Set<string>, lang: Lang3): string {
+  return html.replace(/\bhref\s*=\s*(["']?)product:([^"'\s>]*)\1/gi, (_m, _q: string, id: string) =>
+    allowed.has(id) ? `href="${publicPath(lang, "/p/" + id)}"` : 'href=""');
+}
+
+/* An edit that comes back with a good part of the article gone is not the
+   edit that was asked for — the model dropped sections on its way through a
+   long text — unless the owner asked for a shorter one. */
+const SHORTEN_RE = /сократ|короч|убер|удал|shorten|shorter|cut|remove|lühen|lühem|eemald/i;
+function textLength(html: string): number {
+  return html.replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " ").replace(/\s+/g, " ").trim().length;
+}
+
 export async function POST(req: NextRequest) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
@@ -355,7 +444,9 @@ export async function POST(req: NextRequest) {
 
   // post_full: the catalogue slice rides in with the topic — see postFullInput()
   const post = task === "post_full" ? await postFullInput(body.input) : null;
-  const input = post ? post.input : body.input;
+  // post_edit: the products the article may link ride in with it — see postEditInput()
+  const edit = task === "post_edit" ? await postEditInput(body.input) : null;
+  const input = post ? post.input : edit ? edit.input : body.input;
 
   let prompt: { system: string; user: string };
   try {
@@ -420,7 +511,7 @@ export async function POST(req: NextRequest) {
      editor's «Перевести на ET и EN» writes whatever comes back straight into
      the draft, so half an Estonian article would be saved as the Estonian
      article. */
-  if ((task === "post_full" || task === "post_translate" || task === "newsletter" || task === "translate")
+  if ((task === "post_full" || task === "post_translate" || task === "post_edit" || task === "newsletter" || task === "translate")
       && (extracted.truncated || !extracted.value)) {
     console.error("[admin/ai/text] article cut or unreadable", task, choice.finish_reason);
     return NextResponse.json({ ok: false, error: "truncated" }, { status: 502 });
@@ -435,7 +526,15 @@ export async function POST(req: NextRequest) {
     const signature = settings ? buildSignature(mergeContent(settings.content), lang) : "";
     result = { text: signature ? `${replyText}\n\n${signature}` : replyText };
   } else {
-    result = shapeNonReply(task, lang, parsed);
+    result = shapeNonReply(task, lang, parsed, edit);
+    if (edit && result.text && typeof result.text === "object") {
+      const now = textLength(String((result.text as Record<string, unknown>).body ?? ""));
+      const was = textLength(edit.before);
+      if (!now || (was > 400 && now < was * 0.6 && !SHORTEN_RE.test(edit.ask))) {
+        console.error("[admin/ai/text] edited article came back with text missing", was, now);
+        return NextResponse.json({ ok: false, error: "lost_text" }, { status: 502 });
+      }
+    }
     /* A product's Estonian or English snippet that came back Russian outside
        the product's own name is not that language's snippet: the goods editor
        writes whatever this returns straight into the ET/EN pair, and a
