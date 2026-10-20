@@ -41,12 +41,12 @@ function page(body: string, status = 200): Response {
   const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Подключить Claude — Rempire</title>
 <style>
-:root{color-scheme:light}body{margin:0;background:#f4f3f0;color:#141414;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+:root{color-scheme:light}body{margin:0;padding:0 16px;background:#f4f3f0;color:#141414;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:420px;margin:48px auto;padding:28px 24px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 h1{font-size:22px;margin:0 0 12px}p{margin:0 0 14px}ul{margin:0 0 16px;padding-left:20px}li{margin:4px 0}
 .no{color:#8a2b2b}.mut{color:#666;font-size:14px}label{display:block;font-weight:600;margin:18px 0 6px}
 input[type=password]{box-sizing:border-box;width:100%;padding:12px;font-size:16px;border:1px solid #c9c6bf;border-radius:10px}
-button,.go{display:block;width:100%;margin-top:16px;padding:13px;font-size:16px;font-weight:600;border:0;border-radius:10px;background:#141414;color:#fff;text-align:center;text-decoration:none;cursor:pointer}
+button,.go{display:block;box-sizing:border-box;width:100%;margin-top:16px;padding:13px;font-size:16px;font-weight:600;border:0;border-radius:10px;background:#141414;color:#fff;text-align:center;text-decoration:none;cursor:pointer}
 .err{background:#fbeaea;color:#8a2b2b;padding:10px 12px;border-radius:10px;margin:0 0 14px}
 </style></head><body><main>${body}</main></body></html>`;
   return new Response(html, {
