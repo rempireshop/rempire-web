@@ -349,6 +349,13 @@ describe("shopBody and searchProducts", () => {
     expect(md.html).toContain("<h2>Шампуни</h2>");
     expect(md.html).toContain('<a href="/et/products/kevin-murphy-angel-wash">Angel.Wash</a>');
     expect(md.ids).toEqual(["kevin-murphy-angel-wash"]);
+    // a picture dressed up to look allowed is still judged by the address the sanitiser keeps
+    const photo = list.find((p) => p.id === "kevin-murphy-angel-wash")!.photos[0];
+    const dressed = shopBody(`<p>x</p><IMG alt='src="${photo}"' SRC='https://evil.example/x.jpg'><img data-src="${photo}" src="https://evil.example/y.jpg">`, "RU", byId, new Set([photo]));
+    expect(dressed.html).not.toContain("evil.example");
+    expect(dressed.html).not.toContain("<img");
+    const fine = shopBody(`<p>x</p><img src="${photo}" alt="Angel">`, "RU", byId, new Set([photo]));
+    expect(fine.html).toContain(`<img src="${photo}" alt="Angel"`);
     const found = searchProducts(list, "kevin murphy шампунь", 25).map((p) => p.id);
     expect(found).toContain("kevin-murphy-angel-wash");
     expect(searchProducts(list, "", 5)).toEqual([]);

@@ -102,8 +102,12 @@ const CARD = /<a data-product="([^"]*)"[^>]*>[\s\S]*?<\/a>/g;
  * this language, `data-price="live"` for the price), or dropped.
  * Answers the HTML and the ids it now names, cards first, in their order.
  */
-const IMG = /<img\b[^>]*>/g;
-const IMG_SRC = /\bsrc="([^"]*)"/;
+/* Read over the SANITISER's output only, never raw HTML: openTag() in
+   src/lib/blog-html.mjs rebuilds every picture as exactly
+   `<img src="…" alt="…" loading="lazy">` — src first, double quotes, the alt
+   escaped — so this pattern matches that one shape and nothing a paste could
+   dress up (security review, 20.10.2026). */
+const IMG = /<img src="([^"]*)"[^>]*>/g;
 
 /** Every photo of every product the shop shows — the only pictures an article from Claude may carry. */
 export function shopPhotos(list: ShopProduct[]): Set<string> {
@@ -134,10 +138,7 @@ export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>, 
      anything else, a stock photo or a picture from another site, is not
      something this shop may show, and goes; a figure left empty goes with it. */
   const pictured = carded
-    .replace(IMG, (tag) => {
-      const src = (IMG_SRC.exec(tag) || [])[1] || "";
-      return photos.has(src.replace(/&amp;/g, "&")) ? tag : "";
-    })
+    .replace(IMG, (tag, src: string) => (photos.has(src.replace(/&amp;/g, "&")) ? tag : ""))
     .replace(/<figure[^>]*>\s*<\/figure>/g, "");
   return { html: sanitizeHtml(pictured).replace(/<p>\s*<\/p>/g, ""), ids };
 }
