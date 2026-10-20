@@ -426,7 +426,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export const BLOG_PRODUCTS_MAX = 40;
 
 /** Create (no `id`) or edit the fields of an existing post. Never touches status. */
-export async function upsertPost(input: PostInput): Promise<Post> {
+export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean } = {}): Promise<Post> {
   const title = trilingual(input.title, 200);
   const excerpt = trilingual(input.excerpt, 500);
   const body = trilingual(input.body, BODY_MAX, true, "body_too_long"); // the one field where "\n" is content
@@ -500,11 +500,15 @@ export async function upsertPost(input: PostInput): Promise<Post> {
          cover_url = $5, cover_alt = $6::jsonb, cover_focus = $7, tags = $8, products = $9,
          seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12,
          tags_i18n = coalesce($13::jsonb, tags_i18n), updated_at = now()
-       where id = $14 and deleted_at is null
+       where id = $14 and deleted_at is null${opts.onlyDraft ? " and status = 'draft'" : ""}
        returning ${FULL_COLS}`,
       [...params, input.id],
     );
-    if (!rows.length) throw new BlogError("not_found");
+    /* `onlyDraft` — the Claude connector (src/lib/mcp/tools.ts) may change a
+       draft and nothing else, and the rule is held here, in the write, not
+       only by the read before it: an article published in the admin between
+       the two is not a row this update can touch. */
+    if (!rows.length) throw new BlogError(opts.onlyDraft ? "not_draft" : "not_found");
     return toPost(rows[0]);
   }
 

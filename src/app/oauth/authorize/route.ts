@@ -13,6 +13,13 @@
  *          them would be a door with no ladder. Then a code, five minutes,
  *          bound to the PKCE challenge, the callback and this password.
  *
+ * A sign-in link somebody else started in THEIR Claude and sent to the owner
+ * would end with their Claude connected (security review, 20.10.2026: consent
+ * phishing). What it could reach is drafts and public data, and it still
+ * needs the admin password typed here; the page says in red to allow only a
+ * connection the owner has just started himself, and a new admin password
+ * signs every connection out (src/lib/mcp/oauth.ts).
+ *
  * The way back to Claude is a link the page follows by itself (a meta
  * refresh), not a 302: the shop's CSP allows forms to post only to itself and
  * to Montonio (next.config.ts), and browsers hold the redirect after a form
@@ -60,6 +67,7 @@ ${error ? `<p class="err">${esc(error)}</p>` : ""}
 <p>${esc(r.clientName)} просит доступ к магазину rempireshop.com. Он сможет:</p>
 <ul><li>искать товары, их цены и ссылки</li><li>читать статьи блога</li><li>сохранять <b>черновики</b> статей</li></ul>
 <p class="no">Опубликовать или удалить статью, поменять цены, увидеть заказы и клиентов он не сможет.</p>
+<p class="err">Разрешайте, только если вы сами только что нажали «Подключить» в своём Claude. Если эту ссылку вам кто-то прислал — закройте страницу и не вводите пароль.</p>
 <form method="post" action="/oauth/authorize">
 ${fields.map(([k, v]) => `<input type="hidden" name="${k}" value="${esc(v)}">`).join("\n")}
 <label for="pw">Пароль от админки магазина</label>

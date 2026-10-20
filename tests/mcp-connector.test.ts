@@ -107,6 +107,8 @@ describe("the connector, end to end", () => {
     const html = await page.text();
     expect(html).toContain("Пароль от админки магазина");
     expect(html).toContain("Опубликовать или удалить статью");
+    // consent phishing: allow only a connection you started yourself
+    expect(html).toContain("Если эту ссылку вам кто-то прислал — закройте страницу");
     q.set("password", password);
     const done = await auth.POST(post("/oauth/authorize", q.toString(), "application/x-www-form-urlencoded"));
     const doneHtml = await done.text();
@@ -286,6 +288,14 @@ describe("the connector, end to end", () => {
     expect(refused.isError).toBe(true);
     expect(refused.text).toContain("published");
     expect((await getPostBySlug(out.slug))!.title.RU).toBe("Kevin.Murphy: шампуни");
+  });
+
+  it("holds «drafts only» in the write itself — an article published in between is not touched", async () => {
+    const made = await upsertPost({ title: { RU: "Черновик" }, body: { RU: "<p>Текст.</p>" } });
+    await publishPost(made.id);
+    await expect(upsertPost({ id: made.id, title: { RU: "Подмена" }, body: { RU: "<p>x</p>" } }, { onlyDraft: true }))
+      .rejects.toMatchObject({ code: "not_draft" });
+    expect((await getPostBySlug(made.slug))!.title.RU).toBe("Черновик");
   });
 
   it("reads an article back in the language asked for", async () => {

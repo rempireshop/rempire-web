@@ -17,7 +17,7 @@
  * and save_draft holds an article to it: a link or a card for an id the
  * shop does not sell loses its link and keeps its words.
  */
-import { BLOG_PRODUCTS_MAX, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
+import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { writeAuditSafe } from "@/lib/orders";
 import { publicPath } from "@/lib/shop-paths.mjs";
@@ -379,15 +379,24 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
   if (text(args.seo_title, 70)) seoTitle.RU = text(args.seo_title, 70);
   if (text(args.seo_description, 170)) seoDesc.RU = text(args.seo_description, 170);
 
-  const saved = await upsertPost({
-    ...(was ? { id: was.id, slug: was.slug } : {}),
-    title, excerpt, body, products, tags, seoTitle, seoDesc,
-    coverUrl: was?.coverUrl ?? null,
-    coverAlt: was?.coverAlt,
-    coverFocus: was?.coverFocus ?? null,
-    tagsI18n: was?.tagsI18n,
-    author: was?.author ?? "Rempire",
-  });
+  let saved: Post;
+  try {
+    saved = await upsertPost({
+      ...(was ? { id: was.id, slug: was.slug } : {}),
+      title, excerpt, body, products, tags, seoTitle, seoDesc,
+      coverUrl: was?.coverUrl ?? null,
+      coverAlt: was?.coverAlt,
+      coverFocus: was?.coverFocus ?? null,
+      tagsI18n: was?.tagsI18n,
+      author: was?.author ?? "Rempire",
+    }, { onlyDraft: true }); // held in the write too: published in the admin meanwhile is still refused
+  } catch (e) {
+    if (e instanceof BlogError && (e.code === "not_draft" || e.code === "not_found")) {
+      return no(`«${slug}» is no longer a draft — it was published or deleted in the admin just now. Nothing was changed. Save the new version without slug to make a new draft.`);
+    }
+    if (e instanceof BlogError && e.code === "body_too_long") return no("The text is too long for the shop — shorten it.");
+    throw e;
+  }
   await writeAuditSafe("admin", "mcp.save_draft", { slug: saved.slug, created: !was, langs: LANGS3.filter((l) => given[l]), products: products.length });
   const dropped = LANGS3.filter((l) => given[l] && !body[l]);
   return ok({
