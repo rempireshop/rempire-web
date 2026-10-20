@@ -63,3 +63,8 @@ where it becomes the «what was done» summary.*
 
 **18.10**
 - Search Console indexing requests: the other six Kevin.Murphy products with new descriptions, System 4 shampoo №2 (RU) again, and the Russian pages of Super Goo, Hydrate-Me Masque, Heated Defense and Touchable — Russian Heated Defense and Repair-Me Wash were not indexed yet.
+
+## Week 3 — 19.10 → 25.10
+
+**20.10**
+- Search Console indexing requests: Russian Repair-Me Wash (not indexed yet) and the other seven Russian Kevin.Murphy pages with new descriptions — all twelve now asked for in English and Russian — plus Estonian Super Goo, Heated Defense and Repair-Me Wash.
