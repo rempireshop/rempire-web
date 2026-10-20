@@ -680,6 +680,55 @@ function planFeed(products: FeedProduct[], overrides: Record<string, Override>):
   return plan;
 }
 
+/* ---------- the shop's products, for the Claude connector ---------------
+
+   What Renat's Claude reads when it writes an article (src/lib/mcp/tools.ts):
+   every product a shopper can see, with the names, prices, stock, photo and
+   text the feed itself would send — the same rungsOf()/photosOf() and the
+   same description ladder as buildFeed(), so a price Claude quotes is the
+   till's price. Hidden products are not here at all; one without a photo
+   is (an article may still name it). */
+export type ShopProduct = {
+  id: string;
+  brand: string;
+  cat: string;
+  names: Record<FeedLang, string>;
+  sizes: Array<{ label: string | null; price: number }>;
+  stock: StockState;
+  photo: string | null;
+  texts: Partial<Record<FeedLang, string>>;
+};
+
+export function shopProducts(input: Pick<FeedInput, "overrides" | "descriptions" | "custom">, base: string): ShopProduct[] {
+  const products = [...catalogueProducts(input.descriptions), ...customProducts(input.custom)];
+  const out: ShopProduct[] = [];
+  for (const p of products) {
+    const o = input.overrides[p.id];
+    if (o?.hidden) continue;
+    const ladder = rungsOf(p, o);
+    const sizes = ladder.filter((r) => Number.isFinite(r.price) && r.price > 0);
+    if (!sizes.length) continue;
+    const photo = photosOf(p, o, ladder.length).photos.filter(usableImage)[0];
+    const texts: Partial<Record<FeedLang, string>> = {};
+    for (const lang of ["RU", "ET", "EN"] as const) {
+      const own = p.descOv?.[lang]?.trim();
+      const text = own ? ownerText(own) : p.texts[lang];
+      if (text) texts[lang] = text;
+    }
+    out.push({
+      id: p.id,
+      brand: p.brand,
+      cat: p.cat,
+      names: { RU: p.name, ET: feedName(p.name, "ET"), EN: feedName(p.name, "EN") },
+      sizes: sizes.map((r) => ({ label: r.label, price: r.price })),
+      stock: (o?.stock ?? p.fileStock) as StockState,
+      photo: photo ? absUrl(base, photo) : null,
+      texts,
+    });
+  }
+  return out;
+}
+
 /** One item of the feed, as the checkout link has to find it again. */
 export type FeedOffer = {
   /** The Merchant Center id — g:id. */

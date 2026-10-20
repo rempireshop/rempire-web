@@ -9147,6 +9147,51 @@
       }
     },
     {
+      "id": "ai-claude-connector",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Claude подключён к магазину и сохраняет черновик",
+      "steps": [
+        "claude.ai → Настройки → Коннекторы → добавить свой: Rempire, https://rempireshop.com/api/mcp.",
+        "Нажать «Подключить», ввести пароль от админки, нажать «Разрешить».",
+        "В новом чате: «Напиши короткую статью про масла для бороды с товарами из магазина».",
+        "Попросить: «Сохрани в блог как черновик».",
+        "Открыть Админку → «Блог» и эту статью."
+      ],
+      "expect": [
+        "Страница магазина говорит, что Claude сможет и чего не сможет.",
+        "После «Разрешить» Claude показывает коннектор подключённым.",
+        "В статье настоящие товары магазина со ссылками на них.",
+        "Статья в «Блоге» — черновик, не опубликована.",
+        "Карточки товаров в тексте видны и удаляются, как обычно."
+      ],
+      "why": "Ренат пишет статьи в Claude: без подключения Claude не знает товаров магазина и их адресов, а текст приходилось переносить руками.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-20T17:41:27.857Z",
+      "en": {
+        "title": "Claude is connected to the shop and saves a draft",
+        "steps": [
+          "claude.ai → Settings → Connectors → add a custom one: Rempire, https://rempireshop.com/api/mcp.",
+          "Press «Connect», enter the admin password, press «Разрешить».",
+          "In a new chat: «Напиши короткую статью про масла для бороды с товарами из магазина».",
+          "Ask: «Сохрани в блог как черновик».",
+          "Open Admin → «Блог» and that article."
+        ],
+        "expect": [
+          "The shop's page says what Claude will and will not be able to do.",
+          "After «Разрешить» Claude shows the connector as connected.",
+          "The article names real shop products with links to them.",
+          "The article in «Блог» is a draft, not published.",
+          "Product cards in the text show and can be removed as usual."
+        ],
+        "why": "Renat writes articles in Claude: without the connection Claude does not know the shop's products or their addresses, and the text had to be moved over by hand."
+      }
+    },
+    {
       "id": "ai-assistant-ask",
       "area": "ai",
       "who": "renat",

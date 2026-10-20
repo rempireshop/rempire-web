@@ -1106,6 +1106,13 @@ build-time head until the next deploy (documented).
 
 **Simplification candidates.** Q47 («Только часть» fold), Q48 (sample posts).
 
+**The «Rempire» connector for Claude** (20.10.2026) — Renat's own Claude
+writes the blog against the shop: `/api/mcp` (MCP over stateless JSON-RPC,
+`src/lib/mcp/`) with tools to search products, read posts and **save drafts**
+(never publish), signed in through the shop's own OAuth (`/oauth/*`,
+`/.well-known/oauth-*`) with the admin password; stateless HMAC tokens under
+`SESSION_SECRET`, revoked by changing the admin password. docs/claude-connector.md.
+
 ---
 
 ## 15. Content and settings (hero, announcement, company, legal, the settings pages, journal)

@@ -343,6 +343,21 @@ function routes(): RouteCase[] {
     { name: "GET /ru/blogs/news", path: "/ru/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/route"), jsonBody: false },
     { name: "GET /et/blogs/news", path: "/et/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/route"), jsonBody: false },
     { name: "GET /blogs/news", path: "/blogs/news", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/route"), jsonBody: false },
+    /* The «Rempire» connector for Renat's Claude (src/lib/mcp,
+       docs/claude-connector.md). OAuth answers in RFC shapes ({error} and an
+       HTML sign-in page) and /api/mcp in JSON-RPC, so no {ok,error}; what
+       matters is that no hostile body is a 5xx or a path, that nothing gets
+       past /api/mcp's 401 without a token, and that the sign-in page never
+       reaches the password for a request it has not checked. */
+    { name: "GET /.well-known/oauth-protected-resource", path: "/.well-known/oauth-protected-resource", method: "GET", exports: ["GET"], load: () => import("@/app/.well-known/oauth-protected-resource/route"), jsonBody: false },
+    { name: "GET /.well-known/oauth-protected-resource/api/mcp", path: "/.well-known/oauth-protected-resource/api/mcp", method: "GET", exports: ["GET"], load: () => import("@/app/.well-known/oauth-protected-resource/api/mcp/route"), jsonBody: false },
+    { name: "GET /.well-known/oauth-authorization-server", path: "/.well-known/oauth-authorization-server", method: "GET", exports: ["GET"], load: () => import("@/app/.well-known/oauth-authorization-server/route"), jsonBody: false },
+    { name: "POST /oauth/register", path: "/oauth/register", method: "POST", exports: ["POST"], load: () => import("@/app/oauth/register/route"), jsonBody: false, body: { client_name: "Claude", redirect_uris: ["https://claude.ai/api/mcp/auth_callback"], token_endpoint_auth_method: "none" } },
+    { name: "GET /oauth/authorize", path: "/oauth/authorize", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/oauth/authorize/route"), jsonBody: false, queries: ["", "?client_id=junk", "?response_type=code&redirect_uri=https%3A%2F%2Fevil.example%2Fcb", "?client_id=" + "A".repeat(5000)] },
+    { name: "POST /oauth/authorize", path: "/oauth/authorize", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/oauth/authorize/route"), jsonBody: false, req: { raw: "client_id=junk&password=x", contentType: "application/x-www-form-urlencoded" } },
+    { name: "POST /oauth/token", path: "/oauth/token", method: "POST", exports: ["POST"], load: () => import("@/app/oauth/token/route"), jsonBody: false, req: { raw: "grant_type=authorization_code&code=junk&client_id=junk&code_verifier=junk", contentType: "application/x-www-form-urlencoded" } },
+    { name: "POST /api/mcp/", path: "/api/mcp/", method: "POST", exports: ["POST", "GET", "DELETE"], load: () => import("@/app/api/mcp/route"), jsonBody: false, body: { jsonrpc: "2.0", id: 1, method: "tools/list" } },
+    { name: "GET /api/mcp/", path: "/api/mcp/", method: "GET", exports: ["POST", "GET", "DELETE"], load: () => import("@/app/api/mcp/route"), jsonBody: false },
     { name: "GET /ru/blogs/news/[slug]", path: "/ru/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/ru/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /et/blogs/news/[slug]", path: "/et/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/et/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /blogs/news/[slug]", path: "/blogs/news/x", method: "GET", exports: ["GET"], load: () => import("@/app/blogs/news/[slug]/route"), params: { slug: "" }, jsonBody: false },
