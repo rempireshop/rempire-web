@@ -136,11 +136,14 @@ export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>, 
   });
   /* Pictures: the shop's own product photos only (get_product lists them) —
      anything else, a stock photo or a picture from another site, is not
-     something this shop may show, and goes; a figure left empty goes with it. */
-  const pictured = carded
+     something this shop may show, and goes; a figure left empty goes with it.
+     The filter is the LAST step and reads the sanitiser's canonical output,
+     which nothing re-parses afterwards: what it judged is what is stored. */
+  const canonical = sanitizeHtml(carded);
+  const pictured = canonical
     .replace(IMG, (tag, src: string) => (photos.has(src.replace(/&amp;/g, "&")) ? tag : ""))
-    .replace(/<figure[^>]*>\s*<\/figure>/g, "");
-  return { html: sanitizeHtml(pictured).replace(/<p>\s*<\/p>/g, ""), ids };
+    .replace(/<figure(?: data-fig="[a-z-]+")?>\s*<\/figure>/g, "");
+  return { html: pictured.replace(/<p>\s*<\/p>/g, ""), ids };
 }
 
 /* ---------- the tools ---------- */
