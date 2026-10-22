@@ -74,3 +74,6 @@ where it becomes the «what was done» summary.*
 
 **21.10**
 - Search Console indexing requests: the nine Estonian Kevin.Murphy pages with new descriptions (all twelve now asked for in all three languages) and the Russian System 4 shampoo guide — the guide was not indexed in any language; its Estonian and English pages are next.
+
+**22.10**
+- All four published articles are now indexed in all three languages. Search Console week 14–20.10 vs 7–13.10: impressions +29 %, clicks to pages 23 → 50; average position 13.8 → 17.7 overall, but Estonia steady (9.3 → 9.7, clicks 5 → 14) and Russia steady (11.5 → 11.3) — the drop is impressions from countries the shop barely serves (India, Australia, UK, US, Netherlands) at positions 17–41 and new long-tail English queries. Pages report: 1 050 indexed; of 1 630 not, most are old Shopify addresses (redirects, /en-xx/ markets, ?page=); ~270 «crawled, not indexed» include real Russian product pages. Requested: the Russian beard section and seven Russian product pages (+ Super Goo, already indexed).
