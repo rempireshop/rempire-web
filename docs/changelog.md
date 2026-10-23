@@ -80,3 +80,5 @@ where it becomes the «what was done» summary.*
 
 **23.10**
 - Search Console, our own sitemap only: 782 of 849 pages indexed. The 67 left: 47 not yet crawled (the sets pages, brand pages such as Paul Mitchell, Xerjoff, Tom Ford, Versace, Byredo, and the new Kevin.Murphy Flawless), 14 crawled but not indexed, 3 legal pages Google still holds as blocked by Shopify's old robots.txt (today's robots.txt allows them), 3 canonical. Russian product pages are now indexed almost throughout. The quota ran out after one request (Kevin.Murphy Flawless, English); the rest is queued.
+- Search report before/after launch, with competitors, Bing and AI search, as two dashboards (English for Dim, Russian for Renat) and a Russian PDF. Baseline: Google's AI answers show the shop ~39 times a day (21 before launch); in a 7-question test ChatGPT named the shop 4 times, Perplexity once (by name only); Copilot 0 citations.
+- Bing Webmaster Tools: Bing has indexed only 128 of the shop's addresses (0 errors, 10 warnings). Submitted 100 by hand (home pages, gift sets, Estonian and English sections and brands); the other 53 (Russian sections, the last English brands) are tomorrow's quota.
