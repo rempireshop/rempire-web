@@ -77,3 +77,6 @@ where it becomes the «what was done» summary.*
 
 **22.10**
 - All four published articles are now indexed in all three languages. Search Console week 14–20.10 vs 7–13.10: impressions +29 %, clicks to pages 23 → 50; average position 13.8 → 17.7 overall, but Estonia steady (9.3 → 9.7, clicks 5 → 14) and Russia steady (11.5 → 11.3) — the drop is impressions from countries the shop barely serves (India, Australia, UK, US, Netherlands) at positions 17–41 and new long-tail English queries. Pages report: 1 050 indexed; of 1 630 not, most are old Shopify addresses (redirects, /en-xx/ markets, ?page=); ~270 «crawled, not indexed» include real Russian product pages. Requested: the Russian beard section and seven Russian product pages (+ Super Goo, already indexed).
+
+**23.10**
+- Search Console, our own sitemap only: 782 of 849 pages indexed. The 67 left: 47 not yet crawled (the sets pages, brand pages such as Paul Mitchell, Xerjoff, Tom Ford, Versace, Byredo, and the new Kevin.Murphy Flawless), 14 crawled but not indexed, 3 legal pages Google still holds as blocked by Shopify's old robots.txt (today's robots.txt allows them), 3 canonical. Russian product pages are now indexed almost throughout. The quota ran out after one request (Kevin.Murphy Flawless, English); the rest is queued.
