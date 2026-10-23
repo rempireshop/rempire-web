@@ -48784,22 +48784,31 @@
          keeps the line it always had under its heading (catIntro() in app.js)
          and the description it always carried (brandGeneric), under the
          template's fallback title «{brand} in Tallinn | REMPIRE» (audit §1A).
-         The intro is the shop's own paragraph, not a snippet: seoBrandIntro(). */
+         The intro is the shop's own paragraph, not a snippet: seoBrandIntro().
+         `metaFree` (System 4, Kevin.Murphy, Captain Fawcett — Dim, 23.10.2026)
+         is the description with «in stock in Tallinn», pickup and the free
+         Baltic delivery threshold, filled from the rules like the home page's;
+         `meta` stays as the text for when free delivery is switched off.
+         ChatGPT and Perplexity quote exactly these facts (search report
+         23.10.2026); the page itself does not change. */
       brand: {
         "System 4": {
           RU: {
             title: "System 4 (Sim Sensitive): шампуни №1–4 и сыворотка | REMPIRE",
             meta: "System 4 (Sim Sensitive): шампуни №1–4 для жирной, сухой и чувствительной кожи головы, тоник T, маска O и сыворотка Bio Botanical. Самовывоз на Mardi 1.",
+            metaFree: "System 4 в наличии в Таллинне: шампуни №1–4 для жирной, сухой и чувствительной кожи головы. Самовывоз на Mardi 1, доставка по Балтии бесплатно от {free}.",
             intro: "System 4 — финская линия Sim Sensitive для кожи головы. Номер на шампуне подсказывает тип кожи головы: №1 — жирная и склонная к перхоти, №2 — сухая с перхотью, №3 — для ежедневного ухода, №4 — очень жирная и чувствительная. К ним — тоник T, маска O и сыворотка Bio Botanical. Подобрать номер поможем в салоне на Mardi 1."
           },
           ET: {
             title: "System 4 (Sim Sensitive): šampoonid ja seerum | REMPIRE",
             meta: "Sim Sensitive'i System 4: šampoonid 1–4 rasusele, kuivale ja tundlikule peanahale, toonik T, mask O ja Bio Botanical seerum. Järeletulek Mardi 1, Tallinn.",
+            metaFree: "Sim Sensitive'i System 4 laos Tallinnas: šampoonid 1–4 rasusele, kuivale ja tundlikule peanahale. Järeletulek Mardi 1, tasuta tarne Baltikumis alates {free}.",
             intro: "System 4 on Sim Sensitive'i Soome peanahahoolduse sari. Šampooni number näitab peanaha tüüpi: 1 – rasune ja kõõmale kalduv, 2 – kuiv ja kõõmale kalduv, 3 – igapäevaseks hoolduseks, 4 – väga rasune ja tundlik. Lisaks toonik T, mask O ja Bio Botanical seerum. Õige numbri aitame valida meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "System 4 by Sim Sensitive: Scalp Shampoos & Serum | REMPIRE",
             meta: "System 4 by Sim Sensitive: shampoos 1–4 for oily, dry or sensitive scalps, T tonic, O scalp mask and Bio Botanical serum. Pickup at Mardi 1, Tallinn.",
+            metaFree: "System 4 by Sim Sensitive in stock in Tallinn: shampoos 1–4 for oily, dry or sensitive scalps. Pickup at Mardi 1, free Baltic delivery from {free}.",
             intro: "System 4 is Sim Sensitive's Finnish scalp-care range. The number on each shampoo tells you which scalp it suits: 1 for oily, dandruff-prone, 2 for dry, dandruff-prone, 3 for everyday care and 4 for very oily, sensitive scalps. Alongside them: T tonic, O scalp mask and Bio Botanical serum. We'll help you pick yours at Mardi 1."
           }
         },
@@ -48807,16 +48816,19 @@
           RU: {
             title: "Kevin.Murphy — шампуни, маски и стайлинг | REMPIRE",
             meta: "Kevin.Murphy в Таллинне: шампуни и маски Angel, Hydrate-Me, Repair-Me, Young.Again и стайлинг Night.Rider, Session.Spray. Самовывоз на Mardi 1.",
+            metaFree: "Kevin.Murphy в наличии в Таллинне: шампуни и маски Angel и Hydrate-Me, стайлинг Night.Rider. Самовывоз на Mardi 1, доставка по Балтии бесплатно от {free}.",
             intro: "Kevin.Murphy — австралийская марка салонного ухода за волосами. У нас шампуни и маски Angel, Hydrate-Me, Repair-Me и Young.Again, стайлинг Night.Rider, Rough.Rider, Session.Spray и Anti.Gravity. Что подойдёт вашим волосам, подскажем в салоне на Mardi 1."
           },
           ET: {
             title: "Kevin.Murphy juuksehooldus ja viimistlus | REMPIRE",
             meta: "Kevin.Murphy Tallinnas: Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning Night.Rider ja Session.Spray viimistlus. Järeletulek Mardi 1.",
+            metaFree: "Kevin.Murphy laos Tallinnas: Angel ja Hydrate-Me šampoonid ja maskid, Night.Rider viimistlus. Järeletulek Mardi 1, tasuta tarne Baltikumis alates {free}.",
             intro: "Kevin.Murphy on Austraalia salongi juuksehoolduse bränd. Meil on Angel, Hydrate-Me, Repair-Me ja Young.Again šampoonid ja maskid ning viimistlustooted Night.Rider, Rough.Rider, Session.Spray ja Anti.Gravity. Aitame valida, mis sinu juustele sobib — meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "Kevin.Murphy: Shampoos, Masks & Styling | REMPIRE",
             meta: "Kevin Murphy products in Tallinn: Angel, Hydrate-Me, Repair-Me and Young.Again care, Night.Rider and Session.Spray styling. Pickup at Mardi 1.",
+            metaFree: "Kevin.Murphy in stock in Tallinn: Angel and Hydrate-Me shampoos and masks, Night.Rider styling. Pickup at Mardi 1, free Baltic delivery from {free}.",
             intro: "Kevin.Murphy is an Australian salon hair-care brand. We carry Angel, Hydrate-Me, Repair-Me and Young.Again shampoos and masks, plus Night.Rider, Rough.Rider, Session.Spray and Anti.Gravity styling. We'll help you choose what suits your hair at the salon on Mardi 1."
           }
         },
@@ -48841,16 +48853,19 @@
           RU: {
             title: "Captain Fawcett: масло для бороды, бальзам и воск | REMPIRE",
             meta: "Британский Captain Fawcett: масла и бальзамы для бороды, воск для усов серий Nebula (John Petrucci), Booze & Baccy, Barberism. Самовывоз на Mardi 1.",
+            metaFree: "Captain Fawcett в наличии в Таллинне: масла и бальзамы для бороды, воск для усов. Самовывоз на Mardi 1, доставка по Балтии бесплатно от {free}.",
             intro: "Captain Fawcett — британская марка ухода за бородой и усами. У нас масла и бальзамы для бороды и воск для усов серий Nebula, Booze & Baccy и Barberism — у каждой серии свой аромат. Аромат и фиксацию поможем подобрать в салоне на Mardi 1."
           },
           ET: {
             title: "Captain Fawcett: habemeõli, -palsam ja vuntsivaha | REMPIRE",
             meta: "Briti Captain Fawcett: habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula (John Petrucci), Booze & Baccy ja Barberism. Järeletulek Mardi 1, Tallinn.",
+            metaFree: "Captain Fawcett laos Tallinnas: habemeõlid, habemepalsamid ja vuntsivaha (Nebula, Barberism). Järeletulek Mardi 1, tasuta tarne Baltikumis alates {free}.",
             intro: "Captain Fawcett on Briti habeme- ja vuntsihoolduse bränd. Meil on habemeõlid, habemepalsamid ja vuntsivaha sarjadest Nebula, Booze & Baccy ja Barberism – igal sarjal oma lõhn. Lõhna ja hoidvuse aitame valida meie salongis aadressil Mardi 1."
           },
           EN: {
             title: "Captain Fawcett: Beard Oil, Balm & Moustache Wax | REMPIRE",
             meta: "Captain Fawcett, UK: beard oils, beard balms and moustache wax from the Nebula (John Petrucci), Booze & Baccy and Barberism series. Pickup at Mardi 1.",
+            metaFree: "Captain Fawcett in stock in Tallinn: beard oils, beard balms and moustache wax from Nebula and Barberism. Pickup at Mardi 1, free Baltic delivery from {free}.",
             intro: "Captain Fawcett is a British beard and moustache care brand. We carry beard oils, beard balms and moustache wax from the Nebula, Booze & Baccy and Barberism series, each with its own scent. We'll help you pick the scent and the hold at Mardi 1."
           }
         },
@@ -49512,8 +49527,9 @@
     } else if (kind === "brand") {
       var b = C.brand[key] && C.brand[key][lang];
       if (b) {
+        var bFree = b.metaFree ? seoFreeFrom(rules, "EE") : null;
         t = b.title;
-        d = b.meta;
+        d = bFree === null ? b.meta : seoFill(b.metaFree, { free: seoEur(bFree, lang) });
       } else {
         t = seoFill(C.brandFallback[lang] || C.brandFallback.EN, { brand: key });
         d = seoFill(C.brandGeneric[lang] || C.brandGeneric.EN, { brand: key });

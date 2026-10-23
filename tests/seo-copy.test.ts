@@ -287,6 +287,22 @@ describe("the one figure in the copy comes from the rules", () => {
     expect(none).toMatch(/Järeletulek Mardi 1 või tarne üle Euroopa\.$/);
   });
 
+  it("gives System 4, Kevin.Murphy and Captain Fawcett the same threshold — and their approved line back when it is off", () => {
+    for (const b of ["System 4", "Kevin.Murphy", "Captain Fawcett"] as const) {
+      for (const code of ["RU", "ET", "EN"] as const) {
+        const d = seoHead("brand", b, code, LIVE).d;
+        expect(d.length, `${b} ${code}`).toBeLessThanOrEqual(155);
+        expect(d, `${b} ${code}`).toMatch(code === "EN" ? /€70\.$/ : /70 €\.$/);
+        expect(d, `${b} ${code}`).not.toContain("…");
+        expect(seoHead("brand", b, code, { rules: { freeFrom: null } }).d).toBe(seoCopy().brand[b][code].meta);
+      }
+    }
+    expect(seoHead("brand", "Kevin.Murphy", "ET", LIVE).d)
+      .toBe("Kevin.Murphy laos Tallinnas: Angel ja Hydrate-Me šampoonid ja maskid, Night.Rider viimistlus. Järeletulek Mardi 1, tasuta tarne Baltikumis alates 70 €.");
+    /* a brand without one keeps its approved description */
+    expect(seoHead("brand", "Davines", "ET", LIVE).d).toBe(seoCopy().brand.Davines.ET.meta);
+  });
+
   it("types no threshold anywhere in the copy", () => {
     const block = uncommented(seoCopyBlock(MODULE) ?? "");
     expect(block).toContain("{free}");

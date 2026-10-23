@@ -1253,7 +1253,12 @@ the maker's name + the type, with the price when it fits); a trailing «| REMPIR
 in the house form «— REMPIRE»; the one figure the copy quotes — the free-delivery
 threshold in the Estonian home description — comes from `settings.shipping_rules`
 (`seoCtx()` in app.js, `SEO_CTX` in the prerender) and drops out when delivery
-is never free; Russian aliases only where Search Console shows them
+is never free. Since 23.10.2026 three brand pages quote it too: System 4,
+Kevin.Murphy and Captain Fawcett carry a `metaFree` description («in stock in
+Tallinn», pickup at Mardi 1, free Baltic delivery from {free}) beside their
+approved `meta`, which comes back when free delivery is off — the facts ChatGPT
+and Perplexity quote about a shop (search report of 23.10.2026); the visible
+page does not change; Russian aliases only where Search Console shows them
 («шампунь №1», «Ксерджофф Наксос»). The home page's `<h1>` is still `T.base`:
 a heading is not a search snippet.
 
