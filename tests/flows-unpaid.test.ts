@@ -395,6 +395,17 @@ describe("paid on a second try", () => {
     expect((await getOrder(first.id))!.status).toBe("new");
   });
 
+  it("leaves an order whose payment the bank still holds open to the normal clock", async () => {
+    const first = await place();
+    await setOrderPayment(first.id, { provider: "montonio", ref: "open-1", status: "pending", at: new Date().toISOString() });
+    const again = await paidOrder();
+    await age(first.id, 1);
+    await age(again.id, 1 - (5 * MIN) / DAY);
+
+    expect(await runUnpaidOrders()).toMatchObject({ cancelled: 0, reordered: 0 });
+    expect((await getOrder(first.id))!.status).toBe("new");
+  });
+
   it("matches the e-mail whatever its case", async () => {
     const first = await place({ customer: { ...ORDER.customer, email: "Maria@Example.com" } });
     const again = await paidOrder();

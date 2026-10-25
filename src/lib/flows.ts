@@ -1824,6 +1824,9 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
       where o.status in ${UNPAID_STATUSES}
         and coalesce(o.channel,'web') = 'web'
         and coalesce(o.payment->>'status','') <> 'paid' and o.payment->'held' is null
+        -- a payment the bank still has open is never cut short: only a ticket
+        -- that came back failed/abandoned, or no ticket at all, counts as given up
+        and coalesce(o.payment->>'status','') <> 'pending'
         and o.invoice is null
         and o.email is not null
         and o.created_at <= $1
