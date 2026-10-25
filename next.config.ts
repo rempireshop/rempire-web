@@ -88,12 +88,13 @@ function prerenderedRewrites() {
   if (!out.some((r) => r.source === "/")) out.push({ source: "/", destination: "/shop2/index.html" });
 
   /* The hand-written pages under public/ that are not part of the shop:
-     /guide (what the rebuild does), /cards (the product-card options), /test
-     (the acceptance checklist Renat and Dim fill in) and /golive (what is
-     left before launch, and the lock on the domain switch). Neither Vercel
-     nor `next start` serves a directory's index.html for a slashless address,
-     and no page address has a slash any more. */
-  for (const page of ["guide", "cards", "test", "golive"]) {
+     /cards (the product-card options), /test (the acceptance checklist Renat
+     and Dim fill in) and /golive (what is left before launch, and the lock on
+     the domain switch). /guide, the old overview for Renat, was removed on
+     25.10.2026 at Dim's word. Neither Vercel nor `next start` serves a
+     directory's index.html for a slashless address, and no page address has
+     a slash any more. */
+  for (const page of ["cards", "test", "golive"]) {
     if (existsSync(path.join(PUBLIC, page, "index.html"))) {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
     }
@@ -124,8 +125,8 @@ function prerenderedRewrites() {
  *                 (/, /products/…, /ru/…, /admin), so the strict policy is the
  *                 DEFAULT and the loose one is the named exception: the API
  *                 (a few routes answer HTML of their own — the unsubscribe
- *                 page, the letter previews) and the four hand-written pages
- *                 (/test, /guide, /cards, /golive), which carry an inline
+ *                 page, the letter previews) and the three hand-written pages
+ *                 (/test, /cards, /golive), which carry an inline
  *                 script each, keep 'unsafe-inline'. Both are ours, neither
  *                 renders untrusted input; the admin panel — the one screen a
  *                 stranger's text reaches — is on the strict policy.
@@ -293,12 +294,12 @@ const nextConfig: NextConfig = {
          the rule that turns the class of innerHTML mistakes the audit found
          into a broken layout instead of a takeover. */
       { source: "/:path*", headers: SHOP_HEADERS },
-      /* The API, the prototype's leftover files under /shop/ and the four
+      /* The API, the prototype's leftover files under /shop/ and the three
          hand-written pages: see the note above. */
       { source: "/api/:path*", headers: LOOSE_HEADERS },
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
-      { source: "/:page(test|guide|cards|golive)", headers: LOOSE_HEADERS },
-      { source: "/:page(test|guide|cards|golive)/:path*", headers: LOOSE_HEADERS },
+      { source: "/:page(test|cards|golive)", headers: LOOSE_HEADERS },
+      { source: "/:page(test|cards|golive)/:path*", headers: LOOSE_HEADERS },
       { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
       /* Keep search engines out of everything that is not the shop's own
          domain. `missing` inverts the host test into an ALLOWLIST: the header
@@ -371,15 +372,14 @@ const nextConfig: NextConfig = {
      ONE 301. What is left here are the hand-written pages at the name a human
      types. Dim asked for the checklist twice as /tests before anyone noticed
      the page is at /test; a page whose whole job is to be opened on a phone
-     from a chat message cannot 404 on the plural. Same for the other two, and
-     for /karty — the page is Russian, so a Russian spelling is a fair guess. */
+     from a chat message cannot 404 on the plural. Same for /cards, and for
+     /karty — the page is Russian, so a Russian spelling is a fair guess. */
   async redirects() {
     return [
       { source: "/tests", destination: "/test", permanent: false },
       { source: "/checklist", destination: "/test", permanent: false },
       { source: "/card", destination: "/cards", permanent: false },
       { source: "/karty", destination: "/cards", permanent: false },
-      { source: "/guides", destination: "/guide", permanent: false },
     ];
   },
   /* The prerendered files are `afterFiles` rewrites: a file on disk beats

@@ -984,7 +984,6 @@ test.describe(`deployed shop — ${BASE}`, () => {
       ["/checklist", "/test", 307],
       ["/card", "/cards", 307],
       ["/karty", "/cards", 307],
-      ["/guides", "/guide", 307],
     ];
     for (const [from, to, code] of hops) {
       const res = await get(request, abs(from));
@@ -1069,8 +1068,8 @@ test.describe(`deployed shop — ${BASE}`, () => {
        (docs/audit/security-api.md H5). The files those pages load, still
        under /shop2/ (assets did not move), carry it too. The named exceptions
        keep 'unsafe-inline': the API (a few routes answer HTML of their own),
-       the prototype's leftovers under /shop/ and the four hand-written pages
-       (/test, /guide, /cards, /golive). /admin is asked anonymously, like
+       the prototype's leftovers under /shop/ and the three hand-written pages
+       (/test, /cards, /golive). /admin is asked anonymously, like
        everything here: the shell at 200, the panel's door still shut. */
     const cases: Array<{ url: string; strict: boolean }> = [
       { url: abs("/"), strict: true },

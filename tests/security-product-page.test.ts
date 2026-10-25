@@ -304,13 +304,13 @@ describe("the security headers over the shop's pages", () => {
     }
     // nothing anywhere loosened past what the audit accepted: 'unsafe-inline' for
     // scripts only on the rules that need it — the API (some routes answer HTML
-    // of their own), the prototype's leftover files and the four hand-written
+    // of their own), the prototype's leftover files and the three hand-written
     // pages with an inline script each — never eval, never hashes
     const inlineScript = rules
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
     expect(inlineScript).toEqual([
-      "/api/:path*", "/shop/:path*", "/:page(test|guide|cards|golive)", "/:page(test|guide|cards|golive)/:path*",
+      "/api/:path*", "/shop/:path*", "/:page(test|cards|golive)", "/:page(test|cards|golive)/:path*",
       "/handover",
       "/api/admin/mail/preview/:path*",
     ]);

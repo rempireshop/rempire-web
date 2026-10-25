@@ -1,6 +1,7 @@
 /**
- * The link-preview cards of the three hand-written pages under `public/` —
- * /test/, /cards/ and /guide/ — the ones actually pasted into a chat.
+ * The link-preview cards of the hand-written pages under `public/` —
+ * /test/, /cards/ and /golive/ — the ones actually pasted into a chat
+ * (/guide/ was removed on 25.10.2026).
  *
  * They used to advertise `/og-shop.png`, a shop poster reading «95 ТОВАРОВ»
  * with a «ЧЕРНОВИК ДЛЯ РЕНАТА» badge. The catalogue passed 220 products on
@@ -26,7 +27,6 @@ const PUB = path.join(ROOT, "public");
 const PAGES = [
   ["test", "og-test.png"],
   ["cards", "og-cards.png"],
-  ["guide", "og-guide.png"],
   ["golive", "og-golive.png"],
 ] as const;
 

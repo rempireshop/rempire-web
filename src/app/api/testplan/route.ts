@@ -9,7 +9,7 @@
  *   · GET is PUBLIC, because the page has to be usable before anyone signs in
  *     — that is the whole point of the localStorage half (public/test/index.html).
  *     What it publishes is the committed checklist, which is our own words
- *     about our own shop and is no more secret than /guide/. `answers` comes
+ *     about our own shop and is no more secret than the shop itself. `answers` comes
  *     back only for an admin; for everyone else it is `{}` and `signedIn` is
  *     false, and the page says so in as many words.
  *   · PUT requires the admin session (src/lib/auth.ts) — Renat is already

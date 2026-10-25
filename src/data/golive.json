@@ -1704,12 +1704,12 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Старое хранилище Vercel Blob «rempire-qa» — удалить",
-      "detail": "Лежит на команде Diip в Vercel, ответы опросника времён прототипа. Код магазина его не читает с 07.09 (проверено 25.10). Дим удаляет хранилище (по желанию — сначала выгрузить); Клод убирает неиспользуемый пакет @vercel/blob.",
+      "detail": "Лежит на команде Diip в Vercel, ответы опросника времён прототипа. Код магазина его не читает с 07.09. Пакет @vercel/blob из кода убран 25.10. Осталось Диму: удалить само хранилище (по желанию — сначала выгрузить).",
       "en": {
         "title": "Old Vercel Blob store «rempire-qa» — delete",
-        "detail": "Sits on Diip's Vercel team: questionnaire answers from the prototype days. The shop's code has not read it since 07.09 (checked 25.10). Dim deletes the store (exporting it first if he wants); Claude removes the unused @vercel/blob package."
+        "detail": "Sits on Diip's Vercel team: questionnaire answers from the prototype days. The shop's code has not read it since 07.09. The @vercel/blob package left the code on 25.10. Left for Dim: delete the store itself (exporting it first if he wants)."
       }
     },
     {
@@ -1753,11 +1753,11 @@
         "renat"
       ],
       "status": "doing",
-      "title": "Google Реклама — тест 20 € до 08.11, карта …0731",
-      "detail": "Кампания «Test Shopping EE - System 4 + Captain Fawcett»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта в аккаунте — Mastercard …0731, не Димы: Дим спрашивает Рената, можно ли (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу и карту решает Ренат.",
+      "title": "Google Реклама — тест 20 € до 08.11, карта Рената …0731",
+      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат.",
       "en": {
-        "title": "Google Ads — 20 € test until 08.11, card …0731",
-        "detail": "Campaign «Test Shopping EE - System 4 + Captain Fawcett»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. The card on the account is a Mastercard …0731, not Dim's: Dim asks Renat whether it may be used (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads and the card are Renat's call."
+        "title": "Google Ads — 20 € test until 08.11, Renat's card …0731",
+        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call."
       }
     },
     {
@@ -1937,12 +1937,12 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
-      "title": "Страница /guide («что уже готово») — не обновлять, убрать?",
-      "detail": "rempireshop.com/guide — старая страница для Рената, закрыта от поиска. Дим, 25.10: обновлять не нужно, скорее всего больше не нужна. Убрать её — только с OK Дима.",
+      "status": "done",
+      "title": "Страница /guide («что уже готово») — убрана",
+      "detail": "rempireshop.com/guide — старая страница для Рената, закрыта от поиска. Дим, 25.10: обновлять не нужно, убрать. Убрана 25.10 вместе с адресом /guides и ссылками со страниц /test и /golive.",
       "en": {
-        "title": "The /guide page («what is ready») — no refresh, remove it?",
-        "detail": "rempireshop.com/guide — an old page for Renat, hidden from search. Dim, 25.10: no refresh needed, most likely not needed any more. Removing it only with Dim's OK."
+        "title": "The /guide page («what is ready») — removed",
+        "detail": "rempireshop.com/guide — an old page for Renat, hidden from search. Dim, 25.10: no refresh, remove it. Removed 25.10 together with the /guides address and the links on /test and /golive."
       }
     },
     {
