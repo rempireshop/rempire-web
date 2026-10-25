@@ -6546,6 +6546,7 @@
       "steps": [
         "В разделе «Письма» включить «Заказ ждёт оплаты» и проверить сроки.",
         "Оставить один заказ неоплаченным и один счёт неоплаченным.",
+        "Ещё один заказ бросить на банке и сразу оформить заново с оплатой.",
         "Попросить Дима запускать расписание вручную в нужные дни.",
         "Проверить почту покупателя."
       ],
@@ -6554,17 +6555,20 @@
         "Позже пришло письмо о том, что заказ отменён.",
         "По счёту сначала напоминание, и в нём тот же PDF.",
         "Потом по счёту приходит письмо об отмене.",
-        "Оплаченному заказу и оплаченному счёту писем не приходит."
+        "Оплаченному заказу и оплаченному счёту писем не приходит.",
+        "Брошенный заказ, оплаченный заново в течение суток, отменяется без писем."
       ],
       "why": "Отмена, задевшая оплаченный заказ, отнимает покупку у того, кто заплатил. Заказы, просроченные ещё до того, как переключатель включили, магазин отменяет молча.",
       "risk": "high",
       "writes": true,
-      "mark": "reworded",
+      "mark": "redo",
+      "markedAt": "2026-10-25T09:41:44.303Z",
       "en": {
         "title": "Letters about unpaid orders and invoices",
         "steps": [
           "In «Письма» switch on «Заказ ждёт оплаты» and check the intervals.",
           "Leave one order unpaid and one invoice unpaid.",
+          "Abandon another order at the bank, then place it again and pay.",
           "Ask Dim to start the schedule by hand on the right days.",
           "Check the buyer's mail."
         ],
@@ -6573,7 +6577,8 @@
           "Later a letter says the order has been cancelled.",
           "For the invoice, a reminder comes first, with the same PDF.",
           "Then the invoice gets its own cancellation letter.",
-          "A paid order and a paid invoice get no letters."
+          "A paid order and a paid invoice get no letters.",
+          "An abandoned order paid again within a day is cancelled without letters."
         ],
         "why": "A cancellation that catches a paid order robs somebody who already paid. Orders already overdue when the switch was first turned on are cancelled silently."
       }

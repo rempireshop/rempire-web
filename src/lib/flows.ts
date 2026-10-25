@@ -1663,7 +1663,17 @@ async function explainEmptyBirthdayQueue(
 export interface UnpaidRun extends FlowRun {
   /** Orders cancelled on this pass. */
   cancelled: number;
+  /** …of them, orders the customer paid on a second try — cancelled without a letter. */
+  reordered?: number;
 }
+
+/* How long after an unpaid order a paid order from the same e-mail still
+   counts as that purchase finished on a second try (Dim, 25.10.2026). */
+const REORDER_WINDOW_HOURS = 24;
+/* …and how old the unpaid one must be before it is let go that way: a payment
+   still open at the bank is never cancelled under it (Montonio lets a pending
+   one go after half an hour). */
+const REORDER_SETTLE_HOURS = 2;
 
 /** The row the two queries below share — enough to render either letter. */
 interface UnpaidRow {
@@ -1784,6 +1794,66 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
   let sent = 0;
   let skipped = 0;
   let cancelled = 0;
+  let reordered = 0;
+
+  /* ---- 0. paid on a second try ----------------------------------------- */
+  /* R-100107 → R-100108 and R-100110 → R-100111 (18. and 22.10.2026): the
+     customer came back from the bank without paying and pressed «Оплатить»
+     again, which places a NEW order, and paid that one within minutes. The
+     first order then drew «Заказ ждёт оплаты» on its third day — sent to a
+     customer whose parcel had already arrived — and would have drawn «заказ
+     отменён» on its seventh. An unpaid order whose customer (the same e-mail)
+     paid an order placed within REORDER_WINDOW_HOURS after it is that same
+     purchase, finished: it is cancelled now, with no letter, the paid order's
+     number in the journal and on the order (`payment.reorderedAs`). A paid
+     order placed later than the window is another purchase, and this order
+     keeps its clock and its letters. */
+  const settled = await query<{ id: string; number: string; again: string }>(
+    `select o.id, o.number, p.number as again
+       from orders o
+       join lateral (
+         select p.number from orders p
+          where p.id <> o.id
+            and lower(p.email) = lower(o.email)
+            and p.created_at > o.created_at
+            and p.created_at <= o.created_at + interval '${REORDER_WINDOW_HOURS} hours'
+            and (coalesce(p.payment->>'status','') = 'paid' or p.status in ('paid','shipped','delivered'))
+          order by p.created_at
+          limit 1
+       ) p on true
+      where o.status in ${UNPAID_STATUSES}
+        and coalesce(o.channel,'web') = 'web'
+        and coalesce(o.payment->>'status','') <> 'paid' and o.payment->'held' is null
+        and o.invoice is null
+        and o.email is not null
+        and o.created_at <= $1
+      order by o.created_at
+      limit ${BATCH}`,
+    [new Date(now - REORDER_SETTLE_HOURS * 60 * 60 * 1000).toISOString()],
+  );
+
+  for (const row of settled) {
+    let moved: Awaited<ReturnType<typeof setOrderStatus>>;
+    try {
+      moved = await setOrderStatus(row.id, "cancelled", "system:unpaid", {
+        unless: STILL_UNPAID_ONLY,
+        audit: { reason: "reordered", again: row.again },
+      });
+    } catch (err) {
+      console.error(`[flows] unpaid re-order cancel failed on ${row.number}:`, err);
+      skipped += 1;
+      continue;
+    }
+    // paid in the meantime after all: the `unless` guard left it alone
+    if (!moved) continue;
+    await query(
+      `update orders set payment = coalesce(payment,'{}'::jsonb) || jsonb_build_object('reorderedAs', $2::text)
+        where id = $1`,
+      [row.id, row.again],
+    );
+    reordered += 1;
+    cancelled += 1;
+  }
 
   /* ---- 1. the reminder ------------------------------------------------- */
   /* Old enough for the reminder, not yet old enough to be let go, and never
@@ -1875,7 +1945,7 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
     if (res.ok && !res.skipped) sent += 1;
   }
 
-  return { sent, skipped, cancelled };
+  return { sent, skipped, cancelled, reordered };
 }
 
 /* ---------- the scheduler ------------------------------------------------- */

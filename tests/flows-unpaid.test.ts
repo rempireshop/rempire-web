@@ -303,6 +303,108 @@ describe("the cancellation", () => {
   });
 });
 
+/* R-100107 → R-100108 and R-100110 → R-100111 (18. and 22.10.2026): back from
+   the bank without paying, «Оплатить» again places a NEW order, and the
+   customer paid that one within minutes. The first order then drew «Заказ ждёт
+   оплаты» on day 3 — to a customer whose parcel had already arrived. Dim,
+   25.10.2026: a paid order from the same e-mail within 24 hours means the
+   purchase was finished; the unpaid one goes quietly. */
+describe("paid on a second try", () => {
+  const MIN = 60 * 1000;
+
+  beforeEach(async () => {
+    await setFlows({ unpaid: true, unpaidRemindDays: 3, unpaidCancelDays: 7 });
+  });
+
+  async function paidOrder(extra: Record<string, unknown> = {}): Promise<Order> {
+    const o = await place(extra);
+    await setOrderPayment(o.id, { provider: "mock", ref: `r-${o.number}`, status: "paid", at: new Date().toISOString() });
+    await setOrderStatus(o.id, "paid", "test");
+    return o;
+  }
+
+  it("cancels the unpaid order without a letter and names the paid one", async () => {
+    const first = await place();
+    const again = await paidOrder();
+    await age(first.id, 4);
+    await age(again.id, 4 - (5 * MIN) / DAY); // paid five minutes after the first
+
+    const run = await runUnpaidOrders();
+    expect(run).toMatchObject({ sent: 0, cancelled: 1, reordered: 1 });
+    expect(sent).toHaveLength(0);
+
+    const after = (await getOrder(first.id))!;
+    expect(after.status).toBe("cancelled");
+    expect((after.payment as { reorderedAs?: string }).reorderedAs).toBe(again.number);
+    expect((await getOrder(again.id))!.status).toBe("paid");
+
+    const audit = await query<{ actor: string; payload: { reason?: string; again?: string; number?: string } }>(
+      "select actor, payload from admin_audit where action = 'order.status' and payload->>'reason' = 'reordered'",
+    );
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({ actor: "system:unpaid", payload: { again: again.number, number: first.number } });
+
+    // nothing left for the next run to write about
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 0, cancelled: 0, reordered: 0 });
+    expect(sent).toHaveLength(0);
+  });
+
+  it("does the same before the reminder day, and for an order the bank marked failed", async () => {
+    const first = await place();
+    await setOrderStatus(first.id, "failed", "test");
+    const again = await paidOrder();
+    await age(first.id, 1);
+    await age(again.id, 1 - (40 * MIN) / DAY);
+
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 0, reordered: 1 });
+    expect((await getOrder(first.id))!.status).toBe("cancelled");
+  });
+
+  it("keeps the reminder when the paid order came more than 24 hours later — another purchase", async () => {
+    const first = await place();
+    const later = await paidOrder();
+    await age(first.id, 4);
+    await age(later.id, 2);
+
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 1, cancelled: 0, reordered: 0 });
+    expect(sent[0].subject).toContain(first.number);
+    expect((await getOrder(first.id))!.status).toBe("new");
+  });
+
+  it("keeps the reminder when the paid order is somebody else's, or not paid at all", async () => {
+    const first = await place();
+    const other = await paidOrder({ customer: { ...ORDER.customer, email: "someone@example.com" } });
+    const unpaidAgain = await place();
+    await age(first.id, 4);
+    await age(other.id, 4 - (5 * MIN) / DAY);
+    await age(unpaidAgain.id, 4 - (10 * MIN) / DAY);
+
+    const run = await runUnpaidOrders();
+    expect(run).toMatchObject({ reordered: 0 });
+    expect((await getOrder(first.id))!.status).toBe("new");
+    expect(sent.some((m) => m.subject.includes(first.number))).toBe(true);
+  });
+
+  it("leaves an order alone while its payment may still be open at the bank", async () => {
+    const first = await place();
+    const again = await paidOrder();
+    await age(first.id, 1 / 24); // an hour old
+    await age(again.id, 1 / 48);
+
+    expect(await runUnpaidOrders()).toMatchObject({ cancelled: 0, reordered: 0 });
+    expect((await getOrder(first.id))!.status).toBe("new");
+  });
+
+  it("matches the e-mail whatever its case", async () => {
+    const first = await place({ customer: { ...ORDER.customer, email: "Maria@Example.com" } });
+    const again = await paidOrder();
+    await age(first.id, 4);
+    await age(again.id, 4 - MIN / DAY);
+
+    expect(await runUnpaidOrders()).toMatchObject({ sent: 0, reordered: 1 });
+  });
+});
+
 describe("the scheduler", () => {
   it("reports the unpaid branch beside the other three", async () => {
     await setFlows({ unpaid: true, unpaidRemindDays: 3, unpaidCancelDays: 7 });
