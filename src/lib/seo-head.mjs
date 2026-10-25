@@ -17,7 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
-import { seoLead, seoPriceText, seoProductCore, seoProductMeta, seoProductTitle, seoSnippetText } from "./seo-copy.mjs";
+import { seoLead, seoMetaWithPrice, seoPriceText, seoProductCore, seoProductMeta, seoProductTail, seoProductTitle, seoSnippetText } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -1101,10 +1101,12 @@ export function openingHoursLD(hours) {
    fit, never «…the superficial circulation of the…»; a «BENEFITS:» /
    «ПРЕИМУЩЕСТВА:» label ends the copy; a first sentence longer than the room
    gives its longest clean clause, and only failing that a word cut with «…».
-   The tail itself is as it was. */
+   The tail is seoProductTail() since 25.10.2026 — price, «in stock», the
+   free-delivery threshold, pickup — passed in by productSpec(); without one,
+   the language's delivery line (t.descTail()). */
 export const DESC_MAX = 158;
-export function descFrom(text, t) {
-  const tail = t.descTail();
+export function descFrom(text, t, tailText) {
+  const tail = tailText || t.descTail();
   const lead = dropShout(text) || text;
   if (!lead) return clip(tail, DESC_MAX);
   const room = DESC_MAX - tail.length - 3;   // " · "
@@ -1121,9 +1123,11 @@ export function descFrom(text, t) {
  * product — its items per size, their delivery, the countries it sells to —
  * see productOffersLD() above. Without it the offer is the single one it
  * always was.
- * @param {{ base: any, lang: any, id: any, cat: any, catName: any, brand: any, name: any, price: any, priceFrom: any, stock: any, seoTitle: any, seoDesc: any, body: any, image: any, imageUrls: any, commerce?: any }} spec
+ * `rules` (optional) is settings.shipping_rules as the checkout bills them —
+ * the free-delivery threshold in the description's tail (seoProductTail()).
+ * @param {{ base: any, lang: any, id: any, cat: any, catName: any, brand: any, name: any, price: any, priceFrom: any, stock: any, seoTitle: any, seoDesc: any, body: any, image: any, imageUrls: any, commerce?: any, rules?: any }} spec
  */
-export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls, commerce }) {
+export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls, commerce, rules }) {
   const t = T[lang.code];
   const seg = lang.seg;
   const rest = "/p/" + encodeURIComponent(id) + "/";
@@ -1138,16 +1142,21 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
 
   const text = textForSnippet(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
+  const inStock = stock !== "out";
   /* An owner's or the assistant's own pair is deliberate and is left alone —
      no price is appended to a sentence somebody wrote on purpose. After it,
      the shop's own hand-written line for the products people search for
-     (seoProductMeta(), src/lib/seo-copy.mjs — whole, no delivery line), and
-     only then a description cut from the product's text. */
+     (seoProductMeta(), src/lib/seo-copy.mjs — every word kept, the price and
+     «in stock» after it where they fit), and only then a description cut
+     from the product's text with the whole tail (seoProductTail()). */
+  const handWritten = seoProductMeta(id, lang.code);
   const desc = seoDesc
     ? clip(seoDesc, DESC_MAX)
-    : seoProductMeta(id, lang.code) || (text
-      ? descFrom(text, t)
-      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX));
+    : handWritten
+      ? seoMetaWithPrice(handWritten, priceText, inStock, lang.code, DESC_MAX)
+      : text
+        ? descFrom(text, t, seoProductTail(priceText, inStock, lang.code, rules))
+        : clip(t.prodDesc(priceText, section, stockText), DESC_MAX);
 
   const crumbItems = [
     [t.home, langPath(seg, "/")],

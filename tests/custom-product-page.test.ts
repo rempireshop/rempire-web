@@ -24,6 +24,7 @@ import { exec, query } from "@/lib/db";
 import { runBackInStock, sweepBackInStock } from "@/lib/flows";
 import { createOrder, upsertOverride } from "@/lib/orders";
 import { descriptionHtml } from "@/lib/product-page";
+import { seoProductTail } from "@/lib/seo-copy.mjs";
 import { descFrom, T, textForSnippet } from "@/lib/seo-head.mjs";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
@@ -211,15 +212,14 @@ describe("a custom product's page at request time", () => {
        от 14,90 €» is 62 characters, so the price rides on the short form
        instead of «— REMPIRE».
 
-       The tail lost the price and the stock on 21.09.2026: the price is
-       already in the title above, and «нет в наличии» in a result listing is
-       a line nobody clicks about a page that keeps its ranking anyway. Google
-       reads the real availability from the Offer in the structured data,
-       which cannot go stale between crawls. What is left is the half that
-       answers «why here» and stays true. */
+       The tail lost the price and the stock on 21.09.2026 (the price was in
+       the title) and got them back on 25.10.2026: Estonian results showed
+       Google cutting the price off our titles while competitors' snippets
+       printed theirs. The free-delivery threshold comes from the rules
+       (seoProductTail()); «нет в наличии» is still never written. */
     expect(title(html)).toBe("Proraso Beard Balm — бальзам для бороды · от 14,90 €");
     expect(meta(html, "description")).toBe(
-      "Бальзам для бороды. Смягчает и укладывает · доставка по Эстонии и Балтии · самовывоз в Таллинне",
+      "Бальзам для бороды. Смягчает и укладывает · от 14,90 € · в наличии · бесплатная доставка от 59 € · самовывоз в Таллинне",
     );
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/ru/products/${p.id}`);
     expect(html).toContain('<span class="chip chip--ok">В наличии</span>');
@@ -255,9 +255,9 @@ describe("a custom product's page at request time", () => {
     const p = await createCustomProduct({ brand: "Acme", name: "Shampoo — шампунь", cat: "hair", price: 9, description: { RU: RU_TEXT } });
     const html = await (await pageFor("ru", p.id)).text();
     const d = meta(html, "description");
-    expect(d).toBe("Шампунь для жирной кожи головы · доставка по Эстонии и Балтии · самовывоз в Таллинне");
+    expect(d).toBe("Шампунь для жирной кожи головы · 9 € · в наличии · бесплатная доставка от 59 € · самовывоз в Таллинне");
     // productSpec() over the same paragraphs — what setHead() computes from descOvHtml()
-    expect(d).toBe(descFrom(textForSnippet(descriptionHtml(RU_TEXT)), T.RU));
+    expect(d).toBe(descFrom(textForSnippet(descriptionHtml(RU_TEXT)), T.RU, seoProductTail("9 €", true, "RU", { freeFrom: 59 })));
     expect(d).not.toContain("…");
   });
 

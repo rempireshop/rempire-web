@@ -18,7 +18,7 @@ import { describe, expect, it } from "vitest";
 import {
   clip, descFrom, DESC_MAX, dropShout, fitTitle, LANGS, productSpec, stripTags, T, textForSnippet, unentity,
 } from "@/lib/seo-head.mjs";
-import { seoLead } from "@/lib/seo-copy.mjs";
+import { seoCopy, seoLead, seoMetaWithPrice, seoProductMeta } from "@/lib/seo-copy.mjs";
 
 const RU = T.RU;
 const BASE = "https://rempireshop.com";
@@ -175,8 +175,38 @@ describe("a pair somebody wrote by hand is left alone", () => {
       .toBe("System 4 против выпадения волос — REMPIRE");
   });
 
+  /* 25.10.2026: the price and «в наличии» are back in the tail, and the
+     free-delivery threshold comes from the rules (seoProductTail(),
+     src/lib/seo-copy.mjs) — Estonian results showed Google cutting the price
+     off our titles while competitors' snippets printed theirs. */
   it("builds the tail only when the description comes from the product text", () => {
-    expect(spec({}).desc).toBe("Шампунь для редеющих волос · доставка по Эстонии и Балтии · самовывоз в Таллинне");
+    expect(spec({}).desc).toBe("Шампунь для редеющих волос · от 9 € · в наличии · доставка по Эстонии и Балтии · самовывоз в Таллинне");
+  });
+
+  it("puts the free-delivery threshold from the rules into the tail, and never «нет в наличии»", () => {
+    const withRules = (stock: string) => productSpec({
+      base: BASE, lang: LANGS[0], id: "x", cat: "hair", catName: "Уход за волосами",
+      brand: "System 4", name: "Bio Botanical Shampoo — шампунь", price: 9, priceFrom: true,
+      stock, body: "<p>Шампунь для редеющих волос.</p>", image: "", imageUrls: [],
+      seoTitle: "", seoDesc: "", rules: { freeFrom: 70 },
+    });
+    expect(withRules("in").desc).toBe("Шампунь для редеющих волос · от 9 € · в наличии · бесплатная доставка от 70 € · самовывоз в Таллинне");
+    expect(withRules("out").desc).toBe("Шампунь для редеющих волос · от 9 € · бесплатная доставка от 70 € · самовывоз в Таллинне");
+  });
+
+  it("keeps every word of a hand-written line and adds the price where it fits", () => {
+    const meta = seoProductMeta("system-4-bio-botanical-shampoo", "ET");
+    expect(meta).toBeTruthy();
+    const d = productSpec({
+      base: BASE, lang: LANGS.find((l) => l.code === "ET")!, id: "system-4-bio-botanical-shampoo", cat: "hair", catName: "Juuksehooldus",
+      brand: "System 4", name: "Bio Botanical Shampoo — šampoon", price: 9, priceFrom: true,
+      stock: "in", body: "<p>Šampoon.</p>", image: "", imageUrls: [], seoTitle: "", seoDesc: "", rules: { freeFrom: 70 },
+    }).desc;
+    expect(d.startsWith(meta.replace(/\.$/, ""))).toBe(true);
+    expect(d).toContain("alates 9 €");
+    expect(d.length).toBeLessThanOrEqual(DESC_MAX);
+    // a line too long for the price keeps itself whole
+    expect(seoMetaWithPrice("A".repeat(150), "alates 9 €", true, "ET", DESC_MAX)).toBe("A".repeat(150));
   });
 });
 
@@ -191,17 +221,19 @@ describe("public/shop2/app.js says the same thing after it boots", () => {
     expect(app).toContain("var DESC_MAX = 158;");
     expect(DESC_MAX).toBe(158);
     expect(app).toContain("[^a-zà-öø-ÿšžа-яё]{10,160}?(?=[A-ZÀ-ÖØ-ÞŠŽА-ЯЁ][a-zà-öø-ÿšžа-яё])");
-    expect(app).toContain('trText("доставка по Эстонии и Балтии", lang, false)');
-    expect(T.RU.descTail()).toContain("доставка по Эстонии и Балтии");
-    expect(app).toContain('"доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis"');
-    expect(T.ET.descTail()).toContain("tarne Eestis ja Baltikumis");
-    expect(app).toContain('"доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics"');
-    expect(T.EN.descTail()).toContain("delivery across Estonia and the Baltics");
+    /* the tail is the shared seoProductTail() on both sides since 25.10.2026,
+       and its delivery words are the static page's own fallback line */
+    expect(app).toContain("seoProductTail(priceText, !pGoneSeo, S.lang, seoCtx().rules)");
+    expect(app).toContain("seoMetaWithPrice(handWritten, priceText, !pGoneSeo, S.lang, DESC_MAX)");
+    for (const code of ["RU", "ET", "EN"] as const) {
+      const w = seoCopy().productTail[code];
+      expect(T[code].descTail()).toBe(w.delivery + " · " + w.pickup);
+    }
     /* The entity decode the SEO path used to skip — and since 09.10.2026 the
        very text the static page reads (seoSnippetText(), the seo-copy block):
        a heading line keeps its own full stop instead of running into the copy,
        and the old shop's English pair is cut from, not pasted in raw. */
-    expect(app).toContain('descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)), priceText, stockText, S.lang)');
+    expect(app).toContain('descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)),');
     expect(app).toContain("return seoLead(lead, room).replace(/\\.$/, \"\") + \" · \" + tail;");
     expect(app).toContain("unentity(stripTags(descFor(p))).slice(0, 500)");
     /* And the title: since 09.10.2026 the product-title rule of

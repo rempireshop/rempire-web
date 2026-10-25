@@ -193,7 +193,12 @@ duplicate to clean up:
   that identifies a person browsing.
 - `ref` is a bare referrer **host** (`google.com`), never a full URL — a
   Google search's own query string, which can carry what someone typed, is
-  never captured.
+  never captured. One exception, since 25.10.2026 (the Google Ads test): a
+  visit that landed with `gclid`/`gbraid`/`wbraid` or `utm_source=google-ads`
+  is filed as `ads.google.com` for the rest of the tab's session, so the
+  «Источники» list tells an ad click from a search result. Only that fact is
+  kept (a `rmp_ad` flag in sessionStorage, written after statistics are
+  allowed) — never the click id.
 - Bots and crawlers are recognised by User-Agent and never written at all
   (`src/lib/events.ts` `isBotUA`).
 - **90-day retention.** Rows older than 90 days are deleted by

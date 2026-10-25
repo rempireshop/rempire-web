@@ -15,8 +15,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { SEO_DESC_MAX, seoCopy, seoProductMeta } from "@/lib/seo-copy.mjs";
-import { descFrom, LANGS, productSpec, T, textForSnippet } from "@/lib/seo-head.mjs";
+import { SEO_DESC_MAX, seoCopy, seoMetaWithPrice, seoPriceText, seoProductMeta, seoProductTail } from "@/lib/seo-copy.mjs";
+import { DESC_MAX, descFrom, LANGS, productSpec, T, textForSnippet } from "@/lib/seo-head.mjs";
 import { claimIn } from "./claim-words";
 
 const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
@@ -146,25 +146,38 @@ describe("the table", () => {
 });
 
 describe("who wins", () => {
-  it("a hand-written line is the page's description, whole — no delivery line after it", () => {
+  /* Every word of a hand-written line stays; since 25.10.2026 the price — and
+     «in stock» — follow it where they still fit (seoMetaWithPrice()), never a
+     delivery line. */
+  it("a hand-written line is the page's description, every word of it, with the price after it where it fits", () => {
+    let priced = 0;
     for (const id of Object.keys(META)) {
+      const p = CATALOGUE.find((x) => x.id === id)!;
       for (const code of CODES) {
-        expect(specFor(id, code).desc, `${id} ${code}`).toBe(META[id][code]);
+        const desc = specFor(id, code).desc;
         expect(seoProductMeta(id, code)).toBe(META[id][code]);
+        expect(desc, `${id} ${code}`).toBe(seoMetaWithPrice(META[id][code], seoPriceText(p.price, !!p.priceFrom, code), true, code, DESC_MAX));
+        expect(desc.startsWith(META[id][code].replace(/\.$/, "")), `${id} ${code}`).toBe(true);
+        expect(desc.length).toBeLessThanOrEqual(DESC_MAX);
+        expect(desc).not.toMatch(/доставк|tarne|delivery/);
+        if (desc !== META[id][code]) priced++;
       }
     }
+    // most lines have room for the price
+    expect(priced).toBeGreaterThan(Object.keys(META).length);
   });
 
   it("the owner's own description still wins over it", () => {
     expect(specFor("system-4-special-shampoo-1", "RU", "Свой текст владельца.").desc).toBe("Свой текст владельца.");
     // app.js: the owner's pair first, then the hand-written line, then the text
-    expect(APP).toMatch(/d = so && so\.d \? so\.d\s+: seoProductMeta\(p\.id, S\.lang\) \|\|\s+descFromText\(/);
+    expect(APP).toMatch(/d = so && so\.d \? so\.d\s+: handWritten \? seoMetaWithPrice\(handWritten, [^\n]*\n\s+: descFromText\(/);
   });
 
   it("every other product is still described from its own text", () => {
     const other = CATALOGUE.find((p) => !META[p.id] && TEXT_EN[p.id])!;
     expect(seoProductMeta(other.id, "EN")).toBe("");
-    expect(specFor(other.id, "EN").desc).toBe(descFrom(textForSnippet(TEXT_EN[other.id]), T.EN));
+    const tail = seoProductTail(seoPriceText(other.price, !!other.priceFrom, "EN"), true, "EN", undefined);
+    expect(specFor(other.id, "EN").desc).toBe(descFrom(textForSnippet(TEXT_EN[other.id]), T.EN, tail));
     expect(seoProductMeta("c-anything", "RU")).toBe("");
   });
 });

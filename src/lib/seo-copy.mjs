@@ -595,7 +595,15 @@
           EN: "Creed Aventus Cologne, a 50 ml unisex eau de parfum: tangerine, ginger and pink pepper, patchouli and sandalwood over birch, musk and tonka."
         }
       },
-      from: { EN: "from ", ET: "alates ", RU: "от " }
+      from: { EN: "from ", ET: "alates ", RU: "от " },
+      /* The words after a product snippet — seoProductTail(). `free` takes the
+         threshold from the rules; `delivery` is the line where delivery is
+         never free. */
+      productTail: {
+        RU: { inStock: "в наличии", free: "бесплатная доставка от {free}", delivery: "доставка по Эстонии и Балтии", pickup: "самовывоз в Таллинне" },
+        ET: { inStock: "laos", free: "tasuta tarne alates {free}", delivery: "tarne Eestis ja Baltikumis", pickup: "järeletulek Tallinnas" },
+        EN: { inStock: "in stock", free: "free Baltic delivery from {free}", delivery: "delivery across Estonia and the Baltics", pickup: "pickup in Tallinn" }
+      }
     };
   }
 
@@ -819,6 +827,40 @@
     return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
   }
 
+  /**
+   * What a product snippet ends with: the price, «in stock» when it is, the
+   * free-delivery threshold from the rules (the delivery line where delivery
+   * is never free) and pickup. The price and stock left the snippet on
+   * 21.09.2026 because the title carried the price; on 25.10.2026 Estonian
+   * results showed Google cutting it off our titles while competitors'
+   * snippets printed theirs, so it is back (Dim). «Out of stock» is still
+   * never written — that line only stops the click.
+   */
+  function seoProductTail(priceText, inStock, lang, rules) {
+    var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
+    var free = seoFreeFrom(rules, "EE");
+    var parts = [];
+    if (priceText) parts.push(priceText);
+    if (inStock) parts.push(w.inStock);
+    parts.push(free === null ? w.delivery : seoFill(w.free, { free: seoEur(free, lang) }));
+    parts.push(w.pickup);
+    return parts.join(" · ");
+  }
+
+  /**
+   * A hand-written product line (productMeta) keeps every word it has; the
+   * price — and «in stock» — follow only where they still fit in `max`.
+   */
+  function seoMetaWithPrice(meta, priceText, inStock, lang, max) {
+    var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
+    var base = String(meta).replace(/\.$/, "");
+    if (!priceText) return meta;
+    var both = base + " · " + priceText + (inStock ? " · " + w.inStock : "");
+    if (both.length <= max) return both;
+    var price = base + " · " + priceText;
+    return price.length <= max ? price : meta;
+  }
+
   /** «brand + name — type», with the one alias Russians type for it, if any. */
   function seoProductCore(id, core, lang) {
     var a = lang === "RU" ? seoCopy().ruAlias[id] : null;
@@ -899,5 +941,6 @@
 export {
   SEO_TITLE_MAX, SEO_DESC_MAX,
   seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoHead,
+  seoProductTail, seoMetaWithPrice,
   seoSnippetText, seoLead, seoProductMeta,
 };

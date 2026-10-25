@@ -1068,7 +1068,9 @@ function productPage(p, lang) {
     image: ogPick(productCard(p)),
     imageUrls: [imgUrl(p)],
     // its sizes, delivery and returns, as the Merchant feed has them
-    commerce: productCommerce(p)
+    commerce: productCommerce(p),
+    // the free-delivery threshold in the description's tail
+    rules: SEO_CTX.rules
   });
   const { rest, core, priceText: price, crumbItems } = spec;
 

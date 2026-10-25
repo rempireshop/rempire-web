@@ -211,6 +211,8 @@ export function renderCustomProductPage(
     image: ogImage(base, row),
     imageUrls: photos.length ? photos.map((u) => absUrl(base, u)) : [absUrl(base, OG_DEFAULT)],
     commerce: commerceFor(row, o as Partial<Override> | null | undefined, opts.rules ?? DEFAULT_SHIPPING_RULES, opts.eans ?? {}),
+    // the free-delivery threshold in the description's tail (seoProductTail())
+    rules: opts.rules ?? DEFAULT_SHIPPING_RULES,
   });
   const { seg, rest, core, priceText, stockText, crumbItems } = spec as unknown as {
     seg: string; rest: string; core: string; priceText: string; stockText: string; crumbItems: Array<[string, string | null]>;

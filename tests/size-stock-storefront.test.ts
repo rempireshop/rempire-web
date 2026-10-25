@@ -492,8 +492,10 @@ describe("the offer the head publishes", () => {
     expect(offers).toContain("return ldOffer(pUrl, p.price, !gone);");
     expect(offers).toContain("!gone && !sizeOut(p, r.i)");
     expect(slice("ldOffer")).toContain('availability: "https://schema.org/" + (inStock ? "InStock" : "OutOfStock")');
-    // …and the sentence the result listing prints under it
-    expect(head).toContain('trText(pGoneSeo ? "нет в наличии"');
+    // …and the sentence the result listing prints under it: «в наличии» only
+    // while sizes are left (seoProductTail() since 25.10.2026, never «нет в наличии»)
+    expect(head).toContain("seoProductTail(priceText, !pGoneSeo, S.lang, seoCtx().rules)");
+    expect(head).toContain("seoMetaWithPrice(handWritten, priceText, !pGoneSeo, S.lang, DESC_MAX)");
     // the old rule must be gone from both, or one of them still lies
     expect(head).not.toContain('(p.stock === "out" ? "OutOfStock" : "InStock")');
   });

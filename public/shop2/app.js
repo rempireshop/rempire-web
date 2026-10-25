@@ -204,10 +204,6 @@
       "Фильтры": "Filtrid", "Сортировка": "Järjesta", "Сбросить": "Lähtesta",
       "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
-      // the tail of a product page's meta description — the same words
-      // src/lib/seo-head.mjs's descTail() writes into the static page
-      "доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis",
-      "самовывоз в Таллинне": "järeletulek Tallinnas",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
       "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓",
@@ -3839,8 +3835,6 @@
       "Фильтры": "Filters", "Сортировка": "Sort", "Сбросить": "Reset",
       "Сбросить всё": "Reset all", "Сбросить фильтры": "Reset filters",
       "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
-      "доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics",
-      "самовывоз в Таллинне": "pickup in Tallinn",
       "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
       "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓",
@@ -11983,7 +11977,23 @@
      it at any point in the session still answers "who sent this visitor",
      which is what "top referrer hosts" needs. Host only, never the path or
      query a referring page might have carried (e.g. a Google search term). */
+  /* A click on the shop's own Google Ads (the test of 25.10.2026): Google puts
+     gclid (or gbraid/wbraid) on the landing address and the campaign adds
+     utm_source=google-ads. The referrer alone says google.com — the same as
+     a search result — so such a visit is filed under «ads.google.com» for
+     the rest of the tab's session. The address is read at boot, before
+     anything rewrites it; the flag reaches sessionStorage only from
+     refHost(), which only track() calls — after statistics are allowed. */
+  var AD_KEY = "rmp_ad";
+  var AD_LANDING = /[?&](gclid|gbraid|wbraid)=|[?&]utm_source=google-ads(&|$)/.test(location.search);
+  function adVisit() {
+    try {
+      if (AD_LANDING) sessionStorage.setItem(AD_KEY, "1");
+      return sessionStorage.getItem(AD_KEY) === "1";
+    } catch (e) { return AD_LANDING; }
+  }
   function refHost() {
+    if (adVisit()) return "ads.google.com";
     try {
       if (!document.referrer) return "";
       var h = new URL(document.referrer).hostname;
@@ -48599,14 +48609,14 @@
      share is whole sentences since 09.10.2026 — seoLead(), in the seo-copy
      block below, the same function the static page calls. */
   var DESC_MAX = 158;
-  function descFromText(text, priceText, stockText, lang) {
-    /* Ни цены, ни наличия — 21.09.2026. Цена уже стоит в заголовке, и в
-       сниппете она только повторяется, съедая место у самого текста; а
-       «нет в наличии» в выдаче — это строчка, после которой не нажимают,
-       при том что Google и так знает наличие из Offer в разметке. Место
-       занимает то, что не устаревает и отвечает на «почему здесь». */
-    var tail = trText("доставка по Эстонии и Балтии", lang, false) + " · " +
-      trText("самовывоз в Таллинне", lang, false);
+  function descFromText(text, tail) {
+    /* The tail is seoProductTail() (src/lib/seo-copy.mjs): the price, «в
+       наличии» when it is, the free-delivery threshold from the rules and
+       pickup. 21.09.2026 took the price and stock out because the title
+       carried the price; 25.10.2026 put them back — in Estonian results
+       Google cut the price off our titles while competitors' snippets
+       printed theirs. «Нет в наличии» is still never written: that line
+       only stops the click. */
     var lead = dropShout(text) || text;
     if (!lead) return clipDesc(tail, DESC_MAX);
     var room = DESC_MAX - tail.length - 3;
@@ -49255,7 +49265,15 @@
           EN: "Creed Aventus Cologne, a 50 ml unisex eau de parfum: tangerine, ginger and pink pepper, patchouli and sandalwood over birch, musk and tonka."
         }
       },
-      from: { EN: "from ", ET: "alates ", RU: "от " }
+      from: { EN: "from ", ET: "alates ", RU: "от " },
+      /* The words after a product snippet — seoProductTail(). `free` takes the
+         threshold from the rules; `delivery` is the line where delivery is
+         never free. */
+      productTail: {
+        RU: { inStock: "в наличии", free: "бесплатная доставка от {free}", delivery: "доставка по Эстонии и Балтии", pickup: "самовывоз в Таллинне" },
+        ET: { inStock: "laos", free: "tasuta tarne alates {free}", delivery: "tarne Eestis ja Baltikumis", pickup: "järeletulek Tallinnas" },
+        EN: { inStock: "in stock", free: "free Baltic delivery from {free}", delivery: "delivery across Estonia and the Baltics", pickup: "pickup in Tallinn" }
+      }
     };
   }
 
@@ -49479,6 +49497,40 @@
     return (from ? seoCopy().from[lang] || "" : "") + seoEur(price, lang);
   }
 
+  /**
+   * What a product snippet ends with: the price, «in stock» when it is, the
+   * free-delivery threshold from the rules (the delivery line where delivery
+   * is never free) and pickup. The price and stock left the snippet on
+   * 21.09.2026 because the title carried the price; on 25.10.2026 Estonian
+   * results showed Google cutting it off our titles while competitors'
+   * snippets printed theirs, so it is back (Dim). «Out of stock» is still
+   * never written — that line only stops the click.
+   */
+  function seoProductTail(priceText, inStock, lang, rules) {
+    var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
+    var free = seoFreeFrom(rules, "EE");
+    var parts = [];
+    if (priceText) parts.push(priceText);
+    if (inStock) parts.push(w.inStock);
+    parts.push(free === null ? w.delivery : seoFill(w.free, { free: seoEur(free, lang) }));
+    parts.push(w.pickup);
+    return parts.join(" · ");
+  }
+
+  /**
+   * A hand-written product line (productMeta) keeps every word it has; the
+   * price — and «in stock» — follow only where they still fit in `max`.
+   */
+  function seoMetaWithPrice(meta, priceText, inStock, lang, max) {
+    var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
+    var base = String(meta).replace(/\.$/, "");
+    if (!priceText) return meta;
+    var both = base + " · " + priceText + (inStock ? " · " + w.inStock : "");
+    if (both.length <= max) return both;
+    var price = base + " · " + priceText;
+    return price.length <= max ? price : meta;
+  }
+
   /** «brand + name — type», with the one alias Russians type for it, if any. */
   function seoProductCore(id, core, lang) {
     var a = lang === "RU" ? seoCopy().ruAlias[id] : null;
@@ -49697,7 +49749,6 @@
          has been counted to zero prints «нет в наличии» on the page and has
          no buy row, so the snippet must not offer it either. */
       var pGoneSeo = soldOut(p);
-      var stockText = trText(pGoneSeo ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
       /* Brand, the maker's name and the type, the price when it fits — no
          «— купить в Rempire» filler (seoProductTitle(), the same rule
          productSpec() in src/lib/seo-head.mjs writes into the static page). */
@@ -49718,9 +49769,11 @@
          shop's English description, where the catalogue has one, is that
          text on the English page — the body the prerender cuts it from too;
          it used to go into the tag raw, markup and all. */
+      var handWritten = seoProductMeta(p.id, S.lang);
       d = so && so.d ? so.d
-        : seoProductMeta(p.id, S.lang) ||
-          descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)), priceText, stockText, S.lang);
+        : handWritten ? seoMetaWithPrice(handWritten, priceText, !pGoneSeo, S.lang, DESC_MAX)
+        : descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)),
+          seoProductTail(priceText, !pGoneSeo, S.lang, seoCtx().rules));
       // the page's own address, in the address's language and with no query (?size=)
       var pUrl = location.origin + shopPathFor(langFromPath(location.pathname) || "EN", "/p/" + encodeURIComponent(p.id) + "/");
       // same shape the prerendered pages carry, so taking over a static page

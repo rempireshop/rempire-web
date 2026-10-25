@@ -95,11 +95,15 @@ const browserDesc = runInNewContext([
   appLine(/^ {2}function dropShout\(s\) \{ .* \}$/),
   sliceFrom(/^ {2}function clipDesc\(s, max\) \{$/, FN_END),
   appLine(/^ {2}var DESC_MAX = 158;$/),
-  sliceFrom(/^ {2}function descFromText\(text, priceText, stockText, lang\) \{$/, FN_END),
-].join("\n") + "\n({ descFromText: descFromText, seoSnippetText: seoSnippetText, seoProductMeta: seoProductMeta });") as {
-  descFromText: (text: string, priceText: string, stockText: string, lang: string) => string;
+  sliceFrom(/^ {2}function descFromText\(text, tail\) \{$/, FN_END),
+].join("\n") + "\n({ descFromText: descFromText, seoSnippetText: seoSnippetText, seoProductMeta: seoProductMeta," +
+  " seoProductTail: seoProductTail, seoMetaWithPrice: seoMetaWithPrice, seoPriceText: seoPriceText });") as {
+  descFromText: (text: string, tail: string) => string;
   seoSnippetText: (html: string) => string;
   seoProductMeta: (id: string, lang: string) => string;
+  seoProductTail: (priceText: string, inStock: boolean, lang: string, rules: unknown) => string;
+  seoMetaWithPrice: (meta: string, priceText: string, inStock: boolean, lang: string, max: number) => string;
+  seoPriceText: (price: number, from: boolean, lang: string) => string;
 };
 const loadTexts = (f: string, n: string) => new Function(read("../public/shop/" + f) + "\nreturn " + n + ";")() as Record<string, string>;
 const TEXTS: Record<string, Record<string, string>> = {
@@ -179,9 +183,14 @@ describe("static head == rendered head", () => {
         const staticDesc = productSpec({
           base: "https://rempireshop.com", lang, id: p.id, cat: p.cat, catName: "x", brand: p.brand, name: trName(p.name, code),
           price: p.price, priceFrom: !!p.priceFrom, stock: "in", seoTitle: "", seoDesc: "", body: html, image: "", imageUrls: [],
+          rules: LIVE.rules,
         }).desc;
-        const rendered = browserDesc.seoProductMeta(p.id, code) ||
-          browserDesc.descFromText(browserDesc.seoSnippetText(html), "", "", code);
+        // what setHead() does: the hand-written line with the price where it fits, else the text with the whole tail
+        const priceText = browserDesc.seoPriceText(p.price, !!p.priceFrom, code);
+        const handWritten = browserDesc.seoProductMeta(p.id, code);
+        const rendered = handWritten
+          ? browserDesc.seoMetaWithPrice(handWritten, priceText, true, code, 158)
+          : browserDesc.descFromText(browserDesc.seoSnippetText(html), browserDesc.seoProductTail(priceText, true, code, LIVE.rules));
         expect(rendered, p.id).toBe(staticDesc);
         compared++;
       }
