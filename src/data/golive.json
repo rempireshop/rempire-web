@@ -1596,10 +1596,10 @@
       ],
       "status": "doing",
       "title": "Лист с логинами — Дим заполняет и отдаёт лично",
-      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит.",
+      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит. Отдельный менеджер паролей (Bitwarden) не заводим — Дим, 25.10.",
       "en": {
         "title": "Login sheet — Dim fills it in and hands it over in person",
-        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim types the passwords himself, on his own computer, and gives it to Renat in person — not in a chat, not by e-mail. Claude never sees them."
+        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim writes the passwords in himself, on his own computer, and hands it to Renat in person — not in a chat, not by mail. Claude never sees the passwords. No separate password manager (Bitwarden) — Dim, 25.10."
       }
     },
     {
@@ -1628,10 +1628,10 @@
       ],
       "status": "todo",
       "title": "Домен: владелец — Rempire Store OÜ",
-      "detail": "В Zone.ee владелец rempireshop.com всё ещё THEFLOW OÜ / Denis Kuznetsov. Смена владельца («domeeni omaniku vahetus») — подтверждают обе стороны, может занять несколько дней. Начать сейчас. Потом Дим — партнёр только для поддержки. Продление — раз в год.",
+      "detail": "В Zone.ee владелец rempireshop.com всё ещё THEFLOW OÜ / Denis Kuznetsov. Смена владельца («domeeni omaniku vahetus») — подтверждают обе стороны, может занять несколько дней. Начать сейчас. Потом Дим — партнёр только для поддержки. Продление — раз в год, платит Ренат, когда придёт счёт (Дим, 25.10).",
       "en": {
         "title": "Domain: the owner becomes Rempire Store OÜ",
-        "detail": "At Zone.ee rempireshop.com is still registered to THEFLOW OÜ / Denis Kuznetsov. The owner change («domeeni omaniku vahetus») needs both sides to confirm and can take days. Start now. Afterwards Dim is a partner for support only. Renewal once a year."
+        "detail": "At Zone.ee the owner of rempireshop.com is still THEFLOW OÜ / Denis Kuznetsov. The owner change («domeeni omaniku vahetus») needs both sides to confirm and can take days. Start now. After that Dim is a partner for support only. Renewal is once a year; Renat pays when the bill comes (Dim, 25.10)."
       }
     },
     {
@@ -1690,10 +1690,26 @@
       ],
       "status": "todo",
       "title": "Остальные сервисы: владелец — магазин, Дим — участник",
-      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Реклама, Bing Webmaster — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
+      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Реклама, Bing Webmaster (вход — rempireshopinfo@, Дим 25.10) — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
       "en": {
         "title": "Every other service: the shop owns it, Dim is a member",
-        "detail": "Check each one: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Ads, Bing Webmaster — the shop's account owns it; Dim is a member (support). Shopify — not closed yet."
+        "detail": "Check each one: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Ads, Bing Webmaster (signed in as rempireshopinfo@, Dim 25.10) — the shop's account owns it; Dim is a member (support). Shopify — not closed yet."
+      }
+    },
+    {
+      "area": "ho-accounts",
+      "blocking": false,
+      "id": "ho-blob-cleanup",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "title": "Старое хранилище Vercel Blob «rempire-qa» — удалить",
+      "detail": "Лежит на команде Diip в Vercel, ответы опросника времён прототипа. Код магазина его не читает с 07.09 (проверено 25.10). Дим удаляет хранилище (по желанию — сначала выгрузить); Клод убирает неиспользуемый пакет @vercel/blob.",
+      "en": {
+        "title": "Old Vercel Blob store «rempire-qa» — delete",
+        "detail": "Sits on Diip's Vercel team: questionnaire answers from the prototype days. The shop's code has not read it since 07.09 (checked 25.10). Dim deletes the store (exporting it first if he wants); Claude removes the unused @vercel/blob package."
       }
     },
     {
@@ -1717,15 +1733,15 @@
       "blocking": false,
       "id": "ho-cloudflare-card",
       "who": [
-        "claude",
-        "dim"
+        "dim",
+        "renat"
       ],
       "status": "todo",
-      "title": "Cloudflare — чья карта (хранилище фото)",
-      "detail": "Для хранилища фото (R2) Cloudflare требует карту даже на бесплатном тарифе. Проверить, чья стоит; если Димы — заменить на карту фирмы. Расход сейчас 0 €.",
+      "title": "Cloudflare — карта Димы → карта фирмы (хранилище фото)",
+      "detail": "Для хранилища фото (R2) Cloudflare требует карту даже на бесплатном тарифе. Сейчас там карта Димы (Дим, 25.10) — заменить на карту фирмы: Cloudflare → Billing → Payment info. Расход сейчас 0 €.",
       "en": {
-        "title": "Cloudflare — whose card (photo storage)",
-        "detail": "Cloudflare wants a card for the photo storage (R2) even on the free tier. Check whose it is; if it is Dim's, swap in the company card. The bill today is 0 €."
+        "title": "Cloudflare — Dim's card → the company card (photo storage)",
+        "detail": "Cloudflare wants a card for the photo storage (R2) even on the free tier. It holds Dim's card today (Dim, 25.10) — swap in the company card: Cloudflare → Billing → Payment info. The bill today is 0 €."
       }
     },
     {
@@ -1825,6 +1841,21 @@
     {
       "area": "ho-data",
       "blocking": false,
+      "id": "ho-stripe",
+      "who": [
+        "renat"
+      ],
+      "status": "todo",
+      "title": "Stripe (оплаты картой в Shopify) — закрыть позже, не вместе с Shopify",
+      "detail": "Stripe — отдельный аккаунт Рената; закрытие Shopify его не закрывает. Предложение: оставить, пока покупатель ещё может оспорить старый платёж (около 120 дней после последнего заказа в Shopify — 27.09, то есть до конца января 2027), потом закрыть. Абонентской платы у Stripe нет.",
+      "en": {
+        "title": "Stripe (card payments in Shopify) — close later, not together with Shopify",
+        "detail": "Stripe is Renat's separate account; closing Shopify does not close it. Suggestion: keep it while a customer can still dispute an old payment (about 120 days after the last Shopify order of 27.09, i.e. until the end of January 2027), then close it. Stripe has no monthly fee."
+      }
+    },
+    {
+      "area": "ho-data",
+      "blocking": false,
       "id": "ho-db-backup",
       "who": [
         "claude",
@@ -1877,10 +1908,10 @@
       ],
       "status": "todo",
       "title": "Техническая документация — для поддержки",
-      "detail": "README, карта системы (SYSTEM-MAP устарела с 06.09), аккаунты и переменные Vercel, деплой и ночная пересборка, расписания, и пошагово: сайт не открывается, оплата не проходит, письма не приходят, восстановить базу.",
+      "detail": "README, карта системы (SYSTEM-MAP устарела с 06.09), аккаунты и переменные Vercel, деплой и ночная пересборка, расписания, и пошагово: сайт не открывается, оплата не проходит, письма не приходят, восстановить базу. Search Console в «Аналитике» подключён (GSC_SERVICE_ACCOUNT_JSON и GSC_SITE_URL стоят в Vercel, 25.10).",
       "en": {
         "title": "Technical documentation — for support",
-        "detail": "README, the system map (SYSTEM-MAP is stale since 06.09), accounts and Vercel variables, deploys and the nightly rebuild, schedules, and step by step: the site is down, payments fail, mail does not arrive, restore the database."
+        "detail": "README, the system map (SYSTEM-MAP stale since 06.09), accounts and Vercel variables, deploys and the nightly rebuild, schedules, and step by step: the site does not open, a payment fails, mails do not arrive, restore the database. Search Console in «Аналитика» is connected (GSC_SERVICE_ACCOUNT_JSON and GSC_SITE_URL are set in Vercel, 25.10)."
       }
     },
     {
@@ -1896,6 +1927,22 @@
       "en": {
         "title": "What was done · where it stands · what could come next",
         "detail": "One page: the project's results, known issues, ideas for later — the start of the next Rempire project."
+      }
+    },
+    {
+      "area": "ho-docs",
+      "blocking": false,
+      "id": "ho-guide-page",
+      "who": [
+        "dim",
+        "claude"
+      ],
+      "status": "todo",
+      "title": "Страница /guide («что уже готово») — не обновлять, убрать?",
+      "detail": "rempireshop.com/guide — старая страница для Рената, закрыта от поиска. Дим, 25.10: обновлять не нужно, скорее всего больше не нужна. Убрать её — только с OK Дима.",
+      "en": {
+        "title": "The /guide page («what is ready») — no refresh, remove it?",
+        "detail": "rempireshop.com/guide — an old page for Renat, hidden from search. Dim, 25.10: no refresh needed, most likely not needed any more. Removing it only with Dim's OK."
       }
     },
     {
@@ -1987,10 +2034,10 @@
       ],
       "status": "todo",
       "title": "Новые секреты после передачи",
-      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. Клод готовит список и проверяет после замены.",
+      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. В Vercel стоит DATABASE_SSL_NO_VERIFY — по возможности заменить на DATABASE_SSL_CA (docs/backend.md). Клод готовит список и проверяет после замены.",
       "en": {
         "title": "Fresh secrets after the handover",
-        "detail": "A new SESSION_SECRET (every panel sign-in is reset), CRON_SECRET; optionally new Resend and photo-storage keys. Claude prepares the list and checks after the swap."
+        "detail": "A new SESSION_SECRET (every panel sign-in resets), CRON_SECRET; optionally new Resend and photo-storage keys. Vercel has DATABASE_SSL_NO_VERIFY set — replace it with DATABASE_SSL_CA if possible (docs/backend.md). Claude prepares the list and checks after the swap."
       }
     },
     {
