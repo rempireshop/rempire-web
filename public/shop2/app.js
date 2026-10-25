@@ -8706,14 +8706,18 @@
      These are no longer a constant: whatever the shop *says* here has to be
      what the checkout *charges*, and that number now comes from the server
      (settings.shipping_rules → SHIP_RULES below, mirrored via /api/overrides).
-     The values seeded here are the same defaults src/lib/shipping.ts carries,
-     and refreshShipThresholds() updates them the moment the real rules land.
+     refreshShipThresholds() updates them the moment the real rules land.
      Per-country floors — 50 € everywhere is a giveaway outside Estonia, where
      the FI courier alone costs ~26 € incl. VAT — are set through the rules'
-     freeFromByCountry, not here; EU seeds at 200 because that is what the
-     rules now say (Dim, 08.09.2026), and this line is only ever the value
-     shown before /api/overrides answers. */
-  var THRESH = { EE: 59, LV: 59, LT: 59, FI: 59, EU: 200 };
+     freeFromByCountry, not here.
+     The seed is what the strip, the footer and the product page print until
+     /api/overrides answers, so it carries the shop's LIVE floors, not
+     src/lib/shipping.ts's defaults: those said 59 € everywhere but Europe,
+     and every first paint promised «Балтия от 59 €, Финляндия от 59 €» for a
+     moment after the shop had moved to 70 € (09.10) and Finland to 200 €
+     (Dim, 25.10.2026). When «Бесплатно от» changes in «Доставка и оплата»,
+     change these five numbers with it. */
+  var THRESH = { EE: 70, LV: 70, LT: 70, FI: 200, EU: 200 };
   function refreshShipThresholds() {
     Object.keys(THRESH).forEach(function (c) {
       var by = SHIP_RULES.freeFromByCountry;
@@ -14784,15 +14788,17 @@
     },
     announcement: {
       on: true,
+      /* «Балтия» quotes {EE} and Finland shares {EU}: one amount per group
+         while the rules keep them equal — split them and this line needs an edit. */
       text: {
-        RU: "Бесплатная доставка: Эстония от {EE} € · LV, LT от {LV} € · Финляндия от {FI} €",
-        ET: "Tasuta tarne: Eesti alates {EE} € · LV, LT alates {LV} € · Soome alates {FI} €",
-        EN: "Free delivery: Estonia from {EE} € · LV, LT from {LV} € · Finland from {FI} €"
+        RU: "Бесплатная доставка по Балтии от {EE} €, в Финляндию и остальную Европу — от {EU} €",
+        ET: "Tasuta tarne Baltikumis alates {EE} €, Soome ja mujale Euroopasse alates {EU} €",
+        EN: "Free delivery in the Baltics from {EE} €, to Finland and the rest of Europe from {EU} €"
       },
       short: {
-        RU: "Бесплатная доставка по Эстонии от {EE} €",
-        ET: "Tasuta tarne Eestis alates {EE} €",
-        EN: "Free delivery in Estonia from {EE} €"
+        RU: "Бесплатно: Балтия от {EE} €, Европа от {EU} €",
+        ET: "Tasuta: Baltikum alates {EE} €, Euroopa alates {EU} €",
+        EN: "Free delivery: Baltics from {EE} €, Europe from {EU} €"
       },
       link: ""
     },

@@ -125,15 +125,17 @@ export const DEFAULT_CONTENT: ShopContent = {
   },
   announcement: {
     on: true,
+    /* «Балтия» quotes {EE} and Finland shares {EU}: one amount per group
+       while the rules keep them equal — split them and this line needs an edit. */
     text: tri(
-      "Бесплатная доставка: Эстония от {EE} € · LV, LT от {LV} € · Финляндия от {FI} €",
-      "Tasuta tarne: Eesti alates {EE} € · LV, LT alates {LV} € · Soome alates {FI} €",
-      "Free delivery: Estonia from {EE} € · LV, LT from {LV} € · Finland from {FI} €",
+      "Бесплатная доставка по Балтии от {EE} €, в Финляндию и остальную Европу — от {EU} €",
+      "Tasuta tarne Baltikumis alates {EE} €, Soome ja mujale Euroopasse alates {EU} €",
+      "Free delivery in the Baltics from {EE} €, to Finland and the rest of Europe from {EU} €",
     ),
     short: tri(
-      "Бесплатная доставка по Эстонии от {EE} €",
-      "Tasuta tarne Eestis alates {EE} €",
-      "Free delivery in Estonia from {EE} €",
+      "Бесплатно: Балтия от {EE} €, Европа от {EU} €",
+      "Tasuta: Baltikum alates {EE} €, Euroopa alates {EU} €",
+      "Free delivery: Baltics from {EE} €, Europe from {EU} €",
     ),
     link: "",
   },

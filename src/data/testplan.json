@@ -9817,7 +9817,7 @@
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Полоска с вашим текстом стоит над магазином — и на эстонском, и на английском.",
         "«Вернуть» у полоски не трогает новый телефон.",
-        "Сброс полоски меняет только полоску; реквизиты и IBAN, часы и соцсети остаются.",
+        "Сброс возвращает «Бесплатная доставка по Балтии от 70 €…», остальное не трогает.",
         "Кнопок «Сохранить» нет: всё сохраняется само, вверху «Сохранено ✓»."
       ],
       "why": "Без часов работы вам будут звонить и спрашивать, открыты ли вы.",
@@ -9837,13 +9837,13 @@
           "The opening hours show on «Контакты» and at the foot of every page.",
           "The strip with your text sits above the shop — in Estonian and English too.",
           "«Вернуть» on the strip leaves the new phone alone.",
-          "Resetting the strip changes only the strip; details and IBAN, hours and socials stay.",
+          "Reset brings back «Бесплатная доставка по Балтии от 70 €…», nothing else changes.",
           "No «Сохранить» buttons: everything saves itself, «Сохранено ✓» at the top."
         ],
         "why": "With no opening hours, people phone you to ask if you're open."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-10-25T16:28:06.269Z"
     },
     {
       "id": "settings-delivered-auto",

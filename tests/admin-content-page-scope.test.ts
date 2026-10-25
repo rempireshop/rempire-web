@@ -148,7 +148,7 @@ describe("«Вернуть стандартный текст полоски» on
     expect(p.DEMO.content.hours.mon).toBe("10:00–18:00");
     expect(p.DEMO.content.social.instagram).toBe("https://www.instagram.com/renat/");
     expect(p.DEMO.content.emailFooter.RU).toBe("Спасибо, что вы с нами");
-    expect(p.DEMO.content.announcement.text.RU, "the strip itself was not reset").toMatch(/Бесплатная доставка/);
+    expect(p.DEMO.content.announcement.text.RU, "the strip itself was not reset").toMatch(/Бесплатная доставка по Балтии/);
   });
 
   it("on «О компании» it resets that page's details and leaves the strip alone", () => {
