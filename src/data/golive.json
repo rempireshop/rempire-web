@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-10-09",
+  "asOf": "2026-10-25",
   "phases": [
     {
       "id": "a",
@@ -23,11 +23,11 @@
     },
     {
       "id": "c",
-      "name": "Шаг C — передача Ренату, до 09.11.2026",
-      "note": "Магазин работает с 09.10. Месяц смотрим и улучшаем, 09.11 всё переходит к Ренату: владелец каждого аккаунта, карты фирмы, документы. Дим после передачи — платная поддержка. Долгие вещи (домен, карты, OpenAI) — сразу; документы — в последнюю неделю, когда всё устоится. С 01.11 — только исправления.",
+      "name": "Шаг C — передача Ренату, 08.11.2026",
+      "note": "Магазин работает с 09.10. Месяц смотрим и улучшаем, 08.11 всё переходит к Ренату: владелец каждого аккаунта, карты фирмы, документы. Дим после передачи — платная поддержка. Долгие вещи (домен, карты, OpenAI) — сразу; документы пишем примерно с 02.11, когда код устоится, — не раньше. С 01.11 — только исправления.",
       "en": {
-        "name": "Phase C — handover to Renat, by 09.11.2026",
-        "note": "The shop has run since 09.10. One month of watching and improving, then on 09.11 everything goes to Renat: the owner of every account, the company's cards, the documents. After the handover Dim is paid support. Slow things (domain, cards, OpenAI) start now; the documents are written in the last week, once things have settled. From 01.11 — fixes only."
+        "name": "Phase C — handover to Renat, 08.11.2026",
+        "note": "The shop has run since 09.10. One month of watching and improving, then on 08.11 everything goes to Renat: the owner of every account, the company's cards, the documents. After the handover Dim is paid support. Slow things (domain, cards, OpenAI) start now; the documents are written from about 02.11, once the code has settled — not earlier. From 01.11 — fixes only."
       }
     }
   ],
@@ -146,39 +146,39 @@
       "id": "ho-money",
       "phase": "c",
       "name": "Деньги — всё на фирму",
-      "note": "Ни одной карты Димы после 09.11.",
+      "note": "Ни одной карты Димы после 08.11.",
       "en": {
         "name": "Money — everything on the company",
-        "note": "Not one of Dim's cards after 09.11."
+        "note": "Not one of Dim's cards after 08.11."
       }
     },
     {
       "id": "ho-data",
       "phase": "c",
       "name": "Google и Shopify — что закрыть по порядку",
-      "note": "Shopify выключается последним: на нём ещё висят бесплатные показы в Google.",
+      "note": "Shopify закрывается последним, после выгрузки для бухгалтера. Бесплатные показы в Google идут с наших фидов с 16.10.",
       "en": {
         "name": "Google and Shopify — what to close, in order",
-        "note": "Shopify goes last: Google's free listings still hang on it."
+        "note": "Shopify closes last, after the export for the accountant. Google's free listings run on our own feeds since 16.10."
       }
     },
     {
       "id": "ho-docs",
       "phase": "c",
       "name": "Документы — пишет Клод",
-      "note": "Черновики — в неделю 02–08.11, по готовому коду. Источник — репозиторий, не память.",
+      "note": "Пишем примерно с 02.11, по готовому коду: раньше нет смысла, код ещё меняется (Дим, 25.10). Источник — репозиторий, не память.",
       "en": {
         "name": "Documents — Claude writes them",
-        "note": "Drafts in the week 02–08.11, against the finished code. The source is the repository, not memory."
+        "note": "Written from about 02.11, against the finished code: earlier is pointless, the code still changes (Dim, 25.10). The source is the repository, not memory."
       }
     },
     {
       "id": "ho-day",
       "phase": "c",
-      "name": "День передачи — 09.11",
+      "name": "День передачи — 08.11",
       "note": "Ренат сам входит в каждый сервис; потом у Димы остаётся только доступ для поддержки.",
       "en": {
-        "name": "Handover day — 09.11",
+        "name": "Handover day — 08.11",
         "note": "Renat signs into every service himself; afterwards Dim keeps only what support needs."
       }
     }
@@ -1643,12 +1643,12 @@
         "renat",
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "OpenAI — на аккаунт магазина",
-      "detail": "Сейчас аккаунт и карта Димы. Ключ создать в аккаунте магазина (карта фирмы), Дим вставляет его в Vercel (OPENAI_API_KEY), Клод проверяет помощника в магазине и в панели, старый ключ удалить.",
+      "detail": "API-аккаунт уже на rempireshopinfo@ (пополнен 08.10). Осталось проверить: чья карта на пополнении, что ключ в Vercel (OPENAI_API_KEY) — из аккаунта магазина и старый ключ Димы удалён, месячный лимит ~10 $. После замены Клод проверяет помощника в магазине и в панели.",
       "en": {
         "title": "OpenAI — onto the shop's account",
-        "detail": "Today it is Dim's account and card. Create a key in the shop's account (company card), Dim puts it into Vercel (OPENAI_API_KEY), Claude checks the shop and panel assistants, the old key is deleted."
+        "detail": "The API account is already on rempireshopinfo@ (funded 08.10). Left to check: whose card funded it, that the key in Vercel (OPENAI_API_KEY) comes from the shop's account and Dim's old key is deleted, a monthly limit of ~10 $. After a swap Claude checks the assistant in the shop and in the panel."
       }
     },
     {
@@ -1675,10 +1675,10 @@
       ],
       "status": "todo",
       "title": "GitHub: репозиторий закрыть (private)",
-      "detail": "В день передачи: rempire-web → Settings → Danger zone → private (GitHub спросит код из почты rempireshopinfo@). CI уже уложен в бесплатный лимит закрытого репозитория (~15 мин на пуш, полный прогон раз в неделю, отчёты хранятся 2 дня). Дим остаётся collaborator — для поддержки.",
+      "detail": "В день передачи: rempire-web → Settings → Danger zone → private (GitHub спросит код из почты rempireshopinfo@). Сейчас публичный: Дим вернул его 11.10, чтобы шли проверки. CI уже уложен в бесплатный лимит закрытого репозитория (~15 мин на пуш, полный прогон раз в неделю, отчёты хранятся 2 дня). Дим остаётся collaborator — для поддержки.",
       "en": {
         "title": "GitHub: make the repository private",
-        "detail": "On handover day: rempire-web → Settings → Danger zone → private (GitHub asks for a code from the rempireshopinfo@ mailbox). CI already fits a private repo's free limit (~15 min a push, the full run weekly, reports kept 2 days). Dim stays a collaborator for support."
+        "detail": "On handover day: rempire-web → Settings → Danger zone → private (GitHub asks for a code from the rempireshopinfo@ mailbox). Public today: Dim switched it back on 11.10 so the checks keep running. CI already fits a private repository's free minutes (~15 min a push, the full run weekly, reports kept 2 days). Dim stays a collaborator, for support."
       }
     },
     {
@@ -1690,10 +1690,10 @@
       ],
       "status": "todo",
       "title": "Остальные сервисы: владелец — магазин, Дим — участник",
-      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Bing — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
+      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Реклама, Bing Webmaster — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
       "en": {
         "title": "Every other service: the shop owns it, Dim is a member",
-        "detail": "Check each: Cloudflare, Resend, Railway, Search Console, Merchant Center, Bing — the owner is the shop's account; Dim is a member (support). Shopify — until it is closed."
+        "detail": "Check each one: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Ads, Bing Webmaster — the shop's account owns it; Dim is a member (support). Shopify — not closed yet."
       }
     },
     {
@@ -1706,10 +1706,42 @@
       ],
       "status": "todo",
       "title": "Railway (база данных) — карта фирмы",
-      "detail": "Сейчас карта Димы. Если оплата не пройдёт, магазин остановится — поэтому заменить заранее. Тариф Hobby ~5 $ в месяц.",
+      "detail": "Сейчас карта Димы. Если оплата не пройдёт, магазин остановится — поэтому заменить заранее. Тариф Hobby, ~6 $ в месяц (счёт 02.10 — 6,20 $).",
       "en": {
         "title": "Railway (the database) — the company card",
-        "detail": "Dim's card today. If a payment fails, the shop stops — so swap it early. Hobby plan, ~5 $ a month."
+        "detail": "Dim's card today. If a payment fails, the shop stops — so swap it early. Hobby plan, ~6 $ a month (the 02.10 bill was 6.20 $)."
+      }
+    },
+    {
+      "area": "ho-money",
+      "blocking": false,
+      "id": "ho-cloudflare-card",
+      "who": [
+        "claude",
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Cloudflare — чья карта (хранилище фото)",
+      "detail": "Для хранилища фото (R2) Cloudflare требует карту даже на бесплатном тарифе. Проверить, чья стоит; если Димы — заменить на карту фирмы. Расход сейчас 0 €.",
+      "en": {
+        "title": "Cloudflare — whose card (photo storage)",
+        "detail": "Cloudflare wants a card for the photo storage (R2) even on the free tier. Check whose it is; if it is Dim's, swap in the company card. The bill today is 0 €."
+      }
+    },
+    {
+      "area": "ho-money",
+      "blocking": false,
+      "id": "ho-google-ads",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "doing",
+      "title": "Google Реклама — тест 20 € до 08.11, карта …0731",
+      "detail": "Кампания «Test Shopping EE - System 4 + Captain Fawcett»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта в аккаунте — Mastercard …0731, не Димы: Дим спрашивает Рената, можно ли (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу и карту решает Ренат.",
+      "en": {
+        "title": "Google Ads — 20 € test until 08.11, card …0731",
+        "detail": "Campaign «Test Shopping EE - System 4 + Captain Fawcett»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. The card on the account is a Mastercard …0731, not Dim's: Dim asks Renat whether it may be used (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads and the card are Renat's call."
       }
     },
     {
@@ -1721,10 +1753,10 @@
       ],
       "status": "todo",
       "title": "Список расходов в месяц — в документ Рената",
-      "detail": "Railway ~5 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Vercel, Resend, Cloudflare, GitHub, Google — бесплатно; Shopify ~46 € — до закрытия.",
+      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; Vercel, Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
       "en": {
         "title": "Monthly costs — into Renat's document",
-        "detail": "Railway ~5 $, OpenAI — cents a day, Montonio — per the contract, the domain — yearly; Vercel, Resend, Cloudflare, GitHub, Google — free; Shopify ~46 € — until it closes."
+        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; Vercel, Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
       }
     },
     {
@@ -1734,12 +1766,12 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
-      "title": "Merchant Center: две политики возврата",
-      "detail": "Эстония, Латвия, Литва — возврат бесплатный; остальные страны — за счёт покупателя (из-за Nova Post). Так уже говорят сайт и разметка с 10.10; в Merchant Center сейчас одна политика «за счёт покупателя» на 24 страны.",
+      "status": "done",
+      "title": "Merchant Center: политика возврата",
+      "detail": "Сделано 16.10: одна политика на 24 страны ЕС — 30 дней, по почте, обратная пересылка за счёт покупателя, статус «Verified». «Бесплатный возврат» в Google требует этикетку от магазина, которой нет, — поэтому вторую политику (EE/LV/LT бесплатно, как на сайте) не делали.",
       "en": {
-        "title": "Merchant Center: two return policies",
-        "detail": "Estonia, Latvia, Lithuania — free returns; every other country — at the customer's cost (because of Nova Post). The site and the markup say so since 10.10; Merchant Center still has one «customer pays» policy for 24 countries."
+        "title": "Merchant Center: the return policy",
+        "detail": "Done 16.10: one policy for 24 EU countries — 30 days, by mail, return postage the customer's, status «Verified». Google's «free return» needs a label the shop provides, which it does not — so the second policy (EE/LV/LT free, as the site says) was not made."
       }
     },
     {
@@ -1750,12 +1782,12 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "title": "Merchant Center: наши фиды «Approved» → фиды Shopify выключить",
-      "detail": "Только когда у фидов rempireshop.com статус «Approved». Раньше нельзя: через фиды Shopify идут ~175 бесплатных переходов в месяц.",
+      "detail": "Сделано 16.10: наши фиды EN и RU — 607 из 629 товаров одобрено (остальное — правила Google, например CBD); шесть источников Shopify Дим удалил. Эстонского фида нет: Merchant Center не даёт эстонский язык.",
       "en": {
         "title": "Merchant Center: our feeds «Approved» → switch off Shopify's",
-        "detail": "Only once the rempireshop.com feeds show «Approved». Not before: ~175 free clicks a month still come through Shopify's feeds."
+        "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language."
       }
     },
     {
@@ -1784,10 +1816,10 @@
       ],
       "status": "todo",
       "title": "Закрыть Shopify",
-      "detail": "Около 08–09.11, после выгрузки и выключенных фидов. Экономия ~46 € в месяц. Домен с Shopify уже снят.",
+      "detail": "Около 08.11, после выгрузки. Фиды Shopify уже выключены (16.10). Экономия ~46 € в месяц. Домен с Shopify уже снят.",
       "en": {
         "title": "Close Shopify",
-        "detail": "Around 08–09.11, after the export and with the feeds switched off. Saves ~46 € a month. The domain already left Shopify."
+        "detail": "Around 08.11, after the export. Shopify's feeds are already off (16.10). Saves ~46 € a month. The domain already left Shopify."
       }
     },
     {
@@ -1874,10 +1906,10 @@
         "dim"
       ],
       "status": "todo",
-      "title": "Условия поддержки после 09.11",
+      "title": "Условия поддержки после 08.11",
       "detail": "Дим — платная поддержка: как связаться, что входит, за сколько отвечает. Документ Димы; Клод может набросать черновик.",
       "en": {
-        "title": "Support terms after 09.11",
+        "title": "Support terms after 08.11",
         "detail": "Dim is paid support: how to reach him, what is included, how fast he answers. Dim's document; Claude can draft it."
       }
     },
@@ -1891,10 +1923,10 @@
       ],
       "status": "todo",
       "title": "С 01.11 — только исправления",
-      "detail": "Новые функции — после передачи, в следующем проекте. До 09.11 меняем только то, что сломано.",
+      "detail": "Новые функции — после передачи, в следующем проекте. До 08.11 меняем только то, что сломано. Документы — примерно с 02.11.",
       "en": {
         "title": "From 01.11 — fixes only",
-        "detail": "New features come after the handover, in the next project. Until 09.11 only what is broken changes."
+        "detail": "New features come after the handover, in the next project. Until 08.11 only what is broken changes. The documents — from about 02.11."
       }
     },
     {
@@ -1927,6 +1959,22 @@
       "en": {
         "title": "His own password for /admin",
         "detail": "Renat picks a password and types it himself into tools/hash-password.mjs on Dim's computer; Dim puts the hash into Vercel (ADMIN_PASSWORD_HASH) and redeploys. The old password stops working."
+      }
+    },
+    {
+      "area": "ho-day",
+      "blocking": false,
+      "id": "ho-claude-connector",
+      "who": [
+        "renat",
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Claude Рената: подключить коннектор «Rempire»",
+      "detail": "После своего пароля от панели Ренат в своём Claude добавляет коннектор https://rempireshop.com/api/mcp и входит этим паролем. Подключение Димы с новым паролем перестаёт работать само. Как подключать — docs/claude-connector.md.",
+      "en": {
+        "title": "Renat's Claude: connect the «Rempire» connector",
+        "detail": "Once his own panel password is set, Renat adds the connector https://rempireshop.com/api/mcp in his own Claude and signs in with that password. Dim's connection stops working by itself with the new password. How to connect — docs/claude-connector.md."
       }
     },
     {
