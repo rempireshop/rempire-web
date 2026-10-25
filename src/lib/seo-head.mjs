@@ -17,7 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
-import { seoLead, seoMetaWithPrice, seoPriceText, seoProductCore, seoProductMeta, seoProductTail, seoProductTitle, seoSnippetText } from "./seo-copy.mjs";
+import { seoHomeIntro, seoInfoTail, seoLead, seoMetaWithPrice, seoPriceText, seoProductCore, seoProductMeta, seoProductTail, seoProductTitle, seoSetsDesc, seoSnippetText } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -472,8 +472,9 @@ export const T = {
     base: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
     buy: "купить в Rempire",
     home: "Главная", catalogue: "Каталог", brands: "Бренды", all: "Все товары",
-    homeIntro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. " +
-      "Доставка Omniva, SmartPosti и DPD по Эстонии, Латвии, Литве и Финляндии, самовывоз на Mardi 1.",
+    /* Where the shop delivers comes from the rules — seoShipLine() in
+       src/lib/seo-copy.mjs, the same sentence app.js writes. */
+    homeIntro: rules => seoHomeIntro("RU", rules),
     catsTitle: "Разделы", brandsTitle: "Бренды",
     sizes: "Размеры", description: "Описание",
     inStock: "В наличии", low: "мало", out: "нет в наличии",
@@ -487,14 +488,14 @@ export const T = {
     descTail: () => "доставка по Эстонии и Балтии · самовывоз в Таллинне",
     /* the four screens added 03.09 — sets, one set, the gift card, the policy pages */
     save: "выгода", pieces: "товара в наборе",
-    setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
+    setsDesc: rules => seoSetsDesc("RU", rules),
     setDesc: (price, save, n) => `${price} вместо розницы, ${save} — ${n} в наборе. Магазин Rempire, Таллинн: доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
     /* The denominations are the owner's setting (settings.gift_amounts), not
        a fixed three, so this is a function of the amounts the prerender read
        — «25 €, 50 €, 100 €», already formatted for the language. app.js builds
        the live head from the same two halves (giftDescText). */
     giftDesc: amounts => `Подарочная карта Rempire на ${amounts} — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.`,
-    infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
+    infoDesc: (title, rules) => `${title} — ${seoInfoTail("RU", rules)}`,
     blogEmpty: "Статей пока нет — загляните позже.",
     otherPosts: "Другие статьи",
     /* the request-time blog page (src/lib/blog-page.ts) — the prerender
@@ -512,8 +513,7 @@ export const T = {
     base: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas",
     buy: "osta Rempire'ist",
     home: "Avaleht", catalogue: "Kataloog", brands: "Brändid", all: "Kõik tooted",
-    homeIntro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas. " +
-      "Tarne Omniva, SmartPosti ja DPD-ga Eestis, Lätis, Leedus ja Soomes, järeletulek Mardi 1.",
+    homeIntro: rules => seoHomeIntro("ET", rules),
     catsTitle: "Osakonnad", brandsTitle: "Brändid",
     sizes: "Suurused", description: "Kirjeldus",
     inStock: "Laos", low: "viimased", out: "otsas",
@@ -524,10 +524,10 @@ export const T = {
       `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     descTail: () => "tarne Eestis ja Baltikumis · järeletulek Tallinnas",
     save: "sääst", pieces: "toodet komplektis",
-    setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
+    setsDesc: rules => seoSetsDesc("ET", rules),
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     giftDesc: amounts => `Rempire'i kinkekaart ${amounts} — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.`,
-    infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
+    infoDesc: (title, rules) => `${title} — ${seoInfoTail("ET", rules)}`,
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
     otherPosts: "Teised artiklid",
     // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
@@ -540,8 +540,7 @@ export const T = {
     base: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
     buy: "buy at Rempire",
     home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
-    homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +
-      "Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.",
+    homeIntro: rules => seoHomeIntro("EN", rules),
     catsTitle: "Sections", brandsTitle: "Brands",
     sizes: "Sizes", description: "Description",
     inStock: "In stock", low: "low stock", out: "out of stock",
@@ -552,10 +551,10 @@ export const T = {
       `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     descTail: () => "delivery across Estonia and the Baltics · pickup in Tallinn",
     save: "you save", pieces: "products in the set",
-    setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
+    setsDesc: rules => seoSetsDesc("EN", rules),
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     giftDesc: amounts => `A Rempire gift card for ${amounts} — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.`,
-    infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
+    infoDesc: (title, rules) => `${title} — ${seoInfoTail("EN", rules)}`,
     blogEmpty: "No articles yet — check back soon.",
     otherPosts: "More articles",
     blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found.",

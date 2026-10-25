@@ -1298,7 +1298,7 @@ function homePage(lang) {
   const content = '<div class="wrap">' +
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(t.base) + "</h1>" +
-      '<p class="sec__intro">' + esc(t.homeIntro) + "</p>" +
+      '<p class="sec__intro">' + esc(t.homeIntro(SEO_CTX.rules)) + "</p>" +
       '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' + esc(t.catsTitle) + "</h2>" +
       '<ul class="pre__list">' +
         '<li><a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a></li>" +
@@ -1493,7 +1493,7 @@ function infoPage(slug, lang) {
       spec: {
         lang, seg, rest, legal: true,
         title: fitTitle(heading, heading + " — REMPIRE"),
-        desc: clip(t.infoDesc(heading), 158),
+        desc: clip(t.infoDesc(heading, SEO_CTX.rules), 158),
         image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
         jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
         content: '<div class="wrap wrap--mid">' +
@@ -1524,7 +1524,7 @@ function infoPage(slug, lang) {
       // the policy text the screen draws (and «Контакты»' title) comes with the page
       lang, seg, rest, legal: true,
       title: fitTitle(heading, heading + " — REMPIRE"),
-      desc: clip(t.infoDesc(heading), 158),
+      desc: clip(t.infoDesc(heading, SEO_CTX.rules), 158),
       image: ogPick(ogShopCard(code)), imageAlt: heading, ogType: "article",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
@@ -1679,7 +1679,7 @@ function setsPage(lang) {
     spec: {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — " + t.buy),
-      desc: clip(t.setsDesc, 158),
+      desc: clip(t.setsDesc(SEO_CTX.rules), 158),
       image: ogPick(BUNDLES[0] ? "/shop/og/set-" + BUNDLES[0].id + ".jpg" : null, ogShopCard(code)),
       imageAlt: heading, ogType: "website",
       jsonld: [

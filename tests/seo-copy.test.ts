@@ -288,7 +288,9 @@ describe("the product-title rule", () => {
 
 describe("the one figure in the copy comes from the rules", () => {
   it("prints the Estonian threshold the checkout bills with — and drops the promise when there is none", () => {
-    expect(seoHead("home", "", "ET", LIVE).d).toMatch(/tasuta tarne alates 70 €\.$/);
+    /* «Baltikumis» since 25.10.2026: «tasuta tarne alates 70 €» alone read as
+       free from 70 € to anywhere, and Finland and Europe are free from 200 € */
+    expect(seoHead("home", "", "ET", LIVE).d).toMatch(/tarne üle ELi, Baltikumis tasuta alates 70 €\.$/);
     expect(seoHead("home", "", "ET", { rules: { freeFrom: 59 } }).d).toMatch(/alates 59 €\.$/);
     expect(seoHead("home", "", "ET", { rules: { freeFrom: 70, freeFromByCountry: { EE: 45 } } }).d).toMatch(/alates 45 €\.$/);
     const none = seoHead("home", "", "ET", { rules: { freeFrom: null } }).d;

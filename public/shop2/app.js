@@ -1747,10 +1747,6 @@
       "Уже стандартные значения": "Juba vaikeväärtused",
       /* meta descriptions — the same sentences tools/prerender-shop2.mjs
          writes into /info/…/, /sets/ and /gift/ */
-      "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.":
-        "Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.",
-      "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
-        "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
       "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
         "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
       // UX fix 8: parcel-machine map
@@ -5352,10 +5348,6 @@
       "Уже стандартные значения": "Already the default values",
       /* meta descriptions — the same sentences tools/prerender-shop2.mjs
          writes into /info/…/, /sets/ and /gift/ */
-      "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.":
-        "Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.",
-      "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
-        "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
       "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
         "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
       // UX fix 8: parcel-machine map
@@ -48677,11 +48669,11 @@
       if (want && document.documentElement.lang !== want) document.documentElement.lang = want;
     } catch (e) {}
   }
-  /* The three meta descriptions the info, sets and gift screens carry. They
-     are dictionary keys, so ET and EN come from UI — and they are word for
-     word what tools/prerender-shop2.mjs writes into the same static pages. */
-  var INFO_DESC_TAIL = "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.";
-  var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
+  /* The info and sets screens' descriptions say where the shop delivers, so
+     they come from the rules: seoInfoTail() and seoSetsDesc() in the
+     seo-copy block, the same functions tools/prerender-shop2.mjs writes the
+     static pages with (until 25.10.2026 two dictionary keys that named the
+     Baltics only). */
   /* The gift card's meta description. Not one dictionary key any more: the
      denominations in the middle of it are the owner's setting, so the
      sentence is built from two keys with the generated amounts between them
@@ -48730,21 +48722,21 @@
       home: {
         EN: {
           t: "REMPIRE — Hair, Beard & Skin Care from a Tallinn Salon",
-          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1; free Baltic delivery from {free}.",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume from our salon. Pickup at Mardi 1; EU delivery, free in the Baltics from {free}.",
           dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our salon team. Pickup at Mardi 1, Tallinn; EU-wide delivery.",
           ogT: "REMPIRE — salon hair, beard & skin care, Tallinn",
           ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korean skincare and niche perfume, chosen by our Tallinn salon team. Pickup at Mardi 1 or delivery across Europe."
         },
         ET: {
           t: "REMPIRE — juukse-, habeme- ja nahahooldus Tallinnas",
-          d: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1, tasuta tarne alates {free}.",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid salongist. Järeletulek Mardi 1, tarne üle ELi, Baltikumis tasuta alates {free}.",
           dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa.",
           ogT: "REMPIRE — salongi juukse-, habeme- ja nahahooldus",
           ogD: "Kevin.Murphy, System 4, Davines, Proraso, Korea nahahooldus ja nišiparfüümid meie Tallinna salongi valikust. Järeletulek Mardi 1 või tarne üle Euroopa."
         },
         RU: {
           t: "REMPIRE — уход за волосами, бородой и кожей в Таллинне",
-          d: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона. Самовывоз на Mardi 1, бесплатная доставка по Балтии от {free}.",
+          d: "Kevin.Murphy, System 4, Davines, Proraso, корейский уход и нишевая парфюмерия от салона. Самовывоз на Mardi 1, доставка по ЕС, по Балтии бесплатно от {free}.",
           dNoFree: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона REMPIRE. Самовывоз на Mardi 1, доставка по Эстонии и ЕС.",
           ogT: "REMPIRE — салонный уход для волос, бороды и кожи",
           ogD: "Kevin.Murphy, System 4, Davines, Proraso, корейская косметика и нишевая парфюмерия от салона в Таллинне. Самовывоз на Mardi 1 или доставка по Европе."
@@ -48905,17 +48897,17 @@
         "Creed": {
           RU: {
             title: "Creed: Aventus, Aventus Cologne и Original Vetiver | REMPIRE",
-            meta: "Creed Aventus (бергамот, ананас, берёза), Aventus Cologne с имбирём и Original Vetiver в Таллинне. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            meta: "Creed Aventus (бергамот, ананас, берёза), Aventus Cologne с имбирём и Original Vetiver в Таллинне. Самовывоз на Mardi 1, доставка по ЕС.",
             intro: "Creed — нишевый парфюмерный дом. У нас Creed Aventus с бергамотом, ананасом и дымной берёзой, более свежий Aventus Cologne с имбирём и Original Vetiver с лимоном, зелёными нотами и ветивером. Выбрать между ними поможем на Mardi 1."
           },
           ET: {
             title: "Creed: Aventus, Aventus Cologne, Original Vetiver | REMPIRE",
-            meta: "Creed Aventus (bergamott, ananass, kask), ingveriga Aventus Cologne ja Original Vetiver Tallinnas. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            meta: "Creed Aventus (bergamott, ananass, kask), ingveriga Aventus Cologne ja Original Vetiver Tallinnas. Järeletulek Mardi 1, tarne üle ELi.",
             intro: "Creed on nišiparfüümide maja. Meil on Creed Aventus bergamoti, ananassi ja suitsuse kasepuuga, värskem Aventus Cologne ingveriga ning Original Vetiver sidruni, roheliste nootide ja vetiveriga. Mardi 1 poes aitame neist valida."
           },
           EN: {
             title: "Creed: Aventus, Aventus Cologne & Original Vetiver | REMPIRE",
-            meta: "Creed Aventus (bergamot, pineapple, birch), the ginger-led Aventus Cologne and Original Vetiver in Tallinn. Pickup at Mardi 1, delivery across the Baltics.",
+            meta: "Creed Aventus (bergamot, pineapple, birch), the ginger-led Aventus Cologne and Original Vetiver in Tallinn. Pickup at Mardi 1, EU-wide delivery.",
             intro: "Creed is a niche fragrance house. We carry Creed Aventus with bergamot, pineapple and smoky birch, the brighter Aventus Cologne with ginger, and Original Vetiver with lemon, green notes and vetiver. We'll help you choose at Mardi 1."
           }
         },
@@ -48927,29 +48919,29 @@
           },
           ET: {
             title: "Xerjoff: 1861 Naxos ja Tony Iommi Monkey Special | REMPIRE",
-            meta: "Xerjoff Naxos kollektsioonist 1861 (lavendel, mesi, tubakas, vanill) ja Tony Iommi Monkey Special. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            meta: "Xerjoff Naxos kollektsioonist 1861 (lavendel, mesi, tubakas, vanill) ja Tony Iommi Monkey Special. Järeletulek Mardi 1, tarne üle ELi.",
             intro: "Xerjoff on Torino parfümeeriamaja. Kollektsiooni 1861 Xerjoff Naxos: lavendel, bergamott, mesi, tubakaleht ja vanill; Tony Iommi Monkey Special: rumm, nahk, kaneel ja karamell. Mõlemad on soojad, magusapoolsed lõhnad – valida aitame Mardi 1 poes."
           },
           EN: {
             title: "Xerjoff: 1861 Naxos & Tony Iommi Monkey Special | REMPIRE",
-            meta: "Xerjoff Naxos from the 1861 collection (lavender, honey, tobacco, vanilla) and Tony Iommi Monkey Special in Tallinn. Pickup at Mardi 1, Baltic delivery.",
+            meta: "Xerjoff Naxos from the 1861 collection (lavender, honey, tobacco, vanilla) and Tony Iommi Monkey Special in Tallinn. Pickup at Mardi 1, EU delivery.",
             intro: "Xerjoff is a perfume house from Turin. Xerjoff Naxos from the 1861 collection: lavender, bergamot, honey, tobacco leaf and vanilla; Tony Iommi Monkey Special: rum, leather, cinnamon and caramel. Both are warm, sweet-leaning scents; we'll help you choose at Mardi 1."
           }
         },
         "Byredo": {
           RU: {
             title: "Byredo — Blanche, Mojave Ghost и гель для душа | REMPIRE",
-            meta: "Byredo Blanche — альдегиды, роза и мускус, аромат чистого белья; гель для душа Blanche и Mojave Ghost. Самовывоз на Mardi 1, доставка по Эстонии и Балтии.",
+            meta: "Byredo Blanche — альдегиды, роза и мускус, аромат чистого белья; гель для душа Blanche и Mojave Ghost. Самовывоз на Mardi 1, доставка по ЕС.",
             intro: "Byredo — парфюмерный дом из Стокгольма. Byredo Blanche — аромат чистого белья: альдегиды, роза, пион, мускус и сандал; к нему есть гель для душа Blanche. Mojave Ghost — амбретта, магнолия, сандал и кедр."
           },
           ET: {
             title: "Byredo: Blanche, Mojave Ghost ja dušigeel | REMPIRE",
-            meta: "Byredo Blanche (aldehüüdid, roos, muskus – puhta pesu lõhn), Blanche'i dušigeel ja Mojave Ghost. Järeletulek Mardi 1, tarne Eestis ja Baltikumis.",
+            meta: "Byredo Blanche (aldehüüdid, roos, muskus – puhta pesu lõhn), Blanche'i dušigeel ja Mojave Ghost. Järeletulek Mardi 1, tarne üle ELi.",
             intro: "Byredo on Stockholmi parfümeeriamaja. Byredo Blanche lõhnab nagu puhas pesu: aldehüüdid, roos, pojeng, muskus ja sandlipuu; sellele lisaks Blanche'i dušigeel. Mojave Ghost: ambretiseeme, magnoolia, sandlipuu ja seeder."
           },
           EN: {
             title: "Byredo: Blanche, Mojave Ghost & Blanche Body Wash | REMPIRE",
-            meta: "Byredo Blanche (aldehydes, rose, musk: the scent of clean linen), Blanche body wash and Mojave Ghost. Pickup at Mardi 1, delivery across the Baltics.",
+            meta: "Byredo Blanche (aldehydes, rose, musk: the scent of clean linen), Blanche body wash and Mojave Ghost. Pickup at Mardi 1, EU-wide delivery.",
             intro: "Byredo is a perfume house from Stockholm. Byredo Blanche smells of clean linen: aldehydes, rose, peony, musk and sandalwood, with a matching Blanche body wash. Mojave Ghost: ambrette, magnolia, sandalwood and cedarwood."
           }
         }
@@ -49279,6 +49271,38 @@
         RU: { inStock: "в наличии", free: "бесплатная доставка от {free}", delivery: "доставка по Эстонии и Балтии", pickup: "самовывоз в Таллинне" },
         ET: { inStock: "laos", free: "tasuta tarne alates {free}", delivery: "tarne Eestis ja Baltikumis", pickup: "järeletulek Tallinnas" },
         EN: { inStock: "in stock", free: "free Baltic delivery from {free}", delivery: "delivery across Estonia and the Baltics", pickup: "pickup in Tallinn" }
+      },
+      /* Where the shop delivers, in the sentences search engines and AI
+         answers read: the static home text, the info pages' and the sets
+         page's descriptions — seoShipLine() and the three below it. Until
+         25.10.2026 they named Estonia, Latvia, Lithuania and Finland only,
+         and a customer in Spain took it to mean «not to Spain». The count
+         and the amounts come from the rules; no figure is typed here. */
+      ship: {
+        RU: {
+          head: "Доставка в {n} {countries} Европы", any: "Доставка по Европе", countries: ["страну", "страны", "стран"],
+          free: "Бесплатно: {parts}.", baltic: "по Балтии от {free}", estonia: "по Эстонии от {free}",
+          both: "в Финляндию и остальную Европу от {free}", fi: "в Финляндию от {free}", eu: "в остальную Европу от {free}",
+          shop: "магазин Rempire, Таллинн.", pickup: "Самовывоз на Mardi 1.",
+          intro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне.",
+          sets: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по ЕС."
+        },
+        ET: {
+          head: "Tarne {n} Euroopa {countries}", any: "Tarne üle Euroopa", countries: ["riiki", "riiki", "riiki"],
+          free: "Tasuta: {parts}.", baltic: "Baltikumis alates {free}", estonia: "Eestis alates {free}",
+          both: "Soome ja mujale Euroopasse alates {free}", fi: "Soome alates {free}", eu: "mujale Euroopasse alates {free}",
+          shop: "Rempire'i pood, Tallinn.", pickup: "Järeletulek Mardi 1.",
+          intro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas.",
+          sets: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle ELi."
+        },
+        EN: {
+          head: "Delivery to {n} {countries} in Europe", any: "Delivery across Europe", countries: ["country", "countries", "countries"],
+          free: "Free: {parts}.", baltic: "in the Baltics from {free}", estonia: "in Estonia from {free}",
+          both: "to Finland and the rest of Europe from {free}", fi: "to Finland from {free}", eu: "to the rest of Europe from {free}",
+          shop: "Rempire shop, Tallinn.", pickup: "Pickup at Mardi 1.",
+          intro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn.",
+          sets: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, EU-wide delivery."
+        }
       }
     };
   }
@@ -49471,6 +49495,80 @@
     var by = (rules && rules.freeFromByCountry) || {};
     var v = Object.prototype.hasOwnProperty.call(by, cc) ? by[cc] : rules ? rules.freeFrom : null;
     return typeof v === "number" && isFinite(v) && v >= 0 ? v : null;
+  }
+
+  /* The countries the «Другие страны Европы» row prices — EUROPE in
+     src/lib/shipping.ts, copied because this block reads nothing from its
+     surroundings (tests/seo-ship-line.test.ts holds the two equal). */
+  var SEO_EUROPE = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "FR", "DE", "GR", "HU", "IE", "IT", "LU", "MT", "NL", "PL",
+    "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "CH", "GB"];
+
+  /**
+   * How many countries the checkout delivers to: Estonia, Latvia, Lithuania,
+   * Finland and Europe, minus the ones the owner switched off — the list the
+   * Merchant Center feed ships to. null when the rules carry no
+   * «countriesOff» to count against.
+   */
+  function seoShipCount(rules) {
+    if (!rules || !Array.isArray(rules.countriesOff)) return null;
+    var off = {};
+    rules.countriesOff.forEach(function (c) { off[String(c).toUpperCase()] = true; });
+    return ["EE", "LV", "LT", "FI"].concat(SEO_EUROPE).filter(function (c) { return !off[c]; }).length;
+  }
+
+  /** «Доставка в 25 стран Европы» — or «Доставка по Европе» without a count. */
+  function seoShipHead(lang, rules) {
+    var w = seoCopy().ship[lang] || seoCopy().ship.EN;
+    var n = seoShipCount(rules);
+    if (n === null) return w.any;
+    var k = lang === "RU"
+      ? (n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : 2)
+      : n === 1 ? 0 : 1;
+    return seoFill(w.head, { n: String(n), countries: w.countries[k] });
+  }
+
+  /**
+   * Where the shop delivers and from what it is free, in one or two
+   * sentences: «Доставка в 25 стран Европы. Бесплатно: по Балтии от 70 €, в
+   * Финляндию и остальную Европу от 200 €.» Latvia and Lithuania fold into
+   * «Балтия» only while they share Estonia's floor, Finland into «остальная
+   * Европа» only while it shares Europe's; a floor the owner cleared drops
+   * its clause.
+   */
+  function seoShipLine(lang, rules) {
+    var w = seoCopy().ship[lang] || seoCopy().ship.EN;
+    var eur = function (v) { return seoEur(v, lang); };
+    var ee = seoFreeFrom(rules, "EE"), lv = seoFreeFrom(rules, "LV"), lt = seoFreeFrom(rules, "LT");
+    var fi = seoFreeFrom(rules, "FI"), eu = seoFreeFrom(rules, "EU");
+    var parts = [];
+    if (ee !== null) parts.push(seoFill(lv === ee && lt === ee ? w.baltic : w.estonia, { free: eur(ee) }));
+    if (fi !== null && fi === eu) parts.push(seoFill(w.both, { free: eur(fi) }));
+    else {
+      if (fi !== null) parts.push(seoFill(w.fi, { free: eur(fi) }));
+      if (eu !== null) parts.push(seoFill(w.eu, { free: eur(eu) }));
+    }
+    var head = seoShipHead(lang, rules) + ".";
+    return parts.length ? head + " " + seoFill(w.free, { parts: parts.join(", ") }) : head;
+  }
+
+  /** The home page's static paragraph under its heading — what a crawler reads before the script draws the page. */
+  function seoHomeIntro(lang, rules) {
+    var w = seoCopy().ship[lang] || seoCopy().ship.EN;
+    return w.intro + " " + seoShipLine(lang, rules) + " " + w.pickup;
+  }
+
+  /** What follows «Доставка и оплата —» in an info page's description. */
+  function seoInfoTail(lang, rules) {
+    var w = seoCopy().ship[lang] || seoCopy().ship.EN;
+    return w.shop + " " + seoShipLine(lang, rules);
+  }
+
+  /** The sets page's description — «EU», not the count: the sentence is
+      at Google's length already, and every country the shop can switch on
+      is in Europe. `rules` is taken so the three callers read alike. */
+  function seoSetsDesc(lang, rules) {
+    var w = seoCopy().ship[lang] || seoCopy().ship.EN;
+    return w.sets;
   }
 
   /** «… | REMPIRE» in the shop's house form, «… — REMPIRE» — what fitTitle()
@@ -49830,7 +49928,7 @@
         if (pg) {
           var pgTitle = trText(pg.title, S.lang, false);
           t = pgTitle + " — REMPIRE";
-          d = (pgTitle + " — " + trText(INFO_DESC_TAIL, S.lang, false)).slice(0, 158);
+          d = (pgTitle + " — " + seoInfoTail(S.lang, SHIP_RULES)).slice(0, 158);
         }
       }
       /* «Бренды» is the one shopper-facing page tools/prerender-shop2.mjs
@@ -49860,12 +49958,12 @@
         if (!setsOn()) t = trText("Наборы сейчас недоступны", S.lang, false) + " — REMPIRE";
         else if (S.screen === "bundles") {
           t = trText("Наборы", S.lang, false) + " — REMPIRE";
-          d = trText(SETS_DESC, S.lang, false).slice(0, 158);
+          d = seoSetsDesc(S.lang, SHIP_RULES).slice(0, 158);
         } else {
           var bb = shownBundleById(S.bundleId);
           if (bb) {
             t = bundleTitle(bb) + " — REMPIRE";
-            d = (bundleDesc(bb) || trText(SETS_DESC, S.lang, false)).slice(0, 158);
+            d = (bundleDesc(bb) || seoSetsDesc(S.lang, SHIP_RULES)).slice(0, 158);
           } else t = trText("Набор не найден", S.lang, false) + " — REMPIRE";
         }
       } else if (S.screen === "gift") {

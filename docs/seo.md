@@ -1384,3 +1384,28 @@ Pinned by `tests/blog-page.test.ts` and, end to end, by the «a post
 published after the build» test in `e2e/admin-blog.spec.ts` (published
 through the admin API, the ET head as the server sent it, the tab after
 app.js takes over, the card, the sitemap, 404 once unpublished).
+
+## Where the shop delivers — the sentence machines read (25.10.2026)
+
+A customer in Spain read the shop as «Baltics and Finland only»: the home
+page's static paragraph, the info pages' descriptions and the sets page
+named Estonia, Latvia, Lithuania and Finland, while the checkout, the
+Merchant Center feed, the product markup (`shippingDetails`) and the
+store's `areaServed` all delivered to 25 countries.
+
+One sentence now, built from the rules by `seoShipLine()` in
+`src/lib/seo-copy.mjs` (so app.js carries it too): «Доставка в 25 стран
+Европы. Бесплатно: по Балтии от 70 €, в Финляндию и остальную Европу от
+200 €.» The count is Estonia, Latvia, Lithuania, Finland and `EUROPE`
+(`src/lib/shipping.ts`, copied as `SEO_EUROPE`) minus `countriesOff`;
+the amounts are «Бесплатно от». Latvia and Lithuania fold into «Балтия» only
+while they share Estonia's amount, Finland into «остальная Европа» only while
+it shares Europe's; a cleared amount drops its clause.
+
+Written by: the home page's static paragraph (`seoHomeIntro`, what a
+crawler reads before app.js draws the page — shoppers never see it), every
+info page's description (`seoInfoTail`, prerender and `setHead()` alike)
+and the sets page (`seoSetsDesc`, «доставка по ЕС» — the count would push it
+past 155). The home descriptions say «доставка по ЕС, по Балтии бесплатно от
+{free}». The top strip is the owner's own text (`settings.content`), not
+this. Pinned by `tests/seo-ship-line.test.ts`.
