@@ -344,7 +344,7 @@ export function buildSeoPrompt(lang: Lang3, rawInput: unknown): PromptResult {
     `Product name: ${name}`,
     input.brand ? `Brand: ${input.brand}` : "",
     input.category ? `Category: ${sectionIn(input.category, lang)}` : "",
-    input.summary ? `Summary to work from, use only this, do not add more:\n${input.summary}` : "",
+    input.summary ? `Description from the shop's catalogue — the facts to write from (it may be in another language: take the facts, write them in ${LANG_NAME[lang]}):\n${input.summary}` : "",
   ].filter(Boolean).join("\n");
 
   const L = LANG_NAME[lang];
@@ -361,10 +361,33 @@ ${SEO_PRODUCT_RULES}
 
 TASK: write a Google search snippet for this product, in ${L}.${own}
 - "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Brand, then the maker's name for the product, then what it is, in ${L}: ${SEO_TITLE_EXAMPLES[lang]}.${typeLine}
-- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase. Nothing that is not in INPUT.${lang === "RU" ? "" : ` Written in ${L}, every sentence of it.`}
+- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase — both taken from the description in INPUT. Never invent an effect, an ingredient or an audience it does not give: no «for men», no «for women» unless it says so. Never write about what INPUT lacks or about INPUT itself: no «нет данных», «не указано», «других сведений нет», «pole lisateavet», «no further details», no «its name is…», never the word INPUT. When INPUT has no description, write one plain true sentence — what the product is and what it is used for, from its type and section — and stop there.${lang === "RU" ? "" : ` Written in ${L}, every sentence of it.`}
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
 
   return { system, user: `INPUT:\n${facts}` };
+}
+
+/**
+ * A product snippet's sentences that talk about the data instead of the
+ * product — «Других сведений о продукте нет», «Toote kohta pole lisateavet»,
+ * «The catalogue gives no further product details», «В INPUT нет данных»,
+ * «Its name is Free.Hold». Until 25.10.2026 the goods editor asked for the
+ * snippet with nothing but the name, and 29 products went live with such a
+ * sentence as their Google description (Renat's videos of 25.10.2026). The
+ * prompt forbids it now and is given the description; this is the net under
+ * that: such a sentence is dropped, the rest of the snippet kept.
+ */
+const META_TALK = [
+  /\bINPUT\b/,
+  /нет (данных|сведений|информации)|сведений .{0,30}нет|не указан|не сказано|не описан|других (сведений|характеристик|особенностей|данных)|в (описании|названии)( продукта)? (нет|указан)/i,
+  /pole (lisateavet|lisainfot|kirjeldatud|täpsustatud|märgitud)|lisa(info|teave)\b.{0,40}puudub|toote kohta pole|on toote nimi|nimi on\b|nimega toodet/i,
+  /no (further|other|more)( product)? (details|information|data)|not (listed|specified|given|described|mentioned)|(its|the product(’s|'s)?|the maker(’s|'s)?) name (is|identifies|points|says|highlights)|choose it by its name|the catalogue (gives|provides|has|lists)/i,
+];
+export function seoDropMetaTalk(text: string): string {
+  /* A sentence ends at . ! ? … followed by a space — not at the dot inside
+     «Repair-Me.Wash» or «Free.Hold». */
+  const sentences = String(text || "").trim().split(/(?<=[.!?…])\s+/);
+  return sentences.filter((s) => s && !META_TALK.some((re) => re.test(s))).join(" ").trim();
 }
 
 /**

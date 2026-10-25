@@ -6,11 +6,20 @@
  *   search_products · get_product · list_sections   — the shop as a shopper sees it
  *   list_posts · get_post                           — the blog, drafts included
  *   save_draft                                      — a new draft, or a change to one
+ *   save_product_google_text                        — a product's Google title and description
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
- * touch a published article, a price, a product or an order. A published
- * article is changed in the admin, where its autosave goes live — never
- * from a chat in another product.
+ * touch a published article, a price, a product's own text or an order. A
+ * published article is changed in the admin, where its autosave goes live —
+ * never from a chat in another product.
+ *
+ * The one live write is a product's Google pair (Dim, 25.10.2026: Renat's
+ * panel button wrote «других сведений нет» into 29 of them, and he would
+ * rather have his Claude write them). It is what a search result shows and
+ * nothing a shopper reads on the page, it is checked the way the panel's own
+ * answer is (length, language, no talk about missing data), and it lands in
+ * the change journal as an ordinary product change with what it replaced —
+ * «Вернуть» there puts the old pair back from any device.
  *
  * Every product a tool names comes from the shop's own data
  * (shopProducts() in src/lib/merchant-feed.ts — hidden ones are not there),
@@ -20,6 +29,10 @@
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { writeAuditSafe } from "@/lib/orders";
+import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
+import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
+import { productUrls as pingUrls } from "@/lib/indexnow.mjs";
+import { submitIndexNow } from "@/lib/indexnow-ping";
 import { publicPath } from "@/lib/shop-paths.mjs";
 import { catName, slugify } from "@/lib/seo-head.mjs";
 import type { ToolDef, ToolResult } from "@/lib/mcp/protocol";
@@ -216,6 +229,42 @@ export const TOOLS: ToolDef[] = [
     annotations: READ,
   },
   {
+    name: "save_product_google_text",
+    title: "Записать Google-тексты товара",
+    description:
+      "Write a product's Google search texts — the title and the description Google shows for its page — in Russian (ru), " +
+      "Estonian (et) and/or English (en). Read the product with get_product first and write from its description only: never " +
+      "invent an effect, an ingredient or an audience it does not state. title: at most 60 characters — the brand, the maker's " +
+      "product name exactly as get_product spells it, then what it is in that language («Kevin.Murphy Rough.Rider — глина для " +
+      "укладки», «… — viimistlussavi», «… — styling clay»). description: at most 155 characters — what it is and whom it suits, " +
+      "then the one thing that decides the purchase; no price, no «купить», no delivery promise, and never a sentence about " +
+      "missing information. et and en are written in that language — a Russian word there is refused. Languages you leave out " +
+      "keep their current text. It is saved at once and is live; each save is a line in Админка → Журнал with «Вернуть».",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The product id from search_products." },
+        ru: { $ref: "#/$defs/pair" },
+        et: { $ref: "#/$defs/pair" },
+        en: { $ref: "#/$defs/pair" },
+      },
+      required: ["id"],
+      additionalProperties: false,
+      $defs: {
+        pair: {
+          type: "object",
+          properties: {
+            title: { type: "string", maxLength: 70 },
+            description: { type: "string", maxLength: 170 },
+          },
+          required: ["title", "description"],
+          additionalProperties: false,
+        },
+      },
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -265,7 +314,9 @@ export const INSTRUCTIONS =
   "blog articles with the shop's real products. Before you name a product, find it with search_products and use its exact " +
   "name and page address; never link a product that search does not return. Write in Russian unless the owner asks otherwise. " +
   "Cosmetic effects only — no medical or treatment claims. When the owner is happy with an article, save it with save_draft: " +
-  "it is saved as a draft and the owner publishes it in Админка → Блог. Answer the owner in his language.";
+  "it is saved as a draft and the owner publishes it in Админка → Блог. It also writes a product's Google texts " +
+  "(save_product_google_text) — from the product's own description (get_product), checked and saved live, with «Вернуть» " +
+  "in the admin's journal. Answer the owner in his language.";
 
 const ok = (v: unknown): ToolResult => ({ text: JSON.stringify(v, null, 2) });
 const no = (text: string): ToolResult => ({ text, isError: true });
@@ -300,6 +351,8 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       photos: p.photos,
       url: productUrls(base, p.id),
       description: Object.fromEntries(Object.entries(p.texts).map(([l, t]) => [l, plain(String(t)).slice(0, 1500)])),
+      /* what the owner wrote for Google, when anything — save_product_google_text changes it */
+      google_text: googleOut(await getSeoOverride(p.id)),
     });
   }
 
@@ -349,7 +402,70 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
   }
 
   if (name === "save_draft") return saveDraft(args);
+  if (name === "save_product_google_text") return saveProductGoogleText(args);
   return no(`Unknown tool «${name}».`);
+}
+
+/* ---------- a product's Google pair ---------- */
+
+const GOOGLE_TITLE_MAX = 70;   // the panel's field; the tool asks for 60
+const GOOGLE_DESC_MAX = 170;   // the panel's field; the tool asks for 155
+
+/** The stored shape ({RU:{title,desc}}) as the tool speaks it ({ru:{title,description}}); null when nothing is written. */
+function googleOut(seo: SeoOverride | null): Record<string, { title: string; description: string }> | null {
+  if (!seo) return null;
+  const out: Record<string, { title: string; description: string }> = {};
+  for (const l of LANGS3) {
+    const pair = seo[l];
+    if (pair && (pair.title || pair.desc)) out[l.toLowerCase()] = { title: pair.title ?? "", description: pair.desc ?? "" };
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+async function saveProductGoogleText(args: Record<string, unknown>): Promise<ToolResult> {
+  const id = typeof args.id === "string" ? args.id.trim().toLowerCase() : "";
+  const { list } = await productsNow();
+  const p = list.find((x) => x.id === id);
+  if (!p) return no(`No product «${id}» in the shop — find it with search_products first. Nothing was saved.`);
+
+  const given: Partial<Record<L3, { title: string; desc: string }>> = {};
+  for (const l of LANGS3) {
+    const v = args[l.toLowerCase()];
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const src = v as Record<string, unknown>;
+    const title = typeof src.title === "string" ? src.title.replace(/\s+/g, " ").trim() : "";
+    const desc = typeof src.description === "string" ? src.description.replace(/\s+/g, " ").trim() : "";
+    if (!title || !desc) return no(`${l}: both a title and a description, please. Nothing was saved.`);
+    if (title.length > GOOGLE_TITLE_MAX) return no(`${l} title is ${title.length} characters — at most 60 (Google cuts the rest). Nothing was saved.`);
+    if (desc.length > GOOGLE_DESC_MAX) return no(`${l} description is ${desc.length} characters — at most 155 (Google cuts the rest). Nothing was saved.`);
+    /* the panel's own net (src/lib/ai-prompts.ts): a sentence about missing
+       data is not a description */
+    if (seoDropMetaTalk(desc) !== desc) {
+      return no(`The ${l} description talks about missing information («${desc.slice(0, 90)}») — write about the product from its description instead. Nothing was saved.`);
+    }
+    if (seoOffLanguage(`${title}\n${desc}`, l, { name: p.names.RU, brand: p.brand })) {
+      return no(`The ${l} texts still have Russian words in them — write every word in ${l === "ET" ? "Estonian" : "English"} except the brand and the maker's product name. Nothing was saved.`);
+    }
+    given[l] = { title, desc };
+  }
+  if (!Object.keys(given).length) return no("Send at least one of ru, et, en with a title and a description. Nothing was saved.");
+
+  const was = await getSeoOverride(p.id);
+  const next: SeoOverride = { ...(was ?? {}) };
+  for (const l of LANGS3) if (given[l]) next[l] = given[l];
+  const saved = await setSeoOverride(p.id, next);
+  /* An ordinary product change in the journal, with the pair it replaced:
+     «Вернуть» there sends {seo: <old>} back through PUT /api/admin/overrides
+     (src/lib/audit-undo.ts) — on any device, like the panel's own edits. */
+  await writeAuditSafe("admin", "override.set", { id: p.id, patch: { seo: saved }, via: "claude" }, { before: { seo: was ?? null } });
+  submitIndexNow(pingUrls(p.id));
+  return ok({
+    saved: LANGS3.filter((l) => given[l]).map((l) => l.toLowerCase()),
+    product: `${p.brand} ${p.names.RU}`,
+    google_text: googleOut(saved),
+    next: "Live now (search engines re-read the page in their own time). The owner sees it in Админка → Товары → this product → «Для Google», " +
+      "and «Вернуть» on its line in Админка → Журнал puts the old texts back.",
+  });
 }
 
 type LangIn = { title?: unknown; excerpt?: unknown; body?: unknown };

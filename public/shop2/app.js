@@ -38628,10 +38628,16 @@
       if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
       else toast("Не получилось — попробуйте ещё раз");
     };
-    langs.forEach(function (L) {
+    /* The description goes with it — the text in the box on screen, the
+       saved one, the shop's own, in that language or else Russian. Until
+       25.10.2026 only the name did, and the snippet the model wrote was
+       about the missing data: «Других сведений о продукте нет» on 29
+       products (Renat). The description files are fetched first if the
+       panel has not needed them yet. */
+    var send = function () { langs.forEach(function (L) {
       apiSend("/api/admin/ai/text/", "POST", {
         task: "seo", lang: L,
-        input: { kind: "product", name: p.name, brand: p.brand, category: CAT_NAMES[p.cat] || p.cat },
+        input: { kind: "product", name: p.name, brand: p.brand, category: CAT_NAMES[p.cat] || p.cat, summary: seoSummaryFor(p, L) },
       }).then(function (r) {
         if (r.status === 200 && r.body.ok && r.body.text) {
           var hooks = SEO_HOOKS[L] || SEO_HOOKS.RU;
@@ -38643,7 +38649,22 @@
         else failed = (r.body && r.body.error) || "error";
         done();
       }).catch(function () { failed = "error"; done(); });
-    });
+    }); };
+    contentWantAll().then(send, send);
+  }
+  /** What a product's Google text is written from: its description in `L` —
+      the box on screen, the saved text, the shop's own — else the Russian
+      one, else the English; plain text, at most 800 characters. */
+  function seoSummaryFor(p, L) {
+    var pick = function (code) {
+      var el = document.querySelector(DESC_HOOKS[code]);
+      var own = (el && el.value.trim()) || (p.descOv && p.descOv[code]) || "";
+      var shop = code === "RU" ? (typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || ""
+        : code === "ET" ? (typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) || ""
+        : (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
+      return unentity(stripTags(own || shop)).replace(/\s+/g, " ").trim();
+    };
+    return (pick(L) || pick("RU") || pick("EN")).slice(0, 800);
   }
   /* ---- «✨» — the short texts the assistant writes in place ------------------
      One helper for every field that got a spark: the banner slide, the

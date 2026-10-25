@@ -203,7 +203,7 @@ describe("the connector, end to end", () => {
     expect(note.status).toBe(202);
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
-      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_draft"],
+      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text", "save_draft"],
     );
   });
 
@@ -324,6 +324,58 @@ describe("the connector, end to end", () => {
     expect(p!.body.EN).toContain('<a href="/products/kevin-murphy-angel-wash">Angel.Wash</a>');
     const bad = await tool(t.access_token, "save_draft", { cover: "https://stock.example/x.jpg", ru: { title: "x", body: "<p>y</p>" } });
     expect(bad.isError).toBe(true);
+  });
+
+  /* Renat's panel button wrote «других сведений нет» into 29 products' Google
+     texts (25.10.2026); his Claude writes them now — checked the way the
+     panel's answer is, live, and back with «Вернуть» from the journal. */
+  it("writes a product's Google texts, keeps the languages it was not given, and journals the old ones for «Вернуть»", async () => {
+    const { getSeoOverride, setSeoOverride } = await import("@/lib/product-seo");
+    const { listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    await setSeoOverride(id, { RU: { title: "Старый заголовок", desc: "Старое описание." } });
+
+    const r = await tool(t.access_token, "save_product_google_text", {
+      id,
+      et: { title: "Kevin.Murphy Angel.Wash — šampoon", description: "Õrn šampoon peentele ja värvitud juustele: puhastab ja lisab kohevust." },
+      en: { title: "Kevin.Murphy Angel.Wash — shampoo", description: "A gentle shampoo for fine, coloured hair: cleanses and adds volume." },
+    });
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text).saved).toEqual(["et", "en"]);
+    const seo = await getSeoOverride(id);
+    expect(seo!.RU).toEqual({ title: "Старый заголовок", desc: "Старое описание." });
+    expect(seo!.ET!.title).toBe("Kevin.Murphy Angel.Wash — šampoon");
+    expect(seo!.EN!.desc).toContain("fine, coloured hair");
+    const read = JSON.parse((await tool(t.access_token, "get_product", { id })).text);
+    expect(read.google_text.et.title).toBe("Kevin.Murphy Angel.Wash — šampoon");
+
+    // the journal line puts the old pair back from any device
+    const rows = journalRows(await listAudit(10));
+    const line = rows.find((x) => x.action === "override.set" && (x.payload as { id?: string }).id === id);
+    expect(line!.undo).toEqual({ kind: "override", id, patch: { seo: { RU: { title: "Старый заголовок", desc: "Старое описание." } } } });
+  });
+
+  it("refuses a Google text that is too long, talks about missing data, or is Russian on the Estonian page — and saves nothing", async () => {
+    const { getSeoOverride } = await import("@/lib/product-seo");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    const pair = (title: string, description: string) => ({ title, description });
+    const refused = [
+      { id, ru: pair("К".repeat(71), "Шампунь для тонких волос.") },
+      { id, ru: pair("Kevin.Murphy Angel.Wash — шампунь", "Шампунь для ухода за волосами. Других сведений о продукте нет.") },
+      { id, en: pair("Kevin.Murphy Angel.Wash — shampoo", "A shampoo for hair care. The catalogue gives no further product details.") },
+      { id, et: pair("Kevin.Murphy Angel.Wash — шампунь", "Õrn šampoon peentele juustele.") },
+      { id: "made-up", ru: pair("Заголовок", "Описание товара.") },
+      { id },
+    ];
+    for (const args of refused) {
+      const r = await tool(t.access_token, "save_product_google_text", args);
+      expect(r.isError, JSON.stringify(args)).toBe(true);
+      expect(r.text).toContain("Nothing was saved");
+    }
+    expect(await getSeoOverride(id)).toBeNull();
   });
 
   it("reads an article back in the language asked for", async () => {

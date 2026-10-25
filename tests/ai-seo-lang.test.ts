@@ -190,12 +190,16 @@ describe("«Заполнить автоматически · все три яз�
     };
     const fill = new Function(
       "S", "document", "apiSend", "CAT_NAMES", "SEO_HOOKS", "txt", "admFill", "edLangStatePaint",
-      "goodsNewPaint", "toast", "edAsTextNow", "SRV", "render",
+      "goodsNewPaint", "toast", "edAsTextNow", "SRV", "render", "contentWantAll", "seoSummaryFor",
       `${slice("txt")}\n${slice("admSeoFill")}\nreturn admSeoFill;`,
     )(
       { adminEdit: p.id }, { querySelector: (s: string) => fields[s] || null }, apiSend, CAT_NAMES, SEO_HOOKS,
       undefined, (el: { value: string }, v: string) => { el.value = v; }, () => {},
       () => {}, (m: string) => toasts.push(m), (_k: string, msg: string) => { toasts.push(msg); finished(); }, {}, () => {},
+      /* the description files, and the description each language is written
+         from (seoSummaryFor — tests/ai-seo-meta-talk.test.ts) */
+      () => Promise.resolve([true, true, true]),
+      (_p: unknown, L: string) => ({ RU: "Мягкий шампунь для ежедневного мытья.", ET: "Õrn šampoon igapäevaseks pesuks.", EN: "A gentle everyday shampoo." } as Record<string, string>)[L],
     ) as (p: unknown, langs: string[], btn: { disabled: boolean; textContent: string }) => void;
     const btn = { disabled: false, textContent: "✨ Заполнить автоматически" };
     fill(p, ["RU", "ET", "EN"], btn);
@@ -216,6 +220,8 @@ describe("«Заполнить автоматически · все три яз�
     const { pair, sent } = await press(SHAMPOO);
 
     expect(sent.map((s) => s.lang).sort()).toEqual(["EN", "ET", "RU"]);
+    // each language goes with its own description to write from (25.10.2026)
+    for (const s of sent) expect(s.input.summary, s.lang).toBeTruthy();
     expect(asked.map((a) => a.lang).sort()).toEqual(["EN", "ET", "RU"]);
     for (const a of asked) {
       expect(a.system, a.lang).toContain(`«${words[a.lang][0]}»`);

@@ -63,7 +63,7 @@ import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
 import {
-  AiInputError, buildPrompt, isAiTask, LANGS3, POST_EDIT_PRODUCTS_MAX, POST_PRODUCTS_MAX, seoOffLanguage, seoProductName,
+  AiInputError, buildPrompt, isAiTask, LANGS3, POST_EDIT_PRODUCTS_MAX, POST_PRODUCTS_MAX, seoDropMetaTalk, seoOffLanguage, seoProductName,
   type AiTask, type Lang3,
 } from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
@@ -544,6 +544,15 @@ export async function POST(req: NextRequest) {
     const seoIn = (body.input && typeof body.input === "object" ? body.input : {}) as Record<string, unknown>;
     if (task === "seo" && seoIn.kind !== "post" && seoIn.kind !== "blog" && result.text && typeof result.text === "object") {
       const t = result.text as { title?: string; description?: string };
+      /* A sentence about missing data instead of the product is dropped
+         (seoDropMetaTalk); a snippet with nothing left is not one. */
+      if (t.description) {
+        t.description = seoDropMetaTalk(t.description);
+        if (!t.description) {
+          console.error("[admin/ai/text] product snippet said only that the data was missing", lang);
+          return NextResponse.json({ ok: false, error: "empty_snippet" }, { status: 502 });
+        }
+      }
       if (seoOffLanguage(`${t.title ?? ""}\n${t.description ?? ""}`, lang, body.input)) {
         console.error("[admin/ai/text] product snippet came back in the wrong language", lang);
         return NextResponse.json({ ok: false, error: "wrong_language" }, { status: 502 });

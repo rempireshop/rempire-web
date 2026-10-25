@@ -29,9 +29,14 @@ he checks it in Админка → Блог and publishes it there.*
 * Там: проверить, поставить обложку, при необходимости «Перевести на ET и EN» — и «Опубликовать».
   Или сразу попросить Claude: «сохрани и переведи на эстонский и английский».
 
-**Что Claude может и чего не может:** искать товары, читать статьи, сохранять **черновики**.
-Опубликовать, удалить, поменять опубликованную статью, цены, товары, увидеть заказы и
-клиентов — **не может**. Отключить — в тех же настройках Claude; смена пароля админки
+**Тексты товаров для Google** (с 25.10.2026): «напиши Google-тексты для Kevin.Murphy Rough.Rider на
+трёх языках и сохрани» или «…для всех товаров Kevin.Murphy». Claude читает описание товара и пишет
+заголовок и описание для поиска Google на RU/ET/EN — сохраняется **сразу**, видно в Админке → Товары →
+товар → «Для Google». В Админке → **Журнал** у каждой такой записи есть **«Вернуть»**.
+
+**Что Claude может и чего не может:** искать товары, читать статьи, сохранять **черновики**,
+записывать **тексты товаров для Google**. Опубликовать, удалить, поменять опубликованную статью,
+цены, описание товара, увидеть заказы и клиентов — **не может**. Отключить — в тех же настройках Claude; смена пароля админки
 отключает его сразу.
 
 ## How it works
@@ -73,7 +78,7 @@ opens: drafts only.
 admin login already needs.
 
 **The tools** — `search_products`, `get_product`, `list_sections`, `list_posts`, `get_post`
-(read) and `save_draft` (write). `save_draft`:
+(read), `save_draft` and `save_product_google_text` (write). `save_draft`:
 
 * `ru` required, `et`/`en` optional; HTML (or markdown) through the blog's own `sanitizeHtml()`;
 * a link to a product page (`https://rempireshop.com/…/products/ID`, a relative path or
@@ -89,6 +94,17 @@ admin login already needs.
 * without `slug` — a new draft; with a draft's slug — the languages sent replace theirs, the rest
   (cover, other languages, tags unless sent) stays; a **published** article is refused.
 * journal line `mcp.save_draft`.
+
+`save_product_google_text` (25.10.2026 — Renat's panel button had written «других сведений нет»
+into 29 products, and his Claude writes better): a product's Google pair, `ru`/`et`/`en` each
+`{title, description}`, the same storage as the panel's «Для Google» (`setSeoOverride()`,
+`src/lib/product-seo.ts`). Held the way the panel's own AI answer is: title ≤ 70 (asked for 60),
+description ≤ 170 (asked for 155), no sentence about missing data (`seoDropMetaTalk()`), no
+Russian word on the ET/EN pair outside the brand and the maker's name (`seoOffLanguage()`) —
+anything refused saves nothing. Languages not sent keep theirs. Written as an `override.set`
+journal line with `via: "claude"` and the pair it replaced as `prev`, so «Вернуть» in the panel's
+journal puts the old texts back from any device (`src/lib/audit-undo.ts`); IndexNow hears about
+the page. `get_product` shows the current pair as `google_text`.
 
 **Adding it in Claude Code** (for testing): `claude mcp add --transport http rempire https://rempireshop.com/api/mcp`,
 then `/mcp` → authenticate; loopback callbacks are accepted on any port.

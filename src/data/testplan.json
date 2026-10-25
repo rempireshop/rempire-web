@@ -8883,7 +8883,7 @@
       "lang": "RU",
       "title": "Заголовок и описание для Google",
       "steps": [
-        "Открыть товар и развернуть «Для Google» внизу.",
+        "Открыть товар с описанием, например Blow.Dry Wash, и развернуть «Для Google».",
         "Нажать «✨ Заполнить автоматически · все три языка».",
         "Прочитать «Заголовок» и «Описание» на RU, ET и EN.",
         "На вкладке English стереть заголовок и нажать «✨ Заполнить только по-английски».",
@@ -8892,7 +8892,7 @@
       "expect": [
         "Заголовок помещается в одну строчку, в нём есть название товара.",
         "На ET и EN обе строчки на своём языке, без русских слов — «šampoon», «shampoo».",
-        "Описание — одно-два предложения, не оборванных на середине.",
+        "Описание — о самом товаре, из его описания; без «сведений нет», не оборвано.",
         "Цены в этих двух строчках нет.",
         "Обещаний доставки в них тоже нет.",
         "«Заполнить только по-английски» меняет лишь английскую пару."
@@ -8903,7 +8903,7 @@
       "en": {
         "title": "The title and description for Google",
         "steps": [
-          "Open a product and unfold «Для Google» at the bottom.",
+          "Open a product with a description, e.g. Blow.Dry Wash, and expand «Для Google».",
           "Press «✨ Заполнить автоматически · все три языка» — fill all three languages.",
           "Read «Заголовок» and «Описание» (title, description) in RU, ET and EN.",
           "On the English tab clear the title and press «✨ Заполнить только по-английски» (English only).",
@@ -8912,7 +8912,7 @@
         "expect": [
           "The title fits on one line and carries the product name.",
           "In ET and EN both lines are in that language, no Russian word — «šampoon», «shampoo».",
-          "The description is one or two sentences, not cut off.",
+          "The description is about the product, from its text; no «no further details», not cut off.",
           "Neither line names a price.",
           "Neither line promises a delivery.",
           "«Заполнить только по-английски» changes the English pair alone."
@@ -8920,7 +8920,7 @@
         "why": "These are the lines a person in Google decides by."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T22:21:39.202Z"
+      "markedAt": "2026-10-25T18:42:03.108Z"
     },
     {
       "id": "ai-blog-outline",
@@ -9163,20 +9163,22 @@
         "Нажать «Подключить», ввести пароль от админки, нажать «Разрешить».",
         "В новом чате: «Напиши короткую статью про масла для бороды с товарами из магазина».",
         "Попросить: «Сохрани в блог как черновик».",
-        "Открыть Админку → «Блог» и эту статью."
+        "Открыть Админку → «Блог» и эту статью.",
+        "Попросить: «Напиши Google-тексты для Kevin.Murphy Rough.Rider на трёх языках и сохрани»."
       ],
       "expect": [
         "Страница магазина говорит, что Claude сможет и чего не сможет.",
         "После «Разрешить» Claude показывает коннектор подключённым.",
         "В статье настоящие товары магазина со ссылками на них.",
         "Статья в «Блоге» — черновик, не опубликована.",
-        "Карточки товаров в тексте видны и удаляются, как обычно."
+        "Карточки товаров в тексте видны и удаляются, как обычно.",
+        "У Rough.Rider в «Для Google» тексты от Claude; в «Журнале» строчка с «Вернуть»."
       ],
       "why": "Ренат пишет статьи в Claude: без подключения Claude не знает товаров магазина и их адресов, а текст приходилось переносить руками.",
       "risk": "med",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-10-20T17:41:27.857Z",
+      "markedAt": "2026-10-25T18:42:03.108Z",
       "en": {
         "title": "Claude is connected to the shop and saves a draft",
         "steps": [
@@ -9184,14 +9186,16 @@
           "Press «Connect», enter the admin password, press «Разрешить».",
           "In a new chat: «Напиши короткую статью про масла для бороды с товарами из магазина».",
           "Ask: «Сохрани в блог как черновик».",
-          "Open Admin → «Блог» and that article."
+          "Open Admin → «Блог» and that article.",
+          "Ask: «Write Google texts for Kevin.Murphy Rough.Rider in three languages and save them»."
         ],
         "expect": [
           "The shop's page says what Claude will and will not be able to do.",
           "After «Разрешить» Claude shows the connector as connected.",
           "The article names real shop products with links to them.",
           "The article in «Блог» is a draft, not published.",
-          "Product cards in the text show and can be removed as usual."
+          "Product cards in the text show and can be removed as usual.",
+          "Rough.Rider's «Для Google» holds Claude's texts; «Журнал» has a line with «Вернуть»."
         ],
         "why": "Renat writes articles in Claude: without the connection Claude does not know the shop's products or their addresses, and the text had to be moved over by hand."
       }
