@@ -484,7 +484,8 @@ export const TOOLS: ToolDef[] = [
       "page (page: brand, key: the brand as list_sections spells it), in RU, ET and EN: the Google title, the Google " +
       "description and the line under the page's heading — what the page shows now, and which of them the owner wrote " +
       "himself (by_owner). An intro of null is the shop's generic line («Всё, что есть в наличии от …»). Read it before " +
-      "save_page_text.",
+      "save_page_text — and to translate a page: take the language the owner wrote (usually RU, see by_owner) from here " +
+      "and save its Estonian and English with save_page_text.",
     inputSchema: {
       type: "object",
       properties: {
@@ -504,7 +505,9 @@ export const TOOLS: ToolDef[] = [
       "title, at most 60 characters; description — the Google description, at most 155 characters, what the page offers " +
       "and the one thing that makes someone click; intro — the paragraph under the page's heading, plain text, one " +
       "paragraph, at most 1200 characters. Only facts the owner gave you or the shop's own products show — no prices, no " +
-      "promises about delivery times, never a sentence about missing information. et and en are written in that language. " +
+      "promises about delivery times, never a sentence about missing information. et and en are written in that language — " +
+      "when the owner asks to translate, translate his own text (get_page_texts) faithfully, keep brand and product names as " +
+      "they are, and send all the fields he wrote. " +
       "A field you leave out keeps its text; an empty string \"\" gives that field back to the shop's standard text. Live " +
       "in the shop at once; the static pages search engines read are rebuilt within about a quarter of an hour. Each save " +
       "is a line in Админка → Журнал.",
@@ -589,8 +592,10 @@ export const INSTRUCTIONS =
   "product hidden (create_product: the owner adds photos and shows it in the admin), and the words of a section or brand " +
   "page (get_page_texts, save_page_text) — when the owner " +
   "asks: read the product with get_product first, show the owner what you will save, then save. A price change of more " +
-  "than 30 % needs his explicit yes first. Those are live at once, checked like the admin's own fields, and every change " +
-  "but a count has «Вернуть» in Админка → Журнал. Answer the owner in his language.";
+  "than 30 % needs his explicit yes first. Every text the shop shows is in Russian (ru), Estonian (et) and English (en): " +
+  "when he writes or changes one in Russian, offer to translate it, and when he asks, translate his words faithfully into " +
+  "et and en and save them with the same tool. Those are live at once, checked like the admin's own fields, and every " +
+  "change but a count has «Вернуть» in Админка → Журнал. Answer the owner in his language.";
 
 const ok = (v: unknown): ToolResult => ({ text: JSON.stringify(v, null, 2) });
 const no = (text: string): ToolResult => ({ text, isError: true });

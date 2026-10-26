@@ -666,6 +666,27 @@ describe("the connector, end to end", () => {
     expect(first.undo).toMatchObject({ kind: "setting", key: "page_texts" });
   });
 
+  /* Dim, 26.10.2026: the page texts can be translated — Claude reads the
+     owner's Russian and saves its Estonian and English the same way */
+  it("translates the owner's own Russian page text into et and en", async () => {
+    const { INSTRUCTIONS } = await import("@/lib/mcp/tools");
+    expect(INSTRUCTIONS).toContain("translate his words faithfully into et and en");
+    const t = await tokens();
+    await tool(t.access_token, "save_page_text", { page: "section", key: "styling", ru: { intro: "Воск, паста и глина — укладка от наших барберов." } });
+    const read = JSON.parse((await tool(t.access_token, "get_page_texts", { page: "section", key: "styling" })).text);
+    expect(read.texts.RU).toMatchObject({ intro: "Воск, паста и глина — укладка от наших барберов.", by_owner: ["intro"] });
+    expect(read.texts.ET.by_owner).toEqual([]);
+    const r = await tool(t.access_token, "save_page_text", {
+      page: "section", key: "styling",
+      et: { intro: "Vaha, pasta ja savi — soeng meie barberitelt." },
+      en: { intro: "Wax, paste and clay — styling from our barbers." },
+    });
+    expect(r.isError, r.text).toBe(false);
+    const texts = JSON.parse(r.text).texts;
+    expect([texts.RU.by_owner, texts.ET.by_owner, texts.EN.by_owner]).toEqual([["intro"], ["intro"], ["intro"]]);
+    expect(texts.EN.intro).toBe("Wax, paste and clay — styling from our barbers.");
+  });
+
   it("refuses page texts that are too long, Russian on the Estonian page, or for a page the shop does not have — and saves nothing", async () => {
     const { getSettingRaw } = await import("@/lib/orders");
     const t = await tokens();

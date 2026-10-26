@@ -32827,10 +32827,21 @@
         (f[0] === "intro" && !ph && !val ? '<span class="adm-hint">Пусто — под заголовком стандартная строка магазина.</span>' : "") +
         "</label>";
     }).join("") +
-      (L !== "RU" && own.indexOf("RU") >= 0
-        ? '<button class="adm-link" type="button" data-pttr="' + esc(kind + ":" + key) + '">Перевести с русского</button>'
+      /* on every tab, as in the goods editor (edTrLabel): once the Russian is
+         his own, the Estonian and English standard texts no longer say the
+         same thing — one tap puts his Russian into both (Dim, 26.10.2026) */
+      (own.indexOf("RU") >= 0
+        ? '<button class="adm-link" type="button" data-pttr="' + esc(kind + ":" + key) + '">' + edTrLabel(L.toLowerCase()) + "</button>"
         : "");
     return admFoldHTML("pt:" + kind + ":" + key, esc(ptName(kind, key)), own.length ? admTagHTML("plain", "свои тексты") : "стандартные тексты", body);
+  }
+  /** A translation that came back longer than its box: cut at a word, never
+      mid-word and never with «…» — a Google title with an ellipsis reads as broken. */
+  function ptFit(text, max) {
+    var t = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (t.length <= max) return t;
+    var cut = t.slice(0, max), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "");
   }
   /** The brands the shop shows, as their pages are named. */
   function ptBrands() {
@@ -32875,8 +32886,8 @@
         input: { text: ptGet(kind, key, "RU", f[0]), sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: ["Rempire", kind === "brand" ? key : "Rempire"] }
       }).then(function (r) {
         if (r.status === 200 && r.body && r.body.ok && r.body.texts) {
-          if (r.body.texts.ET) patch[kind][key].ET[f[0]] = String(r.body.texts.ET).slice(0, f[2]);
-          if (r.body.texts.EN) patch[kind][key].EN[f[0]] = String(r.body.texts.EN).slice(0, f[2]);
+          if (r.body.texts.ET) patch[kind][key].ET[f[0]] = ptFit(r.body.texts.ET, f[2]);
+          if (r.body.texts.EN) patch[kind][key].EN[f[0]] = ptFit(r.body.texts.EN, f[2]);
         } else fail = (r.body && r.body.error) || "x";
       }).catch(function () { fail = "x"; }).then(function () {
         if (--left) return;

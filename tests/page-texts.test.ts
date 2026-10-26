@@ -141,6 +141,45 @@ describe("«Настройки → Тексты страниц» (public/shop2/a
     expect(pt.ptActionText({ value: patch })).toBe("Тексты страниц изменены · Уход за бородой · ET");
   });
 
+  /* Dim, 26.10.2026: «make sure that the page texts could be also translated
+     to other languages». The goods editor's translate task, on every tab once
+     the Russian is the owner's own. */
+  it("«Перевести» puts the owner's Russian into ET and EN, every box he wrote, cut at a word", async () => {
+    const lit = (marker: string, end: string) => {
+      const at = APP.indexOf(marker);
+      return APP.slice(at + marker.length, APP.indexOf(end, at) + end.length).replace(/;\s*$/, "");
+    };
+    const sent: Array<{ input: { text: string; keepNames: string[] } }> = [];
+    const applied: Array<{ value: Record<string, Record<string, Record<string, Record<string, string>>>> }> = [];
+    const longEn = "Beard care from our barbers: oils, balms and shaving " + "products ".repeat(10);
+    const DEMO = { pageTexts: { cat: {}, brand: { "Kevin.Murphy": { RU: { title: "Kevin.Murphy — уход", intro: "Австралийский уход." } } } } };
+    const ptTranslate = new Function("DEMO", "apiSend", "admSetApply", `
+      var PT_FIELDS = ${lit("var PT_FIELDS = ", "\n  ];")};
+      function toast() {} function render() {} function admSetWhenReady(fn) { fn(); return null; }
+      ${["ptCopy", "ptDoc", "ptGet", "ptFit", "ptTranslate"].map(sliceFn).join("\n")}
+      return ptTranslate;
+    `)(DEMO, (_u: string, _m: string, body: { input: { text: string; keepNames: string[] } }) => {
+      sent.push(body);
+      const ru = body.input.text;
+      return Promise.resolve({ status: 200, body: { ok: true, texts: ru.startsWith("Kevin") ? { ET: "Kevin.Murphy — hooldus", EN: longEn } : { ET: "Austraalia hooldus.", EN: "Australian care." } } });
+    }, (a: { value: never }) => { applied.push(a); });
+    const btn = { disabled: false, textContent: "Перевести на ET и EN" };
+    ptTranslate(btn, "brand:Kevin.Murphy");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(sent.map((b) => b.input.text).sort()).toEqual(["Kevin.Murphy — уход", "Австралийский уход."]);
+    expect(sent[0].input.keepNames).toContain("Kevin.Murphy");
+    const p = applied[0].value.brand["Kevin.Murphy"];
+    expect(p.ET).toEqual({ title: "Kevin.Murphy — hooldus", intro: "Austraalia hooldus." });
+    expect(p.EN.intro).toBe("Australian care.");
+    expect(p.EN.title.length).toBeLessThanOrEqual(70);
+    expect(p.EN.title).not.toMatch(/…$|\s$/);
+    expect(longEn.startsWith(p.EN.title)).toBe(true);
+    expect(btn).toEqual({ disabled: false, textContent: "Перевести на ET и EN" });
+    // offered on every tab once the Russian is his own — the goods editor's label
+    expect(sliceFn("ptFoldHTML")).toContain('(own.indexOf("RU") >= 0');
+    expect(sliceFn("ptFoldHTML")).toContain("edTrLabel(L.toLowerCase())");
+  });
+
   it("is a settings page with its own slot, journal line and «Вернуть» from any device", () => {
     expect(APP).toContain('["texts", "Тексты страниц", "разделы и бренды — для Google и под заголовком"]');
     expect(APP).toContain('if (page === "texts") return admSetTextsHTML();');
