@@ -8566,6 +8566,11 @@
        EN panel although both dictionaries had them. */
     var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title],[label]") : [];
     for (var i = 0; i < els.length; i++) {
+      /* a box that carries [data-notr] itself shows a text in ITS language —
+         «Тексты страниц» puts the Russian standard line in grey on the RU tab,
+         and the dictionary knows that line, so an English panel showed it in
+         English there (live test, 26.10.2026) */
+      if (els[i].hasAttribute && els[i].hasAttribute("data-notr")) continue;
       for (var a = 0; a < TR_ATTRS.length; a++) {
         var v = els[i].getAttribute(TR_ATTRS[a]);
         if (v && /[А-Яа-яЁё]/.test(v)) {
@@ -32833,8 +32838,9 @@
       var val = ptGet(kind, key, L, f[0]);
       var ph = std[f[0]] || "";
       var box = f[0] === "title"
-        ? '<input class="adm-input" maxlength="' + f[2] + '" data-autosave="' + esc(as) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '">'
-        : '<textarea class="adm-input" rows="' + (f[0] === "intro" ? 4 : 2) + '" maxlength="' + f[2] + '" data-autosave="' + esc(as) +
+        // data-notr: the grey standard text is in the TAB's language, never the panel's (translateTree)
+        ? '<input class="adm-input" data-notr maxlength="' + f[2] + '" data-autosave="' + esc(as) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '">'
+        : '<textarea class="adm-input" data-notr rows="' + (f[0] === "intro" ? 4 : 2) + '" maxlength="' + f[2] + '" data-autosave="' + esc(as) +
             '" placeholder="' + esc(ph) + '">' + esc(val) + "</textarea>";
       return '<label class="adm-field">' + f[1] + box + admAutosaveHintHTML(as) +
         '<span class="adm-hint">' + f[3] + "</span>" +

@@ -190,6 +190,11 @@ describe("«Настройки → Тексты страниц» (public/shop2/a
     expect(APP).toContain('else if (a.type === "set_page_texts") ptSet(a);');
     // never a whole-document write before the panel has read the document
     expect(sliceFn("ptAs")).toContain("admSetWhenReady(");
+    /* the grey standard text stays in the tab's language: an English panel
+       showed the Russian tab's standard line in English (live test, 26.10.2026) */
+    expect(sliceFn("ptFoldHTML")).toContain('<input class="adm-input" data-notr ');
+    expect(sliceFn("ptFoldHTML")).toContain('<textarea class="adm-input" data-notr ');
+    expect(sliceFn("translateTree")).toContain('if (els[i].hasAttribute && els[i].hasAttribute("data-notr")) continue;');
   });
 });
 
