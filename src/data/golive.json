@@ -1902,6 +1902,21 @@
     {
       "area": "ho-docs",
       "blocking": false,
+      "id": "ho-doc-ai",
+      "who": [
+        "claude"
+      ],
+      "status": "doing",
+      "title": "Claude и Помощник — что умеют и как спрашивать",
+      "detail": "Отдельная бумага для Рената: что умеют оба, только Помощник, только Claude, чего не делает никто; 7 правил, как спрашивать; готовые фразы; что делать, если «текст не прошёл проверку». Черновик 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; перед передачей сверить с магазином.",
+      "en": {
+        "title": "Claude and the assistant — what they do and how to ask",
+        "detail": "A paper of its own for Renat: what both do, the assistant only, Claude only, neither; 7 rules on how to ask; ready phrases; what to do when «the text did not pass the shop's check». Draft 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; check against the shop before the handover."
+      }
+    },
+    {
+      "area": "ho-docs",
+      "blocking": false,
       "id": "ho-doc-tech",
       "who": [
         "claude"
