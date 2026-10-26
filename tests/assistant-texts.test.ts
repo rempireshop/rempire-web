@@ -189,6 +189,24 @@ describe("POST /api/assistant — the texts reach the prompt, and a refused text
     expect(system).toContain("texts.RU is the source of every translation");
   });
 
+  /* live test, 26.10.2026: «добавь новый товар: бренд, название, 100 мл за 1 €»
+     was refused — «в описании нет текста…, а придумывать описание нельзя».
+     The worked example had made a description up from a request that gave
+     none, and «never a new claim» then read as «no product without one». */
+  it("a new product with no facts is created without a description, never refused for it", async () => {
+    let system = "";
+    vi.stubGlobal("fetch", vi.fn(async (_u: string, init: { body: string }) => {
+      system = JSON.parse(init.body).messages[0].content;
+      return completion({ reply: "ok", product_ids: [], action: null });
+    }));
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(req({ mode: "admin", messages: [{ role: "user", content: "добавь новый товар: Proraso бальзам, 100 мл, 14,90" }] }));
+    expect(system).toContain("a new product never waits for its description");
+    const bare = system.slice(system.indexOf("EXAMPLE — a new product\n"), system.indexOf("EXAMPLE — a new product with the maker's words"));
+    expect(bare).toContain('"type":"create_product"');
+    expect(bare).not.toContain('"description"');
+  });
+
   it("a text the checks refused leaves no card and says why", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => completion({
       reply: "Перевёл описание — подтвердите.",
