@@ -9291,6 +9291,51 @@
       }
     },
     {
+      "id": "ai-claude-price-stock",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Claude меняет цену и остаток",
+      "steps": [
+        "Выбрать товар с двумя объёмами и спросить Claude: «Сколько он стоит и сколько осталось?»",
+        "Попросить поднять цену большего объёма на 1 € и сохранить.",
+        "Попросить поставить меньшему объёму цену 1 €; на вопрос Claude ответить «нет».",
+        "Сказать: «Посчитал: меньшего объёма осталось 3».",
+        "В Админке → «Журнал» нажать «Вернуть» у строчки с ценой."
+      ],
+      "expect": [
+        "Claude называет те же цены и остатки, что в Админке.",
+        "Новая цена сразу в магазине и в корзине.",
+        "Цену 1 € Claude не сохраняет без вашего «да».",
+        "В «Склад → История» строчка «Claude», остаток 3.",
+        "«Вернуть» возвращает прежнюю цену."
+      ],
+      "why": "Цены и пересчёт склада можно поручить своему Claude; ошибка в цене не пройдёт без вашего «да».",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T07:48:04.714Z",
+      "en": {
+        "title": "Claude changes a price and a count",
+        "steps": [
+          "Pick a product with two sizes and ask Claude: «What does it cost and how many are left?»",
+          "Ask it to raise the bigger size's price by 1 € and save.",
+          "Ask it to set the smaller size to 1 €; answer «no» when Claude asks.",
+          "Say: «I counted: 3 of the smaller size left».",
+          "In Admin → «Журнал» tap «Вернуть» on the price line."
+        ],
+        "expect": [
+          "Claude names the same prices and counts as the admin.",
+          "The new price is in the shop and the cart at once.",
+          "Claude does not save 1 € without your «yes».",
+          "«Склад → История» has a «Claude» line, count 3.",
+          "«Вернуть» brings the previous price back."
+        ],
+        "why": "Prices and stock counts can be handed to your own Claude; a price typo does not go through without your yes."
+      }
+    },
+    {
       "id": "ai-assistant-ask",
       "area": "ai",
       "who": "renat",

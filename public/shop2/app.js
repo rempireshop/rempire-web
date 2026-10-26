@@ -2429,6 +2429,7 @@
       "Отправлен — по скану перевозчика": "Teele saadetud — vedaja skannimise järgi",
       "Товар изменён через Claude": "Toodet muudeti Claude'i kaudu",
       "Свой товар изменён через Claude": "Oma toodet muudeti Claude'i kaudu",
+      "Остаток изменён через Claude": "Laoseisu muudeti Claude'i kaudu",
       "Посылка едет, а заказ отменён или деньги возвращены": "Pakk liigub, kuid tellimus on tühistatud või raha tagastatud",
       "Ждём доставки": "Ootame kättetoimetamist",
       "Последний шаг, без письма.": "Viimane samm, ilma kirjata.",
@@ -6018,6 +6019,7 @@
       "Отправлен — по скану перевозчика": "Shipped — by the carrier's scan",
       "Товар изменён через Claude": "Product changed via Claude",
       "Свой товар изменён через Claude": "Own product changed via Claude",
+      "Остаток изменён через Claude": "Stock count changed via Claude",
       "Посылка едет, а заказ отменён или деньги возвращены": "The parcel is moving, but the order is cancelled or refunded",
       "Ждём доставки": "Waiting for delivery",
       "Последний шаг, без письма.": "The last step, no letter.",
@@ -33030,6 +33032,7 @@
     /* a product's words written by the owner's Claude (src/lib/mcp/tools.ts, 26.10.2026) */
     if (p.via === "claude" && row.action === "override.set") word = "Товар изменён через Claude";
     if (p.via === "claude" && row.action === "product.update") word = "Свой товар изменён через Claude";
+    if (p.via === "claude" && row.action === "stock.set") word = "Остаток изменён через Claude";
     // a settings row names the page's own word for its key, as a node of its own
     if (row.action === "setting.set" && typeof p.key === "string" && AUDIT_SETTING_WORDS[p.key]) {
       return "<span>" + esc(word) + "</span>: <span>" + esc(AUDIT_SETTING_WORDS[p.key]) + "</span>";

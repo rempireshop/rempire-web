@@ -43,9 +43,19 @@ he checks it in Админка → Блог and publishes it there.*
 магазин переводит, — и предложит одно из них. Адрес страницы и остатки не меняются; уже сделанные
 заказы остаются со старым названием. **«Вернуть»** — в Журнале, как для всего остального.
 
+**Цены и остатки** (с 26.10.2026): «сколько стоит и сколько осталось Kevin.Murphy Angel.Wash?»,
+«поставь 250 мл 26,90 €», «посчитал: 100 мл осталось 3». Claude читает товар, говорит, что
+поменяет, и сохраняет. Цену, которая меняется **больше чем на 30 %**, он сначала переспросит —
+сохранит только после вашего «да» (защита от опечатки «5 €» вместо «50 €»). Остаток он записывает,
+только если с момента, как он его прочитал, ничего не продали и не отсканировали — иначе скажет
+новое число и спросит ещё раз. Цена — в Журнале с «Вернуть»; остаток — в Складе → История
+(«Claude») и строчкой в Журнале. Если остаток был 0, люди из «Сообщить о наличии» получат письмо,
+как и при записи в Складе.
+
 **Что Claude может и чего не может:** искать товары, читать статьи, сохранять **черновики**,
-менять **описание, название, бренд, раздел** и **тексты для Google** у товара. Опубликовать,
-удалить, поменять опубликованную статью, цены, наличие, увидеть заказы и клиентов — **не может**. Отключить — в тех же настройках Claude; смена пароля админки
+менять у товара **описание, название, бренд, раздел, тексты для Google, цены и остаток**.
+Опубликовать, удалить, поменять опубликованную статью, удалить товар, увидеть заказы и клиентов —
+**не может**. Отключить — в тех же настройках Claude; смена пароля админки
 отключает его сразу.
 
 ## How it works
@@ -87,8 +97,8 @@ opens: drafts only.
 admin login already needs.
 
 **The tools** — `search_products`, `get_product`, `list_sections`, `list_posts`, `get_post`
-(read), `save_draft`, `save_product_google_text`, `save_product_description` and
-`save_product_name` (write). `save_draft`:
+(read), `save_draft`, `save_product_google_text`, `save_product_description`,
+`save_product_name`, `save_product_price` and `save_product_stock` (write). `save_draft`:
 
 * `ru` required, `et`/`en` optional; HTML (or markdown) through the blog's own `sanitizeHtml()`;
 * a link to a product page (`https://rempireshop.com/…/products/ID`, a relative path or
@@ -135,6 +145,23 @@ rules as the panel's «Что за товар» — one line, `MAX_NAME`/`MAX_BR
 `PRODUCT_CATS`, a name `nameTranslatable()` (otherwise refused with what ET/EN would say and the
 whole `TRANSLATABLE_TAILS` list); a section move resets the subsection. Then
 `requestRebuild("product-rename")` and IndexNow. The id, page address and stock key never change.
+
+`save_product_price` (26.10.2026, Dim: a change of more than 30 % needs the owner's yes):
+`prices: [{size?, price}]` against the till's live ladder (`shopProducts()`, or the row of a
+hidden own product); sizes are matched, never added or removed. A catalogue product is written
+the panel's way (`sizesBody()` in `app.js`): one `price`, or the whole `sizes` ladder with its
+first rung as `price`; an own product through `updateCustomProduct()` (and a price override
+sitting on top of its row is dropped, as `edOwnPump()` does). More than 30 % on any rung is
+refused until the same call comes back with `confirm: true`; the tool text tells Claude to ask
+first. Journal + «Вернуть» like the other product writes; IndexNow.
+
+`save_product_stock` (26.10.2026): an absolute count for one size, `count` over `was` — the
+count `get_product` showed in `stock_count` (`shelfCount()`, null = never counted).
+`setQty(…, { expect: was })` compares inside the locked transaction and throws
+`InventoryError("stale")` when a sale or a scan moved the shelf meanwhile; the tool answers with
+the count now and saves nothing. Ledger row `adjust`, ref «Claude», actor `claude`; journal line
+`stock.set` with `via: "claude"` (no «Вернуть» — a count is put right by counting again).
+0 → more fires the back-in-stock letters, as every count does.
 
 **Adding it in Claude Code** (for testing): `claude mcp add --transport http rempire https://rempireshop.com/api/mcp`,
 then `/mcp` → authenticate; loopback callbacks are accepted on any port.

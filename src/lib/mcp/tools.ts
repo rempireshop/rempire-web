@@ -9,11 +9,13 @@
  *   save_product_google_text                        — a product's Google title and description
  *   save_product_description                        — the text on a product's page
  *   save_product_name                               — a product's name, brand and section
+ *   save_product_price                              — its prices, a big change only once confirmed
+ *   save_product_stock                              — a count on the shelf, only over the count it read
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
- * touch a published article, a price, stock or an order. A published article
- * is changed in the admin, where its autosave goes live — never from a chat
- * in another product.
+ * touch a published article, an order or a customer. A published article is
+ * changed in the admin, where its autosave goes live — never from a chat in
+ * another product.
  *
  * The live writes are a product's words (Dim, 25–26.10.2026: Renat's panel
  * button wrote «других сведений нет» into 29 Google texts and he would rather
@@ -25,6 +27,13 @@
  * the change journal with what it replaced: «Вернуть» there puts it back from
  * any device (src/lib/audit-undo.ts).
  *
+ * Prices and counts (Dim, 26.10.2026: «if he can do it through his Claude
+ * that would make it much easier»). A price that moves more than 30 % is
+ * refused until Claude sends it again with `confirm` — after asking the
+ * owner — because a typo there is money; a count is set only over the count
+ * Claude read (`was`), because a sale or a scan in between would otherwise
+ * be wiped by «осталось 6».
+ *
  * Every product a tool names comes from the shop's own data
  * (shopProducts() in src/lib/merchant-feed.ts — hidden ones are not there),
  * and save_draft holds an article to it: a link or a card for an id the
@@ -35,8 +44,10 @@ import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/m
 import { getOverrideRow, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 import { getDescriptionOverride, setDescriptionOverride, type DescriptionOverride } from "@/lib/product-descriptions";
+import { getLevel, InventoryError, setQty, shelfCount, shelfKey } from "@/lib/inventory";
 import {
-  CustomProductError, getCustomProduct, isCustomId, MAX_BRAND, MAX_NAME, ownPrev, PRODUCT_CATS, updateCustomProduct,
+  CustomProductError, getCustomProduct, isCustomId, MAX_BRAND, MAX_NAME, ownPrev, PRICE_MAX, PRICE_MIN, PRODUCT_CATS,
+  updateCustomProduct,
   type CustomProduct,
 } from "@/lib/custom-products";
 import { nameTranslatable, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
@@ -334,6 +345,62 @@ export const TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
+    name: "save_product_price",
+    title: "Изменить цену товара",
+    description:
+      "Change a product's price in euros, VAT included, as the shop sells it — per size for a product with sizes (the size " +
+      "labels get_product lists), or the one price of a product without. Sizes are not added or removed here. A change of " +
+      "more than 30 % up or down is refused unless confirm is true: tell the owner the old and the new price, ask, and send " +
+      "confirm: true only after he says yes. Live at once — the shop, the checkout and the Google feed; each save is a line " +
+      "in Админка → Журнал with «Вернуть».",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The product id from search_products." },
+        prices: {
+          type: "array",
+          minItems: 1,
+          items: {
+            type: "object",
+            properties: {
+              size: { type: "string", description: "The size label from get_product; leave out for a product without sizes." },
+              price: { type: "number", exclusiveMinimum: 0 },
+            },
+            required: ["price"],
+            additionalProperties: false,
+          },
+        },
+        confirm: { type: "boolean", description: "true only after the owner said yes to a change of more than 30 %." },
+      },
+      required: ["id", "prices"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "save_product_stock",
+    title: "Записать остаток товара",
+    description:
+      "Set how many units of a product (one size) are on the shelf after the owner counted them — «осталось 6». was is the " +
+      "count get_product showed for that size in stock_count (null when it said never counted): if the shelf changed since " +
+      "— a sale, a scan — nothing is saved and the answer says the count now; tell the owner and ask again. size is a label " +
+      "from get_product, left out for a product without sizes. The shop's «в наличии / мало / нет» follows the count; " +
+      "going from 0 to more sends the «back in stock» letters to the people who asked for one. The change is in Админка → " +
+      "Склад → История as «Claude» and a line in Админка → Журнал.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The product id from search_products." },
+        size: { type: "string" },
+        count: { type: "integer", minimum: 0, maximum: 100000 },
+        was: { type: ["integer", "null"], minimum: 0, description: "The count get_product showed (stock_count), null for never counted." },
+      },
+      required: ["id", "count", "was"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -385,9 +452,10 @@ export const INSTRUCTIONS =
   "Cosmetic effects only — no medical or treatment claims. When the owner is happy with an article, save it with save_draft: " +
   "it is saved as a draft and the owner publishes it in Админка → Блог. It also changes a product's words — its Google " +
   "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
-  "(save_product_name) — when the owner asks: read the product with get_product first, show the owner what you will save, " +
-  "then save. Those are live at once, checked like the admin's own fields, and every one has «Вернуть» in Админка → " +
-  "Журнал. Answer the owner in his language.";
+  "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock) — when the owner " +
+  "asks: read the product with get_product first, show the owner what you will save, then save. A price change of more " +
+  "than 30 % needs his explicit yes first. Those are live at once, checked like the admin's own fields, and every change " +
+  "but a count has «Вернуть» in Админка → Журнал. Answer the owner in his language.";
 
 const ok = (v: unknown): ToolResult => ({ text: JSON.stringify(v, null, 2) });
 const no = (text: string): ToolResult => ({ text, isError: true });
@@ -430,6 +498,11 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       section: { id: p.cat, RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
       sizes: p.sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
       stock: stockWord(p.stock),
+      /* the count on the shelf per size, null while nobody has counted it —
+         save_product_stock takes it back as `was` */
+      stock_count: await Promise.all(p.sizes.map(async (s) => ({
+        size: s.label, count: await shelfCount(p.id, await shelfKey(p.id, s.label ?? "")),
+      }))),
       photos: p.photos,
       url: productUrls(base, p.id),
       description,
@@ -489,6 +562,8 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
   if (name === "save_product_google_text") return saveProductGoogleText(args);
   if (name === "save_product_description") return saveProductDescription(args);
   if (name === "save_product_name") return saveProductName(args);
+  if (name === "save_product_price") return saveProductPrice(args);
+  if (name === "save_product_stock") return saveProductStock(args);
   return no(`Unknown tool «${name}».`);
 }
 
@@ -636,6 +711,138 @@ async function saveProductName(args: Record<string, unknown>): Promise<ToolResul
     next: "Live in the shop now under the same id and page address. Orders already placed keep the old name. The static pages " +
       "search engines read are rebuilt within about a quarter of an hour. «Вернуть» on its line in Админка → Журнал puts " +
       "the old name back.",
+  });
+}
+
+/* ---------- prices ---------- */
+
+const PRICE_GUARD = 0.3;          // Dim, 26.10.2026: more than 30 % needs the owner's yes
+const CATALOGUE_PRICE_MAX = 100000; // the override route's own bound (src/app/api/admin/overrides/route.ts)
+
+type Rung = { label: string | null; price: number };
+
+/** The prices the till charges now, per size — the shop's own list, or the row of a hidden own product. */
+async function liveRungs(t: Target): Promise<Rung[]> {
+  const shown = (await productsNow()).list.find((p) => p.id === t.id);
+  if (shown) return shown.sizes.map((s) => ({ label: s.label, price: s.price }));
+  if (!t.own) return [];
+  return t.own.sizes.length
+    ? t.own.sizes.map((label, i) => ({ label, price: t.own!.prices[i] ?? t.own!.prices[0] }))
+    : [{ label: null, price: t.own.prices[0] }];
+}
+const sizeList = (rungs: Rung[]) => rungs.map((r) => r.label).filter(Boolean).join(", ");
+
+async function saveProductPrice(args: Record<string, unknown>): Promise<ToolResult> {
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
+  const rungs = await liveRungs(t);
+  if (!rungs.length) return no("This product has no price in the shop yet — it is set in the admin. Nothing was saved.");
+  const asked = Array.isArray(args.prices) ? args.prices : [];
+  if (!asked.length) return no("Send prices: [{ size, price }] — size as get_product lists it, left out for a product without sizes. Nothing was saved.");
+  const max = t.own ? PRICE_MAX : CATALOGUE_PRICE_MAX;
+  const next = rungs.map((r) => ({ ...r }));
+  const named = new Set<number>();
+  for (const item of asked) {
+    const o = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>) : {};
+    const size = oneLine(o.size);
+    const one = rungs.length === 1 && !size;
+    const i = one ? 0 : rungs.findIndex((r) => (r.label ?? "").toLowerCase() === size.toLowerCase());
+    if (i < 0) return no(`No size «${size}» on this product — its sizes: ${sizeList(rungs) || "none, send one price without size"}. Nothing was saved.`);
+    if (named.has(i)) return no(`«${rungs[i].label ?? "the price"}» is named twice. Nothing was saved.`);
+    named.add(i);
+    const n = typeof o.price === "number" ? o.price : Number(String(o.price ?? "").trim().replace(",", "."));
+    if (!Number.isFinite(n) || n < PRICE_MIN || n > max) {
+      return no(`${rungs[i].label ?? "price"}: a price in euros from ${PRICE_MIN} to ${max}. Nothing was saved.`);
+    }
+    next[i].price = Math.round(n * 100) / 100;
+  }
+  const moved = next
+    .map((r, i) => ({ label: r.label, from: rungs[i].price, to: r.price }))
+    .filter((c) => c.from !== c.to);
+  if (!moved.length) return ok({ saved: [], note: "Those are the prices already — nothing changed." });
+  const big = moved.filter((c) => c.from > 0 && Math.abs(c.to - c.from) / c.from > PRICE_GUARD);
+  if (big.length && args.confirm !== true) {
+    return no(big.map((c) => `${c.label ?? "price"} ${eur(c.from)} → ${eur(c.to)} (${Math.round(((c.to - c.from) / c.from) * 100)} %)`).join(", ") +
+      " — more than 30 %. Ask the owner whether this is right; only after his yes send the same prices again with confirm: true. Nothing was saved.");
+  }
+
+  const single = next.length === 1 && !next[0].label;
+  if (t.own) {
+    const fields: Record<string, unknown> = single ? { price: next[0].price } : { sizes: next.map((r) => ({ size: r.label, price: r.price })) };
+    const before = ownPrev(t.own, fields);
+    await updateCustomProduct(t.id, fields);
+    /* a price override on an own product sits on top of the row's price and
+       would hide the new one — the panel drops it the same way (edOwnPump in
+       public/shop2/app.js) */
+    if ((await getOverrideRow(t.id))?.price != null) await upsertOverride(t.id, { price: null });
+    await journal(t, fields, before);
+  } else {
+    /* the panel's own shapes (sizesBody in public/shop2/app.js): one price, or
+       the whole ladder with its first rung as the price */
+    const full: Partial<Override> = single
+      ? { price: next[0].price }
+      : { sizes: next.map((r) => ({ size: r.label ?? "", price: r.price })), price: next[0].price };
+    const old = await getOverrideRow(t.id);
+    const before: Record<string, unknown> = {};
+    for (const k of Object.keys(full) as Array<keyof Override>) before[k] = old?.[k] ?? null;
+    await upsertOverride(t.id, full);
+    await journal(t, full, before);
+  }
+  resetProductCache();
+  submitIndexNow(pingUrls(t.id));
+  return ok({
+    saved: moved.map((c) => ({ size: c.label, from: eur(c.from), to: eur(c.to) })),
+    product: `${t.brand} ${t.name}`,
+    next: "Live now in the shop, the checkout and the Google feed (the static pages follow at the nightly rebuild). «Вернуть» " +
+      "on its line in Админка → Журнал puts the old prices back.",
+  });
+}
+
+/* ---------- a count on the shelf ---------- */
+
+async function saveProductStock(args: Record<string, unknown>): Promise<ToolResult> {
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
+  const count = Number(args.count);
+  if (typeof args.count !== "number" || !Number.isInteger(count) || count < 0 || count > 100000) {
+    return no("count: a whole number of units, 0 or more. Nothing was saved.");
+  }
+  const was = args.was;
+  if (!(was === null || (typeof was === "number" && Number.isInteger(was) && was >= 0))) {
+    return no("was: the count get_product showed for this size in stock_count — null when it said never counted. Nothing was saved.");
+  }
+  const labels = (await liveRungs(t)).map((r) => r.label).filter((l): l is string => !!l);
+  const size = oneLine(args.size);
+  let label = "";
+  if (labels.length) {
+    const hit = size ? labels.find((l) => l.toLowerCase() === size.toLowerCase()) : labels.length === 1 ? labels[0] : undefined;
+    if (!hit) return no(`Which size? ${labels.join(", ")}. Nothing was saved.`);
+    label = hit;
+  } else if (size) {
+    return no("This product has no sizes — leave size out. Nothing was saved.");
+  }
+  const variant = await shelfKey(t.id, label);
+  let from: number;
+  try {
+    from = (await setQty(t.id, variant, count, { reason: "adjust", ref: "Claude", actor: "claude", expect: was })).qtyBefore;
+  } catch (e) {
+    if (e instanceof InventoryError && e.code === "stale") {
+      const now = e.detail === "untracked" ? null : Number(e.detail);
+      return no(`The shelf changed since you read it: ${label || "this product"} is now ${now == null ? "not counted" : now + " pcs"}, ` +
+        `not ${was == null ? "not counted" : was + " pcs"}. Tell the owner and ask again; send was: ${now == null ? "null" : now}. Nothing was saved.`);
+    }
+    throw e;
+  }
+  await writeAuditSafe("admin", "stock.set", { id: t.id, variant, from: was == null ? null : from, to: count, via: "claude" });
+  resetProductCache();
+  const level = await getLevel(t.id, variant);
+  return ok({
+    product: `${t.brand} ${t.name}`,
+    size: label || null,
+    was,
+    count,
+    shop_says: stockWord(level?.state ?? (count > 0 ? "in" : "out")),
+    next: "Saved. The shop shows the new state within a couple of minutes; Админка → Склад → История has the line with «Claude».",
   });
 }
 

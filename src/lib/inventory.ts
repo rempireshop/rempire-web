@@ -611,7 +611,7 @@ export async function setQty(
   productId: string,
   variant: string | null | undefined,
   qty: number,
-  opts: { reason?: MoveReason; ref?: string | null; actor?: string | null } = {},
+  opts: { reason?: MoveReason; ref?: string | null; actor?: string | null; expect?: number | null } = {},
 ): Promise<MoveResult> {
   const pid = String(productId ?? "").trim();
   if (!pid) throw new InventoryError("bad_product");
@@ -625,9 +625,40 @@ export async function setQty(
   const ref = cleanRef(opts.ref);
   const actor = cleanActor(opts.actor);
 
-  const r = await withTx((q) => applyMove(q, pid, v, null, target, reason, ref, actor));
+  const r = await withTx(async (q) => {
+    /* Compare-and-set, for a caller that read the count some time ago (Renat's
+       Claude, src/lib/mcp/tools.ts): `expect` is the count it saw, null for
+       «never counted». Anything else means the shelf moved meanwhile — a sale,
+       a scan — and «осталось 6» set over it would wipe that move. */
+    if (opts.expect !== undefined) {
+      const now = await countedQty(q, pid, v, true);
+      if (now !== opts.expect) throw new InventoryError("stale", now == null ? "untracked" : String(now));
+    }
+    return applyMove(q, pid, v, null, target, reason, ref, actor);
+  });
   if (r.qtyBefore === 0 && r.qtyAfter > 0) await fireBackInStock(pid);
   return r;
+}
+
+/** The count on one shelf row, or null while nobody has counted it (see the module doc). */
+async function countedQty(q: Querier, productId: string, variant: string, lock: boolean): Promise<number | null> {
+  const row = await q<{ qty: number | string }>(
+    `select qty from stock_levels where product_id = $1 and variant = $2${lock ? " for update" : ""}`,
+    [productId, variant],
+  );
+  if (!row.length) return null;
+  const moved = await q<{ ok: number }>(
+    `select 1 as ok from stock_moves where product_id = $1 and variant = $2 and reason in ${TRACKING_SQL} limit 1`,
+    [productId, variant],
+  );
+  return moved.length ? Number(row[0].qty) || 0 : null;
+}
+
+/** What a shelf row holds right now — null for «never counted», what setQty()'s `expect` compares with. */
+export async function shelfCount(productId: string, variant?: string | null): Promise<number | null> {
+  const pid = String(productId ?? "").trim();
+  if (!pid) return null;
+  return countedQty(query, pid, normVariant(variant), false);
 }
 
 /* ---------- a size renamed or removed in the editor -----------------------

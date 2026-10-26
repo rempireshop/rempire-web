@@ -205,7 +205,7 @@ describe("the connector, end to end", () => {
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
       ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
-        "save_product_description", "save_product_name", "save_draft"],
+        "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "save_draft"],
     );
   });
 
@@ -490,6 +490,79 @@ describe("the connector, end to end", () => {
       { kind: "product", id: own.id, patch: { seo: null } },
       { kind: "product", id: own.id, patch: { description: null } },
     ]);
+  });
+
+  /* 26.10.2026 — prices and counts by Claude: a big price move only after
+     the owner's yes, a count only over the count Claude read. */
+  it("changes a price a little at once, a big change only with confirm — and «Вернуть» goes back to the catalogue's ladder", async () => {
+    const { getOverrideRow, listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const multi = (await productsNow()).list.find((p) => p.sizes.length > 1 && p.sizes.every((s) => s.label))!;
+    const was = multi.sizes.map((s) => ({ size: s.label!, price: s.price }));
+    const small = Math.round(was[0].price * 110) / 100;
+    const half = Math.round(was[1].price * 50) / 100;
+
+    const r = await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size: was[0].size, price: small }] });
+    expect(r.isError, r.text).toBe(false);
+    const ladder = was.map((s, i) => (i === 0 ? { ...s, price: small } : s));
+    expect(await getOverrideRow(multi.id)).toMatchObject({ sizes: ladder, price: small });
+
+    const big = await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size: was[1].size, price: half }] });
+    expect(big.isError).toBe(true);
+    expect(big.text).toContain("confirm: true");
+    expect(big.text).toContain("Nothing was saved");
+    const yes = await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size: was[1].size, price: half }], confirm: true });
+    expect(yes.isError, yes.text).toBe(false);
+    resetProductCache();
+    expect((await productsNow()).list.find((p) => p.id === multi.id)!.sizes.slice(0, 2).map((s) => s.price)).toEqual([small, half]);
+
+    for (const bad of [{ size: "999 л", price: 10 }, { size: was[0].size, price: 0 }]) {
+      const r2 = await tool(t.access_token, "save_product_price", { id: multi.id, prices: [bad], confirm: true });
+      expect(r2.isError, JSON.stringify(bad)).toBe(true);
+    }
+    const lines = journalRows(await listAudit(20)).filter((x) => x.action === "override.set" && (x.payload as { via?: string }).via === "claude");
+    expect(lines.at(-1)!.undo).toEqual({ kind: "override", id: multi.id, patch: { sizes: null, price: null } });
+  });
+
+  it("prices the owner's own product on its row, with «Вернуть»", async () => {
+    const { createCustomProduct, getCustomProduct } = await import("@/lib/custom-products");
+    const { listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const own = await createCustomProduct({ brand: "Proraso", name: "Beard Balm — бальзам для бороды", cat: "beard", sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] });
+    const r = await tool(t.access_token, "save_product_price", { id: own.id, prices: [{ size: "250 мл", price: 26.9 }] });
+    expect(r.isError, r.text).toBe(false);
+    expect(await getCustomProduct(own.id)).toMatchObject({ sizes: ["100 мл", "250 мл"], prices: [14.9, 26.9] });
+    const line = journalRows(await listAudit(10)).find((x) => x.action === "product.update");
+    expect(line!.undo).toEqual({ kind: "product", id: own.id, patch: { sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] } });
+  });
+
+  it("sets a count only over the count it read — a sale in between is not wiped", async () => {
+    const { listMoves, move } = await import("@/lib/inventory");
+    const t = await tokens();
+    const multi = (await productsNow()).list.find((p) => p.sizes.length > 1 && p.sizes.every((s) => s.label))!;
+    const size = multi.sizes[0].label!;
+    const count = async () => JSON.parse((await tool(t.access_token, "get_product", { id: multi.id })).text).stock_count[0];
+    expect(await count()).toEqual({ size, count: null });
+
+    const first = await tool(t.access_token, "save_product_stock", { id: multi.id, size, count: 6, was: null });
+    expect(first.isError, first.text).toBe(false);
+    expect(JSON.parse(first.text)).toMatchObject({ size, was: null, count: 6, shop_says: "в наличии" });
+
+    await move({ productId: multi.id, variant: size, delta: -1, reason: "sale_web", ref: "R-100001", actor: "system" });
+    const stale = await tool(t.access_token, "save_product_stock", { id: multi.id, size, count: 4, was: 6 });
+    expect(stale.isError).toBe(true);
+    expect(stale.text).toContain("is now 5 pcs");
+    expect(stale.text).toContain("Nothing was saved");
+    expect(await count()).toEqual({ size, count: 5 });
+
+    const fixed = await tool(t.access_token, "save_product_stock", { id: multi.id, size, count: 4, was: 5 });
+    expect(fixed.isError, fixed.text).toBe(false);
+    expect(await count()).toEqual({ size, count: 4 });
+    expect((await listMoves({ productId: multi.id }))[0]).toMatchObject({ delta: -1, reason: "adjust", ref: "Claude", actor: "claude" });
+
+    expect((await tool(t.access_token, "save_product_stock", { id: multi.id, count: 1, was: 4 })).text).toContain("Which size?");
   });
 
   it("reads an article back in the language asked for", async () => {
