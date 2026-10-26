@@ -111,7 +111,8 @@ describe("both renderers put the paragraph under the heading", () => {
   });
 
   it("app.js: the same choice in screenCatalog(), kept off the dictionary", () => {
-    expect(APP).toContain('var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : "";');
+    // a section's line comes from the block too since «Тексты страниц» (26.10.2026, tests/page-texts.test.ts)
+    expect(APP).toContain("var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : seoCatIntro(S.cat, S.lang);");
     expect(APP).toContain("var intro = esc(ownIntro || catIntro(S.cat, S.brand));");
     expect(APP).toContain("'<p class=\"sec__intro\"' + (ownIntro ? \" data-notr\" : \"\") + \">\" + intro + \"</p>\"");
   });

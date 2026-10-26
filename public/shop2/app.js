@@ -1413,6 +1413,7 @@
       "Только латинские буквы, цифры и дефис — до 8 знаков.": "Ainult ladina tähed, numbrid ja sidekriips — kuni 8 märki.",
       "Отчёт не загрузился.": "Aruanne ei laadinud.",
       "Тексты писем": "Kirjade tekstid",
+      "Тексты страниц": "Lehtede tekstid",
       "Номиналы подарочной карты": "Kinkekaardi nimiväärtused",
       "Лимит писем": "Kirjade limiit",
       "Один балл — одно евро.": "Üks punkt on üks euro.",
@@ -5029,6 +5030,7 @@
       "Только латинские буквы, цифры и дефис — до 8 знаков.": "Latin letters, digits and a hyphen only — up to 8 characters.",
       "Отчёт не загрузился.": "The report did not load.",
       "Тексты писем": "Letter texts",
+      "Тексты страниц": "Page texts",
       "Номиналы подарочной карты": "Gift card amounts",
       "Лимит писем": "Letter limit",
       "Один балл — одно евро.": "One point is one euro.",
@@ -15520,10 +15522,11 @@
     var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
     /* A brand the owner has written a paragraph for shows it, in the page's
        own language (seoBrandIntro(), src/lib/seo-copy.mjs — the prerender
-       writes the same one); every other page keeps the shop's line, which
+       writes the same one), and so does a section he wrote a line for in
+       «Тексты страниц» (seoCatIntro()); every other page keeps the shop's line, which
        translateTree() translates. `data-notr` keeps the owner's words off
        the dictionary. */
-    var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : "";
+    var ownIntro = S.brand ? seoBrandIntro(S.brand, S.lang) : seoCatIntro(S.cat, S.lang);
     var intro = esc(ownIntro || catIntro(S.cat, S.brand));
     /* A published subcollection (/et/collections/habemeolid): the heading is
        the subcollection's own name and the line under it its own text, both
@@ -33010,7 +33013,7 @@
   var AUDIT_SETTING_WORDS = {
     hero: "Баннер", content: "Данные магазина", shipping_rules: "Тарифы доставки", pricing: "Цены и баллы",
     chatbot: "Чат-помощник", bundles: "Наборы", delivery: "Когда «Доставлен»", shipping_parcel: "Коробка",
-    payment_banks: "Банки в кассе", invoice: "Счета для компаний", mail_texts: "Тексты писем",
+    payment_banks: "Банки в кассе", invoice: "Счета для компаний", mail_texts: "Тексты писем", page_texts: "Тексты страниц",
     flows: "Письма", gift_amounts: "Номиналы подарочной карты", mail_budget: "Лимит писем"
   };
   /** One row of the shop's own log, as HTML.
@@ -44895,6 +44898,10 @@
     else if (s.hero === null) DEMO.hero = null;
     else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
+    /* «Тексты страниц» (settings.page_texts, src/lib/page-texts.mjs): the
+       owner's words for the section and brand pages — seoHead(),
+       seoBrandIntro() and seoCatIntro() in the seo-copy block read them. */
+    if (fed("page_texts")) seoOwnSet(s.page_texts && typeof s.page_texts === "object" ? s.page_texts : null);
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
        absent key means «как всегда» — giftAmountsOn() falls back to the three
        the shop has always sold, and filters whatever arrives through
@@ -49723,14 +49730,88 @@
     return String(t).replace(/\s*\|\s*REMPIRE$/, " — REMPIRE");
   }
 
+  /* ---- the owner's own words over the copy above -------------------------
+     settings.page_texts (src/lib/page-texts.mjs), written in «Настройки →
+     Тексты страниц» or by his Claude (Dim, 26.10.2026): per section and
+     brand page and per language, { title, desc, intro } — only the fields he
+     wrote. Everything he did not write stays the copy above. The prerender
+     sets it from the database before it writes a page, the shop from
+     /api/overrides at boot. */
+  var SEO_OWN = null;
+  function seoOwnSet(v) {
+    SEO_OWN = v && typeof v === "object" && !Array.isArray(v) ? v : null;
+  }
+  /** One field the owner wrote — "" when he wrote none. */
+  function seoOwn(kind, key, lang, field) {
+    var all = SEO_OWN && SEO_OWN[kind];
+    var page = all && Object.prototype.hasOwnProperty.call(all, key) ? all[key] : null;
+    var v = page && page[lang] && page[lang][field];
+    return typeof v === "string" ? v.replace(/^\s+|\s+$/g, "") : "";
+  }
+  /* The line under a section's heading, as the shop has printed it since
+     launch — until 26.10.2026 a Russian line in app.js (CAT_INTROS) and its
+     two translations in the dictionary, word for word these. Here so the
+     prerender, the shop and the owner's Claude read the one copy the owner's
+     own line replaces. */
+  function seoCatLines() {
+    return {
+      all: {
+        RU: "Весь ассортимент Rempire: шампуни, стайлинг, уход за бородой, корейская косметика, парфюмерия и мерч.",
+        ET: "Kogu Rempire'i valik: šampoonid, viimistlus, habemehooldus, Korea nahahooldus, parfüümid ja merch.",
+        EN: "The whole Rempire range: shampoos, styling, beard care, Korean skincare, perfume and merch."
+      },
+      hair: {
+        RU: "Шампуни, кондиционеры, маски и уход за кожей головы — то, чем работает салон Rempire.",
+        ET: "Juuksehooldus Rempire'i salongist Mardi 1: šampoonid, palsamid, juuksemaskid ja peanahahooldus. System 4 rasusele, kuivale või hõrenevale peanahale, Kevin.Murphy, Davines ja Paul Mitchell igapäevaseks hoolduseks — järeletulek Tallinnas või tarne üle Eesti.",
+        EN: "Shampoos, conditioners, hair masks and scalp care — what the Rempire salon works with."
+      },
+      styling: {
+        RU: "Воск для волос, паста, глина, спреи и пудра — то, чем укладывают наши барберы.",
+        ET: "Juuksevaha, pasta, savi, juukselakk ja puuder — viimistlustooted meie barberite valikust.",
+        EN: "Hair wax, paste, clay, hairspray and powder — the styling our barbers work with."
+      },
+      beard: {
+        RU: "Масло для бороды, бальзамы, воск для усов и средства для бритья — выбор наших барберов.",
+        ET: "Habemehooldusvahendid, mida kasutavad meie barberid Mardi 1 salongis: habemeõlid igapäevaseks hoolduseks, habemepalsamid kuju ja pehmuse jaoks, vuntsivaha ning raseerimisgeelid ja -järgsed palsamid. Captain Fawcett, Proraso ja Davines — järeletulek Tallinnas või tarne üle Eesti.",
+        EN: "Beard oil, beard balm, moustache wax and shaving products — our barbers' own pick."
+      },
+      face: {
+        RU: "Корейская косметика и мужской уход: тонеры, средства для умывания, сыворотки, маски и SPF.",
+        ET: "Korea nahahooldus ja meeste näohooldus: toonikud, näopesuvahendid, seerumid, maskid ja SPF.",
+        EN: "Korean skincare and men's face care: toners, cleansers, serums, masks and SPF."
+      },
+      body: {
+        RU: "Уход за татуировкой, гели для душа и мыло — включая мыло ручной работы Rempire.",
+        ET: "Tätoveeringu järelhooldus, dušigeelid ja seep — sealhulgas Rempire'i enda käsitööseep.",
+        EN: "Tattoo aftercare, body wash and soap — including Rempire's own handmade soap."
+      },
+      perfume: {
+        RU: "Нишевая и классическая парфюмерия — оригинальные ароматы в наличии в Таллинне.",
+        ET: "Nišiparfüümid ja klassika — originaaltooted, mida hoiame Tallinnas laos.",
+        EN: "Niche and classic perfume — original fragrances in stock in Tallinn."
+      },
+      merch: {
+        RU: "Футболки Rempire с принтами наших художников — печатаем малыми тиражами.",
+        ET: "Rempire'i T-särgid meie kunstnike trükistega — trükime väikestes tiraažides.",
+        EN: "Rempire T-shirts with prints by our own artists, made in small runs."
+      }
+    };
+  }
+  /** The line under a section's heading — the owner's own, else the shop's; "" for a key with neither. */
+  function seoCatIntro(cat, lang) {
+    var line = seoCatLines()[cat];
+    return seoOwn("cat", cat, lang, "intro") || (line && line[lang]) || "";
+  }
+
   /**
-   * The paragraph under a brand page's heading, in the page's language — or
-   * "" for a brand with no approved text, whose page keeps the shop's
-   * generic line (catIntro() in app.js). Plain text, not HTML.
+   * The paragraph under a brand page's heading, in the page's language — the
+   * owner's own, else the approved one, else "" for a brand with neither,
+   * whose page keeps the shop's generic line (catIntro() in app.js). Plain
+   * text, not HTML.
    */
   function seoBrandIntro(brand, lang) {
     var b = seoCopy().brand[brand];
-    return (b && b[lang] && b[lang].intro) || "";
+    return seoOwn("brand", brand, lang, "intro") || (b && b[lang] && b[lang].intro) || "";
   }
 
   /**
@@ -49824,8 +49905,8 @@
       ogD = h.ogD;
     } else if (kind === "cat") {
       var c = (C.cat[key] || C.cat.all)[lang] || C.cat.all.EN;
-      t = c[0];
-      d = c[1];
+      t = seoOwn("cat", key, lang, "title") || c[0];
+      d = seoOwn("cat", key, lang, "desc") || c[1];
     } else if (kind === "brand") {
       var b = C.brand[key] && C.brand[key][lang];
       if (b) {
@@ -49836,6 +49917,8 @@
         t = seoFill(C.brandFallback[lang] || C.brandFallback.EN, { brand: key });
         d = seoFill(C.brandGeneric[lang] || C.brandGeneric.EN, { brand: key });
       }
+      t = seoOwn("brand", key, lang, "title") || t;
+      d = seoOwn("brand", key, lang, "desc") || d;
       /* the house's name once: a brand that IS the house (Rempire's own
          soap and merch) needs no second one, and a long brand name keeps its
          words rather than the suffix */

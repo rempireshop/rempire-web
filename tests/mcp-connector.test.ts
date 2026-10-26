@@ -205,7 +205,8 @@ describe("the connector, end to end", () => {
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
       ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
-        "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "create_product", "save_draft"],
+        "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "create_product",
+        "get_page_texts", "save_page_text", "save_draft"],
     );
   });
 
@@ -625,6 +626,61 @@ describe("the connector, end to end", () => {
       expect(refused.isError, bad.name).toBe(true);
       expect(refused.text).toContain("Nothing was created");
     }
+  });
+
+  /* «Тексты страниц» by Claude (26.10.2026): a section's or brand's Google
+     pair and the line under its heading, in settings.page_texts. */
+  it("reads and writes a section's and a brand's page texts, «» gives a field back, and the journal keeps the old ones", async () => {
+    const { getSettingRaw, listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const before = JSON.parse((await tool(t.access_token, "get_page_texts", { page: "section", key: "beard" })).text);
+    expect(before.texts.RU.by_owner).toEqual([]);
+    expect(before.texts.EN.intro).toContain("Beard oil");
+
+    const r = await tool(t.access_token, "save_page_text", {
+      page: "section", key: "beard",
+      et: { intro: "Habemeõlid, palsamid ja raseerimistooted — meie barberite valik Mardi 1 salongist." },
+      en: { title: "Beard Care: Oils, Balms & Shaving" },
+    });
+    expect(r.isError, r.text).toBe(false);
+    const after = JSON.parse(r.text).texts;
+    expect(after.ET.intro).toContain("meie barberite valik");
+    expect(after.ET.by_owner).toEqual(["intro"]);
+    expect(after.EN.title).toBe("Beard Care: Oils, Balms & Shaving");
+    expect(after.RU).toEqual(before.texts.RU);
+
+    const brand = await tool(t.access_token, "save_page_text", { page: "brand", key: "kevin.murphy", ru: { intro: "Kevin.Murphy — австралийский уход для волос." } });
+    expect(brand.isError, brand.text).toBe(false);
+    expect(JSON.parse(brand.text).key).toBe("Kevin.Murphy");
+
+    const back = await tool(t.access_token, "save_page_text", { page: "section", key: "beard", en: { title: "" } });
+    expect(back.isError, back.text).toBe(false);
+    expect(JSON.parse(back.text).texts.EN.title).toBe(before.texts.EN.title);
+    expect((await getSettingRaw("page_texts")).value).toEqual({
+      cat: { beard: { ET: { intro: "Habemeõlid, palsamid ja raseerimistooted — meie barberite valik Mardi 1 salongist." } } },
+      brand: { "Kevin.Murphy": { RU: { intro: "Kevin.Murphy — австралийский уход для волос." } } },
+    });
+
+    const first = journalRows(await listAudit(10)).filter((x) => x.action === "setting.set").at(-1)!;
+    expect(first.undo).toMatchObject({ kind: "setting", key: "page_texts" });
+  });
+
+  it("refuses page texts that are too long, Russian on the Estonian page, or for a page the shop does not have — and saves nothing", async () => {
+    const { getSettingRaw } = await import("@/lib/orders");
+    const t = await tokens();
+    for (const args of [
+      { page: "section", key: "beard", et: { title: "Habe — масло для бороды" } },
+      { page: "section", key: "beard", ru: { title: "Б".repeat(71) } },
+      { page: "section", key: "beard", en: { description: "Beard care. No further product details are given." } },
+      { page: "section", key: "kitchen", ru: { intro: "Кухня." } },
+      { page: "brand", key: "Nobody Brand", ru: { intro: "Текст." } },
+      { page: "section", key: "beard" },
+    ]) {
+      const r = await tool(t.access_token, "save_page_text", args);
+      expect(r.isError, JSON.stringify(args)).toBe(true);
+    }
+    expect((await getSettingRaw("page_texts")).found).toBe(false);
   });
 
   it("reads an article back in the language asked for", async () => {

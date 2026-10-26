@@ -110,7 +110,8 @@ import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, 
    subcollections, the brands and the blog list (audit §1A) — the module
    app.js's setHead() carries a copy of, so the head written here and the head
    after boot are one text. */
-import { seoBrandIntro, seoHead, seoSub } from "../src/lib/seo-copy.mjs";
+import { seoBrandIntro, seoCatIntro, seoHead, seoOwnSet, seoSub } from "../src/lib/seo-copy.mjs";
+import { cleanPageTexts } from "../src/lib/page-texts.mjs";
 import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -568,7 +569,11 @@ const subChipLabel = (key, code) => {
    defaults, which is what src/lib/shipping.ts bills a shop with no row too. */
 /* `content` only for its opening hours, which the Organization block names
    when the owner has filled them in (ORG_LD below). */
-const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts", "content"]);
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts", "content", "page_texts"]);
+/* «Тексты страниц»: the owner's titles, descriptions and lines for the section
+   and brand pages, under every seoHead() / seoBrandIntro() / seoCatIntro()
+   below — the same words the shop reads from /api/overrides. */
+seoOwnSet(cleanPageTexts(LIVE_SETTINGS.page_texts));
 const SHIP_RULES_LIVE = DELIVERY ? DELIVERY.liveRules(LIVE_SETTINGS.shipping_rules) : null;
 /* What the head copy reads — the free-delivery threshold of the home page's
    Estonian description — from the same rules the delivery page prints and the
@@ -2036,7 +2041,7 @@ for (const lang of LANGS) {
       lang, kind: "c", id: c, heading, list,
       rest: "/c/" + c + "/",
       desc: head.d, title: head.t,
-      intro: tr(catIntro(c, ""), lang.code, false)
+      intro: seoCatIntro(c, lang.code) || tr(catIntro(c, ""), lang.code, false)
     }));
   }
 

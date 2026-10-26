@@ -66,6 +66,10 @@ const PUBLIC_SETTINGS = [
   // «По счёту — для компаний»: the number prefix and the payment term the
   // checkout quotes («оплата в течение N дней») — src/lib/invoices.ts
   "invoice",
+  // «Тексты страниц»: the owner's titles, descriptions and lines for the
+  // section and brand pages — printed on those pages, public by nature
+  // (src/lib/page-texts.mjs)
+  "page_texts",
 ] as const;
 
 /** The pro (salon) price is commercial information: never on the public feed.

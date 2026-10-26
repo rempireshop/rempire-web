@@ -9381,6 +9381,47 @@
       }
     },
     {
+      "id": "ai-claude-page-texts",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Claude меняет текст страницы раздела",
+      "steps": [
+        "Спросить Claude: «Какой текст сейчас под заголовком раздела Борода?»",
+        "Попросить переписать его на трёх языках и сохранить.",
+        "Открыть раздел «Борода» в магазине на русском, эстонском и английском.",
+        "Попросить: «Верни стандартный текст на английском»."
+      ],
+      "expect": [
+        "Claude называет текст, который сейчас на странице.",
+        "Новый текст сразу под заголовком раздела, на каждом языке свой.",
+        "После «верни» английская страница снова со стандартным текстом.",
+        "В «Журнале» строчки «Тексты страниц»."
+      ],
+      "why": "Тексты разделов и брендов для Google и покупателей теперь меняете вы, а не Дима.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T08:05:21.558Z",
+      "en": {
+        "title": "Claude changes a section page's text",
+        "steps": [
+          "Ask Claude: «What is the text under the Борода section heading now?»",
+          "Ask it to rewrite it in three languages and save.",
+          "Open the «Борода» section in the shop in Russian, Estonian and English.",
+          "Ask: «Put the standard English text back»."
+        ],
+        "expect": [
+          "Claude names the text that is on the page now.",
+          "The new text is under the section heading at once, each language its own.",
+          "After «put back» the English page has the standard text again.",
+          "«Журнал» has «Тексты страниц» lines."
+        ],
+        "why": "The section and brand texts for Google and shoppers are yours to change now, not Dim's."
+      }
+    },
+    {
       "id": "ai-assistant-ask",
       "area": "ai",
       "who": "renat",

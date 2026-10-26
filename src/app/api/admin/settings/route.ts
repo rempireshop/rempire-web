@@ -21,6 +21,8 @@ import { cleanDelivery } from "@/lib/delivery";
 import { mergeParcel } from "@/lib/shipping/parcel";
 import { cleanBankFilter } from "@/lib/payments/methods";
 import { stampUnpaidFloor } from "@/lib/flows";
+import { cleanPageTexts } from "@/lib/page-texts.mjs";
+import { requestRebuild } from "@/lib/rebuild";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -191,6 +193,10 @@ export async function PUT(req: Request) {
          (src/lib/flows.ts stampUnpaidFloor, and the `unpaidFrom` note on the
          Flows type). Same first door as everything above it. */
       if (key === "flows") value = await stampUnpaidFloor(value);
+      /* «Тексты страниц» (src/lib/page-texts.mjs): only what the section and
+         brand pages print, at the lengths they print it — whoever writes,
+         the panel or Renat's Claude. */
+      if (key === "page_texts") value = cleanPageTexts(value);
       /* What this PUT replaces, read just before it does: the audit row keeps
          it (`prev`, db/migrations/207_audit_prev.sql) so «Вернуть» works from
          any device. A key never written before is recorded as null. A read
@@ -212,6 +218,10 @@ export async function PUT(req: Request) {
          the owner saves a price in «Настройки → Доставка» and the very next
          checkout still bills the old one — which is exactly the "the panel
          says one thing, the shop charges another" the editor exists to fix. */
+      /* the static section and brand pages carry these words in their
+         <head> — built again (src/lib/rebuild.ts, at most once in five
+         minutes); the open shop shows them at once */
+      if (key === "page_texts") requestRebuild("page-texts");
       if (key === "shipping_rules") {
         try {
           (await import("@/lib/shipping")).resetShippingRulesCache();

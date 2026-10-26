@@ -12,6 +12,7 @@
  *   save_product_price                              — its prices, a big change only once confirmed
  *   save_product_stock                              — a count on the shelf, only over the count it read
  *   create_product                                  — a new product of the owner's own, HIDDEN
+ *   get_page_texts · save_page_text                 — a section or brand page's Google pair and intro
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
  * touch a published article, an order or a customer. A published article is
@@ -47,7 +48,10 @@
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { query } from "@/lib/db";
-import { getOverrideRow, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
+import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
+import { cleanPageTexts, PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
+import { seoBrandIntro, seoCatIntro, seoHead } from "@/lib/seo-copy.mjs";
+import { loadShippingRules } from "@/lib/shipping";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 import { getDescriptionOverride, setDescriptionOverride, type DescriptionOverride } from "@/lib/product-descriptions";
 import { getLevel, InventoryError, setQty, shelfCount, shelfKey } from "@/lib/inventory";
@@ -473,6 +477,63 @@ export const TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
   {
+    name: "get_page_texts",
+    title: "Тексты страницы раздела или бренда",
+    description:
+      "The words of one section page (page: section, key: hair, styling, beard, face, body, perfume, merch or all) or brand " +
+      "page (page: brand, key: the brand as list_sections spells it), in RU, ET and EN: the Google title, the Google " +
+      "description and the line under the page's heading — what the page shows now, and which of them the owner wrote " +
+      "himself (by_owner). An intro of null is the shop's generic line («Всё, что есть в наличии от …»). Read it before " +
+      "save_page_text.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        page: { type: "string", enum: ["section", "brand"] },
+        key: { type: "string" },
+      },
+      required: ["page", "key"],
+      additionalProperties: false,
+    },
+    annotations: READ,
+  },
+  {
+    name: "save_page_text",
+    title: "Записать тексты страницы",
+    description:
+      "Write the words of a section or brand page in Russian (ru), Estonian (et) and/or English (en): title — the Google " +
+      "title, at most 60 characters; description — the Google description, at most 155 characters, what the page offers " +
+      "and the one thing that makes someone click; intro — the paragraph under the page's heading, plain text, one " +
+      "paragraph, at most 1200 characters. Only facts the owner gave you or the shop's own products show — no prices, no " +
+      "promises about delivery times, never a sentence about missing information. et and en are written in that language. " +
+      "A field you leave out keeps its text; an empty string \"\" gives that field back to the shop's standard text. Live " +
+      "in the shop at once; the static pages search engines read are rebuilt within about a quarter of an hour. Each save " +
+      "is a line in Админка → Журнал.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        page: { type: "string", enum: ["section", "brand"] },
+        key: { type: "string", description: "The section id, or the brand as list_sections spells it." },
+        ru: { $ref: "#/$defs/texts" },
+        et: { $ref: "#/$defs/texts" },
+        en: { $ref: "#/$defs/texts" },
+      },
+      required: ["page", "key"],
+      additionalProperties: false,
+      $defs: {
+        texts: {
+          type: "object",
+          properties: {
+            title: { type: "string", maxLength: 70 },
+            description: { type: "string", maxLength: 170 },
+            intro: { type: "string", maxLength: 1200 },
+          },
+          additionalProperties: false,
+        },
+      },
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -525,7 +586,8 @@ export const INSTRUCTIONS =
   "it is saved as a draft and the owner publishes it in Админка → Блог. It also changes a product's words — its Google " +
   "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
   "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock), and creates a new " +
-  "product hidden (create_product: the owner adds photos and shows it in the admin) — when the owner " +
+  "product hidden (create_product: the owner adds photos and shows it in the admin), and the words of a section or brand " +
+  "page (get_page_texts, save_page_text) — when the owner " +
   "asks: read the product with get_product first, show the owner what you will save, then save. A price change of more " +
   "than 30 % needs his explicit yes first. Those are live at once, checked like the admin's own fields, and every change " +
   "but a count has «Вернуть» in Админка → Журнал. Answer the owner in his language.";
@@ -645,6 +707,8 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
   if (name === "save_product_price") return saveProductPrice(args);
   if (name === "save_product_stock") return saveProductStock(args);
   if (name === "create_product") return createProduct(args);
+  if (name === "get_page_texts") return getPageTexts(args);
+  if (name === "save_page_text") return savePageText(args);
   return no(`Unknown tool «${name}».`);
 }
 
@@ -1091,6 +1155,130 @@ async function createProduct(args: Record<string, unknown>): Promise<ToolResult>
     next: "Hidden — nobody sees it yet. The owner opens Админка → Товары → «Скрытые» → this product, adds its photos and " +
       "turns on «Показывать в магазине». Its Google texts (save_product_google_text), any missing language of the " +
       "description (save_product_description) and its count (save_product_stock, was: null) can be written now, by this id.",
+  });
+}
+
+/* ---------- the section and brand pages' own words ---------- */
+
+type PageKind = "cat" | "brand";
+type PageTexts = ReturnType<typeof cleanPageTexts>;
+const PAGE_FIELD_OUT: Record<string, string> = { title: "title", desc: "description", intro: "intro" };
+
+/** The page a call names: a section id, or a brand the shop shows, spelt the shop's way. */
+async function pageOf(args: Record<string, unknown>, done: string): Promise<{ kind: PageKind; key: string } | ToolResult> {
+  const raw = oneLine(args.key);
+  if (args.page === "section") {
+    const key = raw.toLowerCase();
+    if (!(PAGE_TEXT_CATS as readonly string[]).includes(key)) return no(`key for a section is one of ${PAGE_TEXT_CATS.join(", ")}. ${done}`);
+    return { kind: "cat", key };
+  }
+  if (args.page === "brand") {
+    const brands = [...new Set((await productsNow()).list.map((p) => p.brand))];
+    const key = brands.find((b) => b.toLowerCase() === raw.toLowerCase());
+    if (!key) return no(`No brand «${raw.slice(0, 60)}» in the shop — list_sections lists them. ${done}`);
+    return { kind: "brand", key };
+  }
+  return no(`page is «section» or «brand». ${done}`);
+}
+
+/** The settings row as stored now, cleaned — and the raw value, for the journal's «before». */
+async function storedPageTexts(): Promise<{ texts: PageTexts; before: unknown }> {
+  const row = await getSettingRaw("page_texts");
+  const value = typeof row.value === "string" ? JSON.parse(row.value) : row.value;
+  return { texts: cleanPageTexts(value), before: row.found ? value : null };
+}
+
+/**
+ * What a page shows now, per language: the owner's own field where he wrote
+ * one, else the shop's standard text. The standard is what the shared block
+ * answers on the server, where nothing ever calls seoOwnSet() — the owner's
+ * words are laid over it here, from the row itself.
+ */
+async function pageTextsNow(kind: PageKind, key: string, own: PageTexts) {
+  const rules = await loadShippingRules().catch(() => null);
+  const out: Record<string, Record<string, unknown>> = {};
+  for (const l of LANGS3) {
+    const head = seoHead(kind, key, l, { rules });
+    const mine = (own[kind] as Record<string, Partial<Record<L3, Record<string, string>>>>)[key]?.[l] ?? {};
+    const intro = kind === "cat" ? seoCatIntro(key, l) : seoBrandIntro(key, l);
+    out[l] = {
+      title: mine.title || head.t,
+      description: mine.desc || head.d,
+      intro: mine.intro || intro || null,
+      by_owner: Object.keys(mine).map((f) => PAGE_FIELD_OUT[f]),
+    };
+  }
+  return out;
+}
+
+async function getPageTexts(args: Record<string, unknown>): Promise<ToolResult> {
+  const page = await pageOf(args, "");
+  if (isRefusal(page)) return page;
+  const { base } = await productsNow();
+  const rest = page.kind === "cat" ? `/c/${page.key}` : `/b/${slugify(page.key)}/`;
+  return ok({
+    page: page.kind === "cat" ? "section" : "brand",
+    key: page.key,
+    url: { RU: urlOf(base, "RU", rest), ET: urlOf(base, "ET", rest), EN: urlOf(base, "EN", rest) },
+    texts: await pageTextsNow(page.kind, page.key, (await storedPageTexts()).texts),
+    limits: { title: 60, description: 155, intro: PAGE_TEXT_LIMITS.intro },
+  });
+}
+
+async function savePageText(args: Record<string, unknown>): Promise<ToolResult> {
+  const done = "Nothing was saved.";
+  const page = await pageOf(args, done);
+  if (isRefusal(page)) return page;
+  const { texts: stored, before } = await storedPageTexts();
+  const pages = stored[page.kind] as Record<string, Partial<Record<L3, Record<string, string>>>>;
+  const next = { ...(pages[page.key] ?? {}) };
+  const said: string[] = [];
+  const max: Record<string, number> = { title: PAGE_TEXT_LIMITS.title, desc: PAGE_TEXT_LIMITS.desc, intro: PAGE_TEXT_LIMITS.intro };
+  for (const l of LANGS3) {
+    const v = args[l.toLowerCase()];
+    if (v == null) continue;
+    if (typeof v !== "object" || Array.isArray(v)) return no(`${l.toLowerCase()} is { title, description, intro }. ${done}`);
+    const src = v as Record<string, unknown>;
+    const fields = { ...(next[l] ?? {}) };
+    for (const [field, from] of [["title", "title"], ["desc", "description"], ["intro", "intro"]] as const) {
+      if (!(from in src)) continue;
+      if (typeof src[from] !== "string") return no(`${l} ${from} is text. ${done}`);
+      const text = oneLine(src[from]);
+      said.push(`${l.toLowerCase()}.${from}`);
+      if (!text) { delete fields[field]; continue; }   // back to the shop's standard text
+      if (text.length > max[field]) {
+        const ask = field === "title" ? 60 : field === "desc" ? 155 : max[field];
+        return no(`The ${l} ${from} is ${text.length} characters — at most ${ask}. ${done}`);
+      }
+      if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__/.test(text)) return no(`The ${l} ${from} has HTML or markdown in it — plain text only. ${done}`);
+      if (field !== "title") {
+        const talk = text.split(/(?<=[.!?…])\s+/).find((s) => s && !seoDropMetaTalk(s));
+        if (talk) return no(`The ${l} ${from} talks about missing information («${talk.slice(0, 90)}»). ${done}`);
+      }
+      if (seoOffLanguage(text, l, { name: "", brand: page.kind === "brand" ? page.key : "" })) {
+        return no(`The ${l} ${from} still has Russian words in it — write it in ${l === "ET" ? "Estonian" : "English"}. ${done}`);
+      }
+      fields[field] = text;
+    }
+    if (Object.keys(fields).length) next[l] = fields;
+    else delete next[l];
+  }
+  if (!said.length) return no(`Send at least one of ru, et, en with a title, a description or an intro. ${done}`);
+
+  const value = cleanPageTexts({ ...stored, [page.kind]: { ...pages, [page.key]: next } });
+  await setSetting("page_texts", value);
+  /* a settings change like the panel's own (PUT /api/admin/settings): the
+     journal keeps what it replaced, and «Вернуть» on its line puts the
+     changed fields back (src/lib/audit-undo.ts, kind "setting") */
+  await writeAuditSafe("admin", "setting.set", { key: "page_texts", value, via: "claude" }, { before });
+  requestRebuild("page-texts");
+  return ok({
+    saved: said,
+    page: page.kind === "cat" ? "section" : "brand",
+    key: page.key,
+    texts: await pageTextsNow(page.kind, page.key, value),
+    next: "Live in the shop now; the static pages search engines read are rebuilt within about a quarter of an hour. The " +
+      "owner sees them in Админка → Настройки → Тексты страниц, and the change is a line in Админка → Журнал.",
   });
 }
 

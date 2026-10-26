@@ -58,9 +58,15 @@ he checks it in Админка → Блог and publishes it there.*
 включить «Показывать в магазине». Тексты для Google и остаток Claude может записать сразу.
 Если такой товар уже есть — Claude скажет, какой, и второй не создаст.
 
+**Тексты страниц разделов и брендов** (с 26.10.2026): «перепиши текст под заголовком раздела
+Борода на трёх языках», «сделай Google-заголовок для страницы Kevin.Murphy». Claude показывает,
+что сейчас на странице и что он запишет, и сохраняет — в магазине сразу, в Google — после
+пересборки страниц (около четверти часа). Пустое поле возвращает стандартный текст магазина.
+Те же тексты — в Админке → Настройки → «Тексты страниц».
+
 **Что Claude может и чего не может:** искать товары, читать статьи, сохранять **черновики**,
 менять у товара **описание, название, бренд, раздел, тексты для Google, цены и остаток**,
-создавать **новые товары скрытыми**.
+создавать **новые товары скрытыми**, менять **тексты страниц разделов и брендов**.
 Опубликовать, удалить, поменять опубликованную статью, удалить товар, увидеть заказы и клиентов —
 **не может**. Отключить — в тех же настройках Claude; смена пароля админки
 отключает его сразу.
@@ -105,7 +111,8 @@ admin login already needs.
 
 **The tools** — `search_products`, `get_product`, `list_sections`, `list_posts`, `get_post`
 (read), `save_draft`, `save_product_google_text`, `save_product_description`,
-`save_product_name`, `save_product_price`, `save_product_stock` and `create_product` (write).
+`save_product_name`, `save_product_price`, `save_product_stock`, `create_product` and
+`save_page_text` (write), `get_page_texts` (read).
 `search_products` takes `include_hidden` and `get_product` reads a hidden own product by id
 (`hidden: true`, `url: null`) — so Claude can finish a product it created. `save_draft`:
 
@@ -182,6 +189,18 @@ active: false })` — never live for a moment). Name rules as `save_product_name
 with that brand and name, or the shop sells one — Claude may call twice for one request; a
 deliberate second entry is made in the panel. Journal line `product.create` with `via: "claude"`,
 «Новый товар от Claude — скрыт». Photos and «Показывать в магазине» stay in the panel.
+
+`get_page_texts` / `save_page_text` (26.10.2026): a section page (`all` and the seven
+sections) or a brand page (as the shop spells it) — its Google title (≤ 60) and description
+(≤ 155) and the line under its heading (one paragraph, ≤ 1200), per language. Stored in
+`settings.page_texts` (`src/lib/page-texts.mjs`, `cleanPageTexts()` on every way in — the
+settings route cleans the key too); only what the owner wrote is stored, `""` gives a field
+back. The shared seo-copy block lays it over the approved copy (`seoOwnSet()` / `seoOwn()`,
+`seoHead()`, `seoBrandIntro()`, `seoCatIntro()`): the prerender sets it from the database, the
+shop from `/api/overrides` (`page_texts` is a public setting), the server never sets it, so
+`get_page_texts` reads the approved copy from the block and the owner's words from the row.
+The section lines that were `CAT_INTROS` + dictionary in `app.js` are `seoCatLines()` in the
+block now, word for word. Journal `setting.set` with `prev`; `requestRebuild("page-texts")`.
 
 **Adding it in Claude Code** (for testing): `claude mcp add --transport http rempire https://rempireshop.com/api/mcp`,
 then `/mcp` → authenticate; loopback callbacks are accepted on any port.
