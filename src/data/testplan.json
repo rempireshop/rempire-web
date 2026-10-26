@@ -7613,6 +7613,51 @@
       "markedAt": "2026-09-25T22:28:23.727Z"
     },
     {
+      "id": "goods-rename",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Переименовать товар из каталога",
+      "steps": [
+        "Открыть «Товары» → «Каталог» → Proraso White — бальзам после бритья.",
+        "В «Что за товар» вписать «White Pre-Shave — бальзам после бритья» и нажать мимо.",
+        "Вписать в название «White — эликсир» и посмотреть строчку под полем.",
+        "Открыть товар в магазине на русском, эстонском и английском.",
+        "В «Журнале» нажать «Вернуть» у строчки с названием."
+      ],
+      "expect": [
+        "Новое название сразу в карточке, в списке товаров и в магазине.",
+        "«Эликсир» не сохраняется: рыжая рамка и «Похожие:» с подходящими словами.",
+        "На эстонском и английском название без русских слов.",
+        "Адрес страницы товара прежний.",
+        "«Вернуть» возвращает прежнее название."
+      ],
+      "why": "Вы сами ведёте магазин: название, бренд и раздел любого товара меняются здесь, без Димы.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "Renaming a catalogue product",
+        "steps": [
+          "Open «Товары» → «Каталог» → Proraso White — бальзам после бритья.",
+          "In «Что за товар» type «White Pre-Shave — бальзам после бритья» and tap outside the box.",
+          "Type «White — эликсир» into the name and read the line under the box.",
+          "Open the product in the shop in Russian, Estonian and English.",
+          "In «Журнал» tap «Вернуть» on the name line."
+        ],
+        "expect": [
+          "The new name shows at once in the card, the product list and the shop.",
+          "«Эликсир» does not save: an orange frame and «Похожие:» with suitable words.",
+          "In Estonian and English the name has no Russian words.",
+          "The product page address is unchanged.",
+          "«Вернуть» brings the previous name back."
+        ],
+        "why": "You run the shop yourself: any product's name, brand and section change here, without Dim."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-26T07:12:39.702Z"
+    },
+    {
       "id": "goods-sizes",
       "area": "goods",
       "who": "renat",

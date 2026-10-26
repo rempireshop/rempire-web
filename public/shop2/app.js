@@ -1080,6 +1080,8 @@
       "Выберите": "Valige", "Что за товар": "Mis toode",
       "Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.":
         "See on teie toode: brändi, nime, jaotist, mahte ja fotosid muudate siin ise.",
+      "Адрес страницы при этом не меняется, а заказы остаются со старым названием.":
+        "Lehe aadress seejuures ei muutu ja tellimustes jääb vana nimi.",
       "Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
         "Nimi kirjutatakse üks kord: sari ladina tähtedega, tüüp vene keeles — näiteks «Beard Balm — бальзам для бороды». Tüübi tõlgib pood ise eesti ja inglise keelde.",
       "Не продавать": "Ära müü",
@@ -4690,6 +4692,8 @@
       "Выберите": "Choose", "Что за товар": "What the product is",
       "Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.":
         "This is your own product: you change its brand, name, section, sizes and photos here yourself.",
+      "Адрес страницы при этом не меняется, а заказы остаются со старым названием.":
+        "The page address stays the same, and orders keep the old name.",
       "Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
         "The name is written once: the line in Latin letters, the type in Russian — for example «Beard Balm — бальзам для бороды». The shop translates the type into Estonian and English itself.",
       "Не продавать": "Don't sell",
@@ -7477,6 +7481,12 @@
     [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
     [/^Тип по-русски — так и нужно, магазин переведёт сам\. По-эстонски: (.+) · по-английски: (.+)$/,
       { ET: "Tüüp vene keeles — nii peabki, pood tõlgib ise. Eesti keeles: $1 · inglise keeles: $2", EN: "Type in Russian — that is right, the shop translates it itself. In Estonian: $1 · in English: $2" }],
+    [/^Хвост после « — » не переведётся сам\. Похожие: (.+)$/,
+      { ET: "Saba pärast « — » ei tõlgi ennast ise. Sarnased: $1", EN: "The tail after « — » will not translate itself. Similar: $1" }],
+    [/^Название: «(.+)»$/, { ET: "Nimi: «$1»", EN: "Name: «$1»" }],
+    [/^Название: как в каталоге$/, { ET: "Nimi: nagu kataloogis", EN: "Name: as in the catalogue" }],
+    [/^Бренд «(.+)»: (.+)$/, { ET: "Bränd «$1»: $2", EN: "Brand «$1»: $2" }],
+    [/^Раздел «(.+)»: (.+)$/, { ET: "Jaotis «$1»: $2", EN: "Section «$1»: $2" }],
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
@@ -38711,10 +38721,38 @@
   /** Under the name box of the owner's product: what the ET and EN shop will show for the tail the name has. */
   function edNameHintText(name) {
     var et = trName(name, "ET"), en = trName(name, "EN");
-    if (et !== name || en !== name) return "Тип по-русски — так и нужно, магазин переведёт сам. По-эстонски: " + et + " · по-английски: " + en;
-    return / — /.test(name)
-      ? "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…"
-      : "";
+    if (nameSaysAll(name)) {
+      return et !== name || en !== name ? "Тип по-русски — так и нужно, магазин переведёт сам. По-эстонски: " + et + " · по-английски: " + en : "";
+    }
+    var like = nameTailSuggest(name);
+    return like.length
+      ? "Хвост после « — » не переведётся сам. Похожие: " + like.join(", ")
+      : "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…";
+  }
+  /** Can every language say this name? The Estonian and English names carry
+      no Russian word — the rule the server holds a rename to
+      (nameTranslatable() in src/lib/product-name.ts): a type the tables do
+      not know would stay Russian on those pages, in their letters and in the
+      Merchant Center feed (Dim, 26.10.2026: block it, suggest the words). */
+  function nameSaysAll(name) {
+    return !/[а-яё]/i.test(trName(name, "ET")) && !/[а-яё]/i.test(trName(name, "EN"));
+  }
+  /** Up to five type words the shop CAN translate, closest to the one typed
+      first — by the length of the start they share. */
+  function nameTailSuggest(name) {
+    var at = String(name).lastIndexOf(" — ");
+    var w = (at < 0 ? String(name) : String(name).slice(at + 3)).trim().toLowerCase().split(" ")[0] || "";
+    if (w.length < 3) return [];
+    var seen = {}, out = [];
+    Object.keys(TAIL_EXACT).concat(Object.keys(NAME_TAILS)).forEach(function (t) {
+      if (seen[t]) return;
+      seen[t] = true;
+      var head = t.split(" ")[0], k = 0;
+      while (k < w.length && k < head.length && w[k] === head[k]) k++;
+      if (k >= 3) out.push([k, t]);
+    });
+    out.sort(function (a, b) { return b[0] - a[0] || a[1].length - b[1].length; });
+    return out.slice(0, 5).map(function (x) { return x[1]; });
   }
   function edNameHintPaint(name) {
     var el = document.querySelector("[data-ednamehint]");
@@ -39476,6 +39514,7 @@
     if (a.type === "set_hidden") return edApi(ov, "PUT", { id: a.id, hidden: !!a.value }, ka);
     if (a.type === "set_seo") return edApi(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }, ka);
     if (a.type === "set_subcat") return edApi(ov, "PUT", { id: a.id, subcat: a.value || null }, ka);
+    if (a.type === "set_names") return edApi(ov, "PUT", namesBody(a), ka);
     if (a.type === "set_varimg") return edApi(ov, "PUT", { id: a.id, varImg: a.map }, ka);
     if (a.type === "set_gallery") return edApi(ov, "PUT", { id: a.id, gallery: a.list }, ka);
     if (a.type === "set_description") return edApi(ov, "PUT", { id: a.id, description: a.value || null }, ka);
@@ -39487,6 +39526,14 @@
         .then(function (r) { if (edOk(r)) loadCustomAll(true); return r; });
     }
     return Promise.resolve(false);
+  }
+  /** A catalogue product's name, brand and section (migration 224) as the
+      override route takes them: only the fields the action moves, "" → null
+      gives one back to the catalogue file. */
+  function namesBody(a) {
+    var b = { id: a.id };
+    ["name", "brand", "cat"].forEach(function (k) { if (k in a) b[k] = a[k] || null; });
+    return b;
   }
   /** A field's line in the journal. The same field changed again in the same
       visit is ONE line (the journal keeps 40, in this browser): the newest
@@ -39627,11 +39674,24 @@
     if (field === "brand" || field === "name") {
       return { kind: "name",
         validate: function (v) {
-          if (String(v || "").trim()) return "";
-          return field === "brand" ? "Впишите бренд — например, Proraso." : "Впишите название товара.";
+          var t = String(v || "").trim();
+          if (!t) return field === "brand" ? "Впишите бренд — например, Proraso." : "Впишите название товара.";
+          // a name every language can say (Dim, 26.10.2026) — the hint under the box suggests the words
+          if (field === "name" && !nameSaysAll(t)) return "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…";
+          return "";
         },
         send: function (v, o) {
           var t = String(v || "").trim().slice(0, field === "brand" ? 60 : 120);
+          var cp = P();
+          /* a catalogue product (migration 224): an override of the file's
+             name, brand or section — product_overrides through the same door
+             as its price */
+          if (cp && !cp.custom) {
+            if (cp[field] === t) return Promise.resolve(true);
+            var na = { type: "set_names", id: id };
+            na[field] = t;
+            return edTyped(key, na, o);
+          }
           var c = findCustom(id);
           if (c && c[field] === t) return Promise.resolve(true);
           var patch = {}; patch[field] = t;
@@ -39642,6 +39702,12 @@
       return { kind: "pick",
         validate: function (v) { return CAT_NAMES[v] ? "" : "Выберите раздел."; },
         send: function (v, o) {
+          var cp = P();
+          if (cp && !cp.custom) {
+            if (cp.cat === v) return Promise.resolve(true);
+            // the server clears the subsection with it: a new section starts at «Авто»
+            return edTyped(key, { type: "set_names", id: id, cat: v }, o);
+          }
           var c = findCustom(id);
           if (c && c.cat === v) return Promise.resolve(true);
           // the subsections are the section's own: a new section starts at «Авто»
@@ -39990,11 +40056,15 @@
         '<span data-edsubslot>' + edSubcatField(p.cat, curSub, as("subcat")) + "</span>" +
       "</div>";
   }
+  /* Every product since 26.10.2026 — a catalogue product's name, brand and
+     section are product_overrides (migration 224), «их меняет Дим» no more:
+     Renat runs the shop himself after the handover. */
   function edSecWhat(p) {
     return '<section class="adm-edsec" data-edsec="what">' +
       admSecHeadHTML("Что за товар", "ed-what",
         "<span>Это ваш товар: бренд, название, раздел, объёмы и фото здесь меняете вы сами.</span> " +
-        "<span>Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.</span>") +
+        "<span>Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.</span>" +
+        (p.custom ? "" : " <span>Адрес страницы при этом не меняется, а заказы остаются со старым названием.</span>")) +
       '<div class="adm-edsec__b">' + edWhatFields(p, true) + "</div></section>";
   }
 
@@ -40040,7 +40110,6 @@
     el.hidden = !t;
   }
   function edSecShop(p) {
-    var own = !!p.custom;
     var shown = !goodsOffSale(p);
     var counted = edCounted(p);
     var stopped = p.stock === "out";
@@ -40056,7 +40125,6 @@
       '<div class="adm-edshop">' +
         '<div class="adm-edshop__c">' + admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", shown) + "</div>" +
         '<div class="adm-edshop__c"><div class="adm-field"><span>Наличие</span>' + stock + edWaitHTML(p) + "</div></div>" +
-        (own ? "" : '<div class="adm-edshop__c">' + edSubcatField(p.cat, subcatOf(p), edAsAttr(p, "subcat")) + "</div>") +
       "</div></section>";
   }
   /* ---- «Объёмы и цены» -------------------------------------------------------
@@ -40646,10 +40714,8 @@
           '<h1 class="adm-h1 adm-h1--flat">' + esc(p.name) + "</h1></div>" +
         (live ? admPinnedHTML('data-go-product="' + esc(p.id) + '"', "Открыть в магазине ↗") : "") +
       "</div>" +
-      admHelpHTML("ed-lock", p.custom
-        ? "Это ваш товар: бренд, название и раздел меняются здесь же, в «Что за товар»."
-        : "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное здесь меняете вы.") +
-      (p.custom ? edSecWhat(p) : "") +
+      admHelpHTML("ed-lock", "Это ваш товар: бренд, название и раздел меняются здесь же, в «Что за товар».") +
+      edSecWhat(p) +
       edSecShop(p) + edSecSizes(p) + edSecPhotos(p) +
       '<div class="adm-edpair2">' + edSecVarPhotos(p) + edSecVideo(p) + "</div>" +
       edSecDesc(p) + edSecSeo(p) +
@@ -44085,6 +44151,8 @@
      UX. */
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
+    // a catalogue product's name, brand and section the owner renamed (migration 224), per id
+    names: {},
     proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
     /* per-size stock (r23): the shelf's word for each SIZE, per product id —
        {«75 мл»: "in", «500 мл»: "out"}, '' for a product with no sizes, keyed
@@ -44132,6 +44200,7 @@
       DEMO.video = _dj.video || {};   // features: product video links
       DEMO.gallery = _dj.gallery || {};   // media: uploaded photos
       DEMO.desc = _dj.desc || {};   // assistant-work: description overrides
+      DEMO.names = _dj.names || {};   // migration 224: renames
       if (_dj.chatbot === false) DEMO.chatbot = false;
       if (_dj.bundles === false) DEMO.bundles = false;
       if (_dj.hero && typeof _dj.hero === "object" && Array.isArray(_dj.hero.slides)) DEMO.hero = _dj.hero;
@@ -44230,7 +44299,9 @@
       img: p.img, gallery: p.gallery ? p.gallery.slice() : null,
       // product creation: a custom row's own texts, which an override on the
       // same id sits on top of (applyDemoOverrides) — null for the catalogue's
-      seoOv: p.seoOv || null, descOv: p.descOv || null };
+      seoOv: p.seoOv || null, descOv: p.descOv || null,
+      // migration 224: the file's own name, brand and section, so a rename undone puts them back
+      name: p.name, brand: p.brand, cat: p.cat };
   }
   var BASE = CATALOGUE.map(baseOf);
 
@@ -44386,6 +44457,15 @@
       if (b.sizes) p.sizes = b.sizes.slice(); else delete p.sizes;
       if (b.priceFrom) p.priceFrom = true; else delete p.priceFrom;
       p.stock = b.stock;
+      /* the owner's rename of a catalogue product (migration 224): the name,
+         the brand and the section every card, page, search and basket reads */
+      var nm = !p.custom && DEMO.names && DEMO.names[p.id];
+      if (b.name !== undefined) {
+        p.name = (nm && nm.name) || b.name;
+        p.brand = (nm && nm.brand) || b.brand;
+        p.cat = (nm && nm.cat) || b.cat;
+      }
+      if (nm && nm.brand && typeof BRAND_BY_SLUG === "object" && BRAND_BY_SLUG) BRAND_BY_SLUG[slugify(p.brand)] = p.brand;
       p.seo = b.seo;
       if (b.varImg) p.varImg = b.varImg.slice();
       p.img = b.img;
@@ -44607,7 +44687,7 @@
   var ADM_OV = { at: 0, busy: false, again: false, failedAt: 0, wrote: null };
   var ADM_OV_RETRY_MS = 30000;
   var OV_PUB = null;
-  var OV_MAPS = ["price", "stock", "seo", "subcat", "varimg", "video", "stockVar", "gallery", "desc", "proPrice", "sizes", "hidden"];
+  var OV_MAPS = ["price", "stock", "seo", "subcat", "varimg", "video", "stockVar", "gallery", "desc", "proPrice", "sizes", "hidden", "names"];
   function ovWrote(id) {
     if (id == null || id === "") return;
     id = String(id);
@@ -44719,9 +44799,12 @@
     DEMO.desc = {};   // assistant-work
     DEMO.proPrice = {};   // wholesale/loyalty
     DEMO.sizes = {}; DEMO.hidden = {};   // migration 147
+    DEMO.names = {};   // migration 224
     Object.keys(ov).forEach(function (id) {
       var o = ov[id] || {};
       if (o.price != null) DEMO.price[id] = o.price;
+      // migration 224: a catalogue product's renamed name, brand and section
+      if (o.name || o.brand || o.cat) DEMO.names[id] = { name: o.name || "", brand: o.brand || "", cat: o.cat || "" };
       // migration 147: the whole size ladder and «Показывать в магазине»
       if (Array.isArray(o.sizes) && o.sizes.length) DEMO.sizes[id] = sizeLadder(o.sizes);
       if (o.hidden === true) DEMO.hidden[id] = true;
@@ -45180,6 +45263,7 @@
     // all three languages travel every time, so an emptied pair clears too
     else if (a.type === "set_seo") srvSaved(apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }));
     else if (a.type === "set_subcat") srvSaved(apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }));
+    else if (a.type === "set_names") srvSaved(apiSend(ov, "PUT", namesBody(a)));
     else if (a.type === "set_varimg") srvSaved(apiSend(ov, "PUT", { id: a.id, varImg: a.map }));
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
@@ -46642,6 +46726,11 @@
         : "Тексты писем: стандартные";
     }
     if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
+    if (a.type === "set_names") {
+      if ("name" in a) return a.name ? "Название: «" + a.name + "»" : "Название: как в каталоге";
+      if ("brand" in a) return "Бренд «" + (p ? p.name : a.id) + "»: " + (a.brand || "как в каталоге");
+      return "Раздел «" + (p ? p.name : a.id) + "»: " + (a.cat ? CAT_NAMES[a.cat] || a.cat : "как в каталоге");
+    }
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
     // media
@@ -46926,6 +47015,15 @@
       — the 1a autosave, whose «Сохранено ✓» waits for the 2xx (edWrite). The
       copy, the journal line and its undo are made here as always; only
       srvPush() (and set_video's own write) is left out. */
+  /** A rename into the shop's copy: the fields the action names, "" handing
+      one back to the file; a new section drops the subsection (the server's
+      rule in src/app/api/admin/overrides/route.ts). */
+  function namesApply(a) {
+    var cur = DEMO.names[a.id] || {}, nn = { name: cur.name || "", brand: cur.brand || "", cat: cur.cat || "" };
+    ["name", "brand", "cat"].forEach(function (k) { if (k in a) nn[k] = a[k] || ""; });
+    if (nn.name || nn.brand || nn.cat) DEMO.names[a.id] = nn; else delete DEMO.names[a.id];
+    if ("cat" in a) delete DEMO.subcat[a.id];
+  }
   function demoApply(a, own) {
     // `at`: the journal merges this browser's lines with the server's by time (1a)
     var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), at: Date.now(), txt: actionText(a), a: a, prev: null };
@@ -47046,6 +47144,13 @@
       mailPreviewV += 1;   // the preview iframe must refetch, not reuse
     }
     else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
+    else if (a.type === "set_names") {
+      // the way back is the fields this moved as they were — "" for «as in the catalogue»
+      var wasN = DEMO.names[a.id] || {};
+      entry.prev = { type: "set_names", id: a.id };
+      ["name", "brand", "cat"].forEach(function (k) { if (k in a) entry.prev[k] = wasN[k] || ""; });
+      namesApply(a);
+    }
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     // features
     else if (a.type === "set_video") { entry.prev = { type: "set_video", id: a.id, value: (DEMO.video[a.id] != null ? DEMO.video[a.id] : (p.video || "")) }; DEMO.video[a.id] = a.value; if (!own) pushOverride(a.id, { video_url: a.value }); }
@@ -47258,6 +47363,7 @@
       admBarFlash("mail");   // the bar's «Сохранено ✓» moment (the phone header's word)
     }
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
+    else if (a.type === "set_names") namesApply(a);
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
     else if (a.type === "set_video") { DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }   // features
     else if (a.type === "set_gallery") {   // media

@@ -488,8 +488,8 @@ export async function newsletterCards(ids: string[]): Promise<NewsletterCard[]> 
     const photo = o?.gallery?.[0];
     out.push({
       id,
-      brand: m.b,
-      name: m.n,
+      brand: o?.brand || m.b,
+      name: o?.name || m.n,
       price,
       priceFrom: from,
       img: photo?.thumb || photo?.url || `/shop/img/${id}-0.webp`,

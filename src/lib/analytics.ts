@@ -28,7 +28,7 @@ import { shopDay, shopDaySql, startOfShopDay } from "@/lib/day";
 /* The Overview's «Заканчиваются» reads the same merged in/low/out the shop
    itself renders — numeric stock over the manual override — instead of
    re-deriving it here. See getOverviewSummary() at the bottom of this file. */
-import { getOverrides, type OrderStatus } from "@/lib/orders";
+import { getOverrides, nameOverrides, type OrderStatus } from "@/lib/orders";
 /* «Заканчивается» — the one rule the overview's stock row and the panel's
    «Каталог» chip both count by. See qOverviewLowStock(). */
 import { runsLow, shelfWord, type ShelfRow } from "@/lib/stock-word";
@@ -64,8 +64,17 @@ async function customNames(ids: string[]): Promise<Map<string, { name: string; b
   return out;
 }
 
-/** Fills in, in place, the name and brand productInfo() could not — the custom products. */
+/** Fills in, in place, the name and brand productInfo() could not — the custom
+    products — and the ones the owner renamed in a catalogue product (migration 224). */
 async function nameCustom(...lists: Named[][]): Promise<void> {
+  const renames = await nameOverrides();
+  for (const list of lists) {
+    for (const row of list) {
+      const r = renames.get(row.id);
+      if (r?.name) row.name = r.name;
+      if (r?.brand) row.brand = r.brand;
+    }
+  }
   const names = await customNames(lists.flatMap((l) => l.map((r) => r.id)));
   if (!names.size) return;
   for (const list of lists) {
@@ -785,7 +794,10 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
      looked up by their override rows instead. */
   type Product = { name: string; brand: string; off: boolean; rows: ShelfRow[] };
   const products = new Map<string, Product>();
-  for (const p of CATALOGUE) products.set(p.id, { name: p.n, brand: p.b, off: false, rows: [] });
+  for (const p of CATALOGUE) {
+    const o = overrides[p.id];
+    products.set(p.id, { name: o?.name || p.n, brand: o?.brand || p.b, off: false, rows: [] });
+  }
   try {
     const { getLevels } = await import("@/lib/inventory");
     for (const r of await getLevels({ filter: "all", limit: 1000 })) {

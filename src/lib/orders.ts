@@ -228,6 +228,10 @@ export type OverrideRow = {
   sizes: unknown;
   /** Out of the shop entirely — same migration. */
   hidden: boolean | null;
+  /** A catalogue product's name, brand and section, renamed by the owner — db/migrations/224_override_name_brand_cat.sql. */
+  name?: string | null;
+  brand?: string | null;
+  cat?: string | null;
   updated_at: string | Date;
 };
 
@@ -261,8 +265,42 @@ export type Override = {
   stockByVariant?: Record<string, StockState> | null;
   /** True = out of the shop, the search, the sets and the sitemap. */
   hidden: boolean;
+  /**
+   * A catalogue product's name («White — бальзам после бритья»), brand and
+   * section as the owner renamed them; null = the catalogue file's own.
+   * The id never changes with them — page address, feed offer id and stock
+   * key stay put (db/migrations/224_override_name_brand_cat.sql).
+   */
+  name?: string | null;
+  brand?: string | null;
+  cat?: string | null;
   updatedAt: string | null;
 };
+
+/* The renames alone, for the readers that list many products from the
+   catalogue file and never needed the rest of a row — «Склад», «Аналитика».
+   A minute per instance; a save in this instance forgets it (upsertOverride). */
+type NameOverride = { name: string | null; brand: string | null; cat: string | null };
+let namesCache: { at: number; map: Map<string, NameOverride> } | null = null;
+export async function nameOverrides(maxAgeMs = 60_000): Promise<Map<string, NameOverride>> {
+  if (namesCache && Date.now() - namesCache.at < maxAgeMs) return namesCache.map;
+  try {
+    const rows = await query<{ product_id: string; name: string | null; brand: string | null; cat: string | null }>(
+      "select product_id, name, brand, cat from product_overrides where name is not null or brand is not null or cat is not null",
+    );
+    const map = new Map(rows.map((r) => [r.product_id, { name: r.name || null, brand: r.brand || null, cat: r.cat || null }]));
+    namesCache = { at: Date.now(), map };
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+/** A catalogue row's name, brand and section with the owner's renames on top — every server reader of `n`/`b`/`c` goes through this. */
+export function liveNames<T extends { n: string; b: string; c: string }>(p: T, o?: Pick<Override, "name" | "brand" | "cat"> | null): T {
+  if (!o || (!o.name && !o.brand && !o.cat)) return p;
+  return { ...p, n: o.name || p.n, b: o.brand || p.b, c: o.cat || p.c };
+}
 
 /** Up to a dozen photos per product; more is a mistake, not a gallery. */
 export const MAX_GALLERY = 12;
@@ -655,6 +693,9 @@ function mapOverride(r: OverrideRow): Override {
        ladder that leaves here always agrees with it: `price` wins on rung 0. */
     sizes: sizesWithPrice(cleanSizes(r.sizes), r.price == null ? null : money(num(r.price))),
     hidden: r.hidden === true,
+    name: r.name || null,
+    brand: r.brand || null,
+    cat: r.cat || null,
     updatedAt: r.updated_at ? new Date(r.updated_at as string).toISOString() : null,
   };
 }
@@ -761,6 +802,13 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
     if (ladder && ladder.length && !("price" in patch)) cols.price = money(ladder[0].price);
   }
   if ("hidden" in patch) cols.hidden = patch.hidden === true;
+  /* The name, brand and section — already checked by the route
+     (src/app/api/admin/overrides/route.ts normalise()); "" or null gives the
+     field back to the catalogue file. */
+  if ("name" in patch) cols.name = patch.name ? String(patch.name) : null;
+  if ("brand" in patch) cols.brand = patch.brand ? String(patch.brand) : null;
+  if ("cat" in patch) cols.cat = patch.cat ? String(patch.cat) : null;
+  if ("name" in patch || "brand" in patch || "cat" in patch) namesCache = null;
 
   if (cols.stock != null && !["in", "low", "out"].includes(String(cols.stock))) {
     throw new OrderError("bad_stock", String(cols.stock));
@@ -1328,6 +1376,8 @@ export async function priceItems(
     if (!p) throw new OrderError("unknown_item", raw.id);
 
     const o = overrides[raw.id];
+    // the line carries the name it is bought under — the owner's rename, if any
+    const named = own ? p : liveNames(p, o);
     // a hidden custom product answers s:"out" from customLookup — «нет в
     // наличии» is the honest refusal for something the owner took off sale
     const stock: StockState = own && own.min.s === "out" ? "out" : (o?.stock ?? (p.s as StockState)) || "in";
@@ -1393,8 +1443,8 @@ export async function priceItems(
     lines.push({
       id: p.id,
       kind: "product",
-      title: p.n,
-      brand: p.b,
+      title: named.n,
+      brand: named.b,
       variant: v.label,
       qty,
       price: money(unit),

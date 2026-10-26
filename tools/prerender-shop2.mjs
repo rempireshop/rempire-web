@@ -102,7 +102,7 @@ import {
   productSpec, patchShell, pageAssets, HEAD_MARK, PRE_MARK, VIEWPORT_META, reviewport,
   sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS, postDay, newestPostDay,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED,
-  fillBlogCardPrices, overriddenPrice, withOwnerStock, forSale, onlyForSale, pickTags,
+  fillBlogCardPrices, overriddenPrice, withOwnerStock, withOwnerNames, forSale, onlyForSale, pickTags,
   STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD, productOffersLD
 } from "../src/lib/seo-head.mjs";
 import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, SUBCOLLECTION_MIN } from "../src/lib/shop-paths.mjs";
@@ -173,7 +173,7 @@ const PRODUCT_OVERRIDES = await fetchProductOverrides();
    served as «В наличии» and as schema.org/InStock in static HTML until
    app.js booted and rewrote the head. Google renders JavaScript; a no-JS
    reader, the first paint and every feed reader do not (audit F31). */
-const CATALOGUE = withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES);
+const CATALOGUE = withOwnerNames(withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES), PRODUCT_OVERRIDES);
 
 /* The catalogue a SHOPPER may be shown: every storefront grid, shelf,
    ItemList and brand count below is built from this, never from CATALOGUE.

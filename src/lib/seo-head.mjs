@@ -453,6 +453,17 @@ export const withOwnerStock = (list, overrides) =>
     return stock === p.stock ? p : { ...p, stock };
   });
 
+/** `list` with the owner's renames folded in — a catalogue product's name,
+    brand and section (product_overrides name/brand/cat, migration 224), so
+    the grid, the brand and section pages, the product page and llms.txt all
+    say the name he gave it. The id stays the file's. */
+export const withOwnerNames = (list, overrides) =>
+  list.map(p => {
+    const o = overrides && overrides[p.id];
+    if (!o || (!o.name && !o.brand && !o.cat)) return p;
+    return { ...p, name: o.name || p.name, brand: o.brand || p.brand, cat: o.cat || p.cat };
+  });
+
 /* ---------- copy, one table per language -------------------------------- */
 
 /* Four cells of this table had drifted from app.js by 04.09.2026 and were

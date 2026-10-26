@@ -62,7 +62,7 @@ import catalogueFeed from "@/data/catalogue.feed.json";
 import variantData from "@/data/catalogue.variants.json";
 import { listCustomProducts, type CustomProduct } from "@/lib/custom-products";
 import { query } from "@/lib/db";
-import { getOverrides, overrideLadder, type Override } from "@/lib/orders";
+import { getOverrides, liveNames, overrideLadder, type Override } from "@/lib/orders";
 import { getDescriptionOverrides, type DescriptionOverride } from "@/lib/product-descriptions";
 import { translateProductName, translateVariant } from "@/lib/product-name";
 import {
@@ -528,8 +528,12 @@ type FeedProduct = {
   descOv: DescriptionOverride | null;
 };
 
-function catalogueProducts(descriptions: Record<string, DescriptionOverride>): FeedProduct[] {
-  return CATALOGUE.map((p) => {
+/* The owner's rename of a catalogue product (migration 224) is the feed's
+   name, brand and section too; the id — the offer id Google knows it by —
+   never changes with it. */
+function catalogueProducts(descriptions: Record<string, DescriptionOverride>, overrides: Record<string, Override> = {}): FeedProduct[] {
+  return CATALOGUE.map((p0) => {
+    const p = liveNames(p0, overrides[p0.id]);
     const row = FEED_DATA[p.id];
     return {
       id: p.id,
@@ -702,7 +706,7 @@ export type ShopProduct = {
 };
 
 export function shopProducts(input: Pick<FeedInput, "overrides" | "descriptions" | "custom">, base: string): ShopProduct[] {
-  const products = [...catalogueProducts(input.descriptions), ...customProducts(input.custom)];
+  const products = [...catalogueProducts(input.descriptions, input.overrides), ...customProducts(input.custom)];
   const out: ShopProduct[] = [];
   for (const p of products) {
     const o = input.overrides[p.id];
@@ -753,7 +757,7 @@ export type FeedOffer = {
 
 /** Every item the feed carries today, with its id — in the feed's own order. */
 export function feedOffers(input: Pick<FeedInput, "overrides" | "descriptions" | "custom">): FeedOffer[] {
-  const products = [...catalogueProducts(input.descriptions), ...customProducts(input.custom)];
+  const products = [...catalogueProducts(input.descriptions, input.overrides), ...customProducts(input.custom)];
   const out: FeedOffer[] = [];
   for (const pp of planFeed(products, input.overrides).products) {
     const word = (pp.o?.stock ?? pp.p.fileStock) as StockState;
@@ -845,7 +849,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     .join("\n    ");
 
   const items: string[] = [];
-  const products = [...catalogueProducts(opts.descriptions), ...customProducts(opts.custom)];
+  const products = [...catalogueProducts(opts.descriptions, overrides), ...customProducts(opts.custom)];
   /* Which products, which sizes and which ids — planFeed(), the pass the
      checkout link (resolveCartLink) reads the same ids from. */
   const plan = planFeed(products, overrides);

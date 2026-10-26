@@ -1013,7 +1013,8 @@ export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
     else if (override != null && Number.isFinite(override)) base = rung == null ? override : money(override + (rung - p.p));
     else base = rung ?? p.p;
     const price = money(base);
-    items.push({ id, title: p.n, brand: p.b, variant: label, size, qty, price });
+    // the name the shop shows today — the owner's rename (migration 224), for a catalogue product
+    items.push({ id, title: (!own && o?.name) || p.n, brand: (!own && o?.brand) || p.b, variant: label, size, qty, price });
     total += price * qty;
   }
   return { items, total: money(total) };
@@ -1287,14 +1288,21 @@ export async function productsForAlerts(ids: string[]): Promise<Map<string, Aler
     const keys = [...out.keys()];
     const holes = keys.map((_, i) => `$${i + 1}`).join(",");
     try {
-      const rows = await query<{ product_id: string; price: number | string | null }>(
-        `select product_id, price from product_overrides where product_id in (${holes}) and price is not null`,
+      const rows = await query<{ product_id: string; price: number | string | null; name: string | null; brand: string | null }>(
+        `select product_id, price, name, brand from product_overrides where product_id in (${holes})
+           and (price is not null or name is not null or brand is not null)`,
         keys,
       );
       for (const r of rows) {
-        const price = Number(r.price);
         const p = out.get(r.product_id);
-        if (p && Number.isFinite(price)) p.price = price;
+        if (!p) continue;
+        const price = r.price == null ? NaN : Number(r.price);
+        if (Number.isFinite(price)) p.price = price;
+        // the letter names the product the way its page does now (migration 224)
+        if (!r.product_id.startsWith("c-")) {
+          if (r.name) p.name = r.name;
+          if (r.brand) p.brand = r.brand;
+        }
       }
     } catch {
       /* no overrides table — the catalogue's own price is the answer */

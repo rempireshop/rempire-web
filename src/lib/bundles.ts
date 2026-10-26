@@ -274,8 +274,8 @@ function expand(row: BundleRow, overrides: Record<string, Override>): Bundle {
       variant: it.variant,
       size: it.variant,
       qty: it.qty,
-      brand: p?.b ?? "",
-      name: p?.n ?? it.productId,
+      brand: o?.brand || p?.b || "",
+      name: o?.name || p?.n || it.productId,
       sizeLabel: part.label,
       price: part.price,
       /* «Показывать в магазине» off (product_overrides.hidden, migration 147)

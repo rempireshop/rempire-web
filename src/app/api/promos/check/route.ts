@@ -30,6 +30,7 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { normalisePromoCode, quotePromo, type PromoBasketLine } from "@/lib/promos";
+import { getOverrides } from "@/lib/orders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,6 +104,22 @@ export async function POST(req: Request) {
   const subtotal = Math.max(0, Math.min(100_000, Number(body.subtotal) || 0));
   const shipping = Math.max(0, Math.min(1_000, Number(body.shipping) || 0));
   const items = cleanLines(body.items);
+  /* A catalogue product the owner gave another brand (migration 224) is that
+     brand at the checkout (priceItems), so it is here too — or a brand code
+     would look valid in the basket and be refused at payment. A database
+     that does not answer leaves the file's brand. */
+  if (items && items.length) {
+    try {
+      const known = items.map((l) => String(l.id ?? "")).filter((id) => BRAND_BY_ID.has(id));
+      const ov = known.length ? await getOverrides(known) : {};
+      for (const l of items) {
+        const renamed = ov[String(l.id ?? "")]?.brand;
+        if (renamed) l.brand = renamed;
+      }
+    } catch {
+      /* the file's brand stands */
+    }
+  }
 
   try {
     const quote = await quotePromo(code, subtotal, shipping, items);

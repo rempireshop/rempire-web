@@ -357,7 +357,15 @@ async function isCustomBrand(slug: string): Promise<boolean> {
   try {
     const { listCustomProducts } = await import("@/lib/custom-products");
     const rows = await listCustomProducts({ activeOnly: true });
-    return rows.some((r) => slugify(r.brand) === slug);
+    if (rows.some((r) => slugify(r.brand) === slug)) return true;
+    /* …or a brand the owner gave a catalogue product (migration 224): its
+       page exists the moment the product carries it — the static copy
+       follows with the rebuild the rename asked for. */
+    const { query } = await import("@/lib/db");
+    const renamed = await query<{ brand: string }>(
+      "select distinct brand from product_overrides where brand is not null and not coalesce(hidden, false)",
+    );
+    return renamed.some((r) => slugify(r.brand) === slug);
   } catch (err) {
     console.error("[notfound] custom brands unavailable:", err);
     return true;

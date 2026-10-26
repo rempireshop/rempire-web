@@ -114,6 +114,6 @@ describe("withOwnerStock — what the build hands every page", () => {
       require("node:url").fileURLToPath(new URL("../tools/prerender-shop2.mjs", import.meta.url)),
       "utf8",
     ) as string;
-    expect(src).toContain("const CATALOGUE = withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES);");
+    expect(src).toContain("const CATALOGUE = withOwnerNames(withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDES), PRODUCT_OVERRIDES);");
   });
 });

@@ -31,7 +31,9 @@ import {
   type DescriptionOverride,
 } from "@/lib/product-descriptions";
 import { getSeoOverrides, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
-import { listCustomProducts, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
+import { listCustomProducts, MAX_BRAND, MAX_NAME, PRODUCT_CATS, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
+import { nameTranslatable } from "@/lib/product-name";
+import { requestRebuild } from "@/lib/rebuild";
 import { productUrls } from "@/lib/indexnow.mjs";
 import { submitIndexNow } from "@/lib/indexnow-ping";
 
@@ -41,8 +43,39 @@ function emptyOverride(): Override {
   return {
     price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
     varImg: null, videoUrl: null, gallery: null, proPrice: null,
-    sizes: null, hidden: false, updatedAt: null,
+    sizes: null, hidden: false, name: null, brand: null, cat: null, updatedAt: null,
   };
+}
+
+/* A catalogue product's name, brand and section (migration 224): one line
+   each, the same caps the owner's own products have
+   (src/lib/custom-products.ts), the section one of the seven, and a name
+   every language can say — nameTranslatable(). "" or null gives the field
+   back to the catalogue file. The owner's own products («c-…») rename
+   through PUT /api/admin/products/<id>, never here. */
+function nameFields(id: string, patch: Partial<Override>): void {
+  const one = (key: "name" | "brand" | "cat", max: number) => {
+    if (!(key in patch)) return null;
+    const v = patch[key];
+    if (v == null || v === "") {
+      patch[key] = null;
+      return null;
+    }
+    if (typeof v !== "string") throw new OrderError("bad_body", key);
+    const clean = v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim();
+    if (!clean || clean.length > max) throw new OrderError("bad_body", key);
+    patch[key] = clean;
+    return clean;
+  };
+  const touched = "name" in patch || "brand" in patch || "cat" in patch;
+  if (touched && id.startsWith("c-")) throw new OrderError("bad_body", "own_product");
+  const name = one("name", MAX_NAME);
+  if (name && !nameTranslatable(name)) throw new OrderError("name_untranslatable", name);
+  one("brand", MAX_BRAND);
+  const cat = one("cat", 20);
+  if (cat && !(PRODUCT_CATS as readonly string[]).includes(cat)) throw new OrderError("bad_body", "cat");
+  // a subsection belongs to its section: a move starts from «Авто — по названию»
+  if ("cat" in patch && !("subcat" in patch)) patch.subcat = null;
 }
 
 export const runtime = "nodejs";
@@ -115,6 +148,9 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
      to the generated catalogue file. */
   pick(["sizes"], "sizes");
   pick(["hidden"], "hidden");
+  pick(["name"], "name");
+  pick(["brand"], "brand");
+  pick(["cat"], "cat");
   if ("price" in patch && patch.price != null) {
     const n = Number(patch.price);
     if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);
@@ -145,6 +181,7 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
     throw new OrderError("bad_body", "sizes");
   }
   if ("hidden" in patch && typeof patch.hidden !== "boolean") throw new OrderError("bad_body", "hidden");
+  nameFields(id, patch);
   return { id, patch };
 }
 
@@ -213,11 +250,16 @@ export async function PUT(req: Request) {
   const saved: Record<string, OverrideOut> = {};
   /* the ids whose PAGE changed — anything but the salon price, which only the panel shows */
   const onPage: string[] = [];
+  /* a renamed product moves through the static pages too — brand pages, section
+     pages, every grid tile — so the site is built again (src/lib/rebuild.ts,
+     at most once in five minutes); the open shop shows it at once */
+  let renamed = false;
   try {
     for (const raw0 of list) {
       const raw = raw0 as Record<string, unknown>;
       const { id, patch } = normalise(raw);
       if (!id) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
+      if ("name" in patch || "brand" in patch || "cat" in patch) renamed = true;
       /* The fields this patch is about to replace, as the row held them — the
          audit's `prev` (db/migrations/207_audit_prev.sql), so «Вернуть» in the
          journal works from any device (1a, Dim 25.09.2026, q7). Best effort:
@@ -269,5 +311,6 @@ export async function PUT(req: Request) {
      product's page changed, so the engines hear about it (fire-and-forget,
      the live shop only — src/lib/indexnow-ping.ts). */
   submitIndexNow(onPage.flatMap((id) => productUrls(id)));
+  if (renamed) requestRebuild("product-rename");
   return Response.json({ ok: true, overrides: saved }, { headers: { "cache-control": "no-store" } });
 }

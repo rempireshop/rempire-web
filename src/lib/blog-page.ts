@@ -475,7 +475,8 @@ async function shelfProducts(
        spreads — overriddenPrice() in seo-head.mjs owns that rule, so the
        build reaches the same number for the same article. */
     const { price, from } = overriddenPrice(m.p, VARIANTS[id]?.prices ?? [], o);
-    out.push({ id, brand: m.b, name: m.n, price, priceFrom: from });
+    // the owner's rename (migration 224) — the shelf names it the way the grid does
+    out.push({ id, brand: o?.brand || m.b, name: o?.name || m.n, price, priceFrom: from });
   }
   return { products: out, offSale };
 }

@@ -32,6 +32,9 @@ import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { query, withTx } from "@/lib/db";
 import type { Querier } from "@/lib/db";
+/* the owner's renames of catalogue products (migration 224); orders.ts reaches
+   this module only through import(), so there is no cycle */
+import { liveNames, nameOverrides } from "@/lib/orders";
 
 export type StockState = "in" | "low" | "out";
 
@@ -212,8 +215,12 @@ async function levelByEan(code: string): Promise<StockLevel | null> {
  * catalogue answer exactly as it was.
  */
 async function productRef(productId: string): Promise<EanHit["product"]> {
-  const p = BY_ID.get(productId);
-  if (p) return { id: p.id, brand: p.b, name: p.n, category: p.c, price: p.p };
+  const p0 = BY_ID.get(productId);
+  if (p0) {
+    // the owner's rename (migration 224) — the scanner names it the way the shop does
+    const p = liveNames(p0, (await nameOverrides()).get(productId));
+    return { id: p.id, brand: p.b, name: p.n, category: p.c, price: p.p };
+  }
   try {
     const { customMinByIds, isCustomId } = await import("@/lib/custom-products");
     if (!isCustomId(productId)) return null;
@@ -1106,12 +1113,13 @@ async function trackedKeys(): Promise<Set<string>> {
  * short of putting the product back on sale.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
-  const [dbRows, tracked, custom, owned, hidden] = await Promise.all([
+  const [dbRows, tracked, custom, owned, hidden, renames] = await Promise.all([
     query<StockLevelRow>("select * from stock_levels"),
     trackedKeys(),
     customUniverse(),
     ownerLadders(),
     hiddenIds(),
+    nameOverrides(),
   ]);
   const universe = catalogueUniverse(owned).concat(custom.rows);
 
@@ -1141,7 +1149,8 @@ export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?
   let rows: CatalogueLevelRow[] = universe.map(({ productId, variant }) => {
     const key = productId + "\u0000" + variant;
     const row = byKey.get(key);
-    const p = BY_ID.get(productId) ?? custom.byId.get(productId);
+    const file = BY_ID.get(productId);
+    const p = file ? liveNames(file, renames.get(productId)) : custom.byId.get(productId);
     const qty = row ? Number(row.qty) || 0 : 0;
     const lowThreshold = row ? Number(row.low_threshold) || 0 : DEFAULT_LOW_THRESHOLD;
     return {
@@ -1248,8 +1257,10 @@ export async function listMoves(
      the history is supposed to say what was received or sold. One lookup for
      the whole page, best effort. */
   const own = await customNames(rows.map((r) => r.product_id));
+  const renames = await nameOverrides();
   return rows.map((r) => {
-    const p = BY_ID.get(r.product_id);
+    const file = BY_ID.get(r.product_id);
+    const p = file ? liveNames(file, renames.get(r.product_id)) : undefined;
     const mine = own.get(r.product_id);
     return {
       id: Number(r.id),

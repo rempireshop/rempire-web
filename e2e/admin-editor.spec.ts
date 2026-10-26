@@ -71,10 +71,11 @@ test.describe("admin — the product editor", () => {
     await expect(page.locator("[data-edtab]"), "the card still has tabs").toHaveCount(0);
     // every section, one under the other, in the design's order
     const order = await page.locator("[data-edsec]").evaluateAll((els) => els.map((el) => el.getAttribute("data-edsec")));
-    expect(order.filter((k) => k !== "bysize")).toEqual(["shop", "sizes", "photos", "video", "desc", "seo"]);
-    // what the catalogue owns is not a box here — the «?» says who changes it
+    // «Что за товар» first for a catalogue product too since 26.10.2026 (migration 224)
+    expect(order.filter((k) => k !== "bysize")).toEqual(["what", "shop", "sizes", "photos", "video", "desc", "seo"]);
+    // the name, brand and section are his: the «?» says where they change
     await page.locator('[data-admhelp="ed-lock"]').click();
-    await expect(page.locator("#admhelp-ed-lock")).toContainText("приходят из каталога");
+    await expect(page.locator("#admhelp-ed-lock")).toContainText("меняются здесь же");
     await assertClean(page, w, "the card");
 
     const status = page.locator("[data-admsavest]").first();

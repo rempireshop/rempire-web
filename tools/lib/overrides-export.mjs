@@ -103,6 +103,11 @@ export function overrideRow(r) {
        subcollection's static page lists what its chip filters, and the chip
        reads this same column (DEMO.subcat in app.js). Read from 09.10.2026. */
     subcat: typeof r.subcat === "string" && r.subcat ? r.subcat : null,
+    /* The name, brand and section the owner renamed a catalogue product to
+       (migration 224) — every page the build writes names it so. */
+    name: typeof r.name === "string" && r.name ? r.name : null,
+    brand: typeof r.brand === "string" && r.brand ? r.brand : null,
+    cat: typeof r.cat === "string" && r.cat ? r.cat : null,
   };
 }
 
@@ -157,7 +162,12 @@ export async function fetchProductOverrides() {
   const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
   try {
     await client.connect();
-    const res = await client.query("select product_id, price, sizes, hidden, stock, subcat from product_overrides");
+    /* Every column, not a list: the build runs BEFORE the migrations
+       (prebuild, then postbuild migrate.mjs), so a column the deploy itself
+       adds does not exist yet on its first build — a named list would fail
+       the whole query and the build would fall back to «no overrides» at all,
+       hidden products included. A missing column is simply absent from `r`. */
+    const res = await client.query("select * from product_overrides");
     const out = {};
     for (const r of res.rows) out[r.product_id] = overrideRow(r);
     return out;

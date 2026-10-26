@@ -161,6 +161,18 @@ export function translateVariant(variant: string, lang: unknown): string {
 }
 
 /**
+ * Can every language say this name? True when the Estonian and the English
+ * name have no Russian word left — the line is Latin (or one of NAME_HEADS)
+ * and the type after « — » is one the tables know. What the owner may type
+ * into a product's name (src/app/api/admin/overrides/route.ts): a type the
+ * tables do not know would stay Russian on the Estonian and English pages,
+ * in their letters and in the Merchant Center feed.
+ */
+export function nameTranslatable(name: string): boolean {
+  return !/[а-яё]/i.test(translateProductName(name, "ET")) && !/[а-яё]/i.test(translateProductName(name, "EN"));
+}
+
+/**
  * trName(s, lang) from public/shop2/app.js, on the server. `lang` is the
  * order's language in any spelling («et», «EN», «en-GB»); Russian and
  * anything unrecognised return the name as it is.
