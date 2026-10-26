@@ -237,6 +237,20 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
     }
   });
 
+  /* 26.10.2026: Renat renamed a Proraso aftershave balm without its type
+     word, beard/af listed 5, and the deploy hook's build failed on this rule —
+     every build after it would have, the nightly one included. The rule is
+     the code's (the catalogue file); what the owner's names and subsections
+     do to it is a warning, and the page is still written. */
+  it("fails the build only on the catalogue file's count; the owner's renames only warn", () => {
+    const pre = readFileSync(ROOT + "tools/prerender-shop2.mjs", "utf8");
+    expect(pre).toContain("const n = CATALOGUE_FILE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;");
+    expect(pre).toContain("const live = CATALOGUE.filter(p => p.cat === cat && SUBS.with(p, own(p)).includes(sub)).length;");
+    const warn = pre.indexOf('console.warn("! " + key + " lists "');
+    expect(warn).toBeGreaterThan(pre.indexOf("const live = CATALOGUE"));
+    expect(pre.slice(pre.indexOf("const live = CATALOGUE"), warn)).not.toContain("throw");
+  });
+
   it("has no scalp-care and no Korean-cosmetics page — neither is a chip", () => {
     for (const h of ["scalp-treatment", "peanaha-hooldus", "skraby-dlya-golovy", "korean-cosmetics", "shaving", "raseerimine",
       "sredstva-dlya-britya", "beard-and-mustache-wax", "habeme-vuntsivahad", "vosk-dlya-borody-i-usov"]) {

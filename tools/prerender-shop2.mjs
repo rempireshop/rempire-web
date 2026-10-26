@@ -534,10 +534,22 @@ try {
       const w = seoSub(key, code);
       if (!w || !w.name || !w.title || !w.meta || !w.intro) throw new Error(key + " has no " + code + " words in seoSub() (src/lib/seo-copy.mjs)");
     }
-    const n = CATALOGUE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;
+    /* The publishing rule is the code's: counted on the catalogue file, it
+       fails the build. What the owner does to it since 26.10 — a rename that
+       drops the type word («After Shave Balm for Sensitive Skin» left
+       beard/af with 5, and the deploy hook's build failed, then every build
+       would have) — is only said: the page is still written, with what it
+       lists. Counted as the page lists: his «Подраздел» wins. */
+    const n = CATALOGUE_FILE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;
     if (n < SUBCOLLECTION_MIN) {
       throw new Error(key + " holds " + n + " catalogue products, fewer than " + SUBCOLLECTION_MIN +
         " — take it out of SUB_HANDLES (src/lib/shop-paths.mjs and app.js), or fill it");
+    }
+    const own = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subcat) || "";
+    const live = CATALOGUE.filter(p => p.cat === cat && SUBS.with(p, own(p)).includes(sub)).length;
+    if (live < SUBCOLLECTION_MIN) {
+      console.warn("! " + key + " lists " + live + " products after the owner's names and subsections (" + n +
+        " in the catalogue file) — written anyway; a thin page until he fills it");
     }
   }
 } catch (e) {
