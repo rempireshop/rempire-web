@@ -35,8 +35,17 @@ function line(v, max) {
   return v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max).trim();
 }
 
-/** The document as it may be stored — anything else dropped, never refused. */
+/** @typedef {{ title?: string, desc?: string, intro?: string }} PageTextFields */
+/** @typedef {Partial<Record<"RU" | "ET" | "EN", PageTextFields>>} PageTextPage */
+/** @typedef {{ cat: Record<string, PageTextPage>, brand: Record<string, PageTextPage> }} PageTexts */
+
+/**
+ * The document as it may be stored — anything else dropped, never refused.
+ * @param {unknown} raw
+ * @returns {PageTexts}
+ */
 export function cleanPageTexts(raw) {
+  /** @type {PageTexts} */
   const out = { cat: {}, brand: {} };
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
   for (const kind of ["cat", "brand"]) {
