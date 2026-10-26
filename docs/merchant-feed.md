@@ -37,6 +37,17 @@ whenever Google asks for it:
   three items, grouped together. Today that is **322 items from 220
   products**, plus any product the owner created in the panel that has a
   photo.
+- **The sets («Наборы») are items too** (since 26.10.2026), after the
+  products: one item per set, `set-<id>` (for example `set-face-basic`),
+  marked `is_bundle`, at the set's own price — the one the checkout
+  charges. The title names the products in it, the photos are the
+  products' own (the set page's social card has the tower logo, which
+  Google treats as an overlay), and the brand and barcode are the first
+  product's. A set that is switched off, or all sets while «Наборы на
+  сайте» is off, is left out; a set with a sold-out part is «out of
+  stock». Google's «Купить» on a set opens the set's page and puts it in
+  the basket. Before this, Google found two sets by crawling the site and
+  refused them for missing delivery prices.
 - **Prices include 24 % VAT**, the same as in the shop. There are no sale
   prices, because the shop has none.
 - **The feed can be up to one hour behind the shop.** It is cached for an

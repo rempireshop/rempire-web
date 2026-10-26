@@ -25,6 +25,8 @@
  *     where a custom product's data arrives before the page paints.
  *   · the item exists and is sold out → the product page on that size, with
  *     no `buy`: it says «нет в наличии» and offers «Сообщить о поступлении».
+ *   · the item is a set («set-…», since 26.10.2026) → its /set/ page, with
+ *     `buy=<qty>` unless a part of it is sold out.
  *   · the id is not in the feed, but names a product that is on sale (a size
  *     since removed, say) → that product's page.
  *   · anything else — an unknown id, a hidden product → the shop's home page.
@@ -41,7 +43,7 @@
 import { createHash } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import type { CartLinkLine } from "@/lib/cart-permalink";
-import { feedOffers, sizeSlug, type FeedInput, type FeedOffer } from "@/lib/merchant-feed";
+import { feedOffers, setOffers, sizeSlug, type FeedInput, type FeedOffer, type SetOffer } from "@/lib/merchant-feed";
 import { langPath } from "@/lib/seo-head.mjs";
 import { shopifyVariant, shopifyVariantId, type ShopifyVariant } from "@/lib/shopify-variants";
 
@@ -85,7 +87,7 @@ export type CartLinkTarget = {
  */
 export function resolveCartLink(
   lines: CartLinkLine[],
-  input: Pick<FeedInput, "overrides" | "descriptions" | "custom">,
+  input: Pick<FeedInput, "overrides" | "descriptions" | "custom" | "bundles">,
   seg: string,
   offers: FeedOffer[] = feedOffers(input),
 ): CartLinkTarget {
@@ -94,6 +96,11 @@ export function resolveCartLink(
 
   const offer = offers.find((o) => o.id === line.id);
   if (offer) return offerTarget(offer, line.qty, seg);
+
+  /* A set of today's feed («set-…», setOffers()): its /set/ page, and the
+     same `buy` — buyFromLink() in app.js puts a set in the basket too. */
+  const set = setOffers(input.bundles).find((s) => s.id === line.id);
+  if (set) return setTarget(set, line.qty, seg);
 
   const known = [...CATALOGUE_IDS, ...input.custom.map((c) => c.id)];
 
@@ -118,6 +125,13 @@ function offerTarget(offer: FeedOffer, qty: number, seg: string): CartLinkTarget
     path: productPath(seg, offer.productId, (size ? size + "&" : "") + "buy=" + qty),
     reason: "buy",
   };
+}
+
+/** A set of today's feed: its page, and into the basket unless a part of it is sold out. */
+function setTarget(set: SetOffer, qty: number, seg: string): CartLinkTarget {
+  const path = langPath(seg, "/set/" + encodeURIComponent(set.bundleId) + "/");
+  if (!set.available) return { path, reason: "sold-out" };
+  return { path: path + "?buy=" + qty, reason: "buy" };
 }
 
 /**

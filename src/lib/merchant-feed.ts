@@ -46,6 +46,9 @@
  *   gtin          the barcode Renat bound to that size in «Склад»
  *                 (stock_levels.ean), when it is a real GTIN with a valid
  *                 check digit. See validGtin().
+ *   sets          the «Наборы» the shop sells, after the products, as
+ *                 g:is_bundle items at the set's own price, linked to its
+ *                 /set/ page. See setItems().
  *
  * Prices include Estonian VAT (24 %), exactly as the shop shows them; EU
  * feeds carry VAT-inclusive prices and no g:tax. There is no sale price: the
@@ -60,9 +63,10 @@ import { createHash } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import catalogueFeed from "@/data/catalogue.feed.json";
 import variantData from "@/data/catalogue.variants.json";
+import { BUNDLE_MIN_ITEMS, listBundles, type Bundle, type BundleItemOut } from "@/lib/bundles";
 import { listCustomProducts, type CustomProduct } from "@/lib/custom-products";
 import { query } from "@/lib/db";
-import { getOverrides, liveNames, overrideLadder, type Override } from "@/lib/orders";
+import { getOverrides, getSettingRaw, liveNames, overrideLadder, type Override } from "@/lib/orders";
 import { getDescriptionOverrides, type DescriptionOverride } from "@/lib/product-descriptions";
 import { translateProductName, translateVariant } from "@/lib/product-name";
 import {
@@ -121,6 +125,8 @@ export type FeedInput = {
   eans: Record<string, Record<string, string>>;
   /** settings.shipping_rules as the checkout reads it. */
   rules: ShippingRules;
+  /** The sets a shopper can open — loadSets(). Absent: products only. */
+  bundles?: Bundle[];
 };
 
 /** Is a database configured at all? Without one the feed is the files' own — a local preview. */
@@ -153,16 +159,28 @@ export async function loadEans(productId?: string): Promise<Record<string, Recor
  */
 export async function loadFeedInput(): Promise<FeedInput> {
   if (!hasDatabase()) {
-    return { overrides: {}, descriptions: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES };
+    return { overrides: {}, descriptions: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES, bundles: [] };
   }
-  const [overrides, descriptions, custom, eans, rules] = await Promise.all([
+  const [overrides, descriptions, custom, eans, rules, bundles] = await Promise.all([
     getOverrides(),
     getDescriptionOverrides(),
     listCustomProducts({ activeOnly: true }),
     loadEans(),
     loadShippingRules(),
+    loadSets(),
   ]);
-  return { overrides, descriptions, custom, eans, rules: rules ?? DEFAULT_SHIPPING_RULES };
+  return { overrides, descriptions, custom, eans, rules: rules ?? DEFAULT_SHIPPING_RULES, bundles };
+}
+
+/**
+ * The sets the storefront shows: the active ones, and none at all while
+ * «Наборы на сайте» (settings.bundles) is off — allBundles() in app.js. A
+ * set Google lists must be a set a shopper can open.
+ */
+async function loadSets(): Promise<Bundle[]> {
+  const sw = await getSettingRaw("bundles");
+  if (sw.found && sw.value === false) return [];
+  return listBundles({ activeOnly: true });
 }
 
 /* ---------- small helpers ----------------------------------------------- */
@@ -780,10 +798,50 @@ export function feedOffers(input: Pick<FeedInput, "overrides" | "descriptions" |
   return out;
 }
 
+/* ---------- the sets ------------------------------------------------------
+
+   Dim, 26.10.2026: the sets go into the feed. Until then Google found two of
+   them on its own, crawling the /set/ pages, and refused them («Missing
+   shipping info in some countries»): a crawled item gets no g:shipping. Here
+   a set is one item at the set's own price — the price bundleDefsForOrders()
+   charges, which listBundles() hands over already computed — with g:is_bundle,
+   the brand and barcode of its first product (Google's rule for a bundle the
+   shop puts together itself), and the products' own photos: the /set/ page's
+   social card has the tower in its corner, and a logo on an image is what
+   Merchant Center calls a promotional overlay. */
+
+/** A set's Merchant Center id: «set-» and its own id. No catalogue id starts so (tests/merchant-feed.test.ts). */
+export const setFeedId = (bundleId: string): string => merchantId(idStem("set-" + bundleId));
+
+/** A set the feed can list: active, a set at all (two products or more), at a price the till could charge. */
+const listableSet = (b: Bundle) =>
+  b.active && b.items.length >= BUNDLE_MIN_ITEMS && Number.isFinite(b.price) && b.price > 0;
+
+/** One set of the feed, as the checkout link has to find it again. */
+export type SetOffer = { id: string; bundleId: string; price: number; available: boolean };
+
+/** Every set the feed carries today, with its id — what resolveCartLink() reads a «set-…» id from. */
+export function setOffers(bundles: Bundle[] = []): SetOffer[] {
+  return bundles.filter(listableSet).map((b) => ({
+    id: setFeedId(b.id),
+    bundleId: b.id,
+    price: money(b.price),
+    available: b.stock !== "out",
+  }));
+}
+
+/** «In the set: …» before the list of its products, in the feed's language. */
+const SET_CONTENTS: Record<FeedLang, string> = { EN: "In the set", ET: "Komplektis", RU: "В наборе" };
+
+/** A set's own text in the feed's language, else English, else the Russian it always has. */
+const setText = (t: Record<FeedLang, string>, lang: FeedLang) => (t[lang] || t.EN || t.RU || "").trim();
+
 /* ---------- the feed ---------------------------------------------------- */
 
 export type FeedStats = {
   products: number;
+  /** Sets («Наборы») listed, after the products. */
+  sets: number;
   items: number;
   groups: number;
   outOfStock: number;
@@ -807,7 +865,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
   const seg = (LANGS as Array<{ code: string; seg: string }>).find((l) => l.code === lang)?.seg ?? "";
   const service = SERVICE[lang];
   const stats: FeedStats = {
-    products: 0, items: 0, groups: 0, outOfStock: 0, withGtin: 0, identifierExistsNo: 0,
+    products: 0, sets: 0, items: 0, groups: 0, outOfStock: 0, withGtin: 0, identifierExistsNo: 0,
     missingGtin: 0, hidden: 0, skippedNoImage: [], cyrillicTitles: [],
   };
 
@@ -949,6 +1007,89 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     });
   }
 
+  /* ---- the sets, after the products — see setOffers() ---- */
+  const productById = new Map(products.map((p) => [p.id, p]));
+  /** The photo the product page shows for one size of a product: that size's own, else the first usable one. */
+  const photoOf = (productId: string, index: number): string | undefined => {
+    const p = productById.get(productId);
+    if (!p) return undefined;
+    const o = overrides[productId];
+    const { photos, varImg } = photosOf(p, o, rungsOf(p, o).length);
+    const own = photos[varImg[index] ?? 0];
+    return own && usableImage(own) ? own : photos.find(usableImage);
+  };
+  const offerOfSet = new Map(setOffers(opts.bundles).map((s) => [s.bundleId, s]));
+  for (const b of (opts.bundles ?? []).filter(listableSet)) {
+    const offer = offerOfSet.get(b.id)!;
+    /* the owner's own picture for the set first — a product of the shop, or
+       an uploaded photo — then the photo of every product in it */
+    const chosen = !b.image
+      ? undefined
+      : productById.has(b.image)
+        ? photoOf(b.image, 0)
+        : b.image.startsWith("//") ? "https:" + b.image : b.image;
+    const parts = b.items as BundleItemOut[];
+    const photos = [chosen, ...parts.map((it) => photoOf(it.productId, it.variant))]
+      .filter((u): u is string => !!u && usableImage(u))
+      .filter((u, i, all) => all.indexOf(u) === i);
+    if (!photos.length) {
+      stats.skippedNoImage.push(offer.id);
+      continue;
+    }
+    stats.sets++;
+
+    const heads = parts.map((it) => {
+      const name = feedName(it.name, lang);
+      const head = !it.brand || name.toLowerCase().startsWith(it.brand.toLowerCase() + " ") ? name : `${it.brand} ${name}`;
+      /* the name without its type, and without a maker's own subtitle
+         («Yumain Tattoo Balm – The Ultimate Care for Your Tattoos») */
+      return { it, head, short: head.split(" — ")[0].split(" – ")[0].trim() };
+    });
+    const count = (it: BundleItemOut) => (it.qty > 1 ? `${it.qty} × ` : "");
+    const title = clip(`${setText(b.title, lang)}: ${heads.map((h) => count(h.it) + h.short).join(" + ")}`, 150);
+    if (lang !== "RU" && CYRILLIC.test(title)) stats.cyrillicTitles.push(offer.id);
+    const contents = heads
+      .map((h) => count(h.it) + h.head + (h.it.sizeLabel ? ", " + translateVariant(h.it.sizeLabel, lang) : ""))
+      .join("; ");
+    const description = clip(ownerText(`${setText(b.desc, lang)}\n\n${SET_CONTENTS[lang]}: ${contents}.`), 5000);
+    const main = parts[0];
+    const gtin = validGtin(opts.eans[main.productId]?.[main.sizeLabel ?? ""]);
+    const category = googleCategory(b.cat, []);
+    if (!offer.available) stats.outOfStock++;
+
+    const f: string[] = [
+      el("g:id", offer.id),
+      el("g:title", title),
+      el("g:description", description),
+      el("g:link", base + langPath(seg, "/set/" + encodeURIComponent(b.id) + "/")),
+      el("g:image_link", absUrl(base, photos[0])),
+      ...photos.slice(1, 11).map((u) => el("g:additional_image_link", absUrl(base, u))),
+      el("g:availability", offer.available ? "in_stock" : "out_of_stock"),
+      el("g:price", eurText(offer.price)),
+      el("g:brand", main.brand),
+      el("g:condition", "new"),
+      el("g:is_bundle", "yes"),
+    ];
+    if (gtin) {
+      f.push(el("g:gtin", gtin));
+      stats.withGtin++;
+    } else if (OWN_BRANDS.has(main.brand.trim().toLowerCase())) {
+      f.push(el("g:identifier_exists", "no"));
+      stats.identifierExistsNo++;
+    } else {
+      stats.missingGtin++;
+    }
+    if (category) f.push(el("g:google_product_category", category));
+    const section = catName(b.cat, lang);
+    if (section) f.push(el("g:product_type", section));
+    f.push(el("g:min_handling_time", HANDLING_DAYS.min));
+    f.push(el("g:max_handling_time", HANDLING_DAYS.max));
+    f.push(shippingXml(offer.price));
+    if (freeXml) f.push(freeXml);
+    items.push("  <item>\n    " + f.join("\n    ") + "\n  </item>");
+    stats.items++;
+  }
+
   const now = (opts.now ?? new Date()).toISOString();
   const home = base + langPath(seg, "/");
   const xml =
@@ -960,7 +1101,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     `  ${el("description", t.base)}\n` +
     /* For whoever opens the file: what is in it and what was left out. No
        double hyphen can reach a comment — ids are the only free text here. */
-    `  <!-- ${lang} · ${now} · ${stats.items} items from ${stats.products} products · ` +
+    `  <!-- ${lang} · ${now} · ${stats.items} items from ${stats.products} products and ${stats.sets} sets · ` +
     `${stats.outOfStock} out of stock · ${stats.hidden} hidden · ` +
     `${stats.skippedNoImage.length} without a usable photo -->\n` +
     items.join("\n") +

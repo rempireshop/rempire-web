@@ -21,7 +21,8 @@ import catalogueMin from "@/data/catalogue.min.json";
 import shopifyTable from "@/data/shopify-variants.json";
 import { isCartPermalink, parseCartPermalink, segFromAcceptLanguage } from "@/lib/cart-permalink";
 import { resolveCartLink } from "@/lib/merchant-cart";
-import { buildFeed, feedOffers, idStem, sizeSlug, type FeedInput } from "@/lib/merchant-feed";
+import type { Bundle } from "@/lib/bundles";
+import { buildFeed, feedOffers, idStem, setFeedId, sizeSlug, type FeedInput } from "@/lib/merchant-feed";
 import { shopifyVariant, shopifyVariantId, type ShopifyVariant } from "@/lib/shopify-variants";
 import { exec, query } from "@/lib/db";
 import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
@@ -162,6 +163,32 @@ describe("what cannot be put in the basket", () => {
     expect(go("/cart/no-such-thing:1")).toEqual({ path: "/ru", reason: "unknown" });
     expect(go("/cart/12345678901:1", EMPTY, "")).toEqual({ path: "/", reason: "unknown" });
     expect(go("/cart/abc-0123abcd_x:1")).toEqual({ path: "/ru", reason: "unknown" });
+  });
+});
+
+describe("a set of the feed («set-…», since 26.10.2026)", () => {
+  /* Only what setOffers() reads: active, two parts or more, a price, the stock word. */
+  const set = (stock: "in" | "low" | "out", over: Partial<Bundle> = {}) =>
+    ({
+      id: "face-basic", active: true, price: 57.79, stock,
+      items: [{ productId: "a" }, { productId: "b" }],
+      ...over,
+    }) as unknown as Bundle;
+  const withSets = (...bundles: Bundle[]): FeedInput => ({ ...EMPTY, bundles });
+
+  it("its page, and into the basket — in the browser's language", () => {
+    expect(setFeedId("face-basic")).toBe("set-face-basic");
+    expect(go("/cart/set-face-basic:2", withSets(set("in")), "")).toEqual({ path: "/collections/sets/face-basic?buy=2", reason: "buy" });
+    expect(go("/cart/set-face-basic:1", withSets(set("low")), "ru").path).toBe("/ru/collections/sets/face-basic?buy=1");
+  });
+
+  it("a part sold out: the set's page, and nothing added", () => {
+    expect(go("/cart/set-face-basic:1", withSets(set("out")), "")).toEqual({ path: "/collections/sets/face-basic", reason: "sold-out" });
+  });
+
+  it("a set no longer on sale, or no sets at all: the home page", () => {
+    expect(go("/cart/set-face-basic:1", withSets(set("in", { active: false })), "").reason).toBe("unknown");
+    expect(go("/cart/set-face-basic:1", EMPTY, "")).toEqual({ path: "/", reason: "unknown" });
   });
 });
 
@@ -317,6 +344,46 @@ describe("the storefront: ?buy= puts it in the basket and opens the checkout", (
     const out = run("?size=250ml", P1);
     expect(out.S.cart).toEqual([]);
     expect(out.calls).toEqual([]);
+  });
+
+  /* A set's page (/set/<id>/?buy=, a «set-…» item): the same door, the set's line. */
+  type B = { id: string; price: number; items: Array<{ id: string; size?: number }> };
+  function runSet(search: string, b: B | null, out = false, cart: Array<Record<string, unknown>> = []) {
+    const S: Record<string, unknown> = { screen: "bundle", bundleId: b ? b.id : "x", cart };
+    const calls: string[] = [];
+    let url = "/collections/sets/x" + search;
+    const loc = { get search() { return url.slice(url.indexOf("?") >= 0 ? url.indexOf("?") : url.length); }, pathname: "/collections/sets/x" };
+    const hist = { state: null, replaceState: (_s: unknown, _t: string, u: string) => { url = u; } };
+    new Function("S", "location", "history", "shownBundleById", "bundleStock", "CART_MAX_QTY", "persist", "cartPush", "pushCart", "go",
+      `${slice("bundleLine")} ${slice("buySetFromLink")} ${slice("buyFromLink")} buyFromLink();`)(
+      S, loc, hist, () => b, () => (out ? "out" : "in"), 99,
+      () => calls.push("persist"), { off: true }, () => calls.push("pushCart"),
+      (s: string) => { calls.push("go:" + s); S.screen = s; },
+    );
+    return { S, calls, url };
+  }
+  const SET: B = { id: "face-basic", price: 57.79, items: [{ id: "a" }, { id: "b", size: 1 }] };
+  const SET_LINE = {
+    type: "bundle", id: "bundle:face-basic", qty: 2, price: 57.79,
+    components: [{ id: "a", size: 0, qty: 1 }, { id: "b", size: 1, qty: 1 }],
+  };
+
+  it("a set: its line — the one «В корзину» writes — and the checkout", () => {
+    const out = runSet("?buy=2", SET);
+    expect(out.S.cart).toEqual([SET_LINE]);
+    expect(out.calls).toContain("go:checkout");
+    expect(out.url).toBe("/collections/sets/x");
+    // the same link twice is one line
+    expect(runSet("?buy=2", SET, false, [{ ...SET_LINE }]).S.cart).toEqual([SET_LINE]);
+    expect(src).toContain("else S.cart.push(bundleLine(b, 1));");
+  });
+
+  it("a set with a part sold out, or sets switched off: stays on the page, nothing added", () => {
+    for (const [b, out] of [[SET, true], [null, false]] as const) {
+      const run = runSet("?buy=1", b, out);
+      expect(run.S.cart).toEqual([]);
+      expect(run.calls).not.toContain("go:checkout");
+    }
   });
 
   it("runs at boot, after the page's own route is known", () => {

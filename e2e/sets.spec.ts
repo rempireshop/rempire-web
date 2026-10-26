@@ -81,6 +81,27 @@ for (const [i, lang] of LANGS.entries()) {
   });
 }
 
+/* «Купить» on a set in Google Shopping (since 26.10.2026, when the sets went
+   into the Merchant feed): /cart/set-<id>:<qty> → the set's page with ?buy=
+   (src/lib/merchant-cart.ts) → buySetFromLink() in app.js, which puts the set
+   in the basket and opens the checkout. The whole chain, server included. */
+test.describe("sets — Google Shopping", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(79) });
+
+  test("«Купить» on a set: into the basket, on to the checkout, once", async ({ page }) => {
+    await page.goto(`/cart/set-${BUNDLE.id}:1`);
+    await waitForScreen(page, "checkout");
+    await expect(page).not.toHaveURL(/buy=/);
+    await openSummary(page); // folded on a phone
+    const parts = page.locator(".cosum .cline__parts").first();
+    await expect(parts).toContainText(BUNDLE.componentNames[0]);
+    // Back: the set's page, and the set is not put in a second time
+    await page.goBack();
+    await waitForScreen(page, "bundle");
+    await expect(page.locator("[data-cartbadge]")).toHaveText("1");
+  });
+});
+
 /* ------------------------------------------------------------------------
    «Наборы на сайте» switched off (Настройки → Магазин, settings.bundles).
 

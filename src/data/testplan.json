@@ -3985,6 +3985,45 @@
       "markedAt": "2026-09-23T13:32:52.399Z"
     },
     {
+      "id": "checkout-google-set-link",
+      "area": "checkout",
+      "who": "dim",
+      "device": "any",
+      "lang": "any",
+      "title": "Набор в Google Shopping и его «Купить»",
+      "steps": [
+        "Открыть rempireshop.com/feed/google-en.xml и найти в нём set-face-basic.",
+        "Открыть rempireshop.com/cart/set-face-basic:1.",
+        "Посмотреть корзину, потом нажать «Назад» в браузере."
+      ],
+      "expect": [
+        "В фиде есть товар «Face — three steps: …» с пометкой is_bundle yes.",
+        "Цена — как на странице набора, фото — самих товаров.",
+        "Открылось оформление заказа: набор «Лицо — три шага», 1 штука.",
+        "«Назад» ведёт на страницу набора, второй раз он не добавляется."
+      ],
+      "why": "С 26.10 наборы есть в фиде Google; раньше Google находил два из них сам и отклонял их — без цены доставки.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "A set in Google Shopping and its «Buy»",
+        "steps": [
+          "Open rempireshop.com/feed/google-en.xml and find set-face-basic in it.",
+          "Open rempireshop.com/cart/set-face-basic:1.",
+          "Look at the basket, then press the browser's Back."
+        ],
+        "expect": [
+          "The feed has an item «Face — three steps: …» marked is_bundle yes.",
+          "Its price is the set page's, its photos the products' own.",
+          "The checkout opened: the set «Лицо — три шага», one of it.",
+          "Back leads to the set's page, and it is not added again."
+        ],
+        "why": "Since 26.10 the sets are in the Google feed; before, Google found two of them by itself and refused them for lacking a delivery price."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-26T17:06:16.441Z"
+    },
+    {
       "id": "order-list-chips",
       "area": "orders",
       "who": "renat",

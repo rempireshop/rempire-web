@@ -31,6 +31,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { GET } from "@/app/feed/[file]/route";
+import { listBundles, setBundleActive, upsertBundle, validateBundle } from "@/lib/bundles";
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
 import { setLevel, setQty } from "@/lib/inventory";
@@ -107,7 +108,8 @@ function items(xml: string): Parsed[] {
   });
 }
 const one = (it: Parsed, key: string) => it.fields[key]?.[0];
-const productOf = (it: Parsed) => decodeURIComponent(/\/products\/([^/?]+)(\?size=[^/]*)?$/.exec(one(it, "link") ?? "")![1]);
+/* "" for a set — its link is /collections/sets/<id> */
+const productOf = (it: Parsed) => decodeURIComponent(/\/products\/([^/?]+)(\?size=[^/]*)?$/.exec(one(it, "link") ?? "")?.[1] ?? "");
 const byProduct = (list: Parsed[], id: string) => list.filter((it) => productOf(it) === id);
 const euros = (price: string) => Number(price.replace(/ EUR$/, ""));
 
@@ -162,8 +164,9 @@ beforeEach(async () => {
   process.env.PUBLIC_BASE_URL = LIVE;
   vi.spyOn(console, "error").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});
+  // the seeded sets too: the products are counted on their own, and «sets» adds its own
   await exec(
-    "truncate custom_products, product_overrides, stock_levels, stock_moves, settings, stock_alerts restart identity cascade",
+    "truncate custom_products, product_overrides, stock_levels, stock_moves, settings, stock_alerts, bundles restart identity cascade",
   );
   resetShippingRulesCache();
 });
@@ -421,6 +424,115 @@ describe("prices and availability", () => {
     const en = byProduct((await feed("en")).list, shown.id);
     expect(one(en[0], "description")).toBe("A beard balm.");
     expect(one(en[0], "title")).toBe("Proraso Beard Balm — beard balm, 100 ml");
+  });
+});
+
+/* ---------- the sets ------------------------------------------------------
+
+   Dim, 26.10.2026: «Наборы» go into the feed. Google had found two of them
+   by crawling the /set/ pages and refused both: a crawled item has no
+   shipping. Each set is one g:is_bundle item at the price the checkout
+   charges for its «bundle:<id>» line. */
+
+describe("sets («Наборы»)", () => {
+  /** The shampoo's 250 мл and two Proraso balms, 10 % under what they cost apart. */
+  async function addSet(over: Record<string, unknown> = {}) {
+    const check = validateBundle({
+      id: "test-set",
+      cat: "hair",
+      title: { RU: "Тестовый набор", ET: "Testkomplekt", EN: "Test set" },
+      desc: { RU: "Два товара вместе.", ET: "Kaks toodet koos.", EN: "Two products together." },
+      items: [
+        { productId: SHAMPOO, variant: 1, qty: 1 },
+        { productId: PRORASO, variant: 0, qty: 2 },
+      ],
+      discountPct: 10,
+      active: true,
+      sort: 1,
+      ...over,
+    });
+    if (!check.ok) throw new Error("fixture is invalid: " + check.error);
+    return upsertBundle(check.value);
+  }
+  const setOf = (list: Parsed[]) => list.find((it) => one(it, "id") === "set-test-set");
+
+  it("are one is_bundle item each, after the products, at the price the checkout charges", async () => {
+    await addSet();
+    const { list } = await feed("en");
+    const set = setOf(list)!;
+    expect(set).toBeTruthy();
+    expect(list.indexOf(set)).toBe(list.length - 1);
+    expect(one(set, "is_bundle")).toBe("yes");
+    // 16 € + 2 × 16 € less 10 %: what a «bundle:test-set» line costs at the till
+    expect(one(set, "price")).toBe("43.20 EUR");
+    expect(euros(one(set, "price")!)).toBe(await checkout("bundle:test-set", null));
+    expect(one(set, "availability")).toBe("in_stock");
+    expect(one(set, "link")).toMatch(/^https:\/\/rempireshop\.com\/collections\/sets\/test-set\/?$/);
+    // the first product's brand, Google's rule for a set the shop puts together itself
+    expect(one(set, "brand")).toBe("System 4");
+    expect(one(set, "condition")).toBe("new");
+    expect(one(set, "google_product_category")).toBe("Health & Beauty > Personal Care > Hair Care");
+    expect(one(set, "product_type")).toBe("Hair care");
+    expect(set.shipping.length).toBe(shippingFor(43.2, DEFAULT_SHIPPING_RULES).length);
+    expect(one(set, "min_handling_time")).toBe(String(HANDLING_DAYS.min));
+  });
+
+  it("are named and described by their products, in the feed's language", async () => {
+    await addSet();
+    const en = setOf((await feed("en")).list)!;
+    expect(one(en, "title")).toBe("Test set: System 4 Bio Botanical Shampoo + 2 × Proraso Wood & Spice");
+    expect(one(en, "description")).toBe(
+      "Two products together. In the set: System 4 Bio Botanical Shampoo — shampoo, 250 ml; 2 × Proraso Wood & Spice — beard balm.",
+    );
+    const ru = setOf((await feed("ru")).list)!;
+    expect(one(ru, "title")).toBe("Тестовый набор: System 4 Bio Botanical Shampoo + 2 × Proraso Wood & Spice");
+    expect(one(ru, "description")).toMatch(/^Два товара вместе\. В наборе: System 4 Bio Botanical Shampoo — шампунь, 250 мл; /);
+    expect(one(ru, "link")).toMatch(/^https:\/\/rempireshop\.com\/ru\/collections\/sets\/test-set\/?$/);
+    const et = setOf((await feed("et")).list)!;
+    expect(one(et, "title")).toMatch(/^Testkomplekt: /);
+    expect(one(et, "description")).toMatch(/^Kaks toodet koos\. Komplektis: /);
+  });
+
+  it("show the products' own photos — the size the set holds first — never the /set/ page's card with its logo", async () => {
+    await addSet();
+    const { list } = await feed("en");
+    const set = setOf(list)!;
+    const shampoo250 = byProduct(list, SHAMPOO).find((it) => one(it, "size") === "250 ml")!;
+    const balm = byProduct(list, PRORASO)[0];
+    expect(one(set, "image_link")).toBe(one(shampoo250, "image_link"));
+    expect(set.fields.additional_image_link).toContain(one(balm, "image_link"));
+    expect(one(set, "image_link")).not.toMatch(/\/og\//);
+  });
+
+  it("follow the parts: sold out with one of them, gone when switched off or when «Наборы на сайте» is off", async () => {
+    await addSet();
+    await upsertOverride(PRORASO, { stock: "out" });
+    expect(one(setOf((await feed("en")).list)!, "availability")).toBe("out_of_stock");
+
+    await setBundleActive("test-set", false);
+    expect(setOf((await feed("en")).list)).toBeUndefined();
+
+    await setBundleActive("test-set", true);
+    await setSetting("bundles", false);
+    for (const lang of ["en", "et", "ru"] as const) {
+      const { xml } = await feed(lang);
+      expect(xml).not.toContain("set-test-set");
+      expect(xml).not.toContain("/collections/sets/");
+    }
+  });
+
+  it("move with the products' prices — a set priced by a percent is never a stale number", async () => {
+    await addSet();
+    await upsertOverride(PRORASO, { price: 20 });
+    const [stored] = await listBundles({ activeOnly: true });
+    const set = setOf((await feed("ru")).list)!;
+    expect(euros(one(set, "price")!)).toBe(stored.price);
+    expect(euros(one(set, "price")!)).toBe(await checkout("bundle:test-set", null));
+    expect(stored.price).toBe(50.4); // (16 + 2 × 20) less 10 %
+  });
+
+  it("have ids no product can take: «set-» and the set's own", () => {
+    expect(CATALOGUE.filter((p) => p.id.startsWith("set-"))).toEqual([]);
   });
 });
 

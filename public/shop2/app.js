@@ -20448,6 +20448,7 @@
       return kv && kv.split("=")[0] !== "buy";
     }).join("&");
     try { history.replaceState(history.state || null, "", location.pathname + (rest ? "?" + rest : "")); } catch (e) {}
+    if (S.screen === "bundle" && S.bundleId) { buySetFromLink(S.bundleId, Number(m[1])); return; }
     if (S.screen !== "product" || !S.productId) return;
     var p = byIdOrNull(S.productId);
     if (!p || p.stock === "out" || sizeOut(p, S.size)) return;
@@ -20460,6 +20461,23 @@
     cartPush.off = false;   // a new basket — see addToCart()
     pushCart();
     track("add_to_cart", { productId: p.id, value: sizePrice(p, S.size) });   // analytics agent
+    go("checkout");
+  }
+  /* The same for a set: since 26.10.2026 the feed lists the sets, and a
+     «Купить» on one lands on /set/<id>/?buy=<qty>. The checks
+     addBundleToCart() makes — sets on, this set shown, every part in stock —
+     then at least `qty` of it, and the checkout. */
+  function buySetFromLink(bid, n) {
+    var b = shownBundleById(bid);
+    if (!b || bundleStock(b) === "out") return;
+    var qty = Math.max(1, Math.min(CART_MAX_QTY, n || 1));
+    var line = null;
+    S.cart.forEach(function (l) { if (l.type === "bundle" && l.id === "bundle:" + b.id) line = l; });
+    if (line) line.qty = Math.max(line.qty, qty);
+    else S.cart.push(bundleLine(b, qty));
+    persist();
+    cartPush.off = false;   // a new basket — see addToCart()
+    pushCart();
     go("checkout");
   }
 
@@ -52347,13 +52365,17 @@
     var id = "bundle:" + b.id, line = null;
     S.cart.forEach(function (l) { if (l.type === "bundle" && l.id === id) line = l; });
     if (line) line.qty = Math.min(CART_MAX_QTY, line.qty + 1);
-    else S.cart.push({
-      type: "bundle", id: id, qty: 1, price: b.price,
-      components: b.items.map(function (it) { return { id: it.id, size: it.size || 0, qty: 1 }; })
-    });
+    else S.cart.push(bundleLine(b, 1));
     persist();
     if (S.cartOpen) rebuildCart();
     toast("Набор в корзине ✓");
+  }
+  /** A set's cart line — «В корзину» on the set and «Купить» from Google (buySetFromLink()) write the same one. */
+  function bundleLine(b, qty) {
+    return {
+      type: "bundle", id: "bundle:" + b.id, qty: qty, price: b.price,
+      components: b.items.map(function (it) { return { id: it.id, size: it.size || 0, qty: 1 }; })
+    };
   }
   function addGiftToCart(amount) {
     var a = Number(amount);
