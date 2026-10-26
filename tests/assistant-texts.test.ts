@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url";
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
-import { sanitizeAction } from "@/app/api/assistant/actions";
+import { namesAsAsked, sanitizeAction } from "@/app/api/assistant/actions";
 import { namedPages, namedProductIds } from "@/app/api/assistant/named";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { exec } from "@/lib/db";
@@ -104,6 +104,25 @@ describe("the action door — the connector's checks on the assistant's texts", 
   });
 });
 
+/* the live test of 26.10.2026: the reply promised «ANGEL.WASH Volume — шампунь
+   для волос», the action carried «ANGEL.WASH — шампунь для волос» */
+describe("namesAsAsked — a rename leaves with the name the owner dictated", () => {
+  const model = { type: "set_names", id: "kevin-murphy-angel-wash", name: "ANGEL.WASH — шампунь для волос" };
+  it("puts back the words the model dropped", () => {
+    expect(namesAsAsked(model, "Переименуй этот товар в ANGEL.WASH Volume — шампунь для волос"))
+      .toEqual({ ...model, name: "ANGEL.WASH Volume — шампунь для волос" });
+    expect(namesAsAsked(model, "назови его «ANGEL.WASH Volume — шампунь для волос»."))
+      .toEqual({ ...model, name: "ANGEL.WASH Volume — шампунь для волос" });
+  });
+  it("leaves the model's name when he dictated none, a Russian head, or one no language can say", () => {
+    expect(namesAsAsked(model, "сделай название понятнее")).toBe(model);
+    expect(namesAsAsked(model, "переименуй в Чёрное мыло — ручная работа")).toBe(model);
+    expect(namesAsAsked(model, "переименуй в ANGEL.WASH — эликсир")).toBe(model);
+    const price = { type: "set_price", id: "x", value: 9 };
+    expect(namesAsAsked(price, "в ANGEL.WASH Volume — шампунь")).toBe(price);
+  });
+});
+
 describe("what the owner means — the product and the page read into the prompt", () => {
   it("finds the open product first, then the products his words name; a section or brand his words name", () => {
     expect(namedProductIds("переведи описание", ROWS, "kevin-murphy-angel-wash")).toEqual(["kevin-murphy-angel-wash"]);
@@ -158,7 +177,8 @@ describe("POST /api/assistant — the texts reach the prompt, and a refused text
     const { POST } = await import("@/app/api/assistant/route");
     const res = await POST(req({ mode: "admin", product: "kevin-murphy-angel-wash", messages: [{ role: "user", content: "переведи описание и текст раздела Борода на эстонский" }] }));
     expect(res.status).toBe(200);
-    expect(system).toContain("PRODUCTS THE OWNER MEANS");
+    expect(system).toContain("THE PRODUCT OPEN ON THE OWNER'S SCREEN");
+    expect(system).toContain("never ask which one");
     expect(system).toContain("Свой текст Рената про ANGEL.WASH.");
     expect(system).toContain("PAGES THE OWNER MEANS");
     expect(system).toContain("Habemehooldusvahendid");   // the beard section's standard Estonian line

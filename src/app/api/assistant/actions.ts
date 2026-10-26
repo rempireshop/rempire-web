@@ -1381,6 +1381,36 @@ function sanitizeSetNames(x: Record<string, unknown>, known: Set<string>): objec
   return CUSTOM_ID_RE.test(id) ? { type: "update_product", id, ...out } : { type: "set_names", id, ...out };
 }
 
+/**
+ * A rename leaves with the name the owner DICTATED, when he dictated one.
+ *
+ * Live test, 26.10.2026: «Переименуй этот товар в ANGEL.WASH Volume — шампунь
+ * для волос» came back with the reply promising that name and the action
+ * carrying «ANGEL.WASH — шампунь для волос» — a word of his dropped. Like
+ * draftPostWithAsk() and promoAsAsked(), the owner's own words win: the last
+ * «Latin line — русский тип» in his message, when every language can say
+ * it, replaces the model's. A Russian head (no Latin letter in it) is left to
+ * the model — the words before it cannot be told from the sentence.
+ */
+export function namesAsAsked(action: object | null, ask: string): object | null {
+  const a = action as { type?: unknown; name?: unknown } | null;
+  if (!a || (a.type !== "set_names" && a.type !== "update_product") || typeof a.name !== "string") return action;
+  const text = String(ask || "").replace(/[«»"“”„]/g, " ").replace(/\s+/g, " ").trim();
+  const dash = text.lastIndexOf(" — ");
+  if (dash < 0) return action;
+  const tail = /^ — ([а-яё][а-яё -]*[а-яё])/i.exec(text.slice(dash))?.[1];
+  if (!tail) return action;
+  // the head: the words before the dash, back to the first lower-case Russian word («в», «товар»)
+  const words = text.slice(0, dash).split(" ");
+  const head: string[] = [];
+  for (let i = words.length - 1; i >= 0 && !/^[а-яё,.:]+$/.test(words[i]); i--) head.unshift(words[i]);
+  const headLine = head.join(" ").trim();
+  if (!headLine || !/[a-z]/i.test(headLine) || /[а-яё]/i.test(headLine)) return action;
+  const name = `${headLine} — ${tail.trim()}`;
+  if (name === a.name || name.length > 120 || !nameTranslatable(name)) return action;
+  return { ...a, name };
+}
+
 /** Prices per size, the sizes named as the shop names them; the panel lays them over the product's ladder. */
 function sanitizeSizePrices(x: Record<string, unknown>, known: Set<string>): object | null {
   const id = typeof x.id === "string" ? x.id.trim() : "";

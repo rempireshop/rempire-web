@@ -70,11 +70,18 @@ export async function namedForPrompt(text: string, rows: CatRow[], openId: strin
       const r = await runTool(tool, args);
       return r.isError ? null : r.text.replace(/\s+/g, " ").slice(0, 9000);
     };
-    const products = (await Promise.all(ids.map((id) => read("get_product", { id })))).filter(Boolean);
+    const products = await Promise.all(ids.map((id) => read("get_product", { id })));
     const pageTexts = (await Promise.all(pages.map((p) => read("get_page_texts", p)))).filter(Boolean);
-    if (!products.length && !pageTexts.length) return "";
+    /* the product on his screen gets a block of its own, named for what it is:
+       the live test of 26.10.2026 asked «для какого товара?» three times out
+       of three when it was only the first line of a shared list */
+    const open = openId && products[0] ? products[0] : "";
+    const others = (open ? products.slice(1) : products).filter(Boolean);
+    if (!open && !others.length && !pageTexts.length) return "";
+    const what = "(names, sizes and prices, the page's description and the Google texts in RU/ET/EN; description_by_owner lists the languages he wrote himself)";
     return [
-      products.length ? "PRODUCTS THE OWNER MEANS — as the shop has them now (names, sizes and prices, the page's description and the Google texts in RU/ET/EN; description_by_owner lists the languages he wrote himself):\n" + products.join("\n") : "",
+      open ? `THE PRODUCT OPEN ON THE OWNER'S SCREEN right now ${what}. «этот товар», «этого товара», «его», «описание», «название», «цена», «this product», «see toode» without another product's name mean THIS product — never ask which one:\n${open}` : "",
+      others.length ? `PRODUCTS THE OWNER NAMES — as the shop has them now ${what}:\n${others.join("\n")}` : "",
       pageTexts.length ? "PAGES THE OWNER MEANS — a section's or brand's Google title, description and line under the heading as the page shows them now (by_owner = written by him; the rest is the shop's standard text):\n" + pageTexts.join("\n") : "",
     ].filter(Boolean).join("\n\n");
   } catch (err) {
