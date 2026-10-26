@@ -50,7 +50,7 @@ import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/m
 import { query } from "@/lib/db";
 import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import { cleanPageTexts, PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
-import { seoBrandIntro, seoCatIntro, seoHead } from "@/lib/seo-copy.mjs";
+import { seoStandard } from "@/lib/seo-copy.mjs";
 import { loadShippingRules } from "@/lib/shipping";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 import { getDescriptionOverride, setDescriptionOverride, type DescriptionOverride } from "@/lib/product-descriptions";
@@ -1190,21 +1190,20 @@ async function storedPageTexts(): Promise<{ texts: PageTexts; before: unknown }>
 
 /**
  * What a page shows now, per language: the owner's own field where he wrote
- * one, else the shop's standard text. The standard is what the shared block
- * answers on the server, where nothing ever calls seoOwnSet() — the owner's
- * words are laid over it here, from the row itself.
+ * one, else the shop's standard text — seoStandard(), the same grey text the
+ * panel's «Тексты страниц» shows in an empty box. The owner's words are laid
+ * over it here, from the row itself.
  */
 async function pageTextsNow(kind: PageKind, key: string, own: PageTexts) {
   const rules = await loadShippingRules().catch(() => null);
   const out: Record<string, Record<string, unknown>> = {};
   for (const l of LANGS3) {
-    const head = seoHead(kind, key, l, { rules });
-    const mine = (own[kind] as Record<string, Partial<Record<L3, Record<string, string>>>>)[key]?.[l] ?? {};
-    const intro = kind === "cat" ? seoCatIntro(key, l) : seoBrandIntro(key, l);
+    const std = seoStandard(kind, key, l, { rules });
+    const mine = own[kind][key]?.[l] ?? {};
     out[l] = {
-      title: mine.title || head.t,
-      description: mine.desc || head.d,
-      intro: mine.intro || intro || null,
+      title: mine.title || std.title,
+      description: mine.desc || std.desc,
+      intro: mine.intro || std.intro || null,
       by_owner: Object.keys(mine).map((f) => PAGE_FIELD_OUT[f]),
     };
   }

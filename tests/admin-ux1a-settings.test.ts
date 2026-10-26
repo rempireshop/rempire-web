@@ -174,12 +174,14 @@ describe("the index", () => {
     )({ admSetPage: page }, { matches: !desk }, esc) as string;
   }
 
-  it("six pages, «Письма» between «Оповещения» and «Журнал», «Языки» a line with nothing to tap", () => {
+  it("seven pages, «Письма» between «Оповещения» and «Журнал», no «Языки» line", () => {
     const html = index("EE382200221020145685", false);
     const pages = [...html.matchAll(/data-admsetpage="([a-z]+)"/g)].map((m) => m[1]);
-    expect(pages).toEqual(["delivery", "home", "company", "prices", "push", "journal"]);
+    // «Тексты страниц» since 26.10.2026 (tests/page-texts.test.ts)
+    expect(pages).toEqual(["delivery", "home", "company", "texts", "prices", "push", "journal"]);
     expect(html.indexOf('data-admtab="mail"')).toBeGreaterThan(html.indexOf('data-admsetpage="push"'));
-    expect(html).toContain("RU основной · ET · EN — переводятся сами");
+    // the «Языки магазина» line had nothing to tap — gone at Dim's word, 26.10.2026
+    expect(html).not.toContain("Языки магазина");
     expect(html).not.toContain('data-admsetpage="langs"');
     // the live line under «Оповещения»
     expect(html).toContain("подключено устройств: 2");

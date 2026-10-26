@@ -10071,6 +10071,51 @@
       "markedAt": "2026-10-25T16:28:06.269Z"
     },
     {
+      "id": "settings-page-texts",
+      "area": "reports",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Тексты страниц разделов и брендов",
+      "steps": [
+        "«Настройки» → «Тексты страниц» → «Уход за бородой».",
+        "В «Текст под заголовком» вписать свою строку.",
+        "Открыть раздел «Борода» в магазине.",
+        "Переключить язык на ET и посмотреть серый текст в полях.",
+        "В «Журнале» нажать «Вернуть» у строчки «Тексты страниц»."
+      ],
+      "expect": [
+        "Пустые поля показывают серым стандартный текст магазина.",
+        "Ваша строка сохраняется сама и сразу стоит под заголовком раздела.",
+        "На ET в полях эстонский стандартный текст, не русский.",
+        "«Вернуть» возвращает стандартную строку.",
+        "Строки «Языки магазина» в «Настройках» больше нет."
+      ],
+      "why": "Тексты разделов и брендов для Google и покупателей теперь меняете вы сами.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T08:25:28.700Z",
+      "en": {
+        "title": "Section and brand page texts",
+        "steps": [
+          "«Настройки» → «Тексты страниц» → «Уход за бородой».",
+          "Type your own line into «Текст под заголовком».",
+          "Open the «Борода» section in the shop.",
+          "Switch the language to ET and look at the grey text in the boxes.",
+          "In «Журнал» tap «Вернуть» on the «Тексты страниц» line."
+        ],
+        "expect": [
+          "Empty boxes show the shop's standard text in grey.",
+          "Your line saves itself and is under the section heading at once.",
+          "On ET the boxes show the Estonian standard text, not the Russian.",
+          "«Вернуть» brings the standard line back.",
+          "The «Языки магазина» line is no longer in «Настройки»."
+        ],
+        "why": "The section and brand texts for Google and shoppers are yours to change now."
+      }
+    },
+    {
       "id": "settings-delivered-auto",
       "area": "reports",
       "who": "dim",

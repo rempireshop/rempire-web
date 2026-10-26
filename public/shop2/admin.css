@@ -4574,14 +4574,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-setidx__nm { font-size: 15.5px; line-height: 21px; }
 .adm-setidx__s { font-size: 13px; line-height: 18px; color: var(--a-muted); }
 .adm-setidx__chev { font-size: 18px; line-height: 1; color: var(--a-muted); }
-.adm-setidx__info { display: flex; flex-direction: column; padding: 14px 0; border-bottom: 1px solid var(--a-rule); }
 @media (min-width: 900px) {
   .adm-setidx__r { padding: 10px 10px; margin: 0 -10px; width: calc(100% + 20px); grid-template-columns: minmax(0, 1fr) auto; }
   .adm-setidx__chev { display: none; }
   .adm-setidx__r[aria-current="page"] { background: var(--a-panel); }
   .adm-setidx__r[aria-current="page"] .adm-setidx__nm { font-weight: 600; }
-  .adm-setidx__info { border-bottom: 0; margin-top: 8px; border-top: 1px solid var(--a-rule); }
-  .adm-setidx__info .adm-setidx__nm { font-size: 14px; }
 }
 
 /* a page's title and its «?» */

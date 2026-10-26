@@ -102,6 +102,58 @@ describe("the shared block lays the owner's words over the approved copy", () =>
   });
 });
 
+describe("«Настройки → Тексты страниц» (public/shop2/app.js)", () => {
+  const APP = read("../public/shop2/app.js");
+  const sliceFn = (name: string): string => {
+    const start = APP.indexOf(`  function ${name}(`);
+    if (start < 0) throw new Error(name);
+    let depth = 0;
+    for (let i = APP.indexOf("{", start); i < APP.length; i++) {
+      if (APP[i] === "{") depth++;
+      else if (APP[i] === "}" && --depth === 0) return APP.slice(start, i + 1);
+    }
+    throw new Error(name);
+  };
+  const run = () => new Function("DEMO", "CAT_NAMES", "seoOwnSet", `
+    var PT_FIELDS = [["title"], ["desc"], ["intro"]];
+    ${["ptCopy", "ptDoc", "ptGet", "ptOwnLangs", "ptApply", "ptPrevPatch", "ptSet", "ptName", "ptActionText"].map(sliceFn).join("\n")}
+    return { ptApply: ptApply, ptPrevPatch: ptPrevPatch, ptSet: ptSet, ptGet: ptGet, ptOwnLangs: ptOwnLangs, ptActionText: ptActionText };
+  `);
+
+  it("a box's patch lands alone; its prev puts exactly that box back; «» gives it back to the standard", () => {
+    const DEMO: { pageTexts: unknown } = { pageTexts: { cat: { beard: { RU: { title: "Борода" } } }, brand: {} } };
+    const seen: unknown[] = [];
+    const pt = run()(DEMO, { beard: "Уход за бородой" }, (v: unknown) => seen.push(v));
+    const patch = { cat: { beard: { ET: { intro: "Habemehooldus." } } } };
+    const prev = pt.ptPrevPatch(patch);
+    expect(prev).toEqual({ cat: { beard: { ET: { intro: "" } } } });
+    pt.ptSet({ value: patch });
+    expect(DEMO.pageTexts).toEqual({ cat: { beard: { RU: { title: "Борода" }, ET: { intro: "Habemehooldus." } } }, brand: {} });
+    expect(pt.ptOwnLangs("cat", "beard")).toEqual(["RU", "ET"]);
+    expect(seen.at(-1)).toBe(DEMO.pageTexts);   // the shop's pages read it at once
+    pt.ptSet({ value: prev });
+    expect(DEMO.pageTexts).toEqual({ cat: { beard: { RU: { title: "Борода" } } }, brand: {} });
+    pt.ptSet({ value: { cat: { beard: { RU: { title: "" } } } } });
+    expect(DEMO.pageTexts).toEqual({ cat: {}, brand: {} });
+    // «Вернуть» on another device's line: the whole document as it was
+    pt.ptSet({ value: { cat: {}, brand: { Byredo: { EN: { desc: "x" } } } }, whole: true });
+    expect(pt.ptGet("brand", "Byredo", "EN", "desc")).toBe("x");
+    expect(pt.ptActionText({ value: patch })).toBe("Тексты страниц изменены · Уход за бородой · ET");
+  });
+
+  it("is a settings page with its own slot, journal line and «Вернуть» from any device", () => {
+    expect(APP).toContain('["texts", "Тексты страниц", "разделы и бренды — для Google и под заголовком"]');
+    expect(APP).toContain('if (page === "texts") return admSetTextsHTML();');
+    expect(APP).toMatch(/set_shipping_rules: "shipping_rules",\s+set_page_texts: "page_texts"/);
+    expect(APP).toContain('if (key === "page_texts") return ptDoc();');
+    expect(APP).toContain('mail_texts: "set_mail_texts", page_texts: "set_page_texts"');
+    expect(APP).toContain('if (T === "set_page_texts") return { type: T, value: value && typeof value === "object" ? value : { cat: {}, brand: {} }, whole: true };');
+    expect(APP).toContain('else if (a.type === "set_page_texts") ptSet(a);');
+    // never a whole-document write before the panel has read the document
+    expect(sliceFn("ptAs")).toContain("admSetWhenReady(");
+  });
+});
+
 describe("settings.page_texts on the server", () => {
   let admin = "";
   beforeAll(async () => {

@@ -1338,7 +1338,6 @@
       "скидка салонам, баллы за покупки": "salongide allahindlus, ostupunktid",
       "Журнал": "Logi",
       "что менялось — с «Вернуть»": "mis muutus — koos nupuga «Taasta»",
-      "RU основной · ET · EN — переводятся сами": "RU põhikeel · ET · EN — tõlgitakse ise",
       "Пустое поле — цена Montonio, она серым в поле. Впишите своё число — покупатель заплатит его. Новые цены покупатели видят сразу.": "Tühi väli on Montonio hind, see on väljas hallilt. Kirjutage oma number — ostja maksab selle. Uusi hindu näevad ostjad kohe.",
       "Серые числа — цены Montonio. Жирные — ваши. «—» — перевозчик туда не возит.": "Hallid numbrid on Montonio hinnad, paksud on teie omad. «—» — vedaja sinna ei vii.",
       "Страны Европы": "Euroopa riigid",
@@ -1414,6 +1413,20 @@
       "Отчёт не загрузился.": "Aruanne ei laadinud.",
       "Тексты писем": "Kirjade tekstid",
       "Тексты страниц": "Lehtede tekstid",
+      "разделы и бренды — для Google и под заголовком": "osakonnad ja brändid — Google'ile ja pealkirja alla",
+      "Текст под заголовком": "Tekst pealkirja all",
+      "до 60 знаков — его видно в поиске": "kuni 60 märki — seda näeb otsingus",
+      "до 155 знаков — строка под заголовком в поиске": "kuni 155 märki — rida pealkirja all otsingus",
+      "его видят покупатели на странице": "seda näevad ostjad lehel",
+      "Пусто — под заголовком стандартная строка магазина.": "Tühi — pealkirja all on poe tavaline rida.",
+      "свои тексты": "omad tekstid",
+      "стандартные тексты": "tavalised tekstid",
+      "есть свои тексты": "on omad tekstid",
+      "стандартные": "tavalised",
+      "Тексты страниц сохранены": "Lehtede tekstid salvestatud",
+      "Тексты страниц изменены": "Lehtede tekste muudeti",
+      "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "Pealkiri ja kirjeldus on see, mida Google otsingus näitab. Teksti pealkirja all näevad ostjad osakonna või brändi lehel.",
+      "Пустое поле — стандартный текст магазина, он серым в поле. Новые тексты в магазине сразу, в Google — после того как он заново прочитает страницу.": "Tühi väli on poe tavaline tekst, see on väljas hallina. Uued tekstid on poes kohe, Google'is pärast seda, kui ta lehe uuesti loeb.",
       "Номиналы подарочной карты": "Kinkekaardi nimiväärtused",
       "Лимит писем": "Kirjade limiit",
       "Один балл — одно евро.": "Üks punkt on üks euro.",
@@ -1588,7 +1601,6 @@
       "работает отдельно от сайта — переезд её не трогает": "töötab saidist eraldi — kolimine seda ei puuduta",
       // i18n pass 2 — admin: settings, journal and the assistant
       "Всё, что можно настроить без программиста.": "Kõik, mida saab seadistada ilma programmeerijata.",
-      "Языки магазина": "Poe keeled",
       "Русский — основной": "Vene keel — põhikeel",
       "Письма клиенту": "Kirjad kliendile",
       "Заказ отправлен + трекинг": "Tellimus saadetud + jälgimine",
@@ -4955,7 +4967,6 @@
       "скидка салонам, баллы за покупки": "salon discount, points for purchases",
       "Журнал": "Journal",
       "что менялось — с «Вернуть»": "what changed — with «Restore»",
-      "RU основной · ET · EN — переводятся сами": "RU main · ET · EN — translated automatically",
       "Пустое поле — цена Montonio, она серым в поле. Впишите своё число — покупатель заплатит его. Новые цены покупатели видят сразу.": "An empty box is Montonio's price — shown in grey inside it. Type your own number and the shopper pays that. Shoppers see new prices at once.",
       "Серые числа — цены Montonio. Жирные — ваши. «—» — перевозчик туда не возит.": "Grey numbers are Montonio's prices, bold ones are yours. «—» — the carrier does not deliver there.",
       "Страны Европы": "European countries",
@@ -5031,6 +5042,20 @@
       "Отчёт не загрузился.": "The report did not load.",
       "Тексты писем": "Letter texts",
       "Тексты страниц": "Page texts",
+      "разделы и бренды — для Google и под заголовком": "sections and brands — for Google and under the heading",
+      "Текст под заголовком": "Text under the heading",
+      "до 60 знаков — его видно в поиске": "up to 60 characters — shown in search",
+      "до 155 знаков — строка под заголовком в поиске": "up to 155 characters — the line under the title in search",
+      "его видят покупатели на странице": "shoppers see it on the page",
+      "Пусто — под заголовком стандартная строка магазина.": "Empty — the shop's standard line is under the heading.",
+      "свои тексты": "own texts",
+      "стандартные тексты": "standard texts",
+      "есть свои тексты": "has own texts",
+      "стандартные": "standard",
+      "Тексты страниц сохранены": "Page texts saved",
+      "Тексты страниц изменены": "Page texts changed",
+      "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "The title and description are what Google shows in search. Shoppers see the text under the heading on the section or brand page.",
+      "Пустое поле — стандартный текст магазина, он серым в поле. Новые тексты в магазине сразу, в Google — после того как он заново прочитает страницу.": "An empty box is the shop's standard text, shown in grey in the box. New texts are in the shop at once, in Google after it reads the page again.",
       "Номиналы подарочной карты": "Gift card amounts",
       "Лимит писем": "Letter limit",
       "Один балл — одно евро.": "One point is one euro.",
@@ -5200,7 +5225,6 @@
         "runs separately from the site — the move does not touch it",
       // i18n pass 2 — admin: settings, journal and the assistant
       "Всё, что можно настроить без программиста.": "Everything you can set up without a developer.",
-      "Языки магазина": "Shop languages",
       "Русский — основной": "Russian — the main one",
       "Письма клиенту": "E-mails to the customer",
       "Заказ отправлен + трекинг": "Order shipped + tracking",
@@ -10694,6 +10718,7 @@
     // ---- «Контент» in the admin panel (content) ----
     contentDraft: null,  // working copy of the shop's own details
     contentLang: "RU",   // which language pill the trilingual fields show
+    ptLang: "RU",        // «Тексты страниц»: which language its boxes show
     contentOpen: "",     // which sub-block is unfolded ("" = the summary)
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
     mailLang: "",    // letter language; "" = never chosen here → Russian. admPanesLoad() brings back the last one
@@ -31339,6 +31364,9 @@
     ["delivery", "Доставка и оплата", "цены по странам, способы оплаты"],
     ["home", "Главная страница", "баннер, полоска сверху, наборы"],
     ["company", "О компании", "реквизиты, часы, соцсети, отчёт"],
+    /* Dim, 26.10.2026: the section and brand pages' words are the owner's —
+       «should be in Settings, follow same design rules as for others» */
+    ["texts", "Тексты страниц", "разделы и бренды — для Google и под заголовком"],
     ["prices", "Цены и баллы", "скидка салонам, баллы за покупки"],
     ["push", "Оповещения на телефон", "звонок, когда заказ оплачен"],
     /* «с любого устройства» since 25.09.2026 (q7): the server keeps what
@@ -31376,7 +31404,8 @@
   var ADM_SET_OF = {
     set_hero: "hero", set_content: "content", set_pricing: "pricing", set_delivery: "delivery",
     set_parcel: "shipping_parcel", set_banks: "payment_banks", toggle_chatbot: "chatbot",
-    toggle_bundles: "bundles", set_invoice: "invoice", set_shipping_rules: "shipping_rules"
+    toggle_bundles: "bundles", set_invoice: "invoice", set_shipping_rules: "shipping_rules",
+    set_page_texts: "page_texts"
   };
   /** key → { toast, entry, ref, undoOf } for the next write of that key. */
   var ADM_SET_NOTE = {};
@@ -31394,6 +31423,7 @@
     if (key === "chatbot") return !!DEMO.chatbot;
     if (key === "bundles") return DEMO.bundles !== false;
     if (key === "invoice") return invoiceConf();
+    if (key === "page_texts") return ptDoc();
     return undefined;
   }
   /** The journal's own name for a change — sent as `ref`, so this browser can
@@ -31474,7 +31504,7 @@
      record left over from before would skip the owner typing the old value
      back. Each render of a settings page forgets the records with nothing
      owed; a box that is refused, being typed in or on its way keeps its. */
-  var ADM_SET_FIELD = /^(ship|content|hero|parcel|inv|price|hours):/;
+  var ADM_SET_FIELD = /^(ship|content|hero|parcel|inv|price|hours|pt):/;
   function admSetForget() {
     for (var k in ADM_AS) {
       if (!Object.prototype.hasOwnProperty.call(ADM_AS, k) || !ADM_SET_FIELD.test(k)) continue;
@@ -31509,6 +31539,11 @@
     }
     if (typeof st.chatbot === "boolean" && admSetFresh("chatbot", askedAt)) DEMO.chatbot = st.chatbot;
     if (typeof st.bundles === "boolean" && admSetFresh("bundles", askedAt)) DEMO.bundles = st.bundles;
+    // «Тексты страниц»: the boxes, and what the shop's pages read (seoOwnSet)
+    if (Object.prototype.hasOwnProperty.call(st, "page_texts") && admSetFresh("page_texts", askedAt) && !admSetTyping("pt:")) {
+      DEMO.pageTexts = st.page_texts && typeof st.page_texts === "object" && !Array.isArray(st.page_texts) ? st.page_texts : null;
+      seoOwnSet(DEMO.pageTexts);
+    }
     if (st.invoice && typeof st.invoice === "object" && admSetFresh("invoice", askedAt) && !admSetTyping("inv:")) {
       DEMO.invoice = {
         dueDays: Number(st.invoice.dueDays) || 7,
@@ -31676,11 +31711,8 @@
           '<span class="adm-setidx__chev" aria-hidden="true">›</span></button>' +
           (p[0] === "push" ? admSetMailLinkHTML() : "");
       }).join("") +
-      /* «Языки» (q39): one line, nothing to tap — all three languages are
-         always on and the visitor picks his own; the page it used to open
-         had no setting on it. */
-      '<div class="adm-setidx__info"><span class="adm-setidx__nm">Языки магазина</span>' +
-        '<span class="adm-setidx__s">RU основной · ET · EN — переводятся сами</span></div>' +
+      /* «Языки магазина» (q39) stood here as one line with nothing to tap —
+         removed at Dim's word (26.10.2026): «it does not give any value». */
       "</nav>";
   }
   /* The same GET /api/admin/settings the pages already read (loadAdminPricing)
@@ -31717,6 +31749,7 @@
     if (page === "delivery") return admSetDeliveryHTML();
     if (page === "home") return admSetHomeHTML();
     if (page === "company") return admSetCompanyHTML();
+    if (page === "texts") return admSetTextsHTML();
     if (page === "prices") return admSetPricesHTML();
     if (page === "push") return admSetPushPageHTML();
     return admSetJournalHTML();
@@ -32653,6 +32686,211 @@
       admContentCard(["company", "hours", "contact", "social", "invoice", "emailfooter"]) +
       reportsCard();
   }
+  /* ---------- «Тексты страниц» ---------------------------------------------
+     settings.page_texts (src/lib/page-texts.mjs; Dim, 26.10.2026: «Brand and
+     section intros should be in Settings — follow same design rules as for
+     others»). Per section and brand page and per language, three boxes: the
+     Google title, the Google description and the line under the heading.
+     An empty box is the shop's standard text, grey in the box — as the
+     delivery table's Montonio price is — and only what the owner writes is
+     stored. Each box saves itself (a title when it is left, a text a second
+     after the last keystroke, q1) as a set_page_texts patch through the
+     settings slot, with its journal line and «Вернуть». The shop's pages
+     read the result at once (seoOwnSet in the seo-copy block); the static
+     pages a crawler reads after the rebuild the settings route asks for.
+     Renat's Claude writes the same document (save_page_text). */
+  var PT_FIELDS = [
+    ["title", "Заголовок для Google", 70, "до 60 знаков — его видно в поиске"],
+    ["desc", "Описание для Google", 170, "до 155 знаков — строка под заголовком в поиске"],
+    ["intro", "Текст под заголовком", 1200, "его видят покупатели на странице"]
+  ];
+  function ptCopy(d) {
+    try { return JSON.parse(JSON.stringify(d && typeof d === "object" ? d : { cat: {}, brand: {} })); }
+    catch (e) { return { cat: {}, brand: {} }; }
+  }
+  function ptDoc() {
+    var d = DEMO.pageTexts;
+    return d && typeof d === "object" && !Array.isArray(d) ? d : { cat: {}, brand: {} };
+  }
+  function ptGet(kind, key, L, field) {
+    var all = ptDoc()[kind];
+    var page = all && Object.prototype.hasOwnProperty.call(all, key) ? all[key] : null;
+    var v = page && page[L] && page[L][field];
+    return typeof v === "string" ? v : "";
+  }
+  /** The languages of one page that carry any word of the owner's. */
+  function ptOwnLangs(kind, key) {
+    return ["RU", "ET", "EN"].filter(function (L) {
+      return PT_FIELDS.some(function (f) { return !!ptGet(kind, key, L, f[0]); });
+    });
+  }
+  /** `doc` with a patch laid over it: a box's text, or "" to give it back. */
+  function ptApply(doc, patch) {
+    var out = ptCopy(doc);
+    ["cat", "brand"].forEach(function (kind) {
+      var pk = patch && patch[kind];
+      if (!pk || typeof pk !== "object") return;
+      if (!out[kind] || typeof out[kind] !== "object") out[kind] = {};
+      Object.keys(pk).forEach(function (key) {
+        var page = out[kind][key] && typeof out[kind][key] === "object" ? out[kind][key] : {};
+        Object.keys(pk[key] || {}).forEach(function (L) {
+          var f = page[L] && typeof page[L] === "object" ? page[L] : {};
+          Object.keys(pk[key][L] || {}).forEach(function (field) {
+            var v = String(pk[key][L][field] == null ? "" : pk[key][L][field]).replace(/\s+/g, " ").trim();
+            if (v) f[field] = v; else delete f[field];
+          });
+          if (Object.keys(f).length) page[L] = f; else delete page[L];
+        });
+        if (Object.keys(page).length) out[kind][key] = page; else delete out[kind][key];
+      });
+    });
+    return out;
+  }
+  /** What the boxes a patch names hold now — the patch that puts them back. */
+  function ptPrevPatch(patch) {
+    var out = {};
+    ["cat", "brand"].forEach(function (kind) {
+      var pk = patch && patch[kind];
+      if (!pk || typeof pk !== "object") return;
+      out[kind] = {};
+      Object.keys(pk).forEach(function (key) {
+        out[kind][key] = {};
+        Object.keys(pk[key] || {}).forEach(function (L) {
+          out[kind][key][L] = {};
+          Object.keys(pk[key][L] || {}).forEach(function (field) { out[kind][key][L][field] = ptGet(kind, key, L, field); });
+        });
+      });
+    });
+    return out;
+  }
+  /** Apply a set_page_texts action to the panel and to the pages the shop draws. */
+  function ptSet(a) {
+    DEMO.pageTexts = a.whole ? ptCopy(a.value) : ptApply(ptDoc(), a.value);
+    seoOwnSet(DEMO.pageTexts);
+  }
+  /** One page's name as the owner knows it: the section's, or the brand as the shop spells it. */
+  function ptName(kind, key) {
+    return kind === "cat" ? (key === "all" ? "Все товары" : CAT_NAMES[key] || key) : key;
+  }
+  /** «Тексты страниц изменены · Борода · ET» — one node per fact (admPiecesHTML). */
+  function ptActionText(a) {
+    var v = a && a.value, bits = [];
+    if (!a || a.whole || !v) return "Тексты страниц изменены";
+    ["cat", "brand"].forEach(function (kind) {
+      Object.keys((v && v[kind]) || {}).forEach(function (key) {
+        bits.push(ptName(kind, key));
+        Object.keys(v[kind][key] || {}).forEach(function (L) { if (bits.indexOf(L) < 0) bits.push(L); });
+      });
+    });
+    return ["Тексты страниц изменены"].concat(bits).join(" · ");
+  }
+  /** One box that saves itself: a patch of this box alone, through the settings slot. */
+  function ptAs(kind, key, L, field) {
+    var as = "pt:" + kind + ":" + key + ":" + L + ":" + field;
+    if (!ADM_AS_SPEC[as]) {
+      admAutosaveSpec(as, {
+        kind: field === "title" ? "name" : "text",
+        send: function (v) {
+          var text = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+          if (text === ptGet(kind, key, L, field)) return true;
+          /* never a whole-document PUT over a document this panel has not
+             read yet — it would wipe what his Claude wrote; the change waits
+             for the read and goes the moment it lands */
+          return admSetWhenReady(function () {
+            var patch = {};
+            patch[kind] = {};
+            patch[kind][key] = {};
+            patch[kind][key][L] = {};
+            patch[kind][key][L][field] = text;
+            admSetApply({ type: "set_page_texts", value: patch }, "Тексты страниц сохранены");
+          }) || true;
+        }
+      });
+    }
+    return as;
+  }
+  /** One page's fold: its three boxes in the language the strip shows. */
+  function ptFoldHTML(kind, key) {
+    var L = S.ptLang || "RU";
+    var std = seoStandard(kind, key, L, seoCtx());
+    var own = ptOwnLangs(kind, key);
+    var body = PT_FIELDS.map(function (f) {
+      var as = ptAs(kind, key, L, f[0]);
+      var val = ptGet(kind, key, L, f[0]);
+      var ph = std[f[0]] || "";
+      var box = f[0] === "title"
+        ? '<input class="adm-input" maxlength="' + f[2] + '" data-autosave="' + esc(as) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '">'
+        : '<textarea class="adm-input" rows="' + (f[0] === "intro" ? 4 : 2) + '" maxlength="' + f[2] + '" data-autosave="' + esc(as) +
+            '" placeholder="' + esc(ph) + '">' + esc(val) + "</textarea>";
+      return '<label class="adm-field">' + f[1] + box + admAutosaveHintHTML(as) +
+        '<span class="adm-hint">' + f[3] + "</span>" +
+        (f[0] === "intro" && !ph && !val ? '<span class="adm-hint">Пусто — под заголовком стандартная строка магазина.</span>' : "") +
+        "</label>";
+    }).join("") +
+      (L !== "RU" && own.indexOf("RU") >= 0
+        ? '<button class="adm-link" type="button" data-pttr="' + esc(kind + ":" + key) + '">Перевести с русского</button>'
+        : "");
+    return admFoldHTML("pt:" + kind + ":" + key, esc(ptName(kind, key)), own.length ? admTagHTML("plain", "свои тексты") : "стандартные тексты", body);
+  }
+  /** The brands the shop shows, as their pages are named. */
+  function ptBrands() {
+    var seen = {}, out = [];
+    CATALOGUE.forEach(function (p) { if (p.brand && !seen[p.brand]) { seen[p.brand] = 1; out.push(p.brand); } });
+    return out.sort(function (a, b) { return a.localeCompare(b); });
+  }
+  function admSetTextsHTML() {
+    var head = admSetHeadHTML("texts",
+      "<span>Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.</span> " +
+      "<span>Пустое поле — стандартный текст магазина, он серым в поле. Новые тексты в магазине сразу, в Google — после того как он заново прочитает страницу.</span>");
+    loadAdminPricing(false);   // the same GET /api/admin/settings every settings page makes
+    if (!adminSettingsReady()) return head + admSetLoadingHTML();
+    var L = S.ptLang || "RU";
+    return head +
+      admLangBarHTML("data-ptlang", LANGS, L, "Язык текстов", function (code) {
+        var any = ["cat", "brand"].some(function (kind) {
+          return Object.keys(ptDoc()[kind] || {}).some(function (key) { return ptOwnLangs(kind, key).indexOf(code) >= 0; });
+        });
+        return [any ? "есть свои тексты" : "стандартные"];
+      }, LANG_BAR_NOTE, null) +
+      admSecHeadHTML("Разделы") +
+      ["all"].concat(Object.keys(CAT_NAMES)).map(function (c) { return ptFoldHTML("cat", c); }).join("") +
+      admSecHeadHTML("Бренды") +
+      ptBrands().map(function (b) { return ptFoldHTML("brand", b); }).join("");
+  }
+  /* «Перевести с русского» for one page: the owner's Russian boxes into
+     Estonian and English, then saved like anything typed — the goods
+     editor's translate task, as «О компании» uses it. */
+  function ptTranslate(btn, ref) {
+    if (!btn || btn.disabled) return;
+    var cut = ref.indexOf(":"), kind = ref.slice(0, cut), key = ref.slice(cut + 1);
+    var todo = PT_FIELDS.filter(function (f) { return !!ptGet(kind, key, "RU", f[0]); });
+    if (!todo.length) { toast("Сначала напишите русский текст"); return; }
+    var label = btn.textContent, left = todo.length, fail = "", patch = {};
+    patch[kind] = {};
+    patch[kind][key] = { ET: {}, EN: {} };
+    btn.disabled = true; btn.textContent = "…";
+    todo.forEach(function (f) {
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: ptGet(kind, key, "RU", f[0]), sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: ["Rempire", kind === "brand" ? key : "Rempire"] }
+      }).then(function (r) {
+        if (r.status === 200 && r.body && r.body.ok && r.body.texts) {
+          if (r.body.texts.ET) patch[kind][key].ET[f[0]] = String(r.body.texts.ET).slice(0, f[2]);
+          if (r.body.texts.EN) patch[kind][key].EN[f[0]] = String(r.body.texts.EN).slice(0, f[2]);
+        } else fail = (r.body && r.body.error) || "x";
+      }).catch(function () { fail = "x"; }).then(function () {
+        if (--left) return;
+        btn.disabled = false; btn.textContent = label;
+        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+        else if (fail) toast("Не получилось — попробуйте ещё раз");
+        if (Object.keys(patch[kind][key].ET).length || Object.keys(patch[kind][key].EN).length) {
+          admSetWhenReady(function () { admSetApply({ type: "set_page_texts", value: patch }, "Переведено — проверьте тексты"); });
+        }
+        render();
+      });
+    });
+  }
   /* ---------- «Счета для компаний» ------------------------------------------
      settings.invoice: the number prefix («A-» → A-2026-0001), the payment
      term, and the two intervals the daily job works on — when to remind and
@@ -33231,7 +33469,7 @@
       hero: "set_hero", content: "set_content", pricing: "set_pricing", delivery: "set_delivery",
       shipping_parcel: "set_parcel", payment_banks: "set_banks", chatbot: "toggle_chatbot",
       bundles: "toggle_bundles", invoice: "set_invoice", shipping_rules: "set_shipping_rules",
-      gift_amounts: "set_gift_amounts", mail_texts: "set_mail_texts"
+      gift_amounts: "set_gift_amounts", mail_texts: "set_mail_texts", page_texts: "set_page_texts"
     }[key];
     if (!T || probe) return T || null;
     if (T === "set_shipping_rules") return { type: T, rules: value && typeof value === "object" ? value : cloneRules(SHIP_STORED_DEFAULT), full: true, belowCost: true };
@@ -33242,6 +33480,8 @@
     if (T === "set_banks" || T === "set_gift_amounts") return Array.isArray(value) ? { type: T, value: value } : null;
     if (T === "toggle_chatbot" || T === "toggle_bundles") return typeof value === "boolean" ? { type: T, value: value } : null;
     if (T === "set_mail_texts") return { type: T, value: value && typeof value === "object" ? value : {} };
+    // the whole document as it was: another device's line, put back over what is here now
+    if (T === "set_page_texts") return { type: T, value: value && typeof value === "object" ? value : { cat: {}, brand: {} }, whole: true };
     return { type: T, value: value };   // the banner: null is the standard one
   }
   /** `value` with the row's changes put back: each path to what it held, a
@@ -44902,7 +45142,8 @@
        owner's words for the section and brand pages — seoHead(),
        seoBrandIntro() and seoCatIntro() in the seo-copy block read them. */
     if (fed("page_texts") && typeof seoOwnSet === "function") {
-      seoOwnSet(s.page_texts && typeof s.page_texts === "object" ? s.page_texts : null);
+      DEMO.pageTexts = s.page_texts && typeof s.page_texts === "object" && !Array.isArray(s.page_texts) ? s.page_texts : null;
+      seoOwnSet(DEMO.pageTexts);
     }
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
        absent key means «как всегда» — giftAmountsOn() falls back to the three
@@ -46810,6 +47051,7 @@
     if (a.type === "set_shipping_rules") return shipActionText(a);
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     if (a.type === "set_invoice") return invoiceActionText(a.value || {}, null);
+    if (a.type === "set_page_texts") return ptActionText(a);
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
     // the short form — the model named a topic, the panel writes the article
@@ -47282,6 +47524,16 @@
         if (a.page) contentKeepOther(a.page, cWas);
       }
     }
+    /* «Тексты страниц»: a patch of the boxes that changed ("" = back to the
+       shop's standard text) — or, from «Вернуть» on another device's journal
+       line, the whole document (`whole`). The prev is the same shape, so the
+       line's own «Вернуть» puts back these boxes and no others. */
+    else if (a.type === "set_page_texts") {
+      entry.prev = a.whole
+        ? { type: "set_page_texts", value: ptCopy(ptDoc()), whole: true }
+        : { type: "set_page_texts", value: ptPrevPatch(a.value) };
+      ptSet(a);
+    }
     /* «Счета для компаний» (1a): settings.invoice as a journal line with a way
        back — until 25.09.2026 its save wrote notes and no «Вернуть». */
     else if (a.type === "set_invoice") {
@@ -47384,6 +47636,7 @@
       DEMO.invoice = { prefix: String(iv.prefix == null ? "A-" : iv.prefix), dueDays: Number(iv.dueDays) || 7,
         remindBeforeDays: invoiceDayNum(iv.remindBeforeDays, 2, 30), cancelAfterDays: invoiceDayNum(iv.cancelAfterDays, 7, 90) };
     }
+    else if (a.type === "set_page_texts") ptSet(a);
     else if (a.type === "set_mail_texts") {
       if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
       S.mailDraft = null;
@@ -49799,6 +50052,22 @@
       }
     };
   }
+  /**
+   * What a section or brand page says when the owner has written nothing —
+   * { title, desc, intro }, the copy above alone (the title as Google is
+   * served it). The grey text in an empty box of «Тексты страниц», and the
+   * standard his Claude is shown (get_page_texts).
+   */
+  function seoStandard(kind, key, lang, ctx) {
+    var keep = SEO_OWN;
+    SEO_OWN = null;
+    try {
+      var h = seoHead(kind, key, lang, ctx);
+      return { title: h.t, desc: h.d, intro: kind === "cat" ? seoCatIntro(key, lang) : seoBrandIntro(key, lang) };
+    } finally {
+      SEO_OWN = keep;
+    }
+  }
   /** The line under a section's heading — the owner's own, else the shop's; "" for a key with neither. */
   function seoCatIntro(cat, lang) {
     var line = seoCatLines()[cat];
@@ -51961,7 +52230,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -53429,6 +53698,8 @@
        (cAs), each save the fields it changed and a «Вернуть». -------------- */
     if (d.contentlang) { admAutosaveFlush(); S.contentLang = d.contentlang; render(); return; }
     if (d.contenttr) { contentTranslate(t, String(d.contenttr).split(",")); return; }
+    if (d.ptlang) { admAutosaveFlush(); S.ptLang = d.ptlang; render(); return; }
+    if (d.pttr) { ptTranslate(t, String(d.pttr)); return; }
     if (d.contentannon !== undefined) {
       var cAnn = contentDraft().announcement;
       cAnn.on = cAnn.on === false;

@@ -976,6 +976,22 @@
       }
     };
   }
+  /**
+   * What a section or brand page says when the owner has written nothing —
+   * { title, desc, intro }, the copy above alone (the title as Google is
+   * served it). The grey text in an empty box of «Тексты страниц», and the
+   * standard his Claude is shown (get_page_texts).
+   */
+  function seoStandard(kind, key, lang, ctx) {
+    var keep = SEO_OWN;
+    SEO_OWN = null;
+    try {
+      var h = seoHead(kind, key, lang, ctx);
+      return { title: h.t, desc: h.d, intro: kind === "cat" ? seoCatIntro(key, lang) : seoBrandIntro(key, lang) };
+    } finally {
+      SEO_OWN = keep;
+    }
+  }
   /** The line under a section's heading — the owner's own, else the shop's; "" for a key with neither. */
   function seoCatIntro(cat, lang) {
     var line = seoCatLines()[cat];
@@ -1123,7 +1139,7 @@
 export {
   SEO_TITLE_MAX, SEO_DESC_MAX,
   seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoHead,
-  seoOwnSet, seoOwn, seoCatIntro, seoCatLines,
+  seoOwnSet, seoOwn, seoCatIntro, seoCatLines, seoStandard,
   seoProductTail, seoMetaWithPrice,
   seoSnippetText, seoLead, seoProductMeta,
   SEO_EUROPE, seoShipCount, seoShipLine, seoHomeIntro, seoInfoTail, seoSetsDesc,
