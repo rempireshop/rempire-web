@@ -74,7 +74,7 @@ function nameFields(id: string, patch: Partial<Override>): void {
   one("brand", MAX_BRAND);
   const cat = one("cat", 20);
   if (cat && !(PRODUCT_CATS as readonly string[]).includes(cat)) throw new OrderError("bad_body", "cat");
-  // a subsection belongs to its section: a move starts from «Авто — по названию»
+  // a subsection belongs to its section: a move starts with none (the catalogue's `sub` names the old one)
   if ("cat" in patch && !("subcat" in patch)) patch.subcat = null;
 }
 

@@ -75,9 +75,11 @@ export const CAT_HANDLES = Object.freeze({
    ids are the chips' own (SUBCATS in public/shop2/app.js, which also holds
    who belongs where and each page's words); only an existing chip has a page,
    and the chip row itself does not change (Dim, 09.10.2026). A chip listed
-   here is PUBLISHED: it needs at least SUBCOLLECTION_MIN products and its
-   words in all three languages — tests/subcollections.test.ts holds both, and
-   the prerender refuses to run without them. A chip that is not listed stays
+   here is PUBLISHED: it needs its words in all three languages —
+   tests/subcollections.test.ts holds that, and the prerender refuses to run
+   without them. No minimum count since 26.10.2026 (Dim: «we should not limit
+   the subcollections»): an empty one keeps its page, noindex, out of the
+   sitemap. A chip that is not listed stays
    a filter on the section's address, and every Shopify handle without a page
    goes to the section (src/lib/legacy-redirects.ts). Every handle below is in
    Shopify's sitemap (tools/harvest/old-urls.txt); «После бритья» has
@@ -90,9 +92,6 @@ export const SUB_HANDLES = Object.freeze({
   "hair/co": Object.freeze({ EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" }),
   "styling/pw": Object.freeze({ EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }),
 });
-
-/** The fewest products a subcollection may have and still be a page. */
-export const SUBCOLLECTION_MIN = 6;
 
 /* A brand whose Shopify collection was not spelled like the brand's own slug.
    Every other brand page is /collections/<slugify(brand)>, in all languages. */

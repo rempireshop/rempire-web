@@ -1664,7 +1664,7 @@
       "Цена, €": "Hind, €",
       "Раздел": "Jaotis",
       "Подкатегория": "Alamkategooria",
-      "Авто — по названию": "Automaatne — nime järgi",
+      "Без подраздела": "Ilma alajaotiseta",
       "Фото по объёмам": "Fotod mahtude kaupa",
       "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
         "Millist fotot iga mahu juures näidatakse. Täidetakse poe andmetest automaatselt; siin saab käsitsi parandada.",
@@ -5295,7 +5295,7 @@
       "Цена, €": "Price, €",
       "Раздел": "Section",
       "Подкатегория": "Subcategory",
-      "Авто — по названию": "Automatic — from the name",
+      "Без подраздела": "No subsection",
       "Фото по объёмам": "Photos per size",
       "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
         "Which photo is shown for each size. Filled in automatically from the shop's data; you can correct it by hand here.",
@@ -12583,23 +12583,24 @@
      (/et/collections/habemeolid; SUB_HANDLES in src/lib/shop-paths.mjs and
      SHOP_SUB_HANDLES below). Their chip is an <a href> to that address, drawn
      exactly like the others, and tools/prerender-shop2.mjs writes the page
-     from these very tables and subcatsAuto(): it lifts SUBCATS, SUB_PICKS and
-     the two functions below out of this file by their first and last lines,
-     the way it lifts the dictionary — so keep each at the top level, closing
-     on a line of its own. A page's words (title, meta, the line under the
-     heading) are seoSub() in src/lib/seo-copy.mjs, the block this file
-     carries a copy of. tests/subcollections.test.ts holds every catalogue
-     product to the chips it should be under.
+     from SUBCATS and the two functions below (subcatsAuto, subcatsWith): it
+     lifts them out of this file by their first and last lines, the way it
+     lifts the dictionary — so keep each at the top level, closing on a line
+     of its own. A page's words (title, meta, the line under the heading) are
+     seoSub() in src/lib/seo-copy.mjs, the block this file carries a copy of.
+     tests/subcollections.test.ts holds every catalogue product to its chip.
 
-     The chips and their labels are the owner's (Dim, 09.10.2026: pages for
-     the existing chips, nothing on the row may change), so `re` is each
-     chip's rule exactly as it always was — the product's Russian name — and
-     a product it puts under a chip stays there. `more` is only for a product
-     NONE of a section's chips took (the name carries no Russian type, or a
-     word `re` never knew): it reads the name and the id, Shopify's English
-     handle («davines-medium-hold-styling-paste»), and SUB_PICKS sorts the
-     few whose name says nothing at all. The chip order is the order on
-     screen. */
+     Since 26.10.2026 a product's subsection is ITS OWN, one per product
+     (Dim: «they are there for SEO and should not use some kind of
+     keywords»): `sub` in public/shop/catalogue2.js («beard/af», the section
+     included, so a product moved to another section takes nothing with it),
+     the owner's «Подраздел» in the panel over it, an own product's row. A
+     rename moves nothing — Renat's «After Shave Balm for Sensitive Skin»
+     took a balm off «После бритья» and failed the build the same afternoon.
+     The rules below (`re` on the Russian name, `more` on the name and the
+     id) only SUGGEST a subsection for a new product (subcatSuggest); `sub`
+     was seeded from them on 26.10, one chip each. The chip order is the
+     order on screen. */
   var SUBCATS = {
     hair: [
       { id: "sh", name: "Шампуни", re: /шампунь/i },
@@ -12626,41 +12627,48 @@
       { id: "oi", name: "Масла", re: /масло/i }
     ]
   };
-  /* The products none of the rules can place — the maker's own word for it is
-     the whole name («RE.STORE», «Super.Goo») — sorted by hand, from the
-     maker's description; each one was under no chip before. The owner's own
-     choice in the panel still wins over this. */
-  var SUB_PICKS = {
-    "kevin-murphy-re-store": ["ca"],
-    "kevin-murphy-smooth-again": ["ca"],
-    "heated-defense": ["ca"],
-    "gatsby-moving-rubber-wild-shake-15g": ["pw"],
-    "super-goo": ["ge"],
-    "killer-waves": ["sp"]
-  };
-  /** The chips a product is under by what it is — `p` is {id, name, cat,
-      brand}, nothing else is read. Pure: the prerender and the tests call
-      this very function, lifted out of this file. */
+  /** The chip a catalogue product is under by the catalogue file — `p.sub`
+      («beard/af»), and only while the product is still in that section; []
+      for none. Pure (`p` is {id, name, cat, sub}): the prerender and the
+      tests call this very function, lifted out of this file. */
   function subcatsAuto(p) {
-    var defs = SUBCATS[p.cat] || [];
-    var name = String(p.name || "");
-    var had = defs.filter(function (d) { return d.re.test(name); });
-    if (had.length) return had.map(function (d) { return d.id; });
-    if (Object.prototype.hasOwnProperty.call(SUB_PICKS, p.id)) {
-      return SUB_PICKS[p.id].filter(function (id) { return defs.some(function (d) { return d.id === id; }); });
-    }
-    var text = name + " " + String(p.id || "").replace(/-/g, " ");
-    return defs.filter(function (d) { return d.more && d.more.test(text); }).map(function (d) { return d.id; });
+    var sub = String(p.sub || ""), cut = sub.indexOf("/");
+    if (cut < 0 || sub.slice(0, cut) !== p.cat) return [];
+    var id = sub.slice(cut + 1);
+    return (SUBCATS[p.cat] || []).some(function (d) { return d.id === id; }) ? [id] : [];
   }
   /** …and with the owner's own choice («Подраздел» in the panel: one chip,
-      or "" for «Авто — по названию»), which wins outright, as it always has. */
+      «-» for «Без подраздела», "" for the catalogue's), which wins outright. */
   function subcatsWith(p, own) {
+    if (own === "-") return [];
     return own ? [own] : subcatsAuto(p);
   }
-  /** Which subsection the owner put a product in: his override first, then —
-      product creation — the subsection a custom row was saved with; "" means
-      «авто — по названию», subcatsAuto() decides. */
+  /** The chip the name rules point at — for a NEW product only (the panel's
+      form, as the section and the name are typed). When two rules match
+      («бальзам после бритья»: Бальзамы and После бритья) the longer match is
+      the more specific words; "" when none does. Never a product's chip. */
+  function subcatSuggest(p) {
+    var defs = SUBCATS[p.cat] || [];
+    var name = String(p.name || ""), best = "", len = 0;
+    defs.forEach(function (d) { var m = name.match(d.re); if (m && m[0].length > len) { best = d.id; len = m[0].length; } });
+    if (best) return best;
+    var text = name + " " + String(p.id || "").replace(/-/g, " ");
+    var more = defs.filter(function (d) { return d.more && d.more.test(text); });
+    return more.length ? more[0].id : "";
+  }
+  /** Which subsection the owner put a product in: his override first («-»
+      is «Без подраздела»), then — product creation — the subsection an own
+      product's row was saved with; "" means «as the catalogue has it». */
   function subcatOf(p) { return DEMO.subcat[p.id] || p.subcatBase || ""; }
+  /** The chip the product is under, all said and done — "" for none. */
+  function subcatNow(p) { return subcatsWith(p, subcatOf(p))[0] || ""; }
+  /** A subsection as the journal says it: the chip's label, «без подраздела», «как в каталоге». */
+  function subcatLabel(cat, id) {
+    if (id === "-") return "без подраздела";
+    if (!id) return "как в каталоге";
+    var d = (SUBCATS[cat] || []).filter(function (x) { return x.id === id; })[0];
+    return d ? d.name : id;
+  }
   /** Is the product under this chip, all said and done? */
   function inSubcat(p, id) { return subcatsWith(p, subcatOf(p)).indexOf(id) >= 0; }
   /** A published subcollection (a page of its own) — section and chip. */
@@ -12670,6 +12678,12 @@
     if (S.screen !== "catalog" || S.brand || !subPublished(S.cat, S.subcat)) return null;
     var key = S.cat + "/" + S.subcat;
     return seoSub(key, S.lang) || seoSub(key, "EN");
+  }
+  /** A published subcollection with no product in it at all (not the filters'
+      doing) — its page stays, «Здесь пусто.», and out of Google until one is. */
+  function subEmpty() {
+    if (!subPage()) return false;
+    return !CATALOGUE.some(function (p) { return p.cat === S.cat && inSubcat(p, S.subcat); });
   }
   /** The label of the chip that is lit, in Russian (translateTree() does the rest). */
   function subChipName() {
@@ -15629,6 +15643,9 @@
         (list.length
           ? '<div class="grid" id="catgrid">' + visible.map(cardHTML).join("") + "</div>" +
             '<div id="catmore">' + moreHTML(visible.length, list.length) + "</div>"
+          : subEmpty()
+            ? '<div class="empty"><p>Здесь пусто.</p>' +
+              '<a class="btn btn--ghost" href="' + linkHref("cat", S.cat) + '" data-go-cat="' + S.cat + '">' + name + "</a></div>"
           : '<div class="empty"><p>Под эти фильтры ничего не подошло.</p>' +
             '<button class="btn btn--ghost" data-clearfilter>Сбросить фильтры</button></div>') +
         /* features: sets for this section, in their own grid BELOW the
@@ -39749,19 +39766,21 @@
       edAsGroupFire(e.target, "enter");
     });
   }
-  /** «Подраздел» under a section. `asAttr` is the autosave hook the owner's
-      product card gives it (edAsAttr); a new product's draft has none. No
-      section chosen yet («Новый товар» starts at «Выберите») → a dead box
-      that says what comes first. */
+  /** «Подраздел» under a section — one chip, or «Без подраздела» («-»); the
+      product's own, never read off its name (26.10.2026, subcatsAuto).
+      `asAttr` is the autosave hook the owner's product card gives it
+      (edAsAttr); a new product's draft has none. No section chosen yet
+      («Новый товар» starts at «Выберите») → a dead box. */
   function edSubcatField(cat, cur, asAttr) {
     var subs = SUBCATS[cat] || [];
+    var on = subs.some(function (s2) { return s2.id === cur; });
     return '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat' + (asAttr || "") + (subs.length ? "" : " disabled") + ">" +
       (subs.length
-        ? '<option value=""' + (cur ? "" : " selected") + '>Авто — по названию</option>' +
+        ? '<option value="-"' + (on ? "" : " selected") + ">Без подраздела</option>" +
           subs.map(function (s2) { return '<option value="' + esc(s2.id) + '"' + (cur === s2.id ? " selected" : "") + ">" + esc(s2.name) + "</option>"; }).join("")
         : CAT_NAMES[cat]
           ? '<option value="">у этого раздела нет подразделов</option>'
-          : '<option value="">Авто — по названию</option>') +
+          : '<option value="">Без подраздела</option>') +
       "</select></label>";
   }
   /* ---------- 1a: the product card saves itself -----------------------------
@@ -40006,12 +40025,12 @@
           var cp = P();
           if (cp && !cp.custom) {
             if (cp.cat === v) return Promise.resolve(true);
-            // the server clears the subsection with it: a new section starts at «Авто»
+            // the server clears the subsection with it: a new section starts with none
             return edTyped(key, { type: "set_names", id: id, cat: v }, o);
           }
           var c = findCustom(id);
           if (c && c.cat === v) return Promise.resolve(true);
-          // the subsections are the section's own: a new section starts at «Авто»
+          // the subsections are the section's own: a new section starts with none
           return edOwnField(key, id, { cat: v, subcat: "" }, o);
         } };
     }
@@ -40338,7 +40357,7 @@
      that says what the Estonian and English shop will call it, the section
      and its subsection — at the top of the card, every box saving itself. */
   function edWhatFields(p, own) {
-    var curSub = p.isNew ? (p.subcatBase || "") : subcatOf(p);
+    var curSub = p.isNew ? (p.subcatBase || "") : (subcatNow(p) || "-");
     var as = function (f) { return own ? edAsAttr(p, f) : ""; };
     var hint = function (f) { return own ? admAutosaveHintHTML(edAsKey(p, f)) : ""; };
     return '<div class="adm-field"><label for="edbrand"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span></label>' +
@@ -40927,7 +40946,7 @@
   function applyCreateProduct(a) {
     /* hidden, like the Claude connector's new products (Dim, 26.10.2026): in
        the shop only once its photos are in and «Показывать в магазине» is on */
-    customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "", active: false,
+    customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: a.subcat || "", active: false,
       sizes: a.sizes || [], prices: a.prices && a.prices.length ? a.prices : [a.price], description: a.description || null }, "assistant");
   }
   /** The assistant's update_product: the PATCH the row takes, from the
@@ -47085,7 +47104,7 @@
         ? "Тексты писем: " + mtn + " " + pl(mtn, "свой текст", "своих текста", "своих текстов")
         : "Тексты писем: стандартные";
     }
-    if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
+    if (a.type === "set_subcat") return "Подраздел «" + (p ? p.name : a.id) + "»: " + subcatLabel(p ? p.cat : "", a.value);
     if (a.type === "set_names") {
       if ("name" in a) return a.name ? "Название: «" + a.name + "»" : "Название: как в каталоге";
       if ("brand" in a) return "Бренд «" + (p ? p.name : a.id) + "»: " + (a.brand || "как в каталоге");
@@ -47198,7 +47217,8 @@
         ? a.sizes.map(function (s, i) { return s + " — " + eur(a.prices[i]); }).join(" · ")
         : eur(a.price || (a.prices && a.prices[0]) || 0);
       var cpLangs = a.description ? ["RU", "ET", "EN"].filter(function (L) { return a.description[L]; }) : [];
-      return "Новый товар «" + a.brand + " — " + a.name + "» · " + (CAT_NAMES[a.cat] || a.cat) + " · " + cpPrices +
+      return "Новый товар «" + a.brand + " — " + a.name + "» · " + (CAT_NAMES[a.cat] || a.cat) +
+        (a.subcat ? " · " + subcatLabel(a.cat, a.subcat) : "") + " · " + cpPrices +
         (cpLangs.length ? " · описание: " + cpLangs.join(", ") : "") + "\nТовар появится скрытым. Фото добавите на вкладке «Фото и видео» — она откроется сама; потом включите «Показывать в магазине».";
     }
     if (a.type === "set_product_active") {
@@ -47218,7 +47238,7 @@
       if (a.brand != null && (!up || a.brand !== up.brand)) ch.push("бренд: «" + (up ? up.brand : "—") + "» → «" + a.brand + "»");
       if (a.name != null && (!up || a.name !== up.name)) ch.push("название: «" + (up ? up.name : "—") + "» → «" + a.name + "»");
       if (a.cat != null && (!up || a.cat !== up.cat)) ch.push("раздел: " + (up && CAT_NAMES[up.cat] ? CAT_NAMES[up.cat] : "—") + " → " + (CAT_NAMES[a.cat] || a.cat));
-      if (a.subcat != null && (!up || (a.subcat || "") !== (up.subcat || ""))) ch.push("подраздел: " + (a.subcat || "авто"));
+      if (a.subcat != null && (!up || (a.subcat || "") !== (up.subcat || ""))) ch.push("подраздел: " + subcatLabel(a.cat || (up && up.cat) || "", a.subcat));
       if (a.sizes && a.sizes.length) {
         if (!up || JSON.stringify([a.sizes, a.prices || []]) !== JSON.stringify([(up.sizes || []), (up.prices || [])])) {
           ch.push("размеры и цены: " + a.sizes.map(function (s, i) { return s + " — " + (a.prices && a.prices[i] != null ? eur(a.prices[i]) : "как было"); }).join(" · "));
@@ -50618,7 +50638,9 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
-    if (SERVED_ROBOTS) setMetaTag("robots", NOINDEX_SCREENS[S.screen] ? "noindex, nofollow" : SERVED_ROBOTS);
+    /* an empty subcollection keeps its address and its words, out of Google
+       until a product is in it again (Dim, 26.10.2026) — the static page says the same */
+    if (SERVED_ROBOTS) setMetaTag("robots", NOINDEX_SCREENS[S.screen] ? "noindex, nofollow" : subEmpty() && !/noindex/.test(SERVED_ROBOTS) ? "noindex, follow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
@@ -55543,9 +55565,14 @@
     // patch, like every other change on the goods editor's form
     else if (t.matches("[data-edcat]")) {
       var subSlot = document.querySelector("[data-edsubslot]");
-      // the owner's product: the new box saves itself too (a new section starts at «Авто»)
+      /* the owner's product: the new box saves itself too, and a product moved
+         to another section starts there with no subsection (the server clears
+         it with the move) — he picks one. A NEW product's box opens on the
+         chip its name suggests (subcatSuggest), which he can change. */
       var subP = S.adminEdit && S.adminEdit !== "new" ? admEditProduct(S.adminEdit) : null;
-      if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, "", subP ? edAsAttr(subP, "subcat") : ""); translateTree(subSlot); }
+      var nameBox = document.querySelector("[data-edname]");
+      var subGuess = subP ? "-" : subcatSuggest({ cat: t.value, name: nameBox ? nameBox.value : "", id: "" });
+      if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, subGuess, subP ? edAsAttr(subP, "subcat") : ""); translateTree(subSlot); }
     }
     // the card's size picker — state first, then patch the price in place
     /* «Бренд» — a native <select> of twenty-six names, so the phone's own

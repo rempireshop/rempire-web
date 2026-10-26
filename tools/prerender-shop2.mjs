@@ -105,7 +105,7 @@ import {
   fillBlogCardPrices, overriddenPrice, withOwnerStock, withOwnerNames, forSale, onlyForSale, pickTags,
   STORE_GEO, STORE_MAP_URL, STORE_SAME_AS, returnPolicyLD, shippingServiceLD, openingHoursLD, productOffersLD
 } from "../src/lib/seo-head.mjs";
-import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES, SUBCOLLECTION_MIN } from "../src/lib/shop-paths.mjs";
+import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES } from "../src/lib/shop-paths.mjs";
 /* The titles and meta descriptions of the home page, the sections, the
    subcollections, the brands and the blog list (audit §1A) — the module
    app.js's setHead() carries a copy of, so the head written here and the head
@@ -507,24 +507,28 @@ try {
 
 /* subcollections: the chips that are pages (SUB_HANDLES in
    src/lib/shop-paths.mjs — /et/collections/habemeolid and five more). Who is
-   under which chip (SUBCATS, SUB_PICKS, subcatsAuto/subcatsWith) lives in
-   app.js beside the chips that use it, and is lifted the way the dictionary
-   is — so a subcollection's static page lists exactly what its chip filters.
-   Each page's words in three languages are seoSub() in src/lib/seo-copy.mjs,
+   under which chip (SUBCATS, subcatsAuto/subcatsWith — the product's own
+   `sub` in catalogue2.js and the owner's «Подраздел») lives in app.js beside
+   the chips that use it, and is lifted the way the dictionary is — so a
+   subcollection's static page lists exactly what its chip filters. Each
+   page's words in three languages are seoSub() in src/lib/seo-copy.mjs,
    beside the sections' and the brands'. FATAL, like the dictionary: the
    addresses are routed either way, and a page without these would carry the
-   wrong words or the wrong products. The same check holds the publishing
-   rule: a subcollection needs SUBCOLLECTION_MIN catalogue products and its
-   words in all three languages. */
+   wrong words or the wrong products.
+
+   No minimum count any more (Dim, 26.10.2026: «we should not limit the
+   subcollections, they are there for SEO»). A subcollection with nothing in
+   it keeps its page — noindex, out of the sitemap, a link to its section —
+   until a product is in it again (subcollectionPage, SUB_EMPTY). Until then
+   a rename could fail every build: «fewer than 6» on beard/af. */
 let SUBS = null;
 try {
   const pieces = [
     sliceFrom(/^ {2}var SUBCATS = \{$/, DECL_END),
-    sliceFrom(/^ {2}var SUB_PICKS = \{$/, DECL_END),
     sliceFrom(/^ {2}function subcatsAuto\(p\) \{$/, FN_END),
     sliceFrom(/^ {2}function subcatsWith\(p, own\) \{$/, FN_END)
   ];
-  if (pieces.some(p => !p)) throw new Error("could not lift the subcollections (SUBCATS, SUB_PICKS, subcatsAuto, subcatsWith) out of app.js");
+  if (pieces.some(p => !p)) throw new Error("could not lift the subcollections (SUBCATS, subcatsAuto, subcatsWith) out of app.js");
   SUBS = new Function(pieces.join("\n") +
     "\nreturn { cats: SUBCATS, auto: subcatsAuto, with: subcatsWith };")();
   for (const key of Object.keys(SUB_HANDLES)) {
@@ -533,23 +537,6 @@ try {
     for (const code of ["RU", "ET", "EN"]) {
       const w = seoSub(key, code);
       if (!w || !w.name || !w.title || !w.meta || !w.intro) throw new Error(key + " has no " + code + " words in seoSub() (src/lib/seo-copy.mjs)");
-    }
-    /* The publishing rule is the code's: counted on the catalogue file, it
-       fails the build. What the owner does to it since 26.10 — a rename that
-       drops the type word («After Shave Balm for Sensitive Skin» left
-       beard/af with 5, and the deploy hook's build failed, then every build
-       would have) — is only said: the page is still written, with what it
-       lists. Counted as the page lists: his «Подраздел» wins. */
-    const n = CATALOGUE_FILE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;
-    if (n < SUBCOLLECTION_MIN) {
-      throw new Error(key + " holds " + n + " catalogue products, fewer than " + SUBCOLLECTION_MIN +
-        " — take it out of SUB_HANDLES (src/lib/shop-paths.mjs and app.js), or fill it");
-    }
-    const own = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subcat) || "";
-    const live = CATALOGUE.filter(p => p.cat === cat && SUBS.with(p, own(p)).includes(sub)).length;
-    if (live < SUBCOLLECTION_MIN) {
-      console.warn("! " + key + " lists " + live + " products after the owner's names and subsections (" + n +
-        " in the catalogue file) — written anyway; a thin page until he fills it");
     }
   }
 } catch (e) {
@@ -560,6 +547,13 @@ try {
 /* «Подраздел» as the owner set it in the panel — it wins over the rules, on
    the static page as on the chip. */
 const ownSubcat = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subcat) || "";
+/* The published subcollections with nothing on sale in them this build: their
+   page says so, noindex, and the sitemap leaves them out. */
+const SUB_EMPTY = new Set(Object.keys(SUB_HANDLES).filter(key => {
+  const [cat, sub] = key.split("/");
+  return !ON_SALE.some(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
+}));
+for (const key of SUB_EMPTY) console.warn("! " + key + " has nothing on sale — its page is noindex and out of the sitemap until it has");
 /* The chip's own label («Масла»), in the page's language — the dictionary
    translates it, as translateTree() does on the shop's chip row. */
 const subChipLabel = (key, code) => {
@@ -1142,7 +1136,7 @@ function productPage(p, lang) {
    different texts since 09.10.2026: the description is the search snippet
    (src/lib/seo-copy.mjs), the intro the shop's own line (catIntro() in app.js),
    which the static page used to replace with the snippet. */
-function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro }) {
+function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, intro, back }) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
   const crumbItems = [
@@ -1180,7 +1174,8 @@ function listingPage({ lang, kind, id, heading, h1, list, rest, desc, title, int
       '<p class="sec__intro">' + esc(intro) + "</p>" +
       (empty
         ? '<p class="muted sec__empty">' + esc(tr("Здесь пусто.", code, false)) +
-          (rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
+          (back ? ' <a href="' + href(seg, back[0]) + '">' + esc(back[1]) + "</a>"
+            : rest === "/c/all/" ? "" : ' <a href="' + href(seg, "/c/all/") + '">' + esc(t.all) + "</a>") + "</p>"
         : grid(list, seg, code, t, true)) +
     "</section>" +
     langNav(seg, rest, t) +
@@ -1233,8 +1228,14 @@ function subcollectionPage(key, lang) {
     lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), h1: words.h1 || words.name, list,
     rest: "/c/" + key + "/",
     desc: head.d, title: head.t,
-    intro: words.intro
+    intro: words.intro,
+    // empty: «Здесь пусто.» points at its own section, not at «Все товары»
+    back: ["/c/" + cat + "/", tr(CAT_NAMES[cat], lang.code, false)]
   });
+  /* Nothing in it (Dim, 26.10.2026): the address and the words stay, out of
+     Google until a product is in it again — and out of the sitemap below
+     (SUB_EMPTY). The shop says the same (subEmpty() in app.js). */
+  if (!list.length && !/noindex/.test(ROBOTS)) page.spec.robots = "noindex, follow";
   page.spec.imageAlt = words.name;
   for (const ld of page.spec.jsonld) if (ld["@type"] === "ItemList") ld.name = words.name;
   return page;
@@ -2187,7 +2188,7 @@ for (const lang of LANGS) {
   for (const b of BRANDS) entries.push(urlEntry("/b/" + BRAND_SLUG.get(b) + "/", lang.seg, "0.6"));
   /* a subcollection is a narrower shelf of a section: below the section,
      beside the brands */
-  for (const key of Object.keys(SUB_HANDLES)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));
+  for (const key of Object.keys(SUB_HANDLES)) if (!SUB_EMPTY.has(key)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));
   /* The product pages are NOT here. Their files are still written above —
      that is what makes the shop fast and indexable — but which of them a
      crawler is offered depends on «Показывать в магазине», a column the owner

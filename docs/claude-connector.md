@@ -161,7 +161,11 @@ stripped, so Claude rewrites it; ≤ 4000 characters; `seoDropMetaTalk()` per se
 `save_product_name` (26.10.2026, Dim: «block + suggest»): `name`/`brand`/`section`, the same
 rules as the panel's «Что за товар» — one line, `MAX_NAME`/`MAX_BRAND`, a section from
 `PRODUCT_CATS`, a name `nameTranslatable()` (otherwise refused with what ET/EN would say and the
-whole `TRANSLATABLE_TAILS` list); a section move resets the subsection. Then
+whole `TRANSLATABLE_TAILS` list); a section move leaves the product with no subsection unless
+`subsection` is sent with it. `subsection` (26.10.2026): a chip id or its label of the product's
+section, `""` for none — `readSubsection()` in `src/lib/subsections.ts`; written as the panel's
+«Подраздел» (`product_overrides.subcat`, `-` for none; an own product's row). The subsection is
+the product's own, never its name's, and decides which subcollection page lists it. Then
 `requestRebuild("product-rename")` and IndexNow. The id, page address and stock key never change.
 
 `save_product_price` (26.10.2026, Dim: a change of more than 30 % needs the owner's yes):
@@ -186,7 +190,8 @@ the count now and saves nothing. Ledger row `adjust`, ref «Claude», actor `cla
 
 `create_product` (26.10.2026): an own product, created **hidden** (`createCustomProduct(…, {
 active: false })` — never live for a moment). Name rules as `save_product_name`, prices through
-`cleanCustomProductInput()` (1–500 €), an optional description checked as
+`cleanCustomProductInput()` (1–500 €), an optional `subsection` (as `save_product_name`; none when
+not sent — the owner picks it in the panel), an optional description checked as
 `save_product_description`'s (`descriptionTexts()`). Refused when the owner already has a product
 with that brand and name, or the shop sells one — Claude may call twice for one request; a
 deliberate second entry is made in the panel. Journal line `product.create` with `via: "claude"`,

@@ -1434,7 +1434,7 @@
         "После «Масла»: адрес /ru/collections/maslo-dlya-borody, заголовок «Масло для бороды», в крошках — «Уход за бородой».",
         "«Назад» вернул весь раздел, его адрес и заголовок «Уход за бородой».",
         "«Гели» фильтруют на месте, адрес раздела не меняется.",
-        "Старая ссылка открыла раздел с выбранным «После бритья» — только бальзамы и лосьоны.",
+        "Старая ссылка открыла «После бритья» — только бальзамы после бритья и лосьоны.",
         "Эстонская страница: заголовок «Habemeõlid», выбрано «Õlid», под ним масла для бороды."
       ],
       "why": "Google годами показывал эти адреса Shopify — теперь это снова страницы, а не переход на весь раздел.",
@@ -1457,7 +1457,7 @@
           "After «Масла»: address /ru/collections/maslo-dlya-borody, heading «Масло для бороды», «Уход за бородой» in the crumbs.",
           "Back brought the whole section back, with its address and the heading «Уход за бородой».",
           "«Гели» filters in place, the section's address stays.",
-          "The old link opened the section with «После бритья» picked — only balms and lotions.",
+          "The old link opened «После бритья» — only aftershave balms and lotions.",
           "The Estonian page: heading «Habemeõlid», «Õlid» picked, beard oils under it."
         ],
         "why": "Google showed these Shopify addresses for years — now they are pages again, not a jump to the whole section."
@@ -7950,6 +7950,55 @@
       },
       "mark": "redo",
       "markedAt": "2026-09-25T10:44:55.950Z"
+    },
+    {
+      "id": "goods-subsection",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Подраздел товара — свой, не по названию",
+      "steps": [
+        "«Товары» → «White — бальзам после бритья» (Proraso).",
+        "Посмотреть поле «Подраздел».",
+        "Поменять название, например дописать слово в конце.",
+        "Открыть в магазине «Уход за бородой» → «После бритья».",
+        "В карточке выбрать «Подраздел: Без подраздела», снова открыть «После бритья».",
+        "Вернуть «После бритья».",
+        "«+ Товар»: название «Maharajah Beard Balm — бальзам для бороды», раздел «Уход за бородой»."
+      ],
+      "expect": [
+        "В «Подразделе» стоит «После бритья», варианта «Авто — по названию» больше нет.",
+        "После переименования товар остаётся в «После бритья».",
+        "Бальзамы после бритья — только в «После бритья», в «Бальзамах» их нет.",
+        "«Без подраздела» убирает товар из «После бритья», «Вернуть» возвращает.",
+        "У нового товара «Подраздел» сам предлагает «Бальзамы», его можно поменять."
+      ],
+      "why": "Подразделы — страницы для Google; товар больше не выпадает из них при переименовании.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T13:21:19.316Z",
+      "en": {
+        "title": "A product's subsection — its own, not by its name",
+        "steps": [
+          "«Товары» → «White — бальзам после бритья» (Proraso).",
+          "Look at the «Подраздел» (subsection) box.",
+          "Change the name, e.g. add a word at the end.",
+          "In the shop open «Уход за бородой» → «После бритья».",
+          "In the card pick «Подраздел: Без подраздела», open «После бритья» again.",
+          "Set «После бритья» back.",
+          "«+ Товар»: name «Maharajah Beard Balm — бальзам для бороды», section «Уход за бородой»."
+        ],
+        "expect": [
+          "«Подраздел» shows «После бритья»; the «Авто — по названию» choice is gone.",
+          "After the rename the product stays in «После бритья».",
+          "Aftershave balms are only in «После бритья», not in «Бальзамы».",
+          "«Без подраздела» takes it off «После бритья»; «Вернуть» brings it back.",
+          "A new product's «Подраздел» suggests «Бальзамы» by itself; it can be changed."
+        ],
+        "why": "Subsections are pages for Google; a rename no longer drops a product out of one."
+      }
     },
     {
       "id": "bundles-create",

@@ -65,7 +65,8 @@ import { requestRebuild } from "@/lib/rebuild";
 import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
 import { productUrls as pingUrls } from "@/lib/indexnow.mjs";
 import { submitIndexNow } from "@/lib/indexnow-ping";
-import { publicPath } from "@/lib/shop-paths.mjs";
+import { publicPath, SUB_HANDLES } from "@/lib/shop-paths.mjs";
+import { NO_SUBSECTION, readSubsection, SUBSECTIONS, subsectionName, subsectionOf } from "@/lib/subsections";
 import { catName, slugify } from "@/lib/seo-head.mjs";
 import type { ToolDef, ToolResult } from "@/lib/mcp/protocol";
 
@@ -253,7 +254,7 @@ export const TOOLS: ToolDef[] = [
     name: "get_product",
     title: "Товар целиком",
     description:
-      "One product of the shop by its id: names in RU/ET/EN, brand, section, every size with its price, stock, its photos " +
+      "One product of the shop by its id: names in RU/ET/EN, brand, section and subsection, every size with its price, stock, its photos " +
       "(addresses an article may use as its cover or as a picture in the text), " +
       "the page address in each language and the shop's own description texts — the facts to write from. Never invent " +
       "ingredients or effects the description does not state.",
@@ -268,7 +269,8 @@ export const TOOLS: ToolDef[] = [
   {
     name: "list_sections",
     title: "Разделы и бренды",
-    description: "The shop's sections and brands with their page addresses in RU, ET and EN — for links to a whole section or brand.",
+    description: "The shop's sections (each with its subsections — the chips under it; the ones with a page of their own carry its " +
+      "addresses) and brands with their page addresses in RU, ET and EN — for links to a whole section, subsection or brand.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     annotations: READ,
   },
@@ -363,7 +365,9 @@ export const TOOLS: ToolDef[] = [
       "letters exactly as the maker spells it, then « — » and what it is in Russian, from the type words the shop translates " +
       "(«Bio Botanical Shampoo — шампунь», «White — бальзам после бритья»); a name the Estonian and English pages could not " +
       "say is refused with the list of those words. section is one of the ids list_sections gives (hair, styling, beard, " +
-      "face, body, perfume, merch); moving a product to another section puts its subsection back to automatic. The product " +
+      "face, body, perfume, merch); subsection is one of that section's subsections list_sections gives (\"af\" or its name " +
+      "«После бритья»), or \"\" for none — it decides which shelf, and which subcollection page Google reads, the product is " +
+      "on; a product moved to another section has none until you send one. The product " +
       "keeps its id, page address and stock; orders already placed keep the old name. Live in the shop at once; the static " +
       "pages search engines read are rebuilt within about a quarter of an hour. Each save is a line in Админка → Журнал " +
       "with «Вернуть».",
@@ -374,6 +378,7 @@ export const TOOLS: ToolDef[] = [
         name: { type: "string", maxLength: 120, description: "«Latin product name — русский тип»." },
         brand: { type: "string", maxLength: 60 },
         section: { type: "string", enum: [...PRODUCT_CATS] },
+        subsection: { type: "string", maxLength: 40, description: "A subsection id or name from list_sections, or \"\" for none." },
       },
       required: ["id"],
       additionalProperties: false,
@@ -444,7 +449,9 @@ export const TOOLS: ToolDef[] = [
       "turns on «Показывать в магазине». Use it when the owner names a product the shop does not have (search_products " +
       "first: a product the shop already sells is refused). brand as the maker writes it; name the shop's way — the maker's " +
       "product name in Latin letters, « — », the type in Russian from the words the shop translates (as save_product_name); " +
-      "section one of list_sections' ids; either price (one price) or sizes [{size, price}] («100 мл», «250 мл»), euros " +
+      "section one of list_sections' ids, and subsection one of that section's subsections (what the product IS — a beard " +
+      "balm is «Бальзамы», an aftershave balm «После бритья»; leave it out only when none fits); either price (one price) or " +
+      "sizes [{size, price}] («100 мл», «250 мл»), euros " +
       "with VAT, 1–500. description {ru, et, en} is optional, plain text as save_product_description takes it — only facts " +
       "the owner gave you. Afterwards its Google texts can be written with save_product_google_text and its count with " +
       "save_product_stock, by the id this returns.",
@@ -454,6 +461,7 @@ export const TOOLS: ToolDef[] = [
         brand: { type: "string", maxLength: 60 },
         name: { type: "string", maxLength: 120, description: "«Latin product name — русский тип»." },
         section: { type: "string", enum: [...PRODUCT_CATS] },
+        subsection: { type: "string", maxLength: 40, description: "A subsection id or name from list_sections." },
         price: { type: "number", minimum: 1, maximum: 500, description: "For a product without sizes." },
         sizes: {
           type: "array",
@@ -633,6 +641,8 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
        this answer, so it gets the paragraphs. The owner's own product keeps
        its texts on its row; a catalogue product's are in product_overrides. */
     const ownDesc = row ? row.description : await getDescriptionOverride(p.id);
+    // the chip it is under: the owner's «Подраздел» (the row's, for his own product) over the catalogue's
+    const subId = subsectionOf(p, row ? row.subcat : (await getOverrideRow(p.id))?.subcat);
     const description: Partial<Record<L3, string>> = {};
     for (const l of LANGS3) {
       const t = ownDesc?.[l] || (p.texts[l] ? paragraphs(String(p.texts[l])) : "");
@@ -643,6 +653,7 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       brand: p.brand,
       names: p.names,
       section: { id: p.cat, RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
+      subsection: subId ? { id: subId, RU: subsectionName(p.cat, subId) } : null,
       sizes: p.sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
       ...(shown ? { stock: stockWord(p.stock) } : { hidden: true }),
       /* the count on the shelf per size, null while nobody has counted it —
@@ -668,6 +679,14 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
         id: c,
         name: { RU: catName(c, "RU"), ET: catName(c, "ET"), EN: catName(c, "EN") },
         url: { RU: urlOf(base, "RU", `/c/${c}`), ET: urlOf(base, "ET", `/c/${c}`), EN: urlOf(base, "EN", `/c/${c}`) },
+        subsections: (SUBSECTIONS[c] || []).map((s) => ({
+          id: s.id,
+          name: s.name,
+          // six of them are a page of their own (/collections/aftershave …)
+          ...(SUB_HANDLES[`${c}/${s.id}` as keyof typeof SUB_HANDLES]
+            ? { url: { RU: urlOf(base, "RU", `/c/${c}/${s.id}`), ET: urlOf(base, "ET", `/c/${c}/${s.id}`), EN: urlOf(base, "EN", `/c/${c}/${s.id}`) } }
+            : {}),
+        })),
       })),
       brands: brands.map((b) => ({
         name: b,
@@ -838,9 +857,13 @@ async function saveProductName(args: Record<string, unknown>): Promise<ToolResul
     }
     patch.cat = cat;
   }
-  if (!Object.keys(patch).length) return no("Send at least one of name, brand, section. Nothing was saved.");
+  // the chip under the section it ends up in — "" for none
+  const sub = readSubsection(patch.cat ?? t.cat, args.subsection);
+  if (sub && "error" in sub) return no(sub.error + " Nothing was saved.");
+  if (!Object.keys(patch).length && !sub) return no("Send at least one of name, brand, section, subsection. Nothing was saved.");
 
   if (t.own) {
+    if (sub) (patch as Record<string, unknown>).subcat = sub.id;
     const before = ownPrev(t.own, patch);
     try {
       await updateCustomProduct(t.id, patch);
@@ -852,8 +875,11 @@ async function saveProductName(args: Record<string, unknown>): Promise<ToolResul
   } else {
     /* the override route's own rule (nameFields in
        src/app/api/admin/overrides/route.ts): a subsection belongs to its
-       section, so a move starts from «Авто — по названию» */
-    const full: Partial<Override> = { ...patch, ...("cat" in patch ? { subcat: null } : {}) };
+       section, so a move starts with none */
+    const full: Partial<Override> = {
+      ...patch,
+      ...(sub ? { subcat: sub.id || NO_SUBSECTION } : "cat" in patch ? { subcat: null } : {}),
+    };
     const old = await getOverrideRow(t.id);
     const before: Record<string, unknown> = {};
     for (const k of Object.keys(full) as Array<keyof Override>) before[k] = old?.[k] ?? null;
@@ -864,12 +890,14 @@ async function saveProductName(args: Record<string, unknown>): Promise<ToolResul
   requestRebuild("product-rename");
   submitIndexNow(pingUrls(t.id));
   const name = patch.name ?? t.name;
+  const catNow = patch.cat ?? t.cat;
   return ok({
-    saved: Object.keys(patch).map((k) => (k === "cat" ? "section" : k)),
+    saved: [...Object.keys(patch).filter((k) => k !== "subcat").map((k) => (k === "cat" ? "section" : k)), ...(sub ? ["subsection"] : [])],
     id: t.id,
     brand: patch.brand ?? t.brand,
     names: { RU: name, ET: translateProductName(name, "ET"), EN: translateProductName(name, "EN") },
-    section: catName(patch.cat ?? t.cat, "RU"),
+    section: catName(catNow, "RU"),
+    ...(sub ? { subsection: sub.id ? subsectionName(catNow, sub.id) : "нет" } : {}),
     next: "Live in the shop now under the same id and page address. Orders already placed keep the old name. The static pages " +
       "search engines read are rebuilt within about a quarter of an hour. «Вернуть» on its line in Админка → Журнал puts " +
       "the old name back.",
@@ -1121,6 +1149,8 @@ async function createProduct(args: Record<string, unknown>): Promise<ToolResult>
   if (!name || name.length > MAX_NAME) return no(`name: one line of 1–${MAX_NAME} characters. ${done}`);
   if (!nameTranslatable(name)) return no(untranslatable(name).replace("Nothing was saved.", done));
   if (!(PRODUCT_CATS as readonly string[]).includes(cat)) return no(`section is one of ${PRODUCT_CATS.join(", ")} — list_sections names them. ${done}`);
+  const sub = readSubsection(cat, args.subsection);
+  if (sub && "error" in sub) return no(`${sub.error} ${done}`);
   const sizes = Array.isArray(args.sizes) && args.sizes.length ? args.sizes : null;
   if (!sizes && args.price == null) return no(`Send price (one price) or sizes [{size, price}]. ${done}`);
   const desc = args.description && typeof args.description === "object" && !Array.isArray(args.description)
@@ -1141,7 +1171,7 @@ async function createProduct(args: Record<string, unknown>): Promise<ToolResult>
   let row: CustomProduct;
   try {
     row = await createCustomProduct(
-      { brand, name, cat, ...(sizes ? { sizes } : { price: args.price }), description: Object.keys(desc).length ? desc : null },
+      { brand, name, cat, subcat: sub ? sub.id : "", ...(sizes ? { sizes } : { price: args.price }), description: Object.keys(desc).length ? desc : null },
       { active: false },
     );
   } catch (e) {
@@ -1155,6 +1185,7 @@ async function createProduct(args: Record<string, unknown>): Promise<ToolResult>
     brand: row.brand,
     names: { RU: row.name, ET: translateProductName(row.name, "ET"), EN: translateProductName(row.name, "EN") },
     section: catName(row.cat, "RU"),
+    subsection: row.subcat ? subsectionName(row.cat, row.subcat) : "нет — save_product_name subsection sets it",
     sizes: ownShape(row).sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
     description: LANGS3.filter((l) => row.description?.[l]).map((l) => l.toLowerCase()),
     next: "Hidden — nobody sees it yet. The owner opens Админка → Товары → «Скрытые» → this product, adds its photos and " +

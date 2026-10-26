@@ -168,14 +168,16 @@ test.describe("sweep — goods editor", () => {
       const sub = page.locator("[data-edsubcat]");
       if (await sub.count() && await sub.isEnabled()) {
         const values = await sub.locator("option").evaluateAll((o) => o.map((x) => (x as HTMLOptionElement).value));
-        const nonEmpty = values.filter(Boolean);
-        if (nonEmpty.length) {
-          await sub.selectOption(nonEmpty[0]);
+        // the product's own subsection since 26.10.2026: a chip, or «-» «Без подраздела» — put back as it was
+        const was = await sub.inputValue();
+        const other = values.filter((v) => v && v !== "-" && v !== was);
+        if (other.length) {
+          await sub.selectOption(other[0]);
           await settled(page, "the subsection");
           await openGoods(page, subject);
           await toSection(page, "shop");
-          expect(await sub.inputValue()).toBe(nonEmpty[0]);
-          await sub.selectOption("");
+          expect(await sub.inputValue()).toBe(other[0]);
+          await sub.selectOption(was);
           await settled(page, "the subsection back");
         }
       }

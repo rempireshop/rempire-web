@@ -458,6 +458,50 @@ describe("the connector, end to end", () => {
     expect(line!.undo).toEqual({ kind: "override", id, patch: { name: null, cat: null, subcat: "shampoo-oily" } });
   });
 
+  /* 26.10.2026 (Dim): a product's subsection is its own, not its name's — and
+     it decides which subcollection page Google reads it on, so Claude reads
+     and writes it as the panel's «Подраздел» does. */
+  it("reads and sets a product's subsection — by id or label, none with \"\" — and lists each section's", async () => {
+    const { getOverrideRow } = await import("@/lib/orders");
+    const { getCustomProduct } = await import("@/lib/custom-products");
+    const t = await tokens();
+    const id = "davines-softening-shaving-gel";
+    const sub = async () => JSON.parse((await tool(t.access_token, "get_product", { id })).text).subsection;
+    expect(await sub()).toEqual({ id: "ge", RU: "Гели" });
+
+    const r = await tool(t.access_token, "save_product_name", { id, subsection: "После бритья" });
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text)).toMatchObject({ saved: ["subsection"], subsection: "После бритья" });
+    expect((await getOverrideRow(id))?.subcat).toBe("af");
+    resetProductCache();
+    expect(await sub()).toEqual({ id: "af", RU: "После бритья" });
+
+    expect((await tool(t.access_token, "save_product_name", { id, subsection: "" })).isError).toBe(false);
+    expect((await getOverrideRow(id))?.subcat).toBe("-");
+    resetProductCache();
+    expect(await sub()).toBeNull();
+
+    const bad = await tool(t.access_token, "save_product_name", { id, subsection: "Шампуни" });   // a hair chip
+    expect(bad.isError).toBe(true);
+    expect(bad.text).toContain("Nothing was saved");
+    expect((await getOverrideRow(id))?.subcat).toBe("-");
+
+    const sections = JSON.parse((await tool(t.access_token, "list_sections", {})).text).sections;
+    const beard = sections.find((s: { id: string }) => s.id === "beard");
+    expect(beard.subsections.map((s: { id: string }) => s.id)).toEqual(["oi", "ba", "af", "ge"]);
+    expect(beard.subsections.find((s: { id: string }) => s.id === "af").url.ET).toMatch(/\/et\/collections\/raseerimisjargne-hooldus$/);
+    expect(beard.subsections.find((s: { id: string }) => s.id === "ge").url).toBeUndefined();   // a chip, no page
+    expect(sections.find((s: { id: string }) => s.id === "perfume").subsections).toEqual([]);
+
+    const made = await tool(t.access_token, "create_product", {
+      brand: "Captain Fawcett", name: "Maharajah Beard Balm — бальзам для бороды", section: "beard", subsection: "ba", price: 24.9,
+    });
+    expect(made.isError, made.text).toBe(false);
+    const ownId = JSON.parse(made.text).created;
+    expect(JSON.parse(made.text).subsection).toBe("Бальзамы");
+    expect((await getCustomProduct(ownId))?.subcat).toBe("ba");
+  });
+
   it("writes the owner's own product on its own row — text, Google pair, name — even while it is hidden, each with «Вернуть»", async () => {
     const { createCustomProduct, getCustomProduct, setCustomProductActive } = await import("@/lib/custom-products");
     const { getDescriptionOverride } = await import("@/lib/product-descriptions");

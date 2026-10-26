@@ -6,13 +6,18 @@
  * Who is under which chip is ONE function, subcatsAuto() in
  * public/shop2/app.js, beside the chips that use it; tools/prerender-shop2.mjs
  * lifts it out of that file by its first and last lines (with SUBCATS and
- * SUB_PICKS), and so does this test, the same way — so what is held here is
+ * subcatsWith), and so does this test, the same way — so what is held here is
  * what the chips filter and what the static pages list. A page's words are
  * seoSub() / seoHead("sub") in src/lib/seo-copy.mjs.
  *
- * The rule held below: every chip keeps its label and every product it showed
- * before 09.10.2026; the only products that move are ones no chip showed, and
- * only under a chip whose label is plainly what they are (ADDED).
+ * Since 26.10.2026 the chip is the product's OWN — `sub` in catalogue2.js
+ * (`sb` in catalogue.min.json), the owner's «Подраздел» over it — one per
+ * product, never read off the name (Dim: «they are there for SEO and should
+ * not use some kind of keywords»). It was seeded from the name rules that
+ * placed every product until then, which this test still writes out (BASE,
+ * ADDED): every product keeps the chip they gave it, the four aftershave
+ * balms keep «После бритья» alone, and a rename moves nothing. No minimum
+ * count: an empty subcollection keeps its page, noindex, out of the sitemap.
  *
  * The addresses are SUB_HANDLES in src/lib/shop-paths.mjs (and its ES5 twin
  * SHOP_SUB_HANDLES in app.js); the old Shopify spellings move in one hop
@@ -32,7 +37,6 @@ import {
   parseShopPath,
   publicPath,
   SUB_HANDLES,
-  SUBCOLLECTION_MIN,
   subOfHandle,
 } from "@/lib/shop-paths.mjs";
 
@@ -53,17 +57,18 @@ function sliceFrom(startRx: RegExp, endRx: RegExp): string | null {
 }
 type Def = { id: string; name: string; re: RegExp };
 type Words = { name: string; title: string; meta: string; intro: string };
-type Product = { id: string; name: string; cat: string; brand: string };
+type Product = { id: string; name: string; cat: string; brand: string; sub?: string };
 const PIECES = [
   sliceFrom(/^ {2}var SUBCATS = \{$/, DECL_END),
-  sliceFrom(/^ {2}var SUB_PICKS = \{$/, DECL_END),
   sliceFrom(/^ {2}function subcatsAuto\(p\) \{$/, FN_END),
   sliceFrom(/^ {2}function subcatsWith\(p, own\) \{$/, FN_END),
 ];
+// the name rules' one remaining job — a NEW product's first suggestion (not lifted by the prerender)
+const SUGGEST = sliceFrom(/^ {2}function subcatSuggest\(p\) \{$/, FN_END);
 const ctx: Record<string, unknown> = {};
 runInNewContext(
-  PIECES.join("\n") +
-    "\nthis.SUBCATS = SUBCATS; this.auto = subcatsAuto; this.withOwn = subcatsWith;",
+  PIECES.join("\n") + "\n" + SUGGEST +
+    "\nthis.SUBCATS = SUBCATS; this.auto = subcatsAuto; this.withOwn = subcatsWith; this.suggest = subcatSuggest;",
   ctx,
 );
 const SUBCATS = ctx.SUBCATS as Record<string, Def[]>;
@@ -72,11 +77,13 @@ const SUB_PAGES = Object.fromEntries(Object.keys(SUB_HANDLES).map((k) =>
   [k, Object.fromEntries(LANGS.map((L) => [L, seoSub(k, L) as Words]))])) as Record<string, Record<Lang, Words>>;
 const auto = ctx.auto as (p: Product) => string[];
 const withOwn = ctx.withOwn as (p: Product, own: string) => string[];
+const suggest = ctx.suggest as (p: Product) => string;
 
 /* The catalogue the prerender reads (public/shop/catalogue2.js) and the one
    the edge reads (src/data/catalogue.min.json) — the same 220 products. */
 const CATALOGUE = new Function(readFileSync(ROOT + "public/shop/catalogue2.js", "utf8") + "\nreturn CATALOGUE;")() as Product[];
-const MIN = (catalogueMin as Array<{ id: string; n: string; c: string; b: string }>).map((p) => ({ id: p.id, name: p.n, cat: p.c, brand: p.b }));
+const MIN = (catalogueMin as Array<{ id: string; n: string; c: string; b: string; sb?: string }>)
+  .map((p) => ({ id: p.id, name: p.n, cat: p.c, brand: p.b, sub: p.sb }));
 
 /* ---- the chip row of main, word for word ----------------------------------- */
 const BASE: Record<string, Array<[string, string, RegExp]>> = {
@@ -126,6 +133,8 @@ const IN_NONE = [
 describe("the lift — what tools/prerender-shop2.mjs takes out of app.js", () => {
   it("finds every slice, each closing on a line of its own", () => {
     expect(PIECES.every(Boolean)).toBe(true);
+    expect(SUGGEST).toBeTruthy();
+    expect(APP).not.toContain("var SUB_PICKS");
     expect(Object.keys(SUBCATS).sort()).toEqual(["beard", "face", "hair", "styling"]);
   });
 });
@@ -147,9 +156,12 @@ describe("the chip row is the one the shop had — same chips, same labels, same
   });
 });
 
-describe("subcatsAuto — every product under exactly the chips it should be", () => {
+describe("subcatsAuto — every product under its own chip, the one the rules gave it on 26.10", () => {
+  /* What the name rules said, then one chip: «бальзам после бритья» matched
+     Бальзамы and После бритья, and the aftershave balm is an aftershave. */
   const want = (p: Product) => {
     const before = baseChips(p);
+    if (before.includes("ba") && before.includes("af")) return ["af"];
     return before.length ? before : ADDED[p.id] ? [ADDED[p.id]] : [];
   };
 
@@ -170,17 +182,31 @@ describe("subcatsAuto — every product under exactly the chips it should be", (
     expect(auto(p)).toEqual(want(p));
   });
 
-  it("never takes a product away from a chip, and never adds one a chip did not have unless no chip had it", () => {
+  it("is one chip per product, written in the file with its section («beard/af»)", () => {
     for (const p of CATALOGUE) {
-      const before = baseChips(p);
-      if (before.length) expect(auto(p), p.id).toEqual(before);
+      expect(auto(p).length, p.id).toBeLessThanOrEqual(1);
+      if (p.sub) expect(p.sub.split("/")[0], p.id).toBe(p.cat);
     }
   });
 
-  it("keeps «После бритья» to the aftershave — the shaving gels and the pre-shave oil are not under it", () => {
+  it("moves nothing on a rename — the name is not read at all", () => {
+    for (const p of CATALOGUE.filter((x) => x.sub)) {
+      expect(auto({ ...p, name: "Sensitive Skin" }), p.id).toEqual(auto(p));
+      expect(auto({ ...p, name: "Something — шампунь" }), p.id).toEqual(auto(p));
+    }
+  });
+
+  it("takes a product moved to another section off its chip — the chips are the section's own", () => {
+    const p = CATALOGUE.find((x) => x.id === "davines-softening-shaving-gel")!;
+    expect(auto(p)).toEqual(["ge"]);
+    expect(auto({ ...p, cat: "styling" })).toEqual([]);   // styling has a «Гели» too — not this one's
+  });
+
+  it("keeps «После бритья» to the aftershave, the four balms under it alone", () => {
     const af = CATALOGUE.filter((p) => p.cat === "beard" && auto(p).includes("af")).map((p) => p.id);
     expect(af.length).toBe(6);
     for (const id of af) expect(id).toMatch(/after-?shave/);
+    expect(CATALOGUE.filter((p) => p.cat === "beard" && auto(p).includes("ba")).every((p) => !/after-?shave/.test(p.id))).toBe(true);
     expect(auto(CATALOGUE.find((p) => p.id === "davines-pre-shaving-beard-oil")!)).toEqual(["oi"]);
     expect(auto(CATALOGUE.find((p) => p.id === "davines-softening-shaving-gel")!)).toEqual(["ge"]);
   });
@@ -189,47 +215,63 @@ describe("subcatsAuto — every product under exactly the chips it should be", (
     for (const p of CATALOGUE.filter((x) => !SUBCATS[x.cat])) expect(auto(p), p.id).toEqual([]);
   });
 
-  it("reads the edge's catalogue (catalogue.min.json) the same way", () => {
+  it("reads the edge's catalogue (catalogue.min.json) the same way — the same `sub` as `sb`", () => {
     for (const p of MIN) {
       const full = CATALOGUE.find((x) => x.id === p.id)!;
+      expect(p.sub, p.id).toBe(full.sub);
       expect(auto(p), p.id).toEqual(auto(full));
     }
   });
 
-  it("leaves fewer products under no chip than the name-only rule did", () => {
+  it("leaves the same products under no chip — the SEO pass places them (Dim, 26.10)", () => {
     const none = (cat: string) => CATALOGUE.filter((p) => p.cat === cat && !auto(p).length).length;
-    expect(none("hair")).toBe(6);      // 17 of 106 before (audit §6.2)
-    expect(none("styling")).toBe(8);   // 14 of 30
-    expect(none("beard")).toBe(3);     // 4 of 27 — the three moustache waxes
-    expect(none("face")).toBe(4);      // 8 of 20 — the masks and the eye patches
+    expect(none("hair")).toBe(6);
+    expect(none("styling")).toBe(8);
+    expect(none("beard")).toBe(3);     // the three moustache waxes
+    expect(none("face")).toBe(4);      // the masks and the eye patches
   });
 
-  it("sorts a product the owner makes himself by its Russian name, like the catalogue's", () => {
-    expect(auto({ id: "c-abc", name: "Мятный шампунь", cat: "hair", brand: "Своя марка" })).toEqual(["sh"]);
-    expect(auto({ id: "c-abd", name: "Масло для бороды «Кедр»", cat: "beard", brand: "Своя марка" })).toEqual(["oi"]);
+  it("gives a product the owner makes himself the chip he picks — none by itself", () => {
+    expect(auto({ id: "c-abc", name: "Мятный шампунь", cat: "hair", brand: "Своя марка" })).toEqual([]);
+    expect(withOwn({ id: "c-abc", name: "Мятный шампунь", cat: "hair", brand: "Своя марка" }, "sh")).toEqual(["sh"]);
+  });
+});
+
+describe("subcatSuggest — the name rules, for a NEW product's first choice only", () => {
+  it("suggests by the Russian type, the longer match winning", () => {
+    expect(suggest({ id: "", name: "Мятный шампунь", cat: "hair", brand: "" })).toBe("sh");
+    expect(suggest({ id: "", name: "Масло для бороды «Кедр»", cat: "beard", brand: "" })).toBe("oi");
+    expect(suggest({ id: "", name: "Sensitive Skin — бальзам после бритья", cat: "beard", brand: "" })).toBe("af");
+    expect(suggest({ id: "", name: "Beard Balm — бальзам для бороды", cat: "beard", brand: "" })).toBe("ba");
+  });
+  it("falls back on the English words, and suggests nothing it cannot tell", () => {
+    expect(suggest({ id: "", name: "Daily Clay", cat: "styling", brand: "" })).toBe("pw");
+    expect(suggest({ id: "", name: "Maharajah Moustache Wax", cat: "beard", brand: "" })).toBe("");
+    expect(suggest({ id: "", name: "Eau de Parfum", cat: "perfume", brand: "" })).toBe("");
   });
 });
 
 describe("the owner's own «Подраздел» wins, exactly as it did", () => {
   const p = CATALOGUE.find((x) => x.id === "system-4-special-shampoo-1")!;
-  it("replaces the rules with the one chip he chose", () => {
+  it("replaces the catalogue's chip with the one he chose, or none («-»)", () => {
     expect(withOwn(p, "")).toEqual(["sh"]);
     expect(withOwn(p, "ca")).toEqual(["ca"]);
+    expect(withOwn(p, "-")).toEqual([]);
     // a value no chip has puts the product under none — as the old filter did
     expect(withOwn(p, "zz")).toEqual(["zz"]);
   });
 });
 
-describe("publishing — at least SUBCOLLECTION_MIN products and words in three languages", () => {
+describe("publishing — words in three languages, and no minimum count", () => {
   const count = (list: Product[], key: string) => {
     const [cat, sub] = key.split("/");
     return list.filter((p) => p.cat === cat && auto(p).includes(sub)).length;
   };
 
-  it("publishes six existing chips, every one over the threshold, in both catalogue files", () => {
-    expect(SUBCOLLECTION_MIN).toBe(6);
+  it("publishes six existing chips, in both catalogue files", () => {
+    // beard/ba was 8 with the four aftershave balms in it too
     expect(Object.fromEntries(Object.keys(SUB_HANDLES).map((k) => [k, count(CATALOGUE, k)]))).toEqual({
-      "beard/oi": 12, "beard/ba": 8, "beard/af": 6, "hair/sh": 40, "hair/co": 26, "styling/pw": 7,
+      "beard/oi": 12, "beard/ba": 4, "beard/af": 6, "hair/sh": 40, "hair/co": 26, "styling/pw": 7,
     });
     for (const key of Object.keys(SUB_HANDLES)) {
       expect(count(MIN, key), key).toBe(count(CATALOGUE, key));
@@ -238,17 +280,19 @@ describe("publishing — at least SUBCOLLECTION_MIN products and words in three 
   });
 
   /* 26.10.2026: Renat renamed a Proraso aftershave balm without its type
-     word, beard/af listed 5, and the deploy hook's build failed on this rule —
-     every build after it would have, the nightly one included. The rule is
-     the code's (the catalogue file); what the owner's names and subsections
-     do to it is a warning, and the page is still written. */
-  it("fails the build only on the catalogue file's count; the owner's renames only warn", () => {
+     word, beard/af listed 5, and the deploy hook's build failed on «fewer than
+     6» — every build after it would have. Dim: no limit; an empty
+     subcollection keeps its page, noindex, out of the sitemap. */
+  it("holds no minimum; an empty subcollection is noindex and left out of the sitemap", () => {
     const pre = readFileSync(ROOT + "tools/prerender-shop2.mjs", "utf8");
-    expect(pre).toContain("const n = CATALOGUE_FILE.filter(p => p.cat === cat && SUBS.auto(p).includes(sub)).length;");
-    expect(pre).toContain("const live = CATALOGUE.filter(p => p.cat === cat && SUBS.with(p, own(p)).includes(sub)).length;");
-    const warn = pre.indexOf('console.warn("! " + key + " lists "');
-    expect(warn).toBeGreaterThan(pre.indexOf("const live = CATALOGUE"));
-    expect(pre.slice(pre.indexOf("const live = CATALOGUE"), warn)).not.toContain("throw");
+    expect(pre).not.toContain("SUBCOLLECTION_MIN");
+    expect(pre).not.toContain("throw new Error(key + \" holds \"");
+    expect(pre).toContain('if (!list.length && !/noindex/.test(ROBOTS)) page.spec.robots = "noindex, follow";');
+    expect(pre).toContain('if (!SUB_EMPTY.has(key)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));');
+    const check = readFileSync(ROOT + "tools/check-prerender.mjs", "utf8");
+    expect(check).toContain("Object.keys(SUB_HANDLES).length - subEmpty.length");
+    // the shop says the same: noindex and a way to the section
+    expect(APP).toContain('subEmpty() && !/noindex/.test(SERVED_ROBOTS) ? "noindex, follow"');
   });
 
   it("has no scalp-care and no Korean-cosmetics page — neither is a chip", () => {
@@ -512,11 +556,11 @@ describe("the sitemap", () => {
     }
   });
 
-  it("is told to list every published subcollection — the prerender's loop and the checker's count", () => {
+  it("is told to list every published subcollection with something in it — the prerender's loop and the checker's count", () => {
     const pre = readFileSync(ROOT + "tools/prerender-shop2.mjs", "utf8");
-    expect(pre).toContain('for (const key of Object.keys(SUB_HANDLES)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));');
+    expect(pre).toContain('for (const key of Object.keys(SUB_HANDLES)) if (!SUB_EMPTY.has(key)) entries.push(urlEntry("/c/" + key + "/", lang.seg, "0.7"));');
     expect(pre).toContain("for (const key of Object.keys(SUB_HANDLES)) pages.push(subcollectionPage(key, lang));");
     const check = readFileSync(ROOT + "tools/check-prerender.mjs", "utf8");
-    expect(check).toContain("Object.keys(SUB_HANDLES).length + BRANDS.length");
+    expect(check).toContain("Object.keys(SUB_HANDLES).length - subEmpty.length + BRANDS.length");
   });
 });

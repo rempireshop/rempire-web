@@ -450,7 +450,14 @@ else {
      offer them to a crawler are served by src/app/sitemap-products.xml/route.ts,
      because whether a product is hidden is a question only the database can
      answer. */
-  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + Object.keys(SUB_HANDLES).length + BRANDS.length + 1 +
+  /* a subcollection with nothing on sale is written but left out of the
+     sitemap (prerender-shop2.mjs SUB_EMPTY, Dim 26.10.2026) — its Russian
+     page says «Здесь пусто.» */
+  const subEmpty = Object.keys(SUB_HANDLES).filter((k) => {
+    const f = path.join(SHOP2, "ru", "c", ...k.split("/"), "index.html");
+    return existsSync(f) && readFileSync(f, "utf8").includes('class="muted sec__empty"');
+  });
+  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + Object.keys(SUB_HANDLES).length - subEmpty.length + BRANDS.length + 1 +
     LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
     (BLOG_SLUGS ? BLOG_SLUGS.size + 1 : 0);
   const expected = LANGS.length * perLang;
@@ -478,7 +485,7 @@ else {
     const at = (rest) => publicPath(lang, rest);
     const want = [
       // no product row here — src/app/sitemap-products.xml/route.ts serves those
-      ...Object.keys(SUB_HANDLES).map((k) => at("/c/" + k + "/")),
+      ...Object.keys(SUB_HANDLES).filter((k) => !subEmpty.includes(k)).map((k) => at("/c/" + k + "/")),
       ...LEGAL_SLUGS.map((s) => at("/info/" + s + "/")),
       ...(BUNDLES.length ? [at("/sets/"), ...BUNDLES.map((x) => at("/set/" + x.id + "/"))] : []),
       at("/gift/"),

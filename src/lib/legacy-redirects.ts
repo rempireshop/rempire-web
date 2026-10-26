@@ -101,8 +101,7 @@ type Cat = keyof typeof CAT_HANDLES;
    juuksevaha …) is a page of its own at its handle, and parseShopPath()
    answers it before this table is read. Its handles stay listed here all the
    same: they are where the address goes the day the subcollection is no
-   longer published (below SUBCOLLECTION_MIN products) — to its section, as
-   before.
+   longer published (taken out of SUB_HANDLES) — to its section, as before.
 
    Two judgement calls, written down because they are guesses about what a
    2019 Shopify merchandiser meant: bare `palsamid` is read as hair

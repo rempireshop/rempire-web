@@ -16,6 +16,7 @@ import { sanitizeContentPatch } from "@/lib/content";
 import { shelfVariant } from "@/lib/inventory";
 import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
 import { nameTranslatable } from "@/lib/product-name";
+import { NO_SUBSECTION, readSubsection } from "@/lib/subsections";
 import { PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 
@@ -897,10 +898,13 @@ export function sanitizeCreateProduct(raw: unknown): object | null {
   if (!sizes.length && price === null) return null;
 
   const description = blogTrilingual(x.description, 4000);
+  // the chip under the section (src/lib/subsections.ts) — none when the model sent none or a wrong one
+  const sub = readSubsection(cat, x.subcat ?? x.subsection);
   return {
     brand,
     name,
     cat,
+    subcat: sub && "id" in sub ? sub.id : "",
     price: sizes.length ? prices[0] : price,
     sizes,
     prices: sizes.length ? prices : [price as number],
@@ -1087,7 +1091,7 @@ export interface SanitizeOptions {
   /** Every slug the prompt's BLOG POSTS block listed; empty when it was never fetched. */
   postSlugs?: Set<string>;
   /** id → the product's Russian name and brand: what a text in Estonian or English may keep as it is. */
-  products?: Map<string, { name: string; brand: string }>;
+  products?: Map<string, { name: string; brand: string; cat?: string }>;
   /** The brands the shop shows — the only brand pages set_page_texts may write. */
   brands?: Set<string>;
 }
@@ -1113,6 +1117,15 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   }
   if (t === "set_price" && typeof x.id === "string" && known.has(x.id) && typeof x.value === "number" && x.value >= 1 && x.value <= 500) {
     return { type: t, id: x.id, value: Math.round(x.value * 100) / 100 };
+  }
+  /* «Подраздел» of a catalogue product (26.10.2026 — the product's own, never
+     its name's): a chip of ITS section, or «-» for none. An own product («c-…»)
+     takes it through update_product. */
+  if (t === "set_subcat" && typeof x.id === "string" && known.has(x.id) && !CUSTOM_ID_RE.test(x.id)) {
+    const cat = opts.products?.get(x.id)?.cat;
+    const sub = cat ? readSubsection(cat, x.value ?? x.subcat) : undefined;
+    if (!sub || "error" in sub) return null;
+    return { type: t, id: x.id, value: sub.id || NO_SUBSECTION };
   }
   if (t === "set_stock" && typeof x.id === "string" && known.has(x.id) && (x.value === "in" || x.value === "low" || x.value === "out")) {
     return { type: t, id: x.id, value: x.value };

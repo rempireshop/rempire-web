@@ -26,6 +26,7 @@ import { syncVariantRows } from "@/lib/inventory";
 import { cleanGallery, type GalleryPhoto } from "@/lib/orders";
 import { cleanDescriptionPatch, type DescriptionOverride } from "@/lib/product-descriptions";
 import { cleanSeoPatch, type SeoOverride } from "@/lib/product-seo";
+import { SUBSECTIONS } from "@/lib/subsections";
 
 /* ---------- bounds ------------------------------------------------------ */
 
@@ -34,13 +35,10 @@ export const PRODUCT_CATS = ["hair", "styling", "beard", "face", "body", "perfum
 export type ProductCat = (typeof PRODUCT_CATS)[number];
 
 /** The subsections the storefront knows (SUBCATS in public/shop2/app.js) —
- *  anything else is dropped to «авто», never stored. */
-export const SUBCATS: Record<string, readonly string[]> = {
-  hair: ["sh", "co", "ca", "sp"],
-  styling: ["pw", "sp", "ge", "pu"],
-  beard: ["oi", "ba", "af", "ge"],
-  face: ["to", "cl", "cs", "oi"],
-};
+ *  anything else — «-», «Без подраздела» — is stored as none. */
+export const SUBCATS: Record<string, readonly string[]> = Object.fromEntries(
+  Object.entries(SUBSECTIONS).map(([cat, list]) => [cat, list.map((s) => s.id)]),
+);
 
 /** Same 1–500 € window the editor's price box and the assistant's set_price use. */
 export const PRICE_MIN = 1;
