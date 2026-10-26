@@ -2018,10 +2018,10 @@
       ],
       "status": "todo",
       "title": "Claude Рената: подключить коннектор «Rempire»",
-      "detail": "После своего пароля от панели Ренат в своём Claude добавляет коннектор https://rempireshop.com/api/mcp и входит этим паролем. Подключение Димы с новым паролем перестаёт работать само. Как подключать — docs/claude-connector.md. С 26.10 Claude меняет у товара описание, название, бренд, раздел, тексты для Google, цены (больше 30 % — только после «да» Рената) и остаток; на очереди — новые товары (скрытыми) и вступления разделов и брендов.",
+      "detail": "После своего пароля от панели Ренат в своём Claude добавляет коннектор https://rempireshop.com/api/mcp и входит этим паролем. Подключение Димы с новым паролем перестаёт работать само. Как подключать — docs/claude-connector.md. С 26.10 Claude меняет у товара описание, название, бренд, раздел, тексты для Google, цены (больше 30 % — только после «да» Рената) и остаток, создаёт новые товары скрытыми; на очереди — вступления разделов и брендов («Тексты страниц» в Настройках).",
       "en": {
         "title": "Renat's Claude: connect the «Rempire» connector",
-        "detail": "Once his own panel password is set, Renat adds the connector https://rempireshop.com/api/mcp in his own Claude and signs in with that password. Dim's connection stops working by itself with the new password. How to connect — docs/claude-connector.md. Since 26.10 Claude changes a product's description, name, brand, section, Google texts, prices (more than 30 % only after Renat's yes) and shelf count; next: new products (hidden), and the section and brand intros."
+        "detail": "Once his own panel password is set, Renat adds the connector https://rempireshop.com/api/mcp in his own Claude and signs in with that password. Dim's connection stops working by itself with the new password. How to connect — docs/claude-connector.md. Since 26.10 Claude changes a product's description, name, brand, section, Google texts, prices (more than 30 % only after Renat's yes) and shelf count, and creates new products hidden; next: the section and brand intros («Тексты страниц» in Settings)."
       }
     },
     {

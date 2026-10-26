@@ -354,13 +354,18 @@ export async function getCustomProduct(id: string): Promise<CustomProduct | null
   return rows.length ? fromRow(rows[0]) : null;
 }
 
-/** Validates, picks a unique id and inserts. Throws CustomProductError on bad input. */
-export async function createCustomProduct(raw: unknown): Promise<CustomProduct> {
+/**
+ * Validates, picks a unique id and inserts. Throws CustomProductError on bad
+ * input. `active: false` makes it hidden from the first moment — Renat's
+ * Claude creates products that way (src/lib/mcp/tools.ts), and the owner
+ * shows them once the photos are in.
+ */
+export async function createCustomProduct(raw: unknown, opts: { active?: boolean } = {}): Promise<CustomProduct> {
   const input = cleanCustomProductInput(raw);
   const id = await uniqueCustomId(input.brand, input.name);
   const rows = await query<Row>(
-    `insert into custom_products (id, brand, name, cat, subcat, sizes, prices, description, gallery, seo)
-     values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10::jsonb)
+    `insert into custom_products (id, brand, name, cat, subcat, sizes, prices, description, gallery, seo, active)
+     values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9::jsonb, $10::jsonb, $11)
      returning ${COLS}`,
     [
       id, input.brand, input.name, input.cat, input.subcat || null,
@@ -368,6 +373,7 @@ export async function createCustomProduct(raw: unknown): Promise<CustomProduct> 
       input.description ? jsonbParam(input.description) : null,
       input.gallery ? jsonbParam(input.gallery) : null,
       input.seo ? jsonbParam(input.seo) : null,
+      opts.active !== false,
     ],
   );
   return fromRow(rows[0]);

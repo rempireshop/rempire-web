@@ -9336,6 +9336,51 @@
       }
     },
     {
+      "id": "ai-claude-new-product",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Claude создаёт новый товар скрытым",
+      "steps": [
+        "Попросить Claude: «Добавь новый товар: …» — бренд, название, объёмы с ценами, пару фраз описания.",
+        "Попросить то же самое ещё раз.",
+        "Открыть Админку → «Товары» → «Скрытые» и этот товар.",
+        "Добавить фото и включить «Показывать в магазине».",
+        "Открыть товар в магазине на трёх языках."
+      ],
+      "expect": [
+        "Claude создаёт товар и говорит, что он скрыт.",
+        "Второй раз Claude не создаёт, а называет уже созданный.",
+        "До «Показывать в магазине» товара нет в магазине и в поиске.",
+        "В «Журнале» строчка «Новый товар от Claude — скрыт».",
+        "После включения — товар в магазине с ценами и описанием."
+      ],
+      "why": "Новые товары можно заводить через своего Claude, а фото и показ остаются за вами.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T07:54:10.479Z",
+      "en": {
+        "title": "Claude creates a new product, hidden",
+        "steps": [
+          "Ask Claude: «Add a new product: …» — brand, name, sizes with prices, a few words of description.",
+          "Ask the same once more.",
+          "Open Admin → «Товары» → «Скрытые» and that product.",
+          "Add photos and turn on «Показывать в магазине».",
+          "Open the product in the shop in three languages."
+        ],
+        "expect": [
+          "Claude creates the product and says it is hidden.",
+          "The second time Claude does not create it, it names the one it made.",
+          "Before «Показывать в магазине» the product is not in the shop or search.",
+          "«Журнал» has a «Новый товар от Claude — скрыт» line.",
+          "Once shown, the product is in the shop with prices and description."
+        ],
+        "why": "New products can be set up through your own Claude, while photos and showing them stay with you."
+      }
+    },
+    {
       "id": "ai-assistant-ask",
       "area": "ai",
       "who": "renat",

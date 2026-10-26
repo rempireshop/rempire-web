@@ -205,7 +205,7 @@ describe("the connector, end to end", () => {
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
       ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
-        "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "save_draft"],
+        "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "create_product", "save_draft"],
     );
   });
 
@@ -525,6 +525,21 @@ describe("the connector, end to end", () => {
     expect(lines.at(-1)!.undo).toEqual({ kind: "override", id: multi.id, patch: { sizes: null, price: null } });
   });
 
+  /* security review, 26.10.2026: each step under 30 % must not add up to a big
+     move — the guard measures against the price before the day's first change */
+  it("does not let small steps add up past 30 % within a day", async () => {
+    const t = await tokens();
+    const multi = (await productsNow()).list.find((p) => p.sizes.length > 1 && p.sizes.every((s) => s.label))!;
+    const size = multi.sizes[0].label!;
+    const start = multi.sizes[0].price;
+    const step = (k: number) => Math.round(start * k * 100) / 100;
+    expect((await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size, price: step(0.8) }] })).isError).toBe(false);
+    const second = await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size, price: step(0.6) }] });
+    expect(second.isError).toBe(true);
+    expect(second.text).toContain("before today's changes");
+    expect((await tool(t.access_token, "save_product_price", { id: multi.id, prices: [{ size, price: step(0.6) }], confirm: true })).isError).toBe(false);
+  });
+
   it("prices the owner's own product on its row, with «Вернуть»", async () => {
     const { createCustomProduct, getCustomProduct } = await import("@/lib/custom-products");
     const { listAudit } = await import("@/lib/orders");
@@ -563,6 +578,53 @@ describe("the connector, end to end", () => {
     expect((await listMoves({ productId: multi.id }))[0]).toMatchObject({ delta: -1, reason: "adjust", ref: "Claude", actor: "claude" });
 
     expect((await tool(t.access_token, "save_product_stock", { id: multi.id, count: 1, was: 4 })).text).toContain("Which size?");
+  });
+
+  /* step 4 of Dim's list (26.10.2026): a new product, hidden until the owner
+     adds photos and shows it in the panel. */
+  it("creates a new product hidden — readable and changeable by its id, never in the shop, never twice", async () => {
+    const { getCustomProduct } = await import("@/lib/custom-products");
+    const { listAudit } = await import("@/lib/orders");
+    const t = await tokens();
+    const args = {
+      brand: "FLAWLESS",
+      name: "Bond Building Styling Lotion — лосьон для укладки",
+      section: "styling",
+      sizes: [{ size: "100 мл", price: 24.9 }, { size: "250 мл", price: 39.9 }],
+      description: { ru: "Лосьон для укладки, который укрепляет волосы.", en: "A styling lotion that strengthens hair." },
+    };
+    const r = await tool(t.access_token, "create_product", args);
+    expect(r.isError, r.text).toBe(false);
+    const made = JSON.parse(r.text);
+    expect(made).toMatchObject({
+      hidden: true, brand: "FLAWLESS", description: ["ru", "en"],
+      names: { EN: "Bond Building Styling Lotion — lotion for styling" },
+    });
+    const id = made.created as string;
+    expect(await getCustomProduct(id)).toMatchObject({ active: false, cat: "styling", sizes: ["100 мл", "250 мл"], prices: [24.9, 39.9] });
+    expect((await listAudit(5)).find((x) => x.action === "product.create")?.payload).toMatchObject({ id, via: "claude", hidden: true });
+
+    resetProductCache();
+    expect((await productsNow()).list.some((p) => p.id === id)).toBe(false);
+    const read = JSON.parse((await tool(t.access_token, "get_product", { id })).text);
+    expect(read).toMatchObject({ id, hidden: true, url: null, description: { RU: args.description.ru } });
+    expect(JSON.parse((await tool(t.access_token, "search_products", { query: "FLAWLESS Bond" })).text).found).toBe(0);
+    const withHidden = JSON.parse((await tool(t.access_token, "search_products", { query: "FLAWLESS Bond", include_hidden: true })).text);
+    expect(withHidden.products[0]).toMatchObject({ id, hidden: true, url: null });
+
+    const again = await tool(t.access_token, "create_product", args);
+    expect(again.isError).toBe(true);
+    expect(again.text).toContain(id);
+    for (const bad of [
+      { ...args, name: "Bond Lotion — эликсир" },
+      { ...args, name: "Another Lotion — лосьон", sizes: undefined },
+      { ...args, name: "Third Lotion — лосьон", section: "kitchen" },
+      { ...args, name: "Fourth Lotion — лосьон", description: { et: "Juuksesprei для волос." } },
+    ]) {
+      const refused = await tool(t.access_token, "create_product", JSON.parse(JSON.stringify(bad)));
+      expect(refused.isError, bad.name).toBe(true);
+      expect(refused.text).toContain("Nothing was created");
+    }
   });
 
   it("reads an article back in the language asked for", async () => {

@@ -11,6 +11,7 @@
  *   save_product_name                               — a product's name, brand and section
  *   save_product_price                              — its prices, a big change only once confirmed
  *   save_product_stock                              — a count on the shelf, only over the count it read
+ *   create_product                                  — a new product of the owner's own, HIDDEN
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
  * touch a published article, an order or a customer. A published article is
@@ -34,6 +35,10 @@
  * Claude read (`was`), because a sale or a scan in between would otherwise
  * be wiped by «осталось 6».
  *
+ * A new product (step 4 of the same list) is created hidden: the photos and
+ * «Показывать в магазине» stay with the owner in the panel, so nothing Claude
+ * makes reaches a shopper before he has looked at it.
+ *
  * Every product a tool names comes from the shop's own data
  * (shopProducts() in src/lib/merchant-feed.ts — hidden ones are not there),
  * and save_draft holds an article to it: a link or a card for an id the
@@ -41,13 +46,14 @@
  */
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
+import { query } from "@/lib/db";
 import { getOverrideRow, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 import { getDescriptionOverride, setDescriptionOverride, type DescriptionOverride } from "@/lib/product-descriptions";
 import { getLevel, InventoryError, setQty, shelfCount, shelfKey } from "@/lib/inventory";
 import {
-  CustomProductError, getCustomProduct, isCustomId, MAX_BRAND, MAX_NAME, ownPrev, PRICE_MAX, PRICE_MIN, PRODUCT_CATS,
-  updateCustomProduct,
+  createCustomProduct, CustomProductError, getCustomProduct, isCustomId, listCustomProducts, MAX_BRAND, MAX_NAME, ownPrev,
+  PRICE_MAX, PRICE_MIN, PRODUCT_CATS, updateCustomProduct,
   type CustomProduct,
 } from "@/lib/custom-products";
 import { nameTranslatable, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
@@ -96,7 +102,7 @@ const paragraphs = (html: string) => html
   .join("\n\n");
 const searchKey = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}&]+/gu, " ").trim();
 
-function brief(base: string, p: ShopProduct) {
+function brief(base: string, p: ShopProduct, hidden = false) {
   return {
     id: p.id,
     brand: p.brand,
@@ -105,9 +111,31 @@ function brief(base: string, p: ShopProduct) {
     price: p.sizes.length > 1
       ? p.sizes.map((s) => `${s.label ?? ""} ${eur(s.price)}`.trim()).join(" · ")
       : eur(p.sizes[0].price),
-    stock: stockWord(p.stock),
-    url: productUrls(base, p.id),
+    ...(hidden ? { hidden: true, url: null } : { stock: stockWord(p.stock), url: productUrls(base, p.id) }),
   };
+}
+
+/* ---------- the owner's hidden products ---------- */
+
+/** An own product in the shape the read tools speak — for the hidden ones, which the shop's list leaves out. */
+function ownShape(r: CustomProduct): ShopProduct {
+  return {
+    id: r.id,
+    brand: r.brand,
+    cat: r.cat,
+    names: { RU: r.name, ET: translateProductName(r.name, "ET"), EN: translateProductName(r.name, "EN") },
+    sizes: r.sizes.length
+      ? r.sizes.map((label, i) => ({ label, price: r.prices[i] ?? r.prices[0] }))
+      : [{ label: null, price: r.prices[0] }],
+    stock: "in",
+    photo: null,
+    photos: [],   // nothing an article may show: the page is not there
+    texts: {},
+  };
+}
+/** The owner's own products nobody sees yet — what create_product makes, until he shows them. */
+async function hiddenOwn(): Promise<ShopProduct[]> {
+  return (await listCustomProducts()).filter((r) => !r.active).map(ownShape);
 }
 
 /** The products whose brand, names, id or section carry every word of `q` — best first, those in stock before the rest. */
@@ -207,6 +235,10 @@ export const TOOLS: ToolDef[] = [
       properties: {
         query: { type: "string", description: "Words to look for: a brand, a product name, a type («шампунь», «beard oil»)." },
         limit: { type: "integer", minimum: 1, maximum: 25, description: "How many to return, 12 by default." },
+        include_hidden: {
+          type: "boolean",
+          description: "Also the owner's own products nobody sees yet (made with create_product) — to change them. Never link one in an article.",
+        },
       },
       required: ["query"],
       additionalProperties: false,
@@ -401,6 +433,46 @@ export const TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
+    name: "create_product",
+    title: "Новый товар (скрытым)",
+    description:
+      "Create a new product of the owner's own — HIDDEN: nobody sees it until the owner adds its photos in the admin and " +
+      "turns on «Показывать в магазине». Use it when the owner names a product the shop does not have (search_products " +
+      "first: a product the shop already sells is refused). brand as the maker writes it; name the shop's way — the maker's " +
+      "product name in Latin letters, « — », the type in Russian from the words the shop translates (as save_product_name); " +
+      "section one of list_sections' ids; either price (one price) or sizes [{size, price}] («100 мл», «250 мл»), euros " +
+      "with VAT, 1–500. description {ru, et, en} is optional, plain text as save_product_description takes it — only facts " +
+      "the owner gave you. Afterwards its Google texts can be written with save_product_google_text and its count with " +
+      "save_product_stock, by the id this returns.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        brand: { type: "string", maxLength: 60 },
+        name: { type: "string", maxLength: 120, description: "«Latin product name — русский тип»." },
+        section: { type: "string", enum: [...PRODUCT_CATS] },
+        price: { type: "number", minimum: 1, maximum: 500, description: "For a product without sizes." },
+        sizes: {
+          type: "array",
+          maxItems: 10,
+          items: {
+            type: "object",
+            properties: { size: { type: "string", maxLength: 30 }, price: { type: "number", minimum: 1, maximum: 500 } },
+            required: ["size", "price"],
+            additionalProperties: false,
+          },
+        },
+        description: {
+          type: "object",
+          properties: { ru: { type: "string" }, et: { type: "string" }, en: { type: "string" } },
+          additionalProperties: false,
+        },
+      },
+      required: ["brand", "name", "section"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -452,7 +524,8 @@ export const INSTRUCTIONS =
   "Cosmetic effects only — no medical or treatment claims. When the owner is happy with an article, save it with save_draft: " +
   "it is saved as a draft and the owner publishes it in Админка → Блог. It also changes a product's words — its Google " +
   "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
-  "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock) — when the owner " +
+  "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock), and creates a new " +
+  "product hidden (create_product: the owner adds photos and shows it in the admin) — when the owner " +
   "asks: read the product with get_product first, show the owner what you will save, then save. A price change of more " +
   "than 30 % needs his explicit yes first. Those are live at once, checked like the admin's own fields, and every change " +
   "but a count has «Вернуть» in Админка → Журнал. Answer the owner in his language.";
@@ -470,21 +543,28 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
     const q = typeof args.query === "string" ? args.query.slice(0, 200) : "";
     const limit = Math.max(1, Math.min(25, Math.floor(Number(args.limit) || 12)));
     const { base, list } = await productsNow();
-    const found = searchProducts(list, q, limit);
+    /* the owner's hidden products only when asked for — an article never
+       names one (shopBody() drops a link to anything not in the shop) */
+    const hidden = args.include_hidden === true ? await hiddenOwn() : [];
+    const hiddenIds = new Set(hidden.map((p) => p.id));
+    const found = searchProducts([...list, ...hidden], q, limit);
     if (!found.length) return ok({ found: 0, products: [], hint: "Nothing matches every word — try the brand alone, or fewer words." });
-    return ok({ found: found.length, products: found.map((p) => brief(base, p)) });
+    return ok({ found: found.length, products: found.map((p) => brief(base, p, hiddenIds.has(p.id))) });
   }
 
   if (name === "get_product") {
     const id = typeof args.id === "string" ? args.id.trim().toLowerCase() : "";
     const { base, list } = await productsNow();
-    const p = list.find((x) => x.id === id);
+    /* the owner's own product is read from its row even while hidden — what
+       create_product made, before the owner shows it */
+    const row = isCustomId(id) ? await getCustomProduct(id) : null;
+    const shown = list.find((x) => x.id === id);
+    const p = shown ?? (row && !row.active ? ownShape(row) : undefined);
     if (!p) return no(`No product «${id}» in the shop — find it with search_products first.`);
     /* The owner's words as stored — the shop list carries his page text
        flattened for the feed, and save_product_description is written from
        this answer, so it gets the paragraphs. The owner's own product keeps
        its texts on its row; a catalogue product's are in product_overrides. */
-    const row = isCustomId(p.id) ? await getCustomProduct(p.id) : null;
     const ownDesc = row ? row.description : await getDescriptionOverride(p.id);
     const description: Partial<Record<L3, string>> = {};
     for (const l of LANGS3) {
@@ -497,14 +577,14 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       names: p.names,
       section: { id: p.cat, RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
       sizes: p.sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
-      stock: stockWord(p.stock),
+      ...(shown ? { stock: stockWord(p.stock) } : { hidden: true }),
       /* the count on the shelf per size, null while nobody has counted it —
          save_product_stock takes it back as `was` */
       stock_count: await Promise.all(p.sizes.map(async (s) => ({
         size: s.label, count: await shelfCount(p.id, await shelfKey(p.id, s.label ?? "")),
       }))),
       photos: p.photos,
-      url: productUrls(base, p.id),
+      url: shown ? productUrls(base, p.id) : null,
       description,
       /* which of those the owner wrote; the rest is the catalogue's */
       description_by_owner: LANGS3.filter((l) => ownDesc?.[l]),
@@ -564,6 +644,7 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
   if (name === "save_product_name") return saveProductName(args);
   if (name === "save_product_price") return saveProductPrice(args);
   if (name === "save_product_stock") return saveProductStock(args);
+  if (name === "create_product") return createProduct(args);
   return no(`Unknown tool «${name}».`);
 }
 
@@ -588,39 +669,51 @@ const notFound = (raw: unknown) =>
   no(`No product «${typeof raw === "string" ? raw.trim().slice(0, 80) : ""}» in the shop — find it with search_products first. Nothing was saved.`);
 
 /** One product change in the journal with what it replaced — «Вернуть» on its line puts that back (src/lib/audit-undo.ts). */
-async function journal(t: Target, patch: Record<string, unknown>, before: Record<string, unknown>): Promise<void> {
-  if (t.own) await writeAuditSafe("admin", "product.update", { id: t.id, keys: Object.keys(patch), via: "claude" }, { before });
-  else await writeAuditSafe("admin", "override.set", { id: t.id, patch, via: "claude" }, { before });
+async function journal(t: Target, patch: Record<string, unknown>, before: Record<string, unknown>, extra: Record<string, unknown> = {}): Promise<void> {
+  if (t.own) await writeAuditSafe("admin", "product.update", { id: t.id, keys: Object.keys(patch), via: "claude", ...extra }, { before });
+  else await writeAuditSafe("admin", "override.set", { id: t.id, patch, via: "claude", ...extra }, { before });
 }
 
 /* ---------- a product's page text ---------- */
 
 const DESC_MAX = 4000;  // cleanDescriptionPatch() in src/lib/product-descriptions.ts cuts there
 
-async function saveProductDescription(args: Record<string, unknown>): Promise<ToolResult> {
-  const t = await target(args.id);
-  if (!t) return notFound(args.id);
+/**
+ * The page texts a call sends, `{ru, et, en}` at `src`, checked the way the
+ * page needs them — or the refusal for the first one that is not. `done` is
+ * what the refusal ends with: «Nothing was saved.» / «Nothing was created.».
+ */
+function descriptionTexts(src: Record<string, unknown>, who: { name: string; brand: string }, done: string): DescriptionOverride | ToolResult {
   const given: DescriptionOverride = {};
   for (const l of LANGS3) {
-    const v = args[l.toLowerCase()];
+    const v = src[l.toLowerCase()];
     if (v == null) continue;
-    if (typeof v !== "string") return no(`${l.toLowerCase()} is text. Nothing was saved.`);
+    if (typeof v !== "string") return no(`${l.toLowerCase()} is text. ${done}`);
     const text = v.replace(/\r\n?/g, "\n").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
-    if (!text) return no(`${l.toLowerCase()} is empty — send the text, or leave ${l.toLowerCase()} out to keep the current one. Nothing was saved.`);
-    if (text.length > DESC_MAX) return no(`The ${l} text is ${text.length} characters — at most ${DESC_MAX}. Shorten it. Nothing was saved.`);
+    if (!text) return no(`${l.toLowerCase()} is empty — send the text, or leave ${l.toLowerCase()} out to keep the current one. ${done}`);
+    if (text.length > DESC_MAX) return no(`The ${l} text is ${text.length} characters — at most ${DESC_MAX}. Shorten it. ${done}`);
     /* descOvHtml() in public/shop2/app.js escapes the text and makes a <p> of
        each block: a tag or a ** would be printed on the page as it is */
     if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) {
       return no(`The ${l} text has HTML or markdown in it — the page shows every character as typed. Plain text: paragraphs ` +
-        "separated by an empty line, a list as lines starting with «— ». Nothing was saved.");
+        `separated by an empty line, a list as lines starting with «— ». ${done}`);
     }
     const talk = text.split(/(?<=[.!?…])\s+/).find((s) => s && !seoDropMetaTalk(s));
-    if (talk) return no(`The ${l} text talks about missing information («${talk.slice(0, 90)}») — write about the product instead. Nothing was saved.`);
-    if (seoOffLanguage(text, l, { name: t.name, brand: t.brand })) {
-      return no(`The ${l} text still has Russian words in it — write every word in ${l === "ET" ? "Estonian" : "English"} except the brand and the maker's product name. Nothing was saved.`);
+    if (talk) return no(`The ${l} text talks about missing information («${talk.slice(0, 90)}») — write about the product instead. ${done}`);
+    if (seoOffLanguage(text, l, who)) {
+      return no(`The ${l} text still has Russian words in it — write every word in ${l === "ET" ? "Estonian" : "English"} except the brand and the maker's product name. ${done}`);
     }
     given[l] = text;
   }
+  return given;
+}
+const isRefusal = (v: unknown): v is ToolResult => !!v && typeof v === "object" && "isError" in v;
+
+async function saveProductDescription(args: Record<string, unknown>): Promise<ToolResult> {
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
+  const given = descriptionTexts(args, { name: t.name, brand: t.brand }, "Nothing was saved.");
+  if (isRefusal(given)) return given;
   const langs = LANGS3.filter((l) => given[l]);
   if (!langs.length) return no("Send at least one of ru, et, en. Nothing was saved.");
 
@@ -732,6 +825,36 @@ async function liveRungs(t: Target): Promise<Rung[]> {
 }
 const sizeList = (rungs: Rung[]) => rungs.map((r) => r.label).filter(Boolean).join(", ");
 
+/**
+ * What the 30 % guard measures against: each size's price before Claude's
+ * FIRST price change of the last 24 hours (the `fromPrices` its journal line
+ * keeps), else the price now. Measured against the last save alone, three
+ * steps of −25 % would each pass and end at −58 % (security review,
+ * 26.10.2026). A typo net, not a lock — the connector holds the admin's own
+ * rights — but one that cannot be walked around one step at a time.
+ */
+async function priceBaseline(id: string, rungs: Rung[]): Promise<Rung[]> {
+  try {
+    const rows = await query<{ payload: unknown }>(
+      `select payload from admin_audit
+        where action in ('override.set', 'product.update') and payload->>'id' = $1 and payload->>'via' = 'claude'
+          and payload->'fromPrices' is not null and at > now() - interval '24 hours'
+        order by id asc limit 1`,
+      [id],
+    );
+    if (!rows.length) return rungs;
+    const p = typeof rows[0].payload === "string" ? JSON.parse(rows[0].payload) : rows[0].payload;
+    const from = Array.isArray(p?.fromPrices) ? (p.fromPrices as Array<{ size?: unknown; price?: unknown }>) : [];
+    return rungs.map((r) => {
+      const hit = from.find((f) => (f.size ?? null) === r.label);
+      const price = Number(hit?.price);
+      return hit && Number.isFinite(price) ? { label: r.label, price } : r;
+    });
+  } catch {
+    return rungs;
+  }
+}
+
 async function saveProductPrice(args: Record<string, unknown>): Promise<ToolResult> {
   const t = await target(args.id);
   if (!t) return notFound(args.id);
@@ -756,15 +879,20 @@ async function saveProductPrice(args: Record<string, unknown>): Promise<ToolResu
     }
     next[i].price = Math.round(n * 100) / 100;
   }
+  const base = await priceBaseline(t.id, rungs);
   const moved = next
-    .map((r, i) => ({ label: r.label, from: rungs[i].price, to: r.price }))
+    .map((r, i) => ({ label: r.label, from: rungs[i].price, to: r.price, base: base[i].price }))
     .filter((c) => c.from !== c.to);
   if (!moved.length) return ok({ saved: [], note: "Those are the prices already — nothing changed." });
-  const big = moved.filter((c) => c.from > 0 && Math.abs(c.to - c.from) / c.from > PRICE_GUARD);
+  const big = moved.filter((c) => c.base <= 0 || Math.abs(c.to - c.base) / c.base > PRICE_GUARD);
   if (big.length && args.confirm !== true) {
-    return no(big.map((c) => `${c.label ?? "price"} ${eur(c.from)} → ${eur(c.to)} (${Math.round(((c.to - c.from) / c.from) * 100)} %)`).join(", ") +
+    return no(big.map((c) => `${c.label ?? "price"} ${eur(c.from)} → ${eur(c.to)} (` +
+      (c.base > 0 ? `${Math.round(((c.to - c.base) / c.base) * 100)} %` : "from no price") +
+      (c.base !== c.from ? ` against ${eur(c.base)} before today's changes` : "") + ")").join(", ") +
       " — more than 30 %. Ask the owner whether this is right; only after his yes send the same prices again with confirm: true. Nothing was saved.");
   }
+  // what the guard measures the next change against (priceBaseline)
+  const fromPrices = { fromPrices: rungs.map((r) => ({ size: r.label, price: r.price })) };
 
   const single = next.length === 1 && !next[0].label;
   if (t.own) {
@@ -775,7 +903,7 @@ async function saveProductPrice(args: Record<string, unknown>): Promise<ToolResu
        would hide the new one — the panel drops it the same way (edOwnPump in
        public/shop2/app.js) */
     if ((await getOverrideRow(t.id))?.price != null) await upsertOverride(t.id, { price: null });
-    await journal(t, fields, before);
+    await journal(t, fields, before, fromPrices);
   } else {
     /* the panel's own shapes (sizesBody in public/shop2/app.js): one price, or
        the whole ladder with its first rung as the price */
@@ -786,7 +914,7 @@ async function saveProductPrice(args: Record<string, unknown>): Promise<ToolResu
     const before: Record<string, unknown> = {};
     for (const k of Object.keys(full) as Array<keyof Override>) before[k] = old?.[k] ?? null;
     await upsertOverride(t.id, full);
-    await journal(t, full, before);
+    await journal(t, full, before, fromPrices);
   }
   resetProductCache();
   submitIndexNow(pingUrls(t.id));
@@ -907,6 +1035,62 @@ async function saveProductGoogleText(args: Record<string, unknown>): Promise<Too
     google_text: googleOut(saved),
     next: "Live now (search engines re-read the page in their own time). The owner sees it in Админка → Товары → this product → «Для Google», " +
       "and «Вернуть» on its line in Админка → Журнал puts the old texts back.",
+  });
+}
+
+/* ---------- a new product, hidden ---------- */
+
+/** One name for «is this the same product?» — case and spacing aside. */
+const sameWords = (a: string, b: string) => a.replace(/\s+/g, " ").trim().toLowerCase() === b.replace(/\s+/g, " ").trim().toLowerCase();
+
+async function createProduct(args: Record<string, unknown>): Promise<ToolResult> {
+  const done = "Nothing was created.";
+  const brand = oneLine(args.brand);
+  const name = oneLine(args.name);
+  const cat = oneLine(args.section).toLowerCase();
+  if (!brand || brand.length > MAX_BRAND) return no(`brand: one line of 1–${MAX_BRAND} characters. ${done}`);
+  if (!name || name.length > MAX_NAME) return no(`name: one line of 1–${MAX_NAME} characters. ${done}`);
+  if (!nameTranslatable(name)) return no(untranslatable(name).replace("Nothing was saved.", done));
+  if (!(PRODUCT_CATS as readonly string[]).includes(cat)) return no(`section is one of ${PRODUCT_CATS.join(", ")} — list_sections names them. ${done}`);
+  const sizes = Array.isArray(args.sizes) && args.sizes.length ? args.sizes : null;
+  if (!sizes && args.price == null) return no(`Send price (one price) or sizes [{size, price}]. ${done}`);
+  const desc = args.description && typeof args.description === "object" && !Array.isArray(args.description)
+    ? descriptionTexts(args.description as Record<string, unknown>, { name, brand }, done)
+    : {};
+  if (isRefusal(desc)) return desc;
+
+  /* One product, once: Claude may call twice for one request, and the panel
+     is where a deliberate second entry of the same product is made. */
+  const same = (await listCustomProducts()).find((r) => sameWords(r.brand, brand) && sameWords(r.name, name));
+  if (same) {
+    return no(`«${brand} ${name}» is already the owner's product ${same.id} (${same.active ? "in the shop" : "hidden"}) — ` +
+      `change it with the other tools by that id. ${done}`);
+  }
+  const sold = (await productsNow()).list.find((p) => sameWords(p.brand, brand) && sameWords(p.names.RU, name));
+  if (sold) return no(`The shop already sells «${brand} ${name}» as ${sold.id}. ${done}`);
+
+  let row: CustomProduct;
+  try {
+    row = await createCustomProduct(
+      { brand, name, cat, ...(sizes ? { sizes } : { price: args.price }), description: Object.keys(desc).length ? desc : null },
+      { active: false },
+    );
+  } catch (e) {
+    if (e instanceof CustomProductError) return no(`The shop refused it: ${e.code} (${e.field}). ${done}`);
+    throw e;
+  }
+  await writeAuditSafe("admin", "product.create", { id: row.id, brand: row.brand, name: row.name, cat: row.cat, via: "claude", hidden: true });
+  return ok({
+    created: row.id,
+    hidden: true,
+    brand: row.brand,
+    names: { RU: row.name, ET: translateProductName(row.name, "ET"), EN: translateProductName(row.name, "EN") },
+    section: catName(row.cat, "RU"),
+    sizes: ownShape(row).sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
+    description: LANGS3.filter((l) => row.description?.[l]).map((l) => l.toLowerCase()),
+    next: "Hidden — nobody sees it yet. The owner opens Админка → Товары → «Скрытые» → this product, adds its photos and " +
+      "turns on «Показывать в магазине». Its Google texts (save_product_google_text), any missing language of the " +
+      "description (save_product_description) and its count (save_product_stock, was: null) can be written now, by this id.",
   });
 }
 
