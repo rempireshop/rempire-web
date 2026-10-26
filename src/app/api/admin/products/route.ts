@@ -90,8 +90,13 @@ export async function POST(req: Request) {
     { key: readIdempotencyKey(req), route: ROUTE, fingerprint: fingerprintOf(raw) },
     async (): Promise<IdempotentAnswer> => {
       try {
-        const row = await createCustomProduct(body);
-        await writeAuditSafe("admin", "product.create", { id: row.id, brand: row.brand, name: row.name, cat: row.cat });
+        /* `active: false` — created hidden: the assistant's new products,
+           like the Claude connector's (Dim, 26.10.2026), wait for their photos
+           and the owner's «Показывать в магазине». The panel's own form leaves
+           it out and the product is in the shop at once, as always. */
+        const hidden = (body as Record<string, unknown>).active === false;
+        const row = await createCustomProduct(body, { active: !hidden });
+        await writeAuditSafe("admin", "product.create", { id: row.id, brand: row.brand, name: row.name, cat: row.cat, ...(hidden ? { hidden: true } : {}) });
         // a new page in the shop — the engines hear of it (live shop only, fire-and-forget)
         if (row.active) submitIndexNow(productUrls(row.id));
         return { status: 201, body: { ok: true, product: toCatalogueProduct(row) } };

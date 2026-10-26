@@ -353,6 +353,20 @@ describe("custom products (PGlite)", () => {
     expect((await one.GET(req("/api/admin/products/c-nobody/", "GET"), ctx("c-nobody"))).status).toBe(404);
   });
 
+  /* 26.10.2026, Dim: «Помощник» creates new products hidden, like the Claude
+     connector — the panel's own form still puts them in the shop at once */
+  it("POST with active:false creates the product hidden; without it, in the shop as always", async () => {
+    const { POST } = await import("@/app/api/admin/products/route");
+    const { listAudit } = await import("@/lib/orders");
+    const hidden = await (await POST(req("/api/admin/products/", "POST", { brand: "FLAWLESS", name: "Lotion — лосьон", cat: "styling", price: 24.9, active: false }))).json();
+    expect(hidden.product).toMatchObject({ active: false });
+    expect(await getCustomProduct(hidden.product.id)).toMatchObject({ active: false });
+    expect((await listAudit(5)).find((x) => x.action === "product.create")?.payload).toMatchObject({ id: hidden.product.id, hidden: true });
+    const shown = await (await POST(req("/api/admin/products/", "POST", { brand: "FLAWLESS", name: "Gel — гель", cat: "styling", price: 19.9 }))).json();
+    expect(shown.product).toMatchObject({ active: true });
+    expect((await listCustomProducts({ activeOnly: true })).map((p) => p.id)).toEqual([shown.product.id]);
+  });
+
   /* 26.10.2026: Renat's Claude edits his own products too, and «Вернуть» in
      the journal has to reach them from any device, as it does a catalogue
      product (src/lib/audit-undo.ts). */

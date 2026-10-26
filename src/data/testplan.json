@@ -9433,20 +9433,22 @@
         "Прочитать тексты в карточке под ответом и нажать «Применить».",
         "Попросить: «Переименуй его в … — эликсир» и посмотреть ответ.",
         "Попросить: «Поставь объёму 250 мл цену 19,90» и применить.",
-        "Попросить: «Переведи текст раздела Борода на английский» и применить."
+        "Попросить: «Переведи текст раздела Борода на английский» и применить.",
+        "Попросить: «Добавь новый товар: …» и применить."
       ],
       "expect": [
         "В карточке видны новые тексты на каждом языке — до «Применить».",
         "После «Применить» описание на странице товара на ET и EN, в «Журнале» с «Вернуть».",
         "«Эликсир» Помощник не сохраняет и говорит, почему.",
         "Цена меняется только у 250 мл, другие объёмы прежние.",
-        "Английский текст раздела «Борода» — перевод вашего русского."
+        "Английский текст раздела «Борода» — перевод вашего русского.",
+        "Новый товар создаётся скрытым — в магазине его нет до «Показывать в магазине»."
       ],
       "why": "Помощник в админке теперь умеет то же, что ваш Claude: тексты, переводы, названия, цены и тексты страниц.",
       "risk": "med",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-10-26T09:11:37.848Z",
+      "markedAt": "2026-10-26T10:10:23.016Z",
       "en": {
         "title": "The assistant translates and changes texts, names and prices",
         "steps": [
@@ -9454,14 +9456,16 @@
           "Read the texts on the card under the answer and tap «Применить».",
           "Ask: «Переименуй его в … — эликсир» and read the answer.",
           "Ask: «Поставь объёму 250 мл цену 19,90» and apply.",
-          "Ask: «Переведи текст раздела Борода на английский» and apply."
+          "Ask: «Переведи текст раздела Борода на английский» and apply.",
+          "Ask: «Добавь новый товар: …» and apply."
         ],
         "expect": [
           "The card shows the new texts in each language — before «Применить».",
           "After «Применить» the product page has the ET and EN description; «Журнал» has «Вернуть».",
           "The assistant does not save «Эликсир» and says why.",
           "Only the 250 ml price changes; the other sizes keep theirs.",
-          "The English text of the «Борода» section is a translation of your Russian."
+          "The English text of the «Борода» section is a translation of your Russian.",
+          "The new product is created hidden — not in the shop until «Показывать в магазине»."
         ],
         "why": "The admin assistant can now do what your Claude does: texts, translations, names, prices and page texts."
       }

@@ -1424,6 +1424,7 @@
       "есть свои тексты": "on omad tekstid",
       "стандартные": "tavalised",
       "Тексты страниц сохранены": "Lehtede tekstid salvestatud",
+      "Товар создан скрытым ✓ — добавьте фото и включите «Показывать в магазине»": "Toode loodi peidetuna ✓ — lisage fotod ja lülitage sisse «Näidata poes»",
       "Тексты для Google": "Google'i tekstid",
       "Описание товара": "Toote kirjeldus",
       "Цены по объёмам": "Hinnad mahtude kaupa",
@@ -3134,6 +3135,8 @@
       "Отменить можно в журнале.": "Tühistada saab logist.",
       "Заголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.": "Pealkiri, sissejuhatus, tekst, sildid, tooted ja Google'i tekst — vene keeles, siis eesti ja inglise keeles. Avaneb blogi redaktoris mustandina: loete läbi ja avaldate.",
       "Фото добавите на вкладке «Фото и видео» — она откроется сама.": "Fotod lisate vahekaardil «Fotod ja video» — see avaneb ise.",
+      "Товар появится скрытым. Фото добавите на вкладке «Фото и видео» — она откроется сама; потом включите «Показывать в магазине».":
+        "Toode luuakse peidetuna. Fotod lisate vahekaardil «Fotod ja video» — see avaneb ise; siis lülitage sisse «Näidata poes».",
       "баллы включены": "punktid on sees",
       "баллы выключены": "punktid on väljas",
       "снова в продаже": "jälle müügil",
@@ -5057,6 +5060,7 @@
       "есть свои тексты": "has own texts",
       "стандартные": "standard",
       "Тексты страниц сохранены": "Page texts saved",
+      "Товар создан скрытым ✓ — добавьте фото и включите «Показывать в магазине»": "Product created hidden ✓ — add photos and turn on «Show in the shop»",
       "Тексты для Google": "Google texts",
       "Описание товара": "Product description",
       "Цены по объёмам": "Prices by size",
@@ -6735,6 +6739,8 @@
       "Отменить можно в журнале.": "It can be undone from the log.",
       "Заголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.": "Title, intro, body, tags, products and the Google text — in Russian first, then Estonian and English. It opens in the blog editor as a draft: you read it and publish it.",
       "Фото добавите на вкладке «Фото и видео» — она откроется сама.": "You add the photos on the “Photos and video” tab — it opens by itself.",
+      "Товар появится скрытым. Фото добавите на вкладке «Фото и видео» — она откроется сама; потом включите «Показывать в магазине».":
+        "The product is created hidden. You add the photos on the “Photos and video” tab — it opens by itself; then turn on «Show in the shop».",
       "баллы включены": "points are on",
       "баллы выключены": "points are off",
       "снова в продаже": "back on sale",
@@ -40884,7 +40890,7 @@
       pendingAction = null;
       ensureMedia();
       window.scrollTo({ top: 0 });
-      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото" : "Товар добавлен ✓ — он уже в магазине", entry);
+      toast(from === "assistant" ? "Товар создан скрытым ✓ — добавьте фото и включите «Показывать в магазине»" : "Товар добавлен ✓ — он уже в магазине", entry);
       render();
     }).catch(function () { S.goodsBusy = false; render(); toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
@@ -40905,7 +40911,9 @@
 
   /** The assistant's create_product, once the owner pressed «Применить». */
   function applyCreateProduct(a) {
-    customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "",
+    /* hidden, like the Claude connector's new products (Dim, 26.10.2026): in
+       the shop only once its photos are in and «Показывать в магазине» is on */
+    customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "", active: false,
       sizes: a.sizes || [], prices: a.prices && a.prices.length ? a.prices : [a.price], description: a.description || null }, "assistant");
   }
   /** The assistant's update_product: the PATCH the row takes, from the
@@ -47177,7 +47185,7 @@
         : eur(a.price || (a.prices && a.prices[0]) || 0);
       var cpLangs = a.description ? ["RU", "ET", "EN"].filter(function (L) { return a.description[L]; }) : [];
       return "Новый товар «" + a.brand + " — " + a.name + "» · " + (CAT_NAMES[a.cat] || a.cat) + " · " + cpPrices +
-        (cpLangs.length ? " · описание: " + cpLangs.join(", ") : "") + "\nФото добавите на вкладке «Фото и видео» — она откроется сама.";
+        (cpLangs.length ? " · описание: " + cpLangs.join(", ") : "") + "\nТовар появится скрытым. Фото добавите на вкладке «Фото и видео» — она откроется сама; потом включите «Показывать в магазине».";
     }
     if (a.type === "set_product_active") {
       return "Товар «" + (a.name || (p && p.custom ? p.brand + " — " + p.name : a.id)) + "»: " + (a.value ? "снова в продаже" : "снят с продажи");

@@ -232,6 +232,8 @@ describe("the panel lays the assistant's texts over what the product has (public
     expect(APP).toContain('admSetWhenReady(function () { admSetApply(pa, "Тексты страниц сохранены"); render(); });');
     expect(sliceFn("seoOfAction")).toContain("if (a.seo && typeof a.seo === \"object\") return seoMerge(cur, a.seo);");
     expect(APP).toContain('if (act && !act.preview && typeof admTextPreview === "function") act.preview = admTextPreview(act);');
+    // a new product from the assistant is created hidden, like the connector's (Dim, 26.10.2026)
+    expect(sliceFn("applyCreateProduct")).toContain('subcat: "", active: false,');
     // the card's heading says what it changes, not the new Google title (live test, 26.10.2026)
     expect(APP).toContain('set_seo: "Тексты для Google", set_description: "Описание товара"');
     expect(sliceFn("confirmCard")).toContain('esc(a.heading || txt(a.title) || "Предпросмотр изменения")');

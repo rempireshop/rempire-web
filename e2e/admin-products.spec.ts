@@ -438,14 +438,15 @@ test.describe("admin — product creation", () => {
       const card = answer.locator(".adm-propose");
       await expect(card).toContainText(`Новый товар «Proraso — ${NAME}»`);
       await expect(card).toContainText(eur(12.5, "RU"));
-      await expect(card).toContainText("Фото добавите");
+      await expect(card).toContainText("Товар появится скрытым");
       await card.locator("[data-admapply]").click();
       expect(await toastText(page)).toMatch(/Товар создан/);
       await clearToast(page);
       id = await openedCard(page);
       expect(id).toMatch(/^c-proraso-assist-/);
       const row = await page.request.get(`/api/admin/products/${id}/`);
-      expect((await row.json()).product).toMatchObject({ active: true, price: 12.5, cat: "beard", description: { RU: "Масло для бороды.", ET: "Habemeõli.", EN: "Beard oil." } });
+      // hidden until the photos are in, like the Claude connector's (Dim, 26.10.2026)
+      expect((await row.json()).product).toMatchObject({ active: false, price: 12.5, cat: "beard", description: { RU: "Масло для бороды.", ET: "Habemeõli.", EN: "Beard oil." } });
       // the description the assistant wrote is in the card's «Описание»
       await toSection(page, "desc");
       expect(await page.locator("[data-eddescru]").inputValue()).toBe("Масло для бороды.");
