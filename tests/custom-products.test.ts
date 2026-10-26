@@ -353,6 +353,35 @@ describe("custom products (PGlite)", () => {
     expect((await one.GET(req("/api/admin/products/c-nobody/", "GET"), ctx("c-nobody"))).status).toBe(404);
   });
 
+  /* 26.10.2026: Renat's Claude edits his own products too, and «Вернуть» in
+     the journal has to reach them from any device, as it does a catalogue
+     product (src/lib/audit-undo.ts). */
+  it("«Вернуть» in the journal puts an own product's fields back — a section move with its subsection, a price with its ladder", async () => {
+    const one = await import("@/app/api/admin/products/[id]/route");
+    const { listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const patchOf = (u: unknown) => (u as { patch: Record<string, unknown> }).patch;
+    const a = await createCustomProduct({
+      brand: "Proraso", name: "Beard Balm — бальзам для бороды", cat: "beard", subcat: "ba",
+      sizes: ["100 мл"], prices: [14.9], description: { RU: "Старое" },
+    });
+    await one.PUT(req(`/api/admin/products/${a.id}/`, "PUT", { name: "Beard Balm Cypress — бальзам для бороды", cat: "face", description: { RU: "Новое" } }), ctx(a.id));
+    const row = journalRows(await listAudit(10)).find((x) => x.action === "product.update");
+    expect(row?.undo).toEqual({
+      kind: "product", id: a.id,
+      patch: { name: "Beard Balm — бальзам для бороды", cat: "beard", subcat: "ba", description: { RU: "Старое" } },
+    });
+
+    const back = await one.PUT(req(`/api/admin/products/${a.id}/`, "PUT", { ...patchOf(row!.undo), undoOf: row!.id }), ctx(a.id));
+    expect(back.status).toBe(200);
+    expect(await getCustomProduct(a.id)).toMatchObject({ name: "Beard Balm — бальзам для бороды", cat: "beard", subcat: "ba", description: { RU: "Старое" } });
+    expect(journalRows(await listAudit(10)).find((x) => x.id === row!.id)?.undone).toBe(true);
+
+    await one.PUT(req(`/api/admin/products/${a.id}/`, "PUT", { price: 9 }), ctx(a.id));
+    const priced = journalRows(await listAudit(10)).find((x) => x.action === "product.update" && (x.payload as { keys?: string[] }).keys?.includes("price"));
+    expect(patchOf(priced?.undo)).toEqual({ sizes: ["100 мл"], prices: [14.9] });
+  });
+
   it("the public feed carries the active rows in the catalogue's shape and leaves the hidden ones out", async () => {
     const { GET: publicGet } = await import("@/app/api/overrides/route");
     const a = await createCustomProduct({ brand: "Proraso", name: "Beard Balm", cat: "beard", price: 14.9,

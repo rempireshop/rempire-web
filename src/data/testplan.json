@@ -9246,6 +9246,51 @@
       }
     },
     {
+      "id": "ai-claude-product-words",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Claude меняет описание и название товара",
+      "steps": [
+        "В чате Claude: «Перепиши описание FLAWLESS Bond Building Styling Lotion короче, на трёх языках».",
+        "Прочитать, что Claude предлагает, и ответить «сохрани».",
+        "Открыть этот товар в магазине на русском, эстонском и английском.",
+        "Попросить: «Переименуй его в Bond Building Styling Lotion — эликсир для укладки».",
+        "В Админке → «Журнал» нажать «Вернуть» у строчки «через Claude» с описанием."
+      ],
+      "expect": [
+        "Claude показывает текст до сохранения и сохраняет только после «сохрани».",
+        "Новое описание сразу на странице товара, на всех трёх языках.",
+        "«Эликсир» не сохраняется: Claude предлагает слово, которое магазин переводит.",
+        "В «Журнале» строчки «Свой товар изменён через Claude» с «Вернуть».",
+        "«Вернуть» возвращает прежнее описание на странице товара."
+      ],
+      "why": "Вы ведёте магазин сами: тексты и названия товаров можно поручить своему Claude, без Димы.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-26T07:37:21.633Z",
+      "en": {
+        "title": "Claude changes a product's description and name",
+        "steps": [
+          "In a Claude chat: «Rewrite the description of FLAWLESS Bond Building Styling Lotion, shorter, in three languages».",
+          "Read what Claude proposes and answer «save it».",
+          "Open the product in the shop in Russian, Estonian and English.",
+          "Ask: «Rename it to Bond Building Styling Lotion — эликсир для укладки».",
+          "In Admin → «Журнал» tap «Вернуть» on the «через Claude» description line."
+        ],
+        "expect": [
+          "Claude shows the text before saving and saves only after «save it».",
+          "The new description is on the product page at once, in all three languages.",
+          "«Эликсир» does not save: Claude suggests a word the shop translates.",
+          "«Журнал» has «Свой товар изменён через Claude» lines with «Вернуть».",
+          "«Вернуть» brings the previous description back on the product page."
+        ],
+        "why": "You run the shop yourself: product texts and names can be handed to your own Claude, without Dim."
+      }
+    },
+    {
       "id": "ai-assistant-ask",
       "area": "ai",
       "who": "renat",

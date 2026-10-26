@@ -14,6 +14,7 @@ import {
   CustomProductError,
   getCustomProduct,
   isCustomId,
+  ownPrev,
   setCustomProductActive,
   toCatalogueProduct,
   updateCustomProduct,
@@ -31,7 +32,6 @@ const NO_STORE = { "cache-control": "no-store" } as const;
 function notFound() {
   return Response.json({ ok: false, error: "not_found" }, { status: 404 });
 }
-
 export async function GET(req: Request, ctx: Ctx) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
@@ -63,16 +63,34 @@ export async function PUT(req: Request, ctx: Ctx) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
   const patch = body as Record<string, unknown>;
-  const { active, ...fields } = patch;
+  const { active, undoOf: undoRaw, ...fields } = patch;
+  // «Вернуть» on audit row N from the journal: that row reads «возвращено» everywhere
+  const undoOf = Number.isInteger(undoRaw) && (undoRaw as number) > 0 ? (undoRaw as number) : 0;
 
   try {
+    /* What this patch is about to replace — the audit's `prev`, so «Вернуть»
+       in the journal puts the owner's own product back from any device, as
+       it does a catalogue product's (src/lib/audit-undo.ts). Best effort: a
+       read that fails costs the row its way back, never the save. */
+    let before: { before: Record<string, unknown> } | undefined;
+    if (Object.keys(fields).length) {
+      try {
+        const cur = await getCustomProduct(id);
+        if (cur) before = { before: ownPrev(cur, fields) };
+      } catch {
+        before = undefined;
+      }
+    }
     let row = Object.keys(fields).length ? await updateCustomProduct(id, fields) : await getCustomProduct(id);
     if (!row) return notFound();
     if (typeof active === "boolean" && active !== row.active) {
       row = (await setCustomProductActive(id, active)) ?? row;
       await writeAuditSafe("admin", active ? "product.show" : "product.hide", { id });
     }
-    if (Object.keys(fields).length) await writeAuditSafe("admin", "product.update", { id, keys: Object.keys(fields) });
+    if (Object.keys(fields).length) {
+      const keys = Object.keys(fields);
+      await writeAuditSafe("admin", "product.update", undoOf ? { id, keys, undoOf } : { id, keys }, before);
+    }
     // its page changed, appeared or went (live shop only, fire-and-forget)
     if (Object.keys(fields).length || typeof active === "boolean") submitIndexNow(productUrls(id));
     return Response.json({ ok: true, product: toCatalogueProduct(row) }, { headers: NO_STORE });

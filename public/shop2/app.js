@@ -2427,6 +2427,8 @@
       "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.": "Vedaja on paki vastu võtnud — «Teele saadetud» ja jälgimisnumbriga kirja teeb pood ise.",
       "по скану": "skanniga",
       "Отправлен — по скану перевозчика": "Teele saadetud — vedaja skannimise järgi",
+      "Товар изменён через Claude": "Toodet muudeti Claude'i kaudu",
+      "Свой товар изменён через Claude": "Oma toodet muudeti Claude'i kaudu",
       "Посылка едет, а заказ отменён или деньги возвращены": "Pakk liigub, kuid tellimus on tühistatud või raha tagastatud",
       "Ждём доставки": "Ootame kättetoimetamist",
       "Последний шаг, без письма.": "Viimane samm, ilma kirjata.",
@@ -6014,6 +6016,8 @@
       "Перевозчик её принял — «Отправлен» и письмо с трек-номером магазин сделает сам.": "The carrier has it — the shop sets «Shipped» and sends the tracking letter by itself.",
       "по скану": "by scan",
       "Отправлен — по скану перевозчика": "Shipped — by the carrier's scan",
+      "Товар изменён через Claude": "Product changed via Claude",
+      "Свой товар изменён через Claude": "Own product changed via Claude",
       "Посылка едет, а заказ отменён или деньги возвращены": "The parcel is moving, but the order is cancelled or refunded",
       "Ждём доставки": "Waiting for delivery",
       "Последний шаг, без письма.": "The last step, no letter.",
@@ -33023,6 +33027,9 @@
     /* «Отправлен» set by the carrier's scan, not by a press (28.09.2026,
        src/lib/ship-order.ts): the status row carries `via: "carrier"`. */
     if (row.action === "order.status" && p.via === "carrier" && p.to === "shipped") word = "Отправлен — по скану перевозчика";
+    /* a product's words written by the owner's Claude (src/lib/mcp/tools.ts, 26.10.2026) */
+    if (p.via === "claude" && row.action === "override.set") word = "Товар изменён через Claude";
+    if (p.via === "claude" && row.action === "product.update") word = "Свой товар изменён через Claude";
     // a settings row names the page's own word for its key, as a node of its own
     if (row.action === "setting.set" && typeof p.key === "string" && AUDIT_SETTING_WORDS[p.key]) {
       return "<span>" + esc(word) + "</span>: <span>" + esc(AUDIT_SETTING_WORDS[p.key]) + "</span>";
@@ -33141,7 +33148,7 @@
   /** A server row the owner can take back from here. */
   function auditCanUndo(row) {
     if (!row || !row.undo || row.undone) return false;
-    if (row.undo.kind === "override") return true;
+    if (row.undo.kind === "override" || row.undo.kind === "product") return true;
     return !!admSetActionFor(row.undo.key, null, true);
   }
   function admSetJournalHTML() {
@@ -33267,16 +33274,22 @@
   function admJournalUndoServer(row, local) {
     var u = row && row.undo;
     if (!u) return;
-    if (u.kind === "override") {
-      var body = { id: u.id, undoOf: row.id };
+    /* a product's fields: a catalogue product's through the override route,
+       the owner's own («c-…») through its own row's route (26.10.2026) */
+    if (u.kind === "override" || u.kind === "product") {
+      var own = u.kind === "product";
+      var body = own ? { undoOf: row.id } : { id: u.id, undoOf: row.id };
       for (var k in u.patch) if (Object.prototype.hasOwnProperty.call(u.patch, k)) body[k] = u.patch[k];
-      apiSend("/api/admin/overrides/", "PUT", body).then(function (r) {
+      var url = own ? "/api/admin/products/" + encodeURIComponent(u.id) + "/" : "/api/admin/overrides/";
+      apiSend(url, "PUT", body).then(function (r) {
         if (r.status === 401) { SRV.admin = false; render(); return; }
         if (!(r.status === 200 && r.body && r.body.ok)) { toast("Не получилось — попробуйте ещё раз"); return; }
         if (local) { local.undone = true; demoSave(); }
+        if (own && r.body.product) customAdopt(r.body.product);
         admAutosaveReopen("ed:" + u.id + ":", true);   // the card's fields: what they saved is not on the server now
         toast("Вернули ✓");
-        loadServerOverrides(); loadAudit(true);
+        if (own) loadCustomAll(true); else loadServerOverrides();
+        loadAudit(true);
       }).catch(function () { toast("Сервер не отвечает — изменение не сохранилось"); });
       return;
     }

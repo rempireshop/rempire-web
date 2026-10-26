@@ -7,19 +7,23 @@
  *   list_posts · get_post                           — the blog, drafts included
  *   save_draft                                      — a new draft, or a change to one
  *   save_product_google_text                        — a product's Google title and description
+ *   save_product_description                        — the text on a product's page
+ *   save_product_name                               — a product's name, brand and section
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
- * touch a published article, a price, a product's own text or an order. A
- * published article is changed in the admin, where its autosave goes live —
- * never from a chat in another product.
+ * touch a published article, a price, stock or an order. A published article
+ * is changed in the admin, where its autosave goes live — never from a chat
+ * in another product.
  *
- * The one live write is a product's Google pair (Dim, 25.10.2026: Renat's
- * panel button wrote «других сведений нет» into 29 of them, and he would
- * rather have his Claude write them). It is what a search result shows and
- * nothing a shopper reads on the page, it is checked the way the panel's own
- * answer is (length, language, no talk about missing data), and it lands in
- * the change journal as an ordinary product change with what it replaced —
- * «Вернуть» there puts the old pair back from any device.
+ * The live writes are a product's words (Dim, 25–26.10.2026: Renat's panel
+ * button wrote «других сведений нет» into 29 Google texts and he would rather
+ * have his Claude write them; then «he needs to be able to manage his shop» —
+ * the page text and the name too). Each is checked the way the panel checks
+ * it (length, language, no talk about missing data, a name every language can
+ * say), is written where the panel writes it — a catalogue product's into
+ * product_overrides, the owner's own («c-…») onto its own row — and lands in
+ * the change journal with what it replaced: «Вернуть» there puts it back from
+ * any device (src/lib/audit-undo.ts).
  *
  * Every product a tool names comes from the shop's own data
  * (shopProducts() in src/lib/merchant-feed.ts — hidden ones are not there),
@@ -28,8 +32,15 @@
  */
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
-import { writeAuditSafe } from "@/lib/orders";
+import { getOverrideRow, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
+import { getDescriptionOverride, setDescriptionOverride, type DescriptionOverride } from "@/lib/product-descriptions";
+import {
+  CustomProductError, getCustomProduct, isCustomId, MAX_BRAND, MAX_NAME, ownPrev, PRODUCT_CATS, updateCustomProduct,
+  type CustomProduct,
+} from "@/lib/custom-products";
+import { nameTranslatable, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
+import { requestRebuild } from "@/lib/rebuild";
 import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
 import { productUrls as pingUrls } from "@/lib/indexnow.mjs";
 import { submitIndexNow } from "@/lib/indexnow-ping";
@@ -64,6 +75,14 @@ const productUrls = (base: string, id: string) =>
 const stockWord = (s: string) => (s === "out" ? "нет в наличии" : s === "low" ? "мало" : "в наличии");
 const eur = (n: number) => n.toFixed(2).replace(".", ",") + " €";
 const plain = (html: string) => html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+/** A page text as plain text with its paragraphs and list lines kept — the shape save_product_description takes back. */
+const paragraphs = (html: string) => html
+  .replace(/<li[^>]*>/gi, "\n— ")
+  .replace(/<\/(p|ul|ol|h[1-6]|div)>|<br\s*\/?>/gi, "\n\n")
+  .split(/\n{2,}/)
+  .map((block) => block.split("\n").map(plain).filter(Boolean).join("\n"))
+  .filter(Boolean)
+  .join("\n\n");
 const searchKey = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}&]+/gu, " ").trim();
 
 function brief(base: string, p: ShopProduct) {
@@ -265,6 +284,56 @@ export const TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
+    name: "save_product_description",
+    title: "Записать описание товара",
+    description:
+      "Write the description on a product's page — the text a shopper reads under the price — in Russian (ru), Estonian (et) " +
+      "and/or English (en). Read the product with get_product first. Plain text only: the page shows every character as " +
+      "typed, so no HTML and no markdown (**, #, * lists); paragraphs are separated by an empty line, a list is lines " +
+      "starting with «— ». At most 4000 characters per language. Cosmetic effects only — no medical claims — and never " +
+      "invent an ingredient or an effect the owner did not give you. et and en are written in that language — a Russian " +
+      "word there is refused. When the Russian text changes in substance, send all three, or the other languages go on " +
+      "saying the old thing. Languages you leave out keep their current text. It is saved at once and is live; each save " +
+      "is a line in Админка → Журнал with «Вернуть».",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The product id from search_products." },
+        ru: { type: "string", maxLength: 4000 },
+        et: { type: "string", maxLength: 4000 },
+        en: { type: "string", maxLength: 4000 },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "save_product_name",
+    title: "Переименовать товар",
+    description:
+      "Change a product's name, brand and/or section. The name is written the shop's way: the maker's product name in Latin " +
+      "letters exactly as the maker spells it, then « — » and what it is in Russian, from the type words the shop translates " +
+      "(«Bio Botanical Shampoo — шампунь», «White — бальзам после бритья»); a name the Estonian and English pages could not " +
+      "say is refused with the list of those words. section is one of the ids list_sections gives (hair, styling, beard, " +
+      "face, body, perfume, merch); moving a product to another section puts its subsection back to automatic. The product " +
+      "keeps its id, page address and stock; orders already placed keep the old name. Live in the shop at once; the static " +
+      "pages search engines read are rebuilt within about a quarter of an hour. Each save is a line in Админка → Журнал " +
+      "with «Вернуть».",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The product id from search_products." },
+        name: { type: "string", maxLength: 120, description: "«Latin product name — русский тип»." },
+        brand: { type: "string", maxLength: 60 },
+        section: { type: "string", enum: [...PRODUCT_CATS] },
+      },
+      required: ["id"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -314,9 +383,11 @@ export const INSTRUCTIONS =
   "blog articles with the shop's real products. Before you name a product, find it with search_products and use its exact " +
   "name and page address; never link a product that search does not return. Write in Russian unless the owner asks otherwise. " +
   "Cosmetic effects only — no medical or treatment claims. When the owner is happy with an article, save it with save_draft: " +
-  "it is saved as a draft and the owner publishes it in Админка → Блог. It also writes a product's Google texts " +
-  "(save_product_google_text) — from the product's own description (get_product), checked and saved live, with «Вернуть» " +
-  "in the admin's journal. Answer the owner in his language.";
+  "it is saved as a draft and the owner publishes it in Админка → Блог. It also changes a product's words — its Google " +
+  "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
+  "(save_product_name) — when the owner asks: read the product with get_product first, show the owner what you will save, " +
+  "then save. Those are live at once, checked like the admin's own fields, and every one has «Вернуть» in Админка → " +
+  "Журнал. Answer the owner in his language.";
 
 const ok = (v: unknown): ToolResult => ({ text: JSON.stringify(v, null, 2) });
 const no = (text: string): ToolResult => ({ text, isError: true });
@@ -341,18 +412,31 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
     const { base, list } = await productsNow();
     const p = list.find((x) => x.id === id);
     if (!p) return no(`No product «${id}» in the shop — find it with search_products first.`);
+    /* The owner's words as stored — the shop list carries his page text
+       flattened for the feed, and save_product_description is written from
+       this answer, so it gets the paragraphs. The owner's own product keeps
+       its texts on its row; a catalogue product's are in product_overrides. */
+    const row = isCustomId(p.id) ? await getCustomProduct(p.id) : null;
+    const ownDesc = row ? row.description : await getDescriptionOverride(p.id);
+    const description: Partial<Record<L3, string>> = {};
+    for (const l of LANGS3) {
+      const t = ownDesc?.[l] || (p.texts[l] ? paragraphs(String(p.texts[l])) : "");
+      if (t) description[l] = t.slice(0, DESC_MAX);
+    }
     return ok({
       id: p.id,
       brand: p.brand,
       names: p.names,
-      section: { RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
+      section: { id: p.cat, RU: catName(p.cat, "RU"), ET: catName(p.cat, "ET"), EN: catName(p.cat, "EN") },
       sizes: p.sizes.map((s) => ({ size: s.label, price: eur(s.price) })),
       stock: stockWord(p.stock),
       photos: p.photos,
       url: productUrls(base, p.id),
-      description: Object.fromEntries(Object.entries(p.texts).map(([l, t]) => [l, plain(String(t)).slice(0, 1500)])),
+      description,
+      /* which of those the owner wrote; the rest is the catalogue's */
+      description_by_owner: LANGS3.filter((l) => ownDesc?.[l]),
       /* what the owner wrote for Google, when anything — save_product_google_text changes it */
-      google_text: googleOut(await getSeoOverride(p.id)),
+      google_text: googleOut(row ? row.seo : await getSeoOverride(p.id)),
     });
   }
 
@@ -403,7 +487,156 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
 
   if (name === "save_draft") return saveDraft(args);
   if (name === "save_product_google_text") return saveProductGoogleText(args);
+  if (name === "save_product_description") return saveProductDescription(args);
+  if (name === "save_product_name") return saveProductName(args);
   return no(`Unknown tool «${name}».`);
+}
+
+/* ---------- the product a write is about ---------- */
+
+/** A product a write may touch: one the shop shows, or the owner's own («c-…») — that one even while it is hidden. */
+type Target = { id: string; brand: string; name: string; cat: string; own: CustomProduct | null };
+
+async function target(raw: unknown): Promise<Target | null> {
+  const id = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  if (!id) return null;
+  if (isCustomId(id)) {
+    // read past the minute's copy: the row is what the write merges into
+    const own = await getCustomProduct(id);
+    return own ? { id, brand: own.brand, name: own.name, cat: own.cat, own } : null;
+  }
+  const { list } = await productsNow();
+  const p = list.find((x) => x.id === id);
+  return p ? { id, brand: p.brand, name: p.names.RU, cat: p.cat, own: null } : null;
+}
+const notFound = (raw: unknown) =>
+  no(`No product «${typeof raw === "string" ? raw.trim().slice(0, 80) : ""}» in the shop — find it with search_products first. Nothing was saved.`);
+
+/** One product change in the journal with what it replaced — «Вернуть» on its line puts that back (src/lib/audit-undo.ts). */
+async function journal(t: Target, patch: Record<string, unknown>, before: Record<string, unknown>): Promise<void> {
+  if (t.own) await writeAuditSafe("admin", "product.update", { id: t.id, keys: Object.keys(patch), via: "claude" }, { before });
+  else await writeAuditSafe("admin", "override.set", { id: t.id, patch, via: "claude" }, { before });
+}
+
+/* ---------- a product's page text ---------- */
+
+const DESC_MAX = 4000;  // cleanDescriptionPatch() in src/lib/product-descriptions.ts cuts there
+
+async function saveProductDescription(args: Record<string, unknown>): Promise<ToolResult> {
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
+  const given: DescriptionOverride = {};
+  for (const l of LANGS3) {
+    const v = args[l.toLowerCase()];
+    if (v == null) continue;
+    if (typeof v !== "string") return no(`${l.toLowerCase()} is text. Nothing was saved.`);
+    const text = v.replace(/\r\n?/g, "\n").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    if (!text) return no(`${l.toLowerCase()} is empty — send the text, or leave ${l.toLowerCase()} out to keep the current one. Nothing was saved.`);
+    if (text.length > DESC_MAX) return no(`The ${l} text is ${text.length} characters — at most ${DESC_MAX}. Shorten it. Nothing was saved.`);
+    /* descOvHtml() in public/shop2/app.js escapes the text and makes a <p> of
+       each block: a tag or a ** would be printed on the page as it is */
+    if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) {
+      return no(`The ${l} text has HTML or markdown in it — the page shows every character as typed. Plain text: paragraphs ` +
+        "separated by an empty line, a list as lines starting with «— ». Nothing was saved.");
+    }
+    const talk = text.split(/(?<=[.!?…])\s+/).find((s) => s && !seoDropMetaTalk(s));
+    if (talk) return no(`The ${l} text talks about missing information («${talk.slice(0, 90)}») — write about the product instead. Nothing was saved.`);
+    if (seoOffLanguage(text, l, { name: t.name, brand: t.brand })) {
+      return no(`The ${l} text still has Russian words in it — write every word in ${l === "ET" ? "Estonian" : "English"} except the brand and the maker's product name. Nothing was saved.`);
+    }
+    given[l] = text;
+  }
+  const langs = LANGS3.filter((l) => given[l]);
+  if (!langs.length) return no("Send at least one of ru, et, en. Nothing was saved.");
+
+  const was = t.own ? t.own.description : await getDescriptionOverride(t.id);
+  const next: DescriptionOverride = { ...(was ?? {}), ...given };
+  let saved: DescriptionOverride | null;
+  if (t.own) saved = (await updateCustomProduct(t.id, { description: next }))?.description ?? null;
+  else saved = await setDescriptionOverride(t.id, next);
+  await journal(t, { description: saved }, { description: was ?? null });
+  resetProductCache();
+  submitIndexNow(pingUrls(t.id));
+  return ok({
+    saved: langs.map((l) => l.toLowerCase()),
+    product: `${t.brand} ${t.name}`,
+    description: saved,
+    next: "Live on the product page now. The owner sees it in Админка → Товары → this product → «Описание», and «Вернуть» " +
+      "on its line in Админка → Журнал puts the old text back.",
+  });
+}
+
+/* ---------- a product's name, brand and section ---------- */
+
+const oneLine = (v: unknown) => (typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim() : "");
+
+/** The refusal Dim asked for (26.10.2026, «block + suggest»): why, what each language would say, and the words that work. */
+function untranslatable(name: string): string {
+  return `«${name}» would stay partly Russian on the Estonian and English pages and in the Google feed ` +
+    `(ET: «${translateProductName(name, "ET")}», EN: «${translateProductName(name, "EN")}»). Write the maker's product ` +
+    "name in Latin letters, then « — » and one of the type words the shop translates (it may go on with «для волос», " +
+    `«для лица», «для бороды», «для бритья», «для укладки» or «для кожи головы»): ${TRANSLATABLE_TAILS.join(", ")}. ` +
+    "If none fits, the owner asks Dim to add the word. Nothing was saved.";
+}
+
+async function saveProductName(args: Record<string, unknown>): Promise<ToolResult> {
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
+  const patch: { name?: string; brand?: string; cat?: string } = {};
+  if (args.name != null) {
+    const name = oneLine(args.name);
+    if (!name || name.length > MAX_NAME) return no(`name: one line of 1–${MAX_NAME} characters. Nothing was saved.`);
+    if (!nameTranslatable(name)) return no(untranslatable(name));
+    patch.name = name;
+  }
+  if (args.brand != null) {
+    const brand = oneLine(args.brand);
+    if (!brand || brand.length > MAX_BRAND) return no(`brand: one line of 1–${MAX_BRAND} characters. Nothing was saved.`);
+    patch.brand = brand;
+  }
+  if (args.section != null) {
+    const cat = oneLine(args.section).toLowerCase();
+    if (!(PRODUCT_CATS as readonly string[]).includes(cat)) {
+      return no(`section is one of ${PRODUCT_CATS.join(", ")} — list_sections names them. Nothing was saved.`);
+    }
+    patch.cat = cat;
+  }
+  if (!Object.keys(patch).length) return no("Send at least one of name, brand, section. Nothing was saved.");
+
+  if (t.own) {
+    const before = ownPrev(t.own, patch);
+    try {
+      await updateCustomProduct(t.id, patch);
+    } catch (e) {
+      if (e instanceof CustomProductError) return no(`The shop refused it (${e.code}). Nothing was saved.`);
+      throw e;
+    }
+    await journal(t, patch, before);
+  } else {
+    /* the override route's own rule (nameFields in
+       src/app/api/admin/overrides/route.ts): a subsection belongs to its
+       section, so a move starts from «Авто — по названию» */
+    const full: Partial<Override> = { ...patch, ...("cat" in patch ? { subcat: null } : {}) };
+    const old = await getOverrideRow(t.id);
+    const before: Record<string, unknown> = {};
+    for (const k of Object.keys(full) as Array<keyof Override>) before[k] = old?.[k] ?? null;
+    await upsertOverride(t.id, full);
+    await journal(t, full, before);
+  }
+  resetProductCache();
+  requestRebuild("product-rename");
+  submitIndexNow(pingUrls(t.id));
+  const name = patch.name ?? t.name;
+  return ok({
+    saved: Object.keys(patch).map((k) => (k === "cat" ? "section" : k)),
+    id: t.id,
+    brand: patch.brand ?? t.brand,
+    names: { RU: name, ET: translateProductName(name, "ET"), EN: translateProductName(name, "EN") },
+    section: catName(patch.cat ?? t.cat, "RU"),
+    next: "Live in the shop now under the same id and page address. Orders already placed keep the old name. The static pages " +
+      "search engines read are rebuilt within about a quarter of an hour. «Вернуть» on its line in Админка → Журнал puts " +
+      "the old name back.",
+  });
 }
 
 /* ---------- a product's Google pair ---------- */
@@ -423,10 +656,8 @@ function googleOut(seo: SeoOverride | null): Record<string, { title: string; des
 }
 
 async function saveProductGoogleText(args: Record<string, unknown>): Promise<ToolResult> {
-  const id = typeof args.id === "string" ? args.id.trim().toLowerCase() : "";
-  const { list } = await productsNow();
-  const p = list.find((x) => x.id === id);
-  if (!p) return no(`No product «${id}» in the shop — find it with search_products first. Nothing was saved.`);
+  const t = await target(args.id);
+  if (!t) return notFound(args.id);
 
   const given: Partial<Record<L3, { title: string; desc: string }>> = {};
   for (const l of LANGS3) {
@@ -443,25 +674,29 @@ async function saveProductGoogleText(args: Record<string, unknown>): Promise<Too
     if (seoDropMetaTalk(desc) !== desc) {
       return no(`The ${l} description talks about missing information («${desc.slice(0, 90)}») — write about the product from its description instead. Nothing was saved.`);
     }
-    if (seoOffLanguage(`${title}\n${desc}`, l, { name: p.names.RU, brand: p.brand })) {
+    if (seoOffLanguage(`${title}\n${desc}`, l, { name: t.name, brand: t.brand })) {
       return no(`The ${l} texts still have Russian words in them — write every word in ${l === "ET" ? "Estonian" : "English"} except the brand and the maker's product name. Nothing was saved.`);
     }
     given[l] = { title, desc };
   }
   if (!Object.keys(given).length) return no("Send at least one of ru, et, en with a title and a description. Nothing was saved.");
 
-  const was = await getSeoOverride(p.id);
+  /* the owner's own product keeps its pairs on its row, where the panel
+     writes them; a catalogue product's are in product_overrides */
+  const was = t.own ? t.own.seo : await getSeoOverride(t.id);
   const next: SeoOverride = { ...(was ?? {}) };
   for (const l of LANGS3) if (given[l]) next[l] = given[l];
-  const saved = await setSeoOverride(p.id, next);
+  const saved = t.own
+    ? (await updateCustomProduct(t.id, { seo: next }))?.seo ?? null
+    : await setSeoOverride(t.id, next);
   /* An ordinary product change in the journal, with the pair it replaced:
-     «Вернуть» there sends {seo: <old>} back through PUT /api/admin/overrides
+     «Вернуть» there sends {seo: <old>} back through the route that keeps it
      (src/lib/audit-undo.ts) — on any device, like the panel's own edits. */
-  await writeAuditSafe("admin", "override.set", { id: p.id, patch: { seo: saved }, via: "claude" }, { before: { seo: was ?? null } });
-  submitIndexNow(pingUrls(p.id));
+  await journal(t, { seo: saved }, { seo: was ?? null });
+  submitIndexNow(pingUrls(t.id));
   return ok({
     saved: LANGS3.filter((l) => given[l]).map((l) => l.toLowerCase()),
-    product: `${p.brand} ${p.names.RU}`,
+    product: `${t.brand} ${t.name}`,
     google_text: googleOut(saved),
     next: "Live now (search engines re-read the page in their own time). The owner sees it in Админка → Товары → this product → «Для Google», " +
       "and «Вернуть» on its line in Админка → Журнал puts the old texts back.",

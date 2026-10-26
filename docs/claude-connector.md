@@ -34,9 +34,18 @@ he checks it in Админка → Блог and publishes it there.*
 заголовок и описание для поиска Google на RU/ET/EN — сохраняется **сразу**, видно в Админке → Товары →
 товар → «Для Google». В Админке → **Журнал** у каждой такой записи есть **«Вернуть»**.
 
+**Описание и название товара** (с 26.10.2026): «перепиши описание Kevin.Murphy Angel.Wash — короче,
+на трёх языках», «переименуй FLAWLESS Bond Building Styling Lotion в … — лосьон для укладки»,
+«перенеси Proraso White в раздел Борода». Claude сначала читает товар, показывает, что запишет, и
+сохраняет **сразу** — это видно на странице товара. Название пишется так: имя от производителя
+латиницей, потом « — » и тип по-русски («Bio Botanical Shampoo — шампунь»). Если тип такой, что
+эстонская и английская страница его не скажут, Claude получит отказ со списком слов, которые
+магазин переводит, — и предложит одно из них. Адрес страницы и остатки не меняются; уже сделанные
+заказы остаются со старым названием. **«Вернуть»** — в Журнале, как для всего остального.
+
 **Что Claude может и чего не может:** искать товары, читать статьи, сохранять **черновики**,
-записывать **тексты товаров для Google**. Опубликовать, удалить, поменять опубликованную статью,
-цены, описание товара, увидеть заказы и клиентов — **не может**. Отключить — в тех же настройках Claude; смена пароля админки
+менять **описание, название, бренд, раздел** и **тексты для Google** у товара. Опубликовать,
+удалить, поменять опубликованную статью, цены, наличие, увидеть заказы и клиентов — **не может**. Отключить — в тех же настройках Claude; смена пароля админки
 отключает его сразу.
 
 ## How it works
@@ -78,7 +87,8 @@ opens: drafts only.
 admin login already needs.
 
 **The tools** — `search_products`, `get_product`, `list_sections`, `list_posts`, `get_post`
-(read), `save_draft` and `save_product_google_text` (write). `save_draft`:
+(read), `save_draft`, `save_product_google_text`, `save_product_description` and
+`save_product_name` (write). `save_draft`:
 
 * `ru` required, `et`/`en` optional; HTML (or markdown) through the blog's own `sanitizeHtml()`;
 * a link to a product page (`https://rempireshop.com/…/products/ID`, a relative path or
@@ -105,6 +115,26 @@ anything refused saves nothing. Languages not sent keep theirs. Written as an `o
 journal line with `via: "claude"` and the pair it replaced as `prev`, so «Вернуть» in the panel's
 journal puts the old texts back from any device (`src/lib/audit-undo.ts`); IndexNow hears about
 the page. `get_product` shows the current pair as `google_text`.
+
+**Where a product's words live.** A catalogue product's in `product_overrides` (journal line
+`override.set`, undo through `PUT /api/admin/overrides`); the owner's own product («c-…») on its
+`custom_products` row, where the panel writes them (journal line `product.update` with `prev`
+since 26.10.2026, undo through `PUT /api/admin/products/<id>` — `ownPrev()` in
+`src/lib/custom-products.ts`). Every write tool goes through `target()` in `tools.ts`, which
+picks the place; an own product can be written while it is hidden.
+
+`save_product_description` (26.10.2026): the page text, `ru`/`et`/`en` plain strings, merged
+over what is stored (languages not sent keep theirs). Plain text because `descOvHtml()` in
+`app.js` escapes it and makes a `<p>` of each block — HTML or markdown is refused, not
+stripped, so Claude rewrites it; ≤ 4000 characters; `seoDropMetaTalk()` per sentence;
+`seoOffLanguage()` on ET/EN. `get_product` hands the stored text back with its paragraphs
+(`description`, plus `description_by_owner`), not the feed's flattened copy.
+
+`save_product_name` (26.10.2026, Dim: «block + suggest»): `name`/`brand`/`section`, the same
+rules as the panel's «Что за товар» — one line, `MAX_NAME`/`MAX_BRAND`, a section from
+`PRODUCT_CATS`, a name `nameTranslatable()` (otherwise refused with what ET/EN would say and the
+whole `TRANSLATABLE_TAILS` list); a section move resets the subsection. Then
+`requestRebuild("product-rename")` and IndexNow. The id, page address and stock key never change.
 
 **Adding it in Claude Code** (for testing): `claude mcp add --transport http rempire https://rempireshop.com/api/mcp`,
 then `/mcp` → authenticate; loopback callbacks are accepted on any port.

@@ -14,6 +14,10 @@
  *                  that is the bug the journal had (map of the panel, 23.09).
  *   override.set   `undo = { kind: "override", id, patch }` — the product's
  *                  fields as they were; PUT /api/admin/overrides takes it as is.
+ *   product.update `undo = { kind: "product", id, patch }` — the same for the
+ *                  owner's own product («c-…»), through PUT
+ *                  /api/admin/products/<id> (26.10.2026: his Claude edits
+ *                  those too, and «Вернуть» has to reach them).
  *
  * `undone` marks a row a later row names in its `undoOf` — the journal draws it
  * struck through with «вернули» on every device, not only on the one that
@@ -29,7 +33,8 @@ import type { AuditRow } from "@/lib/orders";
 export type AuditChange = { path: string[]; before?: unknown; gone?: true };
 export type AuditUndo =
   | { kind: "setting"; key: string; changes: AuditChange[] }
-  | { kind: "override"; id: string; patch: Record<string, unknown> };
+  | { kind: "override"; id: string; patch: Record<string, unknown> }
+  | { kind: "product"; id: string; patch: Record<string, unknown> };
 export type JournalRow = Omit<AuditRow, "prev"> & { undo?: AuditUndo; undone?: true };
 
 /** More paths than this and the row is a replacement, not an edit — no «Вернуть». */
@@ -91,6 +96,9 @@ export function journalRows(rows: AuditRow[]): JournalRow[] {
     }
     if (r.action === "override.set" && p && typeof p.id === "string" && "prev" in r && plain(prev) && Object.keys(prev).length) {
       out.undo = { kind: "override", id: p.id, patch: prev };
+    }
+    if (r.action === "product.update" && p && typeof p.id === "string" && "prev" in r && plain(prev) && Object.keys(prev).length) {
+      out.undo = { kind: "product", id: p.id, patch: prev };
     }
     if (undoneIds.has(r.id)) out.undone = true;
     return out;

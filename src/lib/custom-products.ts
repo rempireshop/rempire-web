@@ -430,6 +430,26 @@ export async function updateCustomProduct(id: string, raw: unknown): Promise<Cus
   return rows.length ? fromRow(rows[0]) : null;
 }
 
+/**
+ * The row's fields a patch for updateCustomProduct() moves, as they are now —
+ * the audit's `prev`, so «Вернуть» in the journal puts them back from any
+ * device (src/lib/audit-undo.ts). A bare `price` or a size list moves the
+ * whole ladder, so both halves of it go back; a new section can drop the
+ * subsection, so that goes back too.
+ */
+export function ownPrev(cur: CustomProduct, fields: Record<string, unknown>): Record<string, unknown> {
+  const prev: Record<string, unknown> = {};
+  for (const k of ["brand", "name", "cat", "subcat", "description", "gallery", "seo"] as const) {
+    if (k in fields) prev[k] = cur[k] ?? null;
+  }
+  if ("cat" in fields) prev.subcat = cur.subcat ?? null;
+  if ("price" in fields || "sizes" in fields || "prices" in fields) {
+    prev.sizes = cur.sizes;
+    prev.prices = cur.prices;
+  }
+  return prev;
+}
+
 /** «Снять с продажи» (false) and its undo (true). Null when there is no such product. */
 export async function setCustomProductActive(id: string, active: boolean): Promise<CustomProduct | null> {
   if (!isCustomId(id)) return null;

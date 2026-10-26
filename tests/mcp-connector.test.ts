@@ -85,6 +85,7 @@ describe("the connector, end to end", () => {
     setLoginSleeper(async () => {});
     await truncateAll();
     await exec("truncate posts restart identity");
+    await exec("truncate custom_products");
   });
   afterEach(() => {
     process.env.ADMIN_PASSWORD_HASH = hashPassword(PASSWORD);
@@ -203,7 +204,8 @@ describe("the connector, end to end", () => {
     expect(note.status).toBe(202);
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
-      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text", "save_draft"],
+      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
+        "save_product_description", "save_product_name", "save_draft"],
     );
   });
 
@@ -376,6 +378,118 @@ describe("the connector, end to end", () => {
       expect(r.text).toContain("Nothing was saved");
     }
     expect(await getSeoOverride(id)).toBeNull();
+  });
+
+  /* 26.10.2026 — Dim: «he needs to be able to manage his shop». The page
+     text and the name too: checked like the panel's fields, written where
+     the panel keeps them, each back with «Вернуть». */
+  it("writes a product's page text, keeps the languages it was not given, hands it back with its paragraphs, and journals the old one", async () => {
+    const { getDescriptionOverride, setDescriptionOverride } = await import("@/lib/product-descriptions");
+    const { listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    await setDescriptionOverride(id, { EN: "Old English text." });
+    const ru = "Мягкий шампунь для тонких волос.\n\nПодходит для окрашенных волос:\n— очищает бережно\n— добавляет объём";
+
+    const r = await tool(t.access_token, "save_product_description", { id, ru, et: "Õrn šampoon peentele juustele." });
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text).saved).toEqual(["ru", "et"]);
+    expect(await getDescriptionOverride(id)).toEqual({ RU: ru, ET: "Õrn šampoon peentele juustele.", EN: "Old English text." });
+
+    resetProductCache();
+    const read = JSON.parse((await tool(t.access_token, "get_product", { id })).text);
+    expect(read.description.RU).toBe(ru);
+    expect(read.description_by_owner).toEqual(["RU", "ET", "EN"]);
+    expect(read.section.id).toBe("hair");
+
+    const line = journalRows(await listAudit(10)).find((x) => x.action === "override.set" && (x.payload as { id?: string }).id === id);
+    expect(line!.undo).toEqual({ kind: "override", id, patch: { description: { EN: "Old English text." } } });
+  });
+
+  it("refuses page text with HTML or markdown, Russian on the Estonian page, talk about missing data, or nothing in it — and saves nothing", async () => {
+    const { getDescriptionOverride } = await import("@/lib/product-descriptions");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    const refused = [
+      { id, ru: "<p>Шампунь для волос.</p>" },
+      { id, ru: "**Шампунь** для волос." },
+      { id, ru: "## Шампунь\n\nДля волос." },
+      { id, et: "Õrn шампунь peentele juustele." },
+      { id, en: "A gentle shampoo. No further product details are given." },
+      { id, ru: "   " },
+      { id: "made-up", ru: "Текст." },
+      { id },
+    ];
+    for (const args of refused) {
+      const r = await tool(t.access_token, "save_product_description", args);
+      expect(r.isError, JSON.stringify(args)).toBe(true);
+      expect(r.text).toContain("Nothing was saved");
+    }
+    expect(await getDescriptionOverride(id)).toBeNull();
+  });
+
+  it("renames a catalogue product under the same id, moves its section, journals the old one — and refuses a name a language could not say", async () => {
+    const { getOverrideRow, listAudit, upsertOverride } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    await upsertOverride(id, { subcat: "shampoo-oily" });
+
+    const bad = await tool(t.access_token, "save_product_name", { id, name: "Angel.Wash — эликсир свежести" });
+    expect(bad.isError).toBe(true);
+    expect(bad.text).toContain("Nothing was saved");
+    expect(bad.text).toContain("шампунь, кондиционер");   // the words that work
+    expect((await getOverrideRow(id))?.name ?? null).toBeNull();
+
+    const r = await tool(t.access_token, "save_product_name", { id, name: "Angel.Wash Gentle — шампунь для волос", section: "styling" });
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text)).toMatchObject({
+      id, saved: ["name", "section"],
+      names: { ET: "Angel.Wash Gentle — šampoon juustele", EN: "Angel.Wash Gentle — shampoo for hair" },
+    });
+    expect(await getOverrideRow(id)).toMatchObject({ name: "Angel.Wash Gentle — шампунь для волос", cat: "styling", subcat: null });
+    resetProductCache();
+    expect(JSON.parse((await tool(t.access_token, "get_product", { id })).text).names.RU).toBe("Angel.Wash Gentle — шампунь для волос");
+
+    const line = journalRows(await listAudit(10))
+      .find((x) => x.action === "override.set" && (x.payload as { via?: string }).via === "claude");
+    expect(line!.undo).toEqual({ kind: "override", id, patch: { name: null, cat: null, subcat: "shampoo-oily" } });
+  });
+
+  it("writes the owner's own product on its own row — text, Google pair, name — even while it is hidden, each with «Вернуть»", async () => {
+    const { createCustomProduct, getCustomProduct, setCustomProductActive } = await import("@/lib/custom-products");
+    const { getDescriptionOverride } = await import("@/lib/product-descriptions");
+    const { getSeoOverride } = await import("@/lib/product-seo");
+    const { listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const own = await createCustomProduct({ brand: "FLAWLESS", name: "Bond Building Styling Lotion — лосьон", cat: "styling", price: 24.9 });
+    await setCustomProductActive(own.id, false);
+
+    const d = await tool(t.access_token, "save_product_description", { id: own.id, ru: "Лосьон для укладки.", en: "A styling lotion." });
+    expect(d.isError, d.text).toBe(false);
+    const g = await tool(t.access_token, "save_product_google_text", {
+      id: own.id, ru: { title: "FLAWLESS Bond Building Styling Lotion — лосьон", description: "Лосьон для укладки, который бережёт волосы." },
+    });
+    expect(g.isError, g.text).toBe(false);
+    const n = await tool(t.access_token, "save_product_name", { id: own.id, name: "Bond Building Styling Lotion — лосьон для укладки" });
+    expect(n.isError, n.text).toBe(false);
+
+    expect(await getCustomProduct(own.id)).toMatchObject({
+      name: "Bond Building Styling Lotion — лосьон для укладки",
+      description: { RU: "Лосьон для укладки.", EN: "A styling lotion." },
+      seo: { RU: { title: "FLAWLESS Bond Building Styling Lotion — лосьон" } },
+      active: false,
+    });
+    // nothing in product_overrides, where it would shadow the row in the open shop
+    expect(await getDescriptionOverride(own.id)).toBeNull();
+    expect(await getSeoOverride(own.id)).toBeNull();
+    expect(journalRows(await listAudit(10)).filter((x) => x.action === "product.update").map((x) => x.undo)).toEqual([
+      { kind: "product", id: own.id, patch: { name: "Bond Building Styling Lotion — лосьон" } },
+      { kind: "product", id: own.id, patch: { seo: null } },
+      { kind: "product", id: own.id, patch: { description: null } },
+    ]);
   });
 
   it("reads an article back in the language asked for", async () => {
