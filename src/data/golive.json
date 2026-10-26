@@ -1754,10 +1754,10 @@
       ],
       "status": "doing",
       "title": "Google Реклама — тест 20 € до 08.11, карта Рената …0731",
-      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат.",
+      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. 26.10, вечер: 0 показов за полтора дня — при этом кампания и группа «Допущено», все 83 товара трёх брендов допущены без замечаний, по оплате предупреждений нет. Следующая проверка ~29.10; если по-прежнему 0 — поднять ставку или добавить бренды (решает Дим).",
       "en": {
         "title": "Google Ads — 20 € test until 08.11, Renat's card …0731",
-        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call."
+        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call. 26.10, evening: 0 impressions in a day and a half — while the campaign and ad group are «Eligible», all 83 products of the three brands are eligible with no issues, and billing shows no warning. Next check ~29.10; if still 0 — raise the bid or add brands (Dim decides)."
       }
     },
     {
@@ -1800,10 +1800,10 @@
       ],
       "status": "done",
       "title": "Merchant Center: наши фиды «Approved» → фиды Shopify выключить",
-      "detail": "Сделано 16.10: наши фиды EN и RU — 607 из 629 товаров одобрено (остальное — правила Google, например CBD); шесть источников Shopify Дим удалил. Эстонского фида нет: Merchant Center не даёт эстонский язык.",
+      "detail": "Сделано 16.10: наши фиды EN и RU — 607 из 629 товаров одобрено (остальное — правила Google, например CBD); шесть источников Shopify Дим удалил. Эстонского фида нет: Merchant Center не даёт эстонский язык. 26.10: в фиде и наборы — по товару на набор (set-…), с ценой набора и фото самих товаров; раньше Google находил два набора сам и отклонял их без доставки. 28 товаров Google ошибочно пометил «рецептурными лекарствами» — ограничение только во Франции и Германии.",
       "en": {
         "title": "Merchant Center: our feeds «Approved» → switch off Shopify's",
-        "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language."
+        "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language. 26.10: the sets are in the feed too — one item per set (set-…), at the set's price, with the products' own photos; before, Google found two sets by itself and refused them for lacking delivery. Google wrongly flagged 28 items as «prescription drugs» — limited in France and Germany only."
       }
     },
     {
