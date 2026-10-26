@@ -27,6 +27,8 @@ import {
   type DiscountIntent,
 } from "./intent";
 import { answerLang, type Lang3 } from "./reply-lang";
+import { TRANSLATABLE_TAILS } from "@/lib/product-name";
+import { namedForPrompt, TEXT_TRIGGER } from "./named";
 
 /* The shop chat's brain. Rule-based fallback lives in the client
    (public/shop2/chat.js); when OPENAI_API_KEY is set on Vercel this route
@@ -53,7 +55,9 @@ const PROMPT_V = 29; // echoed in responses so a stale deployment is visible fro
    three descriptions); the long-form ones (an article) no longer travel in
    the chat completion at all — see draft_post in adminPrompt(). The shop
    chat answers in a sentence and a few ids and keeps a small cap. */
-const MAX_TOKENS_ADMIN = 1500;
+/* 2500 since 26.10.2026: a description translated into two languages is the
+   assistant's longest honest action now (set_description, set_page_texts). */
+const MAX_TOKENS_ADMIN = 2500;
 const MAX_TOKENS_SHOP = 400;
 
 /* What the owner reads when the model's answer could not be read — never
@@ -80,6 +84,15 @@ const PHOTO_MISSED: Record<string, string> = {
   RU: "Фото я не поставил: не понял, к какой статье. Откройте её в «Блоге» и попросите ещё раз — прямо оттуда.",
   ET: "Fotot ma ei lisanud: ei saanud aru, millise artikli juurde. Ava see «Blogi» all ja palu uuesti — otse sealt.",
   EN: "I did not add the photo: I could not tell which article. Open it under “Blog” and ask again from there.",
+};
+/* A text action the checks refused whole (sanitizeAction in ./actions — the
+   connector's own rules): said, so the owner is not left with «подтвердите»
+   and nothing to confirm. */
+const TEXT_TYPES = new Set(["set_seo", "set_description", "set_names", "set_size_prices", "set_page_texts"]);
+const TEXT_REFUSED: Record<string, string> = {
+  RU: "Это изменение я не подготовил: текст не прошёл проверку магазина (русские слова в эстонском или английском, фраза про «нет данных», название, которое сайт не переведёт, или страница, которой нет). Попросите ещё раз — я перепишу.",
+  ET: "Seda muudatust ma ei valmistanud: tekst ei läbinud poe kontrolli (venekeelsed sõnad eesti- või ingliskeelses tekstis, lause puuduvate andmete kohta, nimi, mida sait ei tõlgi, või lehte pole). Palu uuesti — kirjutan ümber.",
+  EN: "I did not prepare this change: the text did not pass the shop's checks (Russian words in the Estonian or English text, a sentence about missing data, a name the site cannot translate, or a page that does not exist). Ask again and I will rewrite it.",
 };
 /* A promo code proposed with a date or a cap the owner never named has them
    taken off (promoAsAsked in ./actions) — and the model's own sentence may
@@ -470,6 +483,7 @@ function adminPrompt(
   toShipSummary = "",
   weekSummary = "",
   openPost: OpenPostBrief | null = null,
+  named = "",
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -496,7 +510,9 @@ ${hero.length ? hero.map((s) => JSON.stringify(s)).join("\n") : "(the built-in d
 
 SHOP DETAILS as they are right now:
 ${content}
-
+${named ? `
+${named}
+` : ""}
 SALES THIS WEEK — the last 7 days, read from the shop's own database for this very question. The same window and the same queries «Обзор» sums as «выручка за неделю» and «Аналитика» draws for «7 дней», so your figure and the panel's are one figure, not two that happen to be close. This block is ALWAYS here: it is the answer to «сколько заработали за неделю», «покажи аналитику за неделю», «сколько заказов на неделе», «how much did we sell this week» — answer from these numbers, never say the week is not loaded. Point to «Аналитика» afterwards, for the detail. What the week does NOT carry — visitors, conversion, where they came from, what was searched for — is on «Аналитика» and nowhere else: give him the takings you do have and send him there, never invent a percentage.
 ${weekSummary || "(not available right now — say so rather than guessing, and point to «Аналитика»)"}
 
@@ -522,7 +538,7 @@ What the panel really does (say so when relevant, and never promise more): photo
 You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute), and MOST actions land in the change journal — «Настройки → Журнал» — where «Вернуть» takes them back: for those, say «отменить можно в журнале» when it fits. THESE DO NOT GO THROUGH THE JOURNAL, so never promise «Вернуть» or «отменить можно в журнале» for them: stock_adjust and stock_set (the shelf keeps a ledger of movements instead — a wrong figure is corrected by another movement, and the reply should say that: «поправим ещё одним приходом/списанием»), draft_post, publish_post and add_post_photo (an article is edited, and a picture in it deleted, in «Блог»), set_bundle and delete_bundle (the journal keeps a line about them, but there is no button that puts them back). Never call a change a demo. Available actions:
   {"type":"set_price","id":"<catalogue id>","value":<number 1..500>} — change a product's price
   {"type":"set_stock","id":"<catalogue id>","value":"in|low|out"} — availability
-  {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace the product's Google title and meta description (Russian unless the owner asks otherwise). title: AT MOST 60 characters including spaces — count them — and it must carry the brand, the product type and the volume the way a customer types them into Google («Proraso масло для бороды, 30 мл»); no keyword stuffing, no trailing «| Rempire» (the site appends it). description: AT MOST 155 characters including spaces — what the product is and one concrete reason to buy it, never a repeat of the title, never an invented ingredient, result or claim.
+  {"type":"set_seo","id":"<product id>","seo":{"RU":{"title":"<up to 60 chars>","description":"<up to 155 chars>"},"ET":{…},"EN":{…}}} — write/replace a product's Google title and meta description, any product (the catalogue's or the owner's own), in the languages you send — a language left out keeps its own pair. When the owner asks for «Google-тексты» without naming a language, send all three. Estonian and English are written in that language, every word but the brand and the maker's product name. title: AT MOST 60 characters including spaces — count them — and it must carry the brand, the product type and the volume the way a customer types them into Google («Proraso масло для бороды, 30 мл»); no keyword stuffing, no trailing «| Rempire» (the site appends it). description: AT MOST 155 characters including spaces — what the product is and one concrete reason to buy it, never a repeat of the title, never an invented ingredient, result or claim.
   {"type":"toggle_flow","id":"abandoned|birthday|backstock","value":true|false} — switch a customer e-mail flow on or off
   {"type":"toggle_chatbot","value":true|false} — switch the storefront AI chat widget on or off («выключи чат на сайте»)
   {"type":"toggle_bundles","value":true|false} — show or hide the curated sets («наборы») on the storefront («скрой наборы»)
@@ -549,7 +565,11 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"stock_adjust","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","delta":6,"reason":"goods_in|adjust|return"} — a RELATIVE stock move, real numbers not the mало/нет badge («приход 6 штук масла Proraso» is delta:6, reason:"goods_in"; «спишите 2 штуки, разбились» is delta:-2, reason:"adjust"; «вернули 1 шампунь» is delta:1, reason:"return"). delta is the change, never the new total. reason defaults to "adjust" when the owner does not say why.
   {"type":"stock_set","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","qty":10} — an ABSOLUTE count after a physical recount («на полке на самом деле 10 штук» → qty:10), not a delta.
   {"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"…","ET":"…","EN":"…"}} — add a NEW product the shop does not have yet («добавь товар», «заведи новый товар», «новый бальзам Proraso за 14,90»). Never for a product already in the CATALOGUE above — change that one with set_price/set_stock instead. brand and name as the owner said them; name = the line and the type, with the Russian type tail the catalogue uses («Beard Balm — бальзам для бороды»). cat is exactly one of hair|styling|beard|face|body|perfume|merch. price 1–500 €. sizes ONLY when the owner named volumes, each with its own price; otherwise leave sizes out and give one price. description: all three languages, two to four plain sentences each. It is the product page's own text and its opening is what Google shows, so the first sentence names the type and the brand the way a customer searches for them («Бальзам для бороды Proraso …») and says what it does; then who it is for. Only what the owner said — never an invented ingredient, result, award or medical claim. Leave it out entirely rather than pad it. Photos are NOT part of this action: after the owner confirms, the panel creates the product and opens it on its «Фото и видео» tab, so say in the reply that the photos are added there.
-  {"type":"update_product","id":"c-…","brand":"…","name":"…","cat":"beard","subcat":"ba","sizes":[{"size":"100 мл","price":14.9}],"price":14.9,"description":{"RU":"…","ET":"…","EN":"…"}} — change a product the owner created himself: ONLY an id starting with «c-» from the CATALOGUE above (a catalogue product is changed with set_price/set_stock/set_seo instead — its name and sizes cannot be edited here). Send the id and ONLY the fields that change. sizes replaces the WHOLE size list, each size with its own price — copy every size the product keeps from its «|sizes:» line (a size left out is removed; a size respelled at the same position keeps its stock count); price alone makes the product single-price; description replaces all three languages, so write all three; cat exactly one of hair|styling|beard|face|body|perfume|merch («переименуй мой бальзам в …», «поставь бальзаму Proraso 16,90», «добавь объём 250 мл за 24,90», «перенеси товар в раздел борода»)
+  {"type":"set_description","id":"<product id>","value":{"RU":"…","ET":"…","EN":"…"}} — the description on a product's page, any product. Plain text: paragraphs separated by an empty line, a list as lines starting with «— », no HTML, no markdown, no «**». Languages left out keep their own text. To shorten, rewrite or TRANSLATE a description, work from the text PRODUCTS THE OWNER MEANS shows — translate faithfully, keep brand and product names, never add a claim. When the Russian changes in substance, send all three languages. Only facts the owner gave or the description already states; never «нет данных».
+  {"type":"set_names","id":"<catalogue id>","name":"…","brand":"…","cat":"beard"} — rename a product of the catalogue, change its brand or move it to another section (only the fields that change; the owner's own «c-…» product uses update_product). name: the maker's product name in Latin letters exactly as the maker spells it, then « — » and the type in Russian from the shop's words (${TRANSLATABLE_TAILS.join(", ")}; a head word may go on with «для волос», «для бороды», «для лица», «для бритья», «для укладки», «для кожи головы») — a name the Estonian and English pages cannot say is refused. The page address, stock and past orders do not change.
+  {"type":"set_size_prices","id":"<product id>","prices":[{"size":"250 мл","price":24.9}]} — the price of one or more SIZES of a product that has sizes (the sizes as PRODUCTS THE OWNER MEANS lists them), each 1–500 €; the other sizes keep theirs. A product with one price takes set_price instead.
+  {"type":"set_page_texts","value":{"cat":{"beard":{"RU":{"title":"…","desc":"…","intro":"…"}}},"brand":{"Kevin.Murphy":{"ET":{"intro":"…"}}}}} — the words of a section page (cat: hair|styling|beard|face|body|perfume|merch|all) or a brand page (brand as the CATALOGUE spells it): title — the Google title, at most 60 characters; desc — the Google description, at most 155; intro — the paragraph under the page's heading, one paragraph. Only the fields that change; "" gives a field back to the shop's standard text. To translate or rewrite, work from PAGES THE OWNER MEANS. These are what «Настройки → Тексты страниц» edits.
+  {"type":"update_product","id":"c-…","brand":"…","name":"…","cat":"beard","subcat":"ba","sizes":[{"size":"100 мл","price":14.9}],"price":14.9,"description":{"RU":"…","ET":"…","EN":"…"}} — change a product the owner created himself: ONLY an id starting with «c-» from the CATALOGUE above (a catalogue product is changed with set_names, set_price, set_size_prices, set_stock, set_description and set_seo instead). Send the id and ONLY the fields that change. sizes replaces the WHOLE size list, each size with its own price — copy every size the product keeps from its «|sizes:» line (a size left out is removed; a size respelled at the same position keeps its stock count); price alone makes the product single-price; description replaces all three languages, so write all three; cat exactly one of hair|styling|beard|face|body|perfume|merch («переименуй мой бальзам в …», «поставь бальзаму Proraso 16,90», «добавь объём 250 мл за 24,90», «перенеси товар в раздел борода»)
 Use exactly one action per reply, only when the owner asks for a change. If the owner asks to change several things, do the first and say you'll do the rest one by one.
 
 ${intentPromptBlock(intent)}
@@ -647,7 +667,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
   if (limited(ip)) return NextResponse.json({ error: "rate" }, { status: 429 });
 
-  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown; post?: unknown };
+  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown; post?: unknown; product?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -765,6 +785,17 @@ export async function POST(req: NextRequest) {
       !isAdmin && !isMini ? liveRowsForPrompt() : ({} as Record<string, LiveRow>),
     ]);
 
+  /* The product open in the goods editor and whatever product or page his
+     words name, with their texts as the connector reads them — so «переведи
+     описание», «сделай заголовок короче» have something to work from
+     (namedForPrompt above). Only for a question about texts, names or prices,
+     or with a product open. */
+  const allRows = [...(catalogue as CatRow[]), ...custom.rows];
+  const openProduct = isAdmin && typeof body.product === "string" && allRows.some((r) => r.id === body.product) ? body.product : "";
+  const named = isAdmin && !isMini && (openProduct || TEXT_TRIGGER.test(lastUser))
+    ? await namedForPrompt(lastUser, allRows, openProduct)
+    : "";
+
   /* The panel's own language, and then the language the owner actually wrote
      in — see ./reply-lang.ts for why the question wins and what happens when
      it says nothing. `panelLang` is still what the storefront chat answers in:
@@ -776,7 +807,7 @@ export async function POST(req: NextRequest) {
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary, openPost)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary, openPost, named)
         : shopPrompt(lang, lastUser, blogLines, custom.rows, liveRows);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -846,7 +877,9 @@ export async function POST(req: NextRequest) {
      with its stock count). Applying the salvage would delete precisely the
      part that was cut off. The reply still stands, and CUT_REPLY below says
      the answer was cut; the action does not. */
-  const CUT_UNSAFE = new Set(["set_hero", "set_bundle", "update_product"]);
+  /* …and the texts the owner reads on a page: a description, a page's line or
+     a Google pair cut mid-sentence would be saved as it is (26.10.2026) */
+  const CUT_UNSAFE = new Set(["set_hero", "set_bundle", "update_product", "set_description", "set_page_texts", "set_seo"]);
   let cutAction = false;
   if (extracted.truncated && rawAction && typeof rawAction === "object"
       && CUT_UNSAFE.has(String((rawAction as { type?: unknown }).type))) {
@@ -869,6 +902,9 @@ export async function POST(req: NextRequest) {
     attachedKeys: new Set(attachments.map((a) => a.key)),
     openPostSlug: openPost?.slug ?? "",
     postSlugs,
+    // the words a text in Estonian or English may keep, and the brand pages there are
+    products: new Map(allRows.map((r) => [r.id, { name: r.n, brand: r.b }])),
+    brands: new Set(allRows.map((r) => r.b)),
   }), lastUser), lastUser);
   /* …and a promo code leaves with the date and the cap the owner named, and
      no others (promoAsAsked in ./actions): «на 10 %» came back «до 30.09.2026
@@ -911,6 +947,14 @@ export async function POST(req: NextRequest) {
   if (isAdmin && !action && rawAction && typeof rawAction === "object"
       && PHOTO_TYPES.has(String((rawAction as { type?: unknown }).type))) {
     reply += (/[.!?…»)]$/.test(reply) ? " " : ". ") + (PHOTO_MISSED[lang] ?? PHOTO_MISSED.RU);
+  }
+  /* …and the same for a text the checks refused (sanitizeAction: Russian on
+     the Estonian page, «нет данных», a name a language cannot say, a page the
+     shop does not have) — «подтвердите» with no card under it would be untrue */
+  if (isAdmin && !action && !cutAction && rawAction && typeof rawAction === "object"
+      && TEXT_TYPES.has(String((rawAction as { type?: unknown }).type))) {
+    reply += (/[.!?…»)]$/.test(reply) ? " " : ". ") + (TEXT_REFUSED[lang] ?? TEXT_REFUSED.RU);
+    retry = true;
   }
 
   /* The last door on «набор» vs «промокод». The model was told which of the

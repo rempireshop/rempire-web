@@ -88,7 +88,8 @@ describe("sanitizeAction — the actions added this week", () => {
     ) as { title: string; description: string };
     expect(a).toMatchObject({ type: "set_seo", id: "c-proraso-beard-balm", title: "A B" });
     expect(a.description).toHaveLength(170);
-    expect(Object.keys(a).sort()).toEqual(["description", "id", "title", "type"]);
+    // + `seo`, the per-language pairs since 26.10.2026 (tests/assistant-texts.test.ts)
+    expect(Object.keys(a).sort()).toEqual(["description", "id", "seo", "title", "type"]);
     expect(sanitizeAction({ type: "set_seo", id: "touchable", title: { RU: "x" }, description: 5 }, known, true)).toBeNull();
     expect(sanitizeAction({ type: "set_seo", id: "c-nobody", title: "t" }, known, true)).toBeNull();
     expect(sanitizeAction({ type: "set_seo", id: "touchable", title: "t" }, known, false)).toBeNull();

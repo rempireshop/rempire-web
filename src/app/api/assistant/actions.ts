@@ -14,6 +14,9 @@
 
 import { sanitizeContentPatch } from "@/lib/content";
 import { shelfVariant } from "@/lib/inventory";
+import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
+import { nameTranslatable } from "@/lib/product-name";
+import { PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
@@ -1083,6 +1086,10 @@ export interface SanitizeOptions {
   openPostSlug?: string;
   /** Every slug the prompt's BLOG POSTS block listed; empty when it was never fetched. */
   postSlugs?: Set<string>;
+  /** id → the product's Russian name and brand: what a text in Estonian or English may keep as it is. */
+  products?: Map<string, { name: string; brand: string }>;
+  /** The brands the shop shows — the only brand pages set_page_texts may write. */
+  brands?: Set<string>;
 }
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean, opts: SanitizeOptions = {}): object | null {
@@ -1111,12 +1118,14 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
     return { type: t, id: x.id, value: x.value };
   }
   if (t === "set_seo" && typeof x.id === "string" && known.has(x.id)) {
-    // the same one-line, 70/170 shape src/lib/product-seo.ts stores — a
-    // snippet, not a paragraph, and nothing a <title> cannot carry
-    const title = oneLine(x.title, 70);
-    const description = oneLine(x.description, 170);
-    if (!title && !description) return null;
-    return { type: t, id: x.id, title, description };
+    /* the same one-line, 70/170 shape src/lib/product-seo.ts stores — a
+       snippet, not a paragraph, and nothing a <title> cannot carry — now in
+       all three languages (sanitizeSeoLangs, 26.10.2026). The Russian pair
+       still rides as title/description, the shape older journal lines and
+       the panel's seoOfAction() read. */
+    const seo = sanitizeSeoLangs(x, opts.products?.get(x.id) ?? { name: "", brand: "" });
+    if (!Object.keys(seo).length) return null;
+    return { type: t, id: x.id, title: seo.RU?.t ?? "", description: seo.RU?.d ?? "", seo };
   }
   if (t === "toggle_flow" && typeof x.id === "string" && ["abandoned", "birthday", "backstock"].includes(x.id) && typeof x.value === "boolean") {
     return { type: t, id: x.id, value: x.value };
@@ -1262,7 +1271,174 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
     const patch = sanitizeUpdateProduct(x, known);
     return patch ? { type: t, ...patch } : null;
   }
+  /* The owner's words on any product and on the section and brand pages —
+     what his Claude does through the connector (src/lib/mcp/tools.ts), here
+     as actions the panel confirms (Dim, 26.10.2026: «Помощник needs to have
+     same capabilities like Claude has»). See sanitizeProductTexts below. */
+  if (t === "set_description") return sanitizeSetDescription(x, known, opts.products);
+  if (t === "set_names") return sanitizeSetNames(x, known);
+  if (t === "set_size_prices") return sanitizeSizePrices(x, known);
+  if (t === "set_page_texts") return sanitizePageTextsPatch(x.value ?? x, opts.brands);
   return null;
+}
+
+/* ---- the owner's words on products and pages (26.10.2026) ----------------
+ *
+ * The connector's product and page tools, as assistant actions: the same
+ * checks the connector holds a text to (src/lib/mcp/tools.ts) — no HTML or
+ * markdown on a page that prints every character, no sentence about missing
+ * data (seoDropMetaTalk), no Russian on the Estonian or English page outside
+ * the brand and the maker's own name (seoOffLanguage), a name every language
+ * can say (nameTranslatable), a page the shop has. A language that fails is
+ * left out of the action; with nothing left there is no action, and the route
+ * tells the owner why (TEXT_REFUSED). All of these are confirmed in the panel
+ * first and land in the journal with «Вернуть».
+ */
+type Who = { name: string; brand: string };
+const LANGS3 = ["RU", "ET", "EN"] as const;
+type L3 = (typeof LANGS3)[number];
+
+/** A language's half of an object the model may spell {ru:…} or {RU:…}. */
+function langOf(src: Record<string, unknown>, l: L3): unknown {
+  return src[l] ?? src[l.toLowerCase()];
+}
+/** Is this text what its language says it is, and about the product? */
+function textHolds(text: string, lang: L3, who: Who): boolean {
+  if (text.split(/(?<=[.!?…])\s+/).some((s) => s && !seoDropMetaTalk(s))) return false;
+  return !seoOffLanguage(text, lang, who);
+}
+
+/**
+ * The Google pair of a product, per language: `seo: {RU:{title,description},
+ * ET:…, EN:…}`, or the older Russian-only `title`/`description`. Each pair is
+ * one line, 70/170 like the product «Для Google» boxes; a language that does
+ * not hold is dropped. The panel lays the result over the pairs the product
+ * already has (seoOfAction in app.js), so a language left out keeps its own.
+ */
+export function sanitizeSeoLangs(x: Record<string, unknown>, who: Who): Partial<Record<L3, { t: string; d: string }>> {
+  const src = x.seo && typeof x.seo === "object" && !Array.isArray(x.seo)
+    ? (x.seo as Record<string, unknown>)
+    : { RU: { title: x.title, description: x.description } };
+  const out: Partial<Record<L3, { t: string; d: string }>> = {};
+  for (const l of LANGS3) {
+    const v = langOf(src, l);
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const pair = v as Record<string, unknown>;
+    const t = oneLine(pair.title ?? pair.t, 70);
+    const d = oneLine(pair.description ?? pair.desc ?? pair.d, 170);
+    if (!t && !d) continue;
+    if (!textHolds(`${t}\n${d}`.trim(), l, who)) continue;
+    out[l] = { t, d };
+  }
+  return out;
+}
+
+/** The page text of a product, per language — plain paragraphs, as save_product_description takes it. */
+function sanitizeSetDescription(x: Record<string, unknown>, known: Set<string>, products?: Map<string, Who>): object | null {
+  const id = typeof x.id === "string" ? x.id.trim() : "";
+  if (!known.has(id)) return null;
+  const who = products?.get(id) ?? { name: "", brand: "" };
+  const src = x.value && typeof x.value === "object" && !Array.isArray(x.value)
+    ? (x.value as Record<string, unknown>)
+    : x.description && typeof x.description === "object" ? (x.description as Record<string, unknown>) : {};
+  const value: Partial<Record<L3, string>> = {};
+  for (const l of LANGS3) {
+    const v = langOf(src, l);
+    if (typeof v !== "string") continue;
+    const text = v.replace(/\r\n?/g, "\n").replace(/[\p{Cc}\p{Cf}]/gu, (c) => (c === "\n" ? "\n" : " "))
+      .replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, 4000);
+    if (!text) continue;
+    // descOvHtml() prints every character: a tag or a ** would show on the page
+    if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) continue;
+    if (!textHolds(text, l, who)) continue;
+    value[l] = text;
+  }
+  return Object.keys(value).length ? { type: "set_description", id, value } : null;
+}
+
+/** A catalogue product's name, brand and section — the owner's own product is renamed with update_product. */
+function sanitizeSetNames(x: Record<string, unknown>, known: Set<string>): object | null {
+  const id = typeof x.id === "string" ? x.id.trim() : "";
+  if (!known.has(id)) return null;
+  const out: Record<string, unknown> = {};
+  if (x.name !== undefined) {
+    const name = oneLine(x.name, 120);
+    if (!name || !nameTranslatable(name)) return null;
+    out.name = name;
+  }
+  if (x.brand !== undefined) {
+    const brand = oneLine(x.brand, 60);
+    if (!brand) return null;
+    out.brand = brand;
+  }
+  if (x.cat !== undefined || x.category !== undefined || x.section !== undefined) {
+    const cat = oneLine(x.cat ?? x.category ?? x.section, 20).toLowerCase();
+    if (!PRODUCT_CATS.includes(cat)) return null;
+    out.cat = cat;
+  }
+  if (!Object.keys(out).length) return null;
+  // the owner's own row takes the same three fields through its own route
+  return CUSTOM_ID_RE.test(id) ? { type: "update_product", id, ...out } : { type: "set_names", id, ...out };
+}
+
+/** Prices per size, the sizes named as the shop names them; the panel lays them over the product's ladder. */
+function sanitizeSizePrices(x: Record<string, unknown>, known: Set<string>): object | null {
+  const id = typeof x.id === "string" ? x.id.trim() : "";
+  if (!known.has(id) || !Array.isArray(x.prices)) return null;
+  const prices: Array<{ size: string; price: number }> = [];
+  const seen = new Set<string>();
+  for (const item of x.prices.slice(0, PRODUCT_MAX_SIZES)) {
+    const o = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>) : null;
+    if (!o) return null;
+    const size = oneLine(o.size, 30);
+    const price = productPrice(o.price);
+    if (price === null || seen.has(size.toLowerCase())) return null;
+    seen.add(size.toLowerCase());
+    prices.push({ size, price });
+  }
+  return prices.length ? { type: "set_size_prices", id, prices } : null;
+}
+
+/**
+ * A patch of settings.page_texts — {cat|brand: {key: {RU: {title, desc,
+ * intro}}}}, "" giving a field back to the shop's standard text — for a page
+ * the shop has: a section, or a brand it shows (`brands`). The same lengths
+ * cleanPageTexts() keeps (src/lib/page-texts.mjs); a field that does not hold
+ * is dropped.
+ */
+export function sanitizePageTextsPatch(raw: unknown, brands?: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const src = raw as Record<string, unknown>;
+  const patch: Record<string, Record<string, Partial<Record<L3, Record<string, string>>>>> = {};
+  let n = 0;
+  for (const kind of ["cat", "brand"] as const) {
+    const pages = src[kind];
+    if (!pages || typeof pages !== "object" || Array.isArray(pages)) continue;
+    for (const rawKey of Object.keys(pages as object)) {
+      const key = kind === "cat"
+        ? rawKey.toLowerCase()
+        : [...(brands ?? [])].find((b) => b.toLowerCase() === rawKey.trim().toLowerCase()) ?? "";
+      if (!key || (kind === "cat" && !(PAGE_TEXT_CATS as readonly string[]).includes(key))) continue;
+      const page = (pages as Record<string, unknown>)[rawKey];
+      if (!page || typeof page !== "object" || Array.isArray(page)) continue;
+      for (const l of LANGS3) {
+        const f = langOf(page as Record<string, unknown>, l);
+        if (!f || typeof f !== "object" || Array.isArray(f)) continue;
+        for (const [field, ...names] of [["title", "title"], ["desc", "desc", "description"], ["intro", "intro"]] as const) {
+          const name = names.find((k) => k in (f as object));
+          if (!name) continue;
+          const v = (f as Record<string, unknown>)[name];
+          if (typeof v !== "string") continue;
+          const text = oneLine(v, PAGE_TEXT_LIMITS[field]);
+          if (text && !textHolds(text, l, { name: "", brand: kind === "brand" ? key : "" })) continue;
+          ((patch[kind] ??= {})[key] ??= {})[l] ??= {};
+          patch[kind][key][l]![field] = text;
+          n++;
+        }
+      }
+    }
+  }
+  return n ? { type: "set_page_texts", value: patch } : null;
 }
 
 /* ---- what the panel tells the model about the banner it already has ----- */

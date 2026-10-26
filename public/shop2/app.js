@@ -1424,6 +1424,7 @@
       "есть свои тексты": "on omad tekstid",
       "стандартные": "tavalised",
       "Тексты страниц сохранены": "Lehtede tekstid salvestatud",
+      "Цены сохранены ✓": "Hinnad salvestatud ✓",
       "Тексты страниц изменены": "Lehtede tekste muudeti",
       "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "Pealkiri ja kirjeldus on see, mida Google otsingus näitab. Teksti pealkirja all näevad ostjad osakonna või brändi lehel.",
       "Пустое поле — стандартный текст магазина, он серым в поле. Новые тексты в магазине сразу, в Google — после того как он заново прочитает страницу.": "Tühi väli on poe tavaline tekst, see on väljas hallina. Uued tekstid on poes kohe, Google'is pärast seda, kui ta lehe uuesti loeb.",
@@ -5053,6 +5054,7 @@
       "есть свои тексты": "has own texts",
       "стандартные": "standard",
       "Тексты страниц сохранены": "Page texts saved",
+      "Цены сохранены ✓": "Prices saved ✓",
       "Тексты страниц изменены": "Page texts changed",
       "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "The title and description are what Google shows in search. Shoppers see the text under the heading on the section or brand page.",
       "Пустое поле — стандартный текст магазина, он серым в поле. Новые тексты в магазине сразу, в Google — после того как он заново прочитает страницу.": "An empty box is the shop's standard text, shown in grey in the box. New texts are in the shop at once, in Google after it reads the page again.",
@@ -40931,6 +40933,31 @@
   /** The assistant's update_product, once the owner pressed «Применить»:
       PUT the patch, adopt the answer, and leave a journal line whose undo
       PUTs the row back as it was (srvPush's update_product branch). */
+  /** The assistant's prices per size, laid over the product's own ladder and
+      written the editor's way: set_sizes (or set_price for one price) on a
+      catalogue product, the row's sizes and prices on the owner's own. */
+  function applySizePrices(a) {
+    var p = admEditProduct(a.id);
+    if (!p) { toast("Товар не найден — обновите список товаров"); return; }
+    var lad = edLadderNow(p).map(function (r) { return { size: r.size, price: r.price }; });
+    for (var i = 0; i < (a.prices || []).length; i++) {
+      var want = String(a.prices[i].size || "").trim().toLowerCase(), hit = -1;
+      for (var k = 0; k < lad.length; k++) if (String(lad[k].size).trim().toLowerCase() === want) hit = k;
+      if (hit < 0 && lad.length === 1 && !lad[0].size) hit = 0;
+      if (hit < 0) { toast("У товара нет такого объёма."); render(); return; }
+      lad[hit].price = Number(a.prices[i].price);
+    }
+    var multi = lad.length > 1 || !!lad[0].size;
+    if (p.custom) {
+      applyUpdateProduct(multi
+        ? { type: "update_product", id: a.id, sizes: lad.map(function (r) { return r.size; }), prices: lad.map(function (r) { return r.price; }) }
+        : { type: "update_product", id: a.id, price: lad[0].price });
+      return;
+    }
+    var entry = demoApply(multi ? { type: "set_sizes", id: a.id, value: lad, name: p.brand + " — " + p.name } : { type: "set_price", id: a.id, value: lad[0].price });
+    toast("Цены сохранены ✓", entry);
+    render();
+  }
   function applyUpdateProduct(a) {
     var cur = findCustom(a.id);
     if (!cur) { toast("Товар не найден — обновите список товаров"); return; }
@@ -44529,7 +44556,27 @@
   function seoOfAction(a) {
     if (a.value !== undefined) return seoNorm(a.value);
     var cur = DEMO.seo[a.id] || {};
+    // the assistant since 26.10.2026: the languages it wrote, over the pairs the product has
+    if (a.seo && typeof a.seo === "object") return seoMerge(cur, a.seo);
     return seoNorm({ RU: { t: a.title || "", d: a.description || "" }, ET: cur.ET, EN: cur.EN });
+  }
+  /** `cur` ({RU:{t,d}…}) with the languages `langs` carries laid over it — a language left out keeps its own. */
+  function seoMerge(cur, langs) {
+    var out = { RU: cur && cur.RU, ET: cur && cur.ET, EN: cur && cur.EN };
+    SEO_LANGS.forEach(function (L) {
+      var x = langs && langs[L];
+      if (x && typeof x === "object") out[L] = { t: String(x.t || ""), d: String(x.d || "") };
+    });
+    return seoNorm(out);
+  }
+  /** A description {RU,ET,EN} with the languages `value` carries laid over `cur`. */
+  function descMerge(cur, value) {
+    var out = {};
+    SEO_LANGS.forEach(function (L) {
+      var v = (value && value[L]) || (cur && cur[L]) || "";
+      if (v) out[L] = v;
+    });
+    return out;
   }
   /** What the page in `lang` shows: its own pair, each half falling back to
       the Russian one — or null when the owner wrote nothing at all. */
@@ -46894,6 +46941,11 @@
        cannot help for a hidden product: it is not in CATALOGUE any more,
        which is the whole point, so the action carries the name it was made
        under and the line reads the same after a reload. */
+    // the assistant's prices for some sizes, in the words «Объёмы …» already has (UI_RX)
+    if (a.type === "set_size_prices") {
+      return "Объёмы «" + (p ? p.brand + " " + p.name : a.id) + "»: " +
+        (a.prices || []).map(function (r) { return (r.size || "—") + " · " + eur(r.price); }).join(" / ");
+    }
     if (a.type === "set_sizes") {
       var lad = sizeLadder(a.value);
       return "Объёмы «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
@@ -47714,6 +47766,27 @@
      its proposal; a flow that touches the shop or the money sets
      `overlay: true` and screenAdmin() lifts the very same card onto a scrim —
      a card over the page on a desktop, a sheet at the bottom on a phone. */
+  /** The words a text action is about to save, language by language — the
+      card's own box (a.preview), so the owner reads them before «Применить». */
+  function admTextPreview(a) {
+    var lines = [];
+    var cut = function (s) { s = String(s || ""); return s.length > 600 ? s.slice(0, 600) + "…" : s; };
+    if (a.type === "set_description") {
+      SEO_LANGS.forEach(function (L) { if (a.value && a.value[L]) lines.push(L + ": " + cut(a.value[L])); });
+    } else if (a.type === "set_seo" && a.seo) {
+      SEO_LANGS.forEach(function (L) { var x = a.seo[L]; if (x) lines.push(L + ": " + (x.t || "—") + " / " + (x.d || "—")); });
+    } else if (a.type === "set_page_texts" && a.value) {
+      ["cat", "brand"].forEach(function (kind) {
+        Object.keys(a.value[kind] || {}).forEach(function (key) {
+          Object.keys(a.value[kind][key] || {}).forEach(function (L) {
+            var f = a.value[kind][key][L] || {};
+            Object.keys(f).forEach(function (field) { lines.push(ptName(kind, key) + " · " + L + " · " + field + ": " + (cut(f[field]) || "—")); });
+          });
+        });
+      });
+    }
+    return lines.join("\n\n");
+  }
   function confirmCard(a) {
     /* txt(), not esc() straight: this card is the one the ASSISTANT renders,
        so `a` is whatever the model proposed — and `title` on three of its
@@ -47887,7 +47960,10 @@
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), post: blogOpenForAI() })
+      /* product: the one open in the goods editor — what «переведи описание»
+         is about while it is on screen (the route reads its texts the way the
+         Claude connector does, 26.10.2026) */
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), post: blogOpenForAI(), product: S.adminEdit && S.adminEdit !== "new" ? String(S.adminEdit) : null })
     })
       .then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
@@ -47923,6 +47999,8 @@
            name lives in the sets list, which this side pane may never have
            opened, so it is fetched now and loadAdminBundles()'s own render
            redraws the answer with the name in it. */
+        // the texts a text action is about to save, on its card (typeof: harnesses that run this on its own)
+        if (act && !act.preview && typeof admTextPreview === "function") act.preview = admTextPreview(act);
         if (act && act.type === "delete_bundle") {
           act.danger = true;
           act.ok = "Да, удалить";
@@ -53336,6 +53414,28 @@
         if (pa.type === "hero_delete") { admHeroDelete(pa.index); return; }
         // …and a change to one of those rows: a PUT, journalled with the row as it was
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
+        /* The assistant's words on a product (26.10.2026, «the same capabilities
+           as Claude»): the owner's own product keeps them on its row (its route,
+           applyUpdateProduct), a catalogue product in its overrides (demoApply
+           below) — a description or a Google pair laid over what the product
+           has, language by language. */
+        if (pa.type === "set_seo" || pa.type === "set_description") {
+          var txP = admEditProduct(pa.id);
+          if (txP && txP.custom) {
+            var txRow = findCustom(pa.id) || {};
+            applyUpdateProduct(pa.type === "set_description"
+              ? { type: "update_product", id: pa.id, description: descMerge(txRow.description, pa.value) }
+              : { type: "update_product", id: pa.id, seo: seoToServer(seoMerge(seoNorm(txRow.seo) || {}, pa.seo || { RU: { t: pa.title, d: pa.description } })) });
+            return;
+          }
+          if (pa.type === "set_description") pa = { type: "set_description", id: pa.id, value: descMerge(DEMO.desc[pa.id], pa.value) };
+        }
+        if (pa.type === "set_size_prices") { applySizePrices(pa); return; }
+        // «Тексты страниц»: through the settings slot, never over a document not yet read
+        if (pa.type === "set_page_texts") {
+          admSetWhenReady(function () { admSetApply(pa, "Тексты страниц сохранены"); render(); });
+          render(); return;
+        }
         // «Товар» 1a: a size removed after its sheet, «Начать заново» on «Новый товар»
         if (pa.type === "ed_size_del") { edSizeDelApply(pa); return; }
         if (pa.type === "goods_new_reset") { goodsNewReset(); render(); goodsNewFocus(); return; }

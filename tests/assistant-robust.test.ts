@@ -236,7 +236,8 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const sentAdmin = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [], tab: "" }));
     const { POST } = await import("@/app/api/assistant/route");
     await POST(req({ mode: "admin", messages: [{ role: "user", content: "привет" }] }, admin));
-    expect(sentAdmin[0].max_completion_tokens).toBe(1500);
+    // 2500 since 26.10.2026: a description translated into two languages (set_description)
+    expect(sentAdmin[0].max_completion_tokens).toBe(2500);
     expect(sentAdmin[0].reasoning_effort).toBe("none");
     vi.unstubAllGlobals();
     const sentShop = stubOpenAI(JSON.stringify({ reply: "ок", product_ids: [] }));
