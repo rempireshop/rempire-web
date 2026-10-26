@@ -1424,6 +1424,9 @@
       "есть свои тексты": "on omad tekstid",
       "стандартные": "tavalised",
       "Тексты страниц сохранены": "Lehtede tekstid salvestatud",
+      "Тексты для Google": "Google'i tekstid",
+      "Описание товара": "Toote kirjeldus",
+      "Цены по объёмам": "Hinnad mahtude kaupa",
       "Цены сохранены ✓": "Hinnad salvestatud ✓",
       "Тексты страниц изменены": "Lehtede tekste muudeti",
       "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "Pealkiri ja kirjeldus on see, mida Google otsingus näitab. Teksti pealkirja all näevad ostjad osakonna või brändi lehel.",
@@ -5054,6 +5057,9 @@
       "есть свои тексты": "has own texts",
       "стандартные": "standard",
       "Тексты страниц сохранены": "Page texts saved",
+      "Тексты для Google": "Google texts",
+      "Описание товара": "Product description",
+      "Цены по объёмам": "Prices by size",
       "Цены сохранены ✓": "Prices saved ✓",
       "Тексты страниц изменены": "Page texts changed",
       "Заголовок и описание — то, что Google показывает в поиске. Текст под заголовком видят покупатели на странице раздела или бренда.": "The title and description are what Google shows in search. Shoppers see the text under the heading on the section or brand page.",
@@ -25897,7 +25903,7 @@
       '<div class="adm-confirm__card">' +
         // txt(): the overlay twin of confirmCard()'s heading — the same card
         // lifted onto a scrim, so the same door in front of a model's object
-        '<div class="adm-confirm__t" id="admconfirm-t">' + esc(txt(a.title) || "Подтвердите изменение") + "</div>" +
+        '<div class="adm-confirm__t" id="admconfirm-t">' + esc(a.heading || txt(a.title) || "Подтвердите изменение") + "</div>" +
         // admDetailHTML(), not esc() straight: the detail is assembled, and a
         // glued sentence is one the dictionary cannot reach — see the rule above
         '<div class="adm-confirm__d">' + admDetailHTML(txt(a.detail) || actionText(a)) + "</div>" +
@@ -47766,6 +47772,11 @@
      its proposal; a flow that touches the shop or the money sets
      `overlay: true` and screenAdmin() lifts the very same card onto a scrim —
      a card over the page on a desktop, a sheet at the bottom on a phone. */
+  /** The heading of the card for each text action — what it changes, in the panel's own words. */
+  var ADM_TEXT_HEADING = {
+    set_seo: "Тексты для Google", set_description: "Описание товара", set_page_texts: "Тексты страниц",
+    set_names: "Название товара", set_size_prices: "Цены по объёмам"
+  };
   /** The words a text action is about to save, language by language — the
       card's own box (a.preview), so the owner reads them before «Применить». */
   function admTextPreview(a) {
@@ -47795,7 +47806,7 @@
        Object]» (Renat, 13.09.2026). Same for `detail`, which nothing sets on
        an assistant action today and which would land in the same place. */
     return '<div class="adm-propose">' +
-      '<div class="adm-propose__t">' + esc(txt(a.title) || "Предпросмотр изменения") + "</div>" +
+      '<div class="adm-propose__t">' + esc(a.heading || txt(a.title) || "Предпросмотр изменения") + "</div>" +
       // admDetailHTML() for the same reason as the overlay twin above
       '<div class="adm-propose__d">' + admDetailHTML(txt(a.detail) || actionText(a) || "Изменений нет") + "</div>" +
       /* What is about to leave, in the owner's own words — «Написать клиенту»
@@ -48001,6 +48012,10 @@
            redraws the answer with the name in it. */
         // the texts a text action is about to save, on its card (typeof: harnesses that run this on its own)
         if (act && !act.preview && typeof admTextPreview === "function") act.preview = admTextPreview(act);
+        /* …under the card's own word for what it is: set_seo carries the new
+           Russian Google title as `title`, and the card took that for its
+           heading (live test, 26.10.2026) */
+        if (act && typeof ADM_TEXT_HEADING !== "undefined" && ADM_TEXT_HEADING[act.type]) act.heading = ADM_TEXT_HEADING[act.type];
         if (act && act.type === "delete_bundle") {
           act.danger = true;
           act.ok = "Да, удалить";

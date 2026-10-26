@@ -184,6 +184,9 @@ describe("POST /api/assistant — the texts reach the prompt, and a refused text
     expect(system).toContain("Habemehooldusvahendid");   // the beard section's standard Estonian line
     expect(system).toContain('"type":"set_page_texts"');
     expect(system).toContain("шампунь, кондиционер");     // the type words a rename may use
+    // live test, 26.10.2026: «переведи на английский» translated the longer Estonian line
+    expect(system).toContain("never from the Estonian or the English one");
+    expect(system).toContain("texts.RU is the source of every translation");
   });
 
   it("a text the checks refused leaves no card and says why", async () => {
@@ -229,5 +232,8 @@ describe("the panel lays the assistant's texts over what the product has (public
     expect(APP).toContain('admSetWhenReady(function () { admSetApply(pa, "Тексты страниц сохранены"); render(); });');
     expect(sliceFn("seoOfAction")).toContain("if (a.seo && typeof a.seo === \"object\") return seoMerge(cur, a.seo);");
     expect(APP).toContain('if (act && !act.preview && typeof admTextPreview === "function") act.preview = admTextPreview(act);');
+    // the card's heading says what it changes, not the new Google title (live test, 26.10.2026)
+    expect(APP).toContain('set_seo: "Тексты для Google", set_description: "Описание товара"');
+    expect(sliceFn("confirmCard")).toContain('esc(a.heading || txt(a.title) || "Предпросмотр изменения")');
   });
 });
