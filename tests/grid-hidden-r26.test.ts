@@ -137,23 +137,34 @@ const ON_SALE = onlyForSale(CATALOGUE, HIDDEN) as Product[];
 describe("tools/prerender-shop2.mjs — the lists every grid is drawn from", () => {
   it("leaves a hidden product out of its category page, and out of /c/all/", () => {
     const expr = rhs('for (const c of ["all", ...CATS]) {', "list");
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, CATS: ["hair", "body"], c: "hair" }))).toEqual([SHAMPOO]);
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, CATS: ["hair", "body"], c: "all" }))).toEqual([SHAMPOO, SOAP]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, CATS: ["hair", "body"], c: "hair" }))).toEqual([SHAMPOO]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, CATS: ["hair", "body"], c: "all" }))).toEqual([SHAMPOO, SOAP]);
+  });
+
+  /* 26.10.2026: the owner's own products («c-…») are listed after the
+     catalogue's (LISTED) — the hidden catalogue product still is not. */
+  it("lists an own product after the catalogue's, and still not the hidden one", () => {
+    const own = { id: "c-own-shampoo", brand: "System 4", name: "Own — шампунь", cat: "hair" } as unknown as Product;
+    const LISTED = [...ON_SALE, own];
+    const expr = rhs('for (const c of ["all", ...CATS]) {', "list");
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED, CATS: ["hair", "body"], c: "hair" }))).toEqual([SHAMPOO, "c-own-shampoo"]);
+    const brand = rhs("for (const b of BRANDS) {", "list");
+    expect(ids(run<Product[]>(brand, { CATALOGUE, ON_SALE, LISTED, b: "System 4" }))).toEqual([SHAMPOO, "c-own-shampoo"]);
   });
 
   it("leaves it out of its brand page", () => {
     const expr = rhs("for (const b of BRANDS) {", "list");
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, b: "System 4" }))).toEqual([SHAMPOO]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, b: "System 4" }))).toEqual([SHAMPOO]);
   });
 
   it("leaves it out of the home page's shelf", () => {
     const expr = rhs("function homePage(lang) {", "featured");
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE }))).toEqual([SHAMPOO]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE }))).toEqual([SHAMPOO]);
   });
 
   it("leaves it out of the shelf under another product of its category", () => {
     const expr = rhs("function productPage(p, lang) {", "others");
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, p: CATALOGUE[1] }))).toEqual([]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, p: CATALOGUE[1] }))).toEqual([]);
   });
 
   /* The shelf under the hidden product's OWN page, which is still written.
@@ -161,12 +172,12 @@ describe("tools/prerender-shop2.mjs — the lists every grid is drawn from", () 
      page being written for a product that is off sale is the whole point. */
   it("still draws a shelf on the hidden product's own page, without itself on it", () => {
     const expr = rhs("function productPage(p, lang) {", "others");
-    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, p: CATALOGUE[0] }))).toEqual([SHAMPOO]);
+    expect(ids(run<Product[]>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, p: CATALOGUE[0] }))).toEqual([SHAMPOO]);
   });
 
   it("counts a brand on /brands/ by what the brand page will actually show", () => {
     const expr = rhs("const BRAND_COUNT = ", "BRAND_COUNT");
-    const counts = run<Map<string, number>>(expr, { CATALOGUE, ON_SALE, BRANDS: ["System 4", "Rempire"] });
+    const counts = run<Map<string, number>>(expr, { CATALOGUE, ON_SALE, LISTED: ON_SALE, BRANDS: ["System 4", "Rempire"] });
     expect(counts.get("System 4")).toBe(1);
     expect(counts.get("Rempire")).toBe(1);
   });

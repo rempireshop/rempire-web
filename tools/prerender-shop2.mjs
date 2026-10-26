@@ -77,7 +77,7 @@ import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles
    of products this file writes — an article's shelf and every grid on the
    storefront — is a set of links into /p/ addresses, and a hidden product's
    address answers 404. See tools/lib/overrides-export.mjs. */
-import { fetchProductOverrides, fetchStockEans } from "./lib/overrides-export.mjs";
+import { fetchOwnProducts, fetchProductOverrides, fetchStockEans } from "./lib/overrides-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
 /* «Доставка и оплата»: the builder and the rules the checkout bills from, lifted out of app.js. */
 import { liftDelivery } from "./lib/delivery-lift.mjs";
@@ -191,6 +191,14 @@ const CATALOGUE = withOwnerNames(withOwnerStock(CATALOGUE_FILE, PRODUCT_OVERRIDE
    only ever see what is written here. */
 const ON_SALE = onlyForSale(CATALOGUE, PRODUCT_OVERRIDES);
 const HIDDEN_COUNT = CATALOGUE.length - ON_SALE.length;
+/* …and the owner's own products a visitor can open (custom_products, «c-…»),
+   after the catalogue's, as the shop appends them: every section, brand and
+   subcollection grid and the shelf under a product list them too (Dim,
+   26.10.2026 — Google's copy of «Воск для усов» lacked his Maharajah wax).
+   Their own pages are request-time (src/lib/product-page.ts), not written here. */
+const OWN_ON_SALE = (await fetchOwnProducts()).filter(p => CAT_NAMES[p.cat]);
+const LISTED = [...ON_SALE, ...OWN_ON_SALE];
+if (OWN_ON_SALE.length) console.log("  own products in the grids: " + OWN_ON_SALE.map(p => p.id).join(", "));
 
 const loadObj = async (file, name) => {
   try { return new Function(await readFile(path.join(SHOP, file), "utf8") + "\nreturn " + name + ";")(); }
@@ -551,7 +559,7 @@ const ownSubcat = p => (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].subca
    page says so, noindex, and the sitemap leaves them out. */
 const SUB_EMPTY = new Set(Object.keys(SUB_HANDLES).filter(key => {
   const [cat, sub] = key.split("/");
-  return !ON_SALE.some(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
+  return !LISTED.some(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
 }));
 for (const key of SUB_EMPTY) console.warn("! " + key + " has nothing on sale — its page is noindex and out of the sitemap until it has");
 /* The chip's own label («Масла»), in the page's language — the dictionary
@@ -1096,7 +1104,7 @@ function productPage(p, lang) {
      this page is still written for the day the owner switches it back on, and
      until then the middleware withholds it — but nothing must leave it for an
      address that answers 404 today. */
-  const others = ON_SALE.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 8);
+  const others = LISTED.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 8);
 
   const content = '<div class="wrap">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
@@ -1223,7 +1231,7 @@ function subcollectionPage(key, lang) {
   const [cat, sub] = key.split("/");
   const words = seoSub(key, lang.code);
   const head = seoHead("sub", key, lang.code, SEO_CTX);
-  const list = ON_SALE.filter(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
+  const list = LISTED.filter(p => p.cat === cat && SUBS.with(p, ownSubcat(p)).includes(sub));
   const page = listingPage({
     lang, kind: "c", id: key, heading: tr(CAT_NAMES[cat], lang.code, false), h1: words.h1 || words.name, list,
     rest: "/c/" + key + "/",
@@ -1258,7 +1266,7 @@ function subcollectionPage(key, lang) {
    crawlable path from here to all 26 brand pages. */
 
 const BRANDS_INTRO = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
-const BRAND_COUNT = new Map(BRANDS.map(b => [b, ON_SALE.filter(p => p.brand === b).length]));
+const BRAND_COUNT = new Map(BRANDS.map(b => [b, LISTED.filter(p => p.brand === b).length]));
 
 function brandsPage(lang) {
   const { code, seg } = lang;
@@ -2047,7 +2055,7 @@ for (const lang of LANGS) {
   /* Title and description: seoHead(), as setHead() in app.js — no «— купить
      в Rempire» filler (audit §1A). Intro: the shop's own line, catIntro(). */
   for (const c of ["all", ...CATS]) {
-    const list = c === "all" ? ON_SALE : ON_SALE.filter(p => p.cat === c);
+    const list = c === "all" ? LISTED : LISTED.filter(p => p.cat === c);
     const heading = c === "all" ? t.all : tr(CAT_NAMES[c], lang.code, false);
     const head = seoHead("cat", c, lang.code, SEO_CTX);
     pages.push(listingPage({
@@ -2059,7 +2067,7 @@ for (const lang of LANGS) {
   }
 
   for (const b of BRANDS) {
-    const list = ON_SALE.filter(p => p.brand === b);
+    const list = LISTED.filter(p => p.brand === b);
     const head = seoHead("brand", b, lang.code, SEO_CTX);
     pages.push(listingPage({
       lang, kind: "b", id: BRAND_SLUG.get(b), heading: b, list,

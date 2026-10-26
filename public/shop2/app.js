@@ -187,8 +187,8 @@
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
       "После бритья": "Pärast raseerimist", "Тонеры": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
-      "Воск для усов": "Vuntsivahad", "Маски": "Maskid", "Для глаз": "Silmadele",
-      "Для локонов": "Lokkidele", "Кремы и лосьоны": "Kreemid ja losjoonid",
+      "Воск для усов": "Vuntsivahad", "Маски": "Maskid", "Для глаз": "Silmaümbruse hooldus",
+      "Для локонов": "Lokkis juustele", "Кремы и лосьоны": "Kreemid ja losjoonid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       /* per-size stock (r23): the product's own word and one size's word are
          two different sentences and may disagree — «мало» on the product while
@@ -3846,7 +3846,7 @@
       "После бритья": "Aftershave", "Тонеры": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
       "Воск для усов": "Moustache wax", "Маски": "Masks", "Для глаз": "Eye care",
-      "Для локонов": "For curls", "Кремы и лосьоны": "Creams & lotions",
+      "Для локонов": "Curly hair", "Кремы и лосьоны": "Creams & lotions",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       // per-size stock (r23) — see the Estonian table for why each is whole
       "Этого объёма сейчас нет": "This size is out of stock",

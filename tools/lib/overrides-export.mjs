@@ -178,3 +178,72 @@ export async function fetchProductOverrides() {
     await client.end().catch(() => {});
   }
 }
+
+/* ---------- the owner's own products (custom_products), for the grids ------
+
+   Dim, 26.10.2026: «Fix the SEO gap». A product the owner makes in the panel
+   («c-…») has a page of its own, written at request time
+   (src/lib/product-page.ts) and named in sitemap-custom.xml — but every list
+   this build writes (a section, a brand, a subcollection, the shelf under a
+   product) was the catalogue file's alone. On the static copy Google reads,
+   Captain Fawcett's Maharajah wax was missing from «Воск для усов»; shoppers
+   saw it only because app.js redraws the grid from the live feed. These are
+   the rows a stranger can open (active), in the shape card() draws — the same
+   fields toCatalogueProduct() in src/lib/custom-products.ts gives the shop. */
+
+/** The tower the shop shows for a product with no photo yet (PLACEHOLDER_IMG in src/lib/custom-products.ts). */
+const OWN_PLACEHOLDER = "/brand/rempire-tower.svg";
+
+const jsonList = (v) => {
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string") { try { const j = JSON.parse(v); return Array.isArray(j) ? j : []; } catch { return []; } }
+  return [];
+};
+
+/** One custom_products row as a storefront card: id, brand, name, section, its subsection, price, photo. */
+export function ownCard(r) {
+  const sizes = jsonList(r.sizes).map(String);
+  const prices = jsonList(r.prices).map(Number).filter((n) => Number.isFinite(n));
+  const gallery = jsonList(r.gallery);
+  const first = gallery.find((g) => g && typeof g.url === "string" && g.url);
+  const cat = String(r.cat || "");
+  const sub = typeof r.subcat === "string" && r.subcat ? cat + "/" + r.subcat : "";
+  const card = {
+    id: String(r.id), brand: String(r.brand || ""), name: String(r.name || ""), cat, sub,
+    price: prices[0], img: first ? first.url : OWN_PLACEHOLDER, stock: "in", custom: true,
+  };
+  if (sizes.length) {
+    card.sizes = sizes;
+    card.prices = prices;
+    if (new Set(prices).size > 1) card.priceFrom = true;
+  }
+  return card;
+}
+
+/** The owner's own products a visitor can open, oldest first (the order the shop appends them in). */
+export async function fetchOwnProducts() {
+  const url = process.env.DATABASE_URL;
+  if (!url) return [];
+
+  let pg;
+  try {
+    ({ default: pg } = await import("pg"));
+  } catch {
+    console.warn("! overrides-export: the 'pg' package is not installed — no own products in the grids this run");
+    return [];
+  }
+
+  const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
+  try {
+    await client.connect();
+    // every column, for the reason fetchProductOverrides() gives
+    const res = await client.query("select * from custom_products where active = true order by created_at, id");
+    return res.rows.map(ownCard).filter((p) => p.id && Number.isFinite(p.price));
+  } catch (err) {
+    console.warn("! overrides-export: could not read the own products (" + (err && err.message) + ") — the catalogue's alone in the grids this run");
+    return [];
+  } finally {
+    await client.end().catch(() => {});
+  }
+}
+
