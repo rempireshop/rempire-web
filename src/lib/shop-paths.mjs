@@ -91,6 +91,13 @@ export const SUB_HANDLES = Object.freeze({
   "hair/sh": Object.freeze({ EN: "shampoo", ET: "shampoonid", RU: "shampuni-dlya-volos" }),
   "hair/co": Object.freeze({ EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" }),
   "styling/pw": Object.freeze({ EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }),
+  /* 26.10.2026, Dim from the SEO pass: four more Shopify collections Google
+     knew, each with the products it held (rempireshop.myshopify.com's
+     products.json) and Estonian demand from Keyword Planner */
+  "styling/cr": Object.freeze({ EN: "hair-lotion", ET: "juuksekreemid", RU: "losony-dlya-volos" }),
+  "beard/mw": Object.freeze({ EN: "beard-and-mustache-wax", ET: "habeme-vuntsivahad", RU: "vosk-dlya-borody-i-usov" }),
+  "face/ma": Object.freeze({ EN: "face-sheet-masks", ET: "naomaskid", RU: "maski-dlya-litsa" }),
+  "face/ey": Object.freeze({ EN: "eye-care", ET: "silmahooldus", RU: "uhod-za-kozhey-glaz" }),
 });
 
 /* A brand whose Shopify collection was not spelled like the brand's own slug.

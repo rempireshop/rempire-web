@@ -187,6 +187,8 @@
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
       "После бритья": "Pärast raseerimist", "Тонеры": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
+      "Воск для усов": "Vuntsivahad", "Маски": "Maskid", "Для глаз": "Silmadele",
+      "Для локонов": "Lokkidele", "Кремы и лосьоны": "Kreemid ja losjoonid",
       "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       /* per-size stock (r23): the product's own word and one size's word are
          two different sentences and may disagree — «мало» on the product while
@@ -3843,6 +3845,8 @@
       "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
       "После бритья": "Aftershave", "Тонеры": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
+      "Воск для усов": "Moustache wax", "Маски": "Masks", "Для глаз": "Eye care",
+      "Для локонов": "For curls", "Кремы и лосьоны": "Creams & lotions",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       // per-size stock (r23) — see the Estonian table for why each is whole
       "Этого объёма сейчас нет": "This size is out of stock",
@@ -10986,7 +10990,11 @@
     "beard/af": { EN: "aftershave", ET: "raseerimisjargne-hooldus", RU: "losony-posle-britya" },
     "hair/sh": { EN: "shampoo", ET: "shampoonid", RU: "shampuni-dlya-volos" },
     "hair/co": { EN: "conditioner", ET: "palsamid", RU: "konditsionery-dlya-volos" },
-    "styling/pw": { EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" }
+    "styling/pw": { EN: "hair-wax", ET: "juuksevaha", RU: "vosk-dlya-volos" },
+    "styling/cr": { EN: "hair-lotion", ET: "juuksekreemid", RU: "losony-dlya-volos" },
+    "beard/mw": { EN: "beard-and-mustache-wax", ET: "habeme-vuntsivahad", RU: "vosk-dlya-borody-i-usov" },
+    "face/ma": { EN: "face-sheet-masks", ET: "naomaskid", RU: "maski-dlya-litsa" },
+    "face/ey": { EN: "eye-care", ET: "silmahooldus", RU: "uhod-za-kozhey-glaz" }
   };
   var SHOP_BRAND_HANDLES = { "cbd-daily": "cbd-daily-haircare" };
   var SHOP_INFO_PATHS = {
@@ -12609,22 +12617,32 @@
       { id: "sp", name: "Спреи", re: /спрей/i, more: /spray/i }
     ],
     styling: [
-      { id: "pw", name: "Пасты и воски", re: /паста|воск/i, more: /\bpaste\b|\bclay\b|\bwax\b/i },
+      { id: "pw", name: "Пасты и воски", re: /паста|воск|глина/i, more: /\bpaste\b|\bclay\b|\bwax\b/i },
       { id: "sp", name: "Спреи", re: /спрей/i },
       { id: "ge", name: "Гели", re: /гель/i, more: /глазур|glaze|\bgel\b/i },
-      { id: "pu", name: "Пудры", re: /пудр/i }
+      { id: "pu", name: "Пудры", re: /пудр/i },
+      /* 26.10.2026, Dim from the SEO pass: the curl products (lokikreem is
+         searched 100–1K a month in Estonia) and the rest of the leave-in
+         stylers — Shopify's /collections/hair-lotion is the second one's page */
+      { id: "cu", name: "Для локонов", re: /для (локонов|кудр\S*)|локон|кудр/i, more: /\bcurls?\b/i },
+      { id: "cr", name: "Кремы и лосьоны", re: /крем|лосьон|мусс|пенк|сыворотк|текстурайзер/i, more: /lotion|cream|mousse|foam|serum/i }
     ],
     beard: [
       { id: "oi", name: "Масла", re: /масло/i, more: /\boil\b/i },
-      { id: "ba", name: "Бальзамы", re: /бальзам/i },
+      { id: "ba", name: "Бальзамы", re: /бальзам/i, more: /\bbalm\b/i },
       { id: "af", name: "После бритья", re: /лосьон|после бритья/i },
-      { id: "ge", name: "Гели", re: /гель/i }
+      { id: "ge", name: "Гели", re: /гель/i },
+      // Shopify's /collections/beard-and-mustache-wax (26.10.2026)
+      { id: "mw", name: "Воск для усов", re: /воск/i, more: /\bwax\b/i }
     ],
     face: [
       { id: "to", name: "Тонеры", re: /тоник|тонер/i },
       { id: "cl", name: "Очищение", re: /очища|пенка|мыло/i, more: /cleans|умыван|скраб|scrub|\bwash\b/i },
       { id: "cs", name: "Кремы и сыворотки", re: /крем|сыворотк/i, more: /эссенц|essence/i },
-      { id: "oi", name: "Масла", re: /масло/i }
+      { id: "oi", name: "Масла", re: /масло/i },
+      // Shopify's /collections/face-sheet-masks and /collections/eye-care (26.10.2026)
+      { id: "ma", name: "Маски", re: /маск/i, more: /\bmasks?\b/i },
+      { id: "ey", name: "Для глаз", re: /для век|для глаз|патч/i, more: /\beyes?\b/i }
     ]
   };
   /** The chip a catalogue product is under by the catalogue file — `p.sub`
@@ -49611,21 +49629,101 @@
         "styling/pw": {
           RU: {
             title: "Воск для волос, паста и глина: Gatsby, Davines | REMPIRE",
-            meta: "Воск Gatsby Moving Rubber, паста и глина Davines Pasta&Love, паста MITCH от Paul Mitchell — фиксация и текстура для коротких стрижек. Самовывоз в Таллинне.",
+            meta: "Пасты и глина Kevin.Murphy, воск Gatsby Moving Rubber, Davines Pasta&Love и MITCH от Paul Mitchell — фиксация и текстура. Самовывоз в Таллинне.",
             name: "Воск, паста и глина для волос",
-            intro: "Воск даёт блеск и фиксацию, которую можно поправить в течение дня, паста — более мягкий и естественный результат, глина — сильную матовую фиксацию с текстурой. Японские воски Gatsby, Davines Pasta&Love и MITCH от Paul Mitchell закрывают все три варианта."
+            intro: "Воск даёт блеск и фиксацию, которую можно поправить в течение дня, паста — более мягкий и естественный результат, глина — сильную матовую фиксацию с текстурой. Пасты и глина Kevin.Murphy, японские воски Gatsby, Davines Pasta&Love и MITCH от Paul Mitchell закрывают все три варианта."
           },
           ET: {
             title: "Juuksevaha, pasta ja savi: Gatsby, Davines | REMPIRE",
-            meta: "Gatsby Moving Rubber juuksevahad, Davinesi Pasta&Love pasta ja matt savi ning Paul Mitchelli MITCH pasta — fikseerimine ja tekstuur lühikestele soengutele.",
+            meta: "Kevin.Murphy pastad ja savi, Gatsby Moving Rubber vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH — fikseerimine ja tekstuur. Järeletulek Tallinnas.",
             name: "Juuksevaha, pasta ja savi",
-            intro: "Juuksevaha annab läike ja fikseerimise, mida saab päeva jooksul ümber sättida, pasta pehmema ja loomulikuma tulemuse, savi tugeva ja mati fikseerimise koos tekstuuriga. Jaapani Gatsby vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH katavad kõik kolm."
+            intro: "Juuksevaha annab läike ja fikseerimise, mida saab päeva jooksul ümber sättida, pasta pehmema ja loomulikuma tulemuse, savi tugeva ja mati fikseerimise koos tekstuuriga. Kevin.Murphy pastad ja savi, Jaapani Gatsby vahad, Davinesi Pasta&Love ja Paul Mitchelli MITCH katavad kõik kolm."
           },
           EN: {
             title: "Hair Wax, Paste & Clay: Gatsby, Davines, Paul Mitchell",
-            meta: "Gatsby Moving Rubber waxes, Davines Pasta&Love paste and matte clay, Paul Mitchell MITCH paste — hold and texture for short styles. Pickup in Tallinn.",
+            meta: "Kevin.Murphy pastes and clay, Gatsby Moving Rubber waxes, Davines Pasta&Love and Paul Mitchell MITCH — hold and texture. Pickup in Tallinn.",
             name: "Hair wax, paste & clay",
-            intro: "Wax gives shine and a hold you can rework through the day, paste a softer, more natural finish, and clay a strong matte hold with texture. Gatsby's Japanese waxes, Davines Pasta&Love and Paul Mitchell's MITCH cover all three."
+            intro: "Wax gives shine and a hold you can rework through the day, paste a softer, more natural finish, and clay a strong matte hold with texture. Kevin.Murphy's pastes and clay, Gatsby's Japanese waxes, Davines Pasta&Love and Paul Mitchell's MITCH cover all three."
+          }
+        },
+        "styling/cr": {
+          RU: {
+            title: "Кремы и лосьоны для укладки волос | REMPIRE",
+            meta: "Кремы, лосьоны, мусс и сыворотка для укладки Kevin.Murphy и Paul Mitchell: объём, плотность, пляжная текстура, гладкость без пушения. Самовывоз в Таллинне.",
+            name: "Кремы и лосьоны для укладки",
+            intro: "Крем, лосьон или мусс наносят до сушки: они дают объём, плотность, текстуру или гладкость без пушения. Здесь средства для укладки Kevin.Murphy и Paul Mitchell, которые выбрала наша команда."
+          },
+          ET: {
+            title: "Juuksekreemid ja losjoonid soengule | REMPIRE",
+            meta: "Kevin.Murphy ja Paul Mitchelli kreemid, losjoonid, vaht ja seerum soengule: kohevus, tihedus, rannatekstuur, sile juus ilma kahuta. Järeletulek Tallinnas.",
+            name: "Juuksekreemid ja losjoonid",
+            intro: "Kreem, losjoon või vaht kantakse juustele enne föönitamist: need annavad kohevust, tihedust, tekstuuri või siledust ilma kahuta. Siin on Kevin.Murphy ja Paul Mitchelli soenguvahendid, mille valis meie meeskond."
+          },
+          EN: {
+            title: "Hair Creams & Lotions for Styling | REMPIRE",
+            meta: "Kevin.Murphy and Paul Mitchell styling creams, lotions, mousse and serum: volume, thickness, beach texture and frizz-free smoothness. Pickup in Tallinn.",
+            name: "Hair creams & lotions",
+            intro: "A cream, lotion or mousse goes on before blow-drying: it gives volume, thickness, texture or frizz-free smoothness. These are the Kevin.Murphy and Paul Mitchell stylers our team picked."
+          }
+        },
+        "beard/mw": {
+          RU: {
+            title: "Воск для усов Captain Fawcett | REMPIRE",
+            meta: "Воск для усов Captain Fawcett: Nebula Джона Петруччи, Ricki Hall Booze & Baccy и Barberism — чтобы усы держали форму. Самовывоз в Таллинне.",
+            name: "Воск для усов",
+            intro: "Воск держит форму усов весь день и укрощает непослушные волоски. Здесь воски для усов Captain Fawcett: Nebula Джона Петруччи, Ricki Hall Booze & Baccy и Barberism."
+          },
+          ET: {
+            title: "Vuntsivahad: Captain Fawcett | REMPIRE",
+            meta: "Captain Fawcetti vuntsivahad: John Petrucci Nebula, Ricki Hall Booze & Baccy ja Barberism — et vuntsid püsiksid vormis. Järeletulek Tallinnas.",
+            name: "Vuntsivahad",
+            intro: "Vaha hoiab vuntse terve päeva vormis ja taltsutab sõnakuulmatuid karvu. Siin on Captain Fawcetti vuntsivahad: John Petrucci Nebula, Ricki Hall Booze & Baccy ja Barberism."
+          },
+          EN: {
+            title: "Moustache Wax: Captain Fawcett | REMPIRE",
+            meta: "Captain Fawcett moustache wax: John Petrucci's Nebula, Ricki Hall Booze & Baccy and Barberism — to keep a moustache in shape. Pickup in Tallinn.",
+            name: "Moustache wax",
+            intro: "A wax keeps a moustache in shape all day and tames stray hairs. These are Captain Fawcett's moustache waxes: John Petrucci's Nebula, Ricki Hall Booze & Baccy and Barberism."
+          }
+        },
+        "face/ma": {
+          RU: {
+            title: "Маски для лица: тканевые и ночные | REMPIRE",
+            meta: "Тканевые маски Gummy с мадекассосидом и Nature Republic с зелёным чаем, ночная маска LANEIGE Cica. Самовывоз в Таллинне.",
+            name: "Маски для лица",
+            intro: "Маска — быстрый уход за кожей: тканевая работает за один вечер, ночная — пока вы спите. Здесь тканевые маски Gummy и Nature Republic и ночная маска LANEIGE Cica."
+          },
+          ET: {
+            title: "Näomaskid: kangas- ja öömaskid | REMPIRE",
+            meta: "Gummy madekassosiidiga ja Nature Republicu rohelise teega kangasmaskid, LANEIGE Cica öömask. Järeletulek Tallinnas.",
+            name: "Näomaskid",
+            intro: "Mask on kiire hoolitsus nahale: kangasmask mõjub ühe õhtuga, öömask töötab sel ajal, kui magate. Siin on Gummy ja Nature Republicu kangasmaskid ning LANEIGE Cica öömask."
+          },
+          EN: {
+            title: "Face Masks: Sheet & Sleeping Masks | REMPIRE",
+            meta: "Gummy madecassoside and Nature Republic green tea sheet masks, LANEIGE Cica sleeping mask. Pickup in Tallinn, EU delivery.",
+            name: "Face masks",
+            intro: "A mask is quick care for the skin: a sheet mask works in an evening, a sleeping mask while you sleep. These are the Gummy and Nature Republic sheet masks and the LANEIGE Cica sleeping mask."
+          }
+        },
+        "face/ey": {
+          RU: {
+            title: "Уход за кожей вокруг глаз: патчи и крем | REMPIRE",
+            meta: "Гидрогелевые патчи COSRX Advanced Snail с муцином улитки и крем для век Lumin Dark Circle Defense Balm. Самовывоз в Таллинне.",
+            name: "Уход за кожей вокруг глаз",
+            intro: "Кожа вокруг глаз тоньше и суше, поэтому ей нужен свой уход. Здесь гидрогелевые патчи COSRX Advanced Snail и крем для век Lumin Dark Circle Defense Balm."
+          },
+          ET: {
+            title: "Silmaümbruse hooldus: padjad ja kreem | REMPIRE",
+            meta: "COSRX Advanced Snail hüdrogeelsed silmapadjad tigulimaga ja Lumin Dark Circle Defense Balm silmaümbruse kreem. Järeletulek Tallinnas.",
+            name: "Silmaümbruse hooldus",
+            intro: "Silmaümbruse nahk on õhem ja kuivem, seepärast vajab see omaette hoolt. Siin on COSRX Advanced Snail hüdrogeelsed silmapadjad ja Lumini silmaümbruse kreem Dark Circle Defense Balm."
+          },
+          EN: {
+            title: "Eye Care: Eye Patches & Eye Balm | REMPIRE",
+            meta: "COSRX Advanced Snail hydrogel eye patches with snail mucin and the Lumin Dark Circle Defense Balm for the eye area. Pickup in Tallinn.",
+            name: "Eye care",
+            intro: "The skin around the eyes is thinner and drier, so it needs care of its own. These are the COSRX Advanced Snail hydrogel eye patches and Lumin's Dark Circle Defense Balm."
           }
         }
       },

@@ -1464,6 +1464,55 @@
       }
     },
     {
+      "id": "shop-subcollections-seo",
+      "area": "shop",
+      "who": "both",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Новые подразделы: воск для усов, маски, для глаз, кремы",
+      "steps": [
+        "Открыть rempireshop.com/ru/collections/vosk-dlya-borody-i-usov.",
+        "Открыть rempireshop.com/et/collections/naomaskid.",
+        "Открыть rempireshop.com/collections/eye-care.",
+        "Открыть rempireshop.com/ru/collections/losony-dlya-volos.",
+        "Открыть «Стайлинг» и посмотреть ряд под заголовком.",
+        "Открыть rempireshop.com/ru/collections/vosk-dlya-volos."
+      ],
+      "expect": [
+        "Воски для усов Captain Fawcett, в крошках «Уход за бородой».",
+        "Эстонская страница «Näomaskid» с тремя масками.",
+        "Патчи COSRX и крем для век Lumin.",
+        "Кремы, лосьоны, мусс и сыворотка Kevin.Murphy и Paul Mitchell.",
+        "В ряду есть «Для локонов» и «Кремы и лосьоны».",
+        "Среди паст и восков — Night.Rider, Free.Hold и Rough.Rider."
+      ],
+      "why": "Старые адреса Shopify снова страницы; под каждым товаром — свой подраздел.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-26T13:46:10.522Z",
+      "en": {
+        "title": "New subsections: moustache wax, masks, eye care, creams",
+        "steps": [
+          "Open rempireshop.com/ru/collections/vosk-dlya-borody-i-usov.",
+          "Open rempireshop.com/et/collections/naomaskid.",
+          "Open rempireshop.com/collections/eye-care.",
+          "Open rempireshop.com/ru/collections/losony-dlya-volos.",
+          "Open «Стайлинг» (styling) and look at the row under the heading.",
+          "Open rempireshop.com/ru/collections/vosk-dlya-volos."
+        ],
+        "expect": [
+          "Captain Fawcett moustache waxes, «Уход за бородой» in the crumbs.",
+          "The Estonian «Näomaskid» page with three masks.",
+          "The COSRX patches and the Lumin eye balm.",
+          "Kevin.Murphy and Paul Mitchell creams, lotions, mousse and serum.",
+          "The row has «Для локонов» and «Кремы и лосьоны».",
+          "Night.Rider, Free.Hold and Rough.Rider are among the pastes and waxes."
+        ],
+        "why": "Shopify's old addresses are pages again; every product has its own subsection."
+      }
+    },
+    {
       "id": "shop-links-new-tab",
       "area": "shop",
       "who": "dim",

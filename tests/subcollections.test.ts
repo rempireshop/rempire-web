@@ -117,18 +117,22 @@ const ADDED: Record<string, string> = {
   "lumin-skin-charcoal-face-wash-daily-detox": "cl",            // face wash
   "cosrx-advanced-snail-96-mucin-power-essence": "cs",          // essence
 };
-/* …and the ones still under no chip, on purpose: no label on their row says
-   what they are (a paste filed under hair care, a styling cream, a mousse,
-   a moustache wax, a sheet mask). */
-const IN_NONE = [
-  "night-rider", "free-hold", "rough-rider", "kevin-murphy-motion-lotion",
-  "paul-mitchell-curl-quick-slip-styling-cream", "paul-mitchell-curl-hydrating-foam",
-  "kevin-murphy-killer-twirls", "easy-rider", "killer-curls", "body-builder", "paul-mitchell-super-skinny-serum",
-  "kevin-murphy-full-again", "hair-resort", "anti-gravity",
-  "captain-fawcett-nebula-moustache-wax", "captain-fawcett-ricki-hall-booze-baccy-moustache-wax", "captain-fawcett-barberism-moustache-wax",
-  "gummy-sheet-mask-madecassoside-sticker", "cosrx-advanced-snail-hydrogel-eye-patch-60pcs", "laneige-cica-sleeping-mask",
-  "real-nature-green-tea-mask-sheet",
-];
+/* …and the 21 no chip showed until 26.10.2026, placed by the SEO pass (Dim's
+   choices: Shopify's collection for each, Keyword Planner for the demand) —
+   six of them moved from «Уход за волосами» to «Стайлинг» on the way — and the
+   eye balm, which moved from «Кремы и сыворотки» to «Для глаз» with them. */
+const PLACED: Record<string, string> = {
+  "night-rider": "styling/pw", "free-hold": "styling/pw", "rough-rider": "styling/pw",
+  "kevin-murphy-motion-lotion": "styling/cu", "paul-mitchell-curl-quick-slip-styling-cream": "styling/cu",
+  "paul-mitchell-curl-hydrating-foam": "styling/cu", "kevin-murphy-killer-twirls": "styling/cu", "killer-curls": "styling/cu",
+  "easy-rider": "styling/cr", "body-builder": "styling/cr", "paul-mitchell-super-skinny-serum": "styling/cr",
+  "kevin-murphy-full-again": "styling/cr", "hair-resort": "styling/cr", "anti-gravity": "styling/cr",
+  "captain-fawcett-nebula-moustache-wax": "beard/mw", "captain-fawcett-ricki-hall-booze-baccy-moustache-wax": "beard/mw",
+  "captain-fawcett-barberism-moustache-wax": "beard/mw",
+  "gummy-sheet-mask-madecassoside-sticker": "face/ma", "laneige-cica-sleeping-mask": "face/ma", "real-nature-green-tea-mask-sheet": "face/ma",
+  "cosrx-advanced-snail-hydrogel-eye-patch-60pcs": "face/ey", "lumin-skin-dark-circle-defense-balm": "face/ey",
+};
+const IN_NONE = Object.keys(PLACED).filter((id) => id !== "lumin-skin-dark-circle-defense-balm");
 
 describe("the lift — what tools/prerender-shop2.mjs takes out of app.js", () => {
   it("finds every slice, each closing on a line of its own", () => {
@@ -139,17 +143,26 @@ describe("the lift — what tools/prerender-shop2.mjs takes out of app.js", () =
   });
 });
 
-describe("the chip row is the one the shop had — same chips, same labels, same rules", () => {
-  it("keeps every section's chips, in order, with their labels", () => {
+/* The chips the SEO pass of 26.10.2026 added (Dim: from Shopify's collections
+   and Keyword Planner), each at the end of its row. */
+const NEW_CHIPS: Record<string, Array<[string, string]>> = {
+  styling: [["cu", "Для локонов"], ["cr", "Кремы и лосьоны"]],
+  beard: [["mw", "Воск для усов"]],
+  face: [["ma", "Маски"], ["ey", "Для глаз"]],
+};
+
+describe("the chip row is the one the shop had — same chips, same labels — and the five the SEO pass added", () => {
+  it("keeps every section's chips, in order, with their labels, the new ones after them", () => {
     for (const [cat, chips] of Object.entries(BASE)) {
-      expect(SUBCATS[cat].map((d) => [d.id, d.name]), cat).toEqual(chips.map(([id, name]) => [id, name]));
-      expect(SUBCATS[cat].map((d) => d.re.source), cat).toEqual(chips.map(([, , re]) => re.source));
+      expect(SUBCATS[cat].map((d) => [d.id, d.name]), cat)
+        .toEqual([...chips.map(([id, name]) => [id, name]), ...(NEW_CHIPS[cat] || [])]);
     }
   });
 
   it("translates the labels with the dictionary entries they always had", () => {
     for (const label of ["Шампуни", "Кондиционеры", "Маски и уход", "Спреи", "Пасты и воски", "Гели", "Пудры", "Масла",
-      "Бальзамы", "После бритья", "Тонеры", "Очищение", "Кремы и сыворотки"]) {
+      "Бальзамы", "После бритья", "Тонеры", "Очищение", "Кремы и сыворотки",
+      "Воск для усов", "Маски", "Для глаз", "Для локонов", "Кремы и лосьоны"]) {
       expect((APP.match(new RegExp('"' + label + '": "', "g")) || []).length, label).toBe(2);   // ET and EN
     }
     for (const gone of ["Кожа головы", "Корейская косметика", "Бальзамы и воски", "Бритьё"]) expect(APP).not.toContain('"' + gone + '"');
@@ -160,6 +173,7 @@ describe("subcatsAuto — every product under its own chip, the one the rules ga
   /* What the name rules said, then one chip: «бальзам после бритья» matched
      Бальзамы and После бритья, and the aftershave balm is an aftershave. */
   const want = (p: Product) => {
+    if (PLACED[p.id]) return [PLACED[p.id].split("/")[1]];
     const before = baseChips(p);
     if (before.includes("ba") && before.includes("af")) return ["af"];
     return before.length ? before : ADDED[p.id] ? [ADDED[p.id]] : [];
@@ -169,13 +183,18 @@ describe("subcatsAuto — every product under its own chip, the one the rules ga
     const chipped = CATALOGUE.filter((p) => SUBCATS[p.cat]);
     expect(chipped.length).toBe(183);
     for (const p of chipped) {
-      if (!baseChips(p).length) expect(p.id in ADDED || IN_NONE.includes(p.id), p.id).toBe(true);
+      if (!baseChips(p).length) expect(p.id in ADDED || p.id in PLACED, p.id).toBe(true);
     }
-    for (const id of [...Object.keys(ADDED), ...IN_NONE]) {
+    for (const id of Object.keys(ADDED)) {
       const p = chipped.find((x) => x.id === id);
       expect(p, id).toBeTruthy();
       expect(baseChips(p!), id + " was under a chip before").toEqual([]);
     }
+    for (const [id, sub] of Object.entries(PLACED)) {
+      const p = chipped.find((x) => x.id === id);
+      expect(p?.cat, id).toBe(sub.split("/")[0]);
+    }
+    expect(IN_NONE.length).toBe(21);
   });
 
   it.each(CATALOGUE.filter((p) => SUBCATS[p.cat]).map((p) => [p.id, p] as const))("%s", (_id, p) => {
@@ -223,12 +242,10 @@ describe("subcatsAuto — every product under its own chip, the one the rules ga
     }
   });
 
-  it("leaves the same products under no chip — the SEO pass places them (Dim, 26.10)", () => {
-    const none = (cat: string) => CATALOGUE.filter((p) => p.cat === cat && !auto(p).length).length;
-    expect(none("hair")).toBe(6);
-    expect(none("styling")).toBe(8);
-    expect(none("beard")).toBe(3);     // the three moustache waxes
-    expect(none("face")).toBe(4);      // the masks and the eye patches
+  it("leaves no product of the four sections under no chip since the SEO pass (Dim, 26.10)", () => {
+    for (const cat of ["hair", "styling", "beard", "face"]) {
+      expect(CATALOGUE.filter((p) => p.cat === cat && !auto(p).length).map((p) => p.id), cat).toEqual([]);
+    }
   });
 
   it("gives a product the owner makes himself the chip he picks — none by itself", () => {
@@ -246,7 +263,8 @@ describe("subcatSuggest — the name rules, for a NEW product's first choice onl
   });
   it("falls back on the English words, and suggests nothing it cannot tell", () => {
     expect(suggest({ id: "", name: "Daily Clay", cat: "styling", brand: "" })).toBe("pw");
-    expect(suggest({ id: "", name: "Maharajah Moustache Wax", cat: "beard", brand: "" })).toBe("");
+    expect(suggest({ id: "", name: "Maharajah Moustache Wax", cat: "beard", brand: "" })).toBe("mw");
+    expect(suggest({ id: "", name: "Plain Beard Comb", cat: "beard", brand: "" })).toBe("");
     expect(suggest({ id: "", name: "Eau de Parfum", cat: "perfume", brand: "" })).toBe("");
   });
 });
@@ -268,10 +286,11 @@ describe("publishing — words in three languages, and no minimum count", () => 
     return list.filter((p) => p.cat === cat && auto(p).includes(sub)).length;
   };
 
-  it("publishes six existing chips, in both catalogue files", () => {
-    // beard/ba was 8 with the four aftershave balms in it too
+  it("publishes ten chips, in both catalogue files", () => {
+    // beard/ba was 8 with the four aftershave balms in it too; styling/pw 7 before the Kevin.Murphy pastes and clay
     expect(Object.fromEntries(Object.keys(SUB_HANDLES).map((k) => [k, count(CATALOGUE, k)]))).toEqual({
-      "beard/oi": 12, "beard/ba": 4, "beard/af": 6, "hair/sh": 40, "hair/co": 26, "styling/pw": 7,
+      "beard/oi": 12, "beard/ba": 4, "beard/af": 6, "hair/sh": 40, "hair/co": 26, "styling/pw": 10,
+      "styling/cr": 6, "beard/mw": 3, "face/ma": 3, "face/ey": 2,
     });
     for (const key of Object.keys(SUB_HANDLES)) {
       expect(count(MIN, key), key).toBe(count(CATALOGUE, key));
@@ -297,7 +316,7 @@ describe("publishing — words in three languages, and no minimum count", () => 
 
   it("has no scalp-care and no Korean-cosmetics page — neither is a chip", () => {
     for (const h of ["scalp-treatment", "peanaha-hooldus", "skraby-dlya-golovy", "korean-cosmetics", "shaving", "raseerimine",
-      "sredstva-dlya-britya", "beard-and-mustache-wax", "habeme-vuntsivahad", "vosk-dlya-borody-i-usov"]) {
+      "sredstva-dlya-britya"]) {
       expect(subOfHandle(h), h).toBeNull();
     }
   });
@@ -372,6 +391,10 @@ const ADDRESSES: Record<string, Record<Lang, string>> = {
   "hair/sh": { EN: "/collections/shampoo", ET: "/et/collections/shampoonid", RU: "/ru/collections/shampuni-dlya-volos" },
   "hair/co": { EN: "/collections/conditioner", ET: "/et/collections/palsamid", RU: "/ru/collections/konditsionery-dlya-volos" },
   "styling/pw": { EN: "/collections/hair-wax", ET: "/et/collections/juuksevaha", RU: "/ru/collections/vosk-dlya-volos" },
+  "styling/cr": { EN: "/collections/hair-lotion", ET: "/et/collections/juuksekreemid", RU: "/ru/collections/losony-dlya-volos" },
+  "beard/mw": { EN: "/collections/beard-and-mustache-wax", ET: "/et/collections/habeme-vuntsivahad", RU: "/ru/collections/vosk-dlya-borody-i-usov" },
+  "face/ma": { EN: "/collections/face-sheet-masks", ET: "/et/collections/naomaskid", RU: "/ru/collections/maski-dlya-litsa" },
+  "face/ey": { EN: "/collections/eye-care", ET: "/et/collections/silmahooldus", RU: "/ru/collections/uhod-za-kozhey-glaz" },
 };
 const OLD_URLS = readFileSync(ROOT + "tools/harvest/old-urls.txt", "utf8").trim().split(/\r?\n/)
   .map((u) => u.replace(/^https?:\/\/[^/]+/, ""));
@@ -468,7 +491,7 @@ describe("the old Shopify handles — the page itself, or ONE 301", () => {
       expect(parseShopPath(to)!.rest, u).toBe(`/c/${key}/`);
       if (/^\/(?:ru|et)\//.test(u) || /^\/collections\//.test(u)) expect(to, u).toBe(u);
     }
-    expect(own.length).toBe(6 * 6);   // six handles × unprefixed, /ru, /et and the three regional English storefronts
+    expect(own.length).toBe(10 * 6);   // ten handles × unprefixed, /ru, /et and the three regional English storefronts
   });
 
   it("moves another language's spelling, a trailing slash, a capital prefix and a regional storefront in one hop", () => {
@@ -503,9 +526,6 @@ describe("the old Shopify handles — the page itself, or ONE 301", () => {
       ["/collections/shaving", SECTION.beard.EN],
       ["/et/collections/raseerimine", SECTION.beard.ET],
       ["/ru/collections/sredstva-dlya-britya", SECTION.beard.RU],
-      ["/collections/beard-and-mustache-wax", SECTION.beard.EN],
-      ["/et/collections/habeme-vuntsivahad", SECTION.beard.ET],
-      ["/ru/collections/vosk-dlya-borody-i-usov", SECTION.beard.RU],
       ["/collections/scalp-treatment", SECTION.hair.EN],
       ["/et/collections/peanaha-hooldus", SECTION.hair.ET],
       ["/ru/collections/skraby-dlya-golovy", SECTION.hair.RU],
@@ -516,7 +536,6 @@ describe("the old Shopify handles — the page itself, or ONE 301", () => {
       ["/et/collections/juuksemaskid", SECTION.hair.ET],
       ["/ru/collections/laki-dlya-volos", SECTION.styling.RU],
       ["/collections/beard-styling", SECTION.beard.EN],
-      ["/collections/face-sheet-masks", SECTION.face.EN],
     ];
     for (const [from, to] of cases) {
       expect(landing(from), from).toBe(to);

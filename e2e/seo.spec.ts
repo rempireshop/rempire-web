@@ -161,7 +161,9 @@ const SHOPIFY: Array<[string, string, number, string]> = [
   // a published subcollection is a page of its own at Shopify's handle since 09.10.2026 (8943f498)…
   ["/et/collections/habemeolid", "/et/collections/habemeolid", 0, "an Estonian sub-collection with a page"],
   // …and one that is not still moves to its section
-  ["/et/collections/naomaskid", "/et/collections/naohooldus", 1, "an Estonian sub-collection → its section"],
+  // (naomaskid became a page of its own in the SEO pass of 26.10.2026)
+  ["/et/collections/naomaskid", "/et/collections/naomaskid", 0, "an Estonian sub-collection with a page since 26.10"],
+  ["/et/collections/raseerimine", "/et/collections/habemehooldus", 1, "an Estonian sub-collection → its section"],
   ["/ru/collections/uhod-za-volosami", "/ru/collections/uhod-za-volosami", 0, "a section under its own Russian handle"],
   ["/policies/shipping-policy", "/policies/shipping-policy", 0, "Shopify's own policy page"],
   ["/pages/right-to-return", "/policies/refund-policy", 1, "a hand-made Shopify page → the policy"],

@@ -180,7 +180,8 @@ test.describe("admin — product creation", () => {
       await expect(page.locator("[data-goodserr]"), "a product without a section was not refused").toContainText("Выберите раздел");
       await page.locator("[data-edcat]").selectOption("beard");
       // the subsection list follows the section
-      await expect(page.locator("[data-edsubcat] option")).toHaveCount(5);
+      // «Без подраздела» and the five beard chips (26.10.2026: «Воск для усов» added)
+      await expect(page.locator("[data-edsubcat] option")).toHaveCount(6);
       await page.locator("[data-edsubcat]").selectOption("ba");
       await add.click({ force: true });
       await expect(page.locator("[data-goodserr]")).toContainText("Цена — число");

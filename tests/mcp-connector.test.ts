@@ -488,7 +488,8 @@ describe("the connector, end to end", () => {
 
     const sections = JSON.parse((await tool(t.access_token, "list_sections", {})).text).sections;
     const beard = sections.find((s: { id: string }) => s.id === "beard");
-    expect(beard.subsections.map((s: { id: string }) => s.id)).toEqual(["oi", "ba", "af", "ge"]);
+    expect(beard.subsections.map((s: { id: string }) => s.id)).toEqual(["oi", "ba", "af", "ge", "mw"]);
+    expect(beard.subsections.find((s: { id: string }) => s.id === "mw").url.EN).toMatch(/\/collections\/beard-and-mustache-wax$/);
     expect(beard.subsections.find((s: { id: string }) => s.id === "af").url.ET).toMatch(/\/et\/collections\/raseerimisjargne-hooldus$/);
     expect(beard.subsections.find((s: { id: string }) => s.id === "ge").url).toBeUndefined();   // a chip, no page
     expect(sections.find((s: { id: string }) => s.id === "perfume").subsections).toEqual([]);

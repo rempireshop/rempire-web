@@ -35,18 +35,23 @@ export const SUBSECTIONS: Readonly<Record<string, readonly Subsection[]>> = Obje
     { id: "sp", name: "Спреи" },
     { id: "ge", name: "Гели" },
     { id: "pu", name: "Пудры" },
+    { id: "cu", name: "Для локонов" },
+    { id: "cr", name: "Кремы и лосьоны" },
   ],
   beard: [
     { id: "oi", name: "Масла" },
     { id: "ba", name: "Бальзамы" },
     { id: "af", name: "После бритья" },
     { id: "ge", name: "Гели" },
+    { id: "mw", name: "Воск для усов" },
   ],
   face: [
     { id: "to", name: "Тонеры" },
     { id: "cl", name: "Очищение" },
     { id: "cs", name: "Кремы и сыворотки" },
     { id: "oi", name: "Масла" },
+    { id: "ma", name: "Маски" },
+    { id: "ey", name: "Для глаз" },
   ],
 });
 
