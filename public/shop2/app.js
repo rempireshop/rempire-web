@@ -44901,7 +44901,9 @@
     /* «Тексты страниц» (settings.page_texts, src/lib/page-texts.mjs): the
        owner's words for the section and brand pages — seoHead(),
        seoBrandIntro() and seoCatIntro() in the seo-copy block read them. */
-    if (fed("page_texts")) seoOwnSet(s.page_texts && typeof s.page_texts === "object" ? s.page_texts : null);
+    if (fed("page_texts") && typeof seoOwnSet === "function") {
+      seoOwnSet(s.page_texts && typeof s.page_texts === "object" ? s.page_texts : null);
+    }
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
        absent key means «как всегда» — giftAmountsOn() falls back to the three
        the shop has always sold, and filters whatever arrives through

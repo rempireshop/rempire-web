@@ -97,7 +97,7 @@ describe("the shared block lays the owner's words over the approved copy", () =>
     expect(prerender).toContain("seoOwnSet(cleanPageTexts(LIVE_SETTINGS.page_texts));");
     expect(prerender).toContain("intro: seoCatIntro(c, lang.code) ||");
     const app = read("../public/shop2/app.js");
-    expect(app).toContain('if (fed("page_texts")) seoOwnSet(');
+    expect(app).toMatch(/if \(fed\("page_texts"\)[^\n]*\) \{\s+(DEMO\.pageTexts = [^\n]+\s+)?seoOwnSet\(/);
     expect(app).toContain("seoBrandIntro(S.brand, S.lang) : seoCatIntro(S.cat, S.lang)");
   });
 });

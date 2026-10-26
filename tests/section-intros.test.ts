@@ -101,6 +101,10 @@ describe("section intros", () => {
 
   it("are the line both renderers print", () => {
     expect(APP).toContain("var intro = esc(ownIntro || catIntro(S.cat, S.brand));");
-    expect(read("../tools/prerender-shop2.mjs")).toContain('intro: tr(catIntro(c, ""), lang.code, false)');
+    /* since «Тексты страниц» (26.10.2026) the line is the shared block's —
+       seoCatLines(), word for word these, under the owner's own; the
+       dictionary path stays the fallback (tests/page-texts.test.ts) */
+    expect(APP).toContain("seoBrandIntro(S.brand, S.lang) : seoCatIntro(S.cat, S.lang)");
+    expect(read("../tools/prerender-shop2.mjs")).toContain('intro: seoCatIntro(c, lang.code) || tr(catIntro(c, ""), lang.code, false)');
   });
 });
