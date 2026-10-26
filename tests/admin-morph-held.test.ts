@@ -59,7 +59,7 @@ const rig = new Function(`
   var admPaintedKey = "drawn";
   ${["admFieldKey", "admMorphAttrs", "admSelectedIdx", "admMorphChildren", "admHeld", "admMorphNode"].map(slice).join("\n")}
   return { morph: admMorphNode, held: admHeld, key: function () { return admPaintedKey; } };
-`)() as { morph: (from: Box, to: Box) => void; held: (el: Box) => void; key: () => string };
+`)() as { morph: (from: Box, to: Box) => void; held: (el: Box, v?: string) => void; key: () => string };
 
 const promoValue = (value: string) => new Box("INPUT", { class: "adm-input", "data-promof": "value", inputmode: "decimal", value });
 
@@ -122,6 +122,51 @@ describe("a box the model mirrors (admHeld) follows the model, a reset included"
     live.type("1");
     rig.held(live);
     expect(rig.key()).toBe("");
+  });
+});
+
+/**
+ * «Настройки → Тексты страниц», live test 26.10.2026: a line typed, saved,
+ * a second line typed over it and saved, «Вернуть» on the toast — the server
+ * had the first line back, the box still read the second. The box saves
+ * itself without a render, so its markup still said the first line, and the
+ * undo's markup said the first line too: «nothing changed» to the morph. It
+ * needs a render after the first save (any tap does one) — the e2e
+ * (admin-page-texts.spec.ts) switches the language tabs for it.
+ * ptAs now tells the box what the model took (admHeld with the saved text).
+ */
+describe("a box that saves itself follows a «Вернуть» (ptAs)", () => {
+  const intro = (text: string) => new Box("TEXTAREA", { "data-notr": "", "data-autosave": "pt:cat:beard:RU:intro" }, text);
+  const title = (value: string) => new Box("INPUT", { "data-notr": "", "data-autosave": "pt:cat:beard:RU:title", value });
+
+  it("the undone words leave the box", () => {
+    const live = intro("Тестовая строка.");          // the last render drew the first line
+    live.type("Вторая тестовая строка.");             // typed, saved — no render
+    rig.held(live, "Вторая тестовая строка.");
+    rig.morph(live, intro("Тестовая строка."));        // «Вернуть»: the first line again
+    expect(live.value).toBe("Тестовая строка.");
+  });
+
+  it("…in the one-line title box too", () => {
+    const live = title("Борода");
+    live.type("Борода и усы");
+    rig.held(live, "Борода и усы");
+    rig.morph(live, title("Борода"));
+    expect(live.value).toBe("Борода");
+  });
+
+  it("a background render of the saved text leaves the box and its caret alone, a trailing space included", () => {
+    const live = intro("");
+    live.type("Масла для бороды ");                    // still typing: the space is not stored
+    rig.held(live, "Масла для бороды");
+    rig.morph(live, intro("Масла для бороды"));
+    expect(live.value).toBe("Масла для бороды ");
+    expect(live.writes).toBe(0);
+    expect(live.textContent).toBe("Масла для бороды");
+  });
+
+  it("ptAs holds the box with the text it saved", () => {
+    expect(slice("ptAs")).toMatch(/admHeld\(document\.querySelector\(admAsSel\("data-autosave", as\)\), text\)/);
   });
 });
 

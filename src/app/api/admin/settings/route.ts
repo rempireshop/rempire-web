@@ -84,11 +84,16 @@ export async function PUT(req: Request) {
      row reads «возвращено» on every device — and `ref`, the panel's own name
      for the change, so the browser that made it can tell its row from
      another device's. Neither is a setting; both only ever land in the audit
-     line, and anything that is not the expected shape is dropped. */
+     line, and anything that is not the expected shape is dropped.
+     `undoRef` is «Вернуть» named by that `ref` instead of the row's id: the
+     toast's «Вернуть» comes seconds after the save, before the panel has
+     read the journal and could know the id (src/lib/audit-undo.ts). */
   const undoOf = Number.isInteger(body.undoOf) && (body.undoOf as number) > 0 ? (body.undoOf as number) : 0;
   const ref = typeof body.ref === "string" && /^[A-Za-z0-9_-]{1,40}$/.test(body.ref) ? body.ref : "";
+  const undoRef = typeof body.undoRef === "string" && /^[A-Za-z0-9_-]{1,40}$/.test(body.undoRef) ? body.undoRef : "";
   delete body.undoOf;
   delete body.ref;
+  delete body.undoRef;
 
   // {key, value} · {settings:{…}} · a flat map — all mean the same thing here.
   let entries: Array<[string, unknown]>;
@@ -212,6 +217,7 @@ export async function PUT(req: Request) {
       const line: Record<string, unknown> = { key, value };
       if (belowCost.length) line.belowCost = belowCost;
       if (undoOf) line.undoOf = undoOf;
+      if (undoRef) line.undoRef = undoRef;
       if (ref) line.ref = ref;
       await writeAuditSafe("admin", "setting.set", line, before);
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

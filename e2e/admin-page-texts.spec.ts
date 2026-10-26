@@ -40,6 +40,29 @@ test.describe("«Тексты страниц»", () => {
       await expect.poll(async () => (await stored()).page_texts?.cat?.beard?.RU?.intro,
         { timeout: 20_000, message: "the line never reached settings.page_texts" }).toBe(line);
 
+      /* a second line over it, then «Вернуть» on its toast: the first line
+         on the server AND in the box (live test 26.10.2026 — the box kept
+         the undone words). A render first, as any tap makes one: it draws
+         the saved line into the box's markup, the state the bug needed. */
+      await page.locator('[data-ptlang="ET"]').click();
+      await page.locator('[data-ptlang="RU"]').click();
+      await expect(intro).toHaveValue(line);
+      await intro.fill(`${line} — вторая`);
+      await expect.poll(async () => (await stored()).page_texts?.cat?.beard?.RU?.intro,
+        { timeout: 20_000 }).toBe(`${line} — вторая`);
+      await page.locator(".adm-toast__undo").click();
+      await expect.poll(async () => (await stored()).page_texts?.cat?.beard?.RU?.intro,
+        { timeout: 20_000, message: "«Вернуть» did not put the first line back" }).toBe(line);
+      await expect(intro).toHaveValue(line);
+      await intro.blur();
+      await expect(intro, "the undone words came back into the box").toHaveValue(line);
+      // …and the journal's row of the second line reads «вернули» (no «Вернуть» of its own)
+      type Row = { id: number; payload?: { ref?: string; undoRef?: string }; undone?: true };
+      const rows = ((await (await page.request.get("/api/admin/audit/?limit=20")).json()) as { audit: Row[] }).audit;
+      const undoRow = rows.find((r) => r.payload?.undoRef);
+      expect(undoRow, "the toast's «Вернуть» did not name the row it took back").toBeTruthy();
+      expect(rows.find((r) => r.payload?.ref === undoRow!.payload!.undoRef)?.undone).toBe(true);
+
       // Estonian has its own standard text, not the Russian one
       await page.locator('[data-ptlang="ET"]').click();
       await expect(page.locator('[data-autosave="pt:cat:beard:ET:intro"]')).toHaveAttribute("placeholder", /Habemehooldusvahendid/);

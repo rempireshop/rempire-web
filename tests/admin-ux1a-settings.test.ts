@@ -401,6 +401,13 @@ describe("a confirmed delete is held five seconds with «Вернуть» (q8)",
     expect(fn("admUndoToast")).toContain('if (typeof entry.undo === "function") { entry.undo(); return; }');
   });
 
+  it("the toast's «Вернуть» of a setting names its server row by the ref it was saved with", () => {
+    const undo = fn("admUndoToast");
+    expect(undo).toContain("if (ukey && entry.ref) ADM_SET_NOTE[ukey] = { undoRef: entry.ref };");
+    expect(undo.indexOf("undoRef: entry.ref")).toBeLessThan(undo.indexOf("demoUndo(i)"));
+    expect(fn("admSetSend")).toContain("else if (note.undoRef) body.undoRef = note.undoRef;");
+  });
+
   it("«Удалить слайд» asks first — rust, «Не надо» — and «Убрать» on a device waits the same five seconds", () => {
     expect(src).toContain('type: "hero_delete", index: Number(d.herodel), overlay: true, danger: true');
     expect(src).toContain('if (pa.type === "hero_delete") { admHeroDelete(pa.index); return; }');

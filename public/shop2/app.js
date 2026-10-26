@@ -31476,6 +31476,7 @@
     var body = { settings: {} };
     body.settings[key] = admSetValue(key);
     if (note.undoOf) body.undoOf = note.undoOf;
+    else if (note.undoRef) body.undoRef = note.undoRef;
     if (note.ref) body.ref = note.ref;
     return apiSend("/api/admin/settings/", "PUT", body).then(function (r) {
       if (admAutosaveOk(r)) {
@@ -32822,6 +32823,13 @@
             patch[kind][key][L] = {};
             patch[kind][key][L][field] = text;
             admSetApply({ type: "set_page_texts", value: patch }, "Тексты страниц сохранены");
+            /* The model holds the text now, and no render drew it: the box's
+               markup still says what the last render drew — the text one save
+               back. «Вернуть» goes exactly one save back, so the undo's markup
+               was that same text, «nothing changed» to the morph, and the box
+               kept the undone words (live test, 26.10.2026: the second line
+               stayed after «Вернуть» had put the first one back). */
+            if (typeof document !== "undefined") admHeld(document.querySelector(admAsSel("data-autosave", as)), text);
           }) || true;
         }
       });
@@ -50679,10 +50687,13 @@
       = the box). Said on the box itself, for the next render's morph to
       compare its markup with — see admMorphNode. And that render is not
       skipped as «nothing changed»: the markup string it would compare with
-      was drawn before the typing. */
-  function admHeld(el) {
+      was drawn before the typing. `v`: what the model took when that is not
+      the box's text to the letter — a box that saves itself stores it
+      trimmed (ptAs), and a trailing space the owner is still typing past
+      must not count as «the app changed it». */
+  function admHeld(el, v) {
     if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) return;
-    el.__admHeld = el.value;
+    el.__admHeld = v === undefined ? el.value : v;
     admPaintedKey = "";
   }
   function admMorphNode(from, to) {
@@ -52134,6 +52145,13 @@
     var i = DEMO.log.indexOf(entry);
     if (i < 0) return;
     var txt = entry.txt;
+    /* A settings change: its server row reads «вернули» on every device, as
+       after the journal's own «Вернуть» — named by the `ref` it was saved
+       with, since the journal has seldom been read yet in the seconds a
+       toast stands (live test 26.10.2026: the row kept a «Вернуть» of its own).
+       (`typeof`: the harnesses that run this function have no settings slot.) */
+    var ukey = typeof ADM_SET_OF !== "undefined" && entry.a && ADM_SET_OF[entry.a.type];
+    if (ukey && entry.ref) ADM_SET_NOTE[ukey] = { undoRef: entry.ref };
     demoUndo(i);
     journalNote(admCancelLine(txt));
     toast("Отменено");

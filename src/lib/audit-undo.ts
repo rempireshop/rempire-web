@@ -77,10 +77,13 @@ function numberOr0(v: unknown): number {
 /** The rows as GET /api/admin/audit hands them to the journal. */
 export function journalRows(rows: AuditRow[]): JournalRow[] {
   const undoneIds = new Set<number>();
+  // a settings «Вернуть» may name its row by the panel's `ref` (the toast's — PUT /api/admin/settings)
+  const undoneRefs = new Set<string>();
   for (const r of rows) {
     const p = plain(r.payload) ? r.payload : {};
     const of = numberOr0(p.undoOf);
     if (of) undoneIds.add(of);
+    if (r.action === "setting.set" && typeof p.undoRef === "string" && p.undoRef) undoneRefs.add(p.undoRef);
   }
   return rows.map((r) => {
     const { prev, ...row } = r;
@@ -101,6 +104,7 @@ export function journalRows(rows: AuditRow[]): JournalRow[] {
       out.undo = { kind: "product", id: p.id, patch: prev };
     }
     if (undoneIds.has(r.id)) out.undone = true;
+    if (r.action === "setting.set" && p && typeof p.ref === "string" && undoneRefs.has(p.ref)) out.undone = true;
     return out;
   });
 }

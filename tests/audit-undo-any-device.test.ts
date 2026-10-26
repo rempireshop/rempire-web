@@ -117,8 +117,22 @@ describe("PUT /api/admin/settings keeps what it replaced", () => {
     expect(rows[0].payload).toMatchObject({ key: "bundles", undoOf: target.id, ref: "j-abc_1" });
   });
 
+  it("the toast's «Вернуть» names the row by its ref (undoRef) — that row reads undone too", async () => {
+    await putSettings({ settings: { page_texts: { cat: { beard: { RU: { intro: "Первая строка." } } }, brand: {} } }, ref: "jfirst1" });
+    await putSettings({ settings: { page_texts: { cat: { beard: { RU: { intro: "Вторая строка." } } }, brand: {} } }, ref: "jsecond2" });
+    const res = await putSettings({
+      settings: { page_texts: { cat: { beard: { RU: { intro: "Первая строка." } } }, brand: {} } }, undoRef: "jsecond2",
+    });
+    expect(res.status).toBe(200);
+    const rows = await journal();
+    expect(rows.find((r) => r.payload.ref === "jsecond2")!.undone).toBe(true);
+    expect(rows.find((r) => r.payload.ref === "jfirst1")!.undone).toBeUndefined();
+    expect(rows[0].payload).toMatchObject({ key: "page_texts", undoRef: "jsecond2" });
+    expect(rows[0].undone).toBeUndefined();
+  });
+
   it("undoOf and ref are never stored as settings, and junk in them is dropped", async () => {
-    const res = await putSettings({ chatbot: true, undoOf: "7; drop table", ref: "<script>" });
+    const res = await putSettings({ chatbot: true, undoOf: "7; drop table", ref: "<script>", undoRef: "x'; --" });
     expect(res.status).toBe(200);
     const all = await query<{ key: string }>("select key from settings order by key");
     expect(all.map((r) => r.key)).toEqual(["chatbot"]);

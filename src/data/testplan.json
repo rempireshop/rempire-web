@@ -10137,7 +10137,7 @@
         "Пустые поля показывают серым стандартный текст магазина.",
         "Ваша строка сохраняется сама и сразу стоит под заголовком раздела.",
         "На ET и EN — перевод вашей строки, его можно поправить.",
-        "«Вернуть» возвращает прежний текст.",
+        "«Вернуть» в «Журнале» или на всплывающей строке возвращает прежний текст — и в поле.",
         "Строки «Языки магазина» в «Настройках» больше нет."
       ],
       "why": "Тексты разделов и брендов для Google и покупателей теперь меняете вы сами.",
@@ -10158,7 +10158,7 @@
           "Empty boxes show the shop's standard text in grey.",
           "Your line saves itself and is under the section heading at once.",
           "ET and EN hold the translation of your line, and it can be corrected.",
-          "«Вернуть» brings the previous text back.",
+          "«Вернуть» in «Журнал» or on the pop-up brings the old text back, in the box too.",
           "The «Языки магазина» line is no longer in «Настройки»."
         ],
         "why": "The section and brand texts for Google and shoppers are yours to change now."
