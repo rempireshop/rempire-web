@@ -1992,7 +1992,10 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-edshop .adm-seg button { flex: 1 1 0; height: 46px; border: 0; background: var(--a-paper); color: var(--a-ink); font-size: 14px; padding: 0 8px; }
 .adm-edshop .adm-seg button + button { border-left: 1px solid var(--a-ink); }
 .adm-edshop .adm-seg button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
-.adm-edshop .adm-switch { background: var(--a-paper); min-height: 46px; }
+/* the three controls one height, the select's 48 px: «Показывать в магазине»
+   wrapped to two lines of 22 px and stood 62 px tall beside «Наличие» and
+   «Подраздел» (Dim, 26.10.2026); two lines of 18 px fit the box */
+.adm-edshop .adm-switch { background: var(--a-paper); min-height: 0; height: 48px; padding-top: 0; padding-bottom: 0; font-size: 14px; line-height: 18px; }
 /* q41: «N человек ждут — получат письмо» under «Наличие» — ink, not grey: it is news */
 .adm-edwait { display: block; margin-top: 6px; font-size: 13px; line-height: 18px; color: var(--a-ink); }
 .adm-edwait[hidden] { display: none; }
