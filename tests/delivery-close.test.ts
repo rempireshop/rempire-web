@@ -8,7 +8,7 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
-import { cleanDelivery, closeDeliveredOrders, looksDelivered, looksReturned, MAX_AUTO_DAYS } from "@/lib/delivery";
+import { cleanDelivery, closeDeliveredOrders, looksDelivered, looksOnTheWay, looksReturned, MAX_AUTO_DAYS } from "@/lib/delivery";
 import { BIRTHDAY_MAX_DAYS, FLOW_DEFAULTS, getFlows, runBirthdays } from "@/lib/flows";
 import { setSetting } from "@/lib/orders";
 import { shopDay } from "@/lib/day";
@@ -195,6 +195,55 @@ describe("«Доставлен» without the button", () => {
     expect(run.returned ?? 0).toBe(0);
     expect(run.closed).toBe(1);
     expect(await statusOf(id)).toBe("delivered");
+  });
+
+  /* R-100111, 27.10.2026: Nova Post to a Budapest locker, «через 3 дня» and
+     «спрашивать перевозчика» on. The day rule closed it «Доставлен» on the
+     fourth morning; that afternoon Nova Post said «awaitingCollection» — it
+     was in the locker, not with the customer. The panel calls the setting
+     «Если перевозчик молчит — закрыть заказ», and a carrier saying «on its
+     way» is not silent. */
+  it("waits past the days while the carrier it is asked says the parcel is still on its way", async () => {
+    await setSetting("delivery", { autoDays: 3, useCarrier: true });
+    for (const word of ["inTransit", "awaitingCollection", "registered", "pending"]) {
+      await truncateAll();
+      await setSetting("delivery", { autoDays: 3, useCarrier: true });
+      carrierStatus = word;
+      const id = await shippedOrder(4, { shipmentId: "shp-" + word });
+      const run = await closeDeliveredOrders();
+      expect(run.closed, `«${word}» closed the order by the calendar`).toBe(0);
+      expect(run.waiting).toBe(1);
+      expect(await statusOf(id)).toBe("shipped");
+    }
+  });
+
+  it("…and closes it the night the carrier says delivered", async () => {
+    await setSetting("delivery", { autoDays: 3, useCarrier: true });
+    carrierStatus = "delivered";
+    const id = await shippedOrder(4, { shipmentId: "shp-done" });
+    expect((await closeDeliveredOrders()).closed).toBe(1);
+    expect(await statusOf(id)).toBe("delivered");
+  });
+
+  it("the days still close it when the carrier is silent: no shipment, no answer, or a word nobody knows", async () => {
+    await setSetting("delivery", { autoDays: 3, useCarrier: true });
+    const noShipment = await shippedOrder(4);
+    carrierStatus = "someCarrierWord";
+    const unknownWord = await shippedOrder(4, { shipmentId: "shp-odd" });
+    const run = await closeDeliveredOrders();
+    expect(run.closed).toBe(2);
+    expect(run.waiting ?? 0).toBe(0);
+    expect(await statusOf(noShipment)).toBe("delivered");
+    expect(await statusOf(unknownWord)).toBe("delivered");
+  });
+
+  it("only Montonio's words for a parcel in flight count as «on its way»", () => {
+    for (const yes of ["inTransit", "in_transit", "awaitingCollection", "awaiting-collection", "registered", "pending"]) {
+      expect(looksOnTheWay(yes), yes).toBe(true);
+    }
+    for (const no of ["", null, undefined, "delivered", "returned", "registrationFailed", "lost"]) {
+      expect(looksOnTheWay(no), String(no)).toBe(false);
+    }
   });
 });
 

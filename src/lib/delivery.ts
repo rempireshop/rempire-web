@@ -26,6 +26,11 @@
  *    This is the fallback for a hand-over with no Montonio record at all
  *    (a courier collecting from the salon, a parcel booked elsewhere) and for
  *    a carrier whose status never becomes anything this recognises.
+ *    While the carrier is asked and says the parcel is still on its way
+ *    (looksOnTheWay()), the days do not count — the panel calls this setting
+ *    «Если перевозчик молчит — закрыть заказ». Until 27.10.2026 they did:
+ *    R-100111, Nova Post to a Budapest locker, was closed «Доставлен» after
+ *    three days while it sat in the locker waiting to be collected.
  *
  * Nothing here sends a letter — `delivered` never did (docs/shipping.md) —
  * and nothing here throws: a close that fails is a close that did not happen,
@@ -40,6 +45,8 @@ export interface DeliveryRun {
   checked: number;
   /** Parcels the carrier has sent back — left open on purpose, not closed. */
   returned?: number;
+  /** Parcels past the day rule that the carrier says are still on their way — left open. */
+  waiting?: number;
   reason?: string;
 }
 
@@ -134,6 +141,20 @@ export function looksReturned(status: unknown): boolean {
   if (!s) return false;
   return s === "returned" || s === "return" || s.startsWith("returned") ||
     s.startsWith("return_to") || s === "returning";
+}
+
+/**
+ * The carrier still has the parcel — Montonio's own words for one on its way,
+ * from the vocabulary quoted at looksReturned(): `pending`, `registered`,
+ * `inTransit`, `awaitingCollection`. While it says one of these the day rule
+ * waits: «Если перевозчик молчит» is the only case it is for. An allow-list
+ * again, so a word nobody has seen is not «on its way» and the days still
+ * close the order — the fallback the day rule exists to be.
+ */
+export function looksOnTheWay(status: unknown): boolean {
+  const s = String(status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return s === "pending" || s === "registered" || s === "intransit" || s === "in_transit" ||
+    s === "awaitingcollection" || s === "awaiting_collection";
 }
 
 type ShippedRow = { id: string; number: string; shipping: unknown; updated_at: string | Date };
@@ -232,8 +253,10 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
   const cutoff = settings.autoDays ? now - settings.autoDays * 24 * 60 * 60 * 1000 : null;
   let closed = 0;
   let returned = 0;
+  let waiting = 0;
   for (const row of rows) {
     let deliver = false;
+    let onTheWay = false;
     /* A parcel the carrier has sent back is the one case where the clock must
        not run: it is on its way to Renat, not to the customer. Asked for
        whenever we have a shipment id, even with «спрашивать перевозчика» off,
@@ -249,6 +272,7 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
           continue;
         }
         if (settings.useCarrier && looksDelivered(shipment.status)) deliver = true;
+        else if (settings.useCarrier && looksOnTheWay(shipment.status)) onTheWay = true;
       } catch {
         /* not configured, a 404, a timeout — the time rule below still applies */
       }
@@ -256,7 +280,12 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
 
     if (!deliver && cutoff != null) {
       const since = shippedAtOf(row);
-      if (Number.isFinite(since) && since <= cutoff) deliver = true;
+      if (Number.isFinite(since) && since <= cutoff) {
+        /* the carrier answered: the parcel is still in transit or waiting to
+           be collected — not «молчит», so the days wait for its own word */
+        if (onTheWay) waiting += 1;
+        else deliver = true;
+      }
     }
 
     if (!deliver) continue;
@@ -267,6 +296,6 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
       console.error(`[delivery] could not close ${row.number}:`, err);
     }
   }
-  // `returned` is reported so the nightly line says why a parcel did not close
-  return { closed, checked: rows.length, returned };
+  // `returned` and `waiting` are reported so the nightly line says why a parcel did not close
+  return { closed, checked: rows.length, returned, waiting };
 }

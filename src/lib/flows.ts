@@ -1963,7 +1963,7 @@ export interface FlowsReport {
   invoices: { reminded: number; cancelled: number; skipped: number; reason?: string };
   unpaid: UnpaidRun;
   /** «Доставлен» closed without anybody pressing it — src/lib/delivery.ts. */
-  delivered: { closed: number; checked: number; returned?: number; reason?: string };
+  delivered: { closed: number; checked: number; returned?: number; waiting?: number; reason?: string };
   /** Montonio re-asked about shipments whose webhook went quiet — src/lib/shipping/shipment-sync.ts. */
   shipments: {
     checked: number;

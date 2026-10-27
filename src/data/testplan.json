@@ -10339,6 +10339,39 @@
       "markedAt": "2026-09-25T10:51:07.148Z"
     },
     {
+      "id": "orders-delivered-waits-carrier",
+      "area": "reports",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "«Доставлен» ждёт слова перевозчика",
+      "steps": [
+        "31.10 утром: «Заказы» → R-100112 (Nova Post, курьер в Испанию).",
+        "Посмотреть статус заказа и строку посылки в карточке."
+      ],
+      "expect": [
+        "Пока Nova Post пишет «в пути» — заказ «Отправлен».",
+        "«Доставлен» — только когда Nova Post отметит доставку."
+      ],
+      "why": "Раньше заказ закрывался через 3 дня, даже когда посылка ещё лежала в пакомате (R-100111, 27.10).",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "«Delivered» waits for the carrier's word",
+        "steps": [
+          "On 31.10 in the morning: «Заказы» → R-100112 (Nova Post, courier to Spain).",
+          "Look at the order's status and the parcel line on its card."
+        ],
+        "expect": [
+          "While Nova Post says «in transit», the order stays «Отправлен».",
+          "«Доставлен» only once Nova Post marks it delivered."
+        ],
+        "why": "Before, an order closed after 3 days even with the parcel still in a locker (R-100111, 27.10)."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-27T15:04:06.518Z"
+    },
+    {
       "id": "settings-integrations",
       "area": "reports",
       "who": "dim",
