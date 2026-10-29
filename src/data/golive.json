@@ -1814,12 +1814,12 @@
         "dim",
         "claude"
       ],
-      "status": "todo",
+      "status": "done",
       "title": "Shopify: выгрузить заказы и клиентов для бухгалтера",
-      "detail": "CSV из Shopify (Orders, Customers) — в папку на компьютере, не в репозиторий. Клод может помочь проверить, что всё выгрузилось.",
+      "detail": "Сделано до закрытия Shopify (Дим, 29.10): заказы и клиенты выгружены для бухгалтера.",
       "en": {
         "title": "Shopify: export orders and customers for the accountant",
-        "detail": "CSV from Shopify (Orders, Customers) — into a folder on the computer, never the repository. Claude can help check it is all there."
+        "detail": "Done before Shopify was closed (Dim, 29.10): orders and customers exported for the accountant."
       }
     },
     {
