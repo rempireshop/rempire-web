@@ -1,0 +1,52 @@
+# Promote to production — a commit reaches rempireshop.com only after CI passed.
+#
+# Dim, 29.10.2026, before the handover: «each change should not cause git
+# failures» — and a red test should stop a deploy, not ship beside it. Until
+# then every push to `main` deployed at once and CI ran next to it.
+#
+# How: Vercel's Production Branch is `production` (Settings → Environments →
+# Production → Branch Tracking), and nothing pushes to it but this workflow.
+# When CI finishes green for a push to `main`, the exact commit it tested is
+# fast-forwarded onto `production`, and Vercel builds that. A plain push, never
+# a force: if `production` is already ahead (an older run finishing after a
+# newer one), the push is refused and nothing moves.
+#
+# What does NOT wait for CI: the owner's panel edits. They rebuild through the
+# deploy hook (DEPLOY_HOOK_URL, src/lib/rebuild.ts), which Vercel ties to the
+# `production` branch — the same code, his new data.
+#
+# A docs-only push runs no CI (ci.yml paths-ignore) and so moves nothing; the
+# next code push carries it.
+name: Promote to production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fast-forward production to the commit CI passed
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          git fetch origin production || true
+          if git rev-parse --verify -q origin/production >/dev/null && ! git merge-base --is-ancestor origin/production "$SHA"; then
+            echo "production is not behind $SHA — nothing to do"; exit 0
+          fi
+          git push origin "$SHA:refs/heads/production"
+          echo "production → $SHA"

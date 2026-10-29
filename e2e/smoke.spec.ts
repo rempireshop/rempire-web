@@ -520,7 +520,14 @@ test.describe(`deployed shop — ${BASE}`, () => {
         const title = titleOf(body).trim();
         expect(title.length, `${at}: empty <title>`).toBeGreaterThan(0);
         const seen = titles.get(title);
-        expect(seen, `${at}: shares its <title> with ${seen}\n  «${title}»`).toBeUndefined();
+        /* …except one product's own pages in two languages: a name with no
+           type word and no «Для Google» title reads the same in Russian and
+           Estonian — the owner's content, not one page served for another
+           (29.10.2026; the weekly content letter names it). A note, not red. */
+        const sameProduct = !!seen && kind === "product" &&
+          new URL(seen).pathname.replace(/^\/(ru|et)(?=\/)/, "") === new URL(url).pathname.replace(/^\/(ru|et)(?=\/)/, "");
+        if (sameProduct) test.info().annotations.push({ type: "content", description: `${at}: same <title> as ${seen} — «${title}»` });
+        else expect(seen, `${at}: shares its <title> with ${seen}\n  «${title}»`).toBeUndefined();
         titles.set(title, url);
       }
     }

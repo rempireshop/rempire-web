@@ -1964,6 +1964,8 @@ export interface FlowsReport {
   unpaid: UnpaidRun;
   /** «Доставлен» closed without anybody pressing it — src/lib/delivery.ts. */
   delivered: { closed: number; checked: number; returned?: number; waiting?: number; reason?: string };
+  /** «Что поправить на сайте», Mondays — src/lib/content-report.ts (29.10.2026). */
+  content?: { sent: boolean; issues: number; reason?: string };
   /** Montonio re-asked about shipments whose webhook went quiet — src/lib/shipping/shipment-sync.ts. */
   shipments: {
     checked: number;
@@ -2189,6 +2191,9 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     console.error("[flows] delivered failed:", err);
     out.delivered = { closed: 0, checked: 0, reason: "error" };
   }
+  /* The owner's content, once a week — runContentReport() never throws. */
+  const { runContentReport } = await import("@/lib/content-report");
+  out.content = await runContentReport(now);
   /* Housekeeping, not a letter: the per-address cart-write counters
      (db/migrations/181_cart_writes.sql) for days long past. It rides the one
      scheduled job the shop has for the same reason everything else here does
