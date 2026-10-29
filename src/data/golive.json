@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-10-25",
+  "asOf": "2026-10-29",
   "phases": [
     {
       "id": "a",
@@ -1754,10 +1754,10 @@
       ],
       "status": "doing",
       "title": "Google Реклама — тест 20 € до 08.11, карта Рената …0731",
-      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. 26.10, вечер: 0 показов за полтора дня — при этом кампания и группа «Допущено», все 83 товара трёх брендов допущены без замечаний, по оплате предупреждений нет. Следующая проверка ~29.10; если по-прежнему 0 — поднять ставку или добавить бренды (решает Дим).",
+      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. 26.10, вечер: 0 показов за полтора дня — при этом кампания и группа «Допущено», все 83 товара трёх брендов допущены без замечаний, по оплате предупреждений нет. Следующая проверка ~29.10; если по-прежнему 0 — поднять ставку или добавить бренды (решает Дим). 29.10: 0 кликов. 28.10 в 21:50 сбой панели скрыл 75 товаров, среди них все три бренда теста — до восстановления 29.10 в 14:37 их не было ни в магазине, ни в Google.",
       "en": {
         "title": "Google Ads — 20 € test until 08.11, Renat's card …0731",
-        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call. 26.10, evening: 0 impressions in a day and a half — while the campaign and ad group are «Eligible», all 83 products of the three brands are eligible with no issues, and billing shows no warning. Next check ~29.10; if still 0 — raise the bid or add brands (Dim decides)."
+        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call. 26.10, evening: 0 impressions in a day and a half — while the campaign and ad group are «Eligible», all 83 products of the three brands are eligible with no issues, and billing shows no warning. Next check ~29.10; if still 0 — raise the bid or add brands (Dim decides). 29.10: 0 clicks. On 28.10 at 21:50 a panel glitch hid 75 products, all three test brands among them — absent from the shop and Google until restored on 29.10 at 14:37."
       }
     },
     {
@@ -1800,10 +1800,10 @@
       ],
       "status": "done",
       "title": "Merchant Center: наши фиды «Approved» → фиды Shopify выключить",
-      "detail": "Сделано 16.10: наши фиды EN и RU — 607 из 629 товаров одобрено (остальное — правила Google, например CBD); шесть источников Shopify Дим удалил. Эстонского фида нет: Merchant Center не даёт эстонский язык. 26.10: в фиде и наборы — по товару на набор (set-…), с ценой набора и фото самих товаров; раньше Google находил два набора сам и отклонял их без доставки. 28 товаров Google ошибочно пометил «рецептурными лекарствами» — ограничение только во Франции и Германии.",
+      "detail": "Сделано 16.10: наши фиды EN и RU — 607 из 629 товаров одобрено (остальное — правила Google, например CBD); шесть источников Shopify Дим удалил. Эстонского фида нет: Merchant Center не даёт эстонский язык. 26.10: в фиде и наборы — по товару на набор (set-…), с ценой набора и фото самих товаров; раньше Google находил два набора сам и отклонял их без доставки. 28 товаров Google ошибочно пометил «рецептурными лекарствами» — ограничение только во Франции и Германии. 29.10: 27 товаров (83 предложения) снова под «рецептурными лекарствами» — после новых ИИ-описаний с составом, кислотами и предупреждениями; проверку повторно запросить нельзя. Теперь фид отдаёт Google только заголовок и первый абзац описания, на странице товара — весь текст. CBD Daily — правило Google, не исправить текстом.",
       "en": {
         "title": "Merchant Center: our feeds «Approved» → switch off Shopify's",
-        "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language. 26.10: the sets are in the feed too — one item per set (set-…), at the set's price, with the products' own photos; before, Google found two sets by itself and refused them for lacking delivery. Google wrongly flagged 28 items as «prescription drugs» — limited in France and Germany only."
+        "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language. 26.10: the sets are in the feed too — one item per set (set-…), at the set's price, with the products' own photos; before, Google found two sets by itself and refused them for lacking delivery. Google wrongly flagged 28 items as «prescription drugs» — limited in France and Germany only. 29.10: 27 products (83 offers) flagged as «prescription drugs» again — after the new AI descriptions with ingredients, acids and precautions; no further review can be requested. The feed now gives Google only the headline and first paragraph; the product page keeps the whole text. CBD Daily is Google's rule, text cannot fix it."
       }
     },
     {
@@ -1830,12 +1830,12 @@
         "renat",
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "title": "Закрыть Shopify",
-      "detail": "Около 08.11, после выгрузки. Фиды Shopify уже выключены (16.10). Экономия ~46 € в месяц. Домен с Shopify уже снят.",
+      "detail": "Закрыт (Дим, 29.10). Фиды Shopify выключены ещё 16.10, домен с Shopify снят. Экономия ~46 € в месяц. Stripe — отдельно, позже.",
       "en": {
         "title": "Close Shopify",
-        "detail": "Around 08.11, after the export. Shopify's feeds are already off (16.10). Saves ~46 € a month. The domain already left Shopify."
+        "detail": "Closed (Dim, 29.10). Shopify's feeds were off since 16.10 and the domain had left Shopify. Saves ~46 € a month. Stripe separately, later."
       }
     },
     {
@@ -1861,12 +1861,28 @@
         "claude",
         "dim"
       ],
-      "status": "todo",
+      "status": "done",
       "title": "База данных: бэкап, который точно восстанавливается",
-      "detail": "Клод делает выгрузку базы и пробное восстановление в пустую базу на компьютере Димы (файл — не в git, в нём данные покупателей). Плюс проверить, что у Railway включены свои бэкапы.",
+      "detail": "С 29.10 каждую ночь (04:15 по Таллину) GitHub делает копию всей базы, сразу восстанавливает её в пустую базу и сверяет число строк — первый прогон: всё совпало. Копия зашифрована паролем, хранится 30 дней на GitHub магазина. Бесплатно; у Railway на бесплатном тарифе своих бэкапов нет. Как восстановить — docs/backup.md.",
       "en": {
         "title": "Database: a backup that really restores",
-        "detail": "Claude takes a dump and test-restores it into an empty database on Dim's computer (the file stays out of git — it holds customer data). Plus check Railway's own backups are on."
+        "detail": "Since 29.10 GitHub copies the whole database every night (04:15 Tallinn), restores it into an empty database at once and compares the row counts — first run: all matched. Encrypted with a passphrase, kept 30 days on the shop's GitHub. Free; Railway's free plan has no backups of its own. How to restore: docs/backup.md."
+      }
+    },
+    {
+      "area": "ho-data",
+      "blocking": false,
+      "id": "ho-alerts",
+      "who": [
+        "claude",
+        "dim"
+      ],
+      "status": "done",
+      "title": "Сбои сами пишут Диме",
+      "detail": "С 29.10: сайт выходит в свет только после прохождения проверок; если сборка на Vercel падает, проверка краснеет и GitHub пишет Диме. Неудачная ночная пересборка и массовое скрытие товаров (8+ в наличии за сутки) — письмо на info@diipsolutions.eu. Панель не даёт скрыть больше 10 товаров в минуту (сбой 28.10). Учения: GitHub → Actions → «Alert drill».",
+      "en": {
+        "title": "Failures write to Dim by themselves",
+        "detail": "Since 29.10: the site goes live only after the checks pass; a failed Vercel build turns the check red and GitHub mails Dim. A nightly rebuild that never went live and a mass hide (8+ in-stock products in a day) mail info@diipsolutions.eu. The panel will not hide more than 10 products a minute (the 28.10 glitch). Drill: GitHub → Actions → «Alert drill»."
       }
     },
     {
@@ -1984,11 +2000,11 @@
         "dim"
       ],
       "status": "todo",
-      "title": "С 01.11 — только исправления",
-      "detail": "Новые функции — после передачи, в следующем проекте. До 08.11 меняем только то, что сломано. Документы — примерно с 02.11.",
+      "title": "С 03.11 — только исправления",
+      "detail": "Решение Димы 29.10. Новые функции — после передачи, в следующем проекте. До 08.11 меняем только то, что сломано. Документы — примерно с 02.11.",
       "en": {
-        "title": "From 01.11 — fixes only",
-        "detail": "New features come after the handover, in the next project. Until 08.11 only what is broken changes. The documents — from about 02.11."
+        "title": "From 03.11 — fixes only",
+        "detail": "Dim's decision, 29.10. New features come after the handover, in the next project. Until 08.11 only what is broken changes. The documents — from about 02.11."
       }
     },
     {
