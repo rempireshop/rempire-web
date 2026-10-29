@@ -905,3 +905,48 @@ describe("a size's link opens the page on that size", () => {
     expect(shop.sizeFromQuery({ sizes: ["", ""] }, "?size=v2")).toBe(1);
   });
 });
+
+/* 29.10.2026: Google's prescription-drug classifier took 27 products out of
+   free listings after the AI-written texts brought ingredient lists, acids
+   and precautions into the feed. The feed sends the headline and the intro;
+   the page keeps everything (feedIntro). */
+describe("feedIntro() — what of the owner's text Google gets", () => {
+  const TEXT = [
+    "KEVIN.MURPHY YOUNG.AGAIN.WASH — rejuvenating shampoo",
+    "YOUNG.AGAIN.WASH is a shampoo from the REJUVENATE range. It cleanses gently.",
+    "Features:\n— Anti-ageing care: helps combat visible signs of hair ageing.",
+    "Key ingredients:\n— Lotus flower extract.",
+    "Precautions:\n— do not use during pregnancy",
+    "Ingredients (INCI):\nWater (Aqua), Sodium C14-16 Olefin Sulfonate",
+  ].join("\n\n");
+
+  it("keeps the headline and the intro and stops at the first section", async () => {
+    const { feedIntro } = await import("@/lib/merchant-feed");
+    expect(feedIntro(TEXT)).toBe(
+      "KEVIN.MURPHY YOUNG.AGAIN.WASH — rejuvenating shampoo\n\nYOUNG.AGAIN.WASH is a shampoo from the REJUVENATE range. It cleanses gently.",
+    );
+    expect(feedIntro("Шампунь.\n\nДействие:\n— очищает")).toBe("Шампунь.");
+    expect(feedIntro("One paragraph only.")).toBe("One paragraph only.");
+  });
+
+  it("cuts a long intro at a sentence", async () => {
+    const { feedIntro, FEED_INTRO_MAX } = await import("@/lib/merchant-feed");
+    const long = "Headline\n\n" + "A sentence that goes on. ".repeat(60);
+    const out = feedIntro(long);
+    expect(out.length).toBeLessThanOrEqual(FEED_INTRO_MAX);
+    expect(out.endsWith(".")).toBe(true);
+  });
+
+  it("is what the feed carries for an owner's description — never the sections", () => {
+    const { xml } = buildFeed({
+      lang: "EN", base: LIVE, overrides: {}, custom: [], eans: {}, rules: DEFAULT_SHIPPING_RULES,
+      descriptions: { "kevin-murphy-young-again-wash": { EN: TEXT, RU: TEXT, ET: TEXT } },
+    });
+    const item = xml.slice(xml.indexOf("kevin-murphy-young-again-wash"));
+    const desc = item.slice(item.indexOf("<g:description>"), item.indexOf("</g:description>"));
+    expect(desc).toContain("rejuvenating shampoo");
+    expect(desc).not.toContain("Key ingredients");
+    expect(desc).not.toContain("pregnancy");
+    expect(desc).not.toContain("INCI");
+  });
+});

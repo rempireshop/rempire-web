@@ -346,6 +346,34 @@ function unitMeasure(label: string): { measure: string; base: string } | null {
   return { measure: qty + unit, base: "100" + unit };
 }
 
+/**
+ * The part of the owner's text Google gets: the headline and the opening
+ * paragraph, up to the first section («Key ingredients:», «Действие:», «How
+ * to use:», «Precautions:» …), at most FEED_INTRO_MAX characters.
+ *
+ * 29.10.2026: the AI-written texts of 25–29.10 brought ingredient lists, acid
+ * percentages, «anti-ageing», «irritation» and pregnancy precautions into the
+ * feed, and Google's prescription-drug classifier took 27 shampoos and
+ * skin-care products (83 offers) out of free listings and Shopping ads in 24
+ * countries — with no review left to ask for. The product page keeps the
+ * whole text; the feed says what the product is.
+ */
+export const FEED_INTRO_MAX = 900;
+export function feedIntro(text: string): string {
+  const paras = String(text).split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  const out: string[] = [];
+  for (const p of paras) {
+    const head = p.split("\n")[0].trim();
+    if (out.length && (/[:：]$/.test(head) || /^[—–•-]\s/.test(head))) break;
+    out.push(p);
+    if (out.length >= 2) break;
+  }
+  const joined = out.join("\n\n");
+  if (joined.length <= FEED_INTRO_MAX) return joined;
+  const cut = joined.lastIndexOf(". ", FEED_INTRO_MAX);
+  return cut > 0 ? joined.slice(0, cut + 1) : joined.slice(0, FEED_INTRO_MAX);
+}
+
 /** The owner's plain-text description (paragraphs split by blank lines) as feed text. */
 function ownerText(t: string): string {
   const html = String(t)
@@ -921,11 +949,11 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
     const head = name.toLowerCase().startsWith(p.brand.toLowerCase() + " ") ? name : `${p.brand} ${name}`;
     const description = (() => {
       const own = p.descOv?.[lang]?.trim();
-      if (own) return ownerText(own);
+      if (own) return ownerText(feedIntro(own));
       const fromFile = p.texts[lang] ?? p.texts.EN;
       if (fromFile) return fromFile;
       const ownEn = p.descOv?.EN?.trim();
-      if (ownEn) return ownerText(ownEn);
+      if (ownEn) return ownerText(feedIntro(ownEn));
       return clip(`${head}. ${catName(p.cat, lang)}.`, 5000);
     })();
     const link = base + langPath(seg, "/p/" + encodeURIComponent(p.id) + "/");
