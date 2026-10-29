@@ -1079,7 +1079,10 @@ function productPage(p, lang) {
      setHead() in app.js has always drawn once the page boots. Only the
      language's own: a Russian title is not an Estonian page's, even where
      the live page would fall back to it. */
-  const ownSeo = (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].seo && PRODUCT_OVERRIDES[p.id].seo[code]) || {};
+  const ownPair = (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].seo && PRODUCT_OVERRIDES[p.id].seo[code]) || {};
+  /* an Estonian or English pair with Russian in it — saved before the panel
+     refused one (29.10.2026) — is not this page's: the generated title wins */
+  const ownSeo = code !== "RU" && /[\u0400-\u04FF]/.test((ownPair.title || "") + (ownPair.desc || "")) ? {} : ownPair;
   const spec = productSpec({
     base: BASE, lang,
     id: p.id, cat: p.cat, catName, brand: p.brand, name,

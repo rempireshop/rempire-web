@@ -2294,6 +2294,8 @@
       "Порог списания — от 0 до 10 000 баллов.": "Kasutamise lävi — 0 kuni 10 000 punkti.",
       "Остаток — целое число от 0 до 1 000 000.": "Jääk — täisarv 0 kuni 1 000 000.",
       "Этот штрихкод уже привязан к другому товару.": "See triipkood on juba seotud teise tootega.",
+      "В эстонском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз.": "Eestikeelses tekstis on veel venekeelseid sõnu — parandage need või vajutage uuesti «Tõlgi».",
+      "В английском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз.": "Ingliskeelses tekstis on veel venekeelseid sõnu — parandage need või vajutage uuesti «Tõlgi».",
       "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.": "Vöötkood on 8–14 numbrit (EAN/UPC) või oma kood tähtedest, numbritest ja sidekriipsust, 4–32 märki.",
       "Порог «мало» — целое число от 0 до 100 000.": "«Vähe» lävi — täisarv 0 kuni 100 000.",
       "Тарифы Montonio применены ✓": "Montonio tariifid rakendatud ✓",
@@ -5908,6 +5910,8 @@
       "Порог списания — от 0 до 10 000 баллов.": "Redemption threshold — from 0 to 10,000 points.",
       "Остаток — целое число от 0 до 1 000 000.": "Stock — a whole number from 0 to 1,000,000.",
       "Этот штрихкод уже привязан к другому товару.": "This barcode already belongs to another product.",
+      "В эстонском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз.": "The Estonian text still has Russian words in it — fix them or press «Translate» again.",
+      "В английском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз.": "The English text still has Russian words in it — fix them or press «Translate» again.",
       "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.": "A barcode is 8–14 digits (EAN/UPC) or your own code of letters, digits and dashes, 4–32 characters.",
       "Порог «мало» — целое число от 0 до 100 000.": "The «low» threshold — a whole number from 0 to 100,000.",
       "Тарифы Montonio применены ✓": "Montonio tariffs applied ✓",
@@ -39938,9 +39942,20 @@
     render();
     return entry;
   }
+  /* An Estonian or English box that still holds Russian words is refused by
+     the server (`wrong_language`, 29.10.2026 — the check Claude and
+     «Помощник» already made): said under the box like every explained
+     refusal, nothing saved until it changes. */
+  var ED_WRONG_LANG = {
+    ET: "В эстонском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз.",
+    EN: "В английском тексте остались русские слова — исправьте их или нажмите «Перевести» ещё раз."
+  };
   function edTyped(key, a, o) {
     return edWrite(a, o).then(function (r) {
       if (edOk(r)) edCommit(key, a);
+      else if (r && r.body && r.body.error === "wrong_language") {
+        return { refused: ED_WRONG_LANG[String(r.body.detail || "").slice(0, 2)] || ED_WRONG_LANG.ET };
+      }
       return r;
     });
   }

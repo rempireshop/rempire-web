@@ -22,6 +22,8 @@
  * that reloaded onto its copy showed the SEO texts it had just saved as
  * «пусто» (verification pass 25.09.2026).
  */
+import catalogueMin from "@/data/catalogue.min.json";
+import { seoOffLanguage } from "@/lib/ai-prompts";
 import { requireAdmin } from "@/lib/auth";
 import { pendingStockAlertCounts } from "@/lib/customers";
 import { getOverrideRow, getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
@@ -76,6 +78,30 @@ function nameFields(id: string, patch: Partial<Override>): void {
   if (cat && !(PRODUCT_CATS as readonly string[]).includes(cat)) throw new OrderError("bad_body", "cat");
   // a subsection belongs to its section: a move starts with none (the catalogue's `sub` names the old one)
   if ("cat" in patch && !("subcat" in patch)) patch.subcat = null;
+}
+
+/* An Estonian or English description or Google text with Russian words left
+   in it is refused, before anything is written — the check Claude
+   (src/lib/mcp/tools.ts) and «Помощник» already made, now at the panel's own
+   door too (29.10.2026): the panel's translations of 27.10 had left
+   «Чёрное мыло 666 — ручная работа.» at the end of the Estonian and English
+   soap texts. The product's own name and brand may stay as they are spelled,
+   exactly as there (seoOffLanguage). `detail` is the language, for the
+   message under the box. */
+function refuseWrongLanguage(id: string, raw: Record<string, unknown>): void {
+  const p = (catalogueMin as Array<{ id: string; n: string; b: string }>).find((x) => x.id === id);
+  const who = { name: p?.n ?? "", brand: p?.b ?? "" };
+  const pick = (o: unknown, lang: string): unknown => {
+    if (!o || typeof o !== "object") return undefined;
+    const r = o as Record<string, unknown>;
+    return r[lang] ?? r[lang.toLowerCase()];
+  };
+  for (const lang of ["ET", "EN"] as const) {
+    const desc = pick(raw.description ?? raw.descriptions, lang);
+    const seo = pick(raw.seo, lang) as Record<string, unknown> | undefined;
+    const texts = [desc, seo?.title, seo?.t, seo?.desc, seo?.d].filter((t): t is string => typeof t === "string" && !!t.trim());
+    if (texts.some((t) => seoOffLanguage(t, lang, who))) throw new OrderError("wrong_language", lang);
+  }
 }
 
 export const runtime = "nodejs";
@@ -259,6 +285,7 @@ export async function PUT(req: Request) {
       const raw = raw0 as Record<string, unknown>;
       const { id, patch } = normalise(raw);
       if (!id) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
+      refuseWrongLanguage(id, raw);
       if ("name" in patch || "brand" in patch || "cat" in patch) renamed = true;
       /* The fields this patch is about to replace, as the row held them — the
          audit's `prev` (db/migrations/207_audit_prev.sql), so «Вернуть» in the

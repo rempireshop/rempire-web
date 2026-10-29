@@ -9,6 +9,7 @@
  * stock override on a custom id is written and cleared through
  * PUT /api/admin/overrides like on any other product.
  */
+import { seoOffLanguage } from "@/lib/ai-prompts";
 import { requireAdmin } from "@/lib/auth";
 import {
   CustomProductError,
@@ -73,12 +74,26 @@ export async function PUT(req: Request, ctx: Ctx) {
        it does a catalogue product's (src/lib/audit-undo.ts). Best effort: a
        read that fails costs the row its way back, never the save. */
     let before: { before: Record<string, unknown> } | undefined;
+    let cur: Awaited<ReturnType<typeof getCustomProduct>> = null;
     if (Object.keys(fields).length) {
       try {
-        const cur = await getCustomProduct(id);
+        cur = await getCustomProduct(id);
         if (cur) before = { before: ownPrev(cur, fields) };
       } catch {
         before = undefined;
+      }
+    }
+    /* Russian words left in an Estonian or English text are refused, as at
+       PUT /api/admin/overrides (refuseWrongLanguage there, 29.10.2026) —
+       the product's own name and brand excepted. */
+    const who = { name: String(fields.name ?? cur?.name ?? ""), brand: String(fields.brand ?? cur?.brand ?? "") };
+    for (const lang of ["ET", "EN"] as const) {
+      const pick = (o: unknown) =>
+        o && typeof o === "object" ? (o as Record<string, unknown>)[lang] ?? (o as Record<string, unknown>)[lang.toLowerCase()] : undefined;
+      const seo = pick(fields.seo) as Record<string, unknown> | undefined;
+      const texts = [pick(fields.description), seo?.title, seo?.t, seo?.desc, seo?.d].filter((t): t is string => typeof t === "string" && !!t.trim());
+      if (texts.some((t) => seoOffLanguage(t, lang, who))) {
+        return Response.json({ ok: false, error: "wrong_language", field: lang, detail: lang }, { status: 400 });
       }
     }
     let row = Object.keys(fields).length ? await updateCustomProduct(id, fields) : await getCustomProduct(id);

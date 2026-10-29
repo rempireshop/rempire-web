@@ -145,9 +145,12 @@ export function overrideRow(r) {
     subcat: typeof r.subcat === "string" && r.subcat ? r.subcat : null,
     /* The name, brand and section the owner renamed a catalogue product to
        (migration 224) — every page the build writes names it so. */
-    name: typeof r.name === "string" && r.name ? r.name : null,
-    brand: typeof r.brand === "string" && r.brand ? r.brand : null,
-    cat: typeof r.cat === "string" && r.cat ? r.cat : null,
+    /* blank is «not renamed»: a brand of spaces made an empty brand page the
+       sitemap check refuses, and the whole build stopped (tools/chaos-build.mjs,
+       29.10.2026). The panel cannot store one; a row from elsewhere might. */
+    name: typeof r.name === "string" && r.name.trim() ? r.name.trim() : null,
+    brand: typeof r.brand === "string" && r.brand.trim() ? r.brand.trim() : null,
+    cat: typeof r.cat === "string" && r.cat.trim() ? r.cat.trim() : null,
     /* «Для Google» per language — seoPairs() above. Read from 29.10.2026. */
     seo: seoPairs(r),
   };

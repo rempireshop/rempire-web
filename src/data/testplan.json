@@ -9091,6 +9091,45 @@
       "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
+      "id": "ai-translate-russian-left",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Русские слова в эстонском тексте не сохраняются",
+      "steps": [
+        "«Товары» → любой товар → «Описание» → вкладка «Eesti».",
+        "Дописать в конце по-русски: «Тестовая фраза.»",
+        "Подождать пару секунд.",
+        "Стереть дописанное."
+      ],
+      "expect": [
+        "Под полем: «В эстонском тексте остались русские слова…».",
+        "«Сохранено ✓» не появляется, в магазине старый текст.",
+        "После стирания текст сохраняется как обычно."
+      ],
+      "why": "27.10 переводы оставили русские фразы в эстонских и английских описаниях; теперь панель их не пропускает, как и Claude.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "Russian words in an Estonian text are not saved",
+        "steps": [
+          "«Товары» → any product → «Описание» → the «Eesti» tab.",
+          "Add a Russian line at the end: «Тестовая фраза.»",
+          "Wait a couple of seconds.",
+          "Delete what you added."
+        ],
+        "expect": [
+          "Under the box: «В эстонском тексте остались русские слова…».",
+          "No «Сохранено ✓», the shop keeps the old text.",
+          "Once deleted, the text saves as usual."
+        ],
+        "why": "On 27.10 translations left Russian phrases in Estonian and English descriptions; the panel now refuses them, as Claude does."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-29T08:29:25.495Z"
+    },
+    {
       "id": "ai-seo",
       "area": "ai",
       "who": "renat",

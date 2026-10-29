@@ -39,6 +39,13 @@ describe("seoPairs() — the build reads «Для Google» as the live page does
     });
   });
 
+  it("a blank name, brand or section is «not renamed» — an empty brand page would stop the build", () => {
+    // tools/chaos-build.mjs, 29.10.2026: a brand of spaces → /ru/b/ → the sitemap check threw
+    const r = overrideRow({ price: null, sizes: null, name: "   ", brand: "\t ", cat: " " });
+    expect([r.name, r.brand, r.cat]).toEqual([null, null, null]);
+    expect(overrideRow({ price: null, sizes: null, name: " Free.Hold — паста " }).name).toBe("Free.Hold — паста");
+  });
+
   it("nothing written is null; seo_langs as a JSON string is read too", () => {
     expect(seoPairs({ seo_title: null, seo_desc: "", seo_langs: null })).toBeNull();
     expect(seoPairs({ seo_langs: '{"ET":{"title":"Pealkiri"}}' })).toEqual({ ET: { title: "Pealkiri" } });
@@ -58,7 +65,9 @@ describe("seoPairs() — the build reads «Для Google» as the live page does
 
   it("the static product page takes the language's own pair, never another language's", () => {
     const pre = read("../tools/prerender-shop2.mjs");
-    expect(pre).toContain("const ownSeo = (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].seo && PRODUCT_OVERRIDES[p.id].seo[code]) || {};");
+    expect(pre).toContain("const ownPair = (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].seo && PRODUCT_OVERRIDES[p.id].seo[code]) || {};");
+    // an ET/EN pair with Russian in it (saved before the panel refused one) is skipped
+    expect(pre).toContain('const ownSeo = code !== "RU" && /[\\u0400-\\u04FF]/.test((ownPair.title || "") + (ownPair.desc || "")) ? {} : ownPair;');
     expect(pre).toContain('seoTitle: ownSeo.title || (code === "EN" && p.seo && p.seo.t ? p.seo.t : ""),');
     expect(pre).toContain('seoDesc: ownSeo.desc || "",');
   });
