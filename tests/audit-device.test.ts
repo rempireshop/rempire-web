@@ -32,6 +32,13 @@ describe("writeAudit() — the device", () => {
     expect(row.device?.length).toBe(300);
   });
 
+  it("keeps no device on a customer's row — only the panel's own", async () => {
+    const { writeAudit } = await import("@/lib/orders");
+    ua = "Mozilla/5.0 (Android 15) Chrome/141";
+    await writeAudit("someone@example.com", "account.consent", { marketing: true });
+    expect(await last()).toEqual({ action: "account.consent", device: null });
+  });
+
   it("writes the row without one outside a request", async () => {
     const { writeAudit } = await import("@/lib/orders");
     ua = null;

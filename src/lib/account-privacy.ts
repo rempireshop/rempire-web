@@ -246,7 +246,7 @@ export async function eraseCustomerAccount(email: string, opts: EraseOptions = {
     /* The one kind of journal row the customer wrote themselves — «Хочу
        вернуть заказ», actor = their address (return-request route). The row
        stays, with its order number; the address in it becomes the word. */
-    await q("update admin_audit set actor = 'customer' where actor = $1", [addr]);
+    await q("update admin_audit set actor = 'customer', device = null where actor = $1", [addr]);
     // the ledger goes with it — loyalty_ledger.customer_id is `on delete cascade` (100)
     if (customerId) await q("delete from customers where id = $1", [customerId]);
 

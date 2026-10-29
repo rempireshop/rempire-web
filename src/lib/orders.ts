@@ -926,7 +926,10 @@ function insertAudit(actor: string, action: string, payload: unknown, prev: Audi
 export async function writeAudit(actor: string, action: string, payload?: unknown, prev?: AuditPrev): Promise<void> {
   let id: number | undefined;
   try {
-    const device = await requestDevice();
+    /* the panel's own rows only: a customer's (actor = their address) keeps
+       no device, so erasing an account (src/lib/account-privacy.ts) has
+       nothing more to clear */
+    const device = actor === "admin" ? await requestDevice() : null;
     let rows: Array<{ id: string | number }>;
     try {
       rows = await insertAudit(actor, action, payload, prev, device);
