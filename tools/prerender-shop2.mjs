@@ -1073,13 +1073,19 @@ function productPage(p, lang) {
      productSpec() (src/lib/seo-head.mjs), which the request-time page of a
      custom product calls with the owner's own texts. The catalogue's static
      English pair — title and description exported from the old shop — is the
-     English page's when there is one. */
+     English page's when there is one.
+     Above both, since 29.10.2026, the owner's own «Для Google» pair in this
+     page's language (seoPairs(), tools/lib/overrides-export.mjs) — the one
+     setHead() in app.js has always drawn once the page boots. Only the
+     language's own: a Russian title is not an Estonian page's, even where
+     the live page would fall back to it. */
+  const ownSeo = (PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].seo && PRODUCT_OVERRIDES[p.id].seo[code]) || {};
   const spec = productSpec({
     base: BASE, lang,
     id: p.id, cat: p.cat, catName, brand: p.brand, name,
     price: p.price, priceFrom: p.priceFrom, stock: p.stock,
-    seoTitle: code === "EN" && p.seo && p.seo.t ? p.seo.t : "",
-    seoDesc: "",
+    seoTitle: ownSeo.title || (code === "EN" && p.seo && p.seo.t ? p.seo.t : ""),
+    seoDesc: ownSeo.desc || "",
     body: code === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p, code),
     /* Its own 1 200×630 card, drawn above if the old shop had not left one. The
        square .webp cutout is never offered to a scraper: half of them refuse

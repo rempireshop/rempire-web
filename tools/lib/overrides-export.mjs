@@ -78,6 +78,46 @@ function safeParse(s) {
   try { return JSON.parse(s); } catch { return null; }
 }
 
+/* ---------- the owner's Google title and description, per language -------
+
+   «Для Google» in the product card — product_overrides.seo_title / seo_desc
+   (the Russian pair) and seo_langs {ET, EN} — read exactly as fromRow() in
+   src/lib/product-seo.ts reads them: one line, no control or format
+   characters, the title capped at 70 and the description at 170. The live
+   page has drawn them since 09.2026 (setHead() in app.js); the static page
+   Google reads first did not, so Renat's titles reached Google only through
+   the rendered page, and a product whose name carries no type word —
+   «Pasta&Love Strong Hold Mat Clay» — had one <title> in Russian and in
+   Estonian (the smoke test, 29.10.2026). */
+const SEO_TITLE_MAX = 70;
+const SEO_DESC_MAX = 170;
+const seoLine = (v, max) =>
+  typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+function seoPair(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const title = seoLine(raw.title ?? raw.t, SEO_TITLE_MAX);
+  const desc = seoLine(raw.desc ?? raw.d ?? raw.description, SEO_DESC_MAX);
+  if (!title && !desc) return null;
+  return { ...(title ? { title } : {}), ...(desc ? { desc } : {}) };
+}
+/** The row's Google pairs as { RU?, ET?, EN? } — only the languages with text; null for none. */
+export function seoPairs(r) {
+  const out = {};
+  const ru = seoPair({ title: r.seo_title, desc: r.seo_desc });
+  if (ru) out.RU = ru;
+  let rest = r.seo_langs;
+  if (typeof rest === "string") {
+    try { rest = JSON.parse(rest); } catch { rest = null; }
+  }
+  if (rest && typeof rest === "object" && !Array.isArray(rest)) {
+    for (const lang of ["ET", "EN"]) {
+      const pair = seoPair(rest[lang]);
+      if (pair) out[lang] = pair;
+    }
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 /**
  * One `product_overrides` row as the build reads it — the same three fields
  * mapOverride() in src/lib/orders.ts hands the live page, and pure, so the
@@ -108,6 +148,8 @@ export function overrideRow(r) {
     name: typeof r.name === "string" && r.name ? r.name : null,
     brand: typeof r.brand === "string" && r.brand ? r.brand : null,
     cat: typeof r.cat === "string" && r.cat ? r.cat : null,
+    /* «Для Google» per language — seoPairs() above. Read from 29.10.2026. */
+    seo: seoPairs(r),
   };
 }
 

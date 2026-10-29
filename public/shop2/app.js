@@ -13575,7 +13575,9 @@
     return (list || []).map(function (b) {
       var items = (b.items || []).map(function (it) {
         var p = bundleItemProduct(it);
-        if (it.img || !p) return it;
+        if (it.img) return it;
+        // a part taken off sale keeps its photo in the stack — bundleItemImg()
+        if (!p) { var img = bundleItemImg(it); return img ? Object.assign({}, it, { img: img }) : it; }
         return Object.assign({}, it, { img: p.img, brand: it.brand || p.brand, name: it.name || p.name });
       });
       var images = b.images;
@@ -13647,6 +13649,23 @@
   function bundleItemName(it) {
     var p = bundleItemProduct(it);
     return (p ? p.brand + " " + p.name : (it.brand || "") + " " + (it.name || it.id)).trim();
+  }
+  /* A part's photo: the live product's; for a part the owner has taken off
+     sale, the file's own (it leaves CATALOGUE, not FILE_PRODUCTS); else the
+     set's snapshot; else nothing. Never undefined — a set from /api/bundles/
+     carries no photos, and `url('undefined')` is a request for
+     /collections/sets/undefined: Renat hid the Yumain line on 28.10.2026 and
+     «Уход за татуировкой» asked for it on every view (the smoke test). */
+  function bundleItemImg(it) {
+    var p = bundleItemProduct(it);
+    if (p && p.img) return p.img;
+    // `var FILE_PRODUCTS` is assigned ~30 000 lines below; a set drawn before
+    // that line has run finds it undefined, not empty
+    var file = FILE_PRODUCTS || [];
+    for (var i = 0; i < file.length; i++) {
+      if (file[i].id === it.id && file[i].img) return file[i].img;
+    }
+    return it.img || "";
   }
   /* Three product photos stacked instead of a new photo shoot: at card size
      the overlap reads as «несколько вещей», and no set needs an asset. */
@@ -13767,7 +13786,6 @@
           '<p class="bdesc">' + esc(bundleDesc(b)) + "</p>" +
           '<div class="sec__head sec__head--sub"><h2 class="sec__title">Что внутри</h2></div>' +
           '<div class="bitems">' + b.items.map(function (it) {
-            var p = bundleItemProduct(it);
             /* Which one is missing, on its own line. The sentence under the
                list says a part is gone; it never said WHICH, so the shopper
                had to open all three products to find out — Renat, 13.09.2026.
@@ -13775,8 +13793,9 @@
                use, so it needs no new dictionary key and reads the same
                everywhere. */
             var gone = bundleItemStock(it) === "out";
+            var ph = bundleItemImg(it);
             return '<div class="bitem"><span class="bitem__ph">' +
-                '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
+                '<span class="ph"' + (ph ? ' style="background-image:url(\'' + ph + '\')"' : "") + '></span></span>' +
               '<a class="bitem__nm" href="' + linkHref("product", it.id) + '" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
                 (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") +
                 /* How many of it. expand() multiplies the part's price by qty

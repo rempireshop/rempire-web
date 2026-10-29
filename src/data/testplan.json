@@ -765,6 +765,39 @@
       "markedAt": "2026-09-25T10:44:55.950Z"
     },
     {
+      "id": "shop-set-hidden-part-photo",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Набор с убранным товаром — фото на месте",
+      "steps": [
+        "Открыть «Наборы» → «Уход за татуировкой» (товары Yumain сейчас убраны из магазина).",
+        "Посмотреть список «Что внутри»."
+      ],
+      "expect": [
+        "У всех трёх товаров есть фото, пустых серых квадратов нет.",
+        "Набор помечен «нет в наличии», кнопки «В корзину» нет."
+      ],
+      "why": "29.10: после того как Yumain убрали из магазина, страница набора запрашивала несуществующую картинку.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "A set with a hidden product — photos still there",
+        "steps": [
+          "Open «Наборы» → «Уход за татуировкой» (the Yumain products are hidden from the shop now).",
+          "Look at the «Что внутри» list."
+        ],
+        "expect": [
+          "All three products have a photo, no empty grey squares.",
+          "The set says «нет в наличии», with no «В корзину» button."
+        ],
+        "why": "29.10: once Yumain was hidden, the set's page asked for a picture that does not exist."
+      },
+      "area": "shop",
+      "mark": "new",
+      "markedAt": "2026-10-29T07:23:27.123Z"
+    },
+    {
       "id": "shop-gift-page",
       "area": "shop",
       "who": "renat",
@@ -9103,6 +9136,41 @@
       },
       "mark": "redo",
       "markedAt": "2026-10-25T18:42:03.108Z"
+    },
+    {
+      "id": "ai-seo-static-title",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "any",
+      "title": "Свой заголовок для Google — в самой странице",
+      "steps": [
+        "Открыть view-source:https://rempireshop.com/ru/products/davines-pasta-love-strong-hold-mat-clay.",
+        "Найти строку <title>.",
+        "То же для /et/products/davines-pasta-love-strong-hold-mat-clay."
+      ],
+      "expect": [
+        "В русской странице — «… — глина», как в «Для Google».",
+        "В эстонской — «… — juuksevaha», а не русский заголовок."
+      ],
+      "why": "Google сначала читает саму страницу; до 29.10 свой заголовок появлялся в ней только после загрузки скрипта.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "Your own Google title — in the page itself",
+        "steps": [
+          "Open view-source:https://rempireshop.com/ru/products/davines-pasta-love-strong-hold-mat-clay.",
+          "Find the <title> line.",
+          "The same for /et/products/davines-pasta-love-strong-hold-mat-clay."
+        ],
+        "expect": [
+          "The Russian page says «… — глина», as in «Для Google».",
+          "The Estonian one says «… — juuksevaha», not the Russian title."
+        ],
+        "why": "Google reads the page itself first; until 29.10 the owner's title appeared in it only after the script loaded."
+      },
+      "area": "ai",
+      "mark": "new",
+      "markedAt": "2026-10-29T07:23:27.123Z"
     },
     {
       "id": "ai-blog-outline",
