@@ -1,0 +1,100 @@
+# Database backup — every night, off Railway, and proven restorable every time.
+#
+# 29.10.2026, the readiness pass before the handover: the production database
+# (Railway Postgres, all orders, customers and the owner's edits) had NO
+# backup at all — Railway's Hobby plan cannot make one («Upgrade to Pro to
+# create new backups»). This makes one a night without a plan change:
+#
+#   1. pg_dump of the whole database (plain SQL, gzip);
+#   2. that dump restored into a throwaway Postgres in this job, and the row
+#      counts of the tables that matter compared with the source — a backup
+#      nobody has restored is a hope, not a backup;
+#   3. encrypted (AES-256, the BACKUP_PASSPHRASE secret) and kept as a
+#      workflow artifact for 30 days.
+#
+# A red run mails the workflow's owner, like any other.
+#
+# Secrets (repository → Settings → Secrets → Actions):
+#   BACKUP_DATABASE_URL  the public DATABASE_URL of the Railway Postgres
+#   BACKUP_PASSPHRASE    a long passphrase, kept by Dim AND Renat — without it
+#                        the artifacts cannot be read
+# Until both exist the job only says so and stays green.
+#
+# To restore (docs/backup.md): download the artifact, then
+#   gpg --batch --passphrase "$BACKUP_PASSPHRASE" -d rempire-*.sql.gz.gpg | gunzip | psql "$NEW_DATABASE_URL"
+name: Database backup
+
+on:
+  schedule:
+    # 02:15 UTC, before the nightly rebuild and the 07:00 cron
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      scratch:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: scratch
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      SRC: ${{ secrets.BACKUP_DATABASE_URL }}
+      PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+      SCRATCH: postgres://postgres:scratch@localhost:5432/postgres
+      PG: docker run --rm -i --network host -e PGSSLMODE=require postgres:18
+      PGLOCAL: docker run --rm -i --network host postgres:18
+    steps:
+      - name: Secrets set?
+        id: ready
+        run: |
+          if [ -z "$SRC" ] || [ -z "$PASS" ]; then
+            echo "::warning::BACKUP_DATABASE_URL / BACKUP_PASSPHRASE are not set — no backup made"
+            echo "go=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=yes" >> "$GITHUB_OUTPUT"
+            echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dump
+        if: steps.ready.outputs.go == 'yes'
+        run: |
+          $PG pg_dump --no-owner --no-privileges "$SRC" | gzip -9 > dump.sql.gz
+          ls -l dump.sql.gz
+          test "$(stat -c %s dump.sql.gz)" -gt 10000
+
+      - name: Restore into a scratch Postgres and compare
+        if: steps.ready.outputs.go == 'yes'
+        run: |
+          gunzip -c dump.sql.gz | $PGLOCAL psql -q -v ON_ERROR_STOP=1 "$SCRATCH" > /dev/null
+          for t in orders customers product_overrides custom_products bundles posts settings stock_levels admin_audit; do
+            a=$($PG psql -tA "$SRC" -c "select count(*) from $t" 2>/dev/null || echo "?")
+            b=$($PGLOCAL psql -tA "$SCRATCH" -c "select count(*) from $t" 2>/dev/null || echo "?")
+            echo "$t: live $a, restored $b"
+            # the live table may have grown since the dump; it may never have FEWER rows restored
+            if [ "$a" = "?" ] || [ "$b" = "?" ] || [ "$b" -gt "$a" ] || [ "$b" -lt $(( a - 50 )) ]; then
+              echo "::error::$t does not match ($a live, $b restored)"; exit 1
+            fi
+          done
+
+      - name: Encrypt
+        if: steps.ready.outputs.go == 'yes'
+        run: |
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASS" \
+            -o "rempire-${{ steps.ready.outputs.day }}.sql.gz.gpg" dump.sql.gz
+          rm dump.sql.gz
+
+      - uses: actions/upload-artifact@v4
+        if: steps.ready.outputs.go == 'yes'
+        with:
+          name: rempire-db-${{ steps.ready.outputs.day }}
+          path: rempire-*.sql.gz.gpg
+          retention-days: 30
+          if-no-files-found: error

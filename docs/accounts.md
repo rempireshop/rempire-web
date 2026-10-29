@@ -113,3 +113,21 @@ Two things for Renat, both money-shaped:
   Montonio, so the IBAN in «Реквизиты» is the account the money actually lands
   on. It is the only field of the whole flow that cannot be guessed and cannot
   be wrong.
+
+## Renewals, limits and alerts after the handover (29.10.2026)
+
+What can run out, expire or stop the shop, and who hears about it. Checked 29.10.2026; ⚠ = a decision or a check still open.
+
+| What | Limit / renewal | What happens if missed | Who is told |
+|---|---|---|---|
+| Domain rempireshop.com (Zone.ee) | yearly; ⚠ check the date in my.zone.eu (registered June 2022) | the whole shop and its mail stop | Zone mails blackboxestonia@ (Renat) |
+| Vercel (team Rempire, Hobby) | free; 10 GB deployment storage (retention 1 day / 1 week, see memory of 23.09); ⚠ Hobby terms are non-commercial — Pro $20/mo is the compliant plan | over the cap old deployments are deleted (site stays up); a failed build keeps the last good one | Vercel mails the team owner: failed deploys and storage warnings ⚠ make sure that is info@diipsolutions.eu or reaches it |
+| Railway Postgres (Hobby $5/mo) | 16 MB used; **no built-in backups on Hobby** | data loss without a backup | `.github/workflows/backup.yml` makes one a night (needs the two secrets, docs/backup.md); Pro $20/mo would add Railway's own |
+| GitHub (user rempireshop) | Actions: unlimited while the repo is public; private = 2 000 free minutes/month — CI ~15 min a push, the weekly browser suite ~50, smoke 2×/day ~2, backup ~3 a night ≈ 700–900 a month | over the minutes, checks stop running (the shop does not) | GitHub mails the account; failed checks mail the workflow owner ⚠ notification routing → info@diipsolutions.eu |
+| Resend (free) | 3 000 mails/month, 100/day | customer letters stop past the cap | Resend dashboard only |
+| OpenAI API | pay-as-you-go; ⚠ key still on Dim's account → move to the shop's (handover) | the assistant, AI search and texts fail politely; the shop works | OpenAI billing mails the key owner |
+| Cloudflare (Email Routing, R2 media) | free; R2 10 GB | photos stop uploading / mail forwarding stops | Cloudflare mails rempireshopinfo@ |
+| Montonio | contract fee monthly | payments and labels stop | Montonio mails Renat |
+| Google Ads | post-paid, Renat's card …0731 | campaign pauses | Google mails rempireshopinfo@ |
+
+**Alerts that reach Dim (info@diipsolutions.eu):** a red CI or deployed-smoke check (GitHub), a failed build or nightly rebuild (Vercel), a failed nightly backup (GitHub), and the Monday letter «Что поправить на сайте» (copy; src/lib/content-report.ts, `DEV_ALERT_TO`).
