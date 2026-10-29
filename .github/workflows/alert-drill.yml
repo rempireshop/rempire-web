@@ -1,0 +1,27 @@
+# Alert drill — a run that fails on purpose, to prove GitHub's failure mail
+# reaches you.
+#
+# GitHub mails a red run to the account it belongs to: whoever pushed (CI,
+# Promote to production and the smoke run inside it), whoever last edited a
+# schedule (the nightly backup, the twice-daily smoke), whoever pressed «Run
+# workflow». That account's Settings → Notifications → Default notifications
+# email decides the mailbox (Dim's: info@diipsolutions.eu, 29.10.2026).
+#
+# Actions → Alert drill → Run workflow. A mail «Run failed: Alert drill» within
+# a few minutes means every red check will reach the same mailbox. The build
+# alerts that do not go through GitHub have their own drill:
+# POST /api/admin/alert-drill/ (src/lib/build-watch.ts).
+name: Alert drill
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::error::Alert drill — this run fails on purpose. If its mail reached you, so will every red check."
+          exit 1

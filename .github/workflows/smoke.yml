@@ -54,6 +54,11 @@ on:
     # 06:20 and 18:20 UTC. Off the hour on purpose — GitHub's scheduler queues
     # everybody's `0 * * * *` together and runs them late.
     - cron: "20 6,18 * * *"
+  # 4. called by «Promote to production» once Vercel has built the push — the
+  #    same suite, but as part of a run that belongs to whoever pushed, so a red
+  #    result mails them; a deployment_status run belongs to vercel[bot] and
+  #    mails nobody (29.10.2026).
+  workflow_call:
   workflow_dispatch:
     inputs:
       target:

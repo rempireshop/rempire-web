@@ -1966,6 +1966,8 @@ export interface FlowsReport {
   delivered: { closed: number; checked: number; returned?: number; waiting?: number; reason?: string };
   /** «Что поправить на сайте», Mondays — src/lib/content-report.ts (29.10.2026). */
   content?: { sent: boolean; issues: number; reason?: string };
+  /** A Vercel build asked by the deploy hook that never went live — src/lib/build-watch.ts. */
+  build?: { sent: boolean; problem?: string; reason?: string };
   /** Montonio re-asked about shipments whose webhook went quiet — src/lib/shipping/shipment-sync.ts. */
   shipments: {
     checked: number;
@@ -2194,6 +2196,8 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
   /* The owner's content, once a week — runContentReport() never throws. */
   const { runContentReport } = await import("@/lib/content-report");
   out.content = await runContentReport(now);
+  /* A deploy-hook build that never went live — runBuildWatch() never throws. */
+  out.build = await (await import("@/lib/build-watch")).runBuildWatch(now);
   /* Housekeeping, not a letter: the per-address cart-write counters
      (db/migrations/181_cart_writes.sql) for days long past. It rides the one
      scheduled job the shop has for the same reason everything else here does

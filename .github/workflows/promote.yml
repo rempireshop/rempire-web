@@ -17,6 +17,12 @@
 #
 # A docs-only push runs no CI (ci.yml paths-ignore) and so moves nothing; the
 # next code push carries it.
+#
+# Then it waits for Vercel: the build of that commit is reported back to GitHub
+# as a Production deployment. A failed build turns this run red, and a red run
+# mails whoever pushed — the only way a failed Vercel build reaches anyone but
+# the shop's own Gmail (Vercel mails the account owner only). Hook builds,
+# which never reach GitHub, are watched by src/lib/build-watch.ts.
 name: Promote to production
 
 on:
@@ -27,6 +33,7 @@ on:
 
 permissions:
   contents: write
+  deployments: read
 
 concurrency:
   group: promote-production
@@ -36,11 +43,14 @@ jobs:
   promote:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
+    outputs:
+      moved: ${{ steps.push.outputs.moved }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Fast-forward production to the commit CI passed
+        id: push
         env:
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
@@ -50,3 +60,30 @@ jobs:
           fi
           git push origin "$SHA:refs/heads/production"
           echo "production → $SHA"
+          echo "moved=yes" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Vercel's production build
+        if: steps.push.outputs.moved == 'yes'
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 50); do
+            id=$(gh api "repos/$GITHUB_REPOSITORY/deployments?sha=$SHA&environment=Production" --jq ".[0].id // empty")
+            if [ -n "$id" ]; then
+              state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --jq ".[0].state // empty")
+              case "$state" in
+                success) echo "Vercel built and deployed $SHA"; exit 0 ;;
+                failure|error) echo "::error::Vercel's build of $SHA failed — the site still runs the previous build. Vercel → rempire-web → Deployments → Build Logs"; exit 1 ;;
+              esac
+            fi
+            sleep 30
+          done
+          echo "::error::no finished Production deployment of $SHA after 25 minutes — Vercel → rempire-web → Deployments"; exit 1
+
+  # The deployed shop, checked as part of this run: a red result mails whoever
+  # pushed (the same suite's deployment_status run belongs to vercel[bot]).
+  smoke:
+    needs: promote
+    if: needs.promote.outputs.moved == 'yes'
+    uses: ./.github/workflows/smoke.yml

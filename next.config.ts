@@ -247,6 +247,9 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   images: { unoptimized: true },
   reactStrictMode: true,
+  /* When this build was made — src/lib/build-watch.ts compares it with the
+     last deploy-hook call to tell a hook build that never went live. */
+  env: { BUILD_AT: new Date().toISOString() },
   /**
    * The printable gift card (src/lib/giftcard-pdf.ts) and the link-preview
    * card (src/lib/og-card.ts) read three TTFs and the brand's tower path off
