@@ -894,18 +894,48 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
  */
 export type AuditPrev = { before: unknown };
 
+/**
+ * The browser and system of the request that made a journal row, as its
+ * User-Agent says it — the `device` column (db/migrations/225_audit_device.sql).
+ * 28.10.2026: 75 products were hidden at machine speed from an admin session
+ * that had been idle for half an hour, and nothing in the journal could say
+ * from which phone or computer. Null outside a request (cron, tests, scripts).
+ */
+async function requestDevice(): Promise<string | null> {
+  try {
+    const { headers } = await import("next/headers");
+    const ua = (await headers()).get("user-agent");
+    return ua ? ua.slice(0, 300) : null;
+  } catch {
+    return null;
+  }
+}
+
+function insertAudit(actor: string, action: string, payload: unknown, prev: AuditPrev | undefined, device: string | null) {
+  const cols = ["actor", "action", "payload"];
+  const vals: unknown[] = [actor, action, jsonbParam(payload)];
+  if (prev) { cols.push("prev"); vals.push(jsonbParam(prev.before)); }
+  if (device) { cols.push("device"); vals.push(device); }
+  const marks = cols.map((c, i) => (c === "payload" || c === "prev" ? `$${i + 1}::jsonb` : `$${i + 1}`));
+  return query<{ id: string | number }>(
+    `insert into admin_audit (${cols.join(", ")}) values (${marks.join(", ")}) returning id`,
+    vals,
+  );
+}
+
 export async function writeAudit(actor: string, action: string, payload?: unknown, prev?: AuditPrev): Promise<void> {
   let id: number | undefined;
   try {
-    const rows = prev
-      ? await query<{ id: string | number }>(
-          "insert into admin_audit (actor, action, payload, prev) values ($1, $2, $3::jsonb, $4::jsonb) returning id",
-          [actor, action, jsonbParam(payload), jsonbParam(prev.before)],
-        )
-      : await query<{ id: string | number }>(
-          "insert into admin_audit (actor, action, payload) values ($1, $2, $3::jsonb) returning id",
-          [actor, action, jsonbParam(payload)],
-        );
+    const device = await requestDevice();
+    let rows: Array<{ id: string | number }>;
+    try {
+      rows = await insertAudit(actor, action, payload, prev, device);
+    } catch (err) {
+      /* the column arrives with migration 225, which the live database runs
+         when someone presses «migrate» — until then the row goes without it */
+      if (!device || (err as { code?: string }).code !== "42703") throw err;
+      rows = await insertAudit(actor, action, payload, prev, null);
+    }
     const n = Number(rows[0]?.id);
     id = Number.isFinite(n) ? n : undefined;
   } finally {
