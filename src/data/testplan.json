@@ -8600,6 +8600,43 @@
       "markedAt": "2026-09-25T23:23:02.337Z"
     },
     {
+      "id": "goods-hide-burst",
+      "area": "goods",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Быстрые нажатия «Показывать в магазине» не скрывают товары пачкой",
+      "steps": [
+        "«Товары» → список.",
+        "У одного товара дважды очень быстро нажать «Показывать в магазине».",
+        "Подождать секунду и вернуть товар, если он скрыт."
+      ],
+      "expect": [
+        "Срабатывает только первое нажатие.",
+        "Товар скрыт один раз и не мигает туда-обратно.",
+        "Через секунду обычное нажатие возвращает товар."
+      ],
+      "why": "28.10 переключатели сработали сами с машинной скоростью: за 5 секунд скрыто 75 товаров в наличии. Теперь панель игнорирует нажатия чаще раза в полсекунды, а сервер не скрывает больше 10 товаров в минуту.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "Fast presses on «Показывать в магазине» do not hide products in bulk",
+        "steps": [
+          "«Товары» → the list.",
+          "On one product press «Показывать в магазине» twice very quickly.",
+          "Wait a second and show the product again if it is hidden."
+        ],
+        "expect": [
+          "Only the first press counts.",
+          "The product is hidden once and does not flip back and forth.",
+          "A normal press a second later shows it again."
+        ],
+        "why": "On 28.10 the switches fired at machine speed: 75 products in stock hidden in 5 seconds. The panel now ignores presses faster than one per half second, and the server hides no more than 10 products a minute."
+      },
+      "mark": "new",
+      "markedAt": "2026-10-29T12:31:19.263Z"
+    },
+    {
       "id": "people-list",
       "area": "people",
       "who": "renat",

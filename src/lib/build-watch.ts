@@ -101,6 +101,53 @@ export async function runBuildWatch(
 }
 
 /**
+ * «Скрыто N товаров в наличии» — the morning after a mass hide.
+ *
+ * 28.10.2026: the panel's «Показывать в магазине» switches fired at machine
+ * speed (a held key or a touch glitch) and 75 products in stock left the shop
+ * and Google; it took a day and a Merchant Center graph to notice. The panel
+ * and the server now refuse such a burst (src/app/api/admin/overrides), and
+ * this is the net under them: when HIDE_ALERT_MIN or more products that are
+ * still hidden and still on the shelf were hidden in the last 24 hours, one
+ * letter in Russian to the shop's mailbox and to Dim, with the names and the
+ * way back (Журнал → «Вернуть»). A deliberate clear-out reads the letter and
+ * ignores it.
+ */
+export const HIDE_ALERT_MIN = 8;
+
+export async function runHideWatch(): Promise<{ sent: boolean; hidden: number; reason?: string }> {
+  try {
+    const rows = await query<{ id: string }>(
+      `select distinct a.payload->>'id' as id
+         from admin_audit a
+         join product_overrides o on o.product_id = a.payload->>'id'
+        where a.action = 'override.set' and a.at > now() - interval '24 hours'
+          and a.payload->'patch'->>'hidden' = 'true' and o.hidden
+          and exists (select 1 from stock_levels s where s.product_id = o.product_id and s.qty > 0)
+        order by 1`,
+    );
+    if (rows.length < HIDE_ALERT_MIN) return { sent: false, hidden: rows.length };
+    const names = rows.map((r) => "— " + r.id);
+    const text = [
+      `За последние сутки из магазина скрыто ${rows.length} товаров, которые есть на складе:`,
+      "",
+      ...names.slice(0, 120),
+      ...(names.length > 120 ? [`…и ещё ${names.length - 120}`] : []),
+      "",
+      "Если вы скрыли их сами — ничего делать не нужно.",
+      "Если нет: панель → Журнал → «Вернуть» у этих строк, или напишите Диме.",
+      "Скрытые товары не видны покупателям и пропадают из Google Покупок.",
+    ].join("\n");
+    const to = [(process.env.RESEND_TO ?? "").trim(), devAlertTo()].filter(Boolean);
+    const res = await sendMail({ to, subject: `REMPIRE — скрыто ${rows.length} товаров в наличии`, text, tags: { template: "hide-watch" } });
+    return { sent: !!res.ok, hidden: rows.length, reason: res.ok ? undefined : res.error };
+  } catch (err) {
+    console.error("[hide-watch] could not check:", err);
+    return { sent: false, hidden: 0, reason: "error" };
+  }
+}
+
+/**
  * The drill (POST /api/admin/alert-drill/): one letter down the same road a
  * real alert takes — same sender, same DEV_ALERT_TO — saying what the watch
  * sees on the live build right now. Dim, 29.10.2026: «make sure we set up

@@ -25,6 +25,7 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import { seoOffLanguage } from "@/lib/ai-prompts";
 import { requireAdmin } from "@/lib/auth";
+import { query } from "@/lib/db";
 import { pendingStockAlertCounts } from "@/lib/customers";
 import { getOverrideRow, getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import {
@@ -101,6 +102,23 @@ function refuseWrongLanguage(id: string, raw: Record<string, unknown>): void {
     const seo = pick(raw.seo, lang) as Record<string, unknown> | undefined;
     const texts = [desc, seo?.title, seo?.t, seo?.desc, seo?.d].filter((t): t is string => typeof t === "string" && !!t.trim());
     if (texts.some((t) => seoOffLanguage(t, lang, who))) throw new OrderError("wrong_language", lang);
+  }
+}
+
+/** Hides a minute the panel may make without `confirmHide` — see PUT. */
+const HIDE_BURST = 10;
+
+/** Products hidden in the last minute, from the journal; 0 when it cannot be read — a save is never blocked by that. */
+async function recentHides(): Promise<number> {
+  try {
+    const rows = await query<{ n: number }>(
+      `select count(*)::int as n from admin_audit
+        where action = 'override.set' and at > now() - interval '1 minute'
+          and payload->'patch'->>'hidden' = 'true'`,
+    );
+    return rows[0]?.n ?? 0;
+  } catch {
+    return 0;
   }
 }
 
@@ -271,6 +289,20 @@ export async function PUT(req: Request) {
      list; normalise() then reads `.id` off it and throws (audit: fuzz). */
   if (list.some((p) => !p || typeof p !== "object" || Array.isArray(p))) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  }
+
+  /* A burst of hides is refused (29.10.2026). On 28.10 the panel's «Показывать
+     в магазине» switches fired at machine speed — a held key or a touch
+     glitch: 75 products in stock left the shop and Google in five seconds and
+     nobody noticed for a day. Nobody hides more than HIDE_BURST products a
+     minute by hand; a deliberate clear-out waits a minute between tens, or
+     sends `confirmHide: true`. Showing a product is never limited. */
+  const hides = list.filter((p) => (p as Record<string, unknown>).hidden === true).length;
+  if (hides && (body as Record<string, unknown>).confirmHide !== true) {
+    const recent = await recentHides();
+    if (recent + hides > HIDE_BURST) {
+      return Response.json({ ok: false, error: "hide_burst", detail: String(recent) }, { status: 429 });
+    }
   }
 
   const saved: Record<string, OverrideOut> = {};

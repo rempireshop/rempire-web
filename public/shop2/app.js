@@ -25382,7 +25382,17 @@
       now, the write goes through the autosave queue, the toast can take it
       back. The owner's own product is its row's `active` (DELETE / PUT), a
       catalogue product its override's `hidden`. */
+  /* 29.10.2026: on 28.10 these switches fired at machine speed — a held key
+     or a touch glitch — 75 products in stock hidden in five seconds, five of
+     the owner's own hides undone, one product flipped forty times. Nobody moves
+     two switches within half a second on purpose, so a press that fast is
+     ignored. The server refuses a burst of hides as well
+     (HIDE_BURST, src/app/api/admin/overrides/route.ts). */
+  var GOODS_VIS_LAST = 0;
   function goodsVisToggle(id) {
+    var now = Date.now();
+    if (now - GOODS_VIS_LAST < 500) return;
+    GOODS_VIS_LAST = now;
     var p = admEditProduct(id);
     if (!p || p.isNew) return;
     var off = goodsOffSale(p);
@@ -39890,7 +39900,14 @@
       return edApi(ov, "PUT", { id: a.id, stock: a.value }, ka).then(function (r) { if (edOk(r)) loadWaiting(true); return r; });
     }
     if (a.type === "set_sizes") return edApi(ov, "PUT", sizesBody(a), ka);
-    if (a.type === "set_hidden") return edApi(ov, "PUT", { id: a.id, hidden: !!a.value }, ka);
+    if (a.type === "set_hidden") {
+      return edApi(ov, "PUT", { id: a.id, hidden: !!a.value }, ka).then(function (r) {
+        if (r && r.body && r.body.error === "hide_burst") {
+          toast("Слишком много товаров скрыто за минуту — этот не скрыт. Проверьте список и попробуйте через минуту.");
+        }
+        return r;
+      });
+    }
     if (a.type === "set_seo") return edApi(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }, ka);
     if (a.type === "set_subcat") return edApi(ov, "PUT", { id: a.id, subcat: a.value || null }, ka);
     if (a.type === "set_names") return edApi(ov, "PUT", namesBody(a), ka);
