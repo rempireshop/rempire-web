@@ -206,6 +206,7 @@ function setPageHTML(b: Bundle): string {
      var bundleTitle = function (x) { return x.title.RU; };
      var bundleDesc = function (x) { return (x.desc && x.desc.RU) || ""; };
      var bundleItemProduct = function () { return null; };
+     var bundleItemImg = function (it) { return it.img || ""; };
      var bundleItemStock = function () { return "in"; };
      var bundleItemName = function (it) { return it.id; };
      var pdpShipLine = function () { return "Доставка"; };
