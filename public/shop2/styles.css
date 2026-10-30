@@ -1571,11 +1571,15 @@ body.is-locked .sbot { display: none; }
   cursor: pointer; border: none; width: 100%; color: inherit; font: inherit;
 }
 .intro svg { height: 92px; width: auto; }
-.intro__word { font-family: Oswald, sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: .1em; animation: spread .9s var(--ease) .9s both; }
 /* letter-spacing also trails the last letter, which pushed the word .21em
    left of the tower (Dim, 30.10.2026: «a bit off center»); the same amount
-   in front of the first letter puts it back under the mark */
-@keyframes spread { from { letter-spacing: .1em; padding-left: .1em; opacity: 0; } to { letter-spacing: .42em; padding-left: .42em; opacity: 1; } }
+   in front of the first letter puts it back under the mark.
+   The rule itself is the finished look and the keyframe only says where the
+   spread starts: an iPhone 13 Pro Max (Dim, 30.10.2026) showed the word at
+   the start spacing, so a device that does not run the animation now rests
+   on the spaced-out word every other device ends on. */
+.intro__word { font-family: Oswald, sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: .42em; padding-left: .42em; animation: spread .9s var(--ease) .9s backwards; }
+@keyframes spread { from { letter-spacing: .1em; padding-left: .1em; opacity: 0; } }
 .intro--out { animation: fadeOut .5s ease forwards; }
 @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 .tw-draw { fill: none; stroke: var(--ink); stroke-width: 2; }

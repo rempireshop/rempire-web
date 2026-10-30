@@ -1631,27 +1631,31 @@
       "who": "dim",
       "device": "phone",
       "lang": "ET",
-      "title": "Заставка ровно по центру",
+      "title": "Заставка одинаковая на iPhone и Android",
       "steps": [
-        "Открыть rempireshop.com в новой вкладке (заставка показывается раз за вкладку).",
+        "Открыть rempireshop.com в новой вкладке на iPhone (заставка показывается раз за вкладку).",
+        "То же на Android-телефоне.",
         "Посмотреть на башню и слово REMPIRE под ней."
       ],
       "expect": [
-        "Слово REMPIRE стоит ровно под башней, не сдвинуто влево."
+        "Слово REMPIRE стоит ровно под башней, не сдвинуто влево.",
+        "Буквы широко разнесены — одинаково на iPhone и на Android."
       ],
       "why": "Первое, что видит покупатель, — логотип; кривой выглядит небрежно.",
       "risk": "low",
       "writes": false,
       "mark": "new",
-      "markedAt": "2026-10-30T15:45:00.531Z",
+      "markedAt": "2026-10-30T16:33:08.988Z",
       "en": {
-        "title": "Splash centred",
+        "title": "Splash the same on iPhone and Android",
         "steps": [
-          "Open rempireshop.com in a new tab (the splash shows once per tab).",
+          "Open rempireshop.com in a new tab on an iPhone (the splash shows once per tab).",
+          "The same on an Android phone.",
           "Look at the tower and the word REMPIRE under it."
         ],
         "expect": [
-          "REMPIRE sits exactly under the tower, not shifted left."
+          "REMPIRE sits exactly under the tower, not shifted left.",
+          "The letters are spread wide — the same on the iPhone and on Android."
         ],
         "why": "The logo is the first thing a shopper sees; off-centre looks careless."
       }
