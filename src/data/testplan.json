@@ -7915,7 +7915,7 @@
         "Включить его обратно — на компьютере прямо переключателем в строке каталога."
       ],
       "expect": [
-        "По старой ссылке открывается «Страница не найдена».",
+        "Ссылка сразу даёт «Страница не найдена», а после включения — снова товар.",
         "Ни поиск, ни раздел каталога, ни наборы его больше не показывают.",
         "В панели он остался в списке с пометкой «Скрыт».",
         "Чип «Скрытые» с числом находит его в два касания.",
@@ -7926,7 +7926,7 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z",
+      "markedAt": "2026-10-30T16:48:04.080Z",
       "en": {
         "title": "Taking a product off sale",
         "steps": [
@@ -7938,7 +7938,7 @@
           "Switch it back on — on a computer, with the switch right in the catalogue row."
         ],
         "expect": [
-          "The old link answers «Страница не найдена».",
+          "The link answers «Страница не найдена» at once, and the product again once switched back on.",
           "Neither the search, nor the section, nor the sets show it any more.",
           "In the panel it stays in the list marked «Скрыт» (hidden).",
           "The «Скрытые» chip carries a count and finds it in two taps.",
