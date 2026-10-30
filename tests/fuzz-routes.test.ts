@@ -400,10 +400,16 @@ function bodyPaths(value: unknown, prefix = "", depth = 0): string[] {
 
 const WINDOW = 8;
 /** A deterministic slice of the corpus, offset by the field's own index. */
-function window<T>(corpus: readonly T[], i: number): T[] {
+function window<T>(corpus: readonly T[], i: number, size = WINDOW): T[] {
   const start = (i * 5) % corpus.length;
-  return Array.from({ length: WINDOW }, (_, j) => corpus[(start + j) % corpus.length]);
+  return Array.from({ length: Math.min(size, corpus.length) }, (_, j) => corpus[(start + j) % corpus.length]);
 }
+/* FUZZ_FULL=1 — CI's weekly and on-demand runs (.github/workflows/ci.yml) —
+   gives the money routes the whole corpus on every field. A push gives them
+   a triple window, still rotated by field, so every value lands on several
+   of a route's fields: the same coverage of each value, about a minute
+   cheaper on every push (30.10.2026: the unit tests outgrew CI's limit). */
+const FUZZ_FULL = process.env.FUZZ_FULL === "1";
 
 /** Sentinel for "delete this key" — distinct from a value of undefined. */
 const DROP = Symbol("drop");
@@ -538,7 +544,7 @@ describe("API fuzzing", () => {
         /* The money routes see the whole corpus; everywhere else a fixed
            window of it, rotated by field, keeps the suite under a minute
            while still walking every value across a route's own fields. */
-        for (const value of r.deep ? corpus : window(corpus, i)) {
+        for (const value of r.deep ? (FUZZ_FULL ? corpus : window(corpus, i, WINDOW * 3)) : window(corpus, i)) {
           const res = await call(r, { body: setPath(r.body, path, value), id });
           await checkResponse(v.list, `${r.name} [${path}]`, res, { jsonBody: r.jsonBody });
         }

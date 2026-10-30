@@ -44,7 +44,7 @@ const MISSING_URL =
 /* A module-level variable is not enough: in dev, Next re-evaluates modules on
    every edit, and in serverless each module instance would open its own pool.
    globalThis survives both. */
-const g = globalThis as unknown as { __rempireDb?: Promise<Raw> };
+const g = globalThis as unknown as { __rempireDb?: Promise<Raw>; __rempirePgliteSeed?: Blob };
 
 /* ---------- U+0000 ------------------------------------------------------- */
 
@@ -195,9 +195,11 @@ async function makePg(): Promise<Raw> {
 async function makePglite(): Promise<Raw> {
   const spec = ["@electric-sql", "pglite"].join("/");
   const mod = (await import(/* webpackIgnore: true */ spec)) as {
-    PGlite: new (dataDir?: string) => PgliteDb;
+    PGlite: new (dataDir?: string | { loadDataDir: Blob }) => PgliteDb;
   };
-  const db = new mod.PGlite(process.env.PGLITE_PATH || undefined);
+  // tests/helpers.ts hands over an already-migrated database to start from
+  const seed = g.__rempirePgliteSeed;
+  const db = seed ? new mod.PGlite({ loadDataDir: seed }) : new mod.PGlite(process.env.PGLITE_PATH || undefined);
   return {
     kind: "pglite",
     query: (sql, params) => db.query(sql, cleanParams(params) as unknown[]),

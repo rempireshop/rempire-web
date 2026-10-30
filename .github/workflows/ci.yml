@@ -94,6 +94,9 @@ jobs:
         run: npm run typecheck
 
       - name: Unit tests (vitest, PGlite)
+        env:
+          # the whole fuzz corpus on the money routes — weekly and on the button
+          FUZZ_FULL: ${{ github.event_name != 'push' && '1' || '' }}
         run: npx vitest run --shard=${{ matrix.shard }}/3
 
   e2e:
