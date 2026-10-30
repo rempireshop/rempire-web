@@ -68,11 +68,11 @@ describe("every public blog answer, in every language, is filed under the tag a 
       expect(a.status, code).toBe(200);
       expect(tags(a), `article ${code}`).toContain(BLOG_CACHE_TAG);
       // …and still cached between saves: nothing got slower for a reader
-      expect(a.headers.get("cache-control"), code).toBe("public, max-age=60, stale-while-revalidate=600");
+      expect(a.headers.get("cache-control"), code).toBe("public, max-age=60, s-maxage=86400, stale-while-revalidate=600");
 
       const l = await list.GET(new Request(`${ORIGIN}/api/blog/?lang=${code}&page=1`));
       expect(tags(l), `list ${code}`).toContain(BLOG_CACHE_TAG);
-      expect(l.headers.get("cache-control"), code).toBe("public, max-age=60, stale-while-revalidate=600");
+      expect(l.headers.get("cache-control"), code).toBe("public, max-age=60, s-maxage=86400, stale-while-revalidate=600");
     }
   });
 

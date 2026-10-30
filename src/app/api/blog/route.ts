@@ -43,7 +43,7 @@ export async function GET(req: Request) {
         perPage,
       },
       // …and dropped by every save the public can see — src/lib/blog-cache.ts
-      { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=600", ...BLOG_CACHE_HEADERS } },
+      { headers: { "cache-control": "public, max-age=60, s-maxage=86400, stale-while-revalidate=600", ...BLOG_CACHE_HEADERS } },
     );
   } catch (err) {
     console.error("blog GET failed", err);

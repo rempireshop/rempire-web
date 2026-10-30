@@ -37,7 +37,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isCartPermalink } from "@/lib/cart-permalink";
 import { legacyTarget, PRODUCT_IDS } from "@/lib/legacy-redirects";
-import { noindexShell } from "@/lib/seo-head.mjs";
 import {
   LANG_COOKIE,
   langFromAcceptLanguage,
@@ -55,9 +54,10 @@ import {
  * tools/prerender-shop2.mjs, and the static layer answers a file before any
  * route runs. Dim, 08.09.2026: «if the item is hidden, it should be hidden
  * without any deploys or rebuilds». Middleware is the only layer that runs
- * before that file is served, so the check is here, and it is deliberately
- * not memoised: a cache would be a window in which a hidden product is still
- * served, and that window is the whole thing being fixed.
+ * before that file is served, so the check is here. Nothing is memoised in
+ * this file; the list itself is kept by the CDN and dropped the moment a
+ * product's switch is saved (src/lib/hidden-cache.ts, 30.10.2026 — the
+ * uncached lookup was one function call per product page view).
  *
  * A hidden product's address answers 404 and does NOT redirect to its brand,
  * even though it is a Shopify address too: the switch is a toggle the owner
@@ -99,6 +99,10 @@ async function gone(origin: string): Promise<NextResponse | null> {
   try {
     const res = await fetch(new URL("/shop2/index.html", origin), { signal: AbortSignal.timeout(LOOKUP_MS) });
     if (!res.ok) return null;
+    /* loaded here, not at the top: seo-head is ~80 KB that every cold start
+       of this middleware used to evaluate for the rare hidden product
+       (30.10.2026, Vercel's CPU allowance) */
+    const { noindexShell } = await import("@/lib/seo-head.mjs");
     return new NextResponse(noindexShell(await res.text()), {
       status: 404,
       headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },

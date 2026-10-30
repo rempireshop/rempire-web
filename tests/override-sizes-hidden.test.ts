@@ -239,8 +239,9 @@ describe("a hidden catalogue product, without a rebuild", () => {
     await upsertOverride(sized.id, { price: 1.5 });   // an override that is not a hiding
     const res = await GET();
     expect(res.status).toBe(200);
-    // never cached: every second of s-maxage is a second the hidden page is still served
-    expect(res.headers.get("cache-control")).toBe("no-store");
+    // kept by the CDN under a tag a hide drops (tests/hidden-cache.test.ts)
+    expect(res.headers.get("cache-control")).toBe("public, s-maxage=600");
+    expect(res.headers.get("vercel-cache-tag")).toBe("hidden-products");
     expect(await res.json()).toEqual({ ok: true, ids: [plain.id] });
 
     await upsertOverride(plain.id, { hidden: false });

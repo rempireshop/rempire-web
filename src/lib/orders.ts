@@ -850,6 +850,8 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
        on conflict (product_id) do update set updated_at = now()
        returning *`;
   const rows = await query<OverrideRow>(sql, params);
+  // the middleware's cached hidden list must not outlive this save
+  if ("hidden" in cols) (await import("@/lib/hidden-cache")).refreshHiddenCache();
 
   /* …and it was «нет в наличии» (or could not be read): the people waiting
      hear about it. runBackInStock() itself holds the letter while the page

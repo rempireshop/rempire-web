@@ -24,6 +24,11 @@
  * other articles' titles and covers, so there is no copy a save cannot touch,
  * and a blog of a few dozen pages has no blast radius worth splitting.
  *
+ * Since the tag drops them, the two API answers also carry `s-maxage=86400`
+ * (30.10.2026): the CDN keeps them for a day instead of re-running the
+ * function every minute per language — Vercel Hobby's CPU allowance was at
+ * 75%. A browser still re-asks after `max-age=60`.
+ *
  * How the tag works on Vercel: a function's response carries
  * `Vercel-Cache-Tag` (the CDN files the copy under it and strips the header
  * before the browser sees it), and next/cache's revalidateTag() purges the

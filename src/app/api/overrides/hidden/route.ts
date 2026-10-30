@@ -11,20 +11,22 @@
  * once and the wrong one for a lookup that happens per page view. This one is
  * a list of ids, usually empty.
  *
- * **Never cached.** The point of the middleware's question is that hiding a
- * product takes effect without a deploy and without a wait (Dim, 08.09.2026:
- * «if the item is hidden, it should be hidden without any deploys or
- * rebuilds»), and every second of `s-maxage` here is a second in which the
- * hidden product's page is still served. The query it costs is the one the
- * partial index in migration 147 was created for — `where hidden` over a
- * table whose hidden rows are the few the owner has switched off — so this
- * is a cheap question honestly asked rather than a cached guess.
+ * **Cached, and dropped on every change** (since 30.10.2026). The point of
+ * the middleware's question is that hiding a product takes effect without a
+ * deploy and without a wait (Dim, 08.09.2026: «if the item is hidden, it
+ * should be hidden without any deploys or rebuilds»). It used to be
+ * `no-store` for that reason — one function call per product page view,
+ * about 2,000 a day, which with the middleware itself took the shop to 75%
+ * of Vercel Hobby's CPU allowance. The CDN now keeps the answer under a tag
+ * that upsertOverride() drops whenever `hidden` is written
+ * (src/lib/hidden-cache.ts), so a hide still reaches the next request.
  *
  * Public, like the feed beside it: /api/overrides/ has always published
  * `hidden` per product, because the storefront has to know which products to
  * drop from its own list. Nothing new leaves the server here.
  */
 import { query } from "@/lib/db";
+import { HIDDEN_CACHE_HEADERS } from "@/lib/hidden-cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,7 +38,7 @@ export async function GET() {
     );
     return Response.json(
       { ok: true, ids: rows.map((r) => r.product_id) },
-      { headers: { "cache-control": "no-store" } },
+      { headers: HIDDEN_CACHE_HEADERS },
     );
   } catch (err) {
     /* No database, or a migration that has not run yet. 503 rather than an
