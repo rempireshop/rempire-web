@@ -1863,10 +1863,10 @@
       ],
       "status": "done",
       "title": "База данных: бэкап, который точно восстанавливается",
-      "detail": "С 29.10 каждую ночь (04:15 по Таллину) GitHub делает копию всей базы, сразу восстанавливает её в пустую базу и сверяет число строк — первый прогон: всё совпало. Копия зашифрована паролем, хранится 30 дней на GitHub магазина. Бесплатно; у Railway на бесплатном тарифе своих бэкапов нет. Как восстановить — docs/backup.md.",
+      "detail": "С 29.10 дважды в день (03:17 и 15:43 по Таллину) GitHub делает копию всей базы, сразу восстанавливает её в пустую базу и сверяет число строк — первый прогон: всё совпало. Копия зашифрована паролем, хранится 30 дней на GitHub магазина. Бесплатно; у Railway на бесплатном тарифе своих бэкапов нет. Если копии нет 36 часов — письмо Диме. Как восстановить — docs/backup.md.",
       "en": {
         "title": "Database: a backup that really restores",
-        "detail": "Since 29.10 GitHub copies the whole database every night (04:15 Tallinn), restores it into an empty database at once and compares the row counts — first run: all matched. Encrypted with a passphrase, kept 30 days on the shop's GitHub. Free; Railway's free plan has no backups of its own. How to restore: docs/backup.md."
+        "detail": "Since 29.10 GitHub copies the whole database twice a day (03:17 and 15:43 Tallinn), restores it into an empty database at once and compares the row counts — first run: all matched. Encrypted with a passphrase, kept 30 days on the shop's GitHub. Free; Railway's free plan has no backups of its own. No backup for 36 hours mails Dim. How to restore: docs/backup.md."
       }
     },
     {

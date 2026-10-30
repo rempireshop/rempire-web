@@ -26,8 +26,13 @@ name: Database backup
 
 on:
   schedule:
-    # 02:15 UTC, before the nightly rebuild and the 07:00 cron
-    - cron: "15 2 * * *"
+    # Twice a day at quiet minutes: GitHub drops scheduled runs when it is
+    # busy (the 02:15 run of 30.10.2026 never started), so one a night was a
+    # backup that could silently not exist. Each successful run stamps
+    # settings.backup_last; the daily cron mails Dim when that is older than
+    # 36 hours (runBackupWatch, src/lib/build-watch.ts).
+    - cron: "17 1 * * *"
+    - cron: "43 13 * * *"
   workflow_dispatch:
 
 permissions:
@@ -98,3 +103,8 @@ jobs:
           path: rempire-*.sql.gz.gpg
           retention-days: 30
           if-no-files-found: error
+
+      - name: Stamp the backup in the shop's own database
+        if: steps.ready.outputs.go == 'yes'
+        run: |
+          $PG psql -q -v ON_ERROR_STOP=1 "$SRC" -c "insert into settings (key, value, updated_at) values ('backup_last', to_jsonb(now()), now()) on conflict (key) do update set value = excluded.value, updated_at = now()"

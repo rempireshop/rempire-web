@@ -123,3 +123,41 @@ describe("runAlertDrill()", () => {
     expect(sent[0].text).toContain("Last deploy-hook call: never");
   });
 });
+
+describe("runBackupWatch()", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  const stamp = (iso: string | null) =>
+    iso === null
+      ? query("delete from settings where key = 'backup_last'")
+      : query(
+          `insert into settings (key, value, updated_at) values ('backup_last', to_jsonb($1::text), now())
+           on conflict (key) do update set value = excluded.value`,
+          [iso],
+        );
+
+  it("says nothing while the last backup is fresh, and nothing off the live shop", async () => {
+    sent.length = 0;
+    const { runBackupWatch } = await import("@/lib/build-watch");
+    await stamp(iso(NOW - 20 * 3600_000));
+    expect(await runBackupWatch(NOW, LIVE_ENV)).toMatchObject({ sent: false });
+    await stamp(null);
+    expect(await runBackupWatch(NOW, { ...LIVE_ENV, VERCEL_ENV: "preview" })).toEqual({ sent: false, reason: "disabled" });
+    expect(sent).toEqual([]);
+  });
+
+  it("mails Dim when the last backup is older than 36 hours, or there is none", async () => {
+    sent.length = 0;
+    delete process.env.DEV_ALERT_TO;
+    const { runBackupWatch } = await import("@/lib/build-watch");
+    await stamp(iso(NOW - 40 * 3600_000));
+    expect(await runBackupWatch(NOW, LIVE_ENV)).toMatchObject({ sent: true });
+    await stamp(null);
+    expect(await runBackupWatch(NOW, LIVE_ENV)).toMatchObject({ sent: true });
+    expect(sent).toHaveLength(2);
+    expect(sent[0].to).toBe("info@diipsolutions.eu");
+    expect(sent[0].subject).toBe("REMPIRE — no database backup in 36 hours");
+    expect(sent[1].text).toContain("backup that passed its restore test: never");
+  });
+});

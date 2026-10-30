@@ -1970,6 +1970,8 @@ export interface FlowsReport {
   build?: { sent: boolean; problem?: string; reason?: string };
   /** Products in stock hidden en masse in the last day — src/lib/build-watch.ts. */
   hides?: { sent: boolean; hidden: number; reason?: string };
+  /** No successful database backup for 36 hours — src/lib/build-watch.ts. */
+  backup?: { sent: boolean; lastAt?: string; reason?: string };
   /** Montonio re-asked about shipments whose webhook went quiet — src/lib/shipping/shipment-sync.ts. */
   shipments: {
     checked: number;
@@ -2202,6 +2204,8 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
   out.build = await (await import("@/lib/build-watch")).runBuildWatch(now);
   /* Products in stock hidden en masse in the last day (28.10.2026) — never throws. */
   out.hides = await (await import("@/lib/build-watch")).runHideWatch();
+  /* A database backup that has not run for a day and a half — never throws. */
+  out.backup = await (await import("@/lib/build-watch")).runBackupWatch(now);
   /* Housekeeping, not a letter: the per-address cart-write counters
      (db/migrations/181_cart_writes.sql) for days long past. It rides the one
      scheduled job the shop has for the same reason everything else here does

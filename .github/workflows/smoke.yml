@@ -21,13 +21,13 @@
 #      produce a second red mark saying the same thing. This is the trigger
 #      that answers "did what we just shipped survive contact with the CDN".
 #
-#   2. `schedule` — twice a day, because the interesting half of what this
+#   2. `schedule` — three times a day, because the interesting half of what this
 #      suite watches can break with nobody pushing anything: the Railway
 #      database going away (every page still renders, /api/overrides/ starts
 #      answering 503 and the shop quietly serves yesterday's prices), a TLS
 #      certificate lapsing, a DNS change, a sitemap route that has started
 #      throwing on a row Renat added this morning. A deploy-only trigger is
-#      blind to all of it. Twice rather than hourly: at 3–5 orders a month
+#      blind to all of it. A few times rather than hourly: at 3–5 orders a month
 #      (docs/HOSTING.md) an eight-hour blind spot is not what will cost this
 #      shop a customer, and a suite that mails somebody 24 times a day stops
 #      being read by the second week.
@@ -53,7 +53,10 @@ on:
   schedule:
     # 06:20 and 18:20 UTC. Off the hour on purpose — GitHub's scheduler queues
     # everybody's `0 * * * *` together and runs them late.
-    - cron: "20 6,18 * * *"
+    # odd minutes, three times a day: GitHub delays or drops runs at busy
+    # marks (the 18:20 run of 29.10.2026 started 4½ hours late, the 06:20
+    # run of 30.10 had not started by 08:10)
+    - cron: "37 5,11,17 * * *"
   # 4. called by «Promote to production» once Vercel has built the push — the
   #    same suite, but as part of a run that belongs to whoever pushed, so a red
   #    result mails them; a deployment_status run belongs to vercel[bot] and

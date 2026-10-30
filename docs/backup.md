@@ -1,6 +1,6 @@
 # Database backup and restore
 
-The production database (Railway Postgres 18: orders, customers, the owner's edits, sets, articles, settings) is backed up **every night at 02:15 UTC** by `.github/workflows/backup.yml` — since 29.10.2026; before that there was no backup at all (Railway's Hobby plan makes none).
+The production database (Railway Postgres 18: orders, customers, the owner's edits, sets, articles, settings) is backed up **twice a day, at 01:17 and 13:43 UTC** (GitHub drops scheduled runs when busy — the night run of 30.10.2026 never started), by `.github/workflows/backup.yml` — since 29.10.2026; before that there was no backup at all (Railway's Hobby plan makes none).
 
 Each night the job:
 1. dumps the whole database (`pg_dump`, plain SQL, gzip);
@@ -24,4 +24,4 @@ Until both exist the job says so and stays green. Run it once by hand (Actions �
 3. `gpg --batch --passphrase "<BACKUP_PASSPHRASE>" -d rempire-YYYY-MM-DD.sql.gz.gpg | gunzip | psql "<new database URL>"`
 4. Put the new URL into Vercel → rempire-web → Settings → Environment Variables → `DATABASE_URL` (Production), then redeploy.
 
-The restore drill is the job itself: step 2 above runs every night.
+The restore drill is the job itself: step 2 above runs with every backup. Each successful run stamps `settings.backup_last`; the daily cron mails Dim when no backup has passed for 36 hours (`runBackupWatch`, src/lib/build-watch.ts).

@@ -148,6 +148,44 @@ export async function runHideWatch(): Promise<{ sent: boolean; hidden: number; r
 }
 
 /**
+ * «No database backup since …» — the backup that silently does not exist.
+ *
+ * .github/workflows/backup.yml copies the database twice a day and stamps
+ * settings.backup_last after a run whose restore test passed. GitHub drops
+ * scheduled runs when it is busy (30.10.2026: the night's run never started,
+ * and a run that never starts mails nobody), so the daily cron checks the
+ * stamp: none, or older than BACKUP_STALE_MS, is one letter to Dim. Only on
+ * the live shop (rebuildEnabled()).
+ */
+export const BACKUP_STALE_MS = 36 * 3600_000;
+
+export async function runBackupWatch(
+  now: number = Date.now(),
+  env: Record<string, string | undefined> = process.env,
+): Promise<{ sent: boolean; lastAt?: string; reason?: string }> {
+  try {
+    if (!rebuildEnabled(env)) return { sent: false, reason: "disabled" };
+    const rows = await query<{ value: unknown }>("select value from settings where key = 'backup_last'");
+    const lastAt = typeof rows[0]?.value === "string" ? (rows[0].value as string) : undefined;
+    const last = lastAt ? Date.parse(lastAt) : NaN;
+    if (Number.isFinite(last) && now - last <= BACKUP_STALE_MS) return { sent: false, lastAt };
+    const text = [
+      `The last database backup that passed its restore test: ${utc(lastAt)}.`,
+      "",
+      "Run one now: GitHub → rempireshop/rempire-web → Actions → «Database backup» → Run workflow.",
+      "If it fails, its log says why (the BACKUP_DATABASE_URL secret, Railway, or GitHub itself).",
+      "",
+      "This letter comes with the daily cron (07:00 UTC) until a backup succeeds — src/lib/build-watch.ts.",
+    ].join("\n");
+    const res = await sendMail({ to: devAlertTo(), subject: "REMPIRE — no database backup in 36 hours", text, tags: { template: "backup-watch" } });
+    return { sent: !!res.ok, lastAt, reason: res.ok ? undefined : res.error };
+  } catch (err) {
+    console.error("[backup-watch] could not check:", err);
+    return { sent: false, reason: "error" };
+  }
+}
+
+/**
  * The drill (POST /api/admin/alert-drill/): one letter down the same road a
  * real alert takes — same sender, same DEV_ALERT_TO — saying what the watch
  * sees on the live build right now. Dim, 29.10.2026: «make sure we set up
