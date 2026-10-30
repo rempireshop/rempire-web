@@ -1626,6 +1626,37 @@
       "markedAt": "2026-10-10T15:52:11.275Z"
     },
     {
+      "id": "shop-intro-centered",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "ET",
+      "title": "Заставка ровно по центру",
+      "steps": [
+        "Открыть rempireshop.com в новой вкладке (заставка показывается раз за вкладку).",
+        "Посмотреть на башню и слово REMPIRE под ней."
+      ],
+      "expect": [
+        "Слово REMPIRE стоит ровно под башней, не сдвинуто влево."
+      ],
+      "why": "Первое, что видит покупатель, — логотип; кривой выглядит небрежно.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-30T15:45:00.531Z",
+      "en": {
+        "title": "Splash centred",
+        "steps": [
+          "Open rempireshop.com in a new tab (the splash shows once per tab).",
+          "Look at the tower and the word REMPIRE under it."
+        ],
+        "expect": [
+          "REMPIRE sits exactly under the tower, not shifted left."
+        ],
+        "why": "The logo is the first thing a shopper sees; off-centre looks careless."
+      }
+    },
+    {
       "id": "panel-login",
       "area": "panel",
       "who": "renat",
@@ -3728,6 +3759,43 @@
           "Signed out, the checkout opens on the first step as before."
         ],
         "why": "A customer with a filled-in account pays in four taps."
+      }
+    },
+    {
+      "id": "checkout-wallet-mark",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "ET",
+      "title": "Значок кошелька по телефону",
+      "steps": [
+        "На iPhone открыть любой товар в наличии.",
+        "Посмотреть на чёрную кнопку под «Lisa ostukorvi».",
+        "То же на Android-телефоне или в Chrome на компьютере."
+      ],
+      "expect": [
+        "На iPhone кнопка: «Osta kohe» и значок Apple Pay.",
+        "На Android и в Chrome: «Osta kohe» и значок Google Pay.",
+        "Нажатие ведёт в оформление с выбранным «Apple Pay / Google Pay», как раньше."
+      ],
+      "why": "Кнопка обещает тот кошелёк, который Montonio покажет на этом телефоне.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-10-30T15:45:00.531Z",
+      "en": {
+        "title": "Wallet mark by phone",
+        "steps": [
+          "On an iPhone open any product in stock.",
+          "Look at the black button under «Lisa ostukorvi».",
+          "The same on an Android phone or in Chrome on a computer."
+        ],
+        "expect": [
+          "On the iPhone the button reads «Osta kohe» with the Apple Pay mark.",
+          "On Android and in Chrome: «Osta kohe» with the Google Pay mark.",
+          "A tap opens the checkout with «Apple Pay / Google Pay» chosen, as before."
+        ],
+        "why": "The button promises the wallet Montonio will show on that phone."
       }
     },
     {

@@ -218,6 +218,9 @@ img { max-width: 100%; display: block; }
 /* tight-cropped viewBox: 15px here is a real 15px-tall wordmark */
 .gpay-mark { display: inline-flex; align-items: center; height: 15px; margin-left: 8px; }
 .gpay-mark svg { height: 100%; width: auto; color: var(--paper); }
+/* the Apple Pay mark's box runs from the leaf to the «y» tail, so it needs
+   more height for «Pay» to stand as tall as Google's */
+.gpay-mark--apple { height: 19px; }
 
 .link {
   border: none; background: none; padding: 0; cursor: pointer;
@@ -1569,7 +1572,10 @@ body.is-locked .sbot { display: none; }
 }
 .intro svg { height: 92px; width: auto; }
 .intro__word { font-family: Oswald, sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: .1em; animation: spread .9s var(--ease) .9s both; }
-@keyframes spread { from { letter-spacing: .1em; opacity: 0; } to { letter-spacing: .42em; opacity: 1; } }
+/* letter-spacing also trails the last letter, which pushed the word .21em
+   left of the tower (Dim, 30.10.2026: «a bit off center»); the same amount
+   in front of the first letter puts it back under the mark */
+@keyframes spread { from { letter-spacing: .1em; padding-left: .1em; opacity: 0; } to { letter-spacing: .42em; padding-left: .42em; opacity: 1; } }
 .intro--out { animation: fadeOut .5s ease forwards; }
 @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 .tw-draw { fill: none; stroke: var(--ink); stroke-width: 2; }

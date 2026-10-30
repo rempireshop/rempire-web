@@ -14858,9 +14858,25 @@
     return "";
   }
 
+  /* The wallet Montonio's page will offer on this device. Dim, 30.10.2026:
+     an iPhone read «Osta kohe [G Pay]» — Safari shows Apple Pay there, not
+     Google Pay. ApplePaySession exists wherever Apple Pay can open (Safari on
+     a Mac, every browser on an iPhone since iOS 16); the UA test covers an
+     iPhone or iPad that hides it. Everything else gets Google Pay. */
+  function appleWallet() {
+    try {
+      if (typeof window !== "undefined" && window.ApplePaySession) return true;
+      var nav = typeof navigator !== "undefined" ? navigator : null;
+      if (!nav) return false;
+      return /iPhone|iPad|iPod/.test(nav.userAgent || "") ||
+        (/Macintosh/.test(nav.userAgent || "") && nav.maxTouchPoints > 1);
+    } catch (e) { return false; }
+  }
   function gpayOnDark() {
-    if (typeof PAYLOGOS === "undefined" || !PAYLOGOS.gpay) return "G Pay";
-    return '<span class="gpay-mark">' + PAYLOGOS.gpay + "</span>";
+    var apple = appleWallet();
+    var logo = typeof PAYLOGOS !== "undefined" && PAYLOGOS[apple ? "applepay" : "gpay"];
+    if (!logo) return apple ? "Apple Pay" : "G Pay";
+    return '<span class="gpay-mark' + (apple ? " gpay-mark--apple" : "") + '">' + logo + "</span>";
   }
 
   function payLogosHTML(keys) {

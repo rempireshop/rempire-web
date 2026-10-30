@@ -138,3 +138,7 @@ where it becomes the «what was done» summary.*
 - Merchant Center: the feed now sends Google only the headline and opening paragraph of an owner's description — not «Key ingredients», «What it does», «How to use», precautions or INCI (`feedIntro`, `src/lib/merchant-feed.ts`). The AI-written texts of 25–29.10 had put 27 products (83 offers) under Google's prescription-drug flag, out of free listings and Shopping ads in 24 countries, with no review left to request. The product pages keep the full text.
 - The admin journal now records which device made each change (browser and phone/PC, from the request's User-Agent; `admin_audit.device`, migration 225) — on 28.10 the journal could say what was hidden and when, but not from where.
 - Backups twice a day (01:17 and 13:43 UTC) — GitHub skipped the 02:15 run of 30.10 without a word; each successful run stamps `settings.backup_last` and the daily cron mails Dim when none passed for 36 hours (`runBackupWatch`). The deployed smoke test runs three times a day at odd minutes.
+
+**30.10**
+- The product page's black «Osta kohe» button shows the Apple Pay mark on an iPhone, iPad or Safari on a Mac, and Google Pay everywhere else. It always showed Google Pay, even on an iPhone where Montonio's page offers Apple Pay (`gpayOnDark`/`appleWallet`, `public/shop2/app.js`).
+- The opening splash: «REMPIRE» now sits exactly under the tower. The word's letter-spacing also trailed the last letter and pushed it about 3 px to the left.
