@@ -70,6 +70,9 @@ const PUBLIC_SETTINGS = [
   // section and brand pages — printed on those pages, public by nature
   // (src/lib/page-texts.mjs)
   "page_texts",
+  // «Строка брендов»: the brands the home page's row leaves out — the row is
+  // on the home page for anyone to see (src/lib/home-brands.ts)
+  "home_brands",
 ] as const;
 
 /** The pro (salon) price is commercial information: never on the public feed.

@@ -206,7 +206,7 @@ describe("the connector, end to end", () => {
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
       ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
         "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "create_product",
-        "get_page_texts", "save_page_text", "save_draft"],
+        "get_page_texts", "save_page_text", "get_brand_strip", "save_brand_strip", "save_draft"],
     );
   });
 
@@ -730,6 +730,38 @@ describe("the connector, end to end", () => {
     const texts = JSON.parse(r.text).texts;
     expect([texts.RU.by_owner, texts.ET.by_owner, texts.EN.by_owner]).toEqual([["intro"], ["intro"], ["intro"]]);
     expect(texts.EN.intro).toBe("Wax, paste and clay — styling from our barbers.");
+  });
+
+  /* «Строка брендов» by Claude (31.10.2026): Renat asked to take CBD Daily
+     and Lumin out of the home page's brand row and nothing could. */
+  it("takes brands out of the home page's brand row and puts them back, journalled, and refuses a brand the shop lacks", async () => {
+    const { getSettingRaw, listAudit } = await import("@/lib/orders");
+    const { journalRows } = await import("@/lib/audit-undo");
+    const t = await tokens();
+    const read = JSON.parse((await tool(t.access_token, "get_brand_strip", {})).text);
+    expect(read.brands.length).toBeGreaterThan(2);
+    expect(read.brands.every((b: { shown: boolean }) => b.shown)).toBe(true);
+    const [a, b] = read.brands.map((x: { brand: string }) => x.brand);
+
+    const r = await tool(t.access_token, "save_brand_strip", { hide: [a.toUpperCase(), b] });
+    expect(r.isError, r.text).toBe(false);
+    expect(JSON.parse(r.text).hidden_now).toEqual([a, b]);   // spelt the shop's way, whatever case came in
+    expect((await getSettingRaw("home_brands")).value).toEqual({ hidden: [a, b] });
+    const after = JSON.parse((await tool(t.access_token, "get_brand_strip", {})).text).brands;
+    expect(after.filter((x: { shown: boolean }) => !x.shown).map((x: { brand: string }) => x.brand)).toEqual([a, b]);
+
+    const back = await tool(t.access_token, "save_brand_strip", { show: [a] });
+    expect(back.isError, back.text).toBe(false);
+    expect((await getSettingRaw("home_brands")).value).toEqual({ hidden: [b] });
+    const line = journalRows(await listAudit(10)).find((x) => x.action === "setting.set")!;
+    expect(line.undo).toMatchObject({ kind: "setting", key: "home_brands" });
+
+    for (const bad of [{ hide: ["No Such Brand"] }, {}, { hide: [b], show: [b] }]) {
+      const refused = await tool(t.access_token, "save_brand_strip", bad);
+      expect(refused.isError, JSON.stringify(bad)).toBe(true);
+      expect(refused.text).toContain("Nothing was saved");
+    }
+    expect((await getSettingRaw("home_brands")).value).toEqual({ hidden: [b] });
   });
 
   it("refuses page texts that are too long, Russian on the Estonian page, or for a page the shop does not have — and saves nothing", async () => {

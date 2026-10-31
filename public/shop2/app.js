@@ -1335,7 +1335,7 @@
       /* «Настройки», direction 1a (25.09.2026) — the index, the pages that
          save themselves, the journal from any device */
       "цены по странам, способы оплаты": "hinnad riikide kaupa, makseviisid",
-      "баннер, полоска сверху, наборы": "bänner, riba üleval, komplektid",
+      "баннер, полоска сверху, строка брендов, наборы": "bänner, riba üleval, brändiriba, komplektid",
       "реквизиты, часы, соцсети, отчёт": "rekvisiidid, lahtiolekuajad, sotsiaalmeedia, aruanne",
       "скидка салонам, баллы за покупки": "salongide allahindlus, ostupunktid",
       "Журнал": "Logi",
@@ -1423,6 +1423,12 @@
       "Пусто — под заголовком стандартная строка магазина.": "Tühi — pealkirja all on poe tavaline rida.",
       "свои тексты": "omad tekstid",
       "стандартные тексты": "tavalised tekstid",
+      "Строка брендов": "Brändiriba",
+      "Строка брендов: все бренды": "Brändiriba: kõik brändid",
+      "показаны все": "kõik näha",
+      "В строке брендов на главной:": "Avalehe brändiribal:",
+      "Названия брендов под баннером на главной. Выключенный бренд пропадает только из этой строки — его страница, меню и товары остаются. Новый бренд появляется в строке сам.":
+        "Brändide nimed avalehel bänneri all. Väljalülitatud bränd kaob ainult sellelt ribalt — tema leht, menüü ja tooted jäävad. Uus bränd ilmub ribale ise.",
       "есть свои тексты": "on omad tekstid",
       "стандартные": "tavalised",
       "Тексты страниц сохранены": "Lehtede tekstid salvestatud",
@@ -4975,7 +4981,7 @@
       /* «Настройки», direction 1a (25.09.2026) — the index, the pages that
          save themselves, the journal from any device */
       "цены по странам, способы оплаты": "prices by country, payment methods",
-      "баннер, полоска сверху, наборы": "banner, top strip, sets",
+      "баннер, полоска сверху, строка брендов, наборы": "banner, top strip, brand row, sets",
       "реквизиты, часы, соцсети, отчёт": "company details, hours, social media, report",
       "скидка салонам, баллы за покупки": "salon discount, points for purchases",
       "Журнал": "Journal",
@@ -5063,6 +5069,12 @@
       "Пусто — под заголовком стандартная строка магазина.": "Empty — the shop's standard line is under the heading.",
       "свои тексты": "own texts",
       "стандартные тексты": "standard texts",
+      "Строка брендов": "Brand row",
+      "Строка брендов: все бренды": "Brand row: all brands",
+      "показаны все": "all shown",
+      "В строке брендов на главной:": "In the home page's brand row:",
+      "Названия брендов под баннером на главной. Выключенный бренд пропадает только из этой строки — его страница, меню и товары остаются. Новый бренд появляется в строке сам.":
+        "The brand names under the banner on the home page. A brand switched off leaves only this row — its page, menu entry and products stay. A new brand appears in the row by itself.",
       "есть свои тексты": "has own texts",
       "стандартные": "standard",
       "Тексты страниц сохранены": "Page texts saved",
@@ -7386,6 +7398,14 @@
     [/^Ниже тарифа Montonio: (.+) · вернуть$/, { ET: "Alla Montonio tariifi: $1 · taasta", EN: "Below Montonio's tariff: $1 · undo" }],
     [/^Ниже тарифа Montonio: (.+)$/, { ET: "Alla Montonio tariifi: $1", EN: "Below Montonio's tariff: $1" }],
     [/^(\d+) за сегодня$/, { ET: "$1 täna", EN: "$1 today" }],
+    // «Строка брендов»: the toast, the fold's summary, the journal line (homeBrandsActionText)
+    [/^(.+) убран из строки брендов$/, { ET: "$1 eemaldati brändiribalt", EN: "$1 taken out of the brand row" }],
+    [/^(.+) снова в строке брендов$/, { ET: "$1 on taas brändiribal", EN: "$1 is back in the brand row" }],
+    [/^скрыто: (.+)$/, { ET: "peidetud: $1", EN: "hidden: $1" }],
+    [/^Строка брендов: без (.+)$/, { ET: "Brändiriba: ilma $1", EN: "Brand row: without $1" }],
+    [/^Строка брендов: убрать (.+) · вернуть (.+)$/, { ET: "Brändiriba: eemalda $1 · too tagasi $2", EN: "Brand row: take out $1 · put back $2" }],
+    [/^Строка брендов: убрать (.+)$/, { ET: "Brändiriba: eemalda $1", EN: "Brand row: take out $1" }],
+    [/^Строка брендов: вернуть (.+)$/, { ET: "Brändiriba: too tagasi $1", EN: "Brand row: put back $1" }],
     // busyMsg(): the AI's hourly limit, with the minutes left
     [/^Лимит ИИ на этот час — снова через (\d+) мин$/, { ET: "AI tunnilimiit täis — uuesti $1 min pärast", EN: "AI limit for this hour reached — again in $1 min" }],
     [/^(Пн|Вт|Ср|Чт|Пт|Сб|Вс)–(Пн|Вт|Ср|Чт|Пт|Сб|Вс) (.+)$/, { ET: "$1–$2 $3", EN: "$1–$2 $3" }],
@@ -12586,6 +12606,40 @@
     });
     return out.sort(function (a, b) { return b.n - a.n || a.name.localeCompare(b.name); });
   }
+  /* «Строка брендов» (settings.home_brands, src/lib/home-brands.ts; Renat,
+     31.10.2026: «Удали из строки CBD DAILY и LUMIN» — nothing could). Only the
+     brands the home page's row leaves out are stored, so a brand added later
+     is in the row by itself. The brand keeps its page, menu entry and products. */
+  function homeBrandsHidden() {
+    var h = DEMO.homeBrands && DEMO.homeBrands.hidden;
+    return Array.isArray(h) ? h.filter(function (x) { return typeof x === "string" && x; }) : [];
+  }
+  function homeBrandShown(name) {
+    var n = String(name).toLowerCase();
+    return !homeBrandsHidden().some(function (h) { return h.toLowerCase() === n; });
+  }
+  /** The list an action leaves: the whole of it (`value` — a switch, «Вернуть»), or the assistant's hide / show. */
+  function homeBrandsNext(a) {
+    if (a.value && Array.isArray(a.value.hidden)) return a.value.hidden.slice();
+    var low = function (x) { return String(x).toLowerCase(); };
+    var back = (a.show || []).map(low);
+    var kept = homeBrandsHidden().filter(function (h) { return back.indexOf(low(h)) < 0; });
+    (a.hide || []).forEach(function (h) {
+      if (kept.map(low).indexOf(low(h)) < 0 && back.indexOf(low(h)) < 0) kept.push(String(h));
+    });
+    return kept;
+  }
+  /** The journal's and the confirm card's line. Each shape is a UI_RX rule. */
+  function homeBrandsActionText(a) {
+    if (a.value) {
+      var h = Array.isArray(a.value.hidden) ? a.value.hidden : [];
+      return h.length ? "Строка брендов: без " + h.join(", ") : "Строка брендов: все бренды";
+    }
+    var parts = [];
+    if (a.hide && a.hide.length) parts.push("убрать " + a.hide.join(", "));
+    if (a.show && a.show.length) parts.push("вернуть " + a.show.join(", "));
+    return "Строка брендов: " + parts.join(" · ");
+  }
   /* Subcategories are read out of the products, so a chip never claims a
      shelf the data cannot fill — chips render only with a non-zero count.
      A second scrollable chip row, not a dropdown: the category bar already
@@ -15325,6 +15379,7 @@
   // ---------- screens ----------
   function screenHome() {
     var pop = spread(8, false), fresh = spread(8, true);
+    var row = brands().filter(function (b) { return homeBrandShown(b.name); });
     /* The page's one <h1>, unseen: the hero's slide titles are <h2>s that
        change under the shopper, and the prerendered home (the page a crawler
        reads) says exactly this in a visible heading. */
@@ -15333,14 +15388,15 @@
       /* Brand strip in place of the dots' old neighbourhood: one scrollable
          line under the hero, D-urban style — every name clickable, logos
          where the brand has one (feedback #4). */
-      '<nav class="brandstrip" aria-label="Бренды"><div class="brandstrip__row">' +
-        brands().slice().sort(function (a, b) {
+      /* …less the brands the owner took out of it («Строка брендов») */
+      (row.length ? '<nav class="brandstrip" aria-label="Бренды"><div class="brandstrip__row">' +
+        row.sort(function (a, b) {
           return (BRAND_LOGOS[b.name] ? 1 : 0) - (BRAND_LOGOS[a.name] ? 1 : 0);
         }).map(function (b) {
           // wordmarks only, as in the urban sample — one typographic voice,
           // no logo/text zigzag along the line
           return '<a class="brandstrip__it" href="' + linkHref("brand", b.name) + '" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</a>";
-        }).join("") + "</div></nav>" +
+        }).join("") + "</div></nav>" : "") +
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
@@ -31485,7 +31541,7 @@
      ====================================================================== */
   var ADM_SET_PAGES = [
     ["delivery", "Доставка и оплата", "цены по странам, способы оплаты"],
-    ["home", "Главная страница", "баннер, полоска сверху, наборы"],
+    ["home", "Главная страница", "баннер, полоска сверху, строка брендов, наборы"],
     ["company", "О компании", "реквизиты, часы, соцсети, отчёт"],
     /* Dim, 26.10.2026: the section and brand pages' words are the owner's —
        «should be in Settings, follow same design rules as for others» */
@@ -31528,7 +31584,7 @@
     set_hero: "hero", set_content: "content", set_pricing: "pricing", set_delivery: "delivery",
     set_parcel: "shipping_parcel", set_banks: "payment_banks", toggle_chatbot: "chatbot",
     toggle_bundles: "bundles", set_invoice: "invoice", set_shipping_rules: "shipping_rules",
-    set_page_texts: "page_texts"
+    set_page_texts: "page_texts", set_home_brands: "home_brands"
   };
   /** key → { toast, entry, ref, undoOf } for the next write of that key. */
   var ADM_SET_NOTE = {};
@@ -31547,6 +31603,7 @@
     if (key === "bundles") return DEMO.bundles !== false;
     if (key === "invoice") return invoiceConf();
     if (key === "page_texts") return ptDoc();
+    if (key === "home_brands") return { hidden: homeBrandsHidden() };
     return undefined;
   }
   /** The journal's own name for a change — sent as `ref`, so this browser can
@@ -31667,6 +31724,9 @@
     if (Object.prototype.hasOwnProperty.call(st, "page_texts") && admSetFresh("page_texts", askedAt) && !admSetTyping("pt:")) {
       DEMO.pageTexts = st.page_texts && typeof st.page_texts === "object" && !Array.isArray(st.page_texts) ? st.page_texts : null;
       seoOwnSet(DEMO.pageTexts);
+    }
+    if (Object.prototype.hasOwnProperty.call(st, "home_brands") && admSetFresh("home_brands", askedAt)) {
+      DEMO.homeBrands = st.home_brands && typeof st.home_brands === "object" && Array.isArray(st.home_brands.hidden) ? st.home_brands : null;
     }
     if (st.invoice && typeof st.invoice === "object" && admSetFresh("invoice", askedAt) && !admSetTyping("inv:")) {
       DEMO.invoice = {
@@ -32771,7 +32831,23 @@
           admSwitch("data-admchatbot", chat, "Чат-помощник") + "</div>" +
       "</div>" +
       (annOn ? admSetStripHTML() : "") +
+      admHomeBrandsHTML() +
       admHeroCard();
+  }
+  /* «Строка брендов»: one switch per brand the catalogue has, in the order of
+     the row's own list; folded, because it is forty switches the owner opens
+     twice a year. «Тексты страниц» opens it from a brand's fold. */
+  function admHomeBrandsHTML() {
+    var list = brands();
+    if (!list.length) return "";
+    var off = list.filter(function (b) { return !homeBrandShown(b.name); }).map(function (b) { return b.name; });
+    var sum = off.length ? "<span>скрыто: " + esc(off.join(", ")) + "</span>" : "<span>показаны все</span>";
+    var body = '<p class="adm-hint">Названия брендов под баннером на главной. Выключенный бренд пропадает только из этой строки — его страница, меню и товары остаются. Новый бренд появляется в строке сам.</p>' +
+      '<div class="adm-list adm-list--flat adm-set__sw">' + list.map(function (b) {
+        return '<div class="adm-swrow"><span data-notr>' + esc(b.name) + "</span>" +
+          admSwitch('data-admhomebrand="' + esc(b.name) + '"', homeBrandShown(b.name), esc(b.name)) + "</div>";
+      }).join("") + "</div>";
+    return admFoldHTML("set:home-brands", "Строка брендов", sum, body);
   }
   /** The strip's texts — in the page, not in a fold: it is on every page of the shop. */
   function admSetStripHTML() {
@@ -32964,6 +33040,11 @@
          same thing — one tap puts his Russian into both (Dim, 26.10.2026) */
       (own.indexOf("RU") >= 0
         ? '<button class="adm-link" type="button" data-pttr="' + esc(kind + ":" + key) + '">' + edTrLabel(L.toLowerCase()) + "</button>"
+        : "") +
+      /* where Renat looked first for the home page's brand row (31.10.2026) */
+      (kind === "brand"
+        ? '<p class="adm-hint"><span>В строке брендов на главной:</span> <span>' + (homeBrandShown(key) ? "показан" : "скрыт") +
+          '</span> · <button class="adm-link" type="button" data-admhomebrandsgo>изменить</button></p>'
         : "");
     return admFoldHTML("pt:" + kind + ":" + key, esc(ptName(kind, key)), own.length ? admTagHTML("plain", "свои тексты") : "стандартные тексты", body);
   }
@@ -33394,7 +33475,7 @@
   var AUDIT_SETTING_WORDS = {
     hero: "Баннер", content: "Данные магазина", shipping_rules: "Тарифы доставки", pricing: "Цены и баллы",
     chatbot: "Чат-помощник", bundles: "Наборы", delivery: "Когда «Доставлен»", shipping_parcel: "Коробка",
-    payment_banks: "Банки в кассе", invoice: "Счета для компаний", mail_texts: "Тексты писем", page_texts: "Тексты страниц",
+    payment_banks: "Банки в кассе", invoice: "Счета для компаний", mail_texts: "Тексты писем", page_texts: "Тексты страниц", home_brands: "Строка брендов",
     flows: "Письма", gift_amounts: "Номиналы подарочной карты", mail_budget: "Лимит писем"
   };
   /** One row of the shop's own log, as HTML.
@@ -33612,7 +33693,8 @@
       hero: "set_hero", content: "set_content", pricing: "set_pricing", delivery: "set_delivery",
       shipping_parcel: "set_parcel", payment_banks: "set_banks", chatbot: "toggle_chatbot",
       bundles: "toggle_bundles", invoice: "set_invoice", shipping_rules: "set_shipping_rules",
-      gift_amounts: "set_gift_amounts", mail_texts: "set_mail_texts", page_texts: "set_page_texts"
+      gift_amounts: "set_gift_amounts", mail_texts: "set_mail_texts", page_texts: "set_page_texts",
+      home_brands: "set_home_brands"
     }[key];
     if (!T || probe) return T || null;
     if (T === "set_shipping_rules") return { type: T, rules: value && typeof value === "object" ? value : cloneRules(SHIP_STORED_DEFAULT), full: true, belowCost: true };
@@ -33625,6 +33707,7 @@
     if (T === "set_mail_texts") return { type: T, value: value && typeof value === "object" ? value : {} };
     // the whole document as it was: another device's line, put back over what is here now
     if (T === "set_page_texts") return { type: T, value: value && typeof value === "object" ? value : { cat: {}, brand: {} }, whole: true };
+    if (T === "set_home_brands") return { type: T, value: value && typeof value === "object" && Array.isArray(value.hidden) ? value : { hidden: [] } };
     return { type: T, value: value };   // the banner: null is the standard one
   }
   /** `value` with the row's changes put back: each path to what it held, a
@@ -45368,6 +45451,10 @@
       DEMO.pageTexts = s.page_texts && typeof s.page_texts === "object" && !Array.isArray(s.page_texts) ? s.page_texts : null;
       seoOwnSet(DEMO.pageTexts);
     }
+    // «Строка брендов»: the brands the home page's row leaves out
+    if (fed("home_brands")) {
+      DEMO.homeBrands = s.home_brands && typeof s.home_brands === "object" && Array.isArray(s.home_brands.hidden) ? s.home_brands : null;
+    }
     /* «Подарочные карты»: which denominations the /gift/ page offers. An
        absent key means «как всегда» — giftAmountsOn() falls back to the three
        the shop has always sold, and filters whatever arrives through
@@ -47280,6 +47367,7 @@
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     if (a.type === "set_invoice") return invoiceActionText(a.value || {}, null);
     if (a.type === "set_page_texts") return ptActionText(a);
+    if (a.type === "set_home_brands") return homeBrandsActionText(a);
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
     // the short form — the model named a topic, the panel writes the article
@@ -47763,6 +47851,12 @@
         : { type: "set_page_texts", value: ptPrevPatch(a.value) };
       ptSet(a);
     }
+    /* «Строка брендов»: the whole list travels and comes back — the
+       assistant's hide / show is turned into it here */
+    else if (a.type === "set_home_brands") {
+      entry.prev = { type: "set_home_brands", value: { hidden: homeBrandsHidden() } };
+      DEMO.homeBrands = { hidden: homeBrandsNext(a) };
+    }
     /* «Счета для компаний» (1a): settings.invoice as a journal line with a way
        back — until 25.09.2026 its save wrote notes and no «Вернуть». */
     else if (a.type === "set_invoice") {
@@ -47866,6 +47960,7 @@
         remindBeforeDays: invoiceDayNum(iv.remindBeforeDays, 2, 30), cancelAfterDays: invoiceDayNum(iv.cancelAfterDays, 7, 90) };
     }
     else if (a.type === "set_page_texts") ptSet(a);
+    else if (a.type === "set_home_brands") DEMO.homeBrands = { hidden: homeBrandsNext(a) };
     else if (a.type === "set_mail_texts") {
       if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
       S.mailDraft = null;
@@ -52590,7 +52685,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -53870,6 +53965,28 @@
         admSetApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } }, "Когда «Доставлен»: сохранено");
         render();
       });
+      return;
+    }
+    /* «Строка брендов» (settings.home_brands): one switch per brand. The whole
+       list travels, so it waits for the stored one, as the banks below do. */
+    if (d.admhomebrand !== undefined) {
+      var hbName = d.admhomebrand;
+      admSetWhenReady(function () {
+        var hbOn = homeBrandShown(hbName);
+        var hbNext = hbOn ? homeBrandsHidden().concat(hbName)
+          : homeBrandsHidden().filter(function (h) { return h.toLowerCase() !== String(hbName).toLowerCase(); });
+        admSetApply({ type: "set_home_brands", value: { hidden: hbNext } },
+          hbOn ? hbName + " убран из строки брендов" : hbName + " снова в строке брендов");
+        render();
+      });
+      return;
+    }
+    // «Тексты страниц» → a brand's «изменить»: «Главная страница», the row's fold open and in view
+    if (d.admhomebrandsgo !== undefined) {
+      if (!ADM_FOLD["set:home-brands"]) admFoldToggle("set:home-brands");
+      admSetOpen("home"); render();
+      var hbFold = document.querySelector('[data-admfold="set:home-brands"]');
+      if (hbFold && hbFold.scrollIntoView) hbFold.scrollIntoView({ block: "start" });
       return;
     }
     // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks

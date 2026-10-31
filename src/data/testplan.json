@@ -9356,6 +9356,45 @@
       }
     },
     {
+      "id": "ai-home-brands",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Строку брендов меняют помощник и ваш Claude",
+      "steps": [
+        "В помощнике админки написать «убери Davines из строки брендов» и нажать «Применить».",
+        "Написать «верни Davines в строку брендов» и снова применить.",
+        "В Claude (claude.ai, подключение Rempire) спросить: «какие бренды скрыты в строке на главной?»"
+      ],
+      "expect": [
+        "До применения помощник показывает карточку «Строка брендов: убрать Davines».",
+        "После «Применить» Davines пропадает из строки, после второй просьбы возвращается.",
+        "Claude отвечает: скрыты CBD Daily и Lumin Skin.",
+        "Каждое изменение есть в «Журнале» с кнопкой «Вернуть»."
+      ],
+      "why": "Всё, что делается в админке, должно делаться и словами — в помощнике и в Claude.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-31T07:42:13.371Z",
+      "en": {
+        "title": "The assistant and your Claude change the brand row",
+        "steps": [
+          "In the admin's assistant write «убери Davines из строки брендов» and press «Применить».",
+          "Write «верни Davines в строку брендов» and apply it again.",
+          "In Claude (claude.ai, the Rempire connector) ask: «какие бренды скрыты в строке на главной?»"
+        ],
+        "expect": [
+          "Before applying, the assistant shows a card «Строка брендов: убрать Davines».",
+          "After «Применить» Davines leaves the row; after the second request it is back.",
+          "Claude answers: CBD Daily and Lumin Skin are hidden.",
+          "Each change is in «Журнал» with a «Вернуть» button."
+        ],
+        "why": "Whatever the admin can do should also be doable in words — in the assistant and in Claude."
+      }
+    },
+    {
       "id": "ai-blog-outline",
       "area": "ai",
       "who": "renat",
@@ -10550,6 +10589,49 @@
           "The «Языки магазина» line is no longer in «Настройки»."
         ],
         "why": "The section and brand texts for Google and shoppers are yours to change now."
+      }
+    },
+    {
+      "id": "settings-home-brands",
+      "area": "reports",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Строка брендов на главной: убрать и вернуть бренд",
+      "steps": [
+        "«Настройки» → «Главная страница» → развернуть «Строка брендов».",
+        "Выключить любой бренд, например Davines, и сразу нажать «Вернуть» внизу.",
+        "Открыть rempireshop.com в новой вкладке и посмотреть строку под баннером.",
+        "«Настройки» → «Тексты страниц» → CBD Daily → «изменить»."
+      ],
+      "expect": [
+        "CBD Daily и Lumin Skin уже выключены, остальные включены.",
+        "После «Вернуть» Davines снова включён.",
+        "В строке под баннером нет CBD Daily и Lumin Skin.",
+        "Их товары и страницы брендов в магазине на месте.",
+        "У CBD Daily написано «скрыт», «изменить» открывает «Строку брендов»."
+      ],
+      "why": "30.10 Ренат хотел убрать два бренда из строки, а в админке этого нельзя было сделать.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-31T07:42:13.371Z",
+      "en": {
+        "title": "The brand row on the home page: take a brand out and back",
+        "steps": [
+          "«Настройки» → «Главная страница» → open «Строка брендов».",
+          "Switch off any brand, Davines for example, and press «Вернуть» at the bottom right away.",
+          "Open rempireshop.com in a new tab and look at the row under the banner.",
+          "«Настройки» → «Тексты страниц» → CBD Daily → «изменить»."
+        ],
+        "expect": [
+          "CBD Daily and Lumin Skin are already off, all the others on.",
+          "After «Вернуть» Davines is on again.",
+          "The row under the banner has no CBD Daily and no Lumin Skin.",
+          "Their products and brand pages are still in the shop.",
+          "CBD Daily says «скрыт», and «изменить» opens «Строка брендов»."
+        ],
+        "why": "On 30.10 Renat wanted two brands out of the row, and the admin had no way to do it."
       }
     },
     {

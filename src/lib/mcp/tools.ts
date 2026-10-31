@@ -13,6 +13,7 @@
  *   save_product_stock                              — a count on the shelf, only over the count it read
  *   create_product                                  — a new product of the owner's own, HIDDEN
  *   get_page_texts · save_page_text                 — a section or brand page's Google pair and intro
+ *   get_brand_strip · save_brand_strip              — which brands the home page's brand row shows
  *
  * What it can NOT do is the point of the list: publish, unpublish, delete,
  * touch a published article, an order or a customer. A published article is
@@ -50,6 +51,7 @@ import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/m
 import { query } from "@/lib/db";
 import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import { cleanPageTexts, PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
+import { cleanHomeBrands, matchBrands, patchHomeBrands } from "@/lib/home-brands";
 import { seoStandard } from "@/lib/seo-copy.mjs";
 import { loadShippingRules } from "@/lib/shipping";
 import { getSeoOverride, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
@@ -545,6 +547,34 @@ export const TOOLS: ToolDef[] = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
+    name: "get_brand_strip",
+    title: "Строка брендов на главной",
+    description:
+      "The row of brand names under the banner on the home page («строка брендов»): every brand the shop has, and " +
+      "whether the row shows it (shown) — the owner takes brands out of it in Админка → Настройки → Главная страница → " +
+      "Строка брендов. Read it before save_brand_strip.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: READ,
+  },
+  {
+    name: "save_brand_strip",
+    title: "Убрать бренд из строки или вернуть",
+    description:
+      "Take brands out of the home page's brand row (hide) or put them back (show), brands as get_brand_strip spells " +
+      "them (case does not matter). Only the row changes: the brand's page, its place in the menu and its products stay. " +
+      "A brand added to the shop later is in the row by itself. Live at once; each save is a line in Админка → Журнал " +
+      "with «Вернуть».",
+    inputSchema: {
+      type: "object",
+      properties: {
+        hide: { type: "array", items: { type: "string" }, maxItems: 50, description: "Brands to take out of the row." },
+        show: { type: "array", items: { type: "string" }, maxItems: 50, description: "Brands to put back." },
+      },
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "save_draft",
     title: "Сохранить черновик статьи",
     description:
@@ -598,7 +628,8 @@ export const INSTRUCTIONS =
   "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
   "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock), and creates a new " +
   "product hidden (create_product: the owner adds photos and shows it in the admin), and the words of a section or brand " +
-  "page (get_page_texts, save_page_text) — when the owner " +
+  "page (get_page_texts, save_page_text), and which brands the home page's brand row shows (get_brand_strip, " +
+  "save_brand_strip) — when the owner " +
   "asks: read the product with get_product first, show the owner what you will save, then save. A price change of more " +
   "than 30 % needs his explicit yes first. Every text the shop shows is in Russian (ru), Estonian (et) and English (en): " +
   "when he writes or changes one in Russian, offer to translate it, and when he asks, translate his words faithfully into " +
@@ -733,6 +764,8 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
   if (name === "create_product") return createProduct(args);
   if (name === "get_page_texts") return getPageTexts(args);
   if (name === "save_page_text") return savePageText(args);
+  if (name === "get_brand_strip") return getBrandStrip();
+  if (name === "save_brand_strip") return saveBrandStrip(args);
   return no(`Unknown tool «${name}».`);
 }
 
@@ -1314,6 +1347,54 @@ async function savePageText(args: Record<string, unknown>): Promise<ToolResult> 
     texts: await pageTextsNow(page.kind, page.key, value),
     next: "Live in the shop now; the static pages search engines read are rebuilt within about a quarter of an hour. The " +
       "owner sees them in Админка → Настройки → Тексты страниц, and the change is a line in Админка → Журнал.",
+  });
+}
+
+/* ---------- the home page's brand row (src/lib/home-brands.ts) ---------- */
+
+/** The shop's brands, most products first, and the row's stored exceptions. */
+async function brandStripNow() {
+  const count = new Map<string, number>();
+  for (const p of (await productsNow()).list) count.set(p.brand, (count.get(p.brand) ?? 0) + 1);
+  const brands = [...count.keys()].sort((a, b) => count.get(b)! - count.get(a)! || a.localeCompare(b));
+  const row = await getSettingRaw("home_brands");
+  const value = typeof row.value === "string" ? JSON.parse(row.value) : row.value;
+  return { brands, count, stored: cleanHomeBrands(value), before: row.found ? value : null };
+}
+
+function brandStripOut(brands: string[], count: Map<string, number>, hidden: string[]) {
+  const off = new Set(hidden.map((h) => h.toLowerCase()));
+  return brands.map((b) => ({ brand: b, shown: !off.has(b.toLowerCase()), products: count.get(b) ?? 0 }));
+}
+
+async function getBrandStrip(): Promise<ToolResult> {
+  const { brands, count, stored } = await brandStripNow();
+  return ok({
+    brands: brandStripOut(brands, count, stored.hidden),
+    note: "The row shows brands with a logo first, then the rest; a brand added later is shown by itself.",
+  });
+}
+
+async function saveBrandStrip(args: Record<string, unknown>): Promise<ToolResult> {
+  const done = "Nothing was saved.";
+  const { brands, count, stored, before } = await brandStripNow();
+  const hide = matchBrands(args.hide, brands);
+  const show = matchBrands(args.show, brands);
+  const unknown = [...hide.unknown, ...show.unknown];
+  if (unknown.length) return no(`No brand «${unknown[0]}» in the shop — get_brand_strip lists them. ${done}`);
+  if (!hide.found.length && !show.found.length) return no(`Send hide and/or show with at least one brand. ${done}`);
+  const both = hide.found.find((b) => show.found.includes(b));
+  if (both) return no(`«${both}» is in both hide and show. ${done}`);
+  const value = patchHomeBrands(stored, hide.found, show.found);
+  await setSetting("home_brands", value);
+  // the panel's own settings line: «Вернуть» on it puts the row back (src/lib/audit-undo.ts)
+  await writeAuditSafe("admin", "setting.set", { key: "home_brands", value, via: "claude" }, { before });
+  return ok({
+    hidden_now: hide.found,
+    shown_now: show.found,
+    brands: brandStripOut(brands, count, value.hidden),
+    next: "Live on the home page now (a page already open shows it after a reload). The owner sees it in Админка → " +
+      "Настройки → Главная страница → Строка брендов, and the change is a line in Админка → Журнал.",
   });
 }
 

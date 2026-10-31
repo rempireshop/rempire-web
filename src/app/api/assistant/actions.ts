@@ -18,6 +18,7 @@ import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
 import { nameTranslatable } from "@/lib/product-name";
 import { NO_SUBSECTION, readSubsection } from "@/lib/subsections";
 import { PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
+import { matchBrands } from "@/lib/home-brands";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
@@ -1148,6 +1149,15 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   }
   if (t === "toggle_bundles" && typeof x.value === "boolean") {
     return { type: t, value: x.value };
+  }
+  /* «Строка брендов» on the home page (src/lib/home-brands.ts, 31.10.2026):
+     brands to take out of the row and to put back — brands the shop shows,
+     spelt its way. A name it does not have is dropped, not guessed at. */
+  if (t === "set_home_brands" && opts.brands) {
+    const hide = matchBrands(x.hide, opts.brands).found;
+    const show = matchBrands(x.show, opts.brands).found.filter((b) => !hide.includes(b));
+    if (!hide.length && !show.length) return null;
+    return { type: t, hide, show };
   }
   /* «Наборы»: propose one, or change one that exists. Dim keeps building the
      sets himself — this is the assistant helping, and both go through the
