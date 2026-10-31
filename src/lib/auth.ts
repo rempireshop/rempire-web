@@ -210,6 +210,13 @@ export function rateLimit(bucket: string, ip: string, max: number, windowMs: num
   return rec.n > max;
 }
 
+/** Whole seconds until the caller's window in `bucket` starts over; 0 when it has. */
+export function rateLimitWaitS(bucket: string, ip: string): number {
+  const rec = buckets.get(`${bucket}:${ip}`);
+  const left = rec ? rec.until - Date.now() : 0;
+  return left > 0 ? Math.ceil(left / 1000) : 0;
+}
+
 /** Tests only — forget every counter. */
 export function resetRateLimits(): void {
   buckets.clear();

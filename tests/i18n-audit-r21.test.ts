@@ -376,6 +376,8 @@ function blogTranslate(answer: (text: string) => Answer): BlogOut {
     var d = { admblogtranslate: "" };
     var t = { disabled: false, textContent: "Перевести" };
     function toast(m) { toasts.push(m); }
+    // app.js's own words when the route gave no retryAfter
+    function busyMsg() { return "Слишком много запросов — попробуйте позже"; }
     function render() {}
     function txt(v) { return typeof v === "string" ? v.trim() : ""; }
     function blogCardsOut(h) { return { html: String(h || ""), cards: [] }; }
@@ -450,6 +452,16 @@ describe("«Перевести статью» says it is done only when it is", 
     const limited = blogTranslate(() => ({ status: 429, body: { error: "rate_limited" } }));
     await flush();
     expect(limited.toasts).toEqual(["Слишком много запросов — попробуйте позже"]);
+  });
+});
+
+describe("the AI limit toast names the minutes in all three languages", () => {
+  it("keeps the number and leaves no Russian in ET or EN", () => {
+    for (const lang of ["ET", "EN"] as const) {
+      const out = trText("Лимит ИИ на этот час — снова через 12 мин", lang, false);
+      expect(out).toContain("12");
+      expect(CYRILLIC.test(out)).toBe(false);
+    }
   });
 });
 

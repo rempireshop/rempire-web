@@ -299,13 +299,22 @@ describe("POST /api/admin/ai/text", () => {
     expect((await res.json()).error).toBe("upstream");
   });
 
-  it("rate-limits at 30 calls/hour per admin session", async () => {
+  it("rate-limits at 200 calls/hour per address, and says how long is left", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => fakeCompletion({ description: "d", bullets: [] })));
     const { POST } = await import("@/app/api/admin/ai/text/route");
     let last;
-    for (let i = 0; i < 31; i++) {
+    // 40 products with every button pressed (5 calls each) still go through
+    for (let i = 0; i < 200; i++) {
       last = await POST(req({ task: "describe", lang: "RU", input: { name: "x" + i } }, { cookie: admin }));
     }
-    expect(last!.status).toBe(429);
+    expect(last!.status).toBe(200);
+    last = await POST(req({ task: "describe", lang: "RU", input: { name: "over" } }, { cookie: admin }));
+    expect(last.status).toBe(429);
+    const body = await last.json();
+    expect(body.error).toBe("rate_limited");
+    // the window opened a moment ago: very nearly the whole hour is left
+    expect(body.retryAfter).toBeGreaterThan(3500);
+    expect(body.retryAfter).toBeLessThanOrEqual(3600);
+    expect(last.headers.get("retry-after")).toBe(String(body.retryAfter));
   });
 });

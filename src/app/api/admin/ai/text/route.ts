@@ -59,7 +59,7 @@
  * every other admin action lands in.
  */
 import { after, NextRequest, NextResponse } from "next/server";
-import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
+import { clientIp, rateLimit, rateLimitWaitS, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
 import {
@@ -103,7 +103,11 @@ const MAX_TOKENS: Record<AiTask, number> = {
   newsletter: 1500,
 };
 const TEMPERATURE = 0.4;
-const RATE_MAX = 30;
+/* A runaway guard, not a ration: one product with every button pressed is
+   about five calls (draft, translate, three Google texts), and 30 an hour
+   stopped Renat after six products (30.10.2026). 200 is a full afternoon of
+   bulk edits and still caps a stuck page or a leaked session at a few euros. */
+const RATE_MAX = 200;
 const RATE_WINDOW_MS = 3_600_000;
 /* The biggest honest body is a "translate" of 6 000 characters or a blog
    article of which only the first 1 500 reach the model (src/lib/ai-prompts.ts
@@ -407,7 +411,10 @@ export async function POST(req: NextRequest) {
   if (denied) return denied;
 
   if (rateLimit("ai-text", clientIp(req), RATE_MAX, RATE_WINDOW_MS)) {
-    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+    // how long until the hour starts over — the panel says it in minutes
+    const retryAfter = rateLimitWaitS("ai-text", clientIp(req));
+    return NextResponse.json({ ok: false, error: "rate_limited", retryAfter },
+      { status: 429, headers: { "retry-after": String(retryAfter) } });
   }
 
   const key = process.env.OPENAI_API_KEY;

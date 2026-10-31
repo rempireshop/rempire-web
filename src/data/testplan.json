@@ -9321,6 +9321,41 @@
       "markedAt": "2026-10-29T07:23:27.123Z"
     },
     {
+      "id": "ai-bulk-limit",
+      "area": "ai",
+      "who": "renat",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Много товаров подряд — помощник не останавливается",
+      "steps": [
+        "«Товары» → взять десять товаров подряд без текстов.",
+        "В каждом нажать «Написать черновик», «Перевести на ET и EN» и «Для Google» → «✨ Заполнить автоматически · все три языка».",
+        "Всё это — в течение одного часа."
+      ],
+      "expect": [
+        "Все десять товаров заполнены, «Слишком много запросов» не появляется.",
+        "Если лимит всё же кончился, сообщение говорит, через сколько минут снова можно."
+      ],
+      "why": "30.10 помощник остановил Ренату после шести товаров: лимит был 30 запросов в час, теперь 200.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-10-31T07:16:53.298Z",
+      "en": {
+        "title": "Many products in a row — the assistant keeps going",
+        "steps": [
+          "«Товары» → take ten products in a row that have no texts.",
+          "In each press «Написать черновик», «Перевести на ET и EN» and «Для Google» → «✨ Заполнить автоматически · все три языка».",
+          "All of it within one hour."
+        ],
+        "expect": [
+          "All ten products are filled; «Слишком много запросов» never shows.",
+          "If the limit does run out, the message says in how many minutes it works again."
+        ],
+        "why": "On 30.10 the assistant stopped Renat after six products: the limit was 30 calls an hour, now 200."
+      }
+    },
+    {
       "id": "ai-blog-outline",
       "area": "ai",
       "who": "renat",

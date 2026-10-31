@@ -7386,6 +7386,8 @@
     [/^Ниже тарифа Montonio: (.+) · вернуть$/, { ET: "Alla Montonio tariifi: $1 · taasta", EN: "Below Montonio's tariff: $1 · undo" }],
     [/^Ниже тарифа Montonio: (.+)$/, { ET: "Alla Montonio tariifi: $1", EN: "Below Montonio's tariff: $1" }],
     [/^(\d+) за сегодня$/, { ET: "$1 täna", EN: "$1 today" }],
+    // busyMsg(): the AI's hourly limit, with the minutes left
+    [/^Лимит ИИ на этот час — снова через (\d+) мин$/, { ET: "AI tunnilimiit täis — uuesti $1 min pärast", EN: "AI limit for this hour reached — again in $1 min" }],
     [/^(Пн|Вт|Ср|Чт|Пт|Сб|Вс)–(Пн|Вт|Ср|Чт|Пт|Сб|Вс) (.+)$/, { ET: "$1–$2 $3", EN: "$1–$2 $3" }],
     [/^(Пн|Вт|Ср|Чт|Пт|Сб|Вс) (.+)$/, { ET: "$1 $2", EN: "$1 $2" }],
     [/^(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) (\d{4})$/, { ET: "$1 $2", EN: "$1 $2" }],
@@ -18168,7 +18170,7 @@
       // what landed saves itself (1a) — nothing is left for the owner to press
       if (okN && S.adminBlogEdit === d) blogAutosave("change");
       if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте" : "Готово — проверьте текст.");
-      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else if (failed === "rate_limited") toast(busyMsg());
       else toast("Не получилось — попробуйте ещё раз");
     };
     langs.forEach(function (L) {
@@ -18234,7 +18236,7 @@
   function blogGenErrText(r) {
     if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
     var code = (r.body && r.body.error) || "";
-    if (code === "rate_limited") return "Слишком много запросов — попробуйте позже";
+    if (code === "rate_limited") return busyMsg();
     if (code === "truncated") return "Статья не дописалась до конца — попробуйте ещё раз";
     if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
     return "Не получилось — попробуйте ещё раз";
@@ -29931,7 +29933,7 @@
   function newsGenErrText(r) {
     if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
     var code = (r.body && r.body.error) || "";
-    if (code === "rate_limited") return "Слишком много запросов — попробуйте позже";
+    if (code === "rate_limited") return busyMsg();
     if (code === "truncated") return "Письмо не дописалось до конца — попробуйте ещё раз";
     if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
     return "Не получилось — попробуйте ещё раз";
@@ -33022,7 +33024,7 @@
       }).catch(function () { fail = "x"; }).then(function () {
         if (--left) return;
         btn.disabled = false; btn.textContent = label;
-        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        if (fail === "rate_limited") toast(busyMsg());
         else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
         else if (fail) toast("Не получилось — попробуйте ещё раз");
         if (Object.keys(patch[kind][key].ET).length || Object.keys(patch[kind][key].EN).length) {
@@ -34550,7 +34552,7 @@
       }).catch(function () { fail = "x"; }).then(function () {
         if (--left) return;
         btn.disabled = false; btn.textContent = label;
-        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        if (fail === "rate_limited") toast(busyMsg());
         else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
         else if (fail) toast("Не получилось — попробуйте ещё раз");
         admHeroCommit("Переведено — проверьте тексты");
@@ -34818,7 +34820,7 @@
       }).catch(function () { fail = "x"; }).then(function () {
         if (--left) return;
         btn.disabled = false; btn.textContent = label;
-        if (fail === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        if (fail === "rate_limited") toast(busyMsg());
         else if (fail === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
         else if (fail) toast("Не получилось — попробуйте ещё раз");
         var paths = [];
@@ -37505,7 +37507,7 @@
   function bundleAiFail(r) {
     if (r && r.status === 401) { SRV.admin = false; render(); return; }
     var err = r && r.body && r.body.error;
-    if (err === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+    if (err === "rate_limited") toast(busyMsg());
     else if (err === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
     else toast("Не получилось — попробуйте ещё раз");
   }
@@ -39038,7 +39040,7 @@
         else edAsTextNow("seo", okN === langs.length ? okMsg : "");
       }
       if (okN === langs.length) return;
-      if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      if (failed === "rate_limited") toast(busyMsg());
       else toast("Не получилось — попробуйте ещё раз");
     };
     /* The description goes with it — the text in the box on screen, the
@@ -39101,7 +39103,7 @@
       if (--left) return;
       btn.disabled = false; btn.textContent = label;
       if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
-      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else if (failed === "rate_limited") toast(busyMsg());
       else if (failed === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
       else toast("Не получилось — попробуйте ещё раз");
     };
@@ -45093,6 +45095,15 @@
   var SETTINGS_WRITE_MS = 30000;
   /** `idemKey`: «сделать один раз» — see idemNewKey(). Only the three routes
       that CREATE something read it; everywhere else it is simply absent. */
+  /* The AI route says how long its hourly limit still holds (retryAfter, in
+     seconds, src/app/api/admin/ai/text/route.ts); apiSend notes it, and every
+     «Слишком много запросов» toast in the panel asks busyMsg() for its words —
+     «…снова через 12 мин» instead of a «позже» that read as a slow AI. */
+  var AI_WAIT_UNTIL = 0;
+  function busyMsg() {
+    var left = AI_WAIT_UNTIL - Date.now();
+    return left > 0 ? "Лимит ИИ на этот час — снова через " + Math.max(1, Math.ceil(left / 60000)) + " мин" : "Слишком много запросов — попробуйте позже";
+  }
   function apiSend(url, method, body, idemKey) {
     var head = { "content-type": "application/json" };
     if (idemKey) head["idempotency-key"] = idemKey;
@@ -45103,6 +45114,10 @@
         body: JSON.stringify(body || {})
       });
     };
+    if (url === "/api/admin/ai/text/") return go().then(function (r) {
+      if (r && r.status === 429 && r.body && r.body.retryAfter > 0) AI_WAIT_UNTIL = Date.now() + r.body.retryAfter * 1000;
+      return r;
+    });
     if (method !== "PUT" || url !== "/api/admin/settings/") return go();
     /* …and never for longer than this. The queue frees itself on a REJECTED
        write, which covers a refusal and a dead connection — but not a request
@@ -53150,7 +53165,7 @@
           if (draftEl0) draftEl0.value = S.orderReplyDraft;
           toast("Черновик готов — проверьте и сохраните");
         } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { composeBtn.disabled = false; composeBtn.textContent = composeLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
@@ -53535,7 +53550,7 @@
           if (S.adminEdit === "new") { goodsNewPaint(); toast("Черновик написан — прочитайте и поправьте"); }
           else edAsTextNow("desc", "Черновик написан — прочитайте и поправьте");
         } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { descBtn.disabled = false; descBtn.textContent = descLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
@@ -53568,7 +53583,7 @@
           if (S.adminEdit === "new") { goodsNewPaint(); toast(trMsg); }
           else edAsTextNow("desc", trMsg);
         } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { trBtn.disabled = false; trBtn.textContent = trLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
@@ -54844,7 +54859,7 @@
           render();
           if (S.adminBlogEdit === bdOut) blogAutosave("change");   // it saves itself (1a)
         } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
         else toast("Не получилось — попробуйте ещё раз");
       }).catch(function () { obtn.disabled = false; obtn.textContent = olabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
@@ -54928,7 +54943,7 @@
         if (authFail) { SRV.admin = false; }
         else if (okN === jobs.length) toast("Готово — проверьте текст.");
         else if (okN) toast("Перевелось не всё — проверьте и допишите");
-        else toast(limited2 ? "Слишком много запросов — попробуйте позже" : "Не получилось — попробуйте ещё раз");
+        else toast(limited2 ? busyMsg() : "Не получилось — попробуйте ещё раз");
         render();
         if (okN && S.adminBlogEdit === bdTr) blogAutosave("change");   // it saves itself (1a)
       }).catch(function () { tbtn.disabled = false; tbtn.textContent = tlabel; toast("Не получилось — попробуйте ещё раз"); render(); });
