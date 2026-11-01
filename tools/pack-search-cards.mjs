@@ -39,7 +39,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
-import { chatParams, openaiModel } from "./lib/openai-model.mjs";
+import { chatParams, isReasoningModel, openaiModel } from "./lib/openai-model.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public/shop/search-cards.json");
@@ -52,7 +52,7 @@ export const CARD_VERSION = 1;
 export const EMBED_MODEL = "text-embedding-3-small";
 export const EMBED_DIMS = 256;
 const DESC_MAX = 1500;
-const BUDGET_MS = Number(process.env.SEARCH_CARDS_BUDGET_MS || 360_000);
+const BUDGET_MS = Number(process.env.SEARCH_CARDS_BUDGET_MS || 600_000);
 const MAX_NEW = Number(process.env.SEARCH_CARDS_MAX || 400);
 const POOL = 8;
 
@@ -312,7 +312,7 @@ export function okQuery(q) {
 export function catalogueLines(items, cards) {
   return items.map((x, i) => {
     const c = cards[x.id];
-    const type = c ? c.type.en.join(", ") : "";
+    const type = c ? [...(c.type.en || []), ...(c.type.ru || [])].join(", ") : "";
     const about = c ? c.about.en.slice(0, 8).join("; ") : "";
     return `#${i} ${x.brand} — ${x.name} | ${type} | ${about}`;
   });
@@ -355,8 +355,25 @@ export function cleanAnswers(raw, nQueries, nProducts) {
 }
 
 /** What the answers were given against: the products and their cards. */
-export const catalogueHash = (items, cards) =>
-  createHash("sha256").update(JSON.stringify(items.map((x) => [x.id, cards[x.id] ? cards[x.id].h : ""]))).digest("hex").slice(0, 16);
+export const catalogueHash = (items) =>
+  createHash("sha256").update(JSON.stringify(items.map((x) => x.id).sort())).digest("hex").slice(0, 16);
+
+/** An answer stands while the same products are on sale, for a week at most:
+    a changed description does not re-ask ~600 phrases on every deploy, and a
+    week later every answer has seen the latest cards anyway. */
+export const ANSWER_DAYS = 7;
+export function freshAnswer(stamp, forHash, today) {
+  const [f, d] = String(stamp || "").split(":");
+  return f === forHash && Number.isFinite(+d) && today - +d < ANSWER_DAYS;
+}
+
+/** The answers are not in a hurry: a reasoning model may think (the shop's
+    own calls set it to answer at once — src/lib/openai-chat.ts). */
+export function thinkParams(model) {
+  return isReasoningModel(model)
+    ? { model, max_completion_tokens: 16000, reasoning_effort: "medium" }
+    : chatParams(model, { maxTokens: 2500, temperature: 0 });
+}
 
 /** Search phrases worth a vector ahead of time: the bench's, and the intents. */
 function knownQueries() {
@@ -449,11 +466,11 @@ async function main() {
   const live = new Set(items.map((x) => x.id));
   for (const id of Object.keys(cards)) if (!live.has(id)) delete cards[id];
 
-  /* The answers. Given against one catalogue (catalogueHash): while it is the
-     same, an answered phrase keeps its answer; once a product or a card
-     changes, every phrase is asked again — within the budget, and an old
-     answer stands until its new one lands. */
-  const forHash = catalogueHash(items, cards);
+  /* The answers. Given against one set of products (catalogueHash): while it
+     is the same, an answer stands for ANSWER_DAYS; a product added or gone,
+     or a week passed, and the phrase is asked again — within the budget, the
+     old answer standing until its new one lands. */
+  const forHash = catalogueHash(items);
   const prevAns = prev.answers && typeof prev.answers === "object" ? prev.answers : {};
   const prevFor = prev.answersFor && typeof prev.answersFor === "object" ? prev.answersFor : {};
   const answers = { ...prevAns }, answersFor = { ...prevFor };
@@ -469,33 +486,39 @@ async function main() {
     const k = queryKey(q);
     if (k && !phrases.has(k)) phrases.set(k, keyHash(k));
   }
-  const ask = [...phrases].filter(([, h]) => !prevAns[h] || prevFor[h] !== forHash);
-  let answered = 0;
+  const today = Math.floor(Date.now() / 86_400_000);
+  const ask = [...phrases].filter(([, h]) => !prevAns[h] || !freshAnswer(prevFor[h], forHash, today));
+  let answered = 0, answerFails = 0;
   if (mayPay && ask.length) {
     const { system } = answerPrompt(catalogueLines(items, cards), []);
     const batches = [];
     const mine = ask.filter(([k]) => trusted.has(k));
-    for (let i = 0; i < mine.length; i += 10) batches.push(mine.slice(i, i + 10));
-    for (const one of ask.filter(([k]) => !trusted.has(k))) batches.push([one]);
+    for (let i = 0; i < mine.length; i += 10) batches.push({ b: mine.slice(i, i + 10) });
+    for (const one of ask.filter(([k]) => !trusted.has(k))) batches.push({ b: [one] });
     const worker = async () => {
       while (batches.length && Date.now() - started < BUDGET_MS) {
-        const b = batches.shift();
+        const { b, retry } = batches.shift();
+        let lists = null;
         try {
           const { user } = answerPrompt([], b.map(([k]) => k));
           const j = await openai("chat/completions", {
-            ...chatParams(model, { maxTokens: 2500, temperature: 0 }),
+            ...thinkParams(model),
             response_format: { type: "json_object" },
             messages: [{ role: "system", content: system }, { role: "user", content: user }],
-          }, key, 60_000);
-          const lists = cleanAnswers(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content, b.length, items.length);
-          if (!lists) continue;
-          b.forEach(([, h], i) => { answers[h] = lists[i].map((n) => items[n].id); answersFor[h] = forHash; answered++; });
+          }, key, 150_000);
+          lists = cleanAnswers(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content, b.length, items.length);
         } catch (err) {
-          warn("answers: " + (err && err.message));
+          if (++answerFails <= 3) warn("answers: " + (err && err.message));
         }
+        if (!lists) {
+          // a batch that failed is asked again a phrase at a time, once
+          if (!retry && b.length > 1) for (const one of b) batches.push({ b: [one], retry: true });
+          continue;
+        }
+        b.forEach(([, h], i) => { answers[h] = lists[i].map((n) => items[n].id); answersFor[h] = forHash + ":" + today; answered++; });
       }
     };
-    await Promise.all(Array.from({ length: POOL }, worker));
+    await Promise.all(Array.from({ length: 12 }, worker));
   }
   const wanted = new Set(phrases.values());
   for (const h of Object.keys(answers)) if (!wanted.has(h)) { delete answers[h]; delete answersFor[h]; }

@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import * as mjs from "../tools/lib/openai-model.mjs";
 import * as ts from "../src/lib/openai-chat";
 import {
-  answerPrompt, cardPrompt, catalogueLines, cleanAnswers, cleanCard, embedText, inputHash, keyHash, okQuery,
+  answerPrompt, cardPrompt, catalogueHash, catalogueLines, freshAnswer, thinkParams, cleanAnswers, cleanCard, embedText, inputHash, keyHash, okQuery,
   packVec, plain, productInputs, queryKey, termsOf,
 } from "../tools/pack-search-cards.mjs";
 
@@ -138,10 +138,25 @@ describe("answers to the phrases people type", () => {
     expect(t).toEqual({ ids: ["a", "b"], c: { a: "шампунь, shampoo", b: "paste" }, a: { h1: [1, 0] } });
   });
 
-  it("names every product by number for the model, with its card in English", () => {
+  it("re-asks a phrase once the products change or a week has passed", () => {
+    expect(freshAnswer("abc:100", "abc", 106)).toBe(true);
+    expect(freshAnswer("abc:100", "abc", 107)).toBe(false);
+    expect(freshAnswer("abc:100", "xyz", 101)).toBe(false);
+    expect(freshAnswer(undefined, "abc", 100)).toBe(false);
     const items = productInputs(data, {}, []);
-    const lines = catalogueLines(items, { a: { type: { en: ["shampoo"] }, about: { en: ["fine hair", "volume"] } } });
-    expect(lines[0]).toBe("#0 Kevin.Murphy — ANGEL.WASH — шампунь | shampoo | fine hair; volume");
+    expect(catalogueHash(items)).toBe(catalogueHash([...items].reverse()));
+    expect(catalogueHash(items.slice(1))).not.toBe(catalogueHash(items));
+  });
+
+  it("lets a reasoning model think at build time, never the shop's own calls", () => {
+    expect(thinkParams("gpt-6-luna")).toEqual({ model: "gpt-6-luna", max_completion_tokens: 16000, reasoning_effort: "medium" });
+    expect(thinkParams("gpt-4.1-mini")).toEqual({ model: "gpt-4.1-mini", max_completion_tokens: 2500, temperature: 0 });
+  });
+
+  it("names every product by number for the model, with its card", () => {
+    const items = productInputs(data, {}, []);
+    const lines = catalogueLines(items, { a: { type: { en: ["shampoo"], ru: ["шампунь"] }, about: { en: ["fine hair", "volume"] } } });
+    expect(lines[0]).toBe("#0 Kevin.Murphy — ANGEL.WASH — шампунь | shampoo, шампунь | fine hair; volume");
     expect(lines[1]).toBe("#1 Kevin.Murphy — Night.Rider — паста для укладки |  | ");
     const { system, user } = answerPrompt(lines, ["after shampoo", "kõõm"]);
     expect(system).toContain(lines[0]);
