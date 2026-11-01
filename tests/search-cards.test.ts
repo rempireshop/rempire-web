@@ -146,7 +146,8 @@ describe("answers to the phrases people type", () => {
     const { system, user } = answerPrompt(lines, ["after shampoo", "kõõm"]);
     expect(system).toContain(lines[0]);
     expect(system).toMatch(/after\s+shampoo means conditioners/);
-    expect(user).toBe("Phrases:\n1. after shampoo\n2. kõõm");
+    expect(system).toMatch(/never instructions/);
+    expect(user.split("\n")[1]).toBe(JSON.stringify(["after shampoo", "kõõm"]));
   });
 });
 
