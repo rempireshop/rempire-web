@@ -44,6 +44,7 @@ import { chatParams, openaiModel } from "./lib/openai-model.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public/shop/search-cards.json");
 const OUT_Q = join(ROOT, "public/shop/search-qvec.json");
+const OUT_T = join(ROOT, "public/shop/search-terms.json");
 const LIVE = (process.env.SEARCH_CARDS_PREV_BASE || "https://rempireshop.com").replace(/\/+$/, "");
 
 /** Bump to rewrite every card (a new prompt, a new shape). */
@@ -51,7 +52,7 @@ export const CARD_VERSION = 1;
 export const EMBED_MODEL = "text-embedding-3-small";
 export const EMBED_DIMS = 256;
 const DESC_MAX = 1500;
-const BUDGET_MS = Number(process.env.SEARCH_CARDS_BUDGET_MS || 240_000);
+const BUDGET_MS = Number(process.env.SEARCH_CARDS_BUDGET_MS || 360_000);
 const MAX_NEW = Number(process.env.SEARCH_CARDS_MAX || 400);
 const POOL = 8;
 
@@ -78,9 +79,9 @@ const tri = (v) => {
 
 async function readDb() {
   const url = process.env.DATABASE_URL;
-  if (!url) return { over: {}, own: [] };
+  if (!url) return { over: {}, own: [], searches: [] };
   let pg;
-  try { ({ default: pg } = await import("pg")); } catch { return { over: {}, own: [] }; }
+  try { ({ default: pg } = await import("pg")); } catch { return { over: {}, own: [], searches: [] }; }
   const { sslFor } = await import("./migrate.mjs");
   const client = new pg.Client({ connectionString: url, ssl: sslFor(url) });
   try {
@@ -90,10 +91,16 @@ async function readDb() {
     const over = {};
     for (const r of o.rows) over[r.product_id] = r;
     const c = await client.query("select * from custom_products where active = true order by created_at, id");
-    return { over, own: c.rows };
+    // what shoppers typed this past year, most searched first (src/lib/analytics.ts reads the same rows)
+    let searches = [];
+    try {
+      const q = await client.query("select path from events where type = 'search' and path is not null and at > now() - interval '365 days' group by 1 order by count(*) desc limit 1500");
+      searches = q.rows.map((r) => String(r.path));
+    } catch {}
+    return { over, own: c.rows, searches };
   } catch (err) {
     warn("could not read the database (" + (err && err.message) + ") — the file's own names and texts this run");
-    return { over: {}, own: [] };
+    return { over: {}, own: [], searches: [] };
   } finally {
     await client.end().catch(() => {});
   }
@@ -165,6 +172,21 @@ export function cleanCard(raw) {
   return LANGS.some((L) => card.type[L].length) ? card : null;
 }
 
+/** What the shop downloads: what each product IS in every language (no
+    «about» — as plain words it pulled half the shelf into «beard itch»), the
+    product order, and the answers as numbers into that order. */
+export function termsOf(cards, ids = Object.keys(cards), answers = {}) {
+  const c = {};
+  for (const [id, k] of Object.entries(cards)) c[id] = LANGS.flatMap((L) => (k.type && k.type[L]) || []).join(", ");
+  const at = new Map(ids.map((id, i) => [id, i]));
+  const a = {};
+  for (const [h, list] of Object.entries(answers)) {
+    const n = list.map((id) => at.get(id)).filter((i) => i !== undefined);
+    if (n.length) a[h] = n;
+  }
+  return { ids, c, a };
+}
+
 /** What the meaning vector is made of. */
 export const embedText = (x, c) => [
   `${x.brand} ${x.name}`,
@@ -222,6 +244,102 @@ async function readPrev(file, url) {
   }
 }
 
+/* ---------- answers to the phrases people type --------------------------------
+
+   Word matching cannot read «after shampoo» as «a conditioner»: every word of
+   it names a shampoo. So the model answers the phrases shoppers actually type
+   — the shop's own search log, Search Console's, the intents — at build time,
+   with every product's card in front of it, and the shop looks the phrase up
+   (step 2, docs/plan-2026-11-01-search-cards.md). A phrase the shop has never
+   seen gets today's search, and its answer at the next build.
+
+   The phrase is published only as a hash of the shop's own spelling of it
+   (srchNorm, cut out of app.js), never as text: what somebody typed into the
+   search box is theirs, not a public file's. Anything that looks like contact
+   details never leaves the database at all (okQuery). */
+
+const APP = join(ROOT, "public/shop2/app.js");
+function sliceFn(src, name) {
+  const start = src.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) return src.slice(start, i + 1);
+  }
+  throw new Error(`unbalanced braces around ${name}() in app.js`);
+}
+let normFn = null;
+/** The phrase as the shop spells it — srchNorm() itself, so build and shop always agree. */
+export function queryKey(q) {
+  if (!normFn) {
+    const ctx = vm.createContext({});
+    vm.runInContext(sliceFn(readFileSync(APP, "utf8"), "srchNorm") + "\nthis.f = srchNorm;", ctx);
+    normFn = ctx.f;
+  }
+  return normFn(q).trim();
+}
+/** FNV-1a, 32 bits, base 36 — srchAnswerKey() in app.js computes the same. */
+export function keyHash(k) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(36);
+}
+/** A phrase worth answering: words, not contact details or a pasted paragraph. */
+export function okQuery(q) {
+  const s = String(q || "").trim();
+  return s.length >= 2 && s.length <= 60 && /\p{L}/u.test(s) && !/@/.test(s) &&
+    (s.match(/\d/g) || []).length <= 4 && s.split(/\s+/).length <= 8;
+}
+
+/** One line per product for the model: its number, name, and card in English. */
+export function catalogueLines(items, cards) {
+  return items.map((x, i) => {
+    const c = cards[x.id];
+    const type = c ? c.type.en.join(", ") : "";
+    const about = c ? c.about.en.slice(0, 8).join("; ") : "";
+    return `#${i} ${x.brand} — ${x.name} | ${type} | ${about}`;
+  });
+}
+
+export function answerPrompt(lines, queries) {
+  const system = [
+    "You are the search of REMPIRE, a men's grooming shop in Tallinn. Below is every product, one per line:",
+    "#number brand — name | what it is | what it is for.",
+    "For each search phrase you are given (Russian, Estonian, English, or a typo of them), list the products",
+    "a knowledgeable shop assistant would show for it, best first, at most 24.",
+    "A brand or product name: those products. A product type (shampoo, šampoon, шампунь): every product of",
+    "that type. A need (after shampoo, перхоть, kõõm, beard itch, a gift): the products that serve it - after",
+    "shampoo means conditioners and masks, not shampoos. Nothing fits: an empty list. Never pad with",
+    "products that do not answer the phrase.",
+    'Answer JSON only: {"a":[[numbers for phrase 1],[numbers for phrase 2],...]} in the order given.',
+    "",
+    ...lines,
+  ].join("\n");
+  const user = "Phrases:\n" + queries.map((q, i) => `${i + 1}. ${q}`).join("\n");
+  return { system, user };
+}
+
+/** The model's lists, as product numbers that exist, without repeats; null when the shape is wrong. */
+export function cleanAnswers(raw, nQueries, nProducts) {
+  let j;
+  try { j = typeof raw === "string" ? JSON.parse(raw) : raw; } catch { return null; }
+  if (!j || !Array.isArray(j.a) || j.a.length !== nQueries) return null;
+  return j.a.map((list) => {
+    const seen = new Set();
+    for (const v of Array.isArray(list) ? list : []) {
+      const n = typeof v === "number" ? v : parseInt(String(v).replace(/^#/, ""), 10);
+      if (Number.isInteger(n) && n >= 0 && n < nProducts) seen.add(n);
+      if (seen.size >= 24) break;
+    }
+    return [...seen];
+  });
+}
+
+/** What the answers were given against: the products and their cards. */
+export const catalogueHash = (items, cards) =>
+  createHash("sha256").update(JSON.stringify(items.map((x) => [x.id, cards[x.id] ? cards[x.id].h : ""]))).digest("hex").slice(0, 16);
+
 /** Search phrases worth a vector ahead of time: the bench's, and the intents. */
 function knownQueries() {
   const out = new Set();
@@ -246,7 +364,7 @@ async function main() {
   data.CONTENT_RU = loadGlobals("public/shop/content.ru.js", ["CONTENT_RU"]).CONTENT_RU;
   data.CONTENT_ET = loadGlobals("public/shop/content.et.js", ["CONTENT_ET"]).CONTENT_ET;
 
-  const { over, own } = await readDb();
+  const { over, own, searches } = await readDb();
   const items = productInputs(data, over, own);
 
   const prev = (await readPrev(OUT, LIVE + "/shop/search-cards.json")) || {};
@@ -312,11 +430,58 @@ async function main() {
 
   const live = new Set(items.map((x) => x.id));
   for (const id of Object.keys(cards)) if (!live.has(id)) delete cards[id];
-  writeFileSync(OUT, JSON.stringify({ v: CARD_VERSION, model, emb: EMBED_MODEL + "@" + EMBED_DIMS, built: new Date().toISOString(), cards }));
+
+  /* The answers. Given against one catalogue (catalogueHash): while it is the
+     same, an answered phrase keeps its answer; once a product or a card
+     changes, every phrase is asked again — within the budget, and an old
+     answer stands until its new one lands. */
+  const forHash = catalogueHash(items, cards);
+  const prevAns = prev.answers && typeof prev.answers === "object" ? prev.answers : {};
+  const prevFor = prev.answersFor && typeof prev.answersFor === "object" ? prev.answersFor : {};
+  const answers = { ...prevAns }, answersFor = { ...prevFor };
+  const phrases = new Map();
+  for (const q of [...knownQueries(), ...searches]) {
+    if (!okQuery(q)) continue;
+    const k = queryKey(q);
+    if (k && !phrases.has(k)) phrases.set(k, keyHash(k));
+  }
+  const ask = [...phrases].filter(([, h]) => !prevAns[h] || prevFor[h] !== forHash);
+  let answered = 0;
+  if (mayPay && ask.length) {
+    const { system } = answerPrompt(catalogueLines(items, cards), []);
+    const batches = [];
+    for (let i = 0; i < ask.length; i += 10) batches.push(ask.slice(i, i + 10));
+    const worker = async () => {
+      while (batches.length && Date.now() - started < BUDGET_MS) {
+        const b = batches.shift();
+        try {
+          const { user } = answerPrompt([], b.map(([k]) => k));
+          const j = await openai("chat/completions", {
+            ...chatParams(model, { maxTokens: 2500, temperature: 0 }),
+            response_format: { type: "json_object" },
+            messages: [{ role: "system", content: system }, { role: "user", content: user }],
+          }, key, 60_000);
+          const lists = cleanAnswers(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content, b.length, items.length);
+          if (!lists) continue;
+          b.forEach(([, h], i) => { answers[h] = lists[i].map((n) => items[n].id); answersFor[h] = forHash; answered++; });
+        } catch (err) {
+          warn("answers: " + (err && err.message));
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: POOL }, worker));
+  }
+  const wanted = new Set(phrases.values());
+  for (const h of Object.keys(answers)) if (!wanted.has(h)) { delete answers[h]; delete answersFor[h]; }
+
+  const built = new Date().toISOString();
+  writeFileSync(OUT, JSON.stringify({ v: CARD_VERSION, model, emb: EMBED_MODEL + "@" + EMBED_DIMS, built, cards, answersFor, answers }));
   writeFileSync(OUT_Q, JSON.stringify({ emb: EMBED_MODEL + "@" + EMBED_DIMS, q: qvec }));
+  writeFileSync(OUT_T, JSON.stringify({ v: CARD_VERSION, built, ...termsOf(cards, items.map((x) => x.id).filter((id) => cards[id]), answers) }));
   const have = Object.keys(cards).length;
   log(`${have}/${items.length} products carded (${made} new, ${failed} failed, ${todo.length - made} still to do)` +
     (mayPay ? "" : key ? " — not a production build, reused only" : " — no OPENAI_API_KEY, reused only") +
+    ` · ${Object.keys(answers).length}/${phrases.size} phrases answered (${answered} new)` +
     ` · ${Object.keys(qvec).length} query vectors · ${((Date.now() - started) / 1000).toFixed(1)} s`);
 }
 

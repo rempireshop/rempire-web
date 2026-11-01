@@ -91,3 +91,4 @@ public/llms.txt
 # written at build by tools/pack-search-cards.mjs (prebuild) — the model-written search cards and the known phrases' vectors
 public/shop/search-cards.json
 public/shop/search-qvec.json
+public/shop/search-terms.json

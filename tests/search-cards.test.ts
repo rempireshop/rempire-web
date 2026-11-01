@@ -9,7 +9,8 @@ import { describe, expect, it } from "vitest";
 import * as mjs from "../tools/lib/openai-model.mjs";
 import * as ts from "../src/lib/openai-chat";
 import {
-  cardPrompt, cleanCard, embedText, inputHash, packVec, plain, productInputs,
+  answerPrompt, cardPrompt, catalogueLines, cleanAnswers, cleanCard, embedText, inputHash, keyHash, okQuery,
+  packVec, plain, productInputs, queryKey, termsOf,
 } from "../tools/pack-search-cards.mjs";
 
 type Card = { type: Record<string, string[]>; about: Record<string, string[]> };
@@ -105,6 +106,47 @@ describe("what is kept of the answer", () => {
     for (let i = 0; i < bytes.length; i++) n += (bytes.readInt8(i) / 127) ** 2;
     expect(Math.sqrt(n)).toBeGreaterThan(0.98);
     expect(Math.sqrt(n)).toBeLessThan(1.02);
+  });
+});
+
+describe("answers to the phrases people type", () => {
+  it("keys a phrase the way the shop spells it, and publishes only its hash", () => {
+    expect(queryKey("  После  ШАМПУНЯ! ")).toBe("после шампуня");
+    expect(queryKey("Šampoon")).toBe("sampoon");
+    expect(keyHash(queryKey("after shampoo"))).toBe(keyHash("after shampoo"));
+    expect(keyHash("after shampoo")).toMatch(/^[0-9a-z]{1,7}$/);
+    expect(keyHash("after shampoo")).not.toBe(keyHash("after shampo"));
+  });
+
+  it("never sends contact details or a paste to the model", () => {
+    for (const q of ["shampoo", "после бритья", "kõõm", "creed aventus 50ml"]) expect(okQuery(q), q).toBe(true);
+    for (const q of ["a", "me@x.ee", "+372 5555 1234", "x".repeat(61), "one two three four five six seven eight nine", "!!!"]) {
+      expect(okQuery(q), q).toBe(false);
+    }
+  });
+
+  it("keeps product numbers that exist, once each, in the model's order", () => {
+    expect(cleanAnswers('{"a":[[3,"#1",3,99,-1],[]]}', 2, 10)).toEqual([[3, 1], []]);
+    expect(cleanAnswers('{"a":[[1]]}', 2, 10)).toBeNull();
+    expect(cleanAnswers("nope", 1, 10)).toBeNull();
+    expect(cleanAnswers({ a: [Array.from({ length: 40 }, (_, i) => i)] }, 1, 100)![0]).toHaveLength(24);
+  });
+
+  it("ships answers as numbers into the product order, dropping products that are gone", () => {
+    const cards = { a: { type: { ru: ["шампунь"], en: ["shampoo"] } }, b: { type: { en: ["paste"] } } };
+    const t = termsOf(cards, ["a", "b"], { h1: ["b", "a", "gone"], h2: ["gone"] });
+    expect(t).toEqual({ ids: ["a", "b"], c: { a: "шампунь, shampoo", b: "paste" }, a: { h1: [1, 0] } });
+  });
+
+  it("names every product by number for the model, with its card in English", () => {
+    const items = productInputs(data, {}, []);
+    const lines = catalogueLines(items, { a: { type: { en: ["shampoo"] }, about: { en: ["fine hair", "volume"] } } });
+    expect(lines[0]).toBe("#0 Kevin.Murphy — ANGEL.WASH — шампунь | shampoo | fine hair; volume");
+    expect(lines[1]).toBe("#1 Kevin.Murphy — Night.Rider — паста для укладки |  | ");
+    const { system, user } = answerPrompt(lines, ["after shampoo", "kõõm"]);
+    expect(system).toContain(lines[0]);
+    expect(system).toMatch(/after\s+shampoo means conditioners/);
+    expect(user).toBe("Phrases:\n1. after shampoo\n2. kõõm");
   });
 });
 
