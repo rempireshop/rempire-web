@@ -91,9 +91,9 @@ export function sliceVar(name) {
 
 export const SEARCH_PARTS = {
   vars: ["SRCH_WIDEN", "SRCH_WIDE_MAX", "SRCH_SUFFIX_RU", "SRCH_SUFFIX_LAT", "SRCH_STOP",
-    "SRCH_BRIDGE", "SRCH_CONCERNS", "SRCH_GEN"],
+    "SRCH_BRIDGE", "SRCH_TYPE", "SRCH_CONCERNS", "SRCH_GEN"],
   fns: ["stem", "srchNorm", "srchStem", "srchWords", "srchGroups", "srchConcerns", "srchText",
-    "srchIndex", "srchNameBlob", "srchBlob", "srchExtra", "searchNames", "searchWide"],
+    "srchIndex", "srchNameBlob", "srchBlob", "srchExtra", "searchNames", "searchTypeNames", "searchWide"],
 };
 
 /** The whole search, lifted out of app.js and given the stubs it calls. */
@@ -105,8 +105,9 @@ export function buildSearch(context = ctx) {
     function searchAll(query, aiTerms) {
       var q = String(query || "").trim().toLowerCase();
       if (!q) return [];
-      var res = searchNames(q);
-      if (res.length >= SRCH_WIDEN && !(aiTerms && aiTerms.length)) return res;
+      var res = searchNames(q), widen = res.length < SRCH_WIDEN || (aiTerms && aiTerms.length);
+      res = res.concat(searchTypeNames(q, res));
+      if (!widen) return res;
       return res.concat(searchWide(query, res, aiTerms));
     }
     this.searchAll = searchAll;

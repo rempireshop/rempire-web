@@ -12831,6 +12831,55 @@
       return true;
     });
   }
+  /** Pass 1, the other way round (01.11.2026). A name here is the product's
+      own words plus a Russian tail — «ANGEL.WASH — шампунь» — and only some
+      names carry the type in English too («Bio Botanical Shampoo —
+      шампунь»). So «shampoo» found the 27 of the second kind, pass 1 called
+      that a full page, the search never widened, and not one Kevin.Murphy
+      wash was on it (Renat). «conditioner» missed every «… RINSE —
+      кондиционер» the same way.
+
+      A query word on the left also matches the tail on the right, in the
+      NAME only — the match pass 1 makes, spelled the other way. Every word of
+      the query must still be in the name, and the finds go after pass 1's,
+      so this only ever adds. The left side is written the way srchNorm()
+      leaves text; the right side is a word-start regex over srchNameBlob(),
+      Cyrillic in a regex literal for the reason given above SRCH_SUFFIX_RU.
+      «oil» is anchored at both ends on purpose: «oily hair» is a concern,
+      not a request for oils. */
+  var SRCH_TYPE = [
+    [/^shampoo|^sampoon/, / шампун/], [/^conditioner/, / кондиционер/],
+    [/^palsam/, / (кондиционер|бальзам)/], [/^balm/, / бальзам/],
+    [/^mask/, / маск/], [/^oils?$|^oli$|^olid$/, / масл/],
+    [/^wax|^vaha/, / воск/], [/^paste|^pasta$/, / паст/], [/^clay|^savi$/, / глин/],
+    [/^cream|^kreem/, / крем/], [/^spray|^sprei/, / спре/], [/^gels?$|^geel/, / гел/],
+    [/^lotion|^losjoon/, / лосьон/], [/^powder|^puuder/, / пудр/],
+    [/^serum|^seerum/, / сыворотк/], [/^toner|^tonic|^tooner|^toonik/, / (тонер|тоник)/],
+    [/^scrub|^koorija/, / скраб/], [/^foam/, / пенк/], [/^mousse/, / мусс/], [/^vaht/, / (пенк|мусс)/],
+    [/^perfume|^parfum|^parfuum|^fragrance|^lohn/, / парфюм/],
+    [/^shirts?$|^tshirt|^tees?$|^sark$/, / футболк/], [/^patch|^plaaster/, / патч/],
+    [/^shav|^raseeri/, / брить/],
+    [/^hair|^juuks|^juus/, / волос/], [/^beard|^habe/, / бород/],
+    [/^face$|^facial|^nagu$|^nao$/, / лиц/], [/^body$|^keha/, / тел/]
+  ];
+  function searchTypeNames(q, have) {
+    var words = srchWords(q), need = [], typed = false;
+    for (var i = 0; i < words.length; i++) {
+      var alt = null;
+      for (var t = 0; t < SRCH_TYPE.length && !alt; t++) if (SRCH_TYPE[t][0].test(words[i])) alt = SRCH_TYPE[t][1];
+      if (alt) typed = true;
+      need.push([" " + srchStem(words[i]), alt]);
+    }
+    if (!typed) return [];
+    return CATALOGUE.filter(function (p) {
+      if (have.indexOf(p) >= 0) return false;
+      var name = srchNameBlob(p);
+      for (var k = 0; k < need.length; k++) {
+        if (name.indexOf(need[k][0]) < 0 && !(need[k][1] && need[k][1].test(name))) return false;
+      }
+      return true;
+    });
+  }
 
   /* ---------- search: what the shopper means, not only what they typed -----
      «rasvased juuksed» — Estonian for oily hair — used to find nothing. No
@@ -13262,8 +13311,9 @@
     var ai = aiTermsFor(S.query);
     var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
     if (SRCH_LAST.key === key) return SRCH_LAST.res;
-    var res = searchNames(q);
-    if (res.length < SRCH_WIDEN || ai.length) res = res.concat(searchWide(S.query, res, ai));
+    var res = searchNames(q), widen = res.length < SRCH_WIDEN || ai.length;
+    res = res.concat(searchTypeNames(q, res));
+    if (widen) res = res.concat(searchWide(S.query, res, ai));
     SRCH_LAST = { key: key, res: res };
     return res;
   }

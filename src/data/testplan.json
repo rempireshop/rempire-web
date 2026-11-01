@@ -1142,6 +1142,43 @@
       }
     },
     {
+      "id": "shop-search-type-latin",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Поиск «shampoo» латиницей",
+      "steps": [
+        "Открыть поиск и ввести «shampoo».",
+        "Пролистать список до конца.",
+        "Стереть и ввести «conditioner»."
+      ],
+      "expect": [
+        "Среди шампуней есть Kevin.Murphy — например, ANGEL.WASH.",
+        "В списке только шампуни.",
+        "На «conditioner» есть кондиционеры Kevin.Murphy — например, ANGEL.RINSE."
+      ],
+      "why": "Раньше «shampoo» находил только товары со словом Shampoo в названии, и Kevin.Murphy не было.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "Searching «shampoo» in Latin letters",
+        "steps": [
+          "Open the search and type «shampoo».",
+          "Scroll to the end of the list.",
+          "Clear it and type «conditioner»."
+        ],
+        "expect": [
+          "Kevin.Murphy is among the shampoos — ANGEL.WASH, for one.",
+          "The list holds shampoos only.",
+          "«conditioner» shows the Kevin.Murphy conditioners — ANGEL.RINSE, for one."
+        ],
+        "why": "«shampoo» used to find only products with Shampoo in their name, so Kevin.Murphy was missing."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-01T17:34:09.927Z"
+    },
+    {
       "id": "shop-search-phrase",
       "area": "shop",
       "who": "renat",

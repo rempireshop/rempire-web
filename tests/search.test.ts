@@ -178,6 +178,38 @@ describe("what the shopper means", () => {
   });
 });
 
+describe("the product type typed in English or Estonian", () => {
+  const km = (rows: Row[]) => rows.filter((p) => /murphy/i.test(p.brand));
+
+  it("«shampoo» finds the shampoos named only in Russian — Renat, 01.11.2026", () => {
+    // 27 names say «Shampoo», which used to count as a full page; the
+    // Kevin.Murphy washes say only «— шампунь» and were never on it
+    const before = S.legacySearch("shampoo");
+    const after = S.searchAll("shampoo");
+    expect(km(before)).toHaveLength(0);
+    expect(names(km(after))).toMatch(/ANGEL\.WASH — шампунь/);
+    expect(km(after).length).toBeGreaterThanOrEqual(10);
+    expect(after.every((p) => /шампун|shampoo/i.test(p.name)), names(after)).toBe(true);
+    expect(ids(after).slice(0, before.length)).toEqual(ids(before));
+  });
+
+  it("works for the other tails and for Estonian", () => {
+    expect(names(km(S.searchAll("conditioner")))).toMatch(/ANGEL\.RINSE — кондиционер/);
+    expect(names(km(S.searchAll("šampoon")))).toMatch(/ANGEL\.WASH — шампунь/);
+    expect(names(S.searchAll("beard oil"))).toMatch(/масло для бороды/);
+  });
+
+  it("asks every word to be in the name — «kevin murphy shampoo» puts the washes first", () => {
+    const top = S.searchAll("kevin murphy shampoo").slice(0, 10);
+    expect(top.every((p) => /murphy/i.test(p.brand) && /шампун/.test(p.name)), names(top)).toBe(true);
+  });
+
+  it("does not read a concern as a product type — «oily hair» is not a request for oils", () => {
+    const top = S.searchAll("oily hair").slice(0, 6);
+    expect(top.some((p) => /— масло/.test(p.name)), names(top)).toBe(false);
+  });
+});
+
 describe("the queries that already worked are left alone", () => {
   it("a brand or a product word is answered by pass 1, exactly as before", () => {
     for (const q of ["davines", "шампунь", "kevin murphy", "парфюм", "борода", "футболка"]) {

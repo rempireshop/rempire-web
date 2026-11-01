@@ -152,3 +152,4 @@ where it becomes the «what was done» summary.*
 
 **01.11**
 - Every page's head carries Pinterest's domain claim for rempireshop.com (`<meta name="p:domain_verify">`, Renat's Pinterest account), next to Google's three verification tags (`PINTEREST_DOMAIN_VERIFY`, `src/lib/seo-head.mjs`).
+- Search: a product type typed in English or Estonian («shampoo», «conditioner», «šampoon», «beard oil») also matches the Russian tail of the name, so «shampoo» finds 40 shampoos instead of 27 — the 13 Kevin.Murphy washes (named only «… — шампунь») were missing (`SRCH_TYPE`, `searchTypeNames()` in `public/shop2/app.js`; Renat's report).
