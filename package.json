@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "node tools/minify-shop2.mjs",
     "dev": "next dev --port 3300",
-    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/pack-legal.mjs && node tools/pack-feed.mjs && node tools/copy-vendor.mjs && node tools/minify-shop2.mjs && node tools/prerender-shop2.mjs",
+    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/pack-legal.mjs && node tools/pack-feed.mjs && node tools/pack-search-cards.mjs && node tools/copy-vendor.mjs && node tools/minify-shop2.mjs && node tools/prerender-shop2.mjs",
     "build": "next build",
     "postbuild": "node tools/migrate.mjs --if-configured",
     "start": "next start --port 3300",

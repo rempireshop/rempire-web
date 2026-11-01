@@ -1,0 +1,122 @@
+/**
+ * The build step that writes the search cards (tools/pack-search-cards.mjs) —
+ * the pure half: what goes to the model, what is kept of its answer, how a
+ * card is keyed and packed. No network here; the step's network half fails
+ * open by design and is watched on the live file instead.
+ */
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import * as mjs from "../tools/lib/openai-model.mjs";
+import * as ts from "../src/lib/openai-chat";
+import {
+  cardPrompt, cleanCard, embedText, inputHash, packVec, plain, productInputs,
+} from "../tools/pack-search-cards.mjs";
+
+type Card = { type: Record<string, string[]>; about: Record<string, string[]> };
+const card = (raw: unknown) => cleanCard(raw) as Card | null;
+
+const data = {
+  CATALOGUE: [
+    { id: "a", name: "ANGEL.WASH — шампунь", brand: "Kevin.Murphy", cat: "hair" },
+    { id: "b", name: "Night.Rider — паста для укладки", brand: "Kevin.Murphy", cat: "styling" },
+  ],
+  CAT_NAMES: { hair: "Уход за волосами", styling: "Стайлинг" },
+  CONTENT: { a: "<p>A volumising <b>wash</b> for fine hair.</p>" },
+  CONTENT_RU: { a: "<p>Шампунь для тонких волос.</p>" },
+  CONTENT_ET: {},
+};
+
+describe("the build's copy of the model choice", () => {
+  it("answers exactly as src/lib/openai-chat.ts does", () => {
+    for (const env of [{}, { OPENAI_MODEL: "gpt-4.1-mini" }, { OPENAI_MODEL: " gpt-6-sol " }]) {
+      expect(mjs.openaiModel(env as NodeJS.ProcessEnv)).toBe(ts.openaiModel(env));
+    }
+    for (const m of ["gpt-6-luna", "gpt-4.1-mini", "o4-mini", "gpt-5.1"]) {
+      expect(mjs.chatParams(m, { maxTokens: 9, temperature: 0.2 })).toEqual(ts.chatParams(m, { maxTokens: 9, temperature: 0.2 }));
+    }
+  });
+});
+
+describe("what the model reads", () => {
+  it("takes the owner's renamed name and own description over the file's", () => {
+    const over = { a: { name: "ANGEL.WASH 250 — шампунь", description: { RU: "Свой текст", EN: "", ET: "Oma tekst" } } };
+    const own = [{ id: "c-1", name: "Maharajah — воск для усов", brand: "Captain Fawcett", cat: "beard", description: '{"RU":"Воск"}' }];
+    const items = productInputs(data, over, own);
+    expect(items.map((x) => x.id)).toEqual(["a", "b", "c-1"]);
+    expect(items[0]).toMatchObject({ name: "ANGEL.WASH 250 — шампунь", ru: "Свой текст", et: "Oma tekst", section: "Уход за волосами" });
+    expect(items[0].en).toBe("A volumising wash for fine hair.");
+    expect(items[2]).toMatchObject({ ru: "Воск", section: "beard" });
+  });
+
+  it("strips markup and caps a description", () => {
+    expect(plain("<h3>ПРЕИМУЩЕСТВА:</h3><ul><li>объём&nbsp;</li></ul>")).toBe("ПРЕИМУЩЕСТВА: объём");
+    expect(plain("x".repeat(5000))).toHaveLength(1500);
+  });
+
+  it("names the product and every description it has in the prompt", () => {
+    const [a] = productInputs(data, {}, []);
+    const { system, user } = cardPrompt(a);
+    expect(system).toMatch(/JSON/);
+    expect(user).toContain("Name: ANGEL.WASH — шампунь");
+    expect(user).toContain("Description (ru): Шампунь для тонких волос.");
+    expect(user).not.toContain("Description (et)");
+  });
+
+  it("keys a card by its inputs — a changed description is a new card, nothing else is", () => {
+    const [a] = productInputs(data, {}, []);
+    expect(inputHash(a, "m")).toBe(inputHash({ ...a }, "m"));
+    expect(inputHash({ ...a, ru: a.ru + "!" }, "m")).not.toBe(inputHash(a, "m"));
+    expect(inputHash(a, "other-model")).not.toBe(inputHash(a, "m"));
+  });
+});
+
+describe("what is kept of the answer", () => {
+  it("keeps the shape, lower-cases, trims and caps", () => {
+    const c = card(JSON.stringify({
+      type: { ru: ["Шампунь", "  "], et: ["Šampoon"], en: Array.from({ length: 9 }, (_, i) => "t" + i) },
+      about: { ru: ["После бритья\u0000"], en: ["x".repeat(99)] },
+    }))!;
+    expect(c.type.ru).toEqual(["шампунь"]);
+    expect(c.type.et).toEqual(["šampoon"]);
+    expect(c.type.en).toHaveLength(6);
+    expect(c.about.ru).toEqual(["после бритья"]);
+    expect(c.about.et).toEqual([]);
+    expect(c.about.en[0]).toHaveLength(60);
+  });
+
+  it("refuses an answer with no type at all, or no JSON", () => {
+    expect(cleanCard("not json")).toBeNull();
+    expect(cleanCard("{}")).toBeNull();
+    expect(cleanCard(JSON.stringify({ about: { en: ["x"] } }))).toBeNull();
+  });
+
+  it("builds the vector's text from the name and every term", () => {
+    const [a] = productInputs(data, {}, []);
+    const c = card({ type: { en: ["shampoo"], ru: ["шампунь"] }, about: { en: ["fine hair"] } })!;
+    expect(embedText(a, c)).toBe("Kevin.Murphy ANGEL.WASH — шампунь\nшампунь\n\nshampoo, fine hair");
+  });
+
+  it("packs a vector as unit int8 in base64 — 256 numbers in 344 characters", () => {
+    const v = Array.from({ length: 256 }, (_, i) => Math.sin(i));
+    const b64 = packVec(v);
+    expect(b64).toHaveLength(344);
+    const bytes = Buffer.from(b64, "base64");
+    let n = 0;
+    for (let i = 0; i < bytes.length; i++) n += (bytes.readInt8(i) / 127) ** 2;
+    expect(Math.sqrt(n)).toBeGreaterThan(0.98);
+    expect(Math.sqrt(n)).toBeLessThan(1.02);
+  });
+});
+
+describe("the intents the meaning search is measured against", () => {
+  it("are well formed", () => {
+    const j = JSON.parse(readFileSync(new URL("../tools/search-intents.json", import.meta.url), "utf8"));
+    expect(j.intents.length).toBeGreaterThan(20);
+    for (const it of j.intents) {
+      expect(typeof it.q, JSON.stringify(it)).toBe("string");
+      expect(() => new RegExp(it.match, "i")).not.toThrow();
+      expect(it.min).toBeGreaterThan(0);
+      expect(it.min).toBeLessThanOrEqual(it.top);
+    }
+  });
+});

@@ -87,3 +87,7 @@ tools/generate-use-case-assignment.py
 
 # /llms.txt — written by tools/prerender-shop2.mjs on every build (tools/lib/llms-txt.mjs)
 public/llms.txt
+
+# written at build by tools/pack-search-cards.mjs (prebuild) — the model-written search cards and the known phrases' vectors
+public/shop/search-cards.json
+public/shop/search-qvec.json

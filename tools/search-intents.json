@@ -1,0 +1,31 @@
+{
+  "about": "What a shopper means, with what a right answer looks like: at least `min` of the first `top` results match `match` (a case-insensitive regex over «brand — name»). The meaning-search target (docs/plan-2026-11-01-search-cards.md); pack-search-cards.mjs also gives each phrase a vector ahead of time.",
+  "intents": [
+    { "q": "after shampoo", "top": 6, "min": 5, "match": "кондиционер|маска|бальзам" },
+    { "q": "после шампуня", "top": 6, "min": 5, "match": "кондиционер|маска|бальзам" },
+    { "q": "pärast šampooni", "top": 6, "min": 4, "match": "кондиционер|маска|бальзам" },
+    { "q": "shampoo", "top": 20, "min": 20, "match": "шампунь|shampoo" },
+    { "q": "conditioner", "top": 15, "min": 15, "match": "кондиционер|conditioner" },
+    { "q": "после бритья", "top": 6, "min": 5, "match": "после бритья" },
+    { "q": "aftershave", "top": 6, "min": 5, "match": "после бритья" },
+    { "q": "для кудрявых волос", "top": 6, "min": 4, "match": "локон|кудр|curl" },
+    { "q": "curly hair", "top": 6, "min": 4, "match": "локон|кудр|curl" },
+    { "q": "lokkis juuksed", "top": 6, "min": 4, "match": "локон|кудр|curl" },
+    { "q": "перхоть", "top": 6, "min": 4, "match": "шампунь|тоник|сыворотка" },
+    { "q": "dandruff", "top": 6, "min": 4, "match": "шампунь|тоник|сыворотка" },
+    { "q": "kõõm", "top": 6, "min": 4, "match": "шампунь|тоник|сыворотка" },
+    { "q": "hair loss", "top": 6, "min": 3, "match": "stimulate|кожи головы|шампунь|тоник" },
+    { "q": "выпадение волос", "top": 6, "min": 3, "match": "stimulate|кожи головы|шампунь|тоник" },
+    { "q": "matte hold", "top": 6, "min": 4, "match": "паста|глина|воск|пудра" },
+    { "q": "матовая фиксация", "top": 6, "min": 4, "match": "паста|глина|воск|пудра" },
+    { "q": "beard itch", "top": 6, "min": 4, "match": "бород" },
+    { "q": "зуд бороды", "top": 6, "min": 4, "match": "бород" },
+    { "q": "näoseerum", "top": 2, "min": 2, "match": "сыворотка для лица" },
+    { "q": "habemeõli", "top": 5, "min": 5, "match": "масло для бороды" },
+    { "q": "sheet mask", "top": 2, "min": 2, "match": "маск" },
+    { "q": "heat protection", "top": 4, "min": 1, "match": "термозащит|HEATED" },
+    { "q": "volume for fine hair", "top": 6, "min": 4, "match": "объ|plump|thick|body|volume" },
+    { "q": "oily hair", "top": 6, "min": 4, "match": "шампунь|кондиционер" },
+    { "q": "rasvased juuksed", "top": 6, "min": 4, "match": "шампунь|кондиционер" }
+  ]
+}
