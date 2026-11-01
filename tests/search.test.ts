@@ -197,6 +197,18 @@ describe("the product type typed in English or Estonian", () => {
     expect(names(km(S.searchAll("conditioner")))).toMatch(/ANGEL\.RINSE — кондиционер/);
     expect(names(km(S.searchAll("šampoon")))).toMatch(/ANGEL\.WASH — шампунь/);
     expect(names(S.searchAll("beard oil"))).toMatch(/масло для бороды/);
+    expect(names(S.searchAll("styling"))).toMatch(/Night\.Rider — паста для укладки/);
+    expect(names(S.searchAll("curl"))).toMatch(/Motion\.Lotion — лосьон для локонов/);
+  });
+
+  it("splits an Estonian compound — «näoseerum» is face + serum, and asks for both", () => {
+    const top = (q: string, n: number) => S.searchAll(q).slice(0, n);
+    expect(top("näoseerum", 2).every((p) => /сыворотка для лица/.test(p.name)), names(top("näoseerum", 2))).toBe(true);
+    expect(top("habemeõli", 5).every((p) => /масло для бороды/.test(p.name)), names(top("habemeõli", 5))).toBe(true);
+    expect(top("viimistluspasta", 4).every((p) => /паста для укладки/.test(p.name)), names(top("viimistluspasta", 4))).toBe(true);
+    expect(names(S.searchAll("kangasmask"))).toMatch(/тканевая маска/);
+    expect(names(S.searchAll("kuumakaitsevaht"))).toMatch(/HEATED\.DEFENSE — термозащитная пенка/);
+    expect(names(S.searchAll("plaastrid"))).toMatch(/— патчи/);
   });
 
   it("asks every word to be in the name — «kevin murphy shampoo» puts the washes first", () => {

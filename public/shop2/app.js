@@ -12846,7 +12846,14 @@
       leaves text; the right side is a word-start regex over srchNameBlob(),
       Cyrillic in a regex literal for the reason given above SRCH_SUFFIX_RU.
       «oil» is anchored at both ends on purpose: «oily hair» is a concern,
-      not a request for oils. */
+      not a request for oils.
+
+      Estonian glues the two halves into one word — «näoseerum», «habemeõli»,
+      «viimistluspasta», and that is how the Estonian cards spell the type.
+      srchTypeTests() splits such a word where a type on this list ends it
+      and another entry starts it, and asks for both. Styling and «juukse-»
+      also accept the styling section, because «гель для укладки» is a hair
+      gel without the word «волос» in its name. */
   var SRCH_TYPE = [
     [/^shampoo|^sampoon/, / шампун/], [/^conditioner/, / кондиционер/],
     [/^palsam/, / (кондиционер|бальзам)/], [/^balm/, / бальзам/],
@@ -12857,25 +12864,45 @@
     [/^serum|^seerum/, / сыворотк/], [/^toner|^tonic|^tooner|^toonik/, / (тонер|тоник)/],
     [/^scrub|^koorija/, / скраб/], [/^foam/, / пенк/], [/^mousse/, / мусс/], [/^vaht/, / (пенк|мусс)/],
     [/^perfume|^parfum|^parfuum|^fragrance|^lohn/, / парфюм/],
-    [/^shirts?$|^tshirt|^tees?$|^sark$/, / футболк/], [/^patch|^plaaster/, / патч/],
-    [/^shav|^raseeri/, / брить/],
-    [/^hair|^juuks|^juus/, / волос/], [/^beard|^habe/, / бород/],
-    [/^face$|^facial|^nagu$|^nao$/, / лиц/], [/^body$|^keha/, / тел/]
+    [/^shirts?$|^tshirt|^tees?$|^sark$/, / футболк/], [/^oversize/, / оверсайз/],
+    [/^patch|^plaast/, / патч/], [/^aftershave/, / после брить/], [/^shav|^raseeri/, / брить/],
+    [/^styling|^viimistlus/, / (укладк|стайлинг)/], [/^curl|^lok/, / (локон|кудр)/],
+    [/^leave$|^leavein/, / несмываем/], [/^heat|^kuumakaitse/, / термозащит/],
+    [/^hudrofiil|^hydrophil/, / гидрофильн/], [/^eyes?$|^silma/, / век/], [/^sheet$|^kanga/, / тканев/],
+    [/^scalp|^peanaha/, / голов/],
+    [/^hair|^juuks|^juus/, / (волос|стайлинг)/], [/^beard|^habe/, / бород/],
+    [/^face$|^facial|^nagu$|^nao/, / лиц/], [/^body$|^keha/, / тел/]
   ];
+  function srchTypeOf(w) {
+    for (var t = 0; t < SRCH_TYPE.length; t++) if (SRCH_TYPE[t][0].test(w)) return SRCH_TYPE[t][1];
+    return null;
+  }
+  /** What a query word asks of a name: both halves of a compound, else the
+      one type it starts with, else nothing. */
+  function srchTypeTests(w) {
+    for (var k = w.length - 3; k >= 3; k--) {
+      var tail = srchTypeOf(w.slice(k)), head = tail && srchTypeOf(w.slice(0, k));
+      if (head) return [head, tail];
+    }
+    var one = srchTypeOf(w);
+    return one ? [one] : null;
+  }
   function searchTypeNames(q, have) {
     var words = srchWords(q), need = [], typed = false;
     for (var i = 0; i < words.length; i++) {
-      var alt = null;
-      for (var t = 0; t < SRCH_TYPE.length && !alt; t++) if (SRCH_TYPE[t][0].test(words[i])) alt = SRCH_TYPE[t][1];
-      if (alt) typed = true;
-      need.push([" " + srchStem(words[i]), alt]);
+      var tests = srchTypeTests(words[i]);
+      if (tests) typed = true;
+      need.push([" " + srchStem(words[i]), tests]);
     }
     if (!typed) return [];
     return CATALOGUE.filter(function (p) {
       if (have.indexOf(p) >= 0) return false;
       var name = srchNameBlob(p);
       for (var k = 0; k < need.length; k++) {
-        if (name.indexOf(need[k][0]) < 0 && !(need[k][1] && need[k][1].test(name))) return false;
+        if (name.indexOf(need[k][0]) >= 0) continue;
+        var tests = need[k][1];
+        if (!tests) return false;
+        for (var t = 0; t < tests.length; t++) if (!tests[t].test(name)) return false;
       }
       return true;
     });

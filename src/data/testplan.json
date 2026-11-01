@@ -1151,12 +1151,14 @@
       "steps": [
         "Открыть поиск и ввести «shampoo».",
         "Пролистать список до конца.",
-        "Стереть и ввести «conditioner»."
+        "Стереть и ввести «conditioner».",
+        "Стереть и ввести по-эстонски «näoseerum»."
       ],
       "expect": [
         "Среди шампуней есть Kevin.Murphy — например, ANGEL.WASH.",
         "В списке только шампуни.",
-        "На «conditioner» есть кондиционеры Kevin.Murphy — например, ANGEL.RINSE."
+        "На «conditioner» есть кондиционеры Kevin.Murphy — например, ANGEL.RINSE.",
+        "На «näoseerum» первыми идут сыворотки для лица."
       ],
       "why": "Раньше «shampoo» находил только товары со словом Shampoo в названии, и Kevin.Murphy не было.",
       "risk": "med",
@@ -1166,12 +1168,14 @@
         "steps": [
           "Open the search and type «shampoo».",
           "Scroll to the end of the list.",
-          "Clear it and type «conditioner»."
+          "Clear it and type «conditioner».",
+          "Clear it and type the Estonian «näoseerum» (face serum)."
         ],
         "expect": [
           "Kevin.Murphy is among the shampoos — ANGEL.WASH, for one.",
           "The list holds shampoos only.",
-          "«conditioner» shows the Kevin.Murphy conditioners — ANGEL.RINSE, for one."
+          "«conditioner» shows the Kevin.Murphy conditioners — ANGEL.RINSE, for one.",
+          "«näoseerum» puts the face serums first."
         ],
         "why": "«shampoo» used to find only products with Shampoo in their name, so Kevin.Murphy was missing."
       },
