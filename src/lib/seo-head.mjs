@@ -722,8 +722,15 @@ export const GOOGLE_SITE_VERIFICATION = [
   "vnp_AFwYKflLNLDsABZXCMqo_75IxmAD8RLMIgh4ahs",
   "k3GujBXDQzx0nVeZE5Raig1rp6QDNY8SsR0ONwTb2lw",
 ];
+/* Pinterest's domain claim for rempireshop.com (Renat's Pinterest account,
+   01.11.2026). Pinterest reads it off the home page's source, so it rides in
+   the same block as Google's. A public token, like those. */
+export const PINTEREST_DOMAIN_VERIFY = "da98ac269635a861219b90cef16af348";
 export const verificationMeta = () =>
-  GOOGLE_SITE_VERIFICATION.map(t => `<meta name="google-site-verification" content="${esc(t)}">`).join("\n");
+  [
+    ...GOOGLE_SITE_VERIFICATION.map(t => `<meta name="google-site-verification" content="${esc(t)}">`),
+    `<meta name="p:domain_verify" content="${esc(PINTEREST_DOMAIN_VERIFY)}">`,
+  ].join("\n");
 
 /* Everything a crawler reads, in one block. The prerender writes it between
    the markers in index.html and inlines it verbatim into every generated
