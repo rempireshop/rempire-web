@@ -12894,7 +12894,8 @@
       if (tests) typed = true;
       need.push([" " + srchStem(words[i]), tests]);
     }
-    if (!typed) return [];
+    // with the cards in, every product's own type words are in its name blob
+    if (!typed && !SRCH_CARDS) return [];
     return CATALOGUE.filter(function (p) {
       if (have.indexOf(p) >= 0) return false;
       var name = srchNameBlob(p);
@@ -13208,12 +13209,59 @@
   function srchIndex(p) {
     var ix = SRCH_IX[p.id];
     if (!ix) {
+      /* What the product IS, from its search card, in every language at
+         once (srchCardsWant below) — it counts as much as the name: the card
+         is how «shampoo» knows an «ANGEL.WASH — шампунь». */
+      var card = (SRCH_CARDS && SRCH_CARDS[p.id]) || "";
       ix = SRCH_IX[p.id] = {
-        name: srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || "")),
-        all: srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " "))
+        name: srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || "") + " " + card),
+        all: srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " ") + " " + card)
       };
     }
     return ix;
+  }
+  /* The search cards (docs/plan-2026-11-01-search-cards.md), written by the
+     model at build time (tools/pack-search-cards.mjs): what every product
+     is, in all three languages (SRCH_CARDS), and the model's answer to every
+     phrase shoppers are known to type — «after shampoo» is conditioners and
+     masks — as numbers into SRCH_IDS, keyed by a hash of the phrase
+     (SRCH_ANS). Asked for on the first search, like the descriptions; the
+     page searches without them until they land and once more when they do.
+     A failed fetch is simply a search without them — the search as it was. */
+  var SRCH_CARDS = null, SRCH_ANS = null, SRCH_IDS = null, srchCardsAsked = false;
+  function srchCardsWant() {
+    if (srchCardsAsked || typeof fetch !== "function") return;
+    srchCardsAsked = true;
+    fetch("/shop/search-terms.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.c || typeof j.c !== "object") return;
+      SRCH_CARDS = j.c;
+      if (j.a && typeof j.a === "object" && Array.isArray(j.ids)) { SRCH_ANS = j.a; SRCH_IDS = j.ids; }
+      contentArrived();
+    }).catch(function () {});
+  }
+  /** FNV-1a, 32 bits, base 36 — keyHash() in tools/pack-search-cards.mjs. */
+  function srchAnswerKey(k) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return h.toString(36);
+  }
+  /** The model's answer to this very phrase, as products on sale — or null. */
+  var SRCH_BYID = { gen: -1, map: null };
+  function srchAnswer(query) {
+    if (!SRCH_ANS || !SRCH_IDS) return null;
+    var list = SRCH_ANS[srchAnswerKey(srchNorm(query).replace(/^ +| +$/g, ""))];
+    if (!list || !list.length) return null;
+    if (SRCH_BYID.gen !== SRCH_GEN) {
+      var m = {};
+      for (var c = 0; c < CATALOGUE.length; c++) m[CATALOGUE[c].id] = CATALOGUE[c];
+      SRCH_BYID = { gen: SRCH_GEN, map: m };
+    }
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var p = SRCH_BYID.map[SRCH_IDS[list[i]]];
+      if (p && out.indexOf(p) < 0) out.push(p);
+    }
+    return out.length ? out : null;
   }
   function srchNameBlob(p) { return srchIndex(p).name; }
   function srchBlob(p) { return srchIndex(p).all; }
@@ -13252,6 +13300,13 @@
       номер 1» still puts Special Shampoo 1 first. */
   function searchWide(query, have, aiTerms) {
     var groups = srchGroups(query), cons = srchConcerns(query), extra = srchExtra(aiTerms);
+    /* The query as a phrase, word for word in its order — «after shampoo»
+       is a conditioner, «shampoo» and «after» apart are half the shelf. A
+       product whose text carries the whole phrase outranks one that only
+       carries the words. */
+    var qw = srchWords(query), phrase = null;
+    // srchNorm() leaves letters, digits and single spaces, so «the rest of a word» is [^ ]*
+    if (qw.length > 1) phrase = new RegExp(" " + qw.map(srchStem).join("[^ ]* "));
     if (!groups.length && !cons.length && !extra.length) return [];
     var words = 0;
     for (var q = 0; q < groups.length; q++) if (!/^[0-9]+$/.test(groups[q][0])) words++;
@@ -13295,6 +13350,7 @@
         }
       }
       if (words && (hit === words || (hit >= need && named))) ok = true;
+      if (ok && phrase && phrase.test(all)) score += 8;
       for (var c = 0; c < cons.length; c++) {
         if (cons[c].c && cons[c].c.indexOf(p.cat) < 0) continue;
         var n = (all.match(cons[c].t) || []).length;
@@ -13335,13 +13391,31 @@
        and they are not on the page any more: the first query fetches them,
        and the results are drawn again as each one lands (contentArrived). */
     contentWantAll();
+    srchCardsWant();
     var ai = aiTermsFor(S.query);
     var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
     if (SRCH_LAST.key === key) return SRCH_LAST.res;
-    var res = searchNames(q), widen = res.length < SRCH_WIDEN || ai.length;
-    res = res.concat(searchTypeNames(q, res));
-    if (widen) res = res.concat(searchWide(S.query, res, ai));
+    var res = searchFor(q, S.query, ai);
     SRCH_LAST = { key: key, res: res };
+    return res;
+  }
+  /** The passes, in order. When the model has answered this phrase, its
+      answer IS the meaning pass: it leads — unless the phrase literally names
+      a full page of products («davines», «шампунь»), which keep their place
+      first and the answer follows. The word passes then add what neither
+      had; the widening is the fallback for a phrase nobody answered. */
+  function searchFor(q, query, ai) {
+    var res = searchNames(q), widen = res.length < SRCH_WIDEN || ai.length;
+    var said = srchAnswer(query);
+    if (said) {
+      var lit = res;
+      res = lit.length >= SRCH_WIDEN
+        ? lit.concat(said.filter(function (p) { return lit.indexOf(p) < 0; }))
+        : said.concat(lit.filter(function (p) { return said.indexOf(p) < 0; }));
+    }
+    res = res.concat(searchTypeNames(q, res));
+    // a short answer («beard itch»: one balm) still gets the widening under it
+    if (widen && (!said || said.length < SRCH_WIDEN)) res = res.concat(searchWide(query, res, ai));
     return res;
   }
 

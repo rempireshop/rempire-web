@@ -355,8 +355,10 @@ export function cleanAnswers(raw, nQueries, nProducts) {
 }
 
 /** What the answers were given against: the products and their cards. */
+/** Bump to ask every phrase again (a new prompt, a fix in what the model reads). */
+export const ANSWER_VERSION = 2;
 export const catalogueHash = (items) =>
-  createHash("sha256").update(JSON.stringify(items.map((x) => x.id).sort())).digest("hex").slice(0, 16);
+  createHash("sha256").update(JSON.stringify([ANSWER_VERSION, items.map((x) => x.id).sort()])).digest("hex").slice(0, 16);
 
 /** An answer stands while the same products are on sale, for a week at most:
     a changed description does not re-ask ~600 phrases on every deploy, and a
@@ -474,18 +476,21 @@ async function main() {
   const prevAns = prev.answers && typeof prev.answers === "object" ? prev.answers : {};
   const prevFor = prev.answersFor && typeof prev.answersFor === "object" ? prev.answersFor : {};
   const answers = { ...prevAns }, answersFor = { ...prevFor };
-  const phrases = new Map();
+  /* Keyed by the shop's spelling (diacritics folded), but the model reads
+     the phrase as it was typed: «parast sampooni» is a riddle, «pärast
+     šampooni» is Estonian for «after shampoo». */
+  const phrases = new Map(), textOf = new Map();
   const trusted = new Set();
-  for (const q of knownQueries()) {
-    if (!okQuery(q)) continue;
+  const take = (q, mine) => {
+    if (!okQuery(q)) return;
     const k = queryKey(q);
-    if (k && !phrases.has(k)) { phrases.set(k, keyHash(k)); trusted.add(k); }
-  }
-  for (const q of searches) {
-    if (!okQuery(q)) continue;
-    const k = queryKey(q);
-    if (k && !phrases.has(k)) phrases.set(k, keyHash(k));
-  }
+    if (!k || phrases.has(k)) return;
+    phrases.set(k, keyHash(k));
+    textOf.set(k, String(q).toLowerCase().replace(/\s+/g, " ").trim());
+    if (mine) trusted.add(k);
+  };
+  for (const q of knownQueries()) take(q, true);
+  for (const q of searches) take(q, false);
   const today = Math.floor(Date.now() / 86_400_000);
   const ask = [...phrases].filter(([, h]) => !prevAns[h] || !freshAnswer(prevFor[h], forHash, today));
   let answered = 0, answerFails = 0;
@@ -500,7 +505,7 @@ async function main() {
         const { b, retry } = batches.shift();
         let lists = null;
         try {
-          const { user } = answerPrompt([], b.map(([k]) => k));
+          const { user } = answerPrompt([], b.map(([k]) => textOf.get(k) || k));
           const j = await openai("chat/completions", {
             ...thinkParams(model),
             response_format: { type: "json_object" },

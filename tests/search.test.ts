@@ -15,6 +15,7 @@
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import vm from "node:vm";
 import { describe, expect, it } from "vitest";
 import { buildSearch } from "../tools/search-bench.mjs";
 
@@ -300,5 +301,69 @@ describe("the model's terms, when there are any", () => {
   it("change nothing when the model said nothing", () => {
     expect(ids(S.searchAll("davines", []))).toEqual(ids(S.searchAll("davines")));
     expect(ids(S.searchAll("перхоть", []))).toEqual(ids(S.searchAll("перхоть")));
+  });
+});
+
+/* ---------- with the search cards ---------------------------------------------
+
+   What the shop does once its first search has fetched /shop/search-terms.json
+   (tools/pack-search-cards.mjs, docs/plan-2026-11-01-search-cards.md): every
+   product's type words, and the model's answers to the phrases people type.
+   Measured on the snapshot in tests/fixtures (npm run cards:snapshot). */
+describe("with the search cards", () => {
+  const base = S as unknown as Record<string, unknown>;
+  const C = buildSearch(
+    vm.createContext({
+      CATALOGUE: base.CATALOGUE, CAT_NAMES: base.CAT_NAMES,
+      CONTENT: base.CONTENT, CONTENT_RU: base.CONTENT_RU, CONTENT_ET: base.CONTENT_ET,
+    }),
+    { cards: true },
+  ) as Ctx;
+  const INTENTS = JSON.parse(
+    readFileSync(fileURLToPath(new URL("../tools/search-intents.json", import.meta.url)), "utf8"),
+  ) as { intents: Array<{ q: string; top: number; min: number; match: string }> };
+  const passes = (it: { q: string; top: number; min: number; match: string }) => {
+    const re = new RegExp(it.match, "i");
+    return C.searchAll(it.q).slice(0, it.top).filter((p) => re.test(`${p.brand} — ${p.name}`)).length >= it.min;
+  };
+
+  it("still never returns fewer products than the search it replaced — 629 real phrases", () => {
+    const all = [...QUERIES.concerns, ...QUERIES.gsc];
+    expect(all.filter((q) => C.searchAll(q).length < S.legacySearch(q).length)).toEqual([]);
+  });
+
+  it("keeps a phrase that names a full page of products first, exactly as before", () => {
+    for (const q of ["davines", "шампунь", "kevin murphy", "парфюм"]) {
+      const before = S.legacySearch(q);
+      expect(ids(C.searchAll(q)).slice(0, before.length), q).toEqual(ids(before));
+    }
+  });
+
+  it("«shampoo» has every Kevin.Murphy wash — Renat, 01.11.2026", () => {
+    const km = C.searchAll("shampoo").filter((p) => /murphy/i.test(p.brand) && /шампунь/.test(p.name));
+    expect(km.length).toBeGreaterThanOrEqual(13);
+  });
+
+  it("answers what the shopper means — the intents today's words could not", () => {
+    for (const q of ["перхоть", "dandruff", "kõõm", "oily hair", "rasvased juuksed", "matte hold", "матовая фиксация",
+      "volume for fine hair", "näoseerum", "habemeõli", "curly hair", "lokkis juuksed", "после бритья", "aftershave"]) {
+      const it = INTENTS.intents.find((x) => x.q === q)!;
+      expect(passes(it), `${q}: ${names(C.searchAll(q).slice(0, it.top))}`).toBe(true);
+    }
+  });
+
+  it("does at least as well as the words alone on every intent, in total", () => {
+    const words = INTENTS.intents.filter((it) => {
+      const re = new RegExp(it.match, "i");
+      return S.searchAll(it.q).slice(0, it.top).filter((p) => re.test(`${p.brand} — ${p.name}`)).length >= it.min;
+    }).length;
+    expect(INTENTS.intents.filter(passes).length).toBeGreaterThan(words);
+  });
+
+  it("«after shampoo» leads with what goes on after it, not with shampoos", () => {
+    for (const q of ["after shampoo", "после шампуня"]) {
+      const top = C.searchAll(q).slice(0, 6);
+      expect(top.filter((p) => /шампунь/.test(p.name)), `${q}: ${names(top)}`).toEqual([]);
+    }
   });
 });

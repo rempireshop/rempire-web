@@ -10,8 +10,8 @@ shopper types. The phone searches local data, as fast as today.
 
 | Step | What | Where it runs | State |
 |---|---|---|---|
-| 1 | **Cards**: per product `type` + `about` terms in RU/ET/EN, written by the model; plus a 256-number meaning vector (`text-embedding-3-small`, int8). Known phrases (bench + `tools/search-intents.json`) get vectors too. | build (`tools/pack-search-cards.mjs`, prebuild) — production builds only; reuses the live file's cards by input hash; fails open | built 01.11 |
-| 2 | **Shop reads the cards**: `type` terms count like the name (replaces `SRCH_TYPE` per product), `about` terms like the description; meaning neighbours from the vectors join below the word matches, above a similarity floor, capped. Loaded on the first search, like the descriptions. | browser | next |
+| 1 | **Cards**: per product `type` + `about` terms in RU/ET/EN, written by the model; plus a 256-number meaning vector (`text-embedding-3-small`, int8). Known phrases (bench + `tools/search-intents.json`) get vectors too. | build (`tools/pack-search-cards.mjs`, prebuild) — production builds only; reuses the live file's cards by input hash; fails open | live 01.11 |
+| 2 | **Shop reads the cards**: `type` terms count like the name. `about` as plain words was tried and dropped (it pulled half the shelf into «beard itch»: 14/26 intents vs 20 without cards). Vectors alone scored 13/26 — «after shampoo» sits next to shampoos — so they are not used yet. Instead the build has the model **answer the known phrases** (thinking on), published as hash → product numbers; the shop looks the phrase up. 21/26 intents. | build + browser | live 01.11 |
 | 3 | **A vector for any phrase**: `GET /api/search/vec?q=` → OpenAI embeddings, CDN-cached per phrase; precomputed phrases need no call. | function: a few ms of work, the rest is waiting (not billed as active CPU) | after 2 |
 | 4 | **Live edits**: a product saved in the panel / Помощник / Claude gets a fresh card at once (table `search_cards`, delta endpoint, tag-purged) instead of at the next deploy. | function on save | after handover |
 

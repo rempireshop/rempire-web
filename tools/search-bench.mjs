@@ -91,13 +91,22 @@ export function sliceVar(name) {
 
 export const SEARCH_PARTS = {
   vars: ["SRCH_WIDEN", "SRCH_WIDE_MAX", "SRCH_SUFFIX_RU", "SRCH_SUFFIX_LAT", "SRCH_STOP",
-    "SRCH_BRIDGE", "SRCH_TYPE", "SRCH_CONCERNS", "SRCH_GEN"],
+    "SRCH_BRIDGE", "SRCH_TYPE", "SRCH_CONCERNS", "SRCH_GEN", "SRCH_CARDS", "SRCH_BYID"],
   fns: ["stem", "srchNorm", "srchStem", "srchWords", "srchGroups", "srchConcerns", "srchText",
-    "srchIndex", "srchNameBlob", "srchBlob", "srchExtra", "searchNames", "srchTypeOf", "srchTypeTests", "searchTypeNames", "searchWide"],
+    "srchIndex", "srchNameBlob", "srchBlob", "srchExtra", "searchNames", "srchTypeOf", "srchTypeTests", "searchTypeNames", "searchWide",
+    "srchAnswerKey", "srchAnswer", "searchFor"],
 };
 
-/** The whole search, lifted out of app.js and given the stubs it calls. */
-export function buildSearch(context = ctx) {
+/** The search cards as the shop downloads them (/shop/search-terms.json), from
+    the snapshot in tests/fixtures — `npm run cards:snapshot` refreshes it. */
+export function loadCards() {
+  return JSON.parse(readFileSync(join(ROOT, "tests/fixtures/search-terms.json"), "utf8"));
+}
+
+/** The whole search, lifted out of app.js and given the stubs it calls —
+    with the search cards in when `cards` is true, as the shop has them once
+    its first search has fetched them. */
+export function buildSearch(context = ctx, { cards = false } = {}) {
   const body = `
     ${SEARCH_PARTS.vars.map(sliceVar).join("\n")}
     ${SEARCH_PARTS.fns.map(slice).join("\n")}
@@ -105,10 +114,7 @@ export function buildSearch(context = ctx) {
     function searchAll(query, aiTerms) {
       var q = String(query || "").trim().toLowerCase();
       if (!q) return [];
-      var res = searchNames(q), widen = res.length < SRCH_WIDEN || (aiTerms && aiTerms.length);
-      res = res.concat(searchTypeNames(q, res));
-      if (!widen) return res;
-      return res.concat(searchWide(query, res, aiTerms));
+      return searchFor(q, query, aiTerms || []);
     }
     this.searchAll = searchAll;
     this.searchNames = searchNames;
@@ -119,6 +125,11 @@ export function buildSearch(context = ctx) {
     this.srchBlob = srchBlob;
   `;
   vm.runInContext(body, context);
+  const t = cards ? loadCards() : null;
+  context.SRCH_CARDS = t ? t.c : null;
+  context.SRCH_ANS = t ? t.a : null;
+  context.SRCH_IDS = t ? t.ids : null;
+  context.SRCH_IX = {};
   return context;
 }
 

@@ -24,7 +24,7 @@
     { "q": "habemeõli", "top": 5, "min": 5, "match": "масло для бороды" },
     { "q": "sheet mask", "top": 2, "min": 2, "match": "маск" },
     { "q": "heat protection", "top": 4, "min": 1, "match": "термозащит|HEATED" },
-    { "q": "volume for fine hair", "top": 6, "min": 4, "match": "объ|plump|thick|body|volume" },
+    { "q": "volume for fine hair", "top": 6, "min": 4, "match": "объ|plump|thick|body|volume|full|пудр|мусс|уплотня|gravity" },
     { "q": "oily hair", "top": 6, "min": 4, "match": "шампунь|кондиционер" },
     { "q": "rasvased juuksed", "top": 6, "min": 4, "match": "шампунь|кондиционер" }
   ]
