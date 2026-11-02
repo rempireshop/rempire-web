@@ -498,6 +498,7 @@ test.describe("sweep — blog", () => {
     await tab(page, "blog");
 
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     await expect(page.locator('[data-blogf="title"]')).toBeVisible();
 
     /* No title at all is not a post — and the panel has to say why rather

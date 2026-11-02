@@ -5,6 +5,8 @@
  *
  *   search_products · get_product · list_sections   — the shop as a shopper sees it
  *   list_posts · get_post                           — the blog, drafts included
+ *   list_materials · get_material                   — what an article is written FROM (02.11.2026):
+ *                                                     PDFs, photos, links, samples the owner uploaded
  *   save_draft                                      — a new draft, or a change to one
  *   save_product_google_text                        — a product's Google title and description
  *   save_product_description                        — the text on a product's page
@@ -47,7 +49,8 @@
  * shop does not sell loses its link and keeps its words.
  */
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
-import { isTopic } from "@/lib/blog-magazine.mjs";
+import { cleanSources, isTopic } from "@/lib/blog-magazine.mjs";
+import { getMaterial, listMaterials, materialImageIndex, materialPart } from "@/lib/blog-materials";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { query } from "@/lib/db";
 import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
@@ -295,6 +298,37 @@ export const TOOLS: ToolDef[] = [
         lang: { type: "string", enum: ["RU", "ET", "EN"] },
       },
       required: ["slug"],
+      additionalProperties: false,
+    },
+    annotations: READ,
+  },
+  {
+    name: "list_materials",
+    title: "Материалы для статей",
+    description:
+      "The blog's materials library — what the owner uploaded in Админка → Блог → «+ Статья» → Материалы to write articles FROM: " +
+      "brand PDFs (read on his phone: their text page by page and the pages he ticked as pictures), salon photos, web pages and " +
+      "sample texts («write like this»: tone and length, not facts). Newest first: id, kind (pdf | image | link | text), name, " +
+      "sample, a short piece of the text, and every picture with its address, size, PDF page and label (a PDF photo page is " +
+      "labelled with the heading of the text page before it, e.g. «HYDRATE-ME.WASH — фото»). Read one with get_material. " +
+      "Its pictures may be used in save_draft as the cover or in the text.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: READ,
+  },
+  {
+    name: "get_material",
+    title: "Материал целиком",
+    description:
+      "One material's text, in parts of about 12 000 characters (`part`, 1 by default; the answer says how many there are) — a " +
+      "PDF page by page, each starting «[стр. N · its heading]». Write the article from these facts in your own words: never copy " +
+      "paragraphs (it is brand copy, and duplicate text hurts the shop in Google); a short quote attributed to its author is fine.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "The material id from list_materials." },
+        part: { type: "integer", minimum: 1, description: "Which part of a long text, 1 by default." },
+      },
+      required: ["id"],
       additionalProperties: false,
     },
     annotations: READ,
@@ -586,9 +620,11 @@ export const TOOLS: ToolDef[] = [
       "`body` is HTML using only <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <br>, <a> (markdown is accepted too). " +
       "Link a product with the page address search_products gave for that language; put a product card on a line of its own as " +
       '<p><a data-product="ID"></a></p> right after the paragraph that recommends it. Links and cards for products the shop ' +
-      "does not sell are dropped. Pictures: only the shop's own product photos (get_product → photos) — as `cover` (a product id " +
-      'or one of its photo addresses), or in the text as <figure data-fig="full"><img src="PHOTO" alt="what it shows"></figure> ' +
-      '(data-fig: full, half-left, half-right or small). Any other picture is dropped; the owner adds his own photos in the editor.',
+      "does not sell are dropped. Pictures: the shop's own product photos (get_product → photos) and the pictures of the blog's " +
+      "materials (list_materials → images) — as `cover` (a product id, one of its photo addresses or a material picture address), " +
+      'or in the text as <figure data-fig="full"><img src="ADDRESS" alt="what it shows"><figcaption>a short caption</figcaption></figure> ' +
+      "(data-fig: full, half-left, half-right or small), under the heading the picture belongs to. Any other picture is dropped. " +
+      "Written from materials? Put their names in `sources` (shown under the article only if `show_sources` is true — names, never files).",
     inputSchema: {
       type: "object",
       properties: {
@@ -597,7 +633,15 @@ export const TOOLS: ToolDef[] = [
         et: { $ref: "#/$defs/lang" },
         en: { $ref: "#/$defs/lang" },
         tags: { type: "array", items: { type: "string" }, maxItems: 5, description: "3–5 short Russian tags." },
-        cover: { type: "string", description: "The cover picture: a product id (its first photo) or one of the photo addresses get_product gave." },
+        cover: {
+          type: "string",
+          description: "The cover picture: a product id (its first photo), one of the photo addresses get_product gave, or a material picture address from list_materials.",
+        },
+        sources: {
+          type: "array", items: { type: "string", maxLength: 140 }, maxItems: 12,
+          description: "What the article was written from — the materials' names («Буклет Kevin.Murphy, PDF», «tallinnavesi.ee»). Names only.",
+        },
+        show_sources: { type: "boolean", description: "Show «Написано по материалам» with those names under the article. Off unless the owner asks." },
         topic: {
           type: "string", enum: ["hair", "beard", "styling", "skin", "studio"],
           description: "Which chip on the blog's home the article sits under: hair, beard, styling, skin (face and body) or studio " +
@@ -630,7 +674,11 @@ export const INSTRUCTIONS =
   "blog articles with the shop's real products. Before you name a product, find it with search_products and use its exact " +
   "name and page address; never link a product that search does not return. Write in Russian unless the owner asks otherwise. " +
   "Cosmetic effects only — no medical or treatment claims. When the owner is happy with an article, save it with save_draft: " +
-  "it is saved as a draft and the owner publishes it in Админка → Блог. It also changes a product's words — its Google " +
+  "it is saved as a draft and the owner publishes it in Админка → Блог. To write FROM his materials (a brand's PDF, salon " +
+  "photos, a web page, a sample text), he uploads them in the panel — Админка → Блог → «+ Статья» → Материалы — and then asks " +
+  "you: read them with list_materials and get_material, write in your own words from their facts only (never copy their " +
+  "paragraphs), put the materials' pictures under the headings they belong to, and name the materials in save_draft's " +
+  "`sources`. It also changes a product's words — its Google " +
   "texts (save_product_google_text), the description on its page (save_product_description), its name, brand and section " +
   "(save_product_name), its prices (save_product_price) and its count on the shelf (save_product_stock), and creates a new " +
   "product hidden (create_product: the owner adds photos and shows it in the admin), and the words of a section or brand " +
@@ -762,6 +810,39 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       topic: post.topic,
       sources: post.sources,
       show_sources: post.showSources,
+    });
+  }
+
+  /* The materials library (src/lib/blog-materials.ts) — the same one the
+     panel's «Новая статья» and the Помощник read. */
+  if (name === "list_materials") {
+    const all = await listMaterials(100);
+    if (!all.length) {
+      return ok({ found: 0, materials: [], hint: "Nothing uploaded yet — the owner adds PDFs, photos, links and sample texts in Админка → Блог → «+ Статья» → Материалы." });
+    }
+    return ok({
+      found: all.length,
+      materials: all.map((m) => ({
+        id: m.id, kind: m.kind, name: m.name, sample: m.sample,
+        ...(m.pageCount ? { pages: m.pageCount } : {}),
+        ...(m.url ? { url: m.url } : {}),
+        chars: m.text.length,
+        short: m.text.slice(0, 300),
+        pictures: m.images.map((i) => ({ address: i.url, width: i.w, height: i.h, ...(i.page ? { page: i.page } : {}), label: i.label })),
+        added: m.createdAt,
+      })),
+    });
+  }
+  if (name === "get_material") {
+    const m = typeof args.id === "string" ? await getMaterial(args.id.trim()) : null;
+    if (!m) return no("No such material — see list_materials.");
+    const piece = materialPart(m, Number(args.part) || 1);
+    return ok({
+      id: m.id, kind: m.kind, name: m.name, sample: m.sample,
+      part: piece.part, parts: piece.parts,
+      ...(piece.part < piece.parts ? { next: `get_material with part ${piece.part + 1}` } : {}),
+      text: piece.text,
+      pictures: m.images.map((i) => ({ address: i.url, ...(i.page ? { page: i.page } : {}), label: i.label })),
     });
   }
 
@@ -1434,20 +1515,30 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
 
   const { base, list } = await productsNow();
   const byId = new Map(list.map((p) => [p.id, p]));
-  const photos = shopPhotos(list);
-  /* The cover: a product's first photo by its id, or one of the shop's own
-     photo addresses; anything else is refused rather than quietly dropped, so
-     Claude can tell the owner the picture did not go in. */
+  /* The pictures an article may carry: the shop's own product photos, and —
+     since the materials library (02.11.2026) — every picture the owner
+     uploaded there (list_materials → pictures). Nothing else. */
+  const matImages = await materialImageIndex();
+  const photos = new Set([...shopPhotos(list), ...matImages.keys()]);
+  /* The cover: a product's first photo by its id, or one of those addresses;
+     anything else is refused rather than quietly dropped, so Claude can tell
+     the owner the picture did not go in. A material picture brings its size
+     with it, so the shop draws it in its own shape at once. */
   let coverUrl: string | null = was?.coverUrl ?? null;
   let coverNew = false;
+  let coverDims: { w: number; h: number } | null = null;
   const coverAsk = typeof args.cover === "string" ? args.cover.trim() : "";
   if (coverAsk) {
     const byProduct = byId.get(coverAsk.toLowerCase())?.photo ?? null;
     const url = byProduct ?? (photos.has(coverAsk) ? coverAsk : null);
-    if (!url) return no(`The cover must be a product id or one of the photo addresses get_product gave — «${coverAsk.slice(0, 120)}» is neither. Nothing was saved.`);
+    if (!url) return no(`The cover must be a product id, one of the photo addresses get_product gave or a material picture from list_materials — «${coverAsk.slice(0, 120)}» is none of them. Nothing was saved.`);
     coverNew = url !== coverUrl;
     coverUrl = url;
+    const mi = matImages.get(url);
+    if (mi) coverDims = { w: mi.w, h: mi.h };
   }
+  const sourcesAsk = Array.isArray(args.sources) ? cleanSources(args.sources) : undefined;
+  const showAsk = typeof args.show_sources === "boolean" ? args.show_sources : undefined;
   const title = { RU: "", ET: "", EN: "" }, excerpt = { RU: "", ET: "", EN: "" }, body = { RU: "", ET: "", EN: "" };
   const named: string[] = [];
   for (const l of LANGS3) {
@@ -1493,6 +1584,9 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
       author: was?.author ?? "Rempire",
       // absent keeps what the draft has (upsertPost): a chosen topic, or none
       ...(topicAsk ? { topic: topicAsk } : {}),
+      ...(coverDims ? { coverW: coverDims.w, coverH: coverDims.h } : {}),
+      ...(sourcesAsk !== undefined ? { sources: sourcesAsk } : {}),
+      ...(showAsk !== undefined ? { showSources: showAsk } : {}),
     }, { onlyDraft: true }); // held in the write too: published in the admin meanwhile is still refused
   } catch (e) {
     if (e instanceof BlogError && (e.code === "not_draft" || e.code === "not_found")) {
@@ -1510,6 +1604,7 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
     languages: LANGS3.filter((l) => body[l]),
     cover: coverUrl ? "set" : "none — the owner adds one in the editor",
     topic: saved.topic + (saved.topicChosen ? "" : " (picked by the shop from the text — send topic to choose)"),
+    sources: saved.sources.length ? `${saved.sources.join(" · ")} — ${saved.showSources ? "shown" : "not shown"} under the article` : "none",
     products: products.map((id) => byId.get(id) ? `${byId.get(id)!.brand} ${byId.get(id)!.names.RU}` : id),
     ...(dropped.length ? { not_saved: dropped } : {}),
     admin: base + "/admin",

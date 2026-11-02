@@ -204,7 +204,7 @@ describe("the connector, end to end", () => {
     expect(note.status).toBe(202);
     const list = await call(t.access_token, "tools/list");
     expect(list.body.result.tools.map((x: { name: string }) => x.name)).toEqual(
-      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "save_product_google_text",
+      ["search_products", "get_product", "list_sections", "list_posts", "get_post", "list_materials", "get_material", "save_product_google_text",
         "save_product_description", "save_product_name", "save_product_price", "save_product_stock", "create_product",
         "get_page_texts", "save_page_text", "get_brand_strip", "save_brand_strip", "save_draft"],
     );

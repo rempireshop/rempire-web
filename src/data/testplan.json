@@ -8946,6 +8946,143 @@
       }
     },
     {
+      "id": "blog-materials-pdf",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Новая статья: PDF бренда в материалы",
+      "steps": [
+        "«Блог» → «+ Статья».",
+        "В «О чём статья» написать тему, например «Angel для тонких волос».",
+        "Нажать «PDF / файл» и выбрать каталог бренда.",
+        "Дождаться сетки страниц с фото и посмотреть подписи.",
+        "Снять или поставить галочки и нажать «Готово»."
+      ],
+      "expect": [
+        "Строка «Читаю PDF: страница … из …» идёт, телефон не зависает.",
+        "Под фото подпись — заголовок страницы перед ним, «… — фото».",
+        "Фото по теме уже отмечены.",
+        "После «Готово» в списке PDF с числом страниц и картинок.",
+        "Отмеченные картинки видны маленькими под строкой PDF."
+      ],
+      "why": "Статьи пишутся из материалов бренда; PDF читается на телефоне, сервер его не получает.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "New article: a brand PDF into the materials",
+        "steps": [
+          "«Блог» → «+ Статья».",
+          "In «О чём статья» type a topic, e.g. «Angel для тонких волос».",
+          "Press «PDF / файл» and pick the brand's catalogue.",
+          "Wait for the grid of photo pages and read the captions.",
+          "Tick or untick and press «Готово»."
+        ],
+        "expect": [
+          "The line «Читаю PDF: страница … из …» moves; the phone does not freeze.",
+          "Under each photo: the heading of the page before it, «… — фото».",
+          "Photos on the topic are ticked already.",
+          "After «Готово» the list shows the PDF with its pages and pictures.",
+          "The ticked pictures show small under the PDF's row."
+        ],
+        "why": "Articles are written from the brand's materials; the PDF is read on the phone, the server never gets it."
+      }
+    },
+    {
+      "id": "blog-materials-link-sample",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Материалы: фото, ссылка и образец",
+      "steps": [
+        "«Блог» → «+ Статья».",
+        "Нажать «Фото» и выбрать два фото салона.",
+        "Нажать «Ссылка», вставить адрес открытой страницы и «Добавить».",
+        "Нажать «Ссылка» и вставить https://localhost/admin.",
+        "Нажать «Текст / образец», вставить статью, отметить «Это образец», «Добавить»."
+      ],
+      "expect": [
+        "Фото загружаются и видны маленькими в строке.",
+        "У ссылки написано «страница прочитана».",
+        "Адрес localhost отказан: только открытые страницы в интернете.",
+        "У образца написано «образец — писать так же: тон и длина»."
+      ],
+      "why": "Сервер читает только открытые страницы — никогда свои внутренние адреса.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "Materials: photos, a link and a sample",
+        "steps": [
+          "«Блог» → «+ Статья».",
+          "Press «Фото» and pick two salon photos.",
+          "Press «Ссылка», paste the address of a public page, «Добавить».",
+          "Press «Ссылка» and paste https://localhost/admin.",
+          "Press «Текст / образец», paste an article, tick «Это образец», «Добавить»."
+        ],
+        "expect": [
+          "The photos upload and show small in their row.",
+          "The link says «страница прочитана».",
+          "The localhost address is refused: public pages only.",
+          "The sample says «образец — писать так же: тон и длина»."
+        ],
+        "why": "The server reads public pages only — never its own internal addresses."
+      }
+    },
+    {
+      "id": "blog-draft-from-materials",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Черновик из материалов и публикация",
+      "steps": [
+        "После «blog-materials-pdf» нажать «Написать черновик» и подождать около минуты.",
+        "На шаге «Черновик» выбрать каждую из трёх обложек по очереди.",
+        "Переключить RU, ET, EN.",
+        "У одной картинки нажать «Убрать», у одного товара — ×.",
+        "Нажать «Открыть весь текст в редакторе» и найти жёлтые фразы.",
+        "Вернуться, нажать «Как в магазине», затем «Опубликовать»."
+      ],
+      "expect": [
+        "Черновик открылся сам; ET и EN получают ✓ без нажатий.",
+        "Фото из PDF стоят под заголовком своего товара.",
+        "Над кнопками сказано, сколько фраз не нашлось в материалах.",
+        "В редакторе эти фразы жёлтые.",
+        "В опубликованной статье жёлтого нет, фразы остались.",
+        "Текст пересказан своими словами, не скопирован из PDF."
+      ],
+      "why": "ИИ пишет только из фактов материалов, но всё, что он не смог подтвердить, видно владельцу до публикации.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "A draft from the materials, then publish",
+        "steps": [
+          "After «blog-materials-pdf» press «Написать черновик» and wait about a minute.",
+          "On the «Черновик» step pick each of the three covers in turn.",
+          "Switch RU, ET, EN.",
+          "Press «Убрать» on one picture and × on one product.",
+          "Press «Открыть весь текст в редакторе» and find the yellow sentences.",
+          "Go back, press «Как в магазине», then «Опубликовать»."
+        ],
+        "expect": [
+          "The draft opened by itself; ET and EN get their ✓ with no tap.",
+          "The PDF photos stand under their own product's heading.",
+          "Above the buttons it says how many sentences the materials did not support.",
+          "In the editor those sentences are yellow.",
+          "In the published article nothing is yellow and the sentences remain.",
+          "The text is retold in its own words, not copied from the PDF."
+        ],
+        "why": "The AI writes only from the materials' facts, and whatever it could not support is shown to the owner before publishing."
+      }
+    },
+    {
       "id": "goods-hide-burst",
       "area": "goods",
       "who": "renat",
@@ -9936,6 +10073,49 @@
           "Nothing was published by itself."
         ],
         "why": "The assistant does what Claude does: both set an article's topic, and without one the shop picks it."
+      }
+    },
+    {
+      "id": "ai-blog-materials",
+      "area": "ai",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Claude и Помощник пишут из материалов",
+      "steps": [
+        "Загрузить PDF в «Материалы» (blog-materials-pdf).",
+        "Попросить Claude (коннектор Rempire): «напиши статью из моего PDF с фото».",
+        "Открыть его черновик в «Блоге».",
+        "Попросить Помощника в панели: «напиши статью из этого PDF».",
+        "Подтвердить карточку."
+      ],
+      "expect": [
+        "Claude видит PDF и его картинки, черновик сохранён с фото из PDF.",
+        "Обложка черновика Claude — фото из PDF, своей формы.",
+        "Помощник открывает «Новая статья» и пишет черновик сам.",
+        "Ничего не опубликовано само."
+      ],
+      "why": "Одна библиотека материалов для панели, Помощника и Claude — Помощник умеет то же, что Claude.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "Claude and the assistant write from the materials",
+        "steps": [
+          "Upload a PDF into «Материалы» (blog-materials-pdf).",
+          "Ask Claude (the Rempire connector): «напиши статью из моего PDF с фото».",
+          "Open its draft in «Блог».",
+          "Ask the panel assistant: «напиши статью из этого PDF».",
+          "Confirm the card."
+        ],
+        "expect": [
+          "Claude sees the PDF and its pictures; the draft is saved with PDF photos.",
+          "The cover of Claude's draft is a PDF photo, in its own shape.",
+          "The assistant opens «Новая статья» and writes the draft itself.",
+          "Nothing was published by itself."
+        ],
+        "why": "One materials library for the panel, the assistant and Claude — the assistant does what Claude does."
       }
     },
     {

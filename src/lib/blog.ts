@@ -675,11 +675,54 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
   return toPost(rows[0]);
 }
 
-/** status → 'published'. Keeps the original publishedAt when republishing. */
+/**
+ * One language of a DRAFT, written on its own — the Estonian or English
+ * translation of a draft written from the materials (src/app/api/admin/blog/
+ * draft/route.ts). The two translations run side by side, and a whole-row
+ * save from either would put back the other's language as it was when it
+ * started; jsonb_set touches this language's keys and nothing else.
+ */
+export async function writePostLanguage(
+  id: string,
+  lang: "ET" | "EN",
+  t: { title: string; excerpt: string; body: string; seoTitle: string; seoDesc: string; tags: string[] },
+): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
+  const one = (v: string, max: number) => cleanLine(String(v || "")).slice(0, max);
+  const body = cleanBody(String(t.body || ""));
+  if (body.length > BODY_MAX) throw new BlogError("body_too_long");
+  const tags = cleanList(t.tags, 12, 30).filter((x) => !CYRILLIC.test(x));
+  const path = `{${lang}}`;
+  const rows = await query<PostRow>(
+    `update posts set
+       title = jsonb_set(coalesce(title, '{}'::jsonb), $2::text[], to_jsonb($3::text)),
+       excerpt = jsonb_set(coalesce(excerpt, '{}'::jsonb), $2::text[], to_jsonb($4::text)),
+       body = jsonb_set(coalesce(body, '{}'::jsonb), $2::text[], to_jsonb($5::text)),
+       seo_title = jsonb_set(coalesce(seo_title, '{}'::jsonb), $2::text[], to_jsonb($6::text)),
+       seo_desc = jsonb_set(coalesce(seo_desc, '{}'::jsonb), $2::text[], to_jsonb($7::text)),
+       tags_i18n = jsonb_set(coalesce(tags_i18n, '{}'::jsonb), $2::text[], $8::jsonb),
+       updated_at = now()
+     where id = $1 and deleted_at is null and status = 'draft'
+     returning ${FULL_COLS}`,
+    [id, path, one(t.title, 200), one(t.excerpt, 500), body, one(t.seoTitle, 70), one(t.seoDesc, 170), jsonbParam(tags)],
+  );
+  return rows.length ? toPost(rows[0]) : null;
+}
+
+/** status → 'published'. Keeps the original publishedAt when republishing.
+
+    …and takes the yellow marks out of the text: a draft written from the
+    materials (src/lib/blog-draft.ts) wraps every sentence the materials did
+    not support in <mark data-unsure>, the editor shows it yellow, and what the
+    owner left in is his to publish — unmarked. The words stay; the tags go,
+    in every language, in the same write. (A reader never saw them anyway: the
+    shop's allowlist has no <mark>.) */
 export async function publishPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
+  const strip = (l: string) => `regexp_replace(coalesce(body->>'${l}', ''), '<mark[^>]*>|</mark[^>]*>', '', 'gi')`;
   const rows = await query<PostRow>(
-    `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now()
+    `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now(),
+       body = case when body::text ilike '%<mark%' then jsonb_build_object('RU', ${strip("RU")}, 'ET', ${strip("ET")}, 'EN', ${strip("EN")}) else body end
      where id = $1 and deleted_at is null returning ${FULL_COLS}`,
     [id],
   );

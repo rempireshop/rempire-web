@@ -3,6 +3,7 @@ import catalogue from "@/data/catalogue.min.json";
 import { requireAdmin } from "@/lib/auth";
 import { briefContent, mergeContent } from "@/lib/content";
 import { listAllPosts, listPublished } from "@/lib/blog";
+import { listMaterials } from "@/lib/blog-materials";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
 import { chatParams, openaiModel } from "@/lib/openai-chat";
 import { catalogueLines, relevantProducts, rowLine, type CatRow } from "@/lib/catalogue-slice";
@@ -161,6 +162,8 @@ function limited(ip: string): boolean {
    as customersSummaryForPrompt(): most admin calls never pay for it, and a
    database hiccup here must never be the reason the assistant stops. */
 const BLOG_TRIGGER = /стать|блог|пост|обложк|опублик|artikl|blog|post|cover|publish/i;
+/* …and the materials an article is written from (draft_from_materials) */
+const MATERIAL_TRIGGER = /pdf|пдф|буклет|материал|каталог|брошюр|material|booklet|catalog/i;
 
 /* «Наборы» (Dim, 07.09.2026: the assistant helps build sets). The sets the
    shop has right now — id, Russian title, price, and the products inside —
@@ -177,6 +180,20 @@ async function bundleLinesForPrompt(): Promise<string> {
       const parts = b.items.map((i) => `${i.productId}${i.variant ? ":" + i.variant : ""}${i.qty > 1 ? "×" + i.qty : ""}`).join(" + ");
       return `${b.id}|${title}|${b.price} €|${b.active ? "shown" : "hidden"}|${parts}`;
     }).join("\n");
+  } catch {
+    return "";
+  }
+}
+/* The blog's materials library (src/lib/blog-materials.ts) — what the owner
+   uploaded to write articles FROM. The Помощник does what Claude does
+   (list_materials in src/lib/mcp/tools.ts): with these listed it can start a
+   draft from them (draft_from_materials), which the panel writes with the
+   very writer «Новая статья» uses. Fetched only when the message is about the
+   blog; "" on any database trouble. */
+async function adminMaterialLinesForPrompt(): Promise<string> {
+  try {
+    const all = await listMaterials(15);
+    return all.map((m) => `${m.id}|${m.kind}${m.sample ? " sample" : ""}|${m.name}|${m.pageCount ? m.pageCount + " pages|" : ""}${m.images.length} pictures`).join("\n");
   } catch {
     return "";
   }
@@ -491,6 +508,7 @@ function adminPrompt(
   weekSummary = "",
   openPost: OpenPostBrief | null = null,
   named = "",
+  materialLines = "",
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -500,6 +518,9 @@ ${customersSummary}
 ` : ""}${blogLines ? `
 BLOG POSTS as they are right now (slug|draft-or-published|Russian title) — the slugs publish_post and set_post_cover take; never invent a slug not listed here:
 ${blogLines}
+` : ""}${materialLines ? `
+BLOG MATERIALS — what the owner uploaded in «Блог» → «+ Статья» → «Материалы» to write articles FROM (id|kind|name|…), newest first; the ids draft_from_materials takes, never invent one:
+${materialLines}
 ` : ""}${openPost ? `
 THE ARTICLE THE OWNER IS LOOKING AT RIGHT NOW — it is open in the blog editor on his screen while he types to you:
 ${openPost.slug}|${openPost.status}|${openPost.title || openPost.slug}
@@ -560,7 +581,8 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
   {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU","blog_topic":"<optional: hair | beard | styling | skin | studio — the chip on the blog's home it belongs under; leave it out when unsure, the shop picks one from the text>"} — have a NEW blog article written, one that does not exist yet: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Only ever for a new article — never to change, shorten, extend, retitle or illustrate one that is already there, and never twice in one conversation about the same article: a second draft_post is a second article in the owner's list, which is the thing he has to clean up by hand. Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. The topic is the owner's OWN subject: his words, translated faithfully into Russian, his key words kept — asked for «cool vibes», the topic is «Cool vibes: …», never swapped for another or a more generic subject such as «уход за волосами и укладка». Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
-  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${openPost ? `
+  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${materialLines ? `
+  {"type":"draft_from_materials","about":"<the article's topic, in Russian, one line — the owner's own subject>","materials":["<material id from BLOG MATERIALS>"],"show_sources":false} — have a NEW article written FROM the owner's uploaded materials («напиши статью из этого PDF», «сделай статью по буклету Kevin.Murphy»): name the materials he means (by their names in BLOG MATERIALS; the newest when he says «этот»). Once he confirms, the panel's «Новая статья» writes a Russian draft from them — facts only from the materials, in its own words, their pictures under the right headings, the shop's products — translates it to Estonian and English, and shows him the draft to check. show_sources true only when he asks to show what it was written from. Never publishes. Say exactly that in the reply.` : ""}${openPost ? `
   {"type":"edit_post","what":"<one short Russian line: what will change>"} — change the TEXT of the article he has open («${openPost.slug}»): «сделай товары ссылками на магазин», «добавь ссылки на товары», «исправь второй абзац», «перепиши вступление короче», «поменяй заголовок на …», «добавь абзац про …». His own words go to the article editor, which changes exactly that in every language the article is written in and saves it; «Вернуть» on the message below puts the old text back. A product becomes a link only to the shop's own product page. One edit_post per request; in the reply say in one sentence what will change and that he can read it in the editor. Never for a new article (that is draft_post) and never for a photo or a cover (add_post_photo, set_post_cover).` : `
   (Changing the TEXT of an article that exists — links to products, a paragraph, the title — is an action that works only on the article the owner has OPEN in the blog editor, and none is open now. When he asks for such a change, ask him to open that article in «Блог» and ask again, and send no action.)`}${attachments.length ? `
   {"type":"add_product_photo","id":"<catalogue id>","key":"<a key from PHOTOS above>","main":true|false} — put one of the attached PHOTOS onto a product's page («вот фото для Bio Botanical Shampoo, сделай главным» → main:true; «добавь это фото к маслу Proraso» → main:false). One photo per action; several photos are several replies.
@@ -815,6 +837,10 @@ export async function POST(req: NextRequest) {
      TEXT_TRIGGER's and was answered «нет объёма 500 мл» from the catalogue line
      (live test, 26.10.2026). Nothing named, nothing read. */
   const named = isAdmin && !isMini ? await namedForPrompt(lastUser, allRows, openProduct) : "";
+  // the materials library, when the message is about the blog or its materials (draft_from_materials)
+  const materialLines = isAdmin && !isMini && (BLOG_TRIGGER.test(lastUser) || MATERIAL_TRIGGER.test(lastUser))
+    ? await adminMaterialLinesForPrompt()
+    : "";
 
   /* The panel's own language, and then the language the owner actually wrote
      in — see ./reply-lang.ts for why the question wins and what happens when
@@ -827,7 +853,7 @@ export async function POST(req: NextRequest) {
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary, openPost, named)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary, weekSummary, openPost, named, materialLines)
         : shopPrompt(lang, lastUser, blogLines, custom.rows, liveRows);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -922,6 +948,8 @@ export async function POST(req: NextRequest) {
     attachedKeys: new Set(attachments.map((a) => a.key)),
     openPostSlug: openPost?.slug ?? "",
     postSlugs,
+    // the material ids the BLOG MATERIALS block listed — the only ones draft_from_materials may name
+    materialIds: new Set(materialLines.split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean)),
     // the words a text in Estonian or English may keep, and the brand pages there are
     products: new Map(allRows.map((r) => [r.id, { name: r.n, brand: r.b, cat: r.c }])),
     brands: new Set(allRows.map((r) => r.b)),

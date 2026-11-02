@@ -800,6 +800,7 @@ test.describe("admin — a warehouse row saves itself, and the blog card says wh
     await loginAsAdmin(page);
     await adminSection(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const state = page.locator("[data-blogpubstate]");
     await expect(state).toHaveText("○ Новая статья — сохранится, как только будет заголовок");
     await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации");

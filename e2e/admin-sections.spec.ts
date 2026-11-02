@@ -344,6 +344,7 @@ test.describe("admin sections — Блог", () => {
     await adminSection(page, "blog");
 
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const title = `E2E раздел ${Date.now().toString().slice(-6)}`;
     // the Oswald title input with only a bottom rule — same [data-blogf] hook
     await page.locator('[data-blogf="title"]').fill(title);

@@ -15226,6 +15226,16 @@
     if (node.nodeType !== 1) return "";                       // comments, CDATA, …
     var raw = node.tagName;
     if (BLOG_TAGS_DROP[raw]) return "";                       // tag and contents both
+    /* A sentence the materials did not support — <mark data-unsure>, written
+       by the draft from materials (src/lib/blog-draft.ts). The editor keeps
+       it (yellow, admin.css) so the owner can check it; the shop (`cards`)
+       unwraps it to its words, as the server's allowlist does; «Опубликовать»
+       takes it out of the row (publishPost). Any other <mark> is unwrapped. */
+    if (raw === "MARK") {
+      var marked = blogCleanNodes(node, depth + 1, cards);
+      return !cards && node.hasAttribute("data-unsure") && marked.replace(/<br>/g, "").trim()
+        ? "<mark data-unsure>" + marked + "</mark>" : marked;
+    }
     var name = BLOG_ALIAS[raw] || raw;
     if (!BLOG_TAGS[name] || depth >= BLOG_MAX_DEPTH) return blogCleanNodes(node, depth, cards);
     var tag = name.toLowerCase();
@@ -28424,12 +28434,14 @@
   var BLOG_DEL_WARN = "Статья исчезнет из блога на всех трёх языках.";
   var BLOG_SLUG_WARN = "Старые ссылки на статью перестанут открываться.";
   function admBlogScreen() {
-    var d = S.adminBlogEdit, open = !!d || !!S.adminBlogEditBusy;
+    var d = S.adminBlogEdit, open = !!d || !!S.adminBlogEditBusy || !!S.adminBlogNew;
     return '<div class="adm-screen adm-screen--tight adm-blog2' + (open ? " adm-blog2--ed" : "") + '">' +
       admBlogHeadHTML(d) +
       '<div class="adm-blog2__cols">' +
         '<div class="adm-blog2__list" data-bloglist>' + admBlogListHTML() + "</div>" +
-        '<div class="adm-blog2__ed">' + (d
+        '<div class="adm-blog2__ed">' + (S.adminBlogNew && !d
+          ? admBlogNewHTML()   // «Новая статья» from materials (step 1, step 2)
+          : d
           ? admBlogEditorScreen(d)
           : S.adminBlogEditBusy
             ? '<div class="adm-skel"><i></i><i></i><i></i></div>'
@@ -28680,6 +28692,676 @@
           ? '<p class="adm-hint">Пока нет ни одной строки — в статье ничего не покажется.</p>' : "") +
       "</div>" +
     "</div>";
+  }
+  /* ---------- «Новая статья» from materials (Dim, 02.11.2026) ----------------
+     canvas-banner/project/BlogNew (step 1, «Материалы») and BlogDraft (step 2,
+     «Черновик»). «+ Статья» opens step 1; «Писать самому» at its foot is the
+     blank editor it always opened.
+
+     Step 1: «О чём статья», and the materials — a PDF, photos, a link, a text
+     or a sample («писать так же»). A PDF is read HERE, on the owner's phone,
+     by pdf.js (self-hosted, public/vendor/pdfjs-6.2.108, fetched only when a
+     PDF is added — never on a shop page): its text page by page, each page's
+     heading, and a small picture of every photo page. A brand's catalogue is
+     built text page → photo page (170 A4 pages, 101 full-page photos), so each
+     photo page is labelled with the heading of the text page before it
+     («HYDRATE-ME.WASH — фото»), the ones whose text names the topic are ticked
+     already, and the owner ticks or unticks the rest. Only the ticked pages
+     are rendered at full size and uploaded, as ordinary blog photos; the PDF
+     itself never leaves the phone. The server keeps the text and the pictures
+     (src/lib/blog-materials.ts) — the same library Claude reads.
+
+     «Написать черновик» → /api/admin/blog/draft/: the Russian draft (two
+     minutes at most), then ET and EN side by side. Step 2 is the draft: the
+     cover (a material photo, a collage of the article's products on beige, or
+     the title tile), the three texts, the pictures placed with «Убрать», the
+     products with ×, how many sentences the materials did not support (yellow
+     in the editor), «Как в магазине», «Опубликовать», and the whole text in
+     the editor. Nothing publishes by itself. */
+  var PDFJS_BASE = "/vendor/pdfjs-6.2.108/";
+  var PDFJS = null;
+  function pdfjsLoad() {
+    if (!PDFJS) {
+      PDFJS = import(PDFJS_BASE + "pdf.min.mjs").then(function (m) {
+        m.GlobalWorkerOptions.workerSrc = PDFJS_BASE + "pdf.worker.min.mjs";
+        return m;
+      });
+      PDFJS.catch(function () { PDFJS = null; });
+    }
+    return PDFJS;
+  }
+  /** A photo page goes up this wide; a 4:5 crop of it still fills the reading column. */
+  var BNEW_PIC_W = 1000;
+  var BNEW_THUMB_W = 150;
+  var BNEW_PRETICK_MAX = 8;
+  function bnewState() {
+    if (!S.adminBlogNew) {
+      S.adminBlogNew = { step: 1, about: "", showSources: false, items: [], sheet: "", link: "", text: "", sample: false,
+        busy: false, err: "", lib: null, libOpen: false, post: null, placed: [], unsure: 0, trimmed: null,
+        tr: {}, lang: "RU", cover: "", preview: false };
+    }
+    return S.adminBlogNew;
+  }
+  function bnewOpen() {
+    // «+ Статья» pressed again on step 1 keeps what was added; from step 2 it is a new article
+    if (!(S.adminBlogNew && S.adminBlogNew.step === 1)) S.adminBlogNew = null;
+    S.adminBlogEdit = null; bnewState(); S.adminBlogMenu = false;
+    window.scrollTo({ top: 0 }); render(); refocus("[data-bnewabout]");
+  }
+  /** The topic's word stems — topicStems() in src/lib/blog-materials.ts, the twin. */
+  var BNEW_STOP = { "для": 1, "как": 1, "что": 1, "это": 1, "или": 1, "при": 1, "под": 1, "над": 1, "без": 1, "все": 1, "всё": 1,
+    "его": 1, "она": 1, "они": 1, "про": 1, "котор": 1, "этого": 1, "чтобы": 1, "какой": 1, "какую": 1, "какие": 1, "более": 1,
+    "the": 1, "and": 1, "for": 1, "how": 1, "about": 1, "which": 1, "their": 1, "with": 1, "from": 1, "that": 1, "this": 1,
+    "what": 1, "your": 1, "kuidas": 1, "ning": 1 };
+  function bnewStems(about) {
+    var words = String(about || "").toLowerCase().match(/[a-zа-яёõäöüšž0-9][a-zа-яёõäöüšž0-9.-]*/g) || [];
+    var out = [];
+    words.forEach(function (w) {
+      var c = w.replace(/[.-]+$/, "");
+      if (c.length < 3) return;
+      var s = c.length > 5 ? c.slice(0, 5) : c;
+      if (!BNEW_STOP[s] && out.indexOf(s) < 0) out.push(s);
+    });
+    return out.slice(0, 20);
+  }
+  /** One page of a PDF: its lines top to bottom, its heading, and whether it is a photo page. */
+  function bnewPageInfo(tc, ops, OPS, n) {
+    var rows = {};
+    (tc.items || []).forEach(function (it) {
+      if (!it || typeof it.str !== "string" || !it.str.trim()) return;
+      var y = Math.round(((it.transform && it.transform[5]) || 0) / 3) * 3;
+      (rows[y] = rows[y] || []).push(it);
+    });
+    var lines = Object.keys(rows).map(Number).sort(function (a, b) { return b - a; }).map(function (y) {
+      return rows[y].sort(function (a, b) { return a.transform[4] - b.transform[4]; })
+        .map(function (it) { return it.str; }).join(" ").replace(/\s+/g, " ").trim();
+    }).filter(Boolean);
+    var text = lines.join("\n");
+    var heading = "";
+    for (var i = 0; i < Math.min(lines.length, 6) && !heading; i++) {
+      var letters = lines[i].replace(/[^A-Za-zА-Яа-яЁё]/g, "");
+      if (letters.length >= 3 && lines[i].length <= 120 && letters === letters.toUpperCase()) heading = lines[i];
+    }
+    if (!heading) for (var k = 0; k < lines.length && !heading; k++) if (/[A-Za-zА-Яа-яЁё]{3}/.test(lines[k]) && lines[k].length <= 120) heading = lines[k];
+    var pics = 0, fns = (ops && ops.fnArray) || [];
+    for (var f = 0; f < fns.length; f++) {
+      if (fns[f] === OPS.paintImageXObject || fns[f] === OPS.paintInlineImageXObject || fns[f] === OPS.paintImageXObjectRepeat) pics++;
+    }
+    return { n: n, heading: heading.slice(0, 200), text: text.slice(0, 20000), photo: pics > 0 && text.replace(/\s/g, "").length < 120, thumb: "", tick: false, label: "" };
+  }
+  function bnewRender(page, width, type, quality) {
+    var vp1 = page.getViewport({ scale: 1 });
+    var vp = page.getViewport({ scale: width / vp1.width });
+    var c = document.createElement("canvas");
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    var ctx = c.getContext("2d");
+    return page.render({ canvasContext: ctx, canvas: c, viewport: vp }).promise.then(function () {
+      if (type === "url") return c.toDataURL("image/jpeg", quality);
+      /* A catalogue's photo page is a whole A4 page standing up — a product on
+         a plain set, mostly air above and below. Cut to 4:5 around its middle:
+         that fills the reading column without a page and a half of scrolling,
+         and stands as a card in the grid; the shop never stretches it across
+         the banner (bmagHalf). */
+      var out = c;
+      if (c.height > c.width * 1.25) {
+        out = document.createElement("canvas");
+        out.width = c.width; out.height = Math.round(c.width * 1.25);
+        out.getContext("2d").drawImage(c, 0, Math.round((c.height - out.height) / 2), c.width, out.height, 0, 0, out.width, out.height);
+      }
+      return new Promise(function (resolve) { out.toBlob(function (b) { resolve(b); }, "image/webp", quality); });
+    });
+  }
+  /* Each photo page takes the heading of the text page right before it — the
+     catalogue's own order — and the topic's words tick the ones it is about. */
+  function bnewPair(item) {
+    var pages = item.pdf.pages;
+    pages.forEach(function (p, i) {
+      if (!p.photo) return;
+      for (var j = i - 1; j >= Math.max(0, i - 3); j--) {
+        if (!pages[j].photo && pages[j].heading) { p.pair = pages[j]; break; }
+      }
+      p.label = p.pair ? p.pair.heading + " — фото" : "Страница " + p.n;
+    });
+  }
+  function bnewPreTick(item, stems) {
+    var ticked = 0;
+    item.pdf.pages.forEach(function (p) {
+      if (!p.photo) return;
+      var hay = ((p.pair ? p.pair.heading + "\n" + p.pair.text : "") + "\n" + p.heading).toLowerCase();
+      p.tick = !!stems.length && ticked < BNEW_PRETICK_MAX && stems.some(function (s) { return hay.indexOf(s) >= 0; });
+      if (p.tick) ticked++;
+    });
+  }
+  function bnewNote(item, text) {
+    item.note = text;
+    var el = document.querySelector('[data-bnewnote="' + item.key + '"]');
+    if (el) el.textContent = trText(text, S.lang);
+  }
+  var BNEW_KEY = 0;
+  function bnewAddItem(kind, name) {
+    var st = bnewState();
+    var item = { key: "m" + (++BNEW_KEY), kind: kind, name: name, id: "", note: "", status: "busy", images: [] };
+    st.items.push(item);
+    return item;
+  }
+  function bnewSaved(item, m) {
+    item.id = m.id; item.name = m.name; item.images = m.images || []; item.status = "ok";
+    item.chars = (m.text || "").length || m.chars || 0; item.sample = !!m.sample; item.pageCount = m.pageCount || null;
+    item.note = bnewItemNote(item);
+  }
+  function bnewItemNote(item) {
+    if (item.kind === "pdf") {
+      return (item.pageCount ? item.pageCount + " " + pl(item.pageCount, "страница", "страницы", "страниц") : "PDF") +
+        " · " + (item.images.length ? "картинок: " + item.images.length : "без картинок");
+    }
+    if (item.kind === "image") return "фото: " + item.images.length;
+    if (item.kind === "link") return "страница прочитана";
+    return item.sample ? "образец — писать так же: тон и длина" : "текст";
+  }
+  function bnewFail(item, text) { item.status = "err"; item.note = text; render(); }
+  function bnewPostMaterial(item, payload) {
+    return apiSend("/api/admin/blog/materials/", "POST", payload).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.material) { bnewSaved(item, r.body.material); render(); return; }
+      var code = (r.body && r.body.error) || "";
+      bnewFail(item, /^link_/.test(code)
+        ? (code === "link_not_https" ? "Нужен адрес, который начинается с https://" :
+          code === "link_private_address" || code === "link_private_host" || code === "link_ip_host" ? "Этот адрес читать нельзя — только открытые страницы в интернете." :
+          code === "link_too_large" ? "Страница слишком большая." : "Страницу не получилось прочитать.")
+        : "Не получилось сохранить — попробуйте ещё раз.");
+    }).catch(function () { bnewFail(item, "Нет связи — попробуйте ещё раз."); });
+  }
+  /** A PDF: read it page by page, here, and show the photo pages to tick. */
+  function bnewAddPdf(file) {
+    var st = bnewState();
+    var item = bnewAddItem("pdf", String(file.name || "PDF").slice(0, 200));
+    item.note = "Открываю PDF…"; render();
+    Promise.all([pdfjsLoad(), file.arrayBuffer()]).then(function (r) {
+      var lib = r[0];
+      return lib.getDocument({ data: new Uint8Array(r[1]), isEvalSupported: false }).promise.then(function (doc) {
+        item.pdf = { doc: doc, pages: [], total: doc.numPages };
+        var i = 0;
+        function next() {
+          if (++i > doc.numPages) return Promise.resolve();
+          bnewNote(item, "Читаю PDF: страница " + i + " из " + doc.numPages);
+          return doc.getPage(i).then(function (page) {
+            /* A page full of text is a text page — only a page with little or
+               no text has its drawing read to see whether it holds a picture
+               (that read decodes the page's images: the slow half). */
+            return page.getTextContent().then(function (tc) {
+              var chars = (tc.items || []).reduce(function (n, it) { return n + String((it && it.str) || "").replace(/\s/g, "").length; }, 0);
+              return chars >= 120 ? [tc, { fnArray: [] }] : page.getOperatorList().then(function (ops) { return [tc, ops]; });
+            }).then(function (res) {
+              var info = bnewPageInfo(res[0], res[1], lib.OPS, i);
+              item.pdf.pages.push(info);
+              return (info.photo ? bnewRender(page, BNEW_THUMB_W, "url", 0.7) : Promise.resolve("")).then(function (u) {
+                info.thumb = u || "";
+                page.cleanup();
+              });
+            });
+          }).then(next);
+        }
+        return next();
+      });
+    }).then(function () {
+      bnewPair(item);
+      bnewPreTick(item, bnewStems(st.about));
+      item.status = "pick";
+      item.pageCount = item.pdf.total;
+      item.note = bnewPickNote(item);
+      render();
+    }).catch(function () { bnewFail(item, "Не получилось прочитать PDF — попробуйте другой файл."); });
+  }
+  function bnewPhotos(item) { return item.pdf ? item.pdf.pages.filter(function (p) { return p.photo; }) : []; }
+  function bnewPickNote(item) {
+    var ph = bnewPhotos(item), on = ph.filter(function (p) { return p.tick; }).length;
+    return item.pdf.total + " " + pl(item.pdf.total, "страница", "страницы", "страниц") + " · страниц с фото: " + ph.length + " · отмечено: " + on;
+  }
+  /** «Готово»: the ticked pages up as pictures, then the text and the pictures as one material. */
+  /** After the panel knows whether photos can be stored at all (the upload probe). */
+  function bnewMedia(fn) {
+    var done = false, once = function () { if (!done) { done = true; fn(); } };
+    if (MEDIA.on !== null) { once(); return; }
+    ensureMedia(once);
+    setTimeout(once, 5000);   // a probe that never answers must not hold the PDF
+  }
+  function bnewPdfDone(item) {
+    item.status = "busy"; render();
+    bnewMedia(function () { bnewPdfUpload(item); });
+  }
+  function bnewPdfUpload(item) {
+    var ticked = bnewPhotos(item).filter(function (p) { return p.tick; });
+    // no bucket on this shop: the text is still a material, the pictures stay on the phone
+    var canUp = MEDIA.on === true;
+    var images = [], k = 0;
+    function up() {
+      if (!canUp || k >= ticked.length) return Promise.resolve();
+      var p = ticked[k++];
+      bnewNote(item, "Загружаю картинки: " + k + " из " + ticked.length);
+      return item.pdf.doc.getPage(p.n).then(function (page) {
+        return bnewRender(page, BNEW_PIC_W, "blob", 0.85).then(function (blob) {
+          page.cleanup();
+          if (!blob) return null;
+          var base = String(item.name || "pdf").replace(/\.pdf$/i, "").slice(0, 40);
+          var f;
+          try { f = new File([blob], base + "-p" + p.n + ".webp", { type: "image/webp" }); } catch (e) { f = blob; }
+          return uploadPhoto(f, "blog").then(function (r) {
+            images.push({ id: "p" + p.n, url: r.url, w: r.width, h: r.height, page: p.n, label: p.label });
+          });
+        });
+      }).then(up);
+    }
+    up().then(function () {
+      bnewNote(item, "Сохраняю текст…");
+      var pages = item.pdf.pages.filter(function (p) { return p.text; }).map(function (p) { return { n: p.n, heading: p.heading, text: p.text }; });
+      return bnewPostMaterial(item, { kind: "pdf", name: item.name, pages: pages, images: images, pageCount: item.pdf.total });
+    }).catch(function (e) {
+      bnewFail(item, e && /too_large|payload/.test(String(e.message)) ? "Картинка слишком большая для загрузки." : "Не получилось загрузить картинки — попробуйте ещё раз.");
+    });
+  }
+  function bnewAddPhotos(files) {
+    var item = bnewAddItem("image", files.length === 1 ? String(files[0].name || "Фото").slice(0, 200) : files.length + " фото");
+    item.note = "Загружаю фото…"; render();
+    bnewMedia(function () {
+      if (MEDIA.on !== true) { bnewFail(item, "Фото сюда загрузить нельзя: хранилище фото не подключено."); return; }
+      bnewUploadPhotos(item, files);
+    });
+  }
+  function bnewUploadPhotos(item, files) {
+    var images = [];
+    var chain = Promise.resolve();
+    files.forEach(function (f, i) {
+      chain = chain.then(function () {
+        bnewNote(item, "Загружаю фото: " + (i + 1) + " из " + files.length);
+        return uploadPhoto(f, "blog").then(function (r) {
+          images.push({ id: "f" + (i + 1), url: r.url, w: r.width, h: r.height, page: null, label: String(f.name || "").replace(/\.[^.]*$/, "").slice(0, 120) });
+        });
+      });
+    });
+    chain.then(function () { return bnewPostMaterial(item, { kind: "image", name: item.name, images: images }); })
+      .catch(function () { bnewFail(item, MEDIA.on === false ? "Фото сюда загрузить нельзя: хранилище не подключено." : "Не получилось загрузить фото — попробуйте ещё раз."); });
+  }
+  function bnewAddLink(url) {
+    var item = bnewAddItem("link", url.replace(/^https?:\/\//, "").slice(0, 200));
+    item.note = "Читаю страницу…"; render();
+    bnewPostMaterial(item, { kind: "link", url: url });
+  }
+  function bnewAddText(text, sample) {
+    var first = text.replace(/\s+/g, " ").trim().slice(0, 60);
+    var item = bnewAddItem("text", (sample ? "Образец: «" : "«") + first + (text.length > 60 ? "…" : "") + "»");
+    render();
+    bnewPostMaterial(item, { kind: "text", name: item.name, text: text, sample: !!sample });
+  }
+  function bnewLibLoad() {
+    var st = bnewState();
+    apiJson("/api/admin/blog/materials/").then(function (r) {
+      st.lib = r.status === 200 && r.body.ok ? r.body.materials : [];
+      render();
+    }).catch(function () { st.lib = []; render(); });
+  }
+  /* ---- step 1 ---- */
+  var BNEW_ICON = {
+    pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1"/><path d="M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></svg>',
+    text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>'
+  };
+  function bnewStepsHTML(at) {
+    return '<ol class="adm-bnew__steps" aria-label="Шаги">' + ["Материалы", "Черновик", "Публикация"].map(function (w, i) {
+      return "<li" + (i + 1 === at ? ' aria-current="step"' : "") + "><span>" + (i + 1) + "</span> <span>" + w + "</span></li>";
+    }).join("") + "</ol>";
+  }
+  function bnewItemHTML(item, i) {
+    var thumbs = "";
+    if (item.status === "pick") {
+      var ph = bnewPhotos(item);
+      thumbs = '<div class="adm-bnew__pick">' +
+        '<p class="adm-hint">Отметьте страницы с фото, которые пригодятся в статье. Подпись — заголовок страницы перед фото.</p>' +
+        '<div class="adm-bnew__grid">' + ph.map(function (p) {
+          return '<label class="adm-bnew__page' + (p.tick ? " is-on" : "") + '"><input type="checkbox" data-bnewtick="' + i + ":" + p.n + '"' + (p.tick ? " checked" : "") + ">" +
+            (p.thumb ? '<img src="' + esc(p.thumb) + '" alt="" width="' + BNEW_THUMB_W + '">' : "") +
+            '<span data-notr>' + esc(p.label) + "</span></label>";
+        }).join("") + "</div>" +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--row" type="button" data-bnewpdfok="' + i + '">Готово</button>' +
+          '<button class="adm-link" type="button" data-bnewretick="' + i + '">Отметить по теме</button></div></div>';
+    } else if (item.images && item.images.length) {
+      thumbs = '<div class="adm-bnew__thumbs">' + item.images.slice(0, 5).map(function (im) {
+        return '<img src="' + esc(im.url) + '" alt="" width="54" height="54" loading="lazy">';
+      }).join("") + (item.images.length > 5 ? "<span>+" + (item.images.length - 5) + "</span>" : "") + "</div>";
+    }
+    return '<li class="adm-bnew__item adm-bnew__item--' + item.kind + (item.status === "err" ? " is-err" : "") + '">' +
+      '<div class="adm-bnew__row"><span class="adm-bnew__ico" aria-hidden="true">' + (item.kind === "pdf" ? "PDF" : BNEW_ICON[item.kind] || "") + "</span>" +
+        '<span class="adm-bnew__txt"><span class="adm-bnew__nm" data-notr>' + esc(item.name) + "</span>" +
+        '<span class="adm-bnew__note" data-bnewnote="' + item.key + '">' + esc(item.note || "") + "</span></span>" +
+        (item.status === "busy" ? "" : '<button class="adm-bprod__x" type="button" data-bnewdel="' + i + '" aria-label="Убрать">×</button>') +
+      "</div>" + thumbs + "</li>";
+  }
+  function bnewSheetHTML(st) {
+    if (st.sheet === "link") {
+      return '<div class="adm-bnew__sheet"><label class="adm-field">Адрес страницы' +
+        '<input class="adm-input" type="url" inputmode="url" data-bnewlink value="' + esc(st.link) + '" placeholder="https://…" autocapitalize="off" spellcheck="false"></label>' +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--row" type="button" data-bnewlinkok>Добавить</button>' +
+        '<button class="adm-link adm-link--muted" type="button" data-bnewsheet="">Отмена</button></div></div>';
+    }
+    if (st.sheet === "text") {
+      return '<div class="adm-bnew__sheet"><label class="adm-field">Текст' +
+        '<textarea class="adm-input" rows="6" data-bnewtext placeholder="Вставьте текст — заметки, статью, описание">' + esc(st.text) + "</textarea></label>" +
+        '<label class="adm-check"><input type="checkbox" data-bnewsample' + (st.sample ? " checked" : "") + "> Это образец — писать так же: тон и длина</label>" +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--row" type="button" data-bnewtextok>Добавить</button>' +
+        '<button class="adm-link adm-link--muted" type="button" data-bnewsheet="">Отмена</button></div></div>';
+    }
+    return "";
+  }
+  function bnewLibHTML(st) {
+    if (!st.libOpen) return '<button class="adm-link" type="button" data-bnewlib>Из библиотеки — материалы прошлых статей</button>';
+    if (!st.lib) return '<div class="adm-skel"><i></i><i></i></div>';
+    var have = {};
+    st.items.forEach(function (it) { if (it.id) have[it.id] = 1; });
+    var rest = st.lib.filter(function (m) { return !have[m.id]; });
+    if (!rest.length) return '<p class="adm-hint">В библиотеке больше ничего нет.</p>';
+    return '<ul class="adm-bnew__lib">' + rest.slice(0, 30).map(function (m) {
+      return '<li><span data-notr>' + esc(m.name) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewlibadd="' + esc(m.id) + '">Добавить</button></li>';
+    }).join("") + "</ul>";
+  }
+  function bnewStep1HTML(st) {
+    var ready = st.items.filter(function (it) { return it.status === "ok"; }).length;
+    var busy = st.items.some(function (it) { return it.status === "busy" || it.status === "pick"; });
+    return bnewStepsHTML(1) +
+      '<label class="adm-field adm-bnew__about">О чём статья' +
+        '<textarea class="adm-input" rows="3" data-bnewabout placeholder="Тонкие окрашенные волосы без объёма: какую линию Kevin.Murphy брать и как ухаживать зимой">' +
+        esc(st.about) + "</textarea></label>" +
+      '<div class="adm-bnew__h">Материалы</div>' +
+      '<div class="adm-bnew__add">' +
+        '<label class="adm-bnew__btn">' + BNEW_ICON.pdf + '<span>PDF / файл</span><input type="file" accept="application/pdf,.pdf" data-bnewfile="pdf" hidden></label>' +
+        '<label class="adm-bnew__btn">' + BNEW_ICON.image + '<span>Фото</span><input type="file" accept="image/*" multiple data-bnewfile="photo" hidden></label>' +
+        '<button class="adm-bnew__btn" type="button" data-bnewsheet="link">' + BNEW_ICON.link + "<span>Ссылка</span></button>" +
+        '<button class="adm-bnew__btn" type="button" data-bnewsheet="text">' + BNEW_ICON.text + "<span>Текст / образец</span></button>" +
+      "</div>" +
+      bnewSheetHTML(st) +
+      (st.items.length ? '<ul class="adm-bnew__list" aria-label="Добавлено">' + st.items.map(bnewItemHTML).join("") + "</ul>" : "") +
+      '<div class="adm-bnew__libwrap">' + bnewLibHTML(st) + "</div>" +
+      admLabelledSwitch("data-bnewsrc", "Показать в статье, из чего она написана", st.showSources) +
+      (st.err ? '<div class="adm-err" role="alert">' + esc(st.err) + "</div>" : "") +
+      '<div class="adm-bnew__go">' +
+        '<button class="adm-btn adm-bnew__write" type="button" data-bnewwrite' + (st.busy || busy || !ready ? " disabled" : "") + ">" +
+          (st.busy ? "Пишу черновик…" : "Написать черновик") + "</button>" +
+        '<p class="adm-hint">' + (st.busy
+          ? "Пишу по-русски, потом переведу на ET и EN. Около минуты — не закрывайте страницу."
+          : busy ? "Дождитесь, пока материалы загрузятся."
+          : "ИИ напишет на RU, ET и EN, подберёт товары магазина и картинки из материалов. Около минуты. Ничего не публикуется само.") + "</p>" +
+      "</div>" +
+      '<button class="adm-link adm-link--muted" type="button" data-bnewblank>Писать самому, без материалов</button>';
+  }
+  /* ---- step 2 ---- */
+  /** The heading each placed picture stands under, in the Russian text. */
+  function bnewPicHeadings(html) {
+    var out = {};
+    try {
+      var doc = new DOMParser().parseFromString("<body>" + String(html || "") + "</body>", "text/html");
+      var last = "";
+      [].forEach.call(doc.body.querySelectorAll("h2, h3, img"), function (el) {
+        if (el.tagName === "IMG") { out[el.getAttribute("src") || ""] = last; return; }
+        last = (el.textContent || "").trim();
+      });
+    } catch (e) {}
+    return out;
+  }
+  function bnewUnsureText(n) {
+    return n + " " + pl(n, "фраза не нашлась", "фразы не нашлись", "фраз не нашлись") + " в материалах — отмечены жёлтым в тексте. Проверьте или уберите.";
+  }
+  function bnewMatImages(st) {
+    var out = [];
+    st.items.forEach(function (it) { (it.images || []).forEach(function (im) { out.push(im); }); });
+    return out;
+  }
+  function bnewStep2HTML(st) {
+    var p = st.post;
+    if (!p) return bnewStepsHTML(2) + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    var L = st.lang || "RU";
+    var trBusy = st.tr.ET === "busy" || st.tr.EN === "busy";
+    var heads = bnewPicHeadings(p.body.RU);
+    var pics = (st.placed || []).filter(function (im) { return String(p.body.RU || "").indexOf(im.url) >= 0; });
+    var photo = pics[0] || bnewMatImages(st)[0] || null;
+    var prods = productsById(p.products || []);
+    var cover = st.cover || (p.coverUrl ? (photo && p.coverUrl === photo.url ? "photo" : "collage") : "none");
+    var collage = prods.filter(function (x) { return /^\/shop\//.test(gal(x)[0] || ""); }).slice(0, 2);
+    var unsure = (String(p.body.RU || "").match(/<mark data-unsure>/g) || []).length;
+    var langTab = function (l) {
+      var s = l === "RU" ? "ok" : st.tr[l] || "";
+      return '<button type="button" role="tab" data-bnewlang="' + l + '" aria-selected="' + (L === l) + '">' + l +
+        (s === "ok" && String(p.body[l] || "").trim() ? " ✓" : s === "busy" ? " …" : s === "err" ? " !" : "") + "</button>";
+    };
+    return bnewStepsHTML(2) +
+      '<div class="adm-bnew__h">Обложка — выберите</div>' +
+      '<div class="adm-bnew__covers" role="radiogroup" aria-label="Обложка">' +
+        '<button type="button" role="radio" data-bnewcover="photo" aria-checked="' + (cover === "photo") + '" aria-label="Фото из материалов"' + (photo ? "" : " disabled") + ">" +
+          (photo ? '<img src="' + esc(photo.url) + '" alt="">' : "<span>Нет фото</span>") + "</button>" +
+        '<button type="button" role="radio" class="adm-bnew__collage" data-bnewcover="collage" aria-checked="' + (cover === "collage") + '" aria-label="Товары на бежевом"' +
+          (collage.length && MEDIA.on !== false ? "" : " disabled") + ">" +
+          collage.map(function (x) { return '<img src="' + esc(gal(x)[0]) + '" alt="">'; }).join("") + "</button>" +
+        '<button type="button" role="radio" class="adm-bnew__tile" data-bnewcover="none" aria-checked="' + (cover === "none") + '" aria-label="Только заголовок">' +
+          '<span data-notr>' + esc(p.title.RU) + "</span></button>" +
+      "</div>" +
+      '<div class="adm-bnew__langs" role="tablist" aria-label="Язык">' + ["RU", "ET", "EN"].map(langTab).join("") + "</div>" +
+      (st.tr[L] === "err" ? '<div class="adm-error"><span>Перевод не получился.</span><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewtr="' + L + '">Повторить</button></div>' : "") +
+      '<div class="adm-bnew__card">' +
+        '<span class="adm-bnew__title" data-notr>' + esc(p.title[L] || (st.tr[L] === "busy" ? "Переводим…" : p.title.RU)) + "</span>" +
+        '<span class="adm-bnew__lead" data-notr>' + esc(p.excerpt[L] || "") + "</span>" +
+        pics.map(function (im) {
+          var head = heads[im.url];
+          return '<div class="adm-bnew__pic"><img src="' + esc(im.url) + '" alt="" width="56" height="42">' +
+            '<span><span data-notr>' + esc(im.label || "Картинка") + "</span>" + (im.page ? " · стр. " + im.page : "") +
+              (head ? ' — под заголовком «<span data-notr>' + esc(head) + "</span>»" : "") + "</span>" +
+            '<button class="adm-link" type="button" data-bnewpicdel="' + esc(im.url) + '"' + (trBusy ? " disabled" : "") + ">Убрать</button></div>";
+        }).join("") +
+        '<button class="adm-link" type="button" data-bnewedit>Открыть весь текст в редакторе</button>' +
+      "</div>" +
+      '<div class="adm-bnew__h">Товары статьи — ' + prods.length + "</div>" +
+      '<div class="adm-bnew__chips">' + prods.map(function (x) {
+        return '<span class="adm-bnew__chip"><span data-notr>' + esc(blogProductShort(x)) + "</span>" +
+          '<button type="button" data-bnewproddel="' + esc(x.id) + '" aria-label="Убрать"' + (trBusy ? " disabled" : "") + ">×</button></span>";
+      }).join("") + '<button class="adm-bnew__chipadd" type="button" data-bnewprodadd>+ товар</button></div>' +
+      '<p class="adm-hint">Помощник в чате будет советовать именно эти товары, когда клиент спросит о теме статьи.</p>' +
+      (unsure ? '<div class="adm-note adm-note--warn" role="note"><span>' + esc(bnewUnsureText(unsure)) + "</span></div>" : "") +
+      (st.trimmed && st.trimmed.trimmed
+        ? '<p class="adm-hint">Материалов больше, чем помещается в один черновик: прочитано ' + Math.round(st.trimmed.used / 1000) +
+          " тыс. знаков из " + Math.round(st.trimmed.total / 1000) + " тыс. — страницы по теме и к отмеченным картинкам.</p>"
+        : "") +
+      (st.err ? '<div class="adm-err" role="alert">' + esc(st.err) + "</div>" : "") +
+      '<div class="adm-bnew__end">' +
+        '<button class="adm-btn adm-btn--ghost" type="button" data-bnewpreview>Как в магазине</button>' +
+        '<button class="adm-btn" type="button" data-bnewpublish' + (trBusy || st.busy ? " disabled" : "") + ">" + (trBusy ? "Переводим…" : "Опубликовать") + "</button>" +
+      "</div>" +
+      (st.preview ? bnewPreviewHTML(st) : "");
+  }
+  /* «Как в магазине»: the draft drawn by the shop's own article markup, over
+     the panel — the panel is the same document as the shop, styles and all. */
+  function bnewPreviewHTML(st) {
+    var p = st.post, L = st.lang || "RU";
+    var post = {
+      slug: p.slug, title: p.title[L] || p.title.RU, excerpt: p.excerpt[L] || p.excerpt.RU,
+      bodyHtml: String(p.body[L] || p.body.RU || ""), coverUrl: p.coverUrl, coverAlt: "", coverFocus: p.coverFocus,
+      coverW: p.coverW, coverH: p.coverH, topic: p.topic, minutes: (p.minutes && p.minutes[L]) || 0,
+      author: p.author, publishedAt: new Date().toISOString(), products: p.products, tags: [],
+      sources: p.showSources ? p.sources : []
+    };
+    var featured = productsById(post.products || []);
+    return '<div class="adm-bnew__shop" role="dialog" aria-label="Как в магазине">' +
+      '<div class="adm-bnew__shopbar"><span>Так статью увидят в магазине</span><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewpreview>Закрыть</button></div>' +
+      '<article class="blog__post bmag-post">' + bmagCoverHTML(post) +
+        '<div class="wrap"><div class="blog__read">' + blogHeadHTML(post) + bmagStripHTML(featured.slice(0, 8), featured.length) +
+          '<div class="acc__rich blog__body">' + blogBodyHTML(post.bodyHtml) + "</div>" + bmagSourcesHTML(post) +
+        "</div></div></article></div>";
+  }
+  function admBlogNewHTML() {
+    var st = bnewState();
+    return '<div class="adm-bnew">' +
+      '<div class="adm-blog2__back adm-bnew__back">' + admBackHTML("data-bnewback", "Блог") +
+        (st.step === 2 && st.post ? '<span class="adm-bnew__saved">Сохранено</span>' : "") + "</div>" +
+      (st.step === 2 ? bnewStep2HTML(st) : bnewStep1HTML(st)) + "</div>";
+  }
+  function bnewErrText(r) {
+    if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
+    var code = (r.body && r.body.error) || "";
+    if (code === "rate_limited") return busyMsg();
+    if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
+    if (code === "truncated") return "Черновик не дописался до конца — попробуйте ещё раз.";
+    if (code === "no_materials") return "Добавьте хотя бы один материал.";
+    return "Не получилось — попробуйте ещё раз.";
+  }
+  function bnewWrite() {
+    var st = bnewState();
+    var ids = st.items.filter(function (it) { return it.status === "ok" && it.id; }).map(function (it) { return it.id; });
+    if (!ids.length) { st.err = "Добавьте хотя бы один материал."; render(); return; }
+    st.busy = true; st.err = ""; render();
+    apiSend("/api/admin/blog/draft/", "POST", { about: st.about, materials: ids, showSources: !!st.showSources }).then(function (r) {
+      st.busy = false;
+      if (!(r.status === 200 && r.body.ok && r.body.post)) { st.err = bnewErrText(r); render(); return; }
+      st.post = r.body.post; st.placed = r.body.placed || []; st.unsure = r.body.unsure || 0; st.trimmed = r.body.trimmed || null;
+      st.step = 2; st.lang = "RU"; st.cover = st.post.coverUrl ? "photo" : "none";
+      S.adminBlog = null; blogForget();   // the list shows the new draft
+      window.scrollTo({ top: 0 }); render();
+      bnewTranslate("ET"); bnewTranslate("EN");
+    }).catch(function () { st.busy = false; st.err = "Нет связи — попробуйте ещё раз."; render(); });
+  }
+  function bnewTranslate(L) {
+    var st = bnewState();
+    if (!st.post) return;
+    st.tr[L] = "busy"; render();
+    apiSend("/api/admin/blog/draft/", "POST", { translate: st.post.id, lang: L }).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.post) {
+        st.tr[L] = "ok";
+        // the newer row carries both translations once both are in
+        if (!st.post || String(r.body.post.updatedAt) >= String(st.post.updatedAt)) st.post = r.body.post;
+        else {
+          st.post.body[L] = r.body.post.body[L];
+          st.post.title[L] = r.body.post.title[L];
+          st.post.excerpt[L] = r.body.post.excerpt[L];
+        }
+      } else st.tr[L] = "err";
+      render();
+    }).catch(function () { st.tr[L] = "err"; render(); });
+  }
+  /** A change to the draft from step 2 — the editor's own PATCH, every field. */
+  function bnewPatch(change) {
+    var st = bnewState();
+    if (!st.post) return Promise.resolve();
+    var d = blogDraftFromPost(st.post);
+    change(d);
+    st.err = "";
+    return apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: st.post.id }, blogFieldsPayload(d))).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.post) { st.post = r.body.post; blogListUpsert(r.body.post); }
+      else st.err = blogSaveErrText(blogHttpErr(r));
+      render();
+    }).catch(function () { st.err = "Нет связи — попробуйте ещё раз."; render(); });
+  }
+  function bnewDropPic(url) {
+    bnewPatch(function (d) {
+      ["RU", "ET", "EN"].forEach(function (L) {
+        var html = String(d.body[L] || "");
+        if (html.indexOf(url) < 0) return;
+        try {
+          var doc = new DOMParser().parseFromString("<body>" + html + "</body>", "text/html");
+          [].forEach.call(doc.body.querySelectorAll("img"), function (img) {
+            if (img.getAttribute("src") !== url) return;
+            var fig = img.closest("figure");
+            (fig || img).parentNode.removeChild(fig || img);
+          });
+          d.body[L] = doc.body.innerHTML;
+        } catch (e) {}
+      });
+      if (d.coverUrl === url) { d.coverUrl = ""; d.coverW = null; d.coverH = null; }
+    });
+  }
+  function bnewDropProduct(id) {
+    bnewPatch(function (d) {
+      d.products = d.products.filter(function (x) { return x !== id; });
+      ["RU", "ET", "EN"].forEach(function (L) { d.body[L] = blogDropCard(d.body[L], id); });
+    });
+  }
+  /* A collage of the article's products on the beige the shop uses: two
+     catalogue photos side by side, multiplied onto the colour so their white
+     ground turns beige — then uploaded as the cover, 4:5. Same-origin photos
+     only (/shop/img/), or the canvas could not be read back. */
+  function bnewCollage(prods) {
+    var W = 1200, H = 1500;
+    var c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = "#edeae1"; ctx.fillRect(0, 0, W, H);
+    var srcs = prods.map(function (x) { return gal(x)[0]; }).filter(function (u) { return /^\/shop\//.test(u || ""); }).slice(0, 2);
+    return Promise.all(srcs.map(function (u) {
+      return new Promise(function (resolve) { var im = new Image(); im.onload = function () { resolve(im); }; im.onerror = function () { resolve(null); }; im.src = u; });
+    })).then(function (imgs) {
+      imgs = imgs.filter(Boolean);
+      ctx.globalCompositeOperation = "multiply";
+      imgs.forEach(function (im, i) {
+        var boxW = imgs.length > 1 ? W * 0.56 : W * 0.8, boxH = H * 0.72;
+        var k = Math.min(boxW / im.naturalWidth, boxH / im.naturalHeight);
+        var w = im.naturalWidth * k, h = im.naturalHeight * k;
+        var cx = imgs.length > 1 ? (i === 0 ? W * 0.36 : W * 0.64) : W / 2;
+        ctx.drawImage(im, cx - w / 2, H * 0.9 - h, w, h);
+      });
+      return new Promise(function (resolve) { c.toBlob(function (b) { resolve(b); }, "image/webp", 0.9); });
+    });
+  }
+  function bnewSetCover(kind) {
+    var st = bnewState();
+    if (!st.post) return;
+    var p = st.post;
+    var photo = (st.placed || [])[0] || bnewMatImages(st)[0] || null;
+    if (kind === "none") { st.cover = "none"; bnewPatch(function (d) { d.coverUrl = ""; d.coverW = null; d.coverH = null; d.coverFocus = ""; }); return; }
+    if (kind === "photo" && photo) {
+      st.cover = "photo";
+      bnewPatch(function (d) { d.coverUrl = photo.url; d.coverW = photo.w; d.coverH = photo.h; d.coverFocus = ""; });
+      return;
+    }
+    if (kind === "collage") {
+      st.cover = "collage"; st.busy = true; render();
+      bnewCollage(productsById(p.products || [])).then(function (blob) {
+        if (!blob) throw new Error("collage");
+        var f;
+        try { f = new File([blob], "cover-" + (p.slug || "post") + ".webp", { type: "image/webp" }); } catch (e) { f = blob; }
+        return uploadPhoto(f, "blog");
+      }).then(function (r) {
+        st.busy = false;
+        return bnewPatch(function (d) { d.coverUrl = r.url; d.coverW = r.width; d.coverH = r.height; d.coverFocus = ""; });
+      }).catch(function () { st.busy = false; st.err = "Не получилось собрать обложку — выберите другую."; render(); });
+    }
+  }
+  function bnewPublish() {
+    var st = bnewState();
+    if (!st.post) return;
+    apiSend("/api/admin/blog/", "PATCH", { id: st.post.id, publish: true }).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.post) {
+        var p = r.body.post;
+        S.adminBlogNew = null; S.adminBlog = null; blogForget();
+        toast("Статья опубликована ✓");
+        openBlogEditor(p.id);
+        return;
+      }
+      st.err = blogSaveErrText(blogHttpErr(r)); render();
+    }).catch(function () { st.err = "Нет связи — попробуйте ещё раз."; render(); });
+  }
+  /** «Помощник» → «напиши статью из этого PDF»: the same writer, from the materials it named. */
+  function startDraftFromMaterials(a) {
+    var ids = Array.isArray(a.materials) ? a.materials : [];
+    if (!ids.length) return;
+    S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    bnewOpen();
+    var st = bnewState();
+    st.about = txt(a.about || "");
+    st.showSources = !!a.show_sources;
+    apiJson("/api/admin/blog/materials/").then(function (r) {
+      var list = r.status === 200 && r.body.ok ? r.body.materials : [];
+      st.lib = list;
+      list.filter(function (m) { return ids.indexOf(m.id) >= 0; }).forEach(function (m) {
+        var item = bnewAddItem(m.kind, m.name);
+        bnewSaved(item, m);
+      });
+      render();
+      if (st.items.length) bnewWrite();
+    });
   }
   /** «✨ Помощник напишет статью»: the topic and «Написать статью целиком» —
       the whole article, every field, all three languages (admBlogWriteFull);
@@ -47964,6 +48646,12 @@
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
     // the short form — the model named a topic, the panel writes the article
+    // «напиши статью из этого PDF» — the materials library's own writer (startDraftFromMaterials)
+    if (a.type === "draft_from_materials") {
+      var nm = (a.materials || []).length;
+      return "Новая статья из материалов (" + nm + ")" + (txt(a.about) ? " на тему «" + txt(a.about) + "»" : "") +
+        "\nЧерновик по-русски из фактов материалов, их картинки под нужными заголовками, товары магазина — потом на эстонском и английском. Ничего не публикуется само.";
+    }
     if (a.type === "draft_post" && a.topic && !a.title) {
       // txt(): the model is asked for one Russian line and sometimes sends
       // {RU,ET,EN} — «на тему «[object Object]»» is not a topic
@@ -53285,7 +53973,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -54470,6 +55158,7 @@
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
+        if (pa.type === "draft_from_materials") { startDraftFromMaterials(pa); return; }
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
@@ -55472,9 +56161,63 @@
         blogAutosave("change");
         if (S.adminBlogConfirmBack) blogCloseEditor();   // asked, and pressed again: it goes
       }
-      if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
-      blogStartNew(); window.scrollTo({ top: 0 }); render(); return;
+      if (d.admblogedit) { S.adminBlogNew = null; openBlogEditor(d.admblogedit); return; }
+      /* «+ Статья» opens «Новая статья» → «Материалы» since 02.11.2026; the
+         blank editor it opened before is «Писать самому» at its foot */
+      bnewOpen(); return;
     }
+    /* ---- «Новая статья» from materials (bnew…, admBlogNewHTML) ---- */
+    if (d.bnewback !== undefined) { S.adminBlogNew = null; render(); return; }
+    if (d.bnewblank !== undefined) { S.adminBlogNew = null; blogStartNew(); window.scrollTo({ top: 0 }); render(); return; }
+    if (d.bnewsheet !== undefined) {
+      var bst = bnewState(); bst.sheet = d.bnewsheet || ""; render();
+      if (bst.sheet) refocus(bst.sheet === "link" ? "[data-bnewlink]" : "[data-bnewtext]");
+      return;
+    }
+    if (d.bnewlinkok !== undefined) {
+      var bsl = bnewState(), lurl = String(bsl.link || "").trim();
+      // the shape only — which addresses may be read is the server's rule (src/lib/safe-fetch.ts), and it says why
+      if (!/^https?:\/\/\S+$/i.test(lurl)) { toast("Вставьте адрес страницы — он начинается с https://"); return; }
+      bsl.sheet = ""; bsl.link = ""; bnewAddLink(lurl); return;
+    }
+    if (d.bnewtextok !== undefined) {
+      var bstx = bnewState(), ttext = String(bstx.text || "").trim();
+      if (ttext.length < 20) { toast("Вставьте текст — хотя бы пару предложений."); return; }
+      bstx.sheet = ""; bstx.text = ""; var smp = bstx.sample; bstx.sample = false; bnewAddText(ttext, smp); return;
+    }
+    if (d.bnewdel !== undefined) {
+      var bsd = bnewState(), di = Number(d.bnewdel);
+      if (bsd.items[di]) { var gone2 = bsd.items.splice(di, 1)[0]; if (gone2.pdf && gone2.pdf.doc) { try { gone2.pdf.doc.destroy(); } catch (e) {} } }
+      render(); return;
+    }
+    if (d.bnewpdfok !== undefined) { var pit = bnewState().items[Number(d.bnewpdfok)]; if (pit && pit.pdf) bnewPdfDone(pit); return; }
+    if (d.bnewretick !== undefined) {
+      var rit = bnewState().items[Number(d.bnewretick)];
+      if (rit && rit.pdf) { bnewPreTick(rit, bnewStems(bnewState().about)); rit.note = bnewPickNote(rit); render(); }
+      return;
+    }
+    if (d.bnewlib !== undefined) { var bsb = bnewState(); bsb.libOpen = true; if (!bsb.lib) bnewLibLoad(); render(); return; }
+    if (d.bnewlibadd) {
+      var bsa = bnewState(), lm = (bsa.lib || []).filter(function (m) { return m.id === d.bnewlibadd; })[0];
+      if (lm) { bnewSaved(bnewAddItem(lm.kind, lm.name), lm); render(); }
+      return;
+    }
+    if (d.bnewsrc !== undefined) { var bss = bnewState(); bss.showSources = !bss.showSources; render(); refocus("[data-bnewsrc]"); return; }
+    if (d.bnewwrite !== undefined) { bnewWrite(); return; }
+    if (d.bnewlang) { bnewState().lang = d.bnewlang; render(); return; }
+    if (d.bnewtr) { bnewTranslate(d.bnewtr); return; }
+    if (d.bnewcover) { bnewSetCover(d.bnewcover); return; }
+    if (d.bnewpicdel) { bnewDropPic(d.bnewpicdel); return; }
+    if (d.bnewproddel) { bnewDropProduct(d.bnewproddel); return; }
+    if (d.bnewedit !== undefined || d.bnewprodadd !== undefined) {
+      var bse = bnewState(), pid = bse.post && bse.post.id;
+      S.adminBlogNew = null;
+      if (pid) { openBlogEditor(pid); if (d.bnewprodadd !== undefined) S.adminBlogProdOpen = true; }
+      else render();
+      return;
+    }
+    if (d.bnewpreview !== undefined) { var bsp = bnewState(); bsp.preview = !bsp.preview; render(); if (!bsp.preview) refocus("[data-bnewpreview]"); return; }
+    if (d.bnewpublish !== undefined) { bnewPublish(); return; }
     if (d.admblogback !== undefined) {
       /* What is owed goes now and the editor closes; an article that cannot
          be saved yet is asked about once — about what is on screen, not what
@@ -56224,6 +56967,10 @@
         }
       }
     }
+    // «Новая статья»: the topic, a link, a pasted text — kept in S, no redraw (the caret stays)
+    else if (t.matches("[data-bnewabout]")) { bnewState().about = t.value; }
+    else if (t.matches("[data-bnewlink]")) { bnewState().link = t.value; }
+    else if (t.matches("[data-bnewtext]")) { bnewState().text = t.value; }
     // «Из чего написана» — one line of it, saved like any field (no redraw: the caret stays)
     else if (t.matches("[data-blogsrc]")) {
       var sd = S.adminBlogEdit, si = Number(t.getAttribute("data-blogsrc"));
@@ -56624,6 +57371,29 @@
       t.value = "";
       if (pickedAtt.length) admAttachFiles(pickedAtt);
     }
+    // «Новая статья» → «Материалы»: a PDF (read here, on the phone) or photos
+    else if (t.matches("[data-bnewfile]")) {
+      var pickedNew = [].slice.call(t.files || []);
+      var kindNew = t.getAttribute("data-bnewfile");
+      t.value = "";
+      if (!pickedNew.length) { /* nothing chosen */ }
+      else if (kindNew === "pdf") {
+        if (/pdf/i.test(pickedNew[0].type || "") || /\.pdf$/i.test(pickedNew[0].name || "")) bnewAddPdf(pickedNew[0]);
+        else toast("Это не PDF — выберите файл .pdf");
+      }
+      else bnewAddPhotos(pickedNew);
+    }
+    // …a photo page ticked or unticked in a PDF's grid, the «образец» box
+    else if (t.matches("[data-bnewtick]")) {
+      var tk = String(t.getAttribute("data-bnewtick")).split(":"), tItem = bnewState().items[Number(tk[0])];
+      if (tItem && tItem.pdf) {
+        tItem.pdf.pages.forEach(function (p) { if (p.n === Number(tk[1])) p.tick = !!t.checked; });
+        var lab = t.closest("label");
+        if (lab) lab.classList.toggle("is-on", !!t.checked);
+        bnewNote(tItem, bnewPickNote(tItem));
+      }
+    }
+    else if (t.matches("[data-bnewsample]")) { bnewState().sample = !!t.checked; }
     // blog: the «Картинка» button's own picker — the article body, not the cover
     else if (t.matches("[data-blogtoolfile]")) {
       var pickedBlog = [].slice.call(t.files || []);   // a copy — see [data-galfile] above

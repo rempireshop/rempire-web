@@ -1106,6 +1106,23 @@ export interface SanitizeOptions {
   products?: Map<string, { name: string; brand: string; cat?: string }>;
   /** The brands the shop shows — the only brand pages set_page_texts may write. */
   brands?: Set<string>;
+  /** The material ids the prompt's BLOG MATERIALS block listed — the only ones draft_from_materials may name. */
+  materialIds?: Set<string>;
+}
+
+/* draft_from_materials — a NEW article written from the owner's uploaded
+   materials (src/lib/blog-materials.ts), by the panel's own «Новая статья»
+   writer once he confirms. Only ids the prompt listed; ten at most; the topic
+   is one plain line. The Помощник does what Claude does (list_materials,
+   get_material and save_draft in src/lib/mcp/tools.ts). */
+export function sanitizeDraftFromMaterials(raw: unknown, materialIds: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const ids = Array.isArray(x.materials)
+    ? [...new Set(x.materials.filter((v): v is string => typeof v === "string").map((v) => v.trim()))].filter((v) => materialIds.has(v)).slice(0, 10)
+    : [];
+  if (!ids.length) return null;
+  return { about: oneLine(x.about, BLOG_TOPIC_MAX), materials: ids, show_sources: x.show_sources === true };
 }
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean, opts: SanitizeOptions = {}): object | null {
@@ -1227,6 +1244,11 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   if (t === "publish_post") {
     const pub = sanitizePublishPost(x);
     return pub ? { type: t, ...pub } : null;
+  }
+  // a new article from the materials library — the ids the prompt listed, nothing else
+  if (t === "draft_from_materials") {
+    const fm = sanitizeDraftFromMaterials(x, opts.materialIds ?? new Set<string>());
+    return fm ? { type: t, ...fm } : null;
   }
   // …and the article open on the owner's screen, changed as he asked — that one only
   if (t === "edit_post") {
