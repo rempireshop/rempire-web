@@ -25,6 +25,7 @@
 import { brandStems, isLineOpener, keyHits, topicKeys } from "@/lib/blog-words.mjs";
 import { catalogueBrands } from "@/lib/catalogue-slice";
 import { jsonbParam, query } from "@/lib/db";
+import { pageHeading } from "@/lib/pdf-heading";
 import { keyFromUrl } from "@/lib/storage";
 
 export type MaterialKind = "pdf" | "image" | "link" | "text";
@@ -163,6 +164,13 @@ export function readMaterialInput(raw: unknown, isOurs: (u: unknown) => boolean 
   if (kind === "link") {
     url = oneLine(o.url, MATERIAL_LIMITS.url);
     if (!/^https:\/\//i.test(url)) throw new MaterialError("bad_url");
+  } else if ((kind === "pdf" || kind === "image") && o.url != null && o.url !== "") {
+    /* A PDF or a photo fetched from a public address (materialFromLink in
+       src/lib/blog-material-link.ts) keeps where it came from — and that
+       address is what marks it as a stranger's file everywhere it is read
+       (fromInternet below). */
+    url = oneLine(o.url, MATERIAL_LIMITS.url);
+    if (!/^https:\/\//i.test(url)) throw new MaterialError("bad_url");
   }
   if (kind === "image" && !images.length) throw new MaterialError("no_images");
   if ((kind === "text" || kind === "link") && !text) throw new MaterialError("empty");
@@ -172,6 +180,48 @@ export function readMaterialInput(raw: unknown, isOurs: (u: unknown) => boolean 
     sample: kind === "text" && o.sample === true,
     pageCount: kind === "pdf" ? posInt(o.pageCount, 10_000) : null,
   };
+}
+
+/**
+ * Did a stranger write it? A web page, and a PDF or a photo fetched from a
+ * public address, all carry the address they came from; the owner's own
+ * uploads and pasted texts carry none. Whatever came from the internet is
+ * shown to a model only fenced and labelled as a third party's, and its text
+ * never in a list (list_materials, the Помощник's prompt).
+ */
+export function fromInternet(m: Pick<Material, "kind" | "url">): boolean {
+  return m.kind === "link" || !!m.url;
+}
+
+/* A page mark at the start of a line, the way get_material prints a PDF
+   («[стр. 12 · HYDRATE-ME.WASH]») and the way Claude is asked to copy a PDF
+   it read in the chat — Russian, Estonian or English. */
+const PAGE_MARK = /^[ \t]*\[(?:стр\.?|страница|page|p\.|lk\.?|lehekülg)[ \t]*(\d{1,4})(?:[ \t]*[·|:—-][ \t]*([^\]\n]{0,200}))?\][ \t]*$/gim;
+
+/**
+ * A PDF's text with page marks → its pages, each with its heading (the mark's
+ * own, else the panel's rule — src/lib/pdf-heading.ts). Text before the first
+ * mark, and a text with no marks at all, give no pages: [] means «keep it as
+ * plain text».
+ */
+export function pagesFromText(raw: string): MaterialPage[] {
+  const text = multiLine(raw, MATERIAL_LIMITS.text);
+  const marks = [...text.matchAll(PAGE_MARK)];
+  if (!marks.length) return [];
+  const pages: MaterialPage[] = [];
+  marks.forEach((m, i) => {
+    const start = (m.index ?? 0) + m[0].length;
+    const end = i + 1 < marks.length ? marks[i + 1].index ?? text.length : text.length;
+    const body = text.slice(start, end).trim().slice(0, MATERIAL_LIMITS.pageText);
+    const n = Number(m[1]);
+    if (!n || (!body && !m[2])) return;
+    const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
+    const heading = oneLine(m[2], MATERIAL_LIMITS.heading) || pageHeading(lines);
+    const at = pages.findIndex((p) => p.n === n);
+    if (at >= 0) pages[at] = { n, heading: pages[at].heading || heading, text: (pages[at].text + "\n\n" + body).trim().slice(0, MATERIAL_LIMITS.pageText) };
+    else pages.push({ n, heading, text: body });
+  });
+  return pages.slice(0, MATERIAL_LIMITS.pages).sort((a, b) => a.n - b.n);
 }
 
 /* ---------- storage --------------------------------------------------------- */
@@ -233,6 +283,48 @@ export async function updateMaterial(id: string, patch: { name?: unknown; images
   const rows = await query<Row>(
     `update blog_materials set name = $2, images = $3::jsonb where id = $1 and deleted_at is null returning ${COLS}`,
     [id, name, jsonbParam(images)],
+  );
+  return rows.length ? toMaterial(rows[0]) : null;
+}
+
+/**
+ * More text for a material already saved — Claude sends a long PDF in parts
+ * (save_material's `append_to`, src/lib/mcp/tools.ts): a connector call holds
+ * at most 256 KB. Only the owner's own text and PDF materials grow this way,
+ * never one fetched from the internet; pages with a number it already has
+ * are added to that page, new ones join in page order; the limits of one
+ * material hold for the whole.
+ */
+export async function appendMaterial(id: string, more: { text: string; pages: MaterialPage[] }): Promise<Material | null> {
+  const was = await getMaterial(id);
+  if (!was) return null;
+  if (fromInternet(was) || was.sample || (was.kind !== "pdf" && was.kind !== "text")) throw new MaterialError("not_appendable");
+  let pages = was.pages.slice();
+  let text: string;
+  if (was.pages.length || more.pages.length) {
+    // a plain text that now gets pages keeps what it had as the page before them (or the first one)
+    if (!pages.length && was.text) {
+      const first = Math.min(...more.pages.map((p) => p.n));
+      pages = [{ n: Math.max(1, first - 1), heading: pageHeading(was.text.split("\n").slice(0, 6)), text: was.text }];
+    }
+    for (const p of more.pages) {
+      const at = pages.findIndex((x) => x.n === p.n);
+      if (at >= 0) pages[at] = { ...pages[at], heading: pages[at].heading || p.heading, text: (pages[at].text + "\n\n" + p.text).trim().slice(0, MATERIAL_LIMITS.pageText) };
+      else pages.push(p);
+    }
+    if (!more.pages.length && more.text) {
+      const last = pages[pages.length - 1];
+      pages[pages.length - 1] = { ...last, text: (last.text + "\n\n" + more.text).trim().slice(0, MATERIAL_LIMITS.pageText) };
+    }
+    pages = pages.sort((a, b) => a.n - b.n).slice(0, MATERIAL_LIMITS.pages);
+    text = pages.map((p) => p.text).filter(Boolean).join("\n\n").slice(0, MATERIAL_LIMITS.text);
+  } else {
+    text = (was.text + "\n\n" + more.text).trim().slice(0, MATERIAL_LIMITS.text);
+  }
+  const kind: MaterialKind = pages.length ? "pdf" : was.kind;
+  const rows = await query<Row>(
+    `update blog_materials set kind = $2, text = $3, pages = $4::jsonb where id = $1 and deleted_at is null returning ${COLS}`,
+    [id, kind, text, jsonbParam(pages)],
   );
   return rows.length ? toMaterial(rows[0]) : null;
 }

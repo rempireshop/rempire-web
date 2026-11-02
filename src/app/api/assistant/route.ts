@@ -3,13 +3,14 @@ import catalogue from "@/data/catalogue.min.json";
 import { requireAdmin } from "@/lib/auth";
 import { briefContent, mergeContent } from "@/lib/content";
 import { listAllPosts } from "@/lib/blog";
-import { listMaterials } from "@/lib/blog-materials";
+import { getMaterials, listMaterials } from "@/lib/blog-materials";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
 import { chatParams, openaiModel } from "@/lib/openai-chat";
 import { catalogueLines, relevantProducts, rowLine, type CatRow } from "@/lib/catalogue-slice";
 import {
   briefAnalytics,
   briefAttachments,
+  briefMaterialIds,
   briefHero,
   briefOpenPost,
   draftPostWithAsk,
@@ -191,16 +192,38 @@ async function bundleLinesForPrompt(): Promise<string> {
    draft from them (draft_from_materials), which the panel writes with the
    very writer «Новая статья» uses. Fetched only when the message is about the
    blog; "" on any database trouble. */
-async function adminMaterialLinesForPrompt(): Promise<string> {
+/* …and the ones the panel saved for THIS conversation — a PDF or photos the
+   owner attached with the clip (briefMaterialIds) — first, each marked
+   «ATTACHED NOW», read back from the library even when they are older than
+   the newest fifteen. */
+const ATTACHED_MARK = "ATTACHED NOW";
+async function adminMaterialLinesForPrompt(attached: string[] = []): Promise<string> {
   try {
-    const all = await listMaterials(15);
+    const [all, mine] = await Promise.all([listMaterials(15), attached.length ? getMaterials(attached) : Promise.resolve([])]);
+    const here = new Set(mine.map((m) => m.id));
     /* A name is data: it may come from a file name or a web address, so the
        field separator and line breaks are taken out, and it is quoted. */
     const safeName = (s: string) => JSON.stringify(String(s || "").replace(/[|\r\n\t]+/g, " ").trim().slice(0, 80));
-    return all.map((m) => `${m.id}|${m.kind}${m.sample ? " sample" : ""}|${safeName(m.name)}|${m.pageCount ? m.pageCount + " pages|" : ""}${m.images.length} pictures`).join("\n");
+    return [...mine, ...all.filter((m) => !here.has(m.id))]
+      .map((m) => `${m.id}|${m.kind}${m.sample ? " sample" : ""}|${safeName(m.name)}|${m.pageCount ? m.pageCount + " pages|" : ""}${m.images.length} pictures${here.has(m.id) ? "|" + ATTACHED_MARK : ""}`)
+      .join("\n");
   } catch {
     return "";
   }
+}
+/**
+ * What «это» means once the owner has attached a file: the materials marked
+ * ATTACHED NOW, and one worked example with their own ids — the mini model
+ * follows an example where a rule alone does not hold it (live test,
+ * 26.10.2026). "" when nothing was attached.
+ */
+function attachedMaterialsNote(materialLines: string): string {
+  const ids = materialLines.split("\n").filter((l) => l.endsWith("|" + ATTACHED_MARK)).map((l) => l.split("|")[0]);
+  if (!ids.length) return "";
+  return `The lines ending «${ATTACHED_MARK}» are files the owner attached to THIS conversation with the clip: the panel has already saved them into the materials library (a PDF's text page by page, with the photo pages his topic named; photos as they are). «это», «этот PDF», «по этому», «по ним», «из них», «эти фото» mean exactly those. When he asks for an article from them, answer draft_from_materials with exactly those ids and his topic as "about" (empty when he named none) — never draft_post, which writes without them. When he only attached them, say in one sentence what was saved and offer to write the article; send no action. Never publish.
+EXAMPLE — owner: «напиши статью по этому»
+{"reply":"Напишу статью по этим материалам: черновик по-русски из их фактов, с картинками под нужными заголовками и товарами магазина, потом на эстонском и английском. Подтвердите — откроется «Новая статья»; ничего не публикуется само.","product_ids":[],"tab":"blog","action":{"type":"draft_from_materials","about":"","materials":${JSON.stringify(ids)},"show_sources":false}}
+`;
 }
 async function adminBlogLinesForPrompt(): Promise<string> {
   try {
@@ -526,7 +549,7 @@ ${blogLines}
 ` : ""}${materialLines ? `
 BLOG MATERIALS — what the owner uploaded in «Блог» → «+ Статья» → «Материалы» to write articles FROM (id|kind|name|…), newest first; the ids draft_from_materials takes, never invent one:
 ${materialLines}
-` : ""}${openPost ? `
+${attachedMaterialsNote(materialLines)}` : ""}${openPost ? `
 THE ARTICLE THE OWNER IS LOOKING AT RIGHT NOW — it is open in the blog editor on his screen while he types to you:
 ${openPost.slug}|${openPost.status}|${openPost.title || openPost.slug}
 This is what «эта статья», «она», «сюда», «в неё» mean, and what a message with no article named at all is about. Every action below that takes a post slug MUST use «${openPost.slug}» unless the owner clearly names a different article from the BLOG POSTS list. NEVER answer a request about this article with draft_post: draft_post makes a NEW article, and a second draft of something he is already reading is the mistake he complains about most. A request to change THIS article's text — make its products links to the shop, fix or rewrite a paragraph, shorten or lengthen a part, change the title, add a sentence — is edit_post, described below.
@@ -720,7 +743,7 @@ export async function POST(req: NextRequest) {
      the chat from (window.openChatAbout in public/shop2/chat.js). It is pinned
      for the conversation: that article's digest is always the first SALON
      GUIDE, whatever the question (./blog-digest.ts shopGuides). */
-  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown; post?: unknown; product?: unknown; article?: unknown };
+  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown; materials?: unknown; post?: unknown; product?: unknown; article?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -851,9 +874,13 @@ export async function POST(req: NextRequest) {
      TEXT_TRIGGER's and was answered «нет объёма 500 мл» from the catalogue line
      (live test, 26.10.2026). Nothing named, nothing read. */
   const named = isAdmin && !isMini ? await namedForPrompt(lastUser, allRows, openProduct) : "";
-  // the materials library, when the message is about the blog or its materials (draft_from_materials)
-  const materialLines = isAdmin && !isMini && (BLOG_TRIGGER.test(lastUser) || MATERIAL_TRIGGER.test(lastUser))
-    ? await adminMaterialLinesForPrompt()
+  /* the materials library, when the message is about the blog or its materials
+     (draft_from_materials) — and always once the owner has attached a file in
+     this conversation: «да», «давай» after the panel's «Сохранил PDF…» are
+     about it, and say neither «статья» nor «PDF» */
+  const attachedMaterials = isAdmin && !isMini ? briefMaterialIds(body.materials) : [];
+  const materialLines = isAdmin && !isMini && (attachedMaterials.length || BLOG_TRIGGER.test(lastUser) || MATERIAL_TRIGGER.test(lastUser))
+    ? await adminMaterialLinesForPrompt(attachedMaterials)
     : "";
 
   /* The panel's own language, and then the language the owner actually wrote

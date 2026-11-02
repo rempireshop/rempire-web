@@ -9380,6 +9380,41 @@
       }
     },
     {
+      "id": "blog-materials-link-pdf",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Материалы: ссылка на PDF или на фото",
+      "steps": [
+        "«Блог» → «+ Статья» → «Ссылка».",
+        "Вставить адрес открытого PDF бренда (оканчивается на .pdf) и «Добавить».",
+        "Ещё раз «Ссылка»: адрес фото (.jpg) и «Добавить»."
+      ],
+      "expect": [
+        "У PDF написано, сколько в нём страниц; в библиотеке виден его текст.",
+        "Фото по ссылке видно маленьким в строке."
+      ],
+      "why": "Каталоги часто лежат на сайте бренда: магазин сам скачивает PDF и читает его текст.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T14:54:46.251Z",
+      "en": {
+        "title": "Materials: a link to a PDF or a photo",
+        "steps": [
+          "«Блог» → «+ Статья» → «Ссылка».",
+          "Paste the address of a public brand PDF (ending in .pdf) and «Добавить».",
+          "«Ссылка» again: a photo's address (.jpg) and «Добавить»."
+        ],
+        "expect": [
+          "The PDF says how many pages it has; its text shows in the library.",
+          "The linked photo shows small in its row."
+        ],
+        "why": "Catalogues often sit on the brand's site: the shop downloads the PDF itself and reads its text."
+      }
+    },
+    {
       "id": "blog-materials-delete",
       "area": "goods",
       "who": "renat",
@@ -10443,8 +10478,8 @@
       "why": "Помощник отвечал «добавил фото» и не добавлял, а каждая следующая просьба заводила ещё один черновик. Фраза, которой верят, хуже отказа: вы идёте дальше, а сделано ничего.",
       "risk": "med",
       "writes": true,
-      "mark": "reworded",
-      "markedAt": "2026-10-20T14:56:29.494Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T14:54:46.251Z",
       "en": {
         "title": "The assistant puts a photo into the article you have open",
         "steps": [
@@ -10595,6 +10630,137 @@
           "Nothing was published by itself."
         ],
         "why": "One materials library for the panel, the assistant and Claude — the assistant does what Claude does."
+      }
+    },
+    {
+      "id": "ai-assistant-pdf",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Помощник: PDF скрепкой — в материалы и в статью",
+      "steps": [
+        "Открыть Помощника и нажать скрепку.",
+        "Выбрать PDF бренда (каталог Kevin.Murphy) и ничего не писать.",
+        "Дождаться ответа в чате.",
+        "Нажать «Напиши статью по этому».",
+        "Подтвердить карточку «Новая статья из материалов»."
+      ],
+      "expect": [
+        "Под строкой вопроса видно «Читаю PDF: страница … из …».",
+        "Помощник сам пишет «Сохранил в материалы блога» и число страниц.",
+        "PDF виден в «+ Статья» → «Из библиотеки».",
+        "Открывается «Новая статья», и черновик пишется сам.",
+        "Ничего не опубликовано само."
+      ],
+      "why": "Каталоги у Рената в телефоне: раньше PDF попадал в статью только через «Блог» → «+ Статья».",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T14:54:46.251Z",
+      "en": {
+        "title": "Assistant: a PDF on the clip — into the materials and an article",
+        "steps": [
+          "Open the assistant and tap the clip.",
+          "Pick a brand's PDF (a Kevin.Murphy catalogue) and type nothing.",
+          "Wait for the answer in the chat.",
+          "Tap «Напиши статью по этому».",
+          "Confirm the «Новая статья из материалов» card."
+        ],
+        "expect": [
+          "Under the question box: «Читаю PDF: страница … из …».",
+          "The assistant itself says «Сохранил в материалы блога» and the page count.",
+          "The PDF is in «+ Статья» → «Из библиотеки».",
+          "«Новая статья» opens, and the draft is written by itself.",
+          "Nothing was published by itself."
+        ],
+        "why": "Renat keeps the catalogues on his phone: a PDF used to reach an article only through «Блог» → «+ Статья»."
+      }
+    },
+    {
+      "id": "ai-assistant-photo-use",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Фото в Помощнике: для статьи или для товара",
+      "steps": [
+        "Прикрепить скрепкой одно фото и нажать → без слов.",
+        "Нажать «Для товара».",
+        "Прикрепить другое фото и написать «для статьи про бороду».",
+        "Прикрепить третье фото и написать «это фото для Bio Botanical Shampoo, сделай главным»."
+      ],
+      "expect": [
+        "После → без слов чат спрашивает «Для чего эти фото?» с двумя кнопками.",
+        "«Для товара»: Помощник спрашивает, для какого товара это фото.",
+        "«для статьи…»: чат пишет «Сохранил в материалы блога», фото там.",
+        "Главное фото у Bio Botanical Shampoo ставится, как раньше, через «Применить»."
+      ],
+      "why": "Фото в Помощнике нужны и товарам, и статьям: когда слова не говорят, для чего, лучше спросить.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T14:54:46.251Z",
+      "en": {
+        "title": "Photos in the assistant: for an article or for a product",
+        "steps": [
+          "Attach one photo with the clip and press → with no words.",
+          "Tap «Для товара».",
+          "Attach another photo and type «для статьи про бороду».",
+          "Attach a third photo and type «это фото для Bio Botanical Shampoo, сделай главным»."
+        ],
+        "expect": [
+          "After → with no words the chat asks «Для чего эти фото?» with two buttons.",
+          "«Для товара»: the assistant asks which product the photo is for.",
+          "«для статьи…»: the chat says «Сохранил в материалы блога», the photo is there.",
+          "Bio Botanical Shampoo's main photo is set as before, through «Применить»."
+        ],
+        "why": "Photos in the assistant serve products and articles alike: when the words do not say which, asking is better."
+      }
+    },
+    {
+      "id": "ai-claude-files",
+      "area": "ai",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Claude: файлы из чата — текстом или по ссылке на телефоне",
+      "steps": [
+        "В чате с Claude прикрепить PDF бренда и попросить: «сохрани в материалы для статьи».",
+        "Спросить Claude: «как добавить фото для статьи?».",
+        "Открыть ссылку от Claude на телефоне и выбрать два фото.",
+        "Вернуться в чат и написать «готово, напиши статью».",
+        "Открыть черновик в «Блоге»."
+      ],
+      "expect": [
+        "Claude сохраняет текст PDF и честно говорит, что фото так не передать.",
+        "Claude даёт ссылку и коротко говорит, что нажать.",
+        "Ссылка открывает «+ Статья» → «Материалы», тема уже вписана.",
+        "Черновик написан по тексту PDF, фото из ссылки в нём.",
+        "Ничего не опубликовано само."
+      ],
+      "why": "Claude видит файлы в чате, но передать их магазину не может: фото идут через телефон Рената.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T14:54:46.251Z",
+      "en": {
+        "title": "Claude: files from the chat — as text, or by a link on the phone",
+        "steps": [
+          "In a chat with Claude attach a brand's PDF and ask «сохрани в материалы для статьи».",
+          "Ask Claude: «как добавить фото для статьи?».",
+          "Open Claude's link on the phone and pick two photos.",
+          "Go back to the chat and type «готово, напиши статью».",
+          "Open the draft in «Блог»."
+        ],
+        "expect": [
+          "Claude saves the PDF's text and says plainly the photos cannot go that way.",
+          "Claude gives a link and says briefly what to press.",
+          "The link opens «+ Статья» → «Материалы», the topic already filled in.",
+          "The draft is written from the PDF's text, the linked photos in it.",
+          "Nothing was published by itself."
+        ],
+        "why": "Claude sees the files in the chat but cannot hand them to the shop: photos go through Renat's phone."
       }
     },
     {

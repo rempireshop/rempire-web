@@ -27,6 +27,13 @@
  * nothing on Vercel's CPU meter; the HTML → text is a few regex passes over
  * at most 2 MB.
  *
+ * fetchPublicFile (Dim, 02.11.2026: Renat's Claude saves a material from a
+ * link — «PDFs and images at a URL included, with size/type limits») goes
+ * through the very same loop and takes a PDF (20 MB) or a photo (JPEG, PNG,
+ * WebP, AVIF; 12 MB) as well as a page, within 20 seconds; what the bytes
+ * are is decided by their first bytes, not by the name or the header alone.
+ * src/lib/blog-material-link.ts turns them into a material.
+ *
  * The network halves (`resolve` and `request`) can be handed in, which is how
  * tests/blog-materials.test.ts proves every refusal without a network.
  */
@@ -161,7 +168,11 @@ export function guardedLookup(resolve: Resolve = defaultResolve): net.LookupFunc
   }) as net.LookupFunction;
 }
 
-const defaultRequest: SafeRequest = (url, lookup, signal) =>
+const PAGE_ACCEPT = "text/html,text/plain;q=0.9";
+/** What a file link asks for — a page, a PDF or a photo (fetchPublicFile). */
+const FILE_ACCEPT = "text/html,application/pdf,image/jpeg,image/png,image/webp,image/avif;q=0.9,text/plain;q=0.8";
+
+const requestWith = (accept: string): SafeRequest => (url, lookup, signal) =>
   new Promise((resolve, reject) => {
     const req = https.request(url, {
       method: "GET",
@@ -169,13 +180,15 @@ const defaultRequest: SafeRequest = (url, lookup, signal) =>
       signal,
       headers: {
         "user-agent": "RempireShop/1.0 (+https://rempireshop.com) blog-materials",
-        accept: "text/html,text/plain;q=0.9",
+        accept,
         "accept-encoding": "identity",
       },
     }, (res) => resolve({ status: res.statusCode || 0, headers: res.headers, body: res }));
     req.on("error", reject);
     req.end();
   });
+const defaultRequest: SafeRequest = requestWith(PAGE_ACCEPT);
+const fileRequest: SafeRequest = requestWith(FILE_ACCEPT);
 
 export interface PublicPage {
   url: string;
@@ -183,18 +196,82 @@ export interface PublicPage {
   text: string;
 }
 
+type Deps = { resolve?: Resolve; request?: SafeRequest; timeoutMs?: number; maxBytes?: number };
+
 /**
  * The text of a public https page. Refuses with a SafeFetchError (its `code`
  * says which rule) — never reaches a private address, never follows a
  * redirect it has not checked, never reads past the caps.
  */
-export async function fetchPublicPage(
+export async function fetchPublicPage(raw: string, deps: Deps = {}): Promise<PublicPage> {
+  const maxBytes = deps.maxBytes ?? FETCH_MAX_BYTES;
+  const got = await fetchGuarded(raw, { ...deps, request: deps.request ?? defaultRequest }, (type) =>
+    !type || /^(text\/html|text\/plain|application\/xhtml\+xml)/.test(type) ? { kind: "page", max: maxBytes } : null);
+  return { url: got.url, ...pageOf(got.type, got.body) };
+}
+
+function pageOf(type: string, body: Buffer): { title: string; text: string } {
+  const html = body.toString("utf8");
+  return /html/.test(type) || /<html|<body|<p[\s>]/i.test(html) ? htmlToText(html) : { title: "", text: html };
+}
+
+/* ---------- a file at a link: a page, a PDF or a photo ------------------- */
+
+/** Each kind's own ceiling (Dim's «with size/type limits», 02.11.2026). */
+export const FILE_MAX_BYTES = { page: FETCH_MAX_BYTES, pdf: 20 * 1024 * 1024, image: 12 * 1024 * 1024 } as const;
+/** A 20 MB catalogue on a slow brand site is longer than a page — still waiting, not work. */
+export const FILE_TIMEOUT_MS = 20_000;
+export type PublicFileKind = "page" | "pdf" | "image";
+export type PublicFile =
+  | ({ kind: "page" } & PublicPage)
+  | { kind: "pdf" | "image"; url: string; type: string; bytes: Buffer };
+
+const IMAGE_TYPES = /^image\/(jpeg|jpg|pjpeg|png|webp|avif)\b/;
+/* Servers that send a PDF as «a file» — decided by its first bytes instead. */
+const OCTET = /^(application\/(octet-stream|x-pdf|force-download|download|binary)|binary\/octet-stream)\b/;
+
+/** The kind the first bytes say — never the name, never the header alone. */
+export function sniffKind(bytes: Buffer): "pdf" | "image" | "" {
+  if (bytes.subarray(0, 1024).toString("latin1").includes("%PDF-")) return "pdf";
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image";                                  // JPEG
+  if (bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image";   // PNG
+  if (bytes.subarray(0, 4).toString("latin1") === "RIFF" && bytes.subarray(8, 12).toString("latin1") === "WEBP") return "image";
+  if (bytes.subarray(4, 12).toString("latin1").startsWith("ftypavi")) return "image";                              // AVIF
+  return "";
+}
+
+/**
+ * A public https address as a page's text, a PDF's bytes or a photo's bytes —
+ * through every rule fetchPublicPage keeps (the address, DNS at the connect,
+ * each redirect), each kind under its own ceiling. The type in the header
+ * picks the ceiling; the first bytes have the last word, so a «PDF» that is
+ * an HTML page, or a photo that is a script, is refused as `not_file`.
+ */
+export async function fetchPublicFile(raw: string, deps: Deps = {}): Promise<PublicFile> {
+  const got = await fetchGuarded(raw, { timeoutMs: FILE_TIMEOUT_MS, ...deps, request: deps.request ?? fileRequest }, (type) => {
+    if (!type || /^(text\/html|text\/plain|application\/xhtml\+xml)/.test(type)) return { kind: "page", max: FILE_MAX_BYTES.page };
+    if (/^application\/pdf\b/.test(type) || OCTET.test(type)) return { kind: "pdf", max: FILE_MAX_BYTES.pdf };
+    if (IMAGE_TYPES.test(type)) return { kind: "image", max: FILE_MAX_BYTES.image };
+    return null;
+  });
+  const sniffed = sniffKind(got.body);
+  if (got.kind === "page") {
+    // a page that is really a PDF or a photo, sent as text by a careless server
+    if (sniffed === "pdf" || sniffed === "image") return { kind: sniffed, url: got.url, type: got.type, bytes: got.body };
+    return { kind: "page", url: got.url, ...pageOf(got.type, got.body) };
+  }
+  if (sniffed !== got.kind) throw new SafeFetchError("not_file");
+  return { kind: got.kind as "pdf" | "image", url: got.url, type: got.type, bytes: got.body };
+}
+
+/** The one guarded loop both readers go through; `classify` says which types are wanted and how many bytes each may have. */
+async function fetchGuarded(
   raw: string,
-  deps: { resolve?: Resolve; request?: SafeRequest; timeoutMs?: number; maxBytes?: number } = {},
-): Promise<PublicPage> {
+  deps: Deps,
+  classify: (type: string) => { kind: PublicFileKind; max: number } | null,
+): Promise<{ url: string; type: string; kind: PublicFileKind; body: Buffer }> {
   const resolve = deps.resolve ?? defaultResolve;
   const request = deps.request ?? defaultRequest;
-  const maxBytes = deps.maxBytes ?? FETCH_MAX_BYTES;
   const signal = AbortSignal.timeout(deps.timeoutMs ?? FETCH_TIMEOUT_MS);
   let url = checkUrl(raw);
 
@@ -229,8 +306,13 @@ export async function fetchPublicPage(
       continue;
     }
     if (res.status !== 200) throw new SafeFetchError("http_" + res.status);
-    const type = String(res.headers["content-type"] || "").toLowerCase();
-    if (type && !/^(text\/html|text\/plain|application\/xhtml\+xml)/.test(type)) throw new SafeFetchError("not_text");
+    const type = String(res.headers["content-type"] || "").toLowerCase().trim();
+    const want = classify(type);
+    if (!want) throw new SafeFetchError("not_text");
+    const maxBytes = deps.maxBytes ? Math.min(deps.maxBytes, want.max) : want.max;
+    // a length that says «too big» is refused before a byte is read
+    const declared = Number(res.headers["content-length"]);
+    if (Number.isFinite(declared) && declared > maxBytes) throw new SafeFetchError("too_large");
 
     const chunks: Buffer[] = [];
     let size = 0;
@@ -245,9 +327,7 @@ export async function fetchPublicPage(
       if (err instanceof SafeFetchError) throw err;
       throw new SafeFetchError(signal.aborted ? "timeout" : "unreachable");
     }
-    const html = Buffer.concat(chunks).toString("utf8");
-    const page = /html/.test(type) || /<html|<body|<p[\s>]/i.test(html) ? htmlToText(html) : { title: "", text: html };
-    return { url: url.toString(), title: page.title, text: page.text };
+    return { url: url.toString(), type, kind: want.kind, body: Buffer.concat(chunks) };
   }
 }
 
