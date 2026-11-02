@@ -17,6 +17,7 @@ import { getDescriptionOverrides } from "@/lib/product-descriptions";
 import { getSeoOverrides } from "@/lib/product-seo";
 import { cleanPricing, publicPricing } from "@/lib/loyalty";
 import { cleanGiftAmounts } from "@/lib/giftcards";
+import { googleSignInOn } from "@/lib/google-signin";
 import { listCustomProducts, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
 
 export const runtime = "nodejs";
@@ -150,8 +151,19 @@ export async function GET() {
        denomination the checkout would refuse, so the stored row is sanitised
        here rather than trusted through the generic spread. */
     const giftAmounts = cleanGiftAmounts(stored.gift_amounts);
+    /* «Продолжить с Google» (src/lib/google-signin.ts): whether the storefront
+       draws the button — on once GOOGLE_CLIENT_ID is set on the deployment.
+       Not a stored setting and never one: it rides on this answer because
+       every page already asks for it at boot, so the flag costs no request of
+       its own (Vercel's CPU allowance). Computed after the spread, so a
+       settings row of the same name cannot switch it. */
     return Response.json(
-      { ok: true, overrides: publicOverrides(overrides), custom, settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts } },
+      {
+        ok: true,
+        overrides: publicOverrides(overrides),
+        custom,
+        settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts, google_signin: googleSignInOn() },
+      },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

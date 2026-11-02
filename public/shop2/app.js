@@ -845,6 +845,19 @@
         "Kood on saadetud e-postile — kuus numbrit, kehtib 15 minutit.",
       "Код отправлен — проверьте почту ✓": "Kood on saadetud — vaata e-posti ✓",
       "Вы вошли ✓": "Oled sisse logitud ✓", "Вы вышли ✓": "Oled välja logitud ✓",
+      /* «Продолжить с Google» (googleBtnHTML, 02.11.2026) — the button's label
+         is Google's own wording in each language (its branding guidelines) */
+      "Продолжить с Google": "Jätka Google'iga",
+      "Продолжить с Google — заполнит имя и e-mail": "Jätka Google'iga — täidab nime ja e-posti",
+      "или кодом на почту": "või koodiga e-postile",
+      "Google передаёт нам только имя и e-mail. Тот же e-mail — тот же аккаунт, со всеми заказами.":
+        "Google edastab meile ainult sinu nime ja e-posti aadressi. Sama e-post — sama konto, kõigi tellimustega.",
+      "Открываем Google…": "Avame Google'i…",
+      "Вход через Google отменён. Попробуйте ещё раз или получите код на почту ниже.":
+        "Google'iga sisselogimine katkestati. Proovi uuesti või küsi allpool kood e-postile.",
+      "Вход через Google отменён. Попробуйте ещё раз или впишите e-mail ниже.":
+        "Google'iga sisselogimine katkestati. Proovi uuesti või kirjuta allpool oma e-post.",
+      "Вы вошли как": "Oled sisse logitud kui",
       "Не получилось выйти": "Välja logimine ebaõnnestus",
       "Войдите ещё раз": "Logi uuesti sisse",
       "Код не подошёл — проверьте цифры": "Kood ei sobinud — kontrolli numbreid",
@@ -4494,6 +4507,18 @@
         "The code is on its way — six digits, valid for 15 minutes.",
       "Код отправлен — проверьте почту ✓": "Code sent — check your e-mail ✓",
       "Вы вошли ✓": "You are signed in ✓", "Вы вышли ✓": "You are signed out ✓",
+      /* «Продолжить с Google» (googleBtnHTML, 02.11.2026) */
+      "Продолжить с Google": "Continue with Google",
+      "Продолжить с Google — заполнит имя и e-mail": "Continue with Google — fills name and e-mail",
+      "или кодом на почту": "or with an e-mail code",
+      "Google передаёт нам только имя и e-mail. Тот же e-mail — тот же аккаунт, со всеми заказами.":
+        "Google tells us only your name and e-mail. Same e-mail as before — same account, with all your orders.",
+      "Открываем Google…": "Opening Google…",
+      "Вход через Google отменён. Попробуйте ещё раз или получите код на почту ниже.":
+        "Google sign-in was cancelled. Try again, or get a code by e-mail below.",
+      "Вход через Google отменён. Попробуйте ещё раз или впишите e-mail ниже.":
+        "Google sign-in was cancelled. Try again, or type your e-mail below.",
+      "Вы вошли как": "Signed in as",
       "Не получилось выйти": "Could not sign you out",
       "Войдите ещё раз": "Please sign in again",
       "Код не подошёл — проверьте цифры": "That code did not match — check the digits",
@@ -7665,6 +7690,12 @@
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
       { ET: "$1 tellimust · $2 päevas", EN: "$1 orders · $2 per day" }],
     [/^(\d+) заказ(?:|а|ов)$/, { ET: "$1 tellimust", EN: "$1 orders" }],
+    /* «Вы вошли как … — найдено 3 прежних заказа» after «Продолжить с Google»
+       (googleOkHTML): the count's own node, in the three Russian forms pl()
+       picks; one order is singular in ET and EN too, 21 is not. */
+    [/^найден (1) прежний заказ$/, { ET: "leitud $1 varasem tellimus", EN: "$1 earlier order found" }],
+    [/^найден (\d+) прежний заказ$/, { ET: "leitud $1 varasemat tellimust", EN: "$1 earlier orders found" }],
+    [/^найдено (\d+) прежних заказ(?:а|ов)$/, { ET: "leitud $1 varasemat tellimust", EN: "$1 earlier orders found" }],
     [/^(\d+) в салоне$/, { ET: "$1 salongis", EN: "$1 in the salon" }],
     [/^(.+) в день$/, { ET: "$1 päevas", EN: "$1 per day" }],
     [/^Показаны первые (\d+) из (\d+)$/,
@@ -19354,10 +19385,13 @@
         '<h1 class="display h1">Кабинет</h1>' +
         (stage === "email"
           ? '<p class="muted" style="margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
+            // «Продолжить с Google» first, then «или кодом на почту» (Login.dc.html)
+            acctGoogleHTML() +
             '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '"></label>' +
             (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : "") +
             (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
-            '<button class="btn btn--wide" data-login' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctBusy ? "Отправляем…" : "Получить код") + "</button>"
+            '<button class="btn btn--wide" data-login' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctBusy ? "Отправляем…" : "Получить код") + "</button>" +
+            (GOOGLE_ON ? '<p class="gnote">Google передаёт нам только имя и e-mail. Тот же e-mail — тот же аккаунт, со всеми заказами.</p>' : "")
           /* The address is its own node: translateTree() rewrites whole text
              nodes, and a sentence with an e-mail baked into it can never
              match a dictionary key. */
@@ -19373,6 +19407,8 @@
     var f = S.acctForm;
     return '<div class="wrap wrap--mid"><section class="sec">' +
       '<div class="acct__top"><h1 class="display h1">Кабинет</h1><button class="link" data-logout>Выйти</button></div>' +
+      // just back from «Продолжить с Google»
+      (googleNote("account") === "ok" ? googleOkHTML() : "") +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои заказы</h2></div>' +
       (S.acctOrders.length
@@ -19639,6 +19675,8 @@
     S.email = "";
     S.ship.name = ""; S.ship.phone = ""; S.ship.addr = ""; S.ship.zip = ""; S.ship.city = ""; S.ship.point = null;
     S.emailTouched = false; S.shipTouched = false; S.shipPicked = false;
+    // «Вы вошли как …» from a Google sign-in is no longer true
+    S.gNote = "";
     // …including the "somebody signs in here" flag, so the next visit from
     // this browser is an anonymous one again and asks nothing at boot
     acctHint(false);
@@ -19689,6 +19727,149 @@
         return r.ok ? r.json() : null;
       });
   }
+
+  /* ---------- «Продолжить с Google» ----------------------------------------
+     Dim, 02.11.2026 (canvas-banner/project/Login.dc.html, GoogleBtn.dc.html):
+     a second door into the account, above the e-mailed code and never instead
+     of it — on «Кабинет», and at the checkout's contact step for a shopper who
+     is not signed in. The server side is src/lib/google-signin.ts: the button
+     is a plain link to /api/account/google/start, which sends the browser to
+     Google; Google posts back to the shop, the shop signs the customer in the
+     way a correct code does and sends the browser back to the page it left,
+     with ?google=ok or ?google=cancel on it (googleBack below).
+
+     Drawn only when the deployment has a Google client. /api/overrides/ says
+     so (settings.google_signin — true once GOOGLE_CLIENT_ID is set), so the
+     flag costs no request of its own. The last answer is remembered in this
+     browser (GOOGLE_LS) for one reason: a repeat visit to «Кабинет» paints
+     the button with the first frame instead of pushing the e-mail box down
+     when the feed lands. The feed's answer always wins.
+
+     The button is Google's light button by its branding rules: white, a 1-px
+     #747775 border, 4-px corners, #1f1f1f text at weight 500, the four-colour
+     G as inline SVG (styles.css .gbtn). No Google font, no Google script. */
+  var GOOGLE_LS = "rempire-google-signin";
+  var GOOGLE_ON = (function () {
+    try { return localStorage.getItem(GOOGLE_LS) === "1"; } catch (e) { return false; }
+  })();
+  /** The feed's word (adoptServer). The checkout's contact step is never re-rendered for a feed, so its slot is patched. */
+  function googleAdopt(on) {
+    var was = GOOGLE_ON;
+    GOOGLE_ON = on === true;
+    try {
+      if (GOOGLE_ON) localStorage.setItem(GOOGLE_LS, "1");
+      else localStorage.removeItem(GOOGLE_LS);
+    } catch (e) {}
+    if (was !== GOOGLE_ON) coGooglePatch();
+  }
+  var G_LOGO = '<svg class="gbtn__g" aria-hidden="true" width="20" height="20" viewBox="0 0 48 48">' +
+    '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>' +
+    '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>' +
+    '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>' +
+    '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>';
+  var G_SPIN = '<svg class="gbtn__spin" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>';
+  var G_ALERT = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5v.5"></path></svg>';
+  var G_TICK = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5 9-10"></path></svg>';
+  /** What came back on this screen's address: "ok", "cancel" or "". */
+  function googleNote(screen) { return S.gNote && S.gNoteAt === screen ? S.gNote : ""; }
+  /** The link. `co`: the checkout's own label and its 48-px size (GoogleBtn.dc.html).
+      S.gBusy: tapped, the browser is on its way to Google — grey, «Открываем Google…». */
+  function googleBtnHTML(co) {
+    var back = shopPathFor(S.lang, co ? "/checkout/" : "/account/");
+    return '<a class="gbtn' + (co ? " gbtn--co" : "") + '" href="/api/account/google/start?return=' + encodeURIComponent(back) + '" data-gsignin' +
+      (S.gBusy ? ' aria-disabled="true">' + G_SPIN + "<span>Открываем Google…</span>"
+        : ">" + G_LOGO + "<span>" + (co ? "Продолжить с Google — заполнит имя и e-mail" : "Продолжить с Google") + "</span>") + "</a>";
+  }
+  function googleCancelHTML(msg) {
+    return '<div class="galert" role="alert">' + G_ALERT + "<span>" + msg + "</span></div>";
+  }
+  /** «Вы вошли как anna@… — найдено 3 прежних заказа»: the address its own node, the count its own (UI_RX). */
+  function googleOkHTML() {
+    var n = S.acctOrders.length;
+    return '<div class="gok" role="status">' + G_TICK + "<span><span>Вы вошли как</span> <strong data-notr>" +
+      esc(S.cust && S.cust.email ? S.cust.email : S.email) + "</strong>" +
+      (n ? " — <span>" + googleOrdersFound(n) + "</span>" : "") + "</span></div>";
+  }
+  function googleOrdersFound(n) {
+    return pl(n, "найден " + n + " прежний заказ", "найдено " + n + " прежних заказа", "найдено " + n + " прежних заказов");
+  }
+  /** «Кабинет», signed out: the button, the alert when the last try came back cancelled, the divider. */
+  function acctGoogleHTML() {
+    if (!GOOGLE_ON) return "";
+    return googleBtnHTML(false) +
+      (googleNote("account") === "cancel" ? googleCancelHTML("Вход через Google отменён. Попробуйте ещё раз или получите код на почту ниже.") : "") +
+      '<div class="orline"><span>или кодом на почту</span></div>';
+  }
+  /** The checkout's contact step: the button for a shopper who is not signed in — and whose profile is not on its
+      way (acctHinted) — or the «Вы вошли как» line right after Google sent them back. */
+  function coGoogleHTML() {
+    if (S.loggedIn) return googleNote("checkout") === "ok" && S.cust ? googleOkHTML() : "";
+    if (!GOOGLE_ON || acctHinted()) return "";
+    /* «…получите код на почту ниже» is the account screen's: below the
+       button here is the order's own e-mail box, and no code */
+    return googleBtnHTML(true) +
+      (googleNote("checkout") === "cancel" ? googleCancelHTML("Вход через Google отменён. Попробуйте ещё раз или впишите e-mail ниже.") : "");
+  }
+  /** The slot redrawn in place — the checkout's fields are never rebuilt for this. */
+  function coGooglePatch() {
+    if (S.screen !== "checkout") return;
+    var box = document.querySelector("[data-co-google]");
+    if (!box) return;
+    box.innerHTML = coGoogleHTML();
+    translateTree(box);
+  }
+  /* The tap. The link is followed by hand so the button can say «Открываем
+     Google…» first, greyed, and a second tap cannot start a second sign-in.
+     The state is S.gBusy, not the element's, because anything that redraws
+     the screen while Google's page loads (a feed, the profile) must draw it
+     grey too. A middle click or a modifier opens a tab the way any link does. */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("[data-gsignin]") : null;
+    if (!a) return;
+    if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (S.gBusy) return;
+    S.gBusy = true;
+    a.setAttribute("aria-disabled", "true");
+    a.innerHTML = G_SPIN + "<span>Открываем Google…</span>";
+    translateTree(a);
+    // a Google that never answers must not leave a dead button behind
+    setTimeout(googleUnbusy, 15000);
+    location.assign(a.getAttribute("href"));
+  });
+  function googleUnbusy() {
+    if (!S.gBusy) return;
+    S.gBusy = false;
+    if (S.screen === "checkout") coGooglePatch();
+    else if (S.screen === "account") render();
+  }
+  /* Back from Google's chooser can hand this very page back out of the
+     browser's memory with the button still greyed. */
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) googleUnbusy();
+  });
+  /* The way back: /ru/checkout?google=ok. The flag leaves the address at
+     once — a reload or a shared link must not say «Вы вошли» again — and is
+     kept for the screen it came back to (googleNote). «ok» also means a
+     session cookie has just been set, so this browser counts as signed in
+     from the first paint (acctHint): the profile is asked for at once, and
+     the checkout does not flash the button at a shopper who has just used it.
+     Run here, while the file is evaluated, so the ask below can start now. */
+  (function googleBack() {
+    var m = null;
+    try { m = String(location.search || "").match(/[?&]google=(ok|cancel)(?:&|$)/); } catch (e) { m = null; }
+    if (!m) return;
+    var rest = String(location.search).replace(/^\?/, "").split("&").filter(function (kv) {
+      return kv && kv.split("=")[0] !== "google";
+    }).join("&");
+    try { history.replaceState(history.state || null, "", location.pathname + (rest ? "?" + rest : "") + (location.hash || "")); } catch (e) {}
+    var r = shopRouteOf(location.pathname);
+    var at = r && r.rest === "/account/" ? "account" : r && r.rest === "/checkout/" ? "checkout" : "";
+    if (!at) return;
+    S.gNote = m[1];
+    S.gNoteAt = at;
+    if (m[1] === "ok") acctHint(true);
+  })();
   /**
    * Started HERE, while this file is still being evaluated — before the
    * catalogue is indexed and long before the first screen is painted — in a
@@ -19735,15 +19916,22 @@
     ACCT_BOOT = null;
     pending
       .then(function (j) {
-        if (!j || !j.ok) return;
+        /* signed out after all (a 401 has just dropped acctHint): the
+           checkout may offer «Продолжить с Google» now */
+        if (!j || !j.ok) { coGooglePatch(); return; }
         apiSeen(true);
         // On checkout this only ever needs to reveal/update the loyalty row
         // in the summary — S.ship.name/phone prefill (acctApply, only into
         // still-empty fields) is picked up fresh whenever step 2 actually
         // renders, with no patch needed since the shopper starts on step 1.
         if (acctApply(j)) {
+          /* Back from «Продолжить с Google»: the basket in front of them is
+             attached to a known address now, as after a code (acctVerify) */
+          if (googleNote(S.screen) === "ok" && S.cust) pushCart(true);
           if (S.screen === "checkout") {
             patchSummary();
+            // the button goes, «Вы вошли как …» comes, the fields stay
+            coGooglePatch();
             /* Step 1 was painted before the profile arrived, so the address
                acctApply() just put in S.email is not in the box the shopper is
                looking at: «Далее» pressed a moment too early answered «Введите
@@ -22158,6 +22346,10 @@
           '<section class="costep' + (step === 1 ? " is-open" : "") + '">' +
             coHead(1, "Контакт", esc(S.email || "—")) +
             (step === 1 ? '<div class="costep__body">' +
+              /* «Продолжить с Google — заполнит имя и e-mail», signed out only
+                 (Dim, 02.11.2026); its own slot, patched in place when the
+                 profile or the feed answers (coGooglePatch) */
+              "<div data-co-google>" + coGoogleHTML() + "</div>" +
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
@@ -45587,6 +45779,8 @@
        admin's own no-store read (admSetTake → admSetAdopt) keeps those keys
        in step instead. (`typeof`: harnesses that run this on its own.) */
     var fed = function (key) { return typeof ADM_SET_AT === "undefined" || !ADM_SET_AT[key]; };
+    // «Продолжить с Google»: on when the deployment has a Google client — not a stored setting
+    if (typeof s.google_signin === "boolean" && typeof googleAdopt === "function") googleAdopt(s.google_signin);
     if (typeof s.chatbot === "boolean" && fed("chatbot")) DEMO.chatbot = s.chatbot;
     if (typeof s.bundles === "boolean" && fed("bundles")) DEMO.bundles = s.bundles;
     // the banner: null on the server means «стандартный», and it wins over the
@@ -52446,6 +52640,8 @@
     // the account's point sheet belongs to the account screen and closes with it
     if (S.pointFor === "acct") { S.pointOpen = false; S.pointFor = ""; }
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
+    // what came back from Google belongs to the screen it came back to (googleBack)
+    if (S.gNote && screen !== S.gNoteAt) S.gNote = "";
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") {
       S.coStep = 1; S.pointOpen = false;

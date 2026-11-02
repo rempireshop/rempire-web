@@ -176,6 +176,13 @@ function routes(): RouteCase[] {
     { name: "POST /api/account/code/", path: "/api/account/code/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/code/route"), body: { email: "fuzz@example.com", lang: "RU" } },
     { name: "POST /api/account/login/", path: "/api/account/login/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/login/route"), body: { email: "fuzz@example.com", code: "123456", lang: "RU" } },
     { name: "POST /api/account/logout/", path: "/api/account/logout/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/logout/route") },
+    /* «Продолжить с Google» (src/lib/google-signin.ts), on here — FUZZ_ENV
+       carries a client ID. The start route answers its 302 to Google for
+       every query, a hostile return path included (it becomes /account); the
+       callback has no state cookie in any of these, so every body is its 303
+       «cancel». Neither answers with a body, hence jsonBody: false. */
+    { name: "GET /api/account/google/start/", path: "/api/account/google/start/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/google/start/route"), jsonBody: false, queries: ["", "?return=/ru/checkout", "?return=//evil.example/", "?return=https://evil.example/", "?return=%2F%5Cevil.example", "?return=/api/account/me/", "?return=" + "x".repeat(5000)] },
+    { name: "POST /api/account/google/callback/", path: "/api/account/google/callback/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/google/callback/route"), jsonBody: false, body: { id_token: "a.b.c", state: "s" } },
     { name: "GET /api/account/me/", path: "/api/account/me/", method: "GET", exports: ["GET", "PATCH"], load: () => import("@/app/api/account/me/route"), auth: "customer", req: cust },
     { name: "PATCH /api/account/me/", path: "/api/account/me/", method: "PATCH", exports: ["GET", "PATCH"], load: () => import("@/app/api/account/me/route"), auth: "customer", req: cust, body: { name: "Фазз", phone: "+372 1", birthday: "1990-02-28", marketing: true, lang: "ET" } },
     { name: "GET /api/account/pricing/", path: "/api/account/pricing/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/pricing/route"), auth: "customer", req: cust },

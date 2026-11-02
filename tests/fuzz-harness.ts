@@ -300,6 +300,10 @@ const FUZZ_ENV: Record<string, string> = {
   // product creation: «Убрать фон» on, so POST /api/admin/upload/cutout runs
   // its whole path against the stub instead of answering 503 to everything
   PHOTO_CUTOUT: "openai",
+  // «Продолжить с Google» on, so the two /api/account/google/ routes are
+  // fuzzed past their 404. Nothing dials Google: the callback refuses every
+  // fuzz body at the state cookie, before a key is ever asked for.
+  GOOGLE_CLIENT_ID: "fuzz-client.apps.googleusercontent.com",
 };
 const FUZZ_ENV_OFF = [
   "E2E_BOOTSTRAP",

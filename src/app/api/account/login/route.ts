@@ -6,16 +6,13 @@
  * (src/lib/customers.ts).
  */
 import { clientIp, rateLimit } from "@/lib/auth";
+import { signInCustomer } from "@/lib/customer-signin";
 import {
   checkLoginCode,
-  customerCookie,
   isEmail,
   listCustomerOrders,
-  makeCustomerToken,
   normalizeEmail,
   normalizeLangCode,
-  recordLogin,
-  type Customer,
   type CustomerOrder,
   type LoginCheck,
 } from "@/lib/customers";
@@ -80,25 +77,25 @@ export async function POST(req: Request) {
      BEFORE the token was minted, so one slow query answered a correct code with
      a 503 and no cookie, and the code was already gone (audit).
      The session is signed first — makeCustomerToken() is pure crypto and cannot
-     fail — and the three reads below are best-effort. */
-  const headers = {
-    "set-cookie": customerCookie(req, makeCustomerToken(email)),
-    "cache-control": "no-store",
-  };
+     fail — and the three reads below are best-effort. That order lives in
+     signInCustomer() (src/lib/customer-signin.ts) since 02.11.2026, because
+     «Продолжить с Google» signs customers in too and must do it the same way. */
+  const { cookie, customer } = await signInCustomer(req, email, body.lang ?? normalizeLangCode(undefined));
+  const headers = { "set-cookie": cookie, "cache-control": "no-store" };
 
-  let customer: Customer | null = null;
   let orders: CustomerOrder[] = [];
   // wholesale/loyalty: acctApply() in app.js applies this response exactly
   // like a GET /api/account/me one, so both must carry the same "loyalty" shape.
   let loyalty: AccountLoyalty | null = null;
-  try {
-    customer = await recordLogin(email, body.lang ?? normalizeLangCode(undefined));
-    [orders, loyalty] = await Promise.all([listCustomerOrders(email), accountLoyaltySummary(customer.id)]);
-  } catch (err) {
-    /* Signed in on an empty screen, not signed out on a full one. The next
-       GET /api/account/me fills all three in — with the cookie that is already
-       on its way back. Same fallback profile that route falls back to. */
-    console.error("[api/account/login] signed in, profile unavailable:", err);
+  if (customer) {
+    try {
+      [orders, loyalty] = await Promise.all([listCustomerOrders(email), accountLoyaltySummary(customer.id)]);
+    } catch (err) {
+      /* Signed in on an empty screen, not signed out on a full one. The next
+         GET /api/account/me fills both in — with the cookie that is already
+         on its way back. Same fallback profile that route falls back to. */
+      console.error("[api/account/login] signed in, profile unavailable:", err);
+    }
   }
 
   return Response.json(
