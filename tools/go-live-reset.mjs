@@ -146,6 +146,14 @@ export const PLAN = [
       "and product cards are columns, not child tables.",
   },
   {
+    table: "blog_materials",
+    verdict: "keep",
+    why:
+      "The blog's library of materials — PDFs' text, photos, links and sample texts the owner adds in «+ Статья» " +
+      "to write articles from (228_blog_materials.sql, 02.11.2026). His working files, like the posts made from " +
+      "them; the pictures live on R2 and posts may point at them. Always kept.",
+  },
+  {
     table: "promo_codes",
     verdict: "keep",
     content: true,

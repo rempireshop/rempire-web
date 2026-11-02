@@ -3591,7 +3591,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-bnew__list { margin: 0; padding: 0; list-style: none; background: #fff; border: 1px solid rgba(28, 26, 0, .12); }
 .adm-bnew__item { padding: 12px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid rgba(28, 26, 0, .08); }
 .adm-bnew__item:last-child { border-bottom: 0; }
-.adm-bnew__item.is-err .adm-bnew__note { color: var(--a-error, #8c1a0f); }
+.adm-bnew__item.is-err .adm-bnew__note { color: var(--a-warn); }
 .adm-bnew__row { display: flex; gap: 10px; align-items: flex-start; }
 .adm-bnew__ico {
   width: 36px; height: 44px; flex: none; background: #edeae1; display: flex; align-items: center; justify-content: center;

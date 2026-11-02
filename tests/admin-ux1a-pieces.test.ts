@@ -252,9 +252,13 @@ describe("the look the handoff fixed (admin.css § 3)", () => {
   it("the «?» is the one round control; it is a thumb's size on a phone", () => {
     expect(css).toContain("border-radius: 50%; border: 1px solid var(--a-edge);");
     expect(css).toContain("@media (max-width: 899px) { .adm-help { width: 44px; height: 44px;");
-    /* README § 3: «no radius except the round «?» and status dots» — the one
-       dot so far is «Новый товар»'s step number (screen 13, .adm-gnstep__n) */
-    expect(css.match(/border-radius: (?!0)[^;]+;/g), "something else went round").toEqual(["border-radius: 50%;", "border-radius: 50%;"]);
+    /* README § 3: «no radius except the round «?» and status dots» — the
+       dots so far: «Новый товар»'s step number (screen 13, .adm-gnstep__n)
+       and the banner editor's focus-point ring (.adm-herofocus__dot, a
+       marker on the photo with pointer-events: none, not a control; drawn
+       round in the approved Panel.dc.html, 02.11.2026) */
+    expect(css.match(/border-radius: (?!0)[^;]+;/g), "something else went round").toEqual(["border-radius: 50%;", "border-radius: 50%;", "border-radius: 50%;"]);
+    expect(css).toMatch(/\.adm-herofocus__dot \{[^}]*border-radius: 50%;[^}]*pointer-events: none;/);
     expect(css).toMatch(/\.adm-gnstep__n \{[^}]*border-radius: 50%;/);
   });
 

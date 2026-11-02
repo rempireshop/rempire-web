@@ -20323,7 +20323,8 @@
   /** «Вы вошли как anna@… — найдено 3 прежних заказа»: the address its own node, the count its own (UI_RX). */
   function googleOkHTML() {
     var n = S.acctOrders.length;
-    return '<div class="gok" role="status">' + G_TICK + "<span><span>Вы вошли как</span> <strong data-notr>" +
+    // announced, but `role="status"` stays the toast's alone (tests/admin-unsaved-state.test.ts)
+    return '<div class="gok" aria-live="polite">' + G_TICK + "<span><span>Вы вошли как</span> <strong data-notr>" +
       esc(S.cust && S.cust.email ? S.cust.email : S.email) + "</strong>" +
       (n ? " — <span>" + googleOrdersFound(n) + "</span>" : "") + "</span></div>";
   }
