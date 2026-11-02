@@ -22,6 +22,8 @@
  * labels the photo page after it («HYDRATE-ME.WASH — фото»), so the writer can
  * put the right product's photo under the right heading.
  */
+import { brandStems, isLineOpener, keyHits, topicKeys } from "@/lib/blog-words.mjs";
+import { catalogueBrands } from "@/lib/catalogue-slice";
 import { jsonbParam, query } from "@/lib/db";
 import { keyFromUrl } from "@/lib/storage";
 
@@ -295,12 +297,13 @@ export function topicStems(about: string): string[] {
   }
   return out.slice(0, 20);
 }
-const hitsOf = (text: string, stems: string[]) => {
-  const low = text.toLowerCase();
-  let n = 0;
-  for (const s of stems) if (low.includes(s)) n++;
-  return n;
-};
+
+let brandsOnce: Set<string> | null = null;
+/** The topic's stems that can pick a page: no brand, no word every page says (src/lib/blog-words.mjs — the panel's pre-tick reads the same list). */
+export function materialKeys(about: string): string[] {
+  brandsOnce ??= brandStems(catalogueBrands());
+  return topicKeys(topicStems(about), brandsOnce);
+}
 
 /** About 15–20 thousand tokens of Russian — what one draft may read. */
 export const MATERIAL_BUDGET = 45_000;
@@ -312,6 +315,8 @@ export interface SelectedText {
   used: number;
   total: number;
   trimmed: boolean;
+  /** The headings of the PDF pages read, best first — the products the writer is offered start here (draftProducts). */
+  headings: string[];
 }
 
 /**
@@ -319,16 +324,23 @@ export interface SelectedText {
  * a 170-page catalogue. In this order, while the budget lasts:
  *
  *   1. a sample («писать так же»), cut to 4 000 characters — tone, not facts;
- *   2. from a PDF: the text pages paired with the pictures the owner ticked,
- *      then the pages whose heading or text name the topic's words (the
- *      heading counts three times), best first; the rest is left out;
+ *   2. from a PDF: the text pages paired with the pictures the owner ticked;
+ *      then every page of a line the topic names (its opener — «HYDRATE» —
+ *      to the next opener); then the pages whose heading or text name the
+ *      topic's words (the heading counts three times), best first. The
+ *      words are materialKeys(): the brand's name and the words every page
+ *      says («волосы», «уход», «шампунь») count for nothing, so a page that
+ *      says only those is left out — real test 02.11.2026, where they had
+ *      every page of the catalogue matching and the budget filled with
+ *      pages about other lines;
  *   3. a link's or a pasted text's own text, as it is.
  *
  * `trimmed` is what the panel says out loud («взяты страницы по теме …»).
  */
 export function selectMaterialText(materials: Material[], about: string, budget = MATERIAL_BUDGET): SelectedText {
-  const stems = topicStems(about);
+  const keys = materialKeys(about);
   const blocks: SelectedText["blocks"] = [];
+  const headings: string[] = [];
   let used = 0;
   let total = 0;
   const room = () => Math.max(0, budget - used);
@@ -348,11 +360,27 @@ export function selectMaterialText(materials: Material[], about: string, budget 
         const before = m.pages.filter((p) => p.n <= img.page! && p.text.length > 40).pop();
         if (before) picked.add(before.n);
       }
+      // the line the topic names: from its opener to the next one (the pages come sorted)
+      const inLine = new Set<number>();
+      let on = false;
+      for (const p of m.pages) {
+        if (isLineOpener(p.heading)) on = keyHits(p.heading, keys) > 0;
+        if (on) inLine.add(p.n);
+      }
+      /* A topic that names a line is about that line: outside it, a page
+         counts only when its heading names the topic («… и ANGEL.WASH») —
+         not because its text says «увлажняет», as two pages in three of a
+         Kevin.Murphy catalogue do. With no line named, the text counts too. */
+      const lineNamed = inLine.size > 0;
       const scored = m.pages
         .filter((p) => p.text)
-        .map((p) => ({ p, score: (picked.has(p.n) ? 100 : 0) + hitsOf(p.heading, stems) * 3 + hitsOf(p.text, stems) }))
-        .filter((x) => x.score > 0)
-        .sort((a, b) => b.score - a.score || a.p.n - b.p.n);
+        .map((p) => ({
+          p,
+          tier: picked.has(p.n) ? 2 : inLine.has(p.n) ? 1 : 0,
+          hits: keyHits(p.heading, keys) * 3 + (lineNamed && !inLine.has(p.n) && !picked.has(p.n) ? 0 : keyHits(p.text, keys)),
+        }))
+        .filter((x) => x.tier > 0 || x.hits > 0)
+        .sort((a, b) => b.tier - a.tier || b.hits - a.hits || a.p.n - b.p.n);
       // nothing named the topic at all: the first pages, in order — better than nothing
       const chosen = scored.length ? scored.map((x) => x.p) : m.pages.filter((p) => p.text);
       const parts: string[] = [];
@@ -360,6 +388,7 @@ export function selectMaterialText(materials: Material[], about: string, budget 
         const piece = `[стр. ${p.n}${p.heading ? " · " + p.heading : ""}]\n${p.text}`;
         if (piece.length > room() - parts.join("\n\n").length) continue;
         parts.push(piece);
+        if (p.heading && !headings.includes(p.heading)) headings.push(p.heading);
       }
       // back in page order, which is how the brand wrote them
       parts.sort((a, b) => Number(a.match(/^\[стр\. (\d+)/)?.[1]) - Number(b.match(/^\[стр\. (\d+)/)?.[1]));
@@ -370,7 +399,7 @@ export function selectMaterialText(materials: Material[], about: string, budget 
     const t = m.text.slice(0, room());
     if (t) { blocks.push({ material: m, text: t, sample: false }); used += t.length; }
   }
-  return { blocks, used, total, trimmed: used < total };
+  return { blocks, used, total, trimmed: used < total, headings };
 }
 
 /** One page of a material's text for Claude's get_material — `part` is 1-based. */

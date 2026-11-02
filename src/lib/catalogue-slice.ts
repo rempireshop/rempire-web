@@ -103,6 +103,11 @@ export function relevantLines(text: string): string {
   return relevantProducts(text).map(rowLine).join("\n");
 }
 
+/** Every brand the catalogue file knows, once each. */
+export function catalogueBrands(): string[] {
+  return [...new Set(CAT.map((p) => p.b))];
+}
+
 /** Every id the catalogue file knows. */
 export function catalogueIds(): Set<string> {
   return new Set(CAT.map((p) => p.id));

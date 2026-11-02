@@ -31,9 +31,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { extractJsonObject } from "@/lib/ai-json";
 import { clientIp, rateLimit, rateLimitWaitS, requireAdmin } from "@/lib/auth";
 import { BlogError, getPostById, upsertPost, writePostLanguage } from "@/lib/blog";
-import { mentionedProducts, relevantProducts } from "@/lib/catalogue-slice";
 import {
-  buildDraftPrompt, buildTranslatePrompt, pictureList, readDraftJson, shapeDraftBody, sourcesOf, type DraftProduct,
+  buildDraftPrompt, buildTranslatePrompt, draftProducts, pictureList, readDraftJson, shapeDraftBody, sourcesOf,
 } from "@/lib/blog-draft";
 import { getMaterials, materialImageIndex, selectMaterialText } from "@/lib/blog-materials";
 import { productsNow, shopBody, shopPhotos } from "@/lib/mcp/tools";
@@ -143,18 +142,9 @@ export async function POST(req: NextRequest) {
   const selected = selectMaterialText(materials, about);
   const pictures = pictureList(materials);
 
-  // the shop's products the article may name: the ones the materials and the topic name, shown ones only
-  const seen = new Set<string>();
-  const products: DraftProduct[] = [];
-  const add = (id: string) => {
-    const p = byId.get(id);
-    if (!p || seen.has(id) || products.length >= 40) return;
-    seen.add(id);
-    products.push({ id, brand: p.brand, name: p.names.RU, cat: p.cat });
-  };
-  const readText = selected.blocks.map((b) => b.text).join("\n");
-  for (const r of mentionedProducts(`${about}\n${readText}`, 30)) add(r.id);
-  for (const r of relevantProducts(about, { limit: 16, fill: 4 })) add(r.id);
+  // the shop's products the article may name: the pictures', the topic's, the pages' headings', the text's — shown ones only
+  const products = draftProducts({ about, selected, pictures, list });
+  const seen = new Set(products.map((p) => p.id));
 
   const prompt = buildDraftPrompt({ about, selected, pictures, products });
   const got = await ask(key, prompt.system, prompt.user, 9000);
