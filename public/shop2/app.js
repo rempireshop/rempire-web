@@ -29172,14 +29172,77 @@
       p.label = p.pair ? p.pair.heading + " — фото" : "Страница " + p.n;
     });
   }
-  function bnewPreTick(item, stems) {
-    var ticked = 0;
-    item.pdf.pages.forEach(function (p) {
-      if (!p.photo) return;
-      var hay = ((p.pair ? p.pair.heading + "\n" + p.pair.text : "") + "\n" + p.heading).toLowerCase();
-      p.tick = !!stems.length && ticked < BNEW_PRETICK_MAX && stems.some(function (s) { return hay.indexOf(s) >= 0; });
-      if (p.tick) ticked++;
+  /* Words every page of a brand's catalogue says, so they pick no page: a
+     topic stem that starts with one of these ticks nothing by itself. The
+     brand's own name comes from the shop's brands (bnewBrandStems). Real test,
+     02.11.2026: «Сухие волосы зимой: … Hydrate от Kevin.Murphy — шампунь,
+     кондиционер, маска и ночной уход» ticked the catalogue's first eight
+     photo pages, because «kevin», «волос» and «уход» are on every one of them
+     and the eight were taken in page order. */
+  var BNEW_GENERIC = ["волос", "уход", "ухаж", "лини", "линей", "шампу", "конди", "маск", "масл", "спре", "крем", "гел", "паст", "воск",
+    "средс", "проду", "товар", "косме", "бренд", "салон", "профе", "приме", "преим", "ингре", "основ", "испол", "польз", "выбра", "выбор",
+    "нанес", "кожа", "кожи", "кожу", "голов", "hair", "care", "line", "shamp", "condi", "mask", "masqu", "wash", "rinse", "spray", "oil",
+    "cream", "gel", "paste", "wax", "produ", "brand", "salon", "juuks", "hoold", "šampo", "palsa", "õli", "sprei", "kreem", "toode", "toote", "kasut"];
+  var BNEW_LAT = { "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z", "и": "i", "й": "i", "к": "k",
+    "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ц": "c", "ч": "ch",
+    "ш": "sh", "щ": "sh", "ы": "y", "э": "e", "ю": "yu", "я": "ya" };
+  /** Every brand the shop sells, as stems: «Kevin.Murphy» → kevin, murph. */
+  function bnewBrandStems() {
+    var out = {};
+    (typeof CATALOGUE === "undefined" ? [] : CATALOGUE).forEach(function (p) {
+      String((p && p.brand) || "").toLowerCase().split(/[^a-z0-9а-яёõäöüšž]+/).forEach(function (w) {
+        if (w.length >= 3) out[w.length > 5 ? w.slice(0, 5) : w] = 1;
+      });
     });
+    return out;
+  }
+  /** The topic's stems that can pick a page: no generic word, no brand — «Кевина» is the brand too. */
+  function bnewKeys(stems) {
+    var brands = bnewBrandStems();
+    return (stems || []).filter(function (s) {
+      for (var g = 0; g < BNEW_GENERIC.length; g++) if (s.indexOf(BNEW_GENERIC[g]) === 0) return false;
+      var lat = s.replace(/[а-яё]/g, function (c) { return BNEW_LAT[c] || ""; }).slice(0, 5);
+      return !brands[s] && !brands[lat];
+    });
+  }
+  /* A line's own opening page — «HYDRATE», «REPAIR», «DETOX», «EVERLASTING.
+     COLOUR», «STYLE/CONTROL», or «CURL» printed on a picture: Latin capitals,
+     three words at most, and none of them joined by a dot or a hyphen the way
+     a product's name is («HYDRATE-ME.WASH», «NIGHT.SHIFT»). The line runs
+     from it to the next opener. */
+  function bnewOpener(heading) {
+    var h = String(heading || "").trim().replace(/[.:!?]+$/, "");
+    return /^[A-Z]+(?:(?:\.? | ?[\/&] ?)[A-Z]+){0,2}$/.test(h) && h.replace(/[^A-Z]/g, "").length >= 4;
+  }
+  /* What is ticked, at most BNEW_PRETICK_MAX:
+       1. the photos whose label names a topic word («hydra» → «HYDRATE-ME.WASH — фото»),
+          and every photo of a line the topic names, opener to next opener —
+          NIGHT.SHIFT sits in the HYDRATE line without the word in its name;
+       2. only when the topic names no label and no line: the photos whose
+          text page says the most of its words, best first.
+     Nothing matches — nothing is ticked; there is no «first N» to fall back on. */
+  function bnewPreTick(item, stems) {
+    var keys = bnewKeys(stems);
+    var hits = function (text) {
+      var low = String(text || "").toLowerCase(), n = 0;
+      keys.forEach(function (k) { if (low.indexOf(k) >= 0) n++; });
+      return n;
+    };
+    var named = [], line = [], said = [], inLine = false;
+    item.pdf.pages.forEach(function (p) {
+      if (bnewOpener(p.heading)) inLine = hits(p.heading) > 0;
+      if (!p.photo) return;
+      var n;
+      if (hits((p.pair ? p.pair.heading : "") + "\n" + p.heading)) named.push(p);
+      else if (inLine) line.push(p);
+      else if ((n = hits(p.pair ? p.pair.text : ""))) said.push({ p: p, n: n });
+    });
+    var pick = keys.length ? named.concat(line) : [];
+    if (keys.length && !pick.length) {
+      pick = said.sort(function (a, b) { return b.n - a.n || a.p.n - b.p.n; }).map(function (x) { return x.p; });
+    }
+    pick = pick.slice(0, BNEW_PRETICK_MAX);
+    item.pdf.pages.forEach(function (p) { p.tick = !!p.photo && pick.indexOf(p) >= 0; });
   }
   function bnewNote(item, text) {
     item.note = text;

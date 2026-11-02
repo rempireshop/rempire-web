@@ -9206,36 +9206,38 @@
       "title": "Новая статья: PDF бренда в материалы",
       "steps": [
         "«Блог» → «+ Статья».",
-        "В «О чём статья» написать тему, например «Angel для тонких волос».",
-        "Нажать «PDF / файл» и выбрать каталог бренда.",
+        "В «О чём статья» написать тему: «Сухие волосы зимой: линия Hydrate от Kevin.Murphy».",
+        "Нажать «PDF / файл» и выбрать каталог Kevin.Murphy на русском.",
         "Дождаться сетки страниц с фото и посмотреть подписи.",
         "Снять или поставить галочки и нажать «Готово»."
       ],
       "expect": [
         "Строка «Читаю PDF: страница … из …» идёт, телефон не зависает.",
         "Под фото подпись — заголовок страницы перед ним, «… — фото».",
-        "Фото по теме уже отмечены.",
+        "Отмечены фото линии Hydrate: от «HYDRATE — фото» до «NIGHT.SHIFT — фото».",
+        "Первые страницы каталога («НАША МИССИЯ», «КЕВИН:») не отмечены.",
         "После «Готово» в списке PDF с числом страниц и картинок.",
         "Отмеченные картинки видны маленькими под строкой PDF."
       ],
       "why": "Статьи пишутся из материалов бренда; PDF читается на телефоне, сервер его не получает.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-11-02T09:11:17.000Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T11:36:06.874Z",
       "en": {
         "title": "New article: a brand PDF into the materials",
         "steps": [
           "«Блог» → «+ Статья».",
-          "In «О чём статья» type a topic, e.g. «Angel для тонких волос».",
-          "Press «PDF / файл» and pick the brand's catalogue.",
+          "In «О чём статья» type the topic «Сухие волосы зимой: линия Hydrate от Kevin.Murphy».",
+          "Press «PDF / файл» and pick the Russian Kevin.Murphy catalogue.",
           "Wait for the grid of photo pages and read the captions.",
           "Tick or untick and press «Готово»."
         ],
         "expect": [
           "The line «Читаю PDF: страница … из …» moves; the phone does not freeze.",
           "Under each photo: the heading of the page before it, «… — фото».",
-          "Photos on the topic are ticked already.",
+          "The Hydrate line's photos are ticked: «HYDRATE — фото» to «NIGHT.SHIFT — фото».",
+          "The catalogue's first pages («НАША МИССИЯ», «КЕВИН:») are not ticked.",
           "After «Готово» the list shows the PDF with its pages and pictures.",
           "The ticked pictures show small under the PDF's row."
         ],
@@ -9350,8 +9352,8 @@
       "why": "ИИ пишет только из фактов материалов, но всё, что он не смог подтвердить, видно владельцу до публикации.",
       "risk": "high",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-11-02T09:11:17.000Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T11:36:06.874Z",
       "en": {
         "title": "A draft from the materials, then publish",
         "steps": [
@@ -9371,6 +9373,49 @@
           "The text is retold in its own words, not copied from the PDF."
         ],
         "why": "The AI writes only from the materials' facts, and whatever it could not support is shown to the owner before publishing."
+      }
+    },
+    {
+      "id": "blog-draft-products-quotes",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Черновик: у товара одна карточка, кавычки по языку",
+      "steps": [
+        "Сделать «blog-materials-pdf» с темой про Hydrate и каталогом Kevin.Murphy.",
+        "Нажать «Написать черновик» и подождать около минуты.",
+        "В RU найти раздел NIGHT.SHIFT и абзацы над карточками товаров.",
+        "Переключить ET, затем EN, и найти цитату Кевина."
+      ],
+      "expect": [
+        "В списке товаров черновика есть NIGHT.SHIFT 100ml.",
+        "В разделе NIGHT.SHIFT стоит его карточка.",
+        "Название товара над его карточкой — обычный текст, не ссылка.",
+        "В ET цитата в кавычках „…“.",
+        "В EN цитата в кавычках “…”."
+      ],
+      "why": "В первом черновике NIGHT.SHIFT остался без товара, каждый товар был ссылкой дважды подряд, а в ET стояли русские «…».",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T11:36:06.874Z",
+      "en": {
+        "title": "Draft: one card per product, each language's quotation marks",
+        "steps": [
+          "Do «blog-materials-pdf» with a Hydrate topic and the Kevin.Murphy catalogue.",
+          "Press «Написать черновик» and wait about a minute.",
+          "In RU find the NIGHT.SHIFT section and the paragraphs above the product cards.",
+          "Switch to ET, then EN, and find Kevin's quote."
+        ],
+        "expect": [
+          "The draft's product list has NIGHT.SHIFT 100ml.",
+          "The NIGHT.SHIFT section has its card.",
+          "A product's name above its card is plain text, not a link.",
+          "In ET the quote is in „…“ marks.",
+          "In EN the quote is in “…” marks."
+        ],
+        "why": "The first draft left NIGHT.SHIFT without its product, linked every product twice in a row, and kept the Russian «…» in ET."
       }
     },
     {

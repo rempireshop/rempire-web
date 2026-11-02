@@ -312,6 +312,8 @@ export interface SelectedText {
   used: number;
   total: number;
   trimmed: boolean;
+  /** The headings of the PDF pages read, best first — the products the writer is offered start here (draftProducts). */
+  headings: string[];
 }
 
 /**
@@ -329,6 +331,7 @@ export interface SelectedText {
 export function selectMaterialText(materials: Material[], about: string, budget = MATERIAL_BUDGET): SelectedText {
   const stems = topicStems(about);
   const blocks: SelectedText["blocks"] = [];
+  const headings: string[] = [];
   let used = 0;
   let total = 0;
   const room = () => Math.max(0, budget - used);
@@ -360,6 +363,7 @@ export function selectMaterialText(materials: Material[], about: string, budget 
         const piece = `[стр. ${p.n}${p.heading ? " · " + p.heading : ""}]\n${p.text}`;
         if (piece.length > room() - parts.join("\n\n").length) continue;
         parts.push(piece);
+        if (p.heading && !headings.includes(p.heading)) headings.push(p.heading);
       }
       // back in page order, which is how the brand wrote them
       parts.sort((a, b) => Number(a.match(/^\[стр\. (\d+)/)?.[1]) - Number(b.match(/^\[стр\. (\d+)/)?.[1]));
@@ -370,7 +374,7 @@ export function selectMaterialText(materials: Material[], about: string, budget 
     const t = m.text.slice(0, room());
     if (t) { blocks.push({ material: m, text: t, sample: false }); used += t.length; }
   }
-  return { blocks, used, total, trimmed: used < total };
+  return { blocks, used, total, trimmed: used < total, headings };
 }
 
 /** One page of a material's text for Claude's get_material — `part` is 1-based. */
