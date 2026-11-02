@@ -9,7 +9,9 @@
  *                                            → { ok, material }    a PDF read in the browser, photos, a text
  * POST   /api/admin/blog/materials/  { kind: "link", url }
  *                                            → { ok, material }    the page fetched here, through the SSRF
- *                                                                   guard (src/lib/safe-fetch.ts) — its text only
+ *                                                                   guard (src/lib/safe-fetch.ts) — its text only;
+ *                                                                   a PDF there: its text; a photo: into the
+ *                                                                   bucket (src/lib/blog-material-link.ts)
  * PATCH  /api/admin/blog/materials/  { id, name?, images? }
  *                                            → { ok, material }    more pages ticked, a better name
  * DELETE /api/admin/blog/materials/?id=<id>  → { ok, removed, kept }  gone from every list (the row stays);
@@ -24,14 +26,15 @@ import { requireAdmin } from "@/lib/auth";
 import {
   createMaterial, deleteMaterial, getMaterial, listMaterials, MaterialError, picturesInUse, readMaterialInput, updateMaterial,
 } from "@/lib/blog-materials";
+import { LinkMaterialError, materialFromLink } from "@/lib/blog-material-link";
 import { writeAuditSafe } from "@/lib/orders";
-import { fetchPublicPage, SafeFetchError } from "@/lib/safe-fetch";
 import { deleteObject, keyFromUrl, storageConfigured, thumbKey } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-/* A link is one fetch of at most 10 s (FETCH_TIMEOUT_MS) — waiting, not work. */
-export const maxDuration = 30;
+/* A link is one fetch of at most 20 s (FILE_TIMEOUT_MS) — waiting, not work —
+   and, for a PDF, a few seconds of reading its text (src/lib/pdf-text.ts). */
+export const maxDuration = 60;
 
 const NO_STORE = { "cache-control": "no-store" } as const;
 /** A 170-page catalogue's text in JSON is a few hundred kilobytes; Vercel takes 4.5 MB at most. */
@@ -85,26 +88,21 @@ export async function POST(req: Request) {
   if (!body) return bad("bad_request");
   try {
     if (body.kind === "link") {
-      let page;
+      /* A page, a PDF or a photo at a public address — the same road
+         Claude's save_material takes (src/lib/blog-material-link.ts). Named
+         by its host, not by a page's own <title> or a file's name: a name
+         goes into the panel assistant's prompt and Claude's tool output, and
+         those are words a stranger wrote (security review, 02.11.2026). The
+         owner can rename it. */
+      let got;
       try {
-        page = await fetchPublicPage(String(body.url || ""));
+        got = await materialFromLink(String(body.url || ""), { name: body.name });
       } catch (err) {
-        if (err instanceof SafeFetchError) return bad("link_" + err.code, 422);
+        if (err instanceof LinkMaterialError) return bad(err.code, 422);
         throw err;
       }
-      const host = new URL(page.url).hostname.replace(/^www\./, "");
-      const input = readMaterialInput({
-        kind: "link",
-        url: page.url,
-        /* The host, not the page's own <title>: a name goes into the panel
-           assistant's prompt and Claude's tool output, and a title is text
-           a stranger wrote (security review, 02.11.2026). The owner can
-           rename it. */
-        name: typeof body.name === "string" && body.name.trim() ? body.name : host,
-        text: page.text,
-      });
-      const material = await createMaterial(input);
-      await writeAuditSafe("admin", "blog.material", { id: material.id, kind: "link", host, chars: material.text.length });
+      const material = got.material;
+      await writeAuditSafe("admin", "blog.material", { id: material.id, kind: material.kind, from: "link", host: got.host, chars: material.text.length, images: material.images.length });
       return Response.json({ ok: true, material }, { headers: NO_STORE });
     }
     const material = await createMaterial(readMaterialInput(body));

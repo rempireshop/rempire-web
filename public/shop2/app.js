@@ -2944,9 +2944,17 @@
       "Загружаем фото…": "Laadime fotot…",
       "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
         "Kirjuta, kuhu see panna: „see on foto Bio Botanical Shampoo jaoks, tee peamiseks“.",
-      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
-        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks. Foto saab lisada kirjaklambriga või siia lohistada.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото или PDF можно прикрепить скрепкой или перетащить сюда.":
+        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks. Foto või PDF-i saab lisada kirjaklambriga või siia lohistada.",
       "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
+      /* a PDF through the clip, and what a photo is for (admAttachPdf, admFilesGate) */
+      "Прикрепить фото или PDF": "Lisa foto või PDF", "Фото или PDF для помощника": "Foto või PDF abilisele",
+      "Прикреплённые файлы": "Lisatud failid", "Убрать файл": "Eemalda fail",
+      "Нужна фотография или PDF — JPEG, PNG, WebP или PDF.": "Vaja on fotot või PDF-i — JPEG, PNG, WebP või PDF.",
+      "Для чего эти фото?": "Milleks need fotod on?", "Для статьи": "Artikli jaoks", "Для товара": "Toote jaoks",
+      "Напиши статью по этому": "Kirjuta selle põhjal artikkel", "Открыть в «+ Статья»": "Ava «+ Artikkel» all",
+      "Сохраняю фото в материалы блога…": "Salvestan fotod blogi materjalidesse…",
+      "Сохраняю PDF в материалы блога — отвечу, как только он прочитается.": "Salvestan PDF-i blogi materjalidesse — vastan kohe, kui see on loetud.",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Häälsisestus", "Слушаю…": "Kuulan…",
       "Язык голосового ввода": "Häälsisestuse keel",
@@ -6619,9 +6627,17 @@
       "Загружаем фото…": "Uploading the photo…",
       "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
         "Say where it goes: “this is a photo for Bio Botanical Shampoo, make it the main one”.",
-      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
-        "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval. Attach a photo with the clip or drop it here.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото или PDF можно прикрепить скрепкой или перетащить сюда.":
+        "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval. Attach a photo or a PDF with the clip or drop it here.",
       "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
+      /* a PDF through the clip, and what a photo is for (admAttachPdf, admFilesGate) */
+      "Прикрепить фото или PDF": "Attach a photo or a PDF", "Фото или PDF для помощника": "Photo or PDF for the assistant",
+      "Прикреплённые файлы": "Attached files", "Убрать файл": "Remove the file",
+      "Нужна фотография или PDF — JPEG, PNG, WebP или PDF.": "A photo or a PDF is needed — JPEG, PNG, WebP or PDF.",
+      "Для чего эти фото?": "What are these photos for?", "Для статьи": "For an article", "Для товара": "For a product",
+      "Напиши статью по этому": "Write an article from this", "Открыть в «+ Статья»": "Open in “+ Article”",
+      "Сохраняю фото в материалы блога…": "Saving the photos to the blog's materials…",
+      "Сохраняю PDF в материалы блога — отвечу, как только он прочитается.": "Saving the PDF to the blog's materials — I will answer as soon as it is read.",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Voice input", "Слушаю…": "Listening…",
       "Язык голосового ввода": "Voice input language",
@@ -26911,6 +26927,8 @@
     var a = S.adminAns;
     if (!a || a.q !== S.adminAsk) return "…";
     if (a.fallback) return adminAnswer(a.q);
+    // the panel's own word about a file (admMatConfirm, admFilesGate): no model, its chips under it
+    if (a.local) return admReplyHTML(a.reply || "") + admLocalChipsHTML(a);
     return admReplyHTML(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
       (a.ask && !a.action ? admAskChipsHTML(a.ask) : "") +
@@ -26927,18 +26945,29 @@
   function admAttHTML() {
     var list = S.adminAtt || [];
     if (!list.length) return "";
-    return '<div class="adm-att" data-admattlist aria-label="Прикреплённые фото">' + list.map(function (a, i) {
+    var pdfs = list.filter(function (a) { return a.kind === "pdf"; });
+    var reading = pdfs.filter(function (a) { return a.busy; })[0];
+    return '<div class="adm-att" data-admattlist aria-label="' + (pdfs.length ? "Прикреплённые файлы" : "Прикреплённые фото") + '">' + list.map(function (a, i) {
+      var pdf = a.kind === "pdf";
       return '<span class="adm-att__i' + (a.err ? " adm-att__i--err" : "") + '" title="' + esc(a.name || "") + '">' +
         (a.thumb ? '<span class="adm-att__img" style="background-image:url(\'' + esc(a.thumb).replace(/'/g, "%27") + '\')"></span>'
-          : '<span class="adm-att__img adm-att__img--wait">' + (a.busy ? "…" : "!") + "</span>") +
-        '<button class="adm-att__x" data-admattdel="' + i + '" aria-label="Убрать фото">×</button></span>';
+          /* a PDF: its own word on the tile while it is read and saved (admAttachPdf) */
+          : '<span class="adm-att__img adm-att__img--wait' + (pdf ? " adm-att__img--pdf" : "") + '">' + (pdf && !a.err ? "PDF" : a.busy ? "…" : "!") + "</span>") +
+        '<button class="adm-att__x" data-admattdel="' + i + '" aria-label="' + (pdf ? "Убрать файл" : "Убрать фото") + '">×</button></span>';
     }).join("") +
       (list.some(function (a) { return a.err; })
         ? '<span class="adm-hint adm-hint--warn">' + esc(list.filter(function (a) { return a.err; })[0].err) + "</span>"
-        : list.some(function (a) { return a.busy; })
-          ? '<span class="adm-hint">Загружаем фото…</span>'
-          : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
+        : reading
+          ? '<span class="adm-hint" data-admattnote data-notr>' + esc(reading.note || "Открываю PDF…") + "</span>"
+          : list.some(function (a) { return a.busy; })
+            ? '<span class="adm-hint">Загружаем фото…</span>'
+            : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
       "</div>";
+  }
+  /** The line under the strip while a PDF is read — patched in place: a render per page would take the caret out of the box. */
+  function admAttNotePaint(att) {
+    var el = document.querySelector("[data-admattnote]");
+    if (el && att && att.busy) el.textContent = att.note || "";
   }
   /* Voice input for the question box (Dim, 10.09.2026). The browser's own
      speech recognition — Chrome on a desktop and on Android, Safari on an
@@ -27106,19 +27135,24 @@
     return '<div class="adm-asst__body">' +
       (S.adminAsk
         ? '<div class="adm-msg adm-msg--me">' + esc(S.adminAsk) + "</div>" +
-          '<div class="adm-msg" data-aians>' + (admAI ? admAnswerHTML() : adminAnswer(S.adminAsk)) + "</div>"
+          /* the panel's own answers about a file it has just saved (admMatConfirm,
+             admFilesGate) are drawn with or without a model behind the chat */
+          '<div class="adm-msg" data-aians>' + (admAI || (S.adminAns && S.adminAns.local && S.adminAns.q === S.adminAsk) ? admAnswerHTML() : adminAnswer(S.adminAsk)) + "</div>"
         : '<div class="adm-msg">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — ' +
-          'а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.</div>') +
+          'а изменения предложу на подтверждение. Фото или PDF можно прикрепить скрепкой или перетащить сюда.</div>') +
       admAttHTML() +
       '<div class="adm-asst__chips">' + ADM_ASK.map(function (q) {
         return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="adm-asst__foot">' +
-        '<button class="adm-asst__clip" data-admattach' + (MEDIA.on === false ? " disabled" : "") +
-          ' aria-label="Прикрепить фото" title="Прикрепить фото">' +
+        /* Photos and PDFs (Dim, 02.11.2026): a PDF is read here, on the phone,
+           and saved into the blog's materials (admAttachPdf) — it needs no photo
+           storage, so the clip stays on where photos cannot go up. */
+        '<button class="adm-asst__clip" data-admattach' +
+          ' aria-label="Прикрепить фото или PDF" title="Прикрепить фото или PDF">' +
           '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
           'stroke-linecap="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg></button>' +
-        '<input class="adm-file" type="file" accept="image/*" multiple data-admfile aria-label="Фото для помощника">' +
+        '<input class="adm-file" type="file" accept="image/*,application/pdf,.pdf" multiple data-admfile aria-label="Фото или PDF для помощника">' +
         '<input class="adm-input" data-admq value="' + esc(S.adminQ || "") +
           '" placeholder="' + admVoicePlaceholder() + '" aria-label="Вопрос помощнику">' +
         admVoiceMicHTML() +
@@ -27130,7 +27164,8 @@
      the answer — has to be the only one of its kind on the page. */
   function admClipPaint() {
     var b = document.querySelector("[data-admattach]");
-    if (b) b.disabled = MEDIA.on === false;
+    // a PDF goes in without the photo storage, so a «no» from the upload probe no longer closes the clip
+    if (b) b.disabled = false;
   }
   function admAsstHTML() {
     /* speed, 07.09.2026: the 30-day summary analyticsForAI() puts in the
@@ -27795,6 +27830,8 @@
     var gate = admGateView();
     if (gate === "wait") return admWaitScreen();
     if (gate === "login") return admLoginScreen();
+    // /admin?article=new — Claude's link to «+ Статья» → «Материалы» (admArticleLinkWanted)
+    if (typeof admArticleLinkWanted === "function") admArticleLinkWanted();
     // the products this panel edits: its own no-store read, not the edge copy
     loadAdminOverrides(false);
     var tab = S.adminTab;
@@ -29528,15 +29565,23 @@
     item.note = text;
     var el = document.querySelector('[data-bnewnote="' + item.key + '"]');
     if (el) el.textContent = trText(text, S.lang);
+    // a PDF read for the Помощник says where it is under the chat's strip (admAttachPdf)
+    if (item.onNote) item.onNote(text);
   }
   var BNEW_KEY = 0;
+  /** A material on its way — in the «Новая статья» list (bnewAddItem) or attached to the Помощник (admAttachPdf). */
+  function bnewNewItem(kind, name) {
+    return { key: "m" + (++BNEW_KEY), kind: kind, name: name, id: "", note: "", status: "busy", images: [] };
+  }
   function bnewAddItem(kind, name) {
     var st = bnewState();
-    var item = { key: "m" + (++BNEW_KEY), kind: kind, name: name, id: "", note: "", status: "busy", images: [] };
+    var item = bnewNewItem(kind, name);
     st.items.push(item);
     return item;
   }
   function bnewSaved(item, m) {
+    // a «Ссылка» can turn out to be a PDF or a photo (src/lib/blog-material-link.ts): the item says what it is
+    if (m.kind) item.kind = m.kind;
     item.id = m.id; item.name = m.name; item.images = m.images || []; item.status = "ok";
     item.chars = (m.text || "").length || m.chars || 0; item.sample = !!m.sample; item.pageCount = m.pageCount || null;
     item.note = bnewItemNote(item);
@@ -29551,23 +29596,49 @@
     return item.sample ? "образец — писать так же: тон и длина" : "текст";
   }
   function bnewFail(item, text) { item.status = "err"; item.note = text; render(); }
+  /* What a link that would not become a material says — the same codes as
+     linkErrorText() in src/lib/blog-material-link.ts: a page, a PDF (its
+     text, read on the server) or a photo at a public address. */
+  function bnewLinkErr(code) {
+    if (code === "link_not_https") return "Нужен адрес, который начинается с https://";
+    if (code === "link_private_address" || code === "link_private_host" || code === "link_ip_host") return "Этот адрес читать нельзя — только открытые страницы в интернете.";
+    if (code === "link_too_large") return "Файл по ссылке слишком большой: страница — до 2 МБ, PDF — до 20 МБ, фото — до 12 МБ.";
+    if (code === "link_not_text" || code === "link_not_file") return "По этой ссылке не страница, не PDF и не фото.";
+    if (code === "pdf_encrypted") return "PDF защищён паролем — его не прочитать.";
+    if (code === "pdf_no_text" || code === "pdf_unreadable") return "В этом PDF нет текста, который можно прочитать (похоже на скан).";
+    if (/^pdf_/.test(code)) return "PDF не получилось прочитать.";
+    if (code === "storage_not_configured") return "Фото сохранить нельзя: хранилище фото не подключено.";
+    if (/^image_/.test(code)) return "Фото по ссылке не получилось прочитать.";
+    return "Страницу не получилось прочитать.";
+  }
+  /** POST the material; the saved one comes back, or null when it was refused (the item says why). */
   function bnewPostMaterial(item, payload) {
     return apiSend("/api/admin/blog/materials/", "POST", payload).then(function (r) {
-      if (r.status === 200 && r.body.ok && r.body.material) { bnewSaved(item, r.body.material); render(); return; }
+      if (r.status === 200 && r.body.ok && r.body.material) { bnewSaved(item, r.body.material); render(); return r.body.material; }
       var code = (r.body && r.body.error) || "";
-      bnewFail(item, /^link_/.test(code)
-        ? (code === "link_not_https" ? "Нужен адрес, который начинается с https://" :
-          code === "link_private_address" || code === "link_private_host" || code === "link_ip_host" ? "Этот адрес читать нельзя — только открытые страницы в интернете." :
-          code === "link_too_large" ? "Страница слишком большая." : "Страницу не получилось прочитать.")
-        : "Не получилось сохранить — попробуйте ещё раз.");
-    }).catch(function () { bnewFail(item, "Нет связи — попробуйте ещё раз."); });
+      bnewFail(item, /^(link|pdf|image)_|^storage_not_configured$/.test(code) ? bnewLinkErr(code) : "Не получилось сохранить — попробуйте ещё раз.");
+      return null;
+    }).catch(function () { bnewFail(item, "Нет связи — попробуйте ещё раз."); return null; });
   }
   /** A PDF: read it page by page, here, and show the photo pages to tick. */
   function bnewAddPdf(file) {
     var st = bnewState();
     var item = bnewAddItem("pdf", String(file.name || "PDF").slice(0, 200));
     item.note = "Открываю PDF…"; render();
-    Promise.all([pdfjsLoad(), file.arrayBuffer()]).then(function (r) {
+    bnewReadPdf(item, file).then(function () {
+      bnewPreTick(item, bnewStems(st.about));
+      item.status = "pick";
+      item.note = bnewPickNote(item);
+      render();
+    }).catch(function () { bnewFail(item, "Не получилось прочитать PDF — попробуйте другой файл."); });
+  }
+  /* The reading itself, for «Новая статья» and for the Помощник's clip alike
+     (admAttachPdf): the text page by page, each page's heading, which pages
+     are photos (with a small picture of each), and each photo page labelled
+     by the text page before it. The document stays open in item.pdf.doc — its
+     photo pages go up when they are ticked (bnewPdfPictures). */
+  function bnewReadPdf(item, file) {
+    return Promise.all([pdfjsLoad(), file.arrayBuffer()]).then(function (r) {
       var lib = r[0];
       return lib.getDocument({ data: new Uint8Array(r[1]), isEvalSupported: false }).promise.then(function (doc) {
         item.pdf = { doc: doc, pages: [], total: doc.numPages };
@@ -29596,12 +29667,8 @@
       });
     }).then(function () {
       bnewPair(item);
-      bnewPreTick(item, bnewStems(st.about));
-      item.status = "pick";
       item.pageCount = item.pdf.total;
-      item.note = bnewPickNote(item);
-      render();
-    }).catch(function () { bnewFail(item, "Не получилось прочитать PDF — попробуйте другой файл."); });
+    });
   }
   function bnewPhotos(item) { return item.pdf ? item.pdf.pages.filter(function (p) { return p.photo; }) : []; }
   function bnewPickNote(item) {
@@ -29620,15 +29687,15 @@
     item.status = "busy"; render();
     bnewMedia(function () { bnewPdfUpload(item); });
   }
-  function bnewPdfUpload(item) {
-    var ticked = bnewPhotos(item).filter(function (p) { return p.tick; });
+  /** These photo pages up as blog pictures, one after another; the pictures that went up come back. */
+  function bnewPdfPictures(item, pages) {
     // no bucket on this shop: the text is still a material, the pictures stay on the phone
     var canUp = MEDIA.on === true;
     var images = [], k = 0;
     function up() {
-      if (!canUp || k >= ticked.length) return Promise.resolve();
-      var p = ticked[k++];
-      bnewNote(item, "Загружаю картинки: " + k + " из " + ticked.length);
+      if (!canUp || k >= pages.length) return Promise.resolve();
+      var p = pages[k++];
+      bnewNote(item, "Загружаю картинки: " + k + " из " + pages.length);
       return item.pdf.doc.getPage(p.n).then(function (page) {
         return bnewRender(page, BNEW_PIC_W, "blob", 0.85).then(function (blob) {
           page.cleanup();
@@ -29642,13 +29709,41 @@
         });
       }).then(up);
     }
-    up().then(function () {
+    return up().then(function () { return images; });
+  }
+  /** «Готово»: the ticked pages up, then the text and the pictures as one material — the saved one comes back, or null. */
+  function bnewPdfUpload(item) {
+    var ticked = bnewPhotos(item).filter(function (p) { return p.tick; });
+    return bnewPdfPictures(item, ticked).then(function (images) {
       bnewNote(item, "Сохраняю текст…");
       var pages = item.pdf.pages.filter(function (p) { return p.text; }).map(function (p) { return { n: p.n, heading: p.heading, text: p.text }; });
       return bnewPostMaterial(item, { kind: "pdf", name: item.name, pages: pages, images: images, pageCount: item.pdf.total });
     }).catch(function (e) {
       bnewFail(item, e && /too_large|payload/.test(String(e.message)) ? "Картинка слишком большая для загрузки." : "Не получилось загрузить картинки — попробуйте ещё раз.");
+      return null;
     });
+  }
+  /* A PDF saved before anybody said what the article is about — attached to
+     the Помощник (admAttachPdf) — keeps its document open on the phone. Once
+     the topic is known (startDraftFromMaterials), the photo pages it names
+     and that are not up yet go up, and the material gets them (PATCH: the
+     route's own «more pages ticked»). Nothing to add, or no bucket: as it was. */
+  function bnewTopUp(item, about) {
+    if (!item || !item.pdf || !item.pdf.doc || !item.id || MEDIA.on !== true) return Promise.resolve();
+    bnewPreTick(item, bnewStems(about));
+    var have = {};
+    (item.images || []).forEach(function (im) { if (im.page) have[im.page] = 1; });
+    var more = bnewPhotos(item).filter(function (p) { return p.tick && !have[p.n]; });
+    if (!more.length) return Promise.resolve();
+    item.status = "busy"; render();
+    var done = function () { item.status = "ok"; item.note = bnewItemNote(item); render(); };
+    return bnewPdfPictures(item, more).then(function (images) {
+      if (!images.length) { done(); return; }
+      return apiSend("/api/admin/blog/materials/", "PATCH", { id: item.id, images: (item.images || []).concat(images) }).then(function (r) {
+        if (r.status === 200 && r.body.ok && r.body.material) { bnewSaved(item, r.body.material); render(); }
+        else done();
+      });
+    }).catch(done);
   }
   function bnewAddPhotos(files) {
     var item = bnewAddItem("image", files.length === 1 ? String(files[0].name || "Фото").slice(0, 200) : files.length + " фото");
@@ -29669,8 +29764,8 @@
         });
       });
     });
-    chain.then(function () { return bnewPostMaterial(item, { kind: "image", name: item.name, images: images }); })
-      .catch(function () { bnewFail(item, MEDIA.on === false ? "Фото сюда загрузить нельзя: хранилище не подключено." : "Не получилось загрузить фото — попробуйте ещё раз."); });
+    return chain.then(function () { return bnewPostMaterial(item, { kind: "image", name: item.name, images: images }); })
+      .catch(function () { bnewFail(item, MEDIA.on === false ? "Фото сюда загрузить нельзя: хранилище не подключено." : "Не получилось загрузить фото — попробуйте ещё раз."); return null; });
   }
   function bnewAddLink(url) {
     var item = bnewAddItem("link", url.replace(/^https?:\/\//, "").slice(0, 200));
@@ -29786,6 +29881,14 @@
     var ready = st.items.filter(function (it) { return it.status === "ok"; }).length;
     var busy = st.items.some(function (it) { return it.status === "busy" || it.status === "pick"; });
     return bnewStepsHTML(1) +
+      /* opened from the link Renat's Claude sent him (admArticleLinkWanted):
+         what to press, and where to go back — nothing else is new here */
+      (st.fromLink
+        ? '<div class="adm-note" role="note"><span>' + (ready && !busy
+          ? "Готово — файлы в материалах блога. Вернитесь в чат с Claude и напишите: «готово»."
+          : "Нажмите «PDF / файл» или «Фото» и выберите файлы. У PDF отметьте фото для статьи и нажмите «Готово». Потом вернитесь в чат с Claude и напишите: «готово».") +
+          "</span></div>"
+        : "") +
       '<label class="adm-field adm-bnew__about">О чём статья' +
         '<textarea class="adm-input" rows="3" data-bnewabout placeholder="Тонкие окрашенные волосы без объёма: какую линию Kevin.Murphy брать и как ухаживать зимой">' +
         esc(st.about) + "</textarea></label>" +
@@ -29933,7 +30036,15 @@
     var ids = st.items.filter(function (it) { return it.status === "ok" && it.id; }).map(function (it) { return it.id; });
     if (!ids.length) { st.err = "Добавьте хотя бы один материал."; render(); return; }
     st.busy = true; st.err = ""; render();
-    apiSend("/api/admin/blog/draft/", "POST", { about: st.about, materials: ids, showSources: !!st.showSources }).then(function (r) {
+    /* A PDF the Помощник saved before anybody said what the article is about
+       is still open on the phone: the photo pages this topic names go up now
+       (bnewTopUp). Only those — a PDF ticked here by hand keeps his ticks. */
+    var tops = st.items.filter(function (it) { return it.fromChat && it.status === "ok" && it.pdf && it.pdf.doc && it.id; });
+    var chain = Promise.resolve();
+    tops.forEach(function (it) { chain = chain.then(function () { return bnewTopUp(it, st.about); }); });
+    chain.then(function () {
+      return apiSend("/api/admin/blog/draft/", "POST", { about: st.about, materials: ids, showSources: !!st.showSources });
+    }).then(function (r) {
       st.busy = false;
       if (!(r.status === 200 && r.body.ok && r.body.post)) { st.err = bnewErrText(r); render(); return; }
       st.post = r.body.post; st.placed = r.body.placed || []; st.unsure = r.body.unsure || 0; st.trimmed = r.body.trimmed || null;
@@ -30075,12 +30186,52 @@
       var list = r.status === 200 && r.body.ok ? r.body.materials : [];
       st.lib = list;
       list.filter(function (m) { return ids.indexOf(m.id) >= 0; }).forEach(function (m) {
-        var item = bnewAddItem(m.kind, m.name);
+        if (st.items.some(function (it) { return it.id === m.id; })) return;   // already in this article
+        /* a PDF attached to the Помощник in this visit is still open on the
+           phone (admMatItem): the same item, so its photo pages are at hand */
+        var mine = typeof admMatItem === "function" ? admMatItem(m.id) : null;
+        var item = mine || bnewAddItem(m.kind, m.name);
+        if (mine) { mine.onNote = null; st.items.push(mine); }
         bnewSaved(item, m);
       });
       render();
+      // the photo pages the topic names go up first, inside bnewWrite (bnewTopUp)
       if (st.items.length) bnewWrite();
     });
+  }
+  /* The link Renat's Claude hands him (get_upload_link in src/lib/mcp/
+     tools.ts): /admin?article=new&about=… opens «Блог» → «+ Статья» on
+     «Материалы», the topic filled in (so a PDF's photo pages are ticked by it)
+     and one line on what to press and where to go back. Claude in a chat
+     cannot pass the files themselves; his phone, signed in here, can.
+     Read once, like ?order= (pushOpenWanted); acted on when the panel is
+     really there — after the sign-in, if it asked for one — and then taken
+     out of the address, so a reload is the panel as he left it. */
+  var ARTICLE_LINK = null;   // null: not read yet; false: none, or used
+  function admArticleLinkRead(search) {
+    var s = String(search || "");
+    if (!/[?&]article=new(?:&|#|$)/.test(s)) return false;
+    var m = s.match(/[?&]about=([^&#]*)/), about = "";
+    if (m) { try { about = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { about = ""; } }
+    return { about: about.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 200) };
+  }
+  function admArticleLinkWanted() {
+    if (ARTICLE_LINK === null) ARTICLE_LINK = admArticleLinkRead(location.search);
+    if (!ARTICLE_LINK) return;
+    var want = ARTICLE_LINK;
+    ARTICLE_LINK = false;
+    try {
+      var rest = String(location.search || "").replace(/^\?/, "").split("&")
+        .filter(function (kv) { var k = kv.split("=")[0]; return kv && k !== "article" && k !== "about"; }).join("&");
+      history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + (location.hash || ""));
+    } catch (e) {}
+    // drawn, not rendered: this runs inside screenAdmin(), which is building the page
+    S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = ""; S.admMore = false;
+    S.adminBlogEdit = null; S.adminBlogMenu = false;
+    if (!(S.adminBlogNew && S.adminBlogNew.step === 1)) S.adminBlogNew = null;
+    var st = bnewState();
+    if (want.about) st.about = want.about;
+    st.fromLink = true;
   }
   /** «✨ Помощник напишет статью»: the topic and «Написать статью целиком» —
       the whole article, every field, all three languages (admBlogWriteFull);
@@ -50549,6 +50700,8 @@
   }
   /** The one door the chips, «Спросить» and Enter go through. */
   function admAsk(q) {
+    // a PDF still being read, or photos whose purpose the words do not say (admFilesGate)
+    if (typeof admFilesGate === "function" && admFilesGate(q)) return;
     if (admAI) { askAdminAI(q); return; }
     if (admAI === null) return;   // the probe is in the air: admAskWaiting() fires this question
     if (!admAIFailed) return;     // there is no model behind the route — the canned answer stands
@@ -50638,7 +50791,8 @@
   }
   /** The uploaded photos, as the route wants them told: key and file name. */
   function attachmentsForAI() {
-    return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err; })
+    // a PDF, and photos on their way into the blog's materials, are not photos to file (admMatsForAI carries those)
+    return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err && a.kind !== "pdf" && a.use !== "article"; })
       .map(function (a) { return { key: a.key, name: a.name || "" }; }).slice(0, 6);
   }
   function admPaintAnswer() {
@@ -50664,7 +50818,10 @@
       /* product: the one open in the goods editor — what «переведи описание»
          is about while it is on screen (the route reads its texts the way the
          Claude connector does, 26.10.2026) */
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), post: blogOpenForAI(), product: S.adminEdit && S.adminEdit !== "new" ? String(S.adminEdit) : null })
+      /* materials: the PDFs and photos this chat saved into the blog's library
+         (admMatAdd) — what «напиши статью по этому» is about (typeof: harnesses
+         that run this function on its own) */
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI(), materials: typeof admMatsForAI === "function" ? admMatsForAI() : [], post: blogOpenForAI(), product: S.adminEdit && S.adminEdit !== "new" ? String(S.adminEdit) : null })
     })
       .then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
@@ -50745,15 +50902,26 @@
      confirm card then applies through the panel's own gallery and cover
      writes: journalled, undoable, nothing the chat does on its own. */
   var ADM_ATT_MAX = 6;
+  function admIsPdf(f) { return /pdf/i.test((f && f.type) || "") || /\.pdf$/i.test((f && f.name) || ""); }
   function admAttachFiles(files) {
     var list = S.adminAtt || (S.adminAtt = []);
-    var queue = [];
-    for (var i = 0; i < files.length; i++) if (files[i] && /^image\//.test(files[i].type || "")) queue.push(files[i]);
-    if (!queue.length) { toast("Нужна фотография — JPEG, PNG или WebP."); return; }
-    if (MEDIA.on === false) { toast(MEDIA_ERR.storage_not_configured); return; }
-    if (list.length + queue.length > ADM_ATT_MAX) { toast("Больше 6 фото за раз не нужно."); return; }
+    var queue = [], pdfs = [];
+    for (var i = 0; i < files.length; i++) {
+      if (!files[i]) continue;
+      if (admIsPdf(files[i])) pdfs.push(files[i]);
+      else if (/^image\//.test(files[i].type || "")) queue.push(files[i]);
+    }
+    if (!queue.length && !pdfs.length) { toast("Нужна фотография или PDF — JPEG, PNG, WebP или PDF."); return; }
+    // a PDF: read here and saved into the blog's materials (admAttachPdf) — no photo storage needed
+    pdfs.slice(0, ADM_PDF_MAX).forEach(admAttachPdf);
+    if (!queue.length) { render(); return; }
+    if (MEDIA.on === false) { toast(MEDIA_ERR.storage_not_configured); render(); return; }
+    var photosNow = list.filter(function (a) { return a.kind !== "pdf"; }).length;
+    if (photosNow + queue.length > ADM_ATT_MAX) { toast("Больше 6 фото за раз не нужно."); render(); return; }
     queue.forEach(function (f) {
-      var att = { key: "", url: "", thumb: "", name: String(f.name || "photo").slice(0, 80), busy: true, err: "" };
+      /* `file` is kept: a photo meant for an article goes up again under blog/
+         (admPhotosToArticle) — a material's pictures are blog pictures */
+      var att = { kind: "photo", key: "", url: "", thumb: "", name: String(f.name || "photo").slice(0, 80), busy: true, err: "", file: f, use: "" };
       list.push(att);
       uploadPhoto(f, "product", "inbox").then(function (r) {
         att.busy = false; att.key = r.key || ""; att.url = r.url || ""; att.thumb = r.thumbUrl || r.url || "";
@@ -50774,6 +50942,12 @@
   function admAttRemove(i) {
     var list = S.adminAtt || [];
     var gone = list.splice(i, 1)[0];
+    // a PDF still being read: dropped here, and its reading lands nowhere (admAttachPdf)
+    if (gone && gone.kind === "pdf") {
+      if (gone.item && gone.item.pdf && gone.item.pdf.doc && !gone.matId) { try { gone.item.pdf.doc.destroy(); } catch (e) {} }
+      if (S.adminHeldQ && !admAttBusy()) admHeldGo(false);
+      return;
+    }
     // an unfiled photo is the panel's to delete; a filed one lives in a gallery now
     if (gone && gone.key && !gone.filed) galDrop(gone.key);
   }
@@ -50781,6 +50955,250 @@
   function admAttFiled(key) {
     var list = S.adminAtt || [];
     for (var i = list.length - 1; i >= 0; i--) if (list[i].key === key) { list[i].filed = true; list.splice(i, 1); }
+  }
+
+  /* ---- PDFs and photos for an ARTICLE, through the assistant ----------------
+     Dim, 02.11.2026 — «Claude and Помощник and admin, all of these need to be
+     good and simple»: Renat, the shop's owner, is not good with computers.
+     Until today a brand's PDF became an article's material only through
+     «Блог» → «+ Статья» → «Материалы». Now the clip takes it too:
+
+       a PDF   is ALWAYS a material. It is read here, on the phone, by the code
+               «Новая статья» reads it with (bnewReadPdf) — text page by page,
+               photo pages labelled by the text page before them — and saved
+               the same way (bnewPdfUpload): the photo pages the words so far
+               name go up now, the rest when the article's topic is known
+               (bnewTopUp, from bnewWrite).
+       photos  serve products and covers as before. They become a material
+               only when the message is about an article (admPhotoUse); when it
+               says nothing either way the chat asks — «Для статьи» or «Для
+               товара», one tap.
+
+     Saved, the panel says so itself (admMatConfirm) — what, how many pages
+     and pictures — and offers «Напиши статью по этому»: that goes to the
+     model with the materials' ids (admMatsForAI), it answers
+     draft_from_materials, the owner confirms, «Новая статья» writes the
+     draft. Nothing is ever published by itself. */
+  var ADM_PDF_MAX = 3;
+  /* The files the chat saved in this visit, newest last: {id, kind, name,
+     item, told}. A PDF's item keeps its document open for bnewTopUp — the
+     last three, a catalogue is tens of megabytes. */
+  function admMatAdd(item, m) {
+    var mats = S.adminMats || (S.adminMats = []);
+    if (!mats.some(function (x) { return x.id === m.id; })) mats.push({ id: m.id, kind: m.kind, name: m.name, item: item, told: false });
+    while (mats.length > 10) mats.shift();
+    var open = mats.filter(function (x) { return x.item && x.item.pdf && x.item.pdf.doc; });
+    open.slice(0, Math.max(0, open.length - 3)).forEach(function (x) {
+      try { x.item.pdf.doc.destroy(); } catch (e) {}
+      x.item.pdf.doc = null;
+    });
+  }
+  function admMatItem(id) {
+    var mats = S.adminMats || [];
+    for (var i = 0; i < mats.length; i++) if (mats[i].id === id) return mats[i].item || null;
+    return null;
+  }
+  /** The ids every question carries — the route reads them back from the library (briefMaterialIds). */
+  function admMatsForAI() { return (S.adminMats || []).map(function (x) { return x.id; }).slice(-10); }
+  /** A PDF still being read or saved, or photos on their way into the materials. */
+  function admAttBusy() {
+    return (S.adminAtt || []).some(function (a) { return a.busy && (a.kind === "pdf" || a.use === "article"); });
+  }
+  /** What the words so far are about — the box, or the question that waits — for a PDF's photo pages. */
+  function admTopicNow() { return String((S.adminQ || "") + " " + (S.adminHeldQ || "")).trim(); }
+
+  function admAttachPdf(file) {
+    var list = S.adminAtt || (S.adminAtt = []);
+    var att = { kind: "pdf", key: "", url: "", thumb: "", name: String(file.name || "PDF").slice(0, 80), busy: true, err: "", note: "Открываю PDF…", item: null, matId: "" };
+    list.push(att);
+    var item = bnewNewItem("pdf", String(file.name || "PDF").slice(0, 200));
+    item.fromChat = true;
+    att.item = item;
+    item.onNote = function (t) { att.note = t; admAttNotePaint(att); };
+    bnewReadPdf(item, file).then(function () {
+      if (list.indexOf(att) < 0) return null;   // × while it was being read
+      bnewPreTick(item, bnewStems(admTopicNow()));
+      return new Promise(function (res) { bnewMedia(res); }).then(function () { return bnewPdfUpload(item); });
+    }).then(function (m) {
+      item.onNote = null;
+      if (list.indexOf(att) < 0) return;
+      att.busy = false;
+      if (!m) { att.err = item.note || "Не получилось сохранить PDF — попробуйте ещё раз."; render(); admHeldGo(false); return; }
+      att.matId = m.id;
+      admMatAdd(item, m);
+      list.splice(list.indexOf(att), 1);   // saved: off the strip, into the materials
+      render();
+      admHeldGo(true);
+    }).catch(function () {
+      item.onNote = null;
+      if (list.indexOf(att) < 0) return;
+      att.busy = false; att.err = "Не получилось прочитать PDF — попробуйте другой файл.";
+      render(); admHeldGo(false);
+    });
+  }
+
+  /* What attached photos are for, read off the message: "article" — material
+     for a new article; "other" — today's road (a product's gallery, a cover,
+     a picture into the open article — the model decides); "" — the message
+     does not say, and the chat asks. A cover is never a material; a message
+     with words of its own («фото для Bio Botanical Shampoo») is the model's to
+     read, as it always was; an open editor says what «сюда» is. */
+  var ADM_USE_COVER = /обложк|cover|kaane/i;
+  // into an article that exists — add_post_photo's road, whatever else the sentence says
+  var ADM_USE_INTO = /(^|\s)во?\s+(эту\s+|этой\s+|ту\s+)?стать|в\s+текст|встав|добавь\s+в\s/i;
+  var ADM_USE_ARTICLE = /материал|для\s+(нов\S*\s+)?стат|для\s+блог|(напиш|написать|сделай|сделать|создай|подготов)\S*\s+(\S+\s+)?стать|стать\S*\s+(по|из|про)\s|по\s+(этим|эти|ним)\s|из\s+(этих|них)\s|material|for\s+(an?\s+)?(article|blog)|artikli/i;
+  var ADM_USE_OTHER = /товар|главн|галере|убери\s+фон|без\s+фона|вырез|product|toode|peamine|gallery|сюда/i;
+  var ADM_FILLER = /^(вот|это|эти|этот|фото|фотк\S*|фотограф\S*|снимк\S*|картинк\S*|файл\S*|держи|смотри|глянь|для|стать\S*|блог\S*|pdf|пдф|каталог\S*|буклет\S*|нов\S*|про|мне|пожалуйста|please)$/i;
+  /** Words of his own in a message: three letters or more, not «вот», «фото», «для статьи». */
+  function admPlainWords(q) {
+    return String(q || "").replace(/^📎.*$/, "").split(/[^0-9A-Za-zА-Яа-яЁёÕÄÖÜõäöüŠšŽž.-]+/).filter(function (w) {
+      return w.length >= 3 && !ADM_FILLER.test(w);
+    }).length;
+  }
+  function admPhotoUse(q) {
+    var s = String(q || "");
+    if (ADM_USE_COVER.test(s) || ADM_USE_INTO.test(s)) return "other";
+    if (ADM_USE_ARTICLE.test(s)) return "article";
+    if (ADM_USE_OTHER.test(s) || S.adminBlogEdit || S.adminEdit) return "other";
+    return admPlainWords(s) >= 2 ? "other" : "";
+  }
+  /* The door every question passes first (admAsk): a PDF still being read
+     holds the question until it is saved — its id has to ride with it — and
+     photos the words do not explain are asked about. */
+  function admFilesGate(q) {
+    var list = S.adminAtt || [];
+    if (list.some(function (a) { return a.kind === "pdf" && a.busy; })) {
+      S.adminHeldQ = q;
+      S.adminAns = { q: S.adminAsk, reply: "Сохраняю PDF в материалы блога — отвечу, как только он прочитается.", local: true };
+      admPaintAnswer();
+      return true;
+    }
+    var photos = list.filter(function (a) { return a.kind !== "pdf" && a.key && !a.busy && !a.err && !a.filed && a.use !== "article"; });
+    if (!photos.length) return false;
+    var use = admPhotoUse(q);
+    if (use === "article") { admPhotosToArticle(photos, q); return true; }
+    var fresh = photos.filter(function (a) { return !a.use; });
+    if (use === "" && fresh.length) {
+      S.adminHeldQ = q;
+      S.adminAns = { q: S.adminAsk, reply: "Для чего эти фото?", local: true, choose: "photo" };
+      admPaintAnswer();
+      return true;
+    }
+    fresh.forEach(function (a) { a.use = "other"; });
+    return false;
+  }
+  /* Photos for an article: up again under blog/ — a material's pictures are
+     blog pictures (isOurBlogImage in src/lib/blog-materials.ts) — by the code
+     «Новая статья» uploads its photos with (bnewUploadPhotos); the copies the
+     clip put in the inbox go. */
+  function admPhotosToArticle(photos, q) {
+    photos.forEach(function (a) { a.use = "article"; a.busy = true; });
+    S.adminHeldQ = q;
+    S.adminAns = { q: S.adminAsk, reply: "Сохраняю фото в материалы блога…", local: true };
+    render();
+    var files = photos.map(function (a) { return a.file; }).filter(Boolean);
+    var item = bnewNewItem("image", files.length === 1 ? String(files[0].name || "Фото").slice(0, 200) : files.length + " фото");
+    (files.length ? bnewUploadPhotos(item, files) : Promise.resolve(null)).then(function (m) {
+      var list = S.adminAtt || [];
+      photos.forEach(function (a) { a.busy = false; });
+      if (!m) {
+        photos.forEach(function (a) { a.use = ""; });
+        S.adminHeldQ = "";
+        S.adminAns = { q: S.adminAsk, reply: item.note || "Не получилось сохранить фото — попробуйте ещё раз.", local: true };
+        render();
+        return;
+      }
+      photos.forEach(function (a) { var at = list.indexOf(a); if (at >= 0) list.splice(at, 1); galDrop(a.key); });
+      admMatAdd(item, m);
+      render();
+      admHeldGo(true);
+    });
+  }
+  /** → with an empty box and photos in the strip: the chat asks what they are for, rather than doing nothing. */
+  function admSendFilesOnly() {
+    var photos = (S.adminAtt || []).filter(function (a) { return a.kind !== "pdf" && a.key && !a.busy && !a.err && !a.use; });
+    if (!photos.length) return false;
+    var label = "📎 " + photos.map(function (a) { return a.name; }).join(", ");
+    S.adminAsk = label; render(); admAsk(label);
+    return true;
+  }
+  /** «Для статьи» / «Для товара» under «Для чего эти фото?». */
+  function admPhotoUseChosen(kind) {
+    var q = S.adminHeldQ || S.adminAsk || "";
+    S.adminHeldQ = "";
+    var photos = (S.adminAtt || []).filter(function (a) { return a.kind !== "pdf" && a.key && !a.busy && !a.err && !a.filed && !a.use; });
+    if (!photos.length) return;
+    if (kind === "article") { admPhotosToArticle(photos, q); return; }
+    photos.forEach(function (a) { a.use = "other"; });
+    // today's road: the model reads the photos with the question, and asks which product when it does not say
+    var ask = admPlainWords(q) ? q : "Это фото для товара";
+    S.adminAsk = ask; S.adminAns = null; render();
+    admAsk(ask);
+  }
+  /* A file is saved (or failed), and the question that waited for it goes
+     on: one that asks for an article, or says more than «вот файл», goes to
+     the model with the materials; nothing asked, or nothing but «вот» — the
+     panel says itself what it saved (admMatConfirm). */
+  var ADM_WRITE_RX = /напиш|написать|(сделай|создай)\s+(\S+\s+)?стат|write|kirjuta/i;
+  var ADM_ABOUT_FILES = /^📎|фото|pdf|пдф|стат|материал|каталог|буклет|файл|блог/i;
+  function admHeldGo(saved) {
+    if (admAttBusy()) return;   // another file is still on its way: one answer for all of them
+    var q = S.adminHeldQ || "";
+    S.adminHeldQ = "";
+    var waiting = !!q && q === S.adminAsk;
+    var words = admPlainWords(q);
+    // «сколько заказов?» asked while a PDF was read is still a question for the model
+    if (waiting && (ADM_WRITE_RX.test(q) || words >= 3 || (words && !ADM_ABOUT_FILES.test(q)))) {
+      (S.adminMats || []).forEach(function (x) { x.told = true; });
+      S.adminAns = null; admPaintAnswer();
+      admAsk(q);
+      return;
+    }
+    if (saved || (S.adminMats || []).some(function (x) { return !x.told; })) admMatConfirm(waiting ? q : "");
+    else if (waiting) { S.adminAns = null; admPaintAnswer(); admAsk(q); }
+  }
+  /** «Сохранил в материалы блога: …» — the panel's own answer, and two taps on from it. */
+  function admMatConfirm(q) {
+    var mats = (S.adminMats || []).filter(function (x) { return !x.told; });
+    if (!mats.length) return;
+    // a question is in the air: its answer has the box — the model is told of the files with it (admMatsForAI)
+    if (!q && typeof admAskFlight !== "undefined" && admAskFlight) return;
+    mats.forEach(function (x) { x.told = true; });
+    var noPics = mats.some(function (x) { return x.kind === "pdf" && x.item && !(x.item.images || []).length && bnewPhotos(x.item).length; });
+    var reply = "Сохранил в материалы блога:\n" +
+      mats.map(function (x) { return "• «" + x.name + "» — " + bnewItemNote(x.item || { kind: x.kind, images: [] }); }).join("\n") + "\n" +
+      (noPics ? "Фото из PDF возьму по теме статьи. " : "") +
+      "Написать по " + (mats.length > 1 ? "ним" : "нему") + " статью? Будет черновик — ничего не публикуется само.";
+    var label = q || "📎 " + mats.map(function (x) { return x.name; }).join(", ");
+    S.adminAsk = label;
+    // the model hears it too: «напиши статью по этому» next is about these
+    admConvo.push({ role: "user", content: q || "[Прикрепил файлы: " + mats.map(function (x) { return "«" + x.name + "»"; }).join(", ") + "]" });
+    admConvo.push({ role: "assistant", content: reply });
+    S.adminAns = { q: label, reply: reply, local: true, mats: true };
+    render();
+  }
+  function admLocalChipsHTML(a) {
+    var chips = a.choose === "photo"
+      ? '<button data-admphotouse="article">Для статьи</button><button data-admphotouse="product">Для товара</button>'
+      : a.mats
+        ? '<button data-admask="Напиши статью по этому">Напиши статью по этому</button><button data-admmatopen>Открыть в «+ Статья»</button>'
+        : "";
+    return chips ? '<div class="adm-asst__chips" style="margin-top:10px">' + chips + "</div>" : "";
+  }
+  /* «Открыть в «+ Статья»»: the materials saved here, in «Новая статья» — to
+     give the topic himself and press «Написать черновик» (no model needed). */
+  function admMatOpen() {
+    var mats = S.adminMats || [];
+    if (!mats.length) return;
+    S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    bnewOpen();
+    var st = bnewState();
+    mats.forEach(function (x) {
+      if (!x.item || st.items.some(function (it) { return it.id === x.id; })) return;
+      x.item.onNote = null;
+      st.items.push(x.item);
+    });
+    render();
   }
   /* A photo onto a product: the catalogue product's gallery override
      (set_gallery — the editor's own write) or the owner's product's row
@@ -55146,7 +55564,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -57276,6 +57694,7 @@
         if (qEl) qEl.value = "";
         render(); admAsk(q); refocus("[data-admq]");
       }
+      else admSendFilesOnly();   // → with only photos in the strip: «Для чего эти фото?»
       return;
     }
     if (d.admvoice !== undefined) { admVoiceToggle(); return; }
@@ -57288,6 +57707,9 @@
       return;
     }
     if (d.admattdel !== undefined) { admAttRemove(Number(d.admattdel)); render(); return; }
+    // «Для статьи» / «Для товара», and «Открыть в «+ Статья»» under a saved file (admLocalChipsHTML)
+    if (d.admphotouse !== undefined) { admPhotoUseChosen(d.admphotouse); return; }
+    if (d.admmatopen !== undefined) { admMatOpen(); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
       var sp = byId(S.productId);
@@ -59601,6 +60023,7 @@
         t.value = "";
         render(); admAsk(q); refocus("[data-admq]");
       }
+      else admSendFilesOnly();
     }
     // the order card's note is a textarea — Ctrl/Cmd+Enter saves it now, plain Enter is a new line
     if (t && t.matches && t.matches("[data-admnote]") && (e.ctrlKey || e.metaKey)) {

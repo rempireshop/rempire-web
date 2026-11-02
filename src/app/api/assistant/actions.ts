@@ -758,6 +758,25 @@ export function briefAttachments(raw: unknown): AttachmentBrief[] {
   return out;
 }
 
+/* The materials the panel saved for THIS conversation (Dim, 02.11.2026): a
+   PDF attached with the clip is read on the phone and saved into the blog's
+   library at once, photos for an article likewise (admMatAdd in
+   public/shop2/app.js), and the next question carries their ids. Ids only —
+   the route reads each one back from the library, so a name in the prompt is
+   the stored one, never the panel's word for it. */
+export const ATTACHED_MATERIALS_MAX = 10;
+const MATERIAL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function briefMaterialIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const v of raw) {
+    const id = typeof v === "string" ? v.trim().toLowerCase() : "";
+    if (MATERIAL_ID_RE.test(id) && !out.includes(id)) out.push(id);
+    if (out.length >= ATTACHED_MATERIALS_MAX) break;
+  }
+  return out;
+}
+
 export type OpenPostBrief = { slug: string; title: string; status: string };
 
 /**

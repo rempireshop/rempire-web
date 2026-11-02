@@ -127,11 +127,30 @@ admin login already needs.
 * pictures are the shop's own product photos only (`get_product` → `photos`): `cover` takes a
   product id or one of those addresses (anything else is refused, nothing saved); an `<img>` in
   the text with any other address is dropped, an emptied `<figure>` with it. The owner's own
-  photos cannot travel from a Claude chat into a tool call — they are added in the editor;
+  photos cannot travel from a Claude chat into a tool call — they are added in the editor, or
+  through the materials (`get_upload_link` below), whose pictures `save_draft` takes too;
 * the products it names go into «Товары в статье» (up to 40);
 * without `slug` — a new draft; with a draft's slug — the languages sent replace theirs, the rest
   (cover, other languages, tags unless sent) stays; a **published** article is refused.
 * journal line `mcp.save_draft`.
+
+**Materials** (02.11.2026) — what an article is written FROM, one library with the panel's
+«+ Статья» → «Материалы» and the Помощник (`src/lib/blog-materials.ts`): `list_materials`,
+`get_material` (read), `save_material` (write), `get_upload_link` (read). Claude in a claude.ai
+chat sees the files Renat attaches but cannot hand a file's bytes to any tool, so:
+
+* `save_material` with `text` — a document Claude read, copied faithfully; a PDF with a
+  «[стр. N]» line before each page is kept page by page (`pagesFromText`), more than 30 000
+  characters goes in parts with `append_to`; `sample: true` is «писать так же»;
+* `save_material` with `url` — the shop fetches a public page, a PDF (≤ 20 MB, its text read on
+  the server by `src/lib/pdf-text.ts` — pdf-lib, no pictures) or a photo (≤ 12 MB, into the bucket
+  under `blog/`) through the SSRF guard (`fetchPublicFile`, `src/lib/blog-material-link.ts`),
+  named by its host; anything with a source address is a third party's text (`fromInternet`):
+  never listed with its text, fenced and labelled UNTRUSTED in `get_material`;
+* `get_upload_link` — `/admin?article=new&about=…`, which opens «+ Статья» → «Материалы» on
+  Renat's phone (signed in; after the sign-in otherwise) with the topic filled in, plus the
+  sentence Claude says to him. Photos, and a PDF's pictures, go that way.
+* journal line `mcp.save_material`.
 
 `save_product_google_text` (25.10.2026 — Renat's panel button had written «других сведений нет»
 into 29 products, and his Claude writes better): a product's Google pair, `ru`/`et`/`en` each
