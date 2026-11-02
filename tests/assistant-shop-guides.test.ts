@@ -164,6 +164,9 @@ function asPost(f: Fixture): Post {
     id: f.slug, status: "published", coverAlt: { RU: "", ET: "", EN: "" }, coverFocus: null,
     seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" }, author: "Rempire",
     publishedAt: "2026-10-20T00:00:00.000Z", createdAt: "2026-10-20T00:00:00.000Z", updatedAt: "2026-10-20T00:00:00.000Z",
+    // the magazine fields (227_blog_magazine) — none of them matter to the ranking
+    topic: "hair", topicChosen: false, featured: false, coverW: null, coverH: null,
+    showSources: false, sources: [], minutes: { RU: 0, ET: 0, EN: 0 },
     ...f,
   };
 }
