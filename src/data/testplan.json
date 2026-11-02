@@ -718,6 +718,49 @@
       }
     },
     {
+      "id": "shop-product-desc-sections",
+      "area": "shop",
+      "who": "both",
+      "device": "phone",
+      "lang": "any",
+      "title": "Описание товара с разделами и списками",
+      "steps": [
+        "Открыть в магазине Proraso Beard Oil Azur Lime.",
+        "Раскрыть «Описание».",
+        "Переключить язык на эстонский, потом на английский.",
+        "Открыть тот же товар на компьютере."
+      ],
+      "expect": [
+        "«Преимущества:» — жирный заголовок, под ним список с точками.",
+        "«Объём:» и «Аромат:» жирные, текст после них обычный.",
+        "Звёздочек ** в тексте не видно.",
+        "На эстонском и английском — те же разделы и списки.",
+        "Страница не прыгает, когда описание догружается."
+      ],
+      "why": "Тексты, написанные в панели, Помощником и Claude, раньше показывались сплошными абзацами.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "A product description with sections and lists",
+        "steps": [
+          "Open Proraso Beard Oil Azur Lime in the shop.",
+          "Open «Описание».",
+          "Switch the language to Estonian, then to English.",
+          "Open the same product on a computer."
+        ],
+        "expect": [
+          "«Преимущества:» is a bold heading with a bulleted list under it.",
+          "«Объём:» and «Аромат:» are bold, the text after them is plain.",
+          "No ** asterisks show in the text.",
+          "Estonian and English show the same sections and lists.",
+          "The page does not jump when the description loads."
+        ],
+        "why": "Texts written in the panel, by «Помощник» or by Claude used to show as flat paragraphs."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T11:55:10.827Z"
+    },
+    {
       "id": "shop-sets",
       "area": "shop",
       "who": "renat",
@@ -8491,6 +8534,53 @@
       "markedAt": "2026-09-25T22:31:49.626Z"
     },
     {
+      "id": "goods-desc-format-bar",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Кнопки оформления в описании товара",
+      "steps": [
+        "«Товары» → любой товар → «Описание», вкладка «RU».",
+        "Написать строку «Преимущества», поставить в неё курсор и нажать «Заголовок».",
+        "Под ней написать две строки, выделить их и нажать «• Список».",
+        "Выделить слово в первом абзаце и нажать «Ж».",
+        "Нажать «Как в магазине», потом открыть товар в магазине."
+      ],
+      "expect": [
+        "«Заголовок» ставит двоеточие и отделяет строку пустой строкой сверху.",
+        "«• Список» ставит «— » перед каждой выделенной строкой.",
+        "«Ж» обводит слово звёздочками: **слово**.",
+        "Клавиатура не закрывается, курсор остаётся в поле.",
+        "«Как в магазине» показывает жирный заголовок и список.",
+        "В магазине описание выглядит так же, как в просмотре."
+      ],
+      "why": "Описание с разделами и списками читается легче, чем сплошной текст.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "Formatting buttons in a product description",
+        "steps": [
+          "«Товары» → any product → «Описание», the «RU» tab.",
+          "Type a line «Преимущества», put the cursor in it and press «Заголовок».",
+          "Type two lines under it, select them and press «• Список».",
+          "Select a word in the first paragraph and press «Ж».",
+          "Press «Как в магазине», then open the product in the shop."
+        ],
+        "expect": [
+          "«Заголовок» adds a colon and an empty line above the line.",
+          "«• Список» puts «— » in front of every selected line.",
+          "«Ж» wraps the word in asterisks: **word**.",
+          "The keyboard stays open and the cursor stays in the box.",
+          "«Как в магазине» shows a bold heading and a list.",
+          "In the shop the description looks the way the preview did."
+        ],
+        "why": "A description with sections and lists reads more easily than one block of text."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T11:55:10.827Z"
+    },
+    {
       "id": "goods-new",
       "area": "goods",
       "who": "renat",
@@ -9838,7 +9928,8 @@
         "В поле появился связный русский текст про этот товар.",
         "Текст читается как ваш, а не как реклама.",
         "Нет выдуманных обещаний: сроков, гарантий, лечения.",
-        "Черновик и правки сохраняются сами — в магазине тот же текст."
+        "Черновик и правки сохраняются сами — в магазине тот же текст.",
+        "Под текстом — жирный заголовок «Преимущества:» и три пункта с «— »."
       ],
       "why": "Товар без описания не находится поиском по фразам вроде «перхоть».",
       "risk": "low",
@@ -9855,12 +9946,13 @@
           "A readable Russian text about this product appears in the box.",
           "It reads like your shop, not like an advert.",
           "No invented promises: no deadlines, guarantees or cures.",
-          "The draft and your edits save themselves — the shop shows the same text."
+          "The draft and your edits save themselves — the shop shows the same text.",
+          "Under the text: a bold «Преимущества:» heading and three «— » points."
         ],
         "why": "A product with no description is not found by a phrase like «перхоть»."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:44:55.950Z"
+      "markedAt": "2026-11-02T11:55:10.827Z"
     },
     {
       "id": "ai-translate",
@@ -9878,7 +9970,8 @@
         "В эстонском поле стоит эстонский текст.",
         "В английском поле стоит английский текст.",
         "Русских слов в переводах не осталось.",
-        "На эстонской странице товара виден эстонский текст — сохранять не нужно."
+        "На эстонской странице товара виден эстонский текст — сохранять не нужно.",
+        "Заголовки и пункты списка стоят на своих местах в обоих переводах."
       ],
       "why": "Русское описание на эстонской странице — это покупатель, решивший, что магазин не для него.",
       "risk": "low",
@@ -9894,12 +9987,13 @@
           "The Estonian box holds Estonian text.",
           "The English box holds English text.",
           "No Russian words are left in either translation.",
-          "The Estonian product page shows the Estonian text — nothing to save."
+          "The Estonian product page shows the Estonian text — nothing to save.",
+          "Headings and list points stay in place in both translations."
         ],
         "why": "A Russian description on an Estonian page loses that buyer for good."
       },
       "mark": "redo",
-      "markedAt": "2026-11-02T09:09:56.000Z"
+      "markedAt": "2026-11-02T11:55:10.827Z"
     },
     {
       "id": "ai-translate-russian-left",
@@ -9939,6 +10033,51 @@
       },
       "mark": "new",
       "markedAt": "2026-10-29T08:29:25.495Z"
+    },
+    {
+      "id": "ai-desc-sections",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "ИИ разбивает описание на разделы",
+      "steps": [
+        "Открыть товар, у которого описание — сплошной текст.",
+        "В «Описание» нажать «Разбить на разделы» и подождать.",
+        "Сравнить слова с прежним текстом.",
+        "Нажать «Вернуть» в сообщении внизу.",
+        "Открыть вкладку «Eesti» и нажать «Разбить на разделы» ещё раз."
+      ],
+      "expect": [
+        "Появились заголовки с двоеточием и пункты списка с «— ».",
+        "Слова те же: ничего не добавлено и не выброшено.",
+        "Если ИИ поменял слова — сообщение, текст остался прежним.",
+        "«Вернуть» возвращает текст как был.",
+        "На эстонской вкладке разбивается только эстонский текст."
+      ],
+      "why": "Старые тексты из панели — сплошные абзацы; кнопка делает их удобными, не меняя смысла.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "The AI splits a description into sections",
+        "steps": [
+          "Open a product whose description is one block of text.",
+          "In «Описание» press «Разбить на разделы» and wait.",
+          "Compare the words with the old text.",
+          "Press «Вернуть» in the message at the bottom.",
+          "Open the «Eesti» tab and press «Разбить на разделы» again."
+        ],
+        "expect": [
+          "Headings with a colon and list points with «— » appeared.",
+          "The words are the same: nothing added, nothing dropped.",
+          "If the AI changed words: a message, and the text stays as it was.",
+          "«Вернуть» puts the text back as it was.",
+          "On the Estonian tab only the Estonian text is split."
+        ],
+        "why": "The panel's older texts are flat paragraphs; the button makes them easy to read without changing their meaning."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T11:55:10.827Z"
     },
     {
       "id": "ai-seo",
@@ -10477,13 +10616,14 @@
         "Новое описание сразу на странице товара, на всех трёх языках.",
         "«Эликсир» не сохраняется: Claude предлагает слово, которое магазин переводит.",
         "В «Журнале» строчки «Свой товар изменён через Claude» с «Вернуть».",
-        "«Вернуть» возвращает прежнее описание на странице товара."
+        "«Вернуть» возвращает прежнее описание на странице товара.",
+        "Заголовки разделов и списки Claude пишет так же, как кнопки панели."
       ],
       "why": "Вы ведёте магазин сами: тексты и названия товаров можно поручить своему Claude, без Димы.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-10-26T07:37:21.633Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T11:55:10.827Z",
       "en": {
         "title": "Claude changes a product's description and name",
         "steps": [
@@ -10498,7 +10638,8 @@
           "The new description is on the product page at once, in all three languages.",
           "«Эликсир» does not save: Claude suggests a word the shop translates.",
           "«Журнал» has «Свой товар изменён через Claude» lines with «Вернуть».",
-          "«Вернуть» brings the previous description back on the product page."
+          "«Вернуть» brings the previous description back on the product page.",
+          "Claude writes section headings and lists the way the panel's buttons do."
         ],
         "why": "You run the shop yourself: product texts and names can be handed to your own Claude, without Dim."
       }
@@ -10660,8 +10801,8 @@
       "why": "Помощник в админке теперь умеет то же, что ваш Claude: тексты, переводы, названия, цены и тексты страниц.",
       "risk": "med",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-10-26T10:10:23.016Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T11:55:10.827Z",
       "en": {
         "title": "The assistant translates and changes texts, names and prices",
         "steps": [

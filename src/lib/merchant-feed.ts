@@ -81,6 +81,9 @@ import {
 } from "@/lib/shipping";
 import { offeredCarriers } from "@/lib/shipping/country-prices";
 import { catName, clip, LANGS, langPath, liveBaseFrom, merchantText, T } from "@/lib/seo-head.mjs";
+/* The owner's text carries a light markup (src/lib/desc-format.mjs): «**» for
+   bold must never reach Google — headings and «— » points stay as words. */
+import { descPlain } from "@/lib/desc-format.mjs";
 
 /* ---------- the three feeds --------------------------------------------- */
 
@@ -360,7 +363,8 @@ function unitMeasure(label: string): { measure: string; base: string } | null {
  */
 export const FEED_INTRO_MAX = 900;
 export function feedIntro(text: string): string {
-  const paras = String(text).split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  // marks out first, so a heading written «**Действие:**» still ends the intro
+  const paras = descPlain(String(text)).split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   const out: string[] = [];
   for (const p of paras) {
     const head = p.split("\n")[0].trim();
@@ -374,9 +378,9 @@ export function feedIntro(text: string): string {
   return cut > 0 ? joined.slice(0, cut + 1) : joined.slice(0, FEED_INTRO_MAX);
 }
 
-/** The owner's plain-text description (paragraphs split by blank lines) as feed text. */
+/** The owner's plain-text description (paragraphs split by blank lines) as feed text — its «**» marks taken out. */
 function ownerText(t: string): string {
-  const html = String(t)
+  const html = descPlain(String(t))
     .split(/\n{2,}/)
     .map((p) => p.trim())
     .filter(Boolean)

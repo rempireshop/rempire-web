@@ -1411,8 +1411,11 @@ function sanitizeSetDescription(x: Record<string, unknown>, known: Set<string>, 
     const text = v.replace(/\r\n?/g, "\n").replace(/[\p{Cc}\p{Cf}]/gu, (c) => (c === "\n" ? "\n" : " "))
       .replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, 4000);
     if (!text) continue;
-    // descOvHtml() prints every character: a tag or a ** would show on the page
-    if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) continue;
+    /* the page's renderer (src/lib/desc-format.mjs) draws the shop's own marks
+       only — a heading line ending in «:», «— » points, **bold** — and prints
+       a tag, a # heading, a * list or __ as it is: the same door as Claude's
+       save_product_description */
+    if (/<\/?[a-z][^>]*>/i.test(text) || /__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) continue;
     if (!textHolds(text, l, who)) continue;
     value[l] = text;
   }

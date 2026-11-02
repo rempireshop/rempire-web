@@ -114,7 +114,10 @@ import { parseShopPath, publicPath, respellShopLinks, STATE_RESTS, SUB_HANDLES }
    after boot are one text. */
 import { seoBrandIntro, seoCatIntro, seoHead, seoOwnSet, seoSub } from "../src/lib/seo-copy.mjs";
 import { cleanPageTexts } from "../src/lib/page-texts.mjs";
-import { seoCopyBlock } from "./lib/seo-copy-block.mjs";
+/* The owner's description (plain text, headings, lists, bold) as the product
+   page draws it — the block app.js's descOvHtml() carries a copy of. */
+import { descHtml } from "../src/lib/desc-format.mjs";
+import { descFormatBlock, seoCopyBlock } from "./lib/seo-copy-block.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -210,7 +213,19 @@ const CONTENT = await loadObj("content.js", "CONTENT");
 const CONTENT_RU = await loadObj("content.ru.js", "CONTENT_RU");
 const CONTENT_ET = await loadObj("content.et.js", "CONTENT_ET");
 
+/* descFor() in app.js, step for step: the owner's own text in this language
+   first (product_overrides.description — what the panel, «Помощник» and
+   Claude write), drawn by the shared renderer; then the shop's static HTML.
+   Until 02.11.2026 the static page skipped the first step, so a product with
+   the owner's text was indexed with the old Shopify copy and the live page
+   swapped it for his the moment the overrides feed landed. */
+function ownDesc(p, code) {
+  const d = PRODUCT_OVERRIDES[p.id] && PRODUCT_OVERRIDES[p.id].description;
+  return d && typeof d[code] === "string" && d[code].trim() ? d[code] : "";
+}
 function descFor(p, code) {
+  const own = ownDesc(p, code);
+  if (own) return descHtml(own);
   if (code === "RU" && CONTENT_RU[p.id]) return CONTENT_RU[p.id];
   if (code === "ET" && CONTENT_ET[p.id]) return CONTENT_ET[p.id];
   return CONTENT[p.id] || "";
@@ -474,6 +489,15 @@ const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s)
   if (own === null || app === null || own !== app) {
     console.error("x public/shop2/app.js does not carry the current src/lib/seo-copy.mjs block");
     console.error("x run: node tools/sync-seo-copy.mjs");
+    process.exit(1);
+  }
+  /* …and the description renderer: a static product page drawn by one copy
+     and taken over by another would move under the reader (desc-format). */
+  const descOwn = descFormatBlock(await readFile(path.join(ROOT, "src", "lib", "desc-format.mjs"), "utf8"));
+  const descApp = descFormatBlock(appSrc);
+  if (descOwn === null || descApp === null || descOwn !== descApp) {
+    console.error("x public/shop2/app.js does not carry the current src/lib/desc-format.mjs block");
+    console.error("x run: node tools/sync-desc-format.mjs");
     process.exit(1);
   }
 }
@@ -1135,7 +1159,9 @@ function productPage(p, lang) {
         sizes +
         (descFor(p, code)
           ? "<h2 class=\"display h1\" style=\"font-size:13px;letter-spacing:.18em\">" + esc(t.description) + "</h2>" +
-            '<div class="acc__rich">' + descFor(p, code) + "</div>"
+            /* data-descown: the owner's text, not the static one — app.js keeps
+               it on screen until the overrides feed has spoken (PRE_DESC) */
+            '<div class="acc__rich"' + (ownDesc(p, code) ? " data-descown" : "") + ">" + descFor(p, code) + "</div>"
           : "") +
       "</div>" +
     "</div>" +

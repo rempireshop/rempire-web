@@ -69,6 +69,15 @@ describe("the action door — the connector's checks on the assistant's texts", 
     expect(act({ type: "set_description", id: "made-up", value: { RU: "Текст." } })).toBeNull();
   });
 
+  it("set_description: the shop's format — headings, «— » points, **bold** — passes, like Claude's; other markdown does not", () => {
+    const RU = "Мягкий шампунь для **тонких** волос.\n\nПреимущества:\n— объём без утяжеления\n— лёгкий аромат";
+    const ET = "Õrn šampoon **peentele** juustele.\n\nEelised:\n— kohevus ilma raskuseta\n— kerge lõhn";
+    expect(act({ type: "set_description", id: "kevin-murphy-angel-wash", value: { RU, ET } }))
+      .toEqual({ type: "set_description", id: "kevin-murphy-angel-wash", value: { RU, ET } });
+    expect(act({ type: "set_description", id: "kevin-murphy-angel-wash", value: { RU: "* объём\n* аромат" } })).toBeNull();
+    expect(act({ type: "set_description", id: "kevin-murphy-angel-wash", value: { RU: "## Шампунь\n\nТекст." } })).toBeNull();
+  });
+
   it("set_names: a catalogue product's name every language can say; the owner's own goes through update_product", () => {
     expect(act({ type: "set_names", id: "kevin-murphy-angel-wash", name: "ANGEL.WASH Gentle — шампунь для волос", cat: "hair" }))
       .toEqual({ type: "set_names", id: "kevin-murphy-angel-wash", name: "ANGEL.WASH Gentle — шампунь для волос", cat: "hair" });

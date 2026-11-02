@@ -153,7 +153,29 @@ export function overrideRow(r) {
     cat: typeof r.cat === "string" && r.cat.trim() ? r.cat.trim() : null,
     /* «Для Google» per language — seoPairs() above. Read from 29.10.2026. */
     seo: seoPairs(r),
+    /* «Описание» per language — the owner's page text, which descFor() in
+       tools/prerender-shop2.mjs now draws on the static product page exactly
+       as the live page does (src/lib/desc-format.mjs). Read from 02.11.2026. */
+    description: ownerDescriptions(r.description),
   };
+}
+
+/* cleanDescriptionPatch() in src/lib/product-descriptions.ts, which the live
+   feed reads the column through: per language, newlines kept, control
+   characters gone, at most 4 000 characters. null for none. */
+const DESC_MAX = 4000;
+export function ownerDescriptions(value) {
+  const raw = typeof value === "string" ? safeParse(value) : value;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out = {};
+  for (const lang of ["RU", "ET", "EN"]) {
+    const v = raw[lang];
+    if (typeof v !== "string") continue;
+    const t = v.replace(/\r\n?/g, "\n").replace(/\p{Cc}/gu, (ch) => (ch === "\n" ? "\n" : " "))
+      .replace(/\n{3,}/g, "\n\n").trim().slice(0, DESC_MAX);
+    if (t) out[lang] = t;
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 /**

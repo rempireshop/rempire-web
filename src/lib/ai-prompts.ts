@@ -12,8 +12,9 @@
  */
 import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS, translateProductName } from "@/lib/product-name";
 import { CAT_NAMES_I18N } from "@/lib/seo-head.mjs";
+import { descHeading, descPlain } from "@/lib/desc-format.mjs";
 
-export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "post_edit", "copy", "newsletter"] as const;
+export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "post_edit", "copy", "newsletter", "sections"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
 export const LANGS3 = ["RU", "ET", "EN"] as const;
@@ -152,10 +153,146 @@ export function buildDescribePrompt(lang: Lang3, rawInput: unknown): PromptResul
 TASK: write a product-page description from the facts under INPUT, in ${LANG_NAME[lang]}.
 - "description": 80–140 words, one to three short paragraphs, no headings, no bullet points inside it.
 - THE FIRST SENTENCE IS THE SEARCH SNIPPET. When nobody writes a separate Google description for this product, the shop cuts the page's meta description out of the front of this text (src/lib/seo-head.mjs). So sentence one has to stand on its own in a search result: under 100 characters, saying plainly what the product is and who it is for. Do not open with a heading, with the brand shouted back at the reader, or with a line in capitals — the shop strips a capitalised opening, and what is left is what a stranger reads first.
-- "bullets": exactly 3 short bullet phrases (each under 12 words), the three most useful facts from INPUT for someone deciding whether to buy — not a repeat of the description sentence by sentence.
-Respond with exactly this JSON shape and nothing else: {"description": "...", "bullets": ["...", "...", "..."]}`;
+- "heading": the name of the section the bullets stand under, one or two words in ${LANG_NAME[lang]}, no colon — ${DESCRIBE_HEADING[lang]}.
+- "bullets": exactly 3 short bullet phrases (each under 12 words), the three most useful facts from INPUT for someone deciding whether to buy — not a repeat of the description sentence by sentence. Each is a phrase, not a sentence: no full stop at the end, no dash or bullet sign in front.
+The page shows the description, then the heading in bold, then the bullets as a list.
+${DESCRIBE_EXAMPLE[lang]}
+Respond with exactly this JSON shape and nothing else: {"description": "...", "heading": "...", "bullets": ["...", "...", "..."]}`;
 
   return { system, user: `INPUT:\n${facts}` };
+}
+
+/* The heading the bullets stand under, and one worked example of the whole
+   answer per language (02.11.2026). The example is a DIFFERENT product on
+   purpose, and says so: the mini model follows a shape it is shown far more
+   reliably than one it is told about, and it must not borrow the facts. */
+const DESCRIBE_HEADING: Record<Lang3, string> = {
+  RU: "usually «Преимущества»",
+  ET: "usually «Eelised»",
+  EN: "usually «Benefits»",
+};
+const DESCRIBE_EXAMPLE: Record<Lang3, string> = {
+  RU: `EXAMPLE of the shape only — another product, never copy its words or facts: {"description": "Бальзам после бритья для чувствительной кожи. Успокаивает кожу после бритья и не оставляет липкости.", "heading": "Преимущества", "bullets": ["подходит для ежедневного бритья", "быстро впитывается", "лёгкий свежий аромат"]}`,
+  ET: `EXAMPLE of the shape only — another product, never copy its words or facts: {"description": "Habemeajamisjärgne palsam tundlikule nahale. Rahustab nahka pärast raseerimist ega jäta kleepuvat tunnet.", "heading": "Eelised", "bullets": ["sobib igapäevaseks raseerimiseks", "imendub kiiresti", "kerge värske lõhn"]}`,
+  EN: `EXAMPLE of the shape only — another product, never copy its words or facts: {"description": "An aftershave balm for sensitive skin. It calms the skin after shaving and leaves no sticky feel.", "heading": "Benefits", "bullets": ["suits daily shaving", "absorbs quickly", "a light, fresh scent"]}`,
+};
+
+/* ---------- the description format ------------------------------------------
+ * What every writer of a product's page text writes (src/lib/desc-format.mjs,
+ * Dim 02.11.2026): plain text, a short line ending in «:» is a section
+ * heading, a line starting with «— » is a point of a list, **word** is bold.
+ * One rule text and one worked example, shared by the translator here, the
+ * «Разбить на разделы» task below, «Помощник» (src/app/api/assistant/route.ts)
+ * and Claude's save_product_description (src/lib/mcp/tools.ts). */
+export const DESC_FORMAT_RULE =
+  "A product description is plain text in the shop's format: paragraphs separated by an empty line; a short line of its own ending in «:» is a section heading («Преимущества:», «Применение:», «Eelised:», «How to use:»); a line starting with «— » is a point of a list (the points of one list on consecutive lines, under their heading); **word** is bold inside a sentence. No HTML, no other markdown (no #, no * or + lists, no __).";
+export const DESC_FORMAT_EXAMPLE =
+  "Шампунь для тонких волос, которым не хватает объёма. Мягко очищает и делает волосы плотнее на ощупь.\n\nПреимущества:\n— объём без утяжеления\n— подходит для ежедневного мытья\n— лёгкий свежий аромат\n\nПрименение:\nНанесите на влажные волосы, вспеньте, смойте.";
+
+/* ---------- sections («Разбить на разделы») ----------------------------------
+ * The owner's own text in one language → the same words, put under headings
+ * and into lists. Nothing written, nothing taken away: the route holds the
+ * answer to sectionsKeepWords() below and refuses one that fails it. */
+
+export interface SectionsInput {
+  text: string;
+}
+
+export function buildSectionsPrompt(lang: Lang3, rawInput: unknown): PromptResult {
+  const src = (rawInput && typeof rawInput === "object" ? rawInput : {}) as Record<string, unknown>;
+  const text = para(src.text, 4000);
+  if (!text) throw new AiInputError("missing_text");
+  const system = `${HOUSE_VOICE}
+
+TASK: the TEXT below is a product description in ${LANG_NAME[lang]}. Lay it out in the shop's description format WITHOUT changing a single fact or word:
+${DESC_FORMAT_RULE}
+- Keep every word of the text, in its order, in ${LANG_NAME[lang]}. Do not rewrite, shorten, translate, correct or polish anything; do not add a word that is not there.
+- What you MAY do: break a paragraph into paragraphs; put a heading on a line of its own when the text names a section itself («Преимущества: …», «Применение: …» — the heading is the words before the colon, and what follows goes on the next line); add a heading of one to three words above a group only when the text plainly is that section (its benefits, its use, its ingredients); turn an enumeration into a list, one point per line starting with «— » (the commas and the «и» / «and» / «ja» between the points go, and a point loses its final full stop); begin a sentence with a capital letter after a heading.
+- Never bold anything that is not bold already. Never invent a heading the text gives no ground for. A text that is already laid out comes back as it is.
+EXAMPLE — the text «Шампунь для тонких волос, которым не хватает объёма. Мягко очищает и делает волосы плотнее на ощупь. Преимущества: объём без утяжеления, подходит для ежедневного мытья и лёгкий свежий аромат. Применение: нанесите на влажные волосы, вспеньте, смойте.» comes back as:
+${DESC_FORMAT_EXAMPLE}
+Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
+  return { system, user: `TEXT (${LANG_NAME[lang]}):\n${text}` };
+}
+
+/** Words as the check counts them: the marks out, lower case, «ё» as «е». */
+function wordsOf(s: string): string[] {
+  return descPlain(String(s ?? "")).normalize("NFKC").toLowerCase().replace(/ё/g, "е").match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+/* The words a fact turns on: a «не», a «без» or a number dropped is a fact
+   changed, however few words it is. */
+const FACT_WORDS = new Set(["не", "нет", "без", "ни", "ei", "ilma", "pole", "mitte", "no", "not", "without", "free"]);
+/** New words allowed outside the headings — a share of the answer's own. */
+export const SECTIONS_NEW_MAX = 0.05;
+/** Words of the source allowed to go (the commas' «и», «and», «ja» between the points). */
+export const SECTIONS_DROP_MAX = 0.1;
+/** A heading the model names itself: at most this many words, at most this many headings. */
+export const SECTIONS_HEAD_WORDS = 4;
+export const SECTIONS_HEADS_MAX = 10;
+
+/**
+ * Is `after` the words of `before`, laid out — not a new text? Cheap and
+ * deliberate: the answer's words outside its headings are matched against the
+ * source's words (as a bag: the order may move, a word may be used as often
+ * as the source has it); a heading's words are taken from the source where it
+ * has them and may otherwise be new — that is the one thing the task may add.
+ * Refused: more than SECTIONS_NEW_MAX new words outside the headings, more
+ * than SECTIONS_DROP_MAX of the source gone, any number or negation gone, a
+ * heading of more than SECTIONS_HEAD_WORDS words, more than SECTIONS_HEADS_MAX
+ * headings, HTML, or more bold than the source had.
+ */
+export function sectionsKeepWords(before: string, after: string): { ok: boolean; reason?: string; added: number; dropped: number } {
+  const out = String(after ?? "");
+  if (!out.trim()) return { ok: false, reason: "empty", added: 0, dropped: 0 };
+  if (/<\/?[a-z][^>]*>/i.test(out)) return { ok: false, reason: "html", added: 0, dropped: 0 };
+  const bolds = (s: string) => (String(s).match(/\*\*/g) ?? []).length;
+  if (bolds(out) > bolds(before)) return { ok: false, reason: "bold", added: 0, dropped: 0 };
+  const src = wordsOf(before);
+  const left = new Map<string, number>();
+  for (const w of src) left.set(w, (left.get(w) ?? 0) + 1);
+  const body: string[] = [];
+  const heads: string[][] = [];
+  for (const line of descPlain(out).split("\n")) {
+    const h = descHeading(line);
+    if (h !== null) heads.push(wordsOf(h));
+    else body.push(...wordsOf(line));
+  }
+  if (heads.length > SECTIONS_HEADS_MAX) return { ok: false, reason: "headings", added: 0, dropped: 0 };
+  let added = 0;
+  for (const w of body) {
+    const n = left.get(w) ?? 0;
+    if (n > 0) left.set(w, n - 1);
+    else added++;
+  }
+  for (const h of heads) {
+    let fresh = 0;
+    for (const w of h) {
+      const n = left.get(w) ?? 0;
+      if (n > 0) left.set(w, n - 1);
+      else fresh++;
+    }
+    if (fresh && h.length > SECTIONS_HEAD_WORDS) return { ok: false, reason: "heading", added, dropped: 0 };
+  }
+  let dropped = 0;
+  for (const [w, n] of left) {
+    if (n <= 0) continue;
+    if (FACT_WORDS.has(w) || /\d/.test(w)) return { ok: false, reason: "fact", added, dropped: n };
+    dropped += n;
+  }
+  if (added > SECTIONS_NEW_MAX * Math.max(1, body.length)) return { ok: false, reason: "added", added, dropped };
+  if (dropped > SECTIONS_DROP_MAX * Math.max(1, src.length)) return { ok: false, reason: "dropped", added, dropped };
+  return { ok: true, added, dropped };
+}
+
+/** How a description is laid out: its headings, points and bold — what a translation must keep. */
+export function descStructure(text: string): { heads: number; points: number; bold: number } {
+  let heads = 0, points = 0;
+  for (const line of String(text ?? "").replace(/\r\n?/g, "\n").split("\n")) {
+    const t = line.trim();
+    if (/^[-–—•]\s+/.test(t)) points++;
+    else if (descHeading(t) !== null) heads++;
+  }
+  return { heads, points, bold: (String(text ?? "").match(/\*\*(?=\S)[^\n]*?\S\*\*/g) ?? []).length };
 }
 
 /* ---------- translate ------------------------------------------------------
@@ -169,12 +306,14 @@ export interface TranslateInput {
   sourceLang?: Lang3;
   /** Product/brand names that must survive untranslated even mid-sentence. */
   keepNames?: string[];
+  /** "desc": a product's page text in the shop's description format — kept line for line (DESC_FORMAT_RULE). */
+  format?: "desc";
 }
 
 function cleanTranslateInput(
   raw: unknown,
   fallbackSourceLang: Lang3,
-): { text: string; targetLangs: Lang3[]; sourceLang: Lang3; keepNames: string[] } {
+): { text: string; targetLangs: Lang3[]; sourceLang: Lang3; keepNames: string[]; format: "desc" | "" } {
   const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const text = para(src.text, 6000);
   if (!text) throw new AiInputError("missing_text");
@@ -182,7 +321,10 @@ function cleanTranslateInput(
   const sourceLang = isLang3(src.sourceLang) ? src.sourceLang : fallbackSourceLang;
   const targetLangs = [...new Set(targets)].filter((l) => l !== sourceLang);
   if (!targetLangs.length) throw new AiInputError("missing_target_langs");
-  return { text, targetLangs, sourceLang, keepNames: keepForTargets(listOf(src.keepNames, 20, 80), targetLangs) };
+  return {
+    text, targetLangs, sourceLang, keepNames: keepForTargets(listOf(src.keepNames, 20, 80), targetLangs),
+    format: src.format === "desc" ? "desc" : "",
+  };
 }
 
 /* A catalogue name is «<maker's name> — <Russian type tail>» («Beard Oil Azur
@@ -214,6 +356,17 @@ function placeholderRule(text: string): string {
     : "";
 }
 
+/* A product's page text keeps its layout in every language (02.11.2026): the
+ * same lines, the headings translated with their colon, the «— » points and
+ * the ** around the same words — the route counts them (descStructure) and
+ * refuses a translation that lost one. One worked example, Russian →
+ * Estonian, because the model follows a shape it is shown. */
+function descFormatTranslateRule(): string {
+  return "\nTHE SOURCE IS A PRODUCT DESCRIPTION in the shop's format, and every translation keeps that format exactly: " + DESC_FORMAT_RULE +
+    " Keep the same lines in the same order, an empty line wherever the source has one. Translate a heading's words and keep its «:»; keep each «— » and translate the point after it; keep the ** around the translation of the same words. Never add or drop a line, a heading, a point or a ** pair." +
+    "\nEXAMPLE — the Russian source:\nШампунь для объёма.\n\nПреимущества:\n— объём без утяжеления\n— **лёгкий** аромат\nis in Estonian:\nKohevust andev šampoon.\n\nEelised:\n— kohevus ilma raskuseta\n— **kerge** lõhn\n(inside the JSON string every line break is written as \\n).";
+}
+
 export function buildTranslatePrompt(lang: Lang3, rawInput: unknown): PromptResult {
   const input = cleanTranslateInput(rawInput, lang);
   const keep = input.keepNames.length
@@ -222,7 +375,7 @@ export function buildTranslatePrompt(lang: Lang3, rawInput: unknown): PromptResu
 
   const system = `${HOUSE_VOICE}
 
-TASK: translate the SOURCE TEXT below from ${LANG_NAME[input.sourceLang]} into ${input.targetLangs.map((l) => LANG_NAME[l]).join(" and ")}. Translate meaning, not word for word — it must read as if it had been written natively in each target language, following the voice and formatting rules above. Do not shorten, summarise, expand or add anything the source does not say.${keep}${placeholderRule(input.text)}
+TASK: translate the SOURCE TEXT below from ${LANG_NAME[input.sourceLang]} into ${input.targetLangs.map((l) => LANG_NAME[l]).join(" and ")}. Translate meaning, not word for word — it must read as if it had been written natively in each target language, following the voice and formatting rules above. Do not shorten, summarise, expand or add anything the source does not say.${keep}${placeholderRule(input.text)}${input.format === "desc" ? descFormatTranslateRule() : ""}
 Respond with exactly this JSON shape, one key per requested target language, nothing else: {${input.targetLangs.map((l) => `"${l}": "..."`).join(", ")}}`;
 
   return { system, user: `SOURCE TEXT (${LANG_NAME[input.sourceLang]}):\n${input.text}` };
@@ -1063,6 +1216,7 @@ export function buildPrompt(task: AiTask, lang: Lang3, input: unknown): PromptRe
   if (task === "post_edit") return buildPostEditPrompt(lang, input);
   if (task === "copy") return buildCopyPrompt(lang, input);
   if (task === "newsletter") return buildNewsletterPrompt(lang, input);
+  if (task === "sections") return buildSectionsPrompt(lang, input);
   throw new AiInputError("unknown_task");
 }
 

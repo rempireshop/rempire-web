@@ -13,9 +13,23 @@ export const SEO_COPY_END = "/* seo-copy:end */";
 
 /** The lines between the markers, joined with "\n" — or null when a marker is missing. */
 export function seoCopyBlock(text) {
+  return markedBlock(text, SEO_COPY_START, SEO_COPY_END);
+}
+
+/* The same arrangement for src/lib/desc-format.mjs — the description
+   renderer app.js, the prerender and the request-time product page share
+   (tests/desc-format.test.ts, tools/sync-desc-format.mjs). */
+export const DESC_FORMAT_START = "/* desc-format:start */";
+export const DESC_FORMAT_END = "/* desc-format:end */";
+export function descFormatBlock(text) {
+  return markedBlock(text, DESC_FORMAT_START, DESC_FORMAT_END);
+}
+
+/** The lines between two marker lines (each a whole line), joined with "\n" — or null when one is missing. */
+export function markedBlock(text, start, end) {
   const lines = String(text).split(/\r?\n/);
-  const a = lines.indexOf(SEO_COPY_START);
-  const b = lines.indexOf(SEO_COPY_END, a + 1);
+  const a = lines.indexOf(start);
+  const b = lines.indexOf(end, a + 1);
   if (a < 0 || b < 0) return null;
   return lines.slice(a + 1, b).join("\n");
 }
