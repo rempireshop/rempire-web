@@ -7,7 +7,8 @@
  * GET    /api/admin/blog/?id=<uuid>      → { ok, post: Post }            (full, for the editor)
  * GET    /api/admin/blog/?slug=<slug>    → { ok, post: Post }            (same, by slug — the assistant knows slugs, not ids)
  * POST   /api/admin/blog/  { title?, excerpt?, body?, coverUrl?, coverAlt?,
- *                             coverFocus?, tags?, products?, seoTitle?, seoDesc?, author? }
+ *                             coverFocus?, tags?, products?, seoTitle?, seoDesc?, author?,
+ *                             topic?, featured?, coverW?, coverH?, showSources?, sources? }
  *                                         → { ok, post: Post }            (new post, always created as a draft)
  * PATCH  /api/admin/blog/  { id | slug, publish: true|false }
  *                                         → { ok, post: Post }            (publish / unpublish — publishedAt kept)
@@ -122,6 +123,16 @@ function fieldsOf(body: Record<string, unknown>): PostInput {
     seoTitle: body.seoTitle,
     seoDesc: body.seoDesc,
     author: body.author,
+    /* The magazine (227_blog_magazine.sql) — each absent keeps the row's:
+       «Тема» (null = back to the guess), «На главной блога» (a fourth is
+       refused with featured_full), the cover's own size, and «Показать в
+       статье, из чего она написана» with its lines. */
+    topic: body.topic,
+    featured: body.featured,
+    coverW: body.coverW,
+    coverH: body.coverH,
+    showSources: body.showSources,
+    sources: body.sources,
   };
 }
 

@@ -47,6 +47,7 @@
  * shop does not sell loses its link and keeps its words.
  */
 import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
+import { isTopic } from "@/lib/blog-magazine.mjs";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { query } from "@/lib/db";
 import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
@@ -279,14 +280,14 @@ export const TOOLS: ToolDef[] = [
   {
     name: "list_posts",
     title: "Статьи блога",
-    description: "Every article of the shop's blog, newest first: address (slug), draft or published, Russian title, the public address of a published one.",
+    description: "Every article of the shop's blog, newest first: address (slug), draft or published, Russian title, its topic (the chip on the blog's home), the public address of a published one.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     annotations: READ,
   },
   {
     name: "get_post",
     title: "Статья целиком",
-    description: "One blog article by its slug: title, excerpt and text (HTML) in the language asked for (RU by default), its status and products.",
+    description: "One blog article by its slug: title, excerpt and text (HTML) in the language asked for (RU by default), its status, products, topic and the materials it says it was written from (sources, shown to readers only when show_sources is true).",
     inputSchema: {
       type: "object",
       properties: {
@@ -597,6 +598,11 @@ export const TOOLS: ToolDef[] = [
         en: { $ref: "#/$defs/lang" },
         tags: { type: "array", items: { type: "string" }, maxItems: 5, description: "3–5 short Russian tags." },
         cover: { type: "string", description: "The cover picture: a product id (its first photo) or one of the photo addresses get_product gave." },
+        topic: {
+          type: "string", enum: ["hair", "beard", "styling", "skin", "studio"],
+          description: "Which chip on the blog's home the article sits under: hair, beard, styling, skin (face and body) or studio " +
+            "(the salon itself). Optional — left out, the shop picks it from the article's words and products, and the owner can change it.",
+        },
         seo_title: { type: "string", maxLength: 70, description: "Russian Google title, at most 60 characters." },
         seo_description: { type: "string", maxLength: 170, description: "Russian Google description, at most 155 characters." },
       },
@@ -733,6 +739,7 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       slug: p.slug,
       status: p.status,
       title: p.title.RU || p.title.ET || p.title.EN,
+      topic: p.topic,
       ...(p.status === "published" ? { url: urlOf(base, "RU", `/blog/${p.slug}`) } : {}),
       updated: p.updatedAt,
     })));
@@ -752,6 +759,9 @@ export async function runTool(name: string, args: Record<string, unknown>): Prom
       body: pick(post.body, lang),
       written_in: LANGS3.filter((l) => pick(post.body, l)),
       products: post.products,
+      topic: post.topic,
+      sources: post.sources,
+      show_sources: post.showSources,
     });
   }
 
@@ -1459,6 +1469,12 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
   const products = [...(was?.products ?? [])];
   for (const id of named) if (!products.includes(id) && products.length < BLOG_PRODUCTS_MAX) products.push(id);
   const tags = Array.isArray(args.tags) ? args.tags.map((t) => text(t, 30)).filter(Boolean).slice(0, 5) : was?.tags ?? [];
+  /* The chip: one of the five, or left as it is — a draft that never had one
+     goes on being sorted by its own words (guessTopic, src/lib/blog-magazine.mjs). */
+  const topicAsk = typeof args.topic === "string" ? args.topic.trim().toLowerCase() : "";
+  if (topicAsk && !isTopic(topicAsk)) {
+    return no(`The topic must be one of hair, beard, styling, skin, studio — «${topicAsk.slice(0, 40)}» is none of them. Nothing was saved.`);
+  }
   const seoTitle = { ...(was?.seoTitle ?? { RU: "", ET: "", EN: "" }) };
   const seoDesc = { ...(was?.seoDesc ?? { RU: "", ET: "", EN: "" }) };
   if (text(args.seo_title, 70)) seoTitle.RU = text(args.seo_title, 70);
@@ -1475,6 +1491,8 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
       coverFocus: coverNew ? null : was?.coverFocus ?? null,
       tagsI18n: was?.tagsI18n,
       author: was?.author ?? "Rempire",
+      // absent keeps what the draft has (upsertPost): a chosen topic, or none
+      ...(topicAsk ? { topic: topicAsk } : {}),
     }, { onlyDraft: true }); // held in the write too: published in the admin meanwhile is still refused
   } catch (e) {
     if (e instanceof BlogError && (e.code === "not_draft" || e.code === "not_found")) {
@@ -1491,6 +1509,7 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
     slug: saved.slug,
     languages: LANGS3.filter((l) => body[l]),
     cover: coverUrl ? "set" : "none — the owner adds one in the editor",
+    topic: saved.topic + (saved.topicChosen ? "" : " (picked by the shop from the text — send topic to choose)"),
     products: products.map((id) => byId.get(id) ? `${byId.get(id)!.brand} ${byId.get(id)!.names.RU}` : id),
     ...(dropped.length ? { not_saved: dropped } : {}),
     admin: base + "/admin",

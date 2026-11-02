@@ -44,7 +44,9 @@
    of fallback that have never drifted and that the renderer does not need.
    The other two are the query, which is the actual job of this file. */
 
+import { readFileSync } from "node:fs";
 import { writeCoverFocus } from "../../src/lib/blog-cover.mjs";
+import { cleanSources, guessTopic, isTopic, readMinutes } from "../../src/lib/blog-magazine.mjs";
 import { sslFor } from "../migrate.mjs";
 export {
   looksLikeHtmlBody,
@@ -67,7 +69,45 @@ export function pickLang(t, lang) {
 
 /* ---------- the query --------------------------------------------------- */
 
+/* The shop section of a catalogue product, for guessTopic() — the same map
+   src/lib/blog.ts builds from the same file, so the build and the live page
+   put an article nobody sorted under the same chip. */
+const CAT_OF = new Map(
+  JSON.parse(readFileSync(new URL("../../src/data/catalogue.min.json", import.meta.url), "utf8")).map((p) => [p.id, p.c]),
+);
+const catOf = (id) => CAT_OF.get(id) || "";
+const posInt = (v) => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= 1 && n <= 20000 ? n : null;
+};
+
+/** The magazine's fields (227_blog_magazine.sql), exactly as src/lib/blog.ts
+    toPost() fills them — exported for tests/blog-magazine.test.ts. */
+export function magazineFields(post, r) {
+  const w = posInt(r.cover_w), h = posInt(r.cover_h);
+  const both = !!(post.coverUrl && w && h);
+  return {
+    topic: isTopic(r.topic) ? r.topic : guessTopic(post, catOf),
+    topicChosen: isTopic(r.topic),
+    featured: r.featured === true,
+    coverW: both ? w : null,
+    coverH: both ? h : null,
+    showSources: r.show_sources === true,
+    sources: cleanSources(r.sources),
+    minutes: {
+      RU: readMinutes(pickLang(post.body, "RU")),
+      ET: readMinutes(pickLang(post.body, "ET")),
+      EN: readMinutes(pickLang(post.body, "EN")),
+    },
+  };
+}
+
 function toPost(r) {
+  const post = toPostBase(r);
+  return { ...post, ...magazineFields(post, r) };
+}
+
+function toPostBase(r) {
   return {
     id: r.id,
     slug: r.slug,
@@ -125,6 +165,15 @@ export async function fetchPublishedPosts() {
          the whole query and write no blog pages at all. */
       `select id, slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products,
               to_jsonb(posts) -> 'tags_i18n' as tags_i18n,
+              /* …and the magazine's six (227_blog_magazine.sql) the same way,
+                 for the same reason: the first deploy that brings them reads
+                 a database that has none of them yet. */
+              to_jsonb(posts) ->> 'topic' as topic,
+              (to_jsonb(posts) ->> 'featured')::boolean as featured,
+              (to_jsonb(posts) ->> 'cover_w')::int as cover_w,
+              (to_jsonb(posts) ->> 'cover_h')::int as cover_h,
+              (to_jsonb(posts) ->> 'show_sources')::boolean as show_sources,
+              to_jsonb(posts) -> 'sources' as sources,
               seo_title, seo_desc, author, published_at, updated_at
          from posts
         where status = 'published'

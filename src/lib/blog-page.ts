@@ -30,9 +30,9 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
-import { getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
+import { BLOG_PRODUCTS_MAX, getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
-import { coverImgStyle } from "@/lib/blog-cover.mjs";
+import { articleStaticHTML, homeStaticHTML, publicListItem, publicPost, readNext } from "@/lib/blog-magazine.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
 import { renderNotFoundPage } from "@/lib/notfound-page";
@@ -45,7 +45,6 @@ import {
   breadcrumbLD,
   cheapestPrice,
   clip,
-  crumbs,
   esc,
   eur,
   fillBlogCardPrices,
@@ -78,8 +77,12 @@ const VARIANTS = variantData as Variants;
 /** A product under the article: brand, name and price — the links are what a crawler is here for. */
 export type ShelfProduct = { id: string; brand: string; name: string; price: number; priceFrom: boolean };
 
-/** How many «Товары из статьи» the shelf shows — the same eight app.js draws. */
-const SHELF_MAX = 8;
+/** How many «Товары из статьи» the shelf shows. Eight until the magazine
+    (02.11.2026); now every product the article names — «Все N товаров» in the
+    strip at the top jumps here — the same count app.js and the prerender draw.
+    The strip itself shows the first STRIP_MAX. */
+const SHELF_MAX = BLOG_PRODUCTS_MAX;
+const STRIP_MAX = 8;
 /** …and how many cards inside the text get a live price. Far past what an
  *  article ever carries (the assistant places at most POST_CARDS_MAX); it is
  *  here so a body somebody pastes cannot turn one render into a long query. */
@@ -93,20 +96,6 @@ export function postsNotPrerendered<P extends { slug: string }>(posts: P[], prer
 
 /* ---------- pieces shared by the two pages ------------------------------ */
 
-const dmy = (iso: string | null) => String(iso || "").slice(0, 10).split("-").reverse().join(".");
-/** ` style="object-fit:cover;object-position:…"` (and the zoom, when the owner
-    zoomed that frame), or nothing at all when the owner never chose —
-    src/lib/blog-cover.mjs owns the words. `where` is the frame: "list" for a
-    tile, "post" for the top of the article — each has its own point and zoom
-    since 23.09.2026. Written on the element rather than into a class because
-    it is one photo's setting, not a rule: there is no stylesheet for «this
-    article's cover sits a third of the way down». It beats `#prerender
-    .pre__img { object-fit: contain }`, which is an id selector and outranks
-    every class this page could reach for. */
-const coverStyle = (focus: string | null, where: "list" | "post") => {
-  const css = coverImgStyle(focus, where);
-  return css ? ' style="' + css + '"' : "";
-};
 const stampOf = (p: { updatedAt?: string | null; publishedAt?: string | null }) =>
   Date.parse(p.updatedAt || p.publishedAt || "") || 0;
 
@@ -115,38 +104,25 @@ function jsonScript(id: string, obj: unknown): string {
   return '<script type="application/json" id="' + id + '">' + JSON.stringify(obj).replace(/<\//g, "<\\/") + "</script>";
 }
 
-function listItem(p: PostSummary, code: string) {
-  return {
-    slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
-    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
-    tags: pickTags(p.tags, p.tagsI18n, code), publishedAt: p.publishedAt,
-  };
-}
+/* The list item and the article as /api/blog/ answers them — one writer,
+   src/lib/blog-magazine.mjs, for this page, the API and the prerender. */
+const listItem = (p: PostSummary, code: string) => publicListItem(p, code);
+/** An article's address in this language — what the magazine builders link with. */
+const hrefOf = (seg: string) => (slug: string) => langPath(seg, "/blog/" + encodeURIComponent(slug) + "/");
 
 /** #blogdata — the list for this language, adopted by hydrateBlog() before the first paint. */
-function dataScript(code: string, posts: PostSummary[], total: number): string {
+function dataScript(code: string, posts: PostSummary[], total: number, featured: PostSummary[] = []): string {
   if (!posts.length) return "";
   return jsonScript("blogdata", {
     lang: code, stamp: posts.reduce((m, p) => Math.max(m, stampOf(p)), 0),
     posts: posts.slice(0, 10).map((p) => listItem(p, code)), total, perPage: 10,
+    featured: featured.map((p) => listItem(p, code)),
   });
 }
 
-function tile(post: PostSummary, seg: string, code: string): string {
-  const title = pickLang(post.title, code) || post.slug;
-  const excerpt = pickLang(post.excerpt, code);
-  const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
-  return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
-    (post.coverUrl
-      /* 1200×630 — the shape the tile is actually drawn in, here and in the
-         prerendered twin (tools/prerender-shop2.mjs blogTile). */
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="1200" height="630"' + coverStyle(post.coverFocus, "list") + ">"
-      : "") +
-    '<span class="pre__nm">' + esc(title) + "</span>" +
-    (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
-    (excerpt ? "<p>" + esc(clip(excerpt, 140)) + "</p>" : "") +
-    "</a></li>";
-}
+/** A catalogue product's first photo — every one of them is `/shop/img/<id>-0.webp`
+    (public/shop/catalogue2.js); the owner's own products have no file here. */
+const productImg = (id: string) => (CATALOGUE.has(id) ? "/shop/img/" + encodeURIComponent(id) + "-0.webp" : null);
 
 /** «от 12,90 €» in this language — the shelf's own price line, reused by the
  *  cards inside the text so both read the same figure the same way. */
@@ -182,7 +158,7 @@ function ogImage(base: string, post: Post, lang: Lang): string {
 
 export function renderBlogPostPage(
   post: Post,
-  list: { posts: PostSummary[]; total: number },
+  list: { posts: PostSummary[]; total: number; featured?: PostSummary[] },
   lang: Lang,
   shell: string,
   opts: {
@@ -249,38 +225,35 @@ export function renderBlogPostPage(
      shop's own tab disagreed (09.10.2026). */
   const pageTitle = fitTitle(seoTitleRaw || title, (seoTitleRaw || title) + " — REMPIRE");
   const crumbItems: Array<[string, string | null]> = [[t.home, langPath(seg, "/")], [t.blog, langPath(seg, "/blog/")], [title, null]];
-  const others = list.posts.filter((p) => p.slug !== post.slug).slice(0, 3);
   const image = ogImage(base, post, lang);
   const url = base + langPath(seg, rest);
+  const shown = publicPost(post, code, bodyHtml);
+  // «Читать дальше»: two of the same topic (src/lib/blog-magazine.mjs readNext)
+  const next = (readNext(post, list.posts) as PostSummary[]).map((p) => listItem(p, code));
+  const strip = opts.products.slice(0, STRIP_MAX).map((p) => ({
+    href: langPath(seg, "/p/" + encodeURIComponent(p.id) + "/"),
+    // the name alone, as drawn (and as app.js bmagStripHTML writes it) — the brand is the shelf's
+    img: productImg(p.id), name: nameIn(p.name, code), price: priceLabel(p, t),
+  }));
 
-  const content = '<div class="wrap">' +
-    crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
-    '<article class="sec blog__post blog__read">' +
-      (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630"' + coverStyle(post.coverFocus, "post") + ">"
-        : "") +
-      '<h1 class="display h1">' + esc(title) + "</h1>" +
-      (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
-      (tags.length ? '<ul class="blog__tags">' + tags.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "") +
-      '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
-    "</article>" +
+  /* The same page the prerender writes (src/lib/blog-magazine.mjs): the
+     cover, the reading column with the article in it, and the products at
+     full width under it. */
+  const content = articleStaticHTML({
+      post: shown, code, blogHref: langPath(seg, "/blog/"), hrefOf: hrefOf(seg), bodyShown,
+      strip, productCount: opts.products.length, next,
+      tagsHTML: tags.length ? '<ul class="blog__tags">' + tags.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "",
+      shelfId: "post-products",
+    }) +
+    '<div class="wrap">' +
     (opts.products.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t, code) + "</section>"
-      : "") +
-    (others.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.otherPosts) + "</h2>" +
-        '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map((p) => tile(p, seg, code)).join("") + "</ul></section>"
+      ? '<section class="sec blog__shelf" id="post-products"><h2 class="display h1 blog__h2">' + esc(t.postProducts) + "</h2>" + shelf(opts.products, seg, t, code) + "</section>"
       : "") +
     langNav(seg, rest, t) +
     // #blogpost and #blogdata: the same shapes /api/blog/<slug>/ and
     // /api/blog/ answer, so hydrateBlog() paints the article at once
-    jsonScript("blogpost", { lang: code, stamp: stampOf(post), post: {
-      slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
-      coverFocus: post.coverFocus,
-      tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
-      author: post.author, publishedAt: post.publishedAt,
-    } }) +
-    dataScript(code, list.posts, list.total) +
+    jsonScript("blogpost", { lang: code, stamp: stampOf(post), post: shown }) +
+    dataScript(code, list.posts, list.total, list.featured) +
     "</div>";
 
   const head = headBlock({
@@ -306,7 +279,7 @@ export function renderBlogPostPage(
 }
 
 export function renderBlogListPage(
-  list: { posts: PostSummary[]; total: number },
+  list: { posts: PostSummary[]; total: number; featured?: PostSummary[] },
   lang: Lang,
   shell: string,
   opts: { base: string; robots: string },
@@ -317,16 +290,18 @@ export function renderBlogListPage(
   const t = T[code];
   const rest = "/blog/";
   const heading = t.blog;
-  const content = '<div class="wrap">' +
-    crumbs([[t.home, esc(langPath(seg, "/"))], [heading, null]]) +
-    '<section class="sec">' +
-      '<h1 class="display h1">' + esc(heading) + "</h1>" +
-      (list.posts.length
-        ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + list.posts.map((p) => tile(p, seg, code)).join("") + "</ul>"
-        : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
-    "</section>" +
+  /* The magazine's home (src/lib/blog-magazine.mjs): the featured story,
+     «Блог» with the count, the chips' names and every article in the grid. */
+  const content = (list.posts.length
+      ? homeStaticHTML({
+          posts: list.posts.map((p) => listItem(p, code)),
+          featured: (list.featured ?? []).map((p) => listItem(p, code)),
+          code, hrefOf: hrefOf(seg), total: list.total,
+        })
+      : '<div class="wrap"><section class="sec"><h1 class="display h1">' + esc(heading) + '</h1><p class="muted">' + esc(t.blogEmpty) + "</p></section></div>") +
+    '<div class="wrap">' +
     langNav(seg, rest, t) +
-    dataScript(code, list.posts, list.total) +
+    dataScript(code, list.posts, list.total, list.featured) +
     "</div>";
   const first = list.posts[0];
   /* The blog list's own title and description (audit §1A) — the words the
@@ -490,10 +465,10 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
   if (!clean || clean.length > 80) return html(noindexShell(shell), 404, NO_STORE);
 
   let post: Post | null;
-  let list: { posts: PostSummary[]; total: number };
+  let list: { posts: PostSummary[]; total: number; featured?: PostSummary[] };
   try {
     post = await getPublishedBySlug(clean);
-    list = post ? await listPublished(1, 10) : { posts: [], total: 0 };
+    list = post ? await listPublished(1, 10) : { posts: [], total: 0, featured: [] };
   } catch (err) {
     /* No database: the shell it is — app.js asks the API itself, and shows
        «временно недоступен» if that fails too; a 5xx would show nothing. */
@@ -532,7 +507,7 @@ export async function blogListPageResponse(seg: string): Promise<Response> {
   const lang = langBySeg(seg) as Lang | null;
   if (!lang) return html(shell, 200, "public, max-age=0, must-revalidate");
 
-  let list: { posts: PostSummary[]; total: number };
+  let list: { posts: PostSummary[]; total: number; featured?: PostSummary[] };
   try {
     list = await listPublished(1, 50);
   } catch (err) {

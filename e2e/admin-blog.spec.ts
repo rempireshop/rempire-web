@@ -979,7 +979,9 @@ test.describe("blog — the sample posts", () => {
       await waitForScreen(page, "blog");
       const tiles = page.locator(".blog__tile");
       await expect(tiles.first()).toBeVisible();
-      expect(await tiles.count(), `the ${code} blog listing is short`).toBeGreaterThanOrEqual(3);
+      // the newest article is the story on top since the magazine (02.11.2026), the rest are tiles
+      expect(await tiles.count(), `the ${code} blog listing is short`).toBeGreaterThanOrEqual(2);
+      await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
       await assertClean(page, w, `blog listing (${code})`);
     }
   });
@@ -990,7 +992,8 @@ test.describe("blog — the sample posts", () => {
     await page.goto(shopUrl("", `/blog/${SLUGS[0]}/`));
     await waitForScreen(page, "blogpost");
 
-    await expect(page.locator(".blog__cover")).toBeVisible();
+    // the cover is an <img> in its own <figure> since the magazine (02.11.2026)
+    await expect(page.locator(".bmag-post__cover img")).toBeVisible();
     /* The real body, not the skeleton: since the blog paints from its cached
        summary first, `.blog__body` matches the `aria-busy` placeholder too, and
        `waitForScreen` + a visible cover are both true while that placeholder is

@@ -88,36 +88,52 @@ test.describe("blog — tiles read as links", () => {
   });
 });
 
+/* The magazine (Dim, 02.11.2026 — canvas-banner/project/Article): the
+   listing has no crumbs any more, its «Блог» heading starts where every page's
+   content does; the article's «Блог / Тема» sits under its cover, at the left
+   edge of the reading column (.blog__read), and the products shelf under the
+   article takes the page's full width again. */
 for (const lang of LANGS) {
-  test(`an article's breadcrumbs start where the listing's do — ${lang.code}`, async ({ page }) => {
-    // the listing keeps its crumbs in the ordinary .wrap, like every page
+  test(`the listing's heading and the article's reading column line up with the page — ${lang.code}`, async ({ page }) => {
     await page.goto(shopUrl(lang.seg, "/blog/"));
     await waitForScreen(page, "blog");
     // measure only once the real tiles are in: the cold skeleton → list
     // repaint replaces <main>, and a node measured across that swap is a
     // detached one (NaN geometry)
     await expect(page.locator(".blog__tile").first()).toBeVisible();
-    const list = await crumbEdges(page, "the listing");
-    expect(Math.abs(list.crumbs - list.wrap)).toBeLessThanOrEqual(1);
+    // read in ONE layout pass, and retried across a repaint — see crumbEdges()
+    const list = { h: 0, wrap: 0 };
+    await expect
+      .poll(async () => {
+        const r = await page.evaluate(() => {
+          const h = document.querySelector("main .bmag__h");
+          const w = document.querySelector("main .bmag")?.closest(".wrap");
+          if (!h || !w || !h.getBoundingClientRect().width) return null;
+          return { h: h.getBoundingClientRect().left, wrap: w.getBoundingClientRect().left + parseFloat(getComputedStyle(w).paddingLeft) };
+        });
+        if (r) Object.assign(list, r);
+        return r !== null;
+      }, { message: "no «Блог» heading on the listing" })
+      .toBe(true);
+    expect(Math.abs(list.h - list.wrap)).toBeLessThanOrEqual(1);
 
     await page.locator(`.blog__tile[data-go-blog="${SLUGS[0]}"]`).click();
     await waitForScreen(page, "blogpost");
-    // the article and, below it, the «other articles» shelf — the last
-    // thing that can still repaint the page (the list landing after the post)
+    // the article and «Читать дальше» — the last thing that can still repaint
+    // the page (the list landing after the post)
     await expect(page.locator(".blog__body:not(.blog__sk) h2").first()).toBeVisible();
     await expect(page.locator(".blog__shelf .blog__tile").first()).toBeVisible();
-    // not squeezed into the reading column any more
-    expect(await page.locator("main .crumbs").evaluate((el) => !!el.closest(".wrap--mid, .blog__read"))).toBe(false);
+    // «Блог / Тема» starts where the reading column does
+    expect(await page.locator("main .bmag-post__crumbs").evaluate((el) => !!el.closest(".blog__read"))).toBe(true);
     const post = await crumbEdges(page, "the article");
-    expect(Math.abs(post.crumbs - list.crumbs), "the article's crumbs sit elsewhere than the listing's").toBeLessThanOrEqual(1);
-    expect(Math.abs(post.crumbs - list.wrap)).toBeLessThanOrEqual(1);
-    // the article itself is a centred reading column, the shelves under it are not
     const read = await page.locator(".blog__read").boundingBox();
-    const shelf = await page.locator(".blog__shelf").first().boundingBox();
     expect(read).not.toBeNull();
+    expect(Math.abs(post.crumbs - read!.x), "the crumbs sit elsewhere than the reading column").toBeLessThanOrEqual(1);
+    // the reading column is centred, the products shelf under it is not
+    const shelf = await page.locator("#post-products").boundingBox();
     expect(shelf).not.toBeNull();
     expect(shelf!.width).toBeGreaterThanOrEqual(read!.width - 1);
-    expect(Math.abs(shelf!.x - list.crumbs)).toBeLessThanOrEqual(1);
+    expect(Math.abs(shelf!.x - list.wrap)).toBeLessThanOrEqual(1);
   });
 }
 
@@ -218,7 +234,9 @@ for (const lang of LANGS) {
     await waitForScreen(page, "blog");
     const tiles = page.locator(".blog__tile");
     await expect(tiles.first()).toBeVisible({ timeout: 2000 });
-    expect(await tiles.count()).toBeGreaterThanOrEqual(3);
+    // the newest of the three samples is the story on top (the magazine, 02.11.2026), the other two are tiles
+    expect(await tiles.count()).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
     expect(Date.now() - t0, "the list waited for the API").toBeLessThan(3500);
     await expect(page.locator(".blog__sk"), "a skeleton was shown although the list was known").toHaveCount(0);
 

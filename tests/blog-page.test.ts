@@ -141,8 +141,9 @@ describe("a post's page at request time", () => {
 
     // the article itself, for a crawler that reads the body
     expect(html).toContain('<div id="prerender">');
-    expect(html).toContain('<h1 class="display h1">Kuidas hooldada habet talvel</h1>');
-    expect(html).toContain('<img class="pre__img blog__cover" src="/shop/img/night-rider-0.webp" alt="Pasta"');
+    // the magazine (02.11.2026): src/lib/blog-magazine.mjs articleStaticHTML
+    expect(html).toContain('<h1 class="bmag-post__h1">Kuidas hooldada habet talvel</h1>');
+    expect(html).toContain('<img class="bmag-post__img bmag-post__img--frame" src="/shop/img/night-rider-0.webp" alt="Pasta"');
     expect(html).toContain("<h2>Talv</h2><p>Õli <strong>iga päev</strong>.</p>");
     /* the tags are the Estonian set (POST.tagsI18n) — never the Russian one on an
        Estonian page (staging 25.09.2026; pickTags in src/lib/seo-head.mjs) */
@@ -154,8 +155,8 @@ describe("a post's page at request time", () => {
     expect(html).toContain(`href="/et/products/${wax.id}"`);
     expect(html).toContain('<span class="pre__nm">Wax</span><span class="pre__pr num">alates 9 €</span>');
     expect(html).not.toContain('href="/et/products/no-such-product"');
-    // «Teised artiklid», and the three-language nav
-    expect(html).toContain('<h2 class="display h1 blog__h2">Teised artiklid</h2>');
+    // «Loe veel» («Читать дальше»), and the three-language nav
+    expect(html).toContain('<h2 class="bmag-next__h">Loe veel</h2>');
     expect(html).toContain(`href="/et/blogs/news/${other.slug}"`);
     expect(html).not.toContain(draft.slug);
     expect(html).toContain(`<a href="/blogs/news/${post.slug}" hreflang="en">EN</a>`);
@@ -261,7 +262,7 @@ describe("«Товары из статьи» prices the shelf the way the shop d
     const row = await upsertPost({ ...POST, products });
     await publishPost(row.id);
     const html = await (await postPage(seg, row.slug)).text();
-    return (html.match(/<section class="sec blog__shelf">[\s\S]*?<\/section>/) || [""])[0];
+    return (html.match(/<section class="sec blog__shelf"[^>]*>[\s\S]*?<\/section>/) || [""])[0];
   }
 
   it("says «от» for a product sold from several sizes, like the catalogue card does", async () => {
@@ -374,9 +375,10 @@ describe("the listing at request time", () => {
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/et/blogs/news`);
     expect(meta(html, "og:type")).toBe("website");
     expect(meta(html, "og:image")).toContain(`/shop2/og/blog-${post.slug}.et.png?v=`);
-    expect(html).toContain('<h1 class="display h1">Blogi</h1>');
-    expect(html).toContain(`<li><a class="pre__card blog__tile" href="/et/blogs/news/${post.slug}">`);
-    expect(html).toContain('<span class="pre__nm">Kuidas hooldada habet talvel</span>');
+    // the magazine (02.11.2026): the only article is the featured story on top
+    expect(html).toContain('<h1 class="bmag__h">Blogi</h1>');
+    expect(html).toContain(`<a class="bmag-hero__btn" href="/et/blogs/news/${post.slug}">Loe artiklit</a>`);
+    expect(html).toContain('<h2 class="bmag-hero__t">Kuidas hooldada habet talvel</h2>');
     expect(html).not.toContain("chernovik");
     const ld = ldBlocks(html);
     const items = ld.find((o) => o["@type"] === "ItemList") as Record<string, unknown> & { itemListElement: Array<{ url: string; name: string }> };

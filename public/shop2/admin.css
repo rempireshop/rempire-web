@@ -3558,6 +3558,14 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 18px; padding: 0;
 }
 .adm-bprod__x:hover { color: var(--a-ink); }
+/* «Тема», «На главной блога», «Показать в статье, из чего она написана» and
+   its lines (admBlogMagHTML, 02.11.2026) — one column, the phone's own. */
+.adm-bmag { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.adm-bmag .adm-hint { margin: -2px 0 6px; }
+.adm-bmag__src { display: flex; flex-direction: column; gap: 6px; }
+.adm-bmag__h { font-size: 12px; line-height: 16px; color: var(--a-muted); }
+.adm-bmag__row { display: flex; align-items: center; gap: 4px; }
+.adm-bmag__row .adm-input { flex: 1; min-width: 0; }
 .adm-acts--links { gap: 8px 20px; }
 /* the article's line at the foot: ● in the shop / ○ a draft */
 .adm-blog2__st { margin: 0; padding-top: 12px; border-top: 1px solid var(--a-rule); font-size: 13px; line-height: 18px; color: var(--a-muted); }
