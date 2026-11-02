@@ -340,10 +340,13 @@ describe("«• Список» — «— » in front of every line the selection
 
 describe("the panel wiring", () => {
   it("the bar sits over the box, its buttons thumb-sized, the preview drawn with descHtml()", () => {
-    expect(APP).toMatch(/edFmtBarHTML\(\) \+\r?\n\s+box\("ru"/);
-    expect(APP).toMatch(/b\("bold", "Ж", " adm-fmtbar__bold"\) \+ b\("head", "Заголовок"\) \+ b\("list", "• Список"\)/);
-    expect(APP).toMatch(/b\("preview", "Как в магазине", " adm-fmtbar__prev"\)/);
-    expect(APP).toMatch(/function edDescPrevHTML\(text\) \{\s+return String\(text \|\| ""\)\.trim\(\) \? descHtml\(text\)/);
+    // since the polish of 02.11.2026: the bar, then the box with «Так увидит покупатель» beside / under it
+    expect(APP).toMatch(/edFmtBarHTML\(\) \+ "<\/div>" \+[\s\S]{0,400}?'<div class="adm-descgrid">' \+\r?\n\s+'<div class="adm-descgrid__box">' \+\r?\n\s+box\("ru"/);
+    expect(APP).toMatch(/data-edfmt="bold" aria-label="Жирный" title="Жирный: \*\*текст\*\*">Ж<\/button>/);
+    expect(APP).toMatch(/data-edfmt="head" data-trkey="Заголовок раздела" title="[^"]+">Заголовок<\/button>/);
+    expect(APP).toMatch(/data-edfmt="list" title="[^"]+">• Список<\/button>/);
+    expect(APP).toMatch(/data-edfmt="preview" aria-haspopup="dialog"/);
+    expect(APP).toMatch(/function edDescPrevHTML\(text\) \{\s+return String\(text \|\| ""\)\.trim\(\) \? "<div data-notr>" \+ descHtml\(text\)/);
     const css = readFileSync(fileURLToPath(new URL("../public/shop2/admin.css", import.meta.url)), "utf8");
     expect(css).toMatch(/\.adm-fmtbar \.adm-btn \{[^}]*min-height: 44px; min-width: 44px;/);
   });

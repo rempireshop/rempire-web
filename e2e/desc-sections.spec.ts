@@ -11,8 +11,10 @@ import { assertClean, openAdmin, watch } from "./sweep-helpers";
  *   · the product page draws it as <strong> headings and <ul> lists, on a
  *     phone and on a desktop, with nothing in it ever becoming markup;
  *   · the card's «Описание» has the format bar — «Ж», «Заголовок»,
- *     «• Список» change the text in the box, the box keeps its focus, and
- *     «Как в магазине» shows it as the page will.
+ *     «• Список» change the text in the box, the box keeps its focus,
+ *     «Так увидит покупатель» beside / under the box shows it as the page
+ *     will, and «Как в магазине» opens that over the whole window. The ET/EN
+ *     panel and «Разбить на разделы» are e2e/desc-editor-polish.spec.ts.
  *
  * Its own product (not fixtures' PRODUCT / PRODUCT_2, which other specs count
  * and price), and its description is taken back off in `finally`.
@@ -111,11 +113,14 @@ test.describe("descriptions with sections", () => {
       const box = page.locator("[data-eddescru]");
       const bar = page.locator('[role="toolbar"][aria-label="Оформление описания"]');
       await expect(bar).toBeVisible();
-      // thumb-sized, all four
-      for (const kind of ["bold", "head", "list", "preview"]) {
+      // thumb-sized, all three — and «Как в магазине» on the preview's own head
+      for (const kind of ["bold", "head", "list"]) {
         const b = await bar.locator(`[data-edfmt="${kind}"]`).boundingBox();
         expect(b && b.height >= 44 && b.width >= 44, `«${kind}» is smaller than 44 px`).toBe(true);
       }
+      const shopBtn = page.locator('[data-edsec="desc"] [data-edfmt="preview"]');
+      const sb = await shopBtn.boundingBox();
+      expect(sb && sb.height >= 44, "«Как в магазине» is smaller than 44 px").toBe(true);
 
       await box.fill("Шампунь для объёма.\nПреимущества\nобъём без утяжеления\nлёгкий аромат");
       const select = (a: number, b: number) => box.evaluate((el, r) => { (el as HTMLTextAreaElement).focus(); (el as HTMLTextAreaElement).setSelectionRange(r[0], r[1]); }, [a, b]);
@@ -145,11 +150,8 @@ test.describe("descriptions with sections", () => {
       await bar.locator('[data-edfmt="bold"]').click();
       await expect.poll(value).toBe("Шампунь для **объёма**.\n\nПреимущества:\n— объём без утяжеления\n— лёгкий аромат");
 
-      // «Как в магазине»: the text as the product page draws it, live
+      // «Так увидит покупатель»: always on the card, the text as the product page draws it, live
       const prev = page.locator("[data-eddescprev]");
-      await expect(prev).toBeHidden();
-      await bar.locator('[data-edfmt="preview"]').click();
-      await expect(bar.locator('[data-edfmt="preview"]')).toHaveAttribute("aria-pressed", "true");
       await expect(prev).toBeVisible();
       await expect(prev.locator("p.desc-h > strong")).toHaveText("Преимущества:");
       await expect(prev.locator("ul li")).toHaveText(["объём без утяжеления", "лёгкий аромат"]);
@@ -157,8 +159,14 @@ test.describe("descriptions with sections", () => {
       await box.press("End");
       await box.pressSequentially("\n— мягкость");
       await expect(prev.locator("ul li")).toHaveCount(3);
-      await bar.locator('[data-edfmt="preview"]').click();
-      await expect(prev).toBeHidden();
+      // «Как в магазине»: the same text over the whole window, in the product page's own fold
+      await shopBtn.click();
+      const sheet = page.locator('.adm-descshop[role="dialog"]');
+      await expect(sheet).toBeVisible();
+      await expect(sheet.locator("details.acc[open] .acc__rich p.desc-h > strong")).toHaveText("Преимущества:");
+      await expect(sheet.locator(".acc__rich ul li")).toHaveCount(3);
+      await sheet.locator('[data-edfmt="shopclose"]').click();
+      await expect(sheet).toHaveCount(0);
 
       // what the bar wrote saves itself like typing does, and reaches the shop
       await settled(page, "the formatted description");

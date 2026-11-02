@@ -73,6 +73,7 @@ const page = new Function(
    function edAsForget() {}
    function goodsNewSave() {}
    function loadWaiting() {}   // q41: the card asks how many wait — not this test's business
+   function edDescLangStart() { return "ru"; }   // …nor which language «Описание» opens on (02.11.2026)
    function vidReset() {}
    function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
    function blogReadForm() {}

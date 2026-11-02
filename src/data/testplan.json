@@ -8596,15 +8596,16 @@
         "Написать строку «Преимущества», поставить в неё курсор и нажать «Заголовок».",
         "Под ней написать две строки, выделить их и нажать «• Список».",
         "Выделить слово в первом абзаце и нажать «Ж».",
-        "Нажать «Как в магазине», потом открыть товар в магазине."
+        "Смотреть окно «Так увидит покупатель» рядом с полем или под ним.",
+        "Нажать «Как в магазине», закрыть, потом открыть товар в магазине."
       ],
       "expect": [
         "«Заголовок» ставит двоеточие и отделяет строку пустой строкой сверху.",
-        "«• Список» ставит «— » перед каждой выделенной строкой.",
-        "«Ж» обводит слово звёздочками: **слово**.",
+        "«• Список» ставит «— » перед каждой строкой; «Ж» обводит слово: **слово**.",
         "Клавиатура не закрывается, курсор остаётся в поле.",
-        "«Как в магазине» показывает жирный заголовок и список.",
-        "В магазине описание выглядит так же, как в просмотре."
+        "Окно сразу показывает жирный заголовок, список и жирное слово.",
+        "«Как в магазине» открывает описание на весь экран, как на странице товара.",
+        "В магазине описание выглядит так же, как в окне."
       ],
       "why": "Описание с разделами и списками читается легче, чем сплошной текст.",
       "risk": "med",
@@ -8616,20 +8617,62 @@
           "Type a line «Преимущества», put the cursor in it and press «Заголовок».",
           "Type two lines under it, select them and press «• Список».",
           "Select a word in the first paragraph and press «Ж».",
-          "Press «Как в магазине», then open the product in the shop."
+          "Watch the «Так увидит покупатель» box beside the field or under it.",
+          "Press «Как в магазине», close it, then open the product in the shop."
         ],
         "expect": [
           "«Заголовок» adds a colon and an empty line above the line.",
-          "«• Список» puts «— » in front of every selected line.",
-          "«Ж» wraps the word in asterisks: **word**.",
+          "«• Список» puts «— » in front of every line; «Ж» wraps the word: **word**.",
           "The keyboard stays open and the cursor stays in the box.",
-          "«Как в магазине» shows a bold heading and a list.",
-          "In the shop the description looks the way the preview did."
+          "The box shows the bold heading, the list and the bold word at once.",
+          "«Как в магазине» opens the description full screen, as on the product page.",
+          "In the shop the description looks the way the box did."
         ],
         "why": "A description with sections and lists reads more easily than one block of text."
       },
       "mark": "new",
-      "markedAt": "2026-11-02T11:55:10.827Z"
+      "markedAt": "2026-11-02T14:45:53.203Z"
+    },
+    {
+      "id": "goods-desc-en-panel",
+      "area": "goods",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "EN",
+      "title": "Описание товара на английской панели",
+      "steps": [
+        "Переключить панель на English и открыть товар с английским описанием.",
+        "Прокрутить к «Description» и нажать «?».",
+        "Навести мышь на B, Heading, • List и «Split into sections».",
+        "Открыть товар без английского текста."
+      ],
+      "expect": [
+        "Открыта вкладка «English»; кнопки, подсказки и сообщения — по-английски.",
+        "Подсказки кнопок показывают разметку: **text**, строка с «:», «— » в начале.",
+        "Окно «What the customer sees» показывает текст как в магазине.",
+        "Товар без английского текста открывается на вкладке «Русский»."
+      ],
+      "why": "Дим работает в английской панели: русские надписи и непонятные кнопки мешали.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "A product description on the English panel",
+        "steps": [
+          "Switch the panel to English and open a product with an English description.",
+          "Scroll to «Description» and press «?».",
+          "Hover over B, Heading, • List and «Split into sections».",
+          "Open a product with no English text."
+        ],
+        "expect": [
+          "The «English» tab is open; buttons, tooltips and messages are in English.",
+          "The tooltips show the marks: **text**, a line with «:», «— » at the start.",
+          "The «What the customer sees» box shows the text as the shop will.",
+          "A product with no English text opens on the «Русский» tab."
+        ],
+        "why": "Dim works in the English panel: Russian labels and unclear buttons got in the way."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T14:45:53.203Z"
     },
     {
       "id": "goods-new",
@@ -10224,16 +10267,18 @@
       "steps": [
         "Открыть товар, у которого описание — сплошной текст.",
         "В «Описание» нажать «Разбить на разделы» и подождать.",
-        "Сравнить слова с прежним текстом.",
-        "Нажать «Вернуть» в сообщении внизу.",
+        "Прочитать предложение и нажать «Отмена».",
+        "Нажать «Разбить на разделы» ещё раз, затем «Применить».",
+        "Нажать «Вернуть как было».",
         "Открыть вкладку «Eesti» и нажать «Разбить на разделы» ещё раз."
       ],
       "expect": [
-        "Появились заголовки с двоеточием и пункты списка с «— ».",
-        "Слова те же: ничего не добавлено и не выброшено.",
-        "Если ИИ поменял слова — сообщение, текст остался прежним.",
-        "«Вернуть» возвращает текст как был.",
-        "На эстонской вкладке разбивается только эстонский текст."
+        "Появляется предложение: для какого языка и как оно будет выглядеть.",
+        "До «Применить» текст в поле не меняется; «Отмена» ничего не меняет.",
+        "После «Применить» — заголовки с двоеточием и пункты с «— », слова те же.",
+        "Если ИИ поменял слова — сообщение, предложения нет.",
+        "«Вернуть как было» возвращает текст как был.",
+        "На эстонской вкладке предложение для эстонского текста."
       ],
       "why": "Старые тексты из панели — сплошные абзацы; кнопка делает их удобными, не меняя смысла.",
       "risk": "med",
@@ -10243,21 +10288,23 @@
         "steps": [
           "Open a product whose description is one block of text.",
           "In «Описание» press «Разбить на разделы» and wait.",
-          "Compare the words with the old text.",
-          "Press «Вернуть» in the message at the bottom.",
+          "Read the proposal and press «Отмена».",
+          "Press «Разбить на разделы» again, then «Применить».",
+          "Press «Вернуть как было».",
           "Open the «Eesti» tab and press «Разбить на разделы» again."
         ],
         "expect": [
-          "Headings with a colon and list points with «— » appeared.",
-          "The words are the same: nothing added, nothing dropped.",
-          "If the AI changed words: a message, and the text stays as it was.",
-          "«Вернуть» puts the text back as it was.",
-          "On the Estonian tab only the Estonian text is split."
+          "A proposal appears: which language it is for and how it will look.",
+          "Until «Применить» the text in the box stays; «Отмена» changes nothing.",
+          "After «Применить»: headings with a colon and points with «— », same words.",
+          "If the AI changed words: a message, and no proposal.",
+          "«Вернуть как было» puts the text back as it was.",
+          "On the Estonian tab the proposal is for the Estonian text."
         ],
         "why": "The panel's older texts are flat paragraphs; the button makes them easy to read without changing their meaning."
       },
       "mark": "new",
-      "markedAt": "2026-11-02T11:55:10.827Z"
+      "markedAt": "2026-11-02T14:45:53.203Z"
     },
     {
       "id": "ai-seo",
