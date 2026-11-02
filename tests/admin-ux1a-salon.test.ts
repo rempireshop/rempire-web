@@ -19,6 +19,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { admSearchSrc } from "./adm-search-lift";
 
 const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
 
@@ -75,6 +76,7 @@ function salon(opts: { S?: Partial<State>; analytics?: Analytics; admin?: boolea
     ${fn("byIdOrNull")}
     ${fn("scanFold")}
     ${fn("scanWordHas")}
+    ${admSearchSrc()}
     ${decl("POS_EAN")}
     ${fn("posEanIndex")}
     ${fn("posCodeHit")}

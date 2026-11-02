@@ -139,8 +139,11 @@ describe("what the source says about the callers", () => {
 
   it("«Каталог» searches the way the owner types, like «Склад» does", () => {
     const rows = body("admCatalogRows");
-    expect(rows).toContain("scanFold(S.goodsQ)");
-    expect(rows).toContain("scanWordHas");
+    // since 02.11.2026 the panel's one product search, which folds with scanFold and matches with scanWordHas
+    expect(rows).toContain("admQueryWords(S.goodsQ)");
+    expect(rows).toContain("admProdMatch(p, words)");
+    expect(body("admFold")).toContain("scanFold(t)");
+    expect(body("admHayHas")).toContain("scanWordHas");
     // the raw substring that could not find «kevin murphy»
     expect(rows).not.toContain('.toLowerCase().indexOf(q) >= 0');
   });

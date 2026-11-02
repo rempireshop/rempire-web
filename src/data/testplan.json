@@ -8681,6 +8681,53 @@
       }
     },
     {
+      "id": "goods-search-langs",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "EN",
+      "title": "Поиск товаров в панели на любом языке",
+      "steps": [
+        "Переключить панель на English и открыть «Товары».",
+        "Ввести в поиск «Shampoo» и пролистать список.",
+        "Стереть и ввести «šampoon», потом «шампуни».",
+        "Стереть и ввести «Conditioner».",
+        "Открыть «Склад» и ввести «šampoon».",
+        "Открыть «Салон» и ввести «shampoo»."
+      ],
+      "expect": [
+        "На «Shampoo» есть Kevin.Murphy ANGEL.WASH и все шампуни, около сорока.",
+        "«šampoon» и «шампуни» находят те же шампуни.",
+        "На «Conditioner» есть ANGEL.RINSE и REPAIR-ME.RINSE.",
+        "На «Складе» «šampoon» показывает те же шампуни.",
+        "В «Салоне» под восемью товарами написано «showing 8 of …»."
+      ],
+      "why": "Панель на английском и эстонском показывает название в переводе, а поиск читал только русское — «Shampoo» находил 27 шампуней из 40.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T14:41:08.969Z",
+      "en": {
+        "title": "Searching products in the panel in any language",
+        "steps": [
+          "Switch the panel to English and open «Товары».",
+          "Type «Shampoo» into the search and scroll the list.",
+          "Clear it and type «šampoon», then «шампуни».",
+          "Clear it and type «Conditioner».",
+          "Open «Склад» and type «šampoon».",
+          "Open «Салон» and type «shampoo»."
+        ],
+        "expect": [
+          "«Shampoo» shows Kevin.Murphy ANGEL.WASH and every shampoo, about forty.",
+          "«šampoon» and «шампуни» find the same shampoos.",
+          "«Conditioner» shows ANGEL.RINSE and REPAIR-ME.RINSE.",
+          "On «Склад» «šampoon» shows the same shampoos.",
+          "In «Салон» it says «showing 8 of …» under eight products."
+        ],
+        "why": "An English or Estonian panel shows the name translated, but the search read only the Russian one — «Shampoo» found 27 of the 40 shampoos."
+      }
+    },
+    {
       "id": "bundles-create",
       "area": "goods",
       "who": "renat",

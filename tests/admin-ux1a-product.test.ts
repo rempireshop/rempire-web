@@ -27,6 +27,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { admSearchSrc } from "./adm-search-lift";
 
 const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
 
@@ -527,6 +528,7 @@ describe("«Каталог»: «Кончаются», a barcode search and the �
     function customFresh() { return false; }
     function scanFold(s) { return String(s || "").toLowerCase().trim(); }
     function scanWordHas(hay, words, w) { return hay.indexOf(w) >= 0; }
+    ${admSearchSrc()}
     ${decl("ADM_TAG_KIND")}
     ${block(app.indexOf("var ADM_GOODS_FILTERS = ["), "ADM_GOODS_FILTERS")};
     ${fn("admTagHTML")}

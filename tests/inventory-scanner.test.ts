@@ -16,6 +16,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { admSearchSrc } from "./adm-search-lift";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const src = readFileSync(APP_JS, "utf8");
@@ -253,6 +254,8 @@ function stockList(rows: Row[], state: Record<string, unknown> = {}) {
     ${slice("stockPage")}
     ${slice("scanFold")}
     ${slice("scanWordHas")}
+    var CATALOGUE = [];
+    ${admSearchSrc()}
     /* The chip rule moved out of stockFiltered into its own function so the
        count printed on a chip and the list it opens cannot disagree. Sliced
        in, not stubbed: «Все» has to keep meaning what the shop means by it. */

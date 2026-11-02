@@ -23,6 +23,7 @@ import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { getLevels, move, setLevel, type CatalogueLevelRow } from "@/lib/inventory";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
+import { admSearchSrc } from "./adm-search-lift";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const src = readFileSync(APP_JS, "utf8");
@@ -82,6 +83,7 @@ function ask(q: string, levels: CatalogueLevelRow[], cat: Shelf[]): Asked {
     ${constant("POS_EAN")}
     ${slice("scanFold")}
     ${slice("scanWordHas")}
+    ${admSearchSrc()}
     ${slice("byIdOrNull")}
     ${slice("edStockFor")}
     ${slice("posEanIndex")}
