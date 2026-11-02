@@ -117,7 +117,7 @@ describe("a hostile PDF stays inside its limits", () => {
     const doc = await PDFDocument.create();
     const bomb = deflateSync(Buffer.alloc(8 * 1024 * 1024));
     const s = PDFRawStream.of(doc.context.obj({ Filter: "FlateDecode" }) as PDFDict, bomb);
-    const budget = { tokens: 1000, bytes: 64 * 1024 };
+    const budget = { ..._test.newBudget(), bytes: 64 * 1024 };
     const t0 = Date.now();
     expect(_test.streamText(s, budget)).toBe("");
     expect(budget.bytes).toBe(64 * 1024);
@@ -128,27 +128,86 @@ describe("a hostile PDF stays inside its limits", () => {
     expect(budget.bytes).toBe(64 * 1024 - 13);
   });
 
-  it("refuses a file whose object streams unpack past the budget, before pdf-lib opens them", () => {
-    const huge = deflateSync(Buffer.alloc(PDF_TEXT_LIMITS.decoded + 1024 * 1024));
-    const head = Buffer.from(`%PDF-1.7\n1 0 obj\n<< /Type /ObjStm /N 1 /First 4 /Filter /FlateDecode /Length ${huge.length} >>\nstream\n`, "latin1");
+  const objStmFile = (filter: string, data: Buffer) => {
+    const head = Buffer.from(`%PDF-1.7\n1 0 obj\n<< /Type /ObjStm /N 1 /First 4 /Filter ${filter} /Length ${data.length} >>\nstream\n`, "latin1");
     const tail = Buffer.from("\nendstream\nendobj\n%%EOF\n", "latin1");
-    const file = new Uint8Array(Buffer.concat([head, huge, tail]));
-    expect(() => _test.checkObjectStreams(file, { tokens: 1, bytes: PDF_TEXT_LIMITS.decoded })).toThrow(PdfTextError);
-    return expect(pdfPages(file)).rejects.toMatchObject({ code: "broken" });
+    return new Uint8Array(Buffer.concat([head, data, tail]));
+  };
+
+  it("refuses a file whose object streams pdf-lib would unpack past the budget while loading", async () => {
+    const t0 = Date.now();
+    const bomb = objStmFile("/FlateDecode", deflateSync(Buffer.alloc(PDF_TEXT_LIMITS.decoded + 1024 * 1024)));
+    await expect(pdfPages(bomb)).rejects.toMatchObject({ code: "broken" });
+    // a filter zlib cannot cap is refused whatever it holds — however the name is spelled
+    await expect(pdfPages(objStmFile("/LZWDecode", Buffer.from("x")))).rejects.toMatchObject({ code: "broken" });
+    await expect(pdfPages(objStmFile("[/ASCII85Decode /FlateDecode]", Buffer.from("x")))).rejects.toMatchObject({ code: "broken" });
+    await expect(pdfPages(objStmFile("/LZWD#65code", Buffer.from("x")))).rejects.toMatchObject({ code: "broken" });
+    expect(Date.now() - t0).toBeLessThan(5000);
   });
 
-  it("charges wide ToUnicode ranges and W widths to one step budget", async () => {
+  it("still reads an ordinary file saved with object streams", async () => {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    doc.addPage().drawText("Object streams are fine when they unpack within the budget, like this one does.", { x: 40, y: 700, size: 12, font });
+    const { pages } = await pdfPages(await doc.save({ useObjectStreams: true }));
+    expect(pages[0].text).toContain("Object streams are fine");
+  });
+
+  it("charges wide ToUnicode ranges and W widths to one budget for the whole document", async () => {
     const t0 = Date.now();
+    const budget = _test.newBudget();
     const lines = Array.from({ length: 2000 }, () => "<0000> <FFFF> <0041>").join("\n");
-    const { map } = parseToUnicode(`1 begincodespacerange <0000> <FFFF> endcodespacerange\n2000 beginbfrange\n${lines}\nendbfrange`);
-    expect(map.size).toBeLessThanOrEqual(PDF_TEXT_LIMITS.cmapSteps);
+    const { map } = parseToUnicode(`1 begincodespacerange <0000> <FFFF> endcodespacerange\n2000 beginbfrange\n${lines}\nendbfrange`, budget);
+    expect(map.size).toBeLessThanOrEqual(PDF_TEXT_LIMITS.steps);
+    expect(budget.steps).toBeLessThanOrEqual(0);
 
     const doc = await PDFDocument.create();
-    const W = doc.context.obj(Array.from({ length: 3000 }, () => [0, 65535, 500]).flat());
-    const desc = doc.context.obj({ Type: "Font", Subtype: "CIDFontType2", W });
-    const font = doc.context.obj({ Type: "Font", Subtype: "Type0", DescendantFonts: [desc] }) as PDFDict;
-    const info = _test.fontInfo(font, { tokens: 1000, bytes: 1024 });
+    const font = (W: unknown[]) => doc.context.obj({
+      Type: "Font", Subtype: "Type0",
+      DescendantFonts: [doc.context.obj({ Type: "Font", Subtype: "CIDFontType2", W: doc.context.obj(W as never) })],
+    }) as PDFDict;
+    // the budget the first font spent is gone for the next one
+    const spent = _test.fontInfo(font([0, 65535, 500]), budget);
+    expect(spent.widths(10)).toBe(1000);
+    // a fresh document: repeated wide ranges stop at the budget
+    const info = _test.fontInfo(font(Array.from({ length: 3000 }, () => [0, 65535, 500]).flat()), _test.newBudget());
     expect(info.widths(10)).toBe(500);
     expect(Date.now() - t0).toBeLessThan(3000);
+  });
+
+  it("walks a page tree that lists the same level twice once per node, not 2^depth times", async () => {
+    // each Pages node lists the next level twice; pdf-lib's getPages() has no visited set
+    const depth = 40;
+    const content = "BT /F1 12 Tf 40 700 Td (A page tree that points back into itself must still read quickly.) Tj ET";
+    const objs: string[] = [];
+    objs[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+    for (let i = 0; i < depth; i++) objs[2 + i] = `<< /Type /Pages /Kids [${3 + i} 0 R ${3 + i} 0 R] /Count 1 >>`;
+    const leaf = 2 + depth;
+    objs[leaf] = `<< /Type /Page /Parent ${leaf - 1} 0 R /MediaBox [0 0 600 800] /Contents ${leaf + 1} 0 R /Resources << /Font << /F1 ${leaf + 2} 0 R >> >> >>`;
+    objs[leaf + 1] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+    objs[leaf + 2] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+    let out = "%PDF-1.4\n";
+    const offs: number[] = [];
+    for (let i = 1; i < objs.length; i++) { offs[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
+    const x = out.length;
+    out += `xref\n0 ${objs.length}\n0000000000 65535 f \n` + offs.slice(1).map((o) => String(o).padStart(10, "0") + " 00000 n \n").join("");
+    out += `trailer\n<< /Size ${objs.length} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF\n`;
+    const t0 = Date.now();
+    const { pages, pageCount } = await pdfPages(new Uint8Array(Buffer.from(out, "latin1")));
+    expect(pageCount).toBe(1);
+    expect(pages[0].text).toContain("points back into itself");
+    expect(Date.now() - t0).toBeLessThan(3000);
+  });
+
+  it("never stalls on a code too large to count by one", () => {
+    const t0 = Date.now();
+    const { map } = parseToUnicode("1 beginbfrange\n<FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00> <FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF> <0041>\nendbfrange");
+    expect(map.size).toBe(0);
+    return PDFDocument.create().then((doc) => {
+      const desc = doc.context.obj({ Type: "Font", Subtype: "CIDFontType2", W: doc.context.obj([1e300, 1e300 + 1e290, 500]) });
+      const f = doc.context.obj({ Type: "Font", Subtype: "Type0", DescendantFonts: [desc] }) as PDFDict;
+      expect(_test.fontInfo(f, _test.newBudget()).widths(5)).toBe(1000);
+      expect(Date.now() - t0).toBeLessThan(2000);
+    });
   });
 });

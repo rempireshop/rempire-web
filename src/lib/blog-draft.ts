@@ -33,8 +33,9 @@ import { mentionedProducts, relevantProducts } from "@/lib/catalogue-slice";
 /** Every run of three or more «<» or «>» — the stuff a material fence is made of — taken out of
     text that goes inside one, in one pass that leaves nothing to recombine. */
 export function unfence(text: string): string {
-  // NFKC first, so full-width «＜＜＜» and other look-alikes become plain «<» before they are counted
-  return String(text || "").normalize("NFKC").replace(/[<>]{3,}/g, " ");
+  // NFKC first, so full-width «＜＜＜» and other look-alikes become plain «<» before they are counted;
+  // then format characters (zero-width space, joiners) go, so «<<​<» cannot hide a run of three
+  return String(text || "").normalize("NFKC").replace(/\p{Cf}/gu, "").replace(/[<>]{3,}/g, " ");
 }
 
 /* ---------- the yellow marks ------------------------------------------------ */

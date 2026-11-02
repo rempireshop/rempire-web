@@ -51381,7 +51381,9 @@
   function admSendFilesOnly() {
     var photos = (S.adminAtt || []).filter(function (a) { return a.kind !== "pdf" && a.key && !a.busy && !a.err && !a.use; });
     if (!photos.length) return false;
-    var label = "📎 " + photos.map(function (a) { return a.name; }).join(", ");
+    // a count, never the names: a file's name is a stranger's text, and this line
+    // reaches the model as Renat's own words (the route lists the names, quoted)
+    var label = "📎 " + photos.length + " фото";
     S.adminAsk = label; render(); admAsk(label);
     return true;
   }
@@ -51434,9 +51436,11 @@
       "Написать по " + (mats.length > 1 ? "ним" : "нему") + " статью? Будет черновик — ничего не публикуется само.";
     var label = q || "📎 " + mats.map(function (x) { return x.name; }).join(", ");
     S.adminAsk = label;
-    // the model hears it too: «напиши статью по этому» next is about these
-    admConvo.push({ role: "user", content: q || "[Прикрепил файлы: " + mats.map(function (x) { return "«" + x.name + "»"; }).join(", ") + "]" });
-    admConvo.push({ role: "assistant", content: reply });
+    // the model hears it too: «напиши статью по этому» next is about these — by
+    // count only, since a file's name is a stranger's text (the route lists the
+    // materials with their names quoted, as data)
+    admConvo.push({ role: "user", content: q || "[Прикрепил файлы: " + mats.length + "]" });
+    admConvo.push({ role: "assistant", content: "Сохранил в материалы блога: " + mats.length + ". Написать по ним статью? Будет черновик — ничего не публикуется само." });
     S.adminAns = { q: label, reply: reply, local: true, mats: true };
     render();
   }

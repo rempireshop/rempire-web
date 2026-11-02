@@ -317,6 +317,11 @@ export async function appendMaterial(id: string, more: { text: string; pages: Ma
       pages[pages.length - 1] = { ...last, text: (last.text + "\n\n" + more.text).trim().slice(0, MATERIAL_LIMITS.pageText) };
     }
     pages = pages.sort((a, b) => a.n - b.n).slice(0, MATERIAL_LIMITS.pages);
+    // the pages are what get_material serves, so they — not only `text` — keep
+    // within one material's text limit: pages past it are dropped from the end
+    let room = MATERIAL_LIMITS.text;
+    pages = pages.filter((p) => (room -= p.text.length) >= 0);
+    if (!pages.length) throw new MaterialError("too_long");
     text = pages.map((p) => p.text).filter(Boolean).join("\n\n").slice(0, MATERIAL_LIMITS.text);
   } else {
     text = (was.text + "\n\n" + more.text).trim().slice(0, MATERIAL_LIMITS.text);

@@ -20,8 +20,12 @@
  * a scan (no text at all) and a file whose fonts carry no way back to letters
  * are refused with a code, never returned as nonsense.
  */
+import { AsyncLocalStorage } from "node:async_hooks";
 import { constants as zlibConstants, inflateSync } from "node:zlib";
-import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, ParseSpeeds, type PDFObject } from "pdf-lib";
+import {
+  decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFObjectStreamParser, PDFRawStream,
+  PDFXRefStreamParser, ParseSpeeds, type PDFObject,
+} from "pdf-lib";
 import { pageHeading } from "@/lib/pdf-heading";
 
 export { pageHeading };
@@ -34,17 +38,19 @@ export class PdfTextError extends Error {
   }
 }
 
-/* `decoded` is what one document may unpack in all — content streams, ToUnicode
-   maps and the object streams pdf-lib opens while loading — so a small file that
-   inflates to gigabytes stops at the cap instead of filling the function's
-   memory. `cmapSteps` bounds the code ranges one font may expand (a W array or a
-   bfrange can name 65 536 codes per entry), `fonts` the fonts one document reads. */
+/* Per document, because a PDF from a link comes from a stranger: `decoded` is
+   what it may unpack in all — the object streams pdf-lib opens while loading,
+   then content streams and ToUnicode maps — so a small file that inflates to
+   gigabytes stops at the cap instead of filling the function's memory; `steps`
+   is how many codes all its fonts' W arrays and ToUnicode ranges may expand (one
+   entry can name 65 536 or more); `fonts` how many fonts it reads. */
 export const PDF_TEXT_LIMITS = {
   pages: 300, pageText: 20_000, total: 300_000, contentBytes: 4 * 1024 * 1024, tokens: 3_000_000,
-  decoded: 64 * 1024 * 1024, cmapSteps: 200_000, fonts: 400,
+  decoded: 64 * 1024 * 1024, steps: 500_000, fonts: 400, pageCount: 5000,
 } as const;
 
-type Budget = { tokens: number; bytes: number };
+type Budget = { tokens: number; bytes: number; steps: number };
+const newBudget = (): Budget => ({ tokens: PDF_TEXT_LIMITS.tokens, bytes: PDF_TEXT_LIMITS.decoded, steps: PDF_TEXT_LIMITS.steps });
 
 export interface PdfPage {
   n: number;
@@ -117,6 +123,8 @@ const hexBytes = (hex: string) => {
   return out;
 };
 const hexInt = (hex: string) => hexBytes(hex).reduce((n, b) => n * 256 + b, 0);
+/** A character code a font can use: a whole number of at most four bytes. */
+const isCode = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= 0xffffffff;
 const utf16 = (hex: string) => {
   const b = hexBytes(hex);
   let s = "";
@@ -124,8 +132,9 @@ const utf16 = (hex: string) => {
   return s;
 };
 
-/** A ToUnicode CMap: its bfchar and bfrange lines, and how long its codes are. */
-export function parseToUnicode(src: string): { map: Map<number, string>; bytes: 1 | 2 } {
+/** A ToUnicode CMap: its bfchar and bfrange lines, and how long its codes are.
+ *  Every code it maps is charged to the document's `steps` budget. */
+export function parseToUnicode(src: string, budget: Budget = newBudget()): { map: Map<number, string>; bytes: 1 | 2 } {
   const map = new Map<number, string>();
   const lens = new Set<number>();
   const tok = /<([0-9A-Fa-f\s]*)>|(\[)|(\])|\b(begincodespacerange|endcodespacerange|beginbfchar|endbfchar|beginbfrange|endbfrange)\b/g;
@@ -133,8 +142,7 @@ export function parseToUnicode(src: string): { map: Map<number, string>; bytes: 
   let buf: Array<string | string[]> = [];
   let arr: string[] | null = null;
   let m: RegExpExecArray | null;
-  let steps = 0;
-  while ((m = tok.exec(src)) && steps < PDF_TEXT_LIMITS.cmapSteps) {
+  while ((m = tok.exec(src)) && budget.steps > 0) {
     if (m[4]) {
       mode = m[4].startsWith("begin") ? m[4].slice(5) : "";
       buf = [];
@@ -147,22 +155,29 @@ export function parseToUnicode(src: string): { map: Map<number, string>; bytes: 
       lens.add(Math.max(1, Math.ceil(String(buf[0]).replace(/\s+/g, "").length / 2)));
       buf = [];
     } else if (mode === "bfchar" && buf.length === 2) {
-      map.set(hexInt(String(buf[0])), utf16(String(buf[1])));
-      steps++;
+      const code = hexInt(String(buf[0]));
+      if (isCode(code)) map.set(code, utf16(String(buf[1])));
+      budget.steps--;
       buf = [];
     } else if (mode === "bfrange" && buf.length === 3) {
       const lo = hexInt(String(buf[0])), hi = hexInt(String(buf[1]));
-      if (hi >= lo && hi - lo <= 0xffff) {
+      budget.steps--;
+      // codes are at most four bytes; an integer offset walks the range, so a
+      // huge float code can never stall the loop
+      if (isCode(lo) && isCode(hi) && hi >= lo && hi - lo <= 0xffff) {
         const dst = buf[2];
-        if (Array.isArray(dst)) dst.forEach((d, i) => { if (lo + i <= hi) map.set(lo + i, utf16(d)); steps++; });
-        else {
+        const span = hi - lo + 1;
+        if (Array.isArray(dst)) {
+          const n = Math.min(dst.length, span, Math.max(0, budget.steps));
+          for (let k = 0; k < n; k++) map.set(lo + k, utf16(dst[k]));
+          budget.steps -= Math.min(dst.length, span);
+        } else {
           const base = utf16(dst);
-          // the range is charged to the whole map's step budget, not to its own length
-          const top = Math.min(hi, lo + Math.max(0, PDF_TEXT_LIMITS.cmapSteps - steps) - 1);
-          steps += hi - lo + 1;
-          for (let c = lo; c <= top; c++) {
-            const last = base.charCodeAt(base.length - 1) + (c - lo);
-            map.set(c, base.slice(0, -1) + String.fromCharCode(last & 0xffff));
+          const n = Math.min(span, Math.max(0, budget.steps));
+          budget.steps -= span;
+          for (let k = 0; k < n; k++) {
+            const last = base.charCodeAt(base.length - 1) + k;
+            map.set(lo + k, base.slice(0, -1) + String.fromCharCode(last & 0xffff));
           }
         }
       }
@@ -193,8 +208,7 @@ function streamText(s: PDFObject | undefined, budget: Budget, max: number = PDF_
   if (!(s instanceof PDFRawStream)) return "";
   const cap = Math.min(max, budget.bytes);
   if (cap <= 0) return "";
-  const f = s.dict.lookup(N("Filter"));
-  const filters = f instanceof PDFName ? [nameOf(f)] : f instanceof PDFArray ? f.asArray().map((x) => nameOf(x)) : [];
+  const filters = filtersOf(s.dict);
   try {
     let out: Uint8Array;
     if (!filters.length) out = s.contents;
@@ -212,44 +226,59 @@ function streamText(s: PDFObject | undefined, budget: Budget, max: number = PDF_
   }
 }
 
-/**
- * pdf-lib inflates every object stream (and the cross-reference stream) while it
- * loads, with no limit. Before that, inflate those few streams here against the
- * document's byte budget: a file whose object streams unpack past it is refused
- * as broken. Page contents and pictures are not touched — they are read later,
- * capped, or never.
+/*
+ * pdf-lib unpacks every object stream and cross-reference stream while it loads,
+ * through PDFObjectStreamParser.forStream / PDFXRefStreamParser.forStream, with
+ * no output limit. Both are wrapped once: inside pdfPages (an AsyncLocalStorage
+ * run, so two reads at once keep their own budgets) each such stream is checked
+ * first — pdf-lib's own parse of its dictionary, so nothing a regex could miss —
+ * and must be one FlateDecode stream that zlib unpacks within the document's
+ * byte budget; any other filter, or a stream zlib will not read, refuses the
+ * file. Outside pdfPages the wrappers do nothing.
  */
-function checkObjectStreams(bytes: Uint8Array, budget: Budget): void {
-  const s = Buffer.from(bytes).toString("latin1");
-  const re = /stream(\r\n|\n|\r)/g;
-  let m: RegExpExecArray | null;
-  let seen = 0;
-  while ((m = re.exec(s))) {
-    if (s.slice(m.index - 3, m.index) === "end") continue;
-    const head = s.slice(Math.max(0, m.index - 2048), m.index);
-    const dict = head.slice(head.lastIndexOf(" obj"));
-    if (!/\/Type\s*\/(ObjStm|XRef)\b/.test(dict) || !/\/FlateDecode\b/.test(dict)) continue;
-    if (++seen > 20_000) throw new PdfTextError("broken");
-    const start = m.index + m[0].length;
-    const end = s.indexOf("endstream", start);
-    if (end < 0) break;
-    let out: Buffer;
+type LoadGuard = { budget: Budget; refused: boolean };
+const loading = new AsyncLocalStorage<LoadGuard>();
+let parsersGuarded = false;
+
+function filtersOf(dict: PDFDict): string[] {
+  const f = dict.lookup(N("Filter"));
+  return f instanceof PDFName ? [nameOf(f)] : f instanceof PDFArray ? f.asArray().map((x) => nameOf(dict.context.lookup(x))) : [];
+}
+
+function checkLoadStream(s: PDFRawStream, g: LoadGuard): void {
+  const filters = filtersOf(s.dict);
+  let size = s.contents.length;
+  if (filters.length === 1 && filters[0] === "FlateDecode") {
     try {
-      out = inflateCapped(bytes.subarray(start, end), budget.bytes);
-    } catch (err) {
-      if ((err as { code?: string }).code === "ERR_BUFFER_TOO_LARGE") throw new PdfTextError("broken");
-      continue;   // a stream zlib will not read: pdf-lib decides about it
+      size = inflateCapped(s.contents, g.budget.bytes).length;
+    } catch {
+      size = Infinity;   // over the budget, or not Flate after all
     }
-    budget.bytes -= out.length;
-    if (budget.bytes <= 0) throw new PdfTextError("broken");
-    re.lastIndex = end;
+  } else if (filters.length) size = Infinity;   // LZW, RunLength, ASCII85, chains: no cap there
+  g.budget.bytes -= size;
+  if (g.budget.bytes < 0) {
+    g.refused = true;
+    throw new PdfTextError("broken");
+  }
+}
+
+function guardParsers(): void {
+  if (parsersGuarded) return;
+  parsersGuarded = true;
+  for (const P of [PDFObjectStreamParser, PDFXRefStreamParser] as unknown as Array<{ forStream: (s: PDFRawStream, ...rest: unknown[]) => unknown }>) {
+    const orig = P.forStream;
+    P.forStream = function (this: unknown, s: PDFRawStream, ...rest: unknown[]) {
+      const g = loading.getStore();
+      if (g) checkLoadStream(s, g);
+      return orig.call(this, s, ...rest);
+    };
   }
 }
 
 function fontInfo(font: PDFDict, budget: Budget): FontInfo {
   const sub = nameOf(font.lookup(N("Subtype")));
   const tu = font.lookup(N("ToUnicode"));
-  const cmap = tu instanceof PDFRawStream ? parseToUnicode(streamText(tu, budget)) : null;
+  const cmap = tu instanceof PDFRawStream ? parseToUnicode(streamText(tu, budget), budget) : null;
   if (sub === "Type0") {
     const desc = font.lookupMaybe(N("DescendantFonts"), PDFArray)?.lookup(0);
     const d = desc instanceof PDFDict ? desc : null;
@@ -257,22 +286,27 @@ function fontInfo(font: PDFDict, budget: Budget): FontInfo {
     const w = new Map<number, number>();
     const W = d?.lookupMaybe(N("W"), PDFArray);
     if (W) {
-      // every code an entry names is charged to one step budget, so repeating a
-      // wide range cannot loop past it even when it adds nothing new to the map
-      let steps = 0;
-      for (let i = 0; i < W.size() && steps < PDF_TEXT_LIMITS.cmapSteps;) {
+      // every code an entry names is charged to the document's step budget, so
+      // repeating a wide range cannot loop past it even when it adds nothing new;
+      // an integer offset walks each range, so a huge float code cannot stall it
+      for (let i = 0; i < W.size() && budget.steps > 0;) {
         const first = num(W.lookup(i));
         const next = W.lookup(i + 1);
+        budget.steps--;
+        if (!isCode(first)) break;   // not a character code: stop reading widths
         if (next instanceof PDFArray) {
-          const k1 = Math.min(next.size(), PDF_TEXT_LIMITS.cmapSteps - steps);
-          for (let k = 0; k < k1; k++) w.set(first + k, num(next.lookup(k)));
-          steps += Math.max(1, k1);
+          const n = Math.min(next.size(), Math.max(0, budget.steps));
+          for (let k = 0; k < n; k++) w.set(first + k, num(next.lookup(k)));
+          budget.steps -= next.size();
           i += 2;
         } else {
-          const last = Math.min(num(next), first + (PDF_TEXT_LIMITS.cmapSteps - steps) - 1), width = num(W.lookup(i + 2));
-          for (let c = first; c <= last; c++) w.set(c, width);
-          steps += Math.max(1, last - first + 1);
+          const last = num(next), width = num(W.lookup(i + 2));
           i += 3;
+          if (!isCode(last) || last < first) continue;
+          const span = last - first + 1;
+          const n = Math.min(span, Math.max(0, budget.steps));
+          for (let k = 0; k < n; k++) w.set(first + k, width);
+          budget.steps -= span;
         }
       }
     }
@@ -528,8 +562,37 @@ function linesOf(pieces: Piece[]): string[] {
   }).filter(Boolean);
 }
 
-function contentsOf(page: { node: { Contents(): PDFObject | undefined } }, budget: Budget): string {
-  const c = page.node.Contents();
+/** A page: its content stream(s) and the Resources it has or inherits from its nearest parent. */
+type Leaf = { contents: PDFObject | undefined; resources: PDFDict | undefined };
+
+/**
+ * The page tree walked here, not by pdf-lib's getPages(), which follows every
+ * Kids entry with no record of where it has been — a tree whose levels each list
+ * the next level twice doubles the work per level (a 2.5 KB file took 46 s, the
+ * security review of 02.11.2026). Each node is visited once, every Kids entry
+ * costs a step, and the walk stops at `countMax` pages.
+ */
+function pageLeaves(doc: PDFDocument, countMax: number): Leaf[] {
+  const out: Leaf[] = [];
+  const seen = new Set<PDFDict>();
+  const stack: Array<{ node: PDFObject | undefined; res: PDFDict | undefined }> = [{ node: doc.catalog.lookup(N("Pages")), res: undefined }];
+  let steps = 0;
+  while (stack.length && out.length < countMax && steps < PDF_TEXT_LIMITS.steps) {
+    const { node, res } = stack.pop()!;
+    steps++;
+    if (!(node instanceof PDFDict) || seen.has(node)) continue;
+    seen.add(node);
+    const own = node.lookup(N("Resources"));
+    const r = own instanceof PDFDict ? own : res;
+    const kids = node.lookup(N("Kids"));
+    if (nameOf(node.lookup(N("Type"))) !== "Page" && kids instanceof PDFArray) {
+      for (let i = kids.size() - 1; i >= 0 && steps < PDF_TEXT_LIMITS.steps; i--, steps++) stack.push({ node: kids.lookup(i), res: r });
+    } else out.push({ contents: node.lookup(N("Contents")), resources: r });
+  }
+  return out;
+}
+
+function contentsOf(c: PDFObject | undefined, budget: Budget): string {
   if (c instanceof PDFArray) {
     const parts: string[] = [];
     let total = 0;
@@ -551,18 +614,22 @@ function contentsOf(page: { node: { Contents(): PDFObject | undefined } }, budge
  */
 export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; pageCount: number }> {
   if (!Buffer.from(bytes.subarray(0, 1024)).toString("latin1").includes("%PDF-")) throw new PdfTextError("not_pdf");
-  const budget: Budget = { tokens: PDF_TEXT_LIMITS.tokens, bytes: PDF_TEXT_LIMITS.decoded };
-  checkObjectStreams(bytes, budget);
+  const budget = newBudget();
+  guardParsers();
+  const guard: LoadGuard = { budget, refused: false };
   let doc: PDFDocument;
   try {
-    doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false, parseSpeed: ParseSpeeds.Fastest });
+    doc = await loading.run(guard, () =>
+      PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false, parseSpeed: ParseSpeeds.Fastest }));
   } catch {
     throw new PdfTextError("broken");
   }
+  // pdf-lib swallows an object that will not parse; a refused stream still refuses the file
+  if (guard.refused) throw new PdfTextError("broken");
   if (doc.isEncrypted) throw new PdfTextError("encrypted");
-  let list;
+  let list: Leaf[];
   try {
-    list = doc.getPages();
+    list = pageLeaves(doc, PDF_TEXT_LIMITS.pageCount);
   } catch {
     throw new PdfTextError("broken");
   }
@@ -573,7 +640,7 @@ export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; p
     st.pieces = [];
     st.seen = new Set();
     try {
-      runContent(contentsOf(list[i], budget), list[i].node.Resources(), ID, st, 0);
+      runContent(contentsOf(list[i].contents, budget), list[i].resources, ID, st, 0);
     } catch {
       continue;   // one page that will not read is one page without text
     }
@@ -590,4 +657,4 @@ export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; p
 }
 
 /** For tests: the lexer and the line setter on their own. */
-export const _test = { Lexer, linesOf, streamText, fontInfo, checkObjectStreams };
+export const _test = { Lexer, linesOf, streamText, fontInfo, newBudget };
