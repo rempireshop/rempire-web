@@ -32,6 +32,12 @@
  * named get a card after the paragraph they belong to, an article short of
  * cards is filled from the slice by the topic's own words, never two cards
  * in a row, one of them near the end.
+ * "sections" («Разбить на разделы», 02.11.2026) hands back the owner's own
+ * product text laid out in the description format — headings, «— » lists —
+ * and is refused as `changed_words` when its words are not his
+ * (sectionsKeepWords in src/lib/ai-prompts.ts). A "translate" sent with
+ * `format: "desc"` is a product's page text and keeps that layout, or is
+ * refused as `lost_structure`.
  * "post_translate" carries that article (or the owner's own) into another
  * language, tags kept in place. "copy" is the short text behind every «✨»
  * button in the panel (banner slide, announcement strip, contact page,
@@ -63,7 +69,7 @@ import { clientIp, rateLimit, rateLimitWaitS, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
 import {
-  AiInputError, buildPrompt, isAiTask, LANGS3, POST_EDIT_PRODUCTS_MAX, POST_PRODUCTS_MAX, seoDropMetaTalk, seoOffLanguage, seoProductName,
+  AiInputError, buildPrompt, descStructure, isAiTask, LANGS3, POST_EDIT_PRODUCTS_MAX, POST_PRODUCTS_MAX, sectionsKeepWords, seoDropMetaTalk, seoOffLanguage, seoProductName,
   type AiTask, type Lang3,
 } from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
@@ -101,6 +107,9 @@ const MAX_TOKENS: Record<AiTask, number> = {
   post_edit: 6000,
   // «Рассылка»: a subject line and 90–220 words of HTML (src/lib/ai-prompts.ts)
   newsletter: 1500,
+  /* «Разбить на разделы»: the owner's own text of up to 4 000 characters
+     comes back whole, laid out — about as long as it went in */
+  sections: 3000,
 };
 const TEMPERATURE = 0.4;
 /* A runaway guard, not a ration: one product with every button pressed is
@@ -184,10 +193,17 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown, edit: PostEdi
     };
   }
   if (task === "describe") {
+    /* a point is a phrase under the heading (src/lib/desc-format.mjs): a
+       dash or bullet sign the model put in front of it, or a full stop at
+       its end, would draw a second marker or a sentence in the list */
     const bullets = Array.isArray(p.bullets)
-      ? p.bullets.map((b) => str(b, 160)).filter(Boolean).slice(0, 3)
+      ? p.bullets.map((b) => str(b, 160).replace(/^[-–—•*]\s*/, "").replace(/\.$/, "").trim()).filter(Boolean).slice(0, 3)
       : [];
-    return { text: { description: str(p.description, 1400), bullets } };
+    const heading = str(p.heading, 40).replace(/\*\*/g, "").replace(/[\s:.]+$/, "");
+    return { text: { description: str(p.description, 1400), heading, bullets } };
+  }
+  if (task === "sections") {
+    return { text: str(p.text, 4000) };
   }
   if (task === "seo") {
     /* An Estonian or English title that still ends in the catalogue's Russian
@@ -518,7 +534,7 @@ export async function POST(req: NextRequest) {
      editor's «Перевести на ET и EN» writes whatever comes back straight into
      the draft, so half an Estonian article would be saved as the Estonian
      article. */
-  if ((task === "post_full" || task === "post_translate" || task === "post_edit" || task === "newsletter" || task === "translate")
+  if ((task === "post_full" || task === "post_translate" || task === "post_edit" || task === "newsletter" || task === "translate" || task === "sections")
       && (extracted.truncated || !extracted.value)) {
     console.error("[admin/ai/text] article cut or unreadable", task, choice.finish_reason);
     return NextResponse.json({ ok: false, error: "truncated" }, { status: 502 });
@@ -563,6 +579,39 @@ export async function POST(req: NextRequest) {
       if (seoOffLanguage(`${t.title ?? ""}\n${t.description ?? ""}`, lang, body.input)) {
         console.error("[admin/ai/text] product snippet came back in the wrong language", lang);
         return NextResponse.json({ ok: false, error: "wrong_language" }, { status: 502 });
+      }
+    }
+    /* «Разбить на разделы»: the owner's words, laid out — or nothing. The box
+       gets whatever this returns and saves it, so an answer that rewrote,
+       added or dropped words (or a «не» or a number) is refused here
+       (sectionsKeepWords), never handed over. Bold he did not have is
+       taken back out rather than refused: it is the one mark the task may
+       not add, and the words under it are his. */
+    if (task === "sections") {
+      const before = String(((body.input ?? {}) as Record<string, unknown>).text ?? "");
+      let out = String(result.text ?? "");
+      if (!before.includes("**")) out = out.replace(/\*\*/g, "");
+      const kept = sectionsKeepWords(before, out);
+      if (!kept.ok) {
+        console.error("[admin/ai/text] sections changed the text", lang, kept.reason, kept.added, kept.dropped);
+        return NextResponse.json({ ok: false, error: "changed_words", detail: kept.reason }, { status: 502 });
+      }
+      result.text = out;
+    }
+    /* A product's page text translated keeps its layout: the same number of
+       headings, «— » points and bold words in every language (descStructure).
+       The panel writes the answer straight into the ET and EN boxes, so a
+       translation that ran the list into a sentence is refused as
+       `lost_structure` and the boxes keep what they had. */
+    const trIn = (body.input && typeof body.input === "object" ? body.input : {}) as Record<string, unknown>;
+    if (task === "translate" && trIn.format === "desc" && result.texts && typeof result.texts === "object") {
+      const want = descStructure(String(trIn.text ?? ""));
+      for (const [l, txt] of Object.entries(result.texts as Record<string, string>)) {
+        const got = descStructure(txt);
+        if (got.heads !== want.heads || got.points !== want.points || got.bold !== want.bold) {
+          console.error("[admin/ai/text] translation lost the description's layout", l, want, got);
+          return NextResponse.json({ ok: false, error: "lost_structure", detail: l }, { status: 502 });
+        }
       }
     }
     if (post && result.text && typeof result.text === "object") {

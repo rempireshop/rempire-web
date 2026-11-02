@@ -2066,6 +2066,12 @@ button, a, summary, label { touch-action: manipulation; }
 .acc__rich ul, .legal ul, .legal ol { margin: 0 0 12px; padding-left: 20px; }
 .acc__rich li, .legal li { margin: 4px 0; }
 .acc__rich h1, .acc__rich h2, .acc__rich h3, .acc__rich h4 { font-size: 14px; margin: 14px 0 6px; font-family: Oswald, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+/* A section heading of the owner's own text («Преимущества:» on a line of its
+   own — src/lib/desc-format.mjs): bold capitals, the design of 02.11.2026,
+   tight above its list or paragraph */
+.acc__rich .desc-h { margin: 14px 0 6px; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+.acc__rich .desc-h:first-child { margin-top: 0; }
+.acc__rich .desc-h strong { font-weight: 700; }
 .legal h1, .legal h2, .legal h3, .legal h4 { font-size: 15px; margin: 20px 0 8px; font-family: Oswald, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .legal { font-size: 14.5px; line-height: 1.65; }
 .legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }

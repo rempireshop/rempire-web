@@ -179,7 +179,8 @@ describe("a custom product's page at request time", () => {
     expect(html).toContain("alates 14,90 €");
     expect(html).toContain("<li>100 мл · <span class=\"num\">14,90 €</span></li>");
     expect(html).toContain("<li>250 мл · <span class=\"num\">24,90 €</span></li>");
-    expect(html).toContain('<div class="acc__rich"><p>Habemepalsam.</p></div>');
+    // data-descown: the owner's own text, which app.js keeps on screen as it is (desc-format, 02.11.2026)
+    expect(html).toContain('<div class="acc__rich" data-descown><p>Habemepalsam.</p></div>');
     expect(html).toContain(`href="/et/collections/proraso"`);
     // the shell's own assets travel unchanged
     expect(html).toContain('<script src="/shop2/app.min.js?v=');

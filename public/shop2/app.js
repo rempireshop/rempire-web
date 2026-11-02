@@ -13390,7 +13390,7 @@
     var ov = p.descOv || {}, so = p.seoOv || {}, langs = ["RU", "ET", "EN"];
     for (var i = 0; i < langs.length; i++) {
       var L = langs[i];
-      if (ov[L]) t.push(ov[L]);
+      if (ov[L]) t.push(descPlain(ov[L]));   // its «**» marks are not words to match
       if (so[L]) t.push(so[L].t || "", so[L].d || "");
     }
     if (p.seo) t.push(p.seo.t || "", p.seo.d || "");
@@ -16134,20 +16134,125 @@
   /* Descriptions and info pages exist in three languages; the source text is
      the shop's own English, RU/ET are its translations. UI chrome stays
      Russian in this round — only the content follows the switcher. */
+  /* The owner's description is plain text with a light markup — a short line
+     ending in «:» is a heading, «— » starts a point of a list, **word** is
+     bold — drawn by descHtml() below: the block between the two desc-format
+     markers is src/lib/desc-format.mjs byte for byte (the rules are written
+     down there; tests/desc-format.test.ts holds the copies equal). The
+     prerendered pages and a custom product's request-time page draw it with
+     the same function, so the static copy and this one are the same HTML. */
+/* desc-format:start */
+  var DESC_HEAD_MAX = 60;
+  var DESC_HEAD_WORDS = 8;
+  var DESC_LABEL_MAX = 32;
+  var DESC_LABEL_WORDS = 4;
+  var DESC_ITEM_MAX = 120;
+  var DESC_UPPER = "A-ZÀ-ÖØ-ÞŠŽА-ЯЁ";
+  var DESC_LETTER = /[A-Za-zÀ-ÖØ-öø-ɏЀ-ӿ]/;
+  var DESC_BULLET = /^[-–—•]\s+/;
+  var DESC_BOLD = /\*\*(?=\S)([^\n]*?\S)\*\*/g;
+  var DESC_LABEL = new RegExp("^([" + DESC_UPPER + "][^.!?;,:«»\"*]{0," + (DESC_LABEL_MAX - 1) + "}):[ \\t]+(\\S.*)$");
+
+  function descEsc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function descWords(s) { return String(s).trim().split(/\s+/).length; }
+  /** «Преимущества:» → "Преимущества" — the heading's words without the colon — or null for a line that is not one. */
+  function descHeading(line) {
+    var t = String(line).trim();
+    var wrapped = /^\*\*([^*]+)\*\*(:?)$/.exec(t);
+    if (wrapped) t = wrapped[1].trim() + wrapped[2];
+    if (t.length > DESC_HEAD_MAX || t.charAt(t.length - 1) !== ":") return null;
+    var w = t.slice(0, -1).replace(/\*\*/g, "").trim();
+    if (!w || !DESC_LETTER.test(w) || w.indexOf(":") >= 0 || DESC_BULLET.test(w)) return null;
+    if (/[.!?…]\s/.test(w) || descWords(w) > DESC_HEAD_WORDS) return null;
+    return w;
+  }
+  /** A line that reads as a point of a list, not as a sentence (the implicit-list rule above). */
+  function descItemLike(line) {
+    var t = String(line).trim();
+    return !!t && t.length <= DESC_ITEM_MAX && !/[.!?…]$/.test(t) && !/[.!?…]\s+\S/.test(t) && descHeading(t) === null;
+  }
+  /** One line's words: escaped, **bold** made bold, a leading label («Объём: 30 мл») in bold. */
+  function descInline(s) { return descEsc(s).replace(DESC_BOLD, "<strong>$1</strong>"); }
+  function descLineHtml(line) {
+    var m = DESC_LABEL.exec(line);
+    if (m && descWords(m[1]) <= DESC_LABEL_WORDS) return "<strong>" + descEsc(m[1]) + ":</strong> " + descInline(m[2]);
+    return descInline(line);
+  }
+  /** The text as blocks: { k: "p", lines }, { k: "h", text }, { k: "ul", items } — in order. */
+  function descBlocks(text) {
+    var paras = String(text == null ? "" : text).replace(/\r\n?/g, "\n").split(/\n[ \t]*\n/);
+    var out = [], afterHead = false;
+    for (var i = 0; i < paras.length; i++) {
+      var lines = paras[i].split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+      if (!lines.length) continue;
+      var k = 0, p = [], ul = [];
+      var plainRun = function (from) {
+        var run = [];
+        for (var r = from; r < lines.length && !DESC_BULLET.test(lines[r]) && descHeading(lines[r]) === null; r++) run.push(lines[r]);
+        return run.length >= 2 && run.every(descItemLike) ? run : null;
+      };
+      var flush = function () {
+        if (p.length) out.push({ k: "p", lines: p });
+        if (ul.length) out.push({ k: "ul", items: ul });
+        p = []; ul = [];
+      };
+      if (afterHead) {
+        var first = plainRun(0);
+        if (first) { out.push({ k: "ul", items: first }); k = first.length; }
+      }
+      afterHead = false;
+      for (; k < lines.length; k++) {
+        var line = lines[k], h = descHeading(line);
+        if (DESC_BULLET.test(line)) {
+          if (p.length) { out.push({ k: "p", lines: p }); p = []; }
+          ul.push(line.replace(DESC_BULLET, ""));
+        } else if (h !== null) {
+          flush();
+          out.push({ k: "h", text: h });
+          var run = plainRun(k + 1);
+          if (run) { out.push({ k: "ul", items: run }); k += run.length; }
+          else if (k === lines.length - 1) afterHead = true;
+        } else {
+          if (ul.length) { out.push({ k: "ul", items: ul }); ul = []; }
+          p.push(line);
+        }
+      }
+      flush();
+    }
+    return out;
+  }
+  /** The owner's text as the page shows it — <p>, <p class="desc-h"><strong>…:</strong></p>, <ul><li>. */
+  function descHtml(text) {
+    return descBlocks(text).map(function (b) {
+      if (b.k === "h") return '<p class="desc-h"><strong>' + descEsc(b.text) + ":</strong></p>";
+      if (b.k === "ul") return "<ul>" + b.items.map(function (x) { return "<li>" + descLineHtml(x) + "</li>"; }).join("") + "</ul>";
+      return "<p>" + b.lines.map(descLineHtml).join("<br>") + "</p>";
+    }).join("");
+  }
+  /** The text with its marks taken out — «**» gone, headings and bullets left as words — for plain-text copies. */
+  function descPlain(text) {
+    return String(text == null ? "" : text).replace(DESC_BOLD, "$1").replace(/\*\*/g, "");
+  }
+/* desc-format:end */
   // assistant-work: the override is plain text (typed by the owner, or the
   // AI's own output), not the hand-authored HTML the static content files
-  // carry — this is descFor()'s only caller of esc(), so a paragraph break
-  // is never rendered raw.
-  function descOvHtml(t) {
-    return String(t || "").split(/\n{2,}/).map(function (p) { return p.trim(); }).filter(Boolean)
-      .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
-  }
+  // carry — escaped by descHtml(), so nothing in it is ever rendered raw.
+  function descOvHtml(t) { return descHtml(t); }
   function descFor(p) {
     // assistant-work: product_overrides.description {RU,ET,EN} — set from the
     // goods editor's «Сгенерировать описание»/«Перевести на ET/EN» buttons or
     // by hand. Present for the current language → wins; absent → the static
     // content.ru.js/content.et.js/content.js text below, same as always.
     if (p.descOv && p.descOv[S.lang]) return descOvHtml(p.descOv[S.lang]);
+    /* The static page carries the owner's text since 02.11.2026 (the
+       prerender reads the same column): until /api/overrides/ has answered,
+       that copy stands — the static text file landing first must not swap
+       the shop's old Shopify copy in for a moment. */
+    if (PRE_DESC && PRE_DESC.own && !SRV.ovDone && PRE_DESC.id === p.id && PRE_DESC.lang === S.lang) return PRE_DESC.html;
     /* …which is fetched when a text is wanted, not with the page (perf,
        09.10.2026: «the files the shop fetches when it needs them»). Until the
        file this text comes from has landed, a product page shows the copy its
@@ -40983,6 +41088,7 @@
         translateTree(slot);
       });
     });
+    edDescPrevPaint();   // «Как в магазине» follows the box the same way
   }
   function admSeoFill(p, langs, btn) {
     if (btn.disabled) return;
@@ -41038,7 +41144,8 @@
       var shop = code === "RU" ? (typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || ""
         : code === "ET" ? (typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) || ""
         : (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
-      return unentity(stripTags(own || shop)).replace(/\s+/g, " ").trim();
+      // the owner's «**» marks out: a Google text is one plain line
+      return unentity(stripTags(own ? descPlain(own) : shop)).replace(/\s+/g, " ").trim();
     };
     return (pick(L) || pick("RU") || pick("EN")).slice(0, 800);
   }
@@ -42789,15 +42896,179 @@
         '<div class="adm-acts">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescgen="' + esc(id) + '">Написать черновик</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admtranslate="' + esc(id) + '" data-edtrlabel>' + edTrLabel(lang) + "</button>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescsplit="' + esc(id) + '">Разбить на разделы</button>' +
         "</div>" +
       "</div>" +
-      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN);
+      edFmtBarHTML() +
+      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
+      '<div class="acc__rich adm-descprev" data-eddescprev' + (S.goodsDescPrev ? "" : " hidden") + ">" +
+        (S.goodsDescPrev ? edDescPrevHTML(dov[lang.toUpperCase()] || "") : "") + "</div>";
+  }
+
+  /* ---- «Описание»: the format bar (Dim, 02.11.2026) -------------------------
+     The owner's text is plain text with a light markup (src/lib/desc-format.mjs):
+     a short line ending in «:» is a section heading, a line starting with «— »
+     is a point of a list, **word** is bold. These buttons write it so nobody
+     has to remember it (canvas-banner/project/Desc.dc.html):
+       «Ж»              the selection in ** ** — out of them again when it is;
+                        with nothing selected, the word under the caret
+       «Заголовок»      the line under the caret, on a line of its own ending
+                        in «:», an empty line above it — a label line
+                        («Применение: нанесите…») is cut at its colon
+       «• Список»       «— » in front of every line the selection touches —
+                        or off them all, when they all have it
+       «Как в магазине» the text under the box as the product page draws it,
+                        with the page's own renderer (descHtml), live
+     The box is a <textarea>, so the caret and the selection are its own
+     selectionStart/End — they survive the tap (mousedown on the bar is
+     stopped, the focus never leaves the box), and each button puts them back
+     around the words it touched. A change goes in through execCommand
+     («insertText»), so Ctrl+Z takes it back and the browser fires the same
+     `input` a keystroke does: the autosave, «есть текст» and the preview
+     follow on their own. Pure functions of (text, selection) → {v, a, b}, so
+     tests/desc-format.test.ts runs them without a page. */
+  function edFmtBarHTML() {
+    var on = !!S.goodsDescPrev;
+    var b = function (kind, label, extra) {
+      return '<button class="adm-btn adm-btn--ghost' + (extra || "") + '" type="button" data-edfmt="' + kind + '"' +
+        (kind === "preview" ? ' aria-pressed="' + on + '"' : "") + (kind === "bold" ? ' aria-label="Жирный"' : "") + ">" + label + "</button>";
+    };
+    return '<div class="adm-fmtbar" role="toolbar" aria-label="Оформление описания">' +
+      b("bold", "Ж", " adm-fmtbar__bold") + b("head", "Заголовок") + b("list", "• Список") +
+      b("preview", "Как в магазине", " adm-fmtbar__prev") + "</div>";
+  }
+  function edDescPrevHTML(text) {
+    return String(text || "").trim() ? descHtml(text)
+      : '<p class="adm-hint">Пусто — на странице товара будет стандартный текст магазина.</p>';
+  }
+  /** The box of the language on screen. */
+  function edDescBox() {
+    var L = String(S.goodsDescLang || "ru").toUpperCase();
+    return typeof document === "undefined" ? null : document.querySelector(DESC_HOOKS[L] || DESC_HOOKS.RU);
+  }
+  /** «Как в магазине», redrawn from the box on screen — edLangStatePaint() calls it on every keystroke. */
+  function edDescPrevPaint() {
+    var pv = typeof document === "undefined" ? null : document.querySelector("[data-eddescprev]");
+    if (!pv || pv.hidden) return;
+    var el = edDescBox();
+    pv.innerHTML = edDescPrevHTML(el ? el.value : "");
+  }
+  function edFmtBold(v, a, b) {
+    if (a === b) {
+      var ws = a, we = a;
+      while (ws > 0 && /[^\s*]/.test(v.charAt(ws - 1))) ws--;
+      while (we < v.length && /[^\s*]/.test(v.charAt(we))) we++;
+      if (ws === we) return { v: v.slice(0, a) + "****" + v.slice(a), a: a + 2, b: a + 2 };
+      if (v.slice(ws - 2, ws) === "**" && v.slice(we, we + 2) === "**") {
+        return { v: v.slice(0, ws - 2) + v.slice(ws, we) + v.slice(we + 2), a: we - 2, b: we - 2 };
+      }
+      return { v: v.slice(0, ws) + "**" + v.slice(ws, we) + "**" + v.slice(we), a: we + 4, b: we + 4 };
+    }
+    // «** word **» is not bold: the selection loses the spaces at its ends
+    while (a < b && /\s/.test(v.charAt(a))) a++;
+    while (b > a && /\s/.test(v.charAt(b - 1))) b--;
+    if (a === b) return null;
+    var inner = v.slice(a, b);
+    if (v.slice(a - 2, a) === "**" && v.slice(b, b + 2) === "**") {
+      return { v: v.slice(0, a - 2) + inner + v.slice(b + 2), a: a - 2, b: b - 2 };
+    }
+    if (inner.length > 4 && /^\*\*[\s\S]*\*\*$/.test(inner)) {
+      return { v: v.slice(0, a) + inner.slice(2, -2) + v.slice(b), a: a, b: b - 4 };
+    }
+    // a ** never spans a line break: each line on its own, a point's «— » left outside
+    var out = inner.split("\n").map(function (l) {
+      return l.trim() ? l.replace(/^(\s*(?:[-–—•]\s+)?)(.*?)(\s*)$/, "$1**$2**$3") : l;
+    }).join("\n");
+    return out.indexOf("\n") < 0 ? { v: v.slice(0, a) + out + v.slice(b), a: a + 2, b: a + out.length - 2 }
+      : { v: v.slice(0, a) + out + v.slice(b), a: a, b: a + out.length };
+  }
+  function edFmtHead(v, a, b) {
+    var ls = v.lastIndexOf("\n", a - 1) + 1;
+    var le = v.indexOf("\n", a);
+    if (le < 0) le = v.length;
+    if (b > le) b = le;   // one line at a time
+    var line = v.slice(ls, le), pre = v.slice(0, ls), post = v.slice(le);
+    var before = "", head = "", rest = "";
+    if (a === b && descHeading(line) !== null) {
+      // a heading already: a plain line again
+      var plain = line.replace(/\*\*/g, "").replace(/\s*:\s*$/, "");
+      return { v: pre + plain + post, a: ls + plain.length, b: ls + plain.length };
+    }
+    if (a !== b) {
+      before = v.slice(ls, a).trim();
+      head = v.slice(a, b);
+      rest = v.slice(b, le).replace(/^\s*:?\s*/, "");
+    } else {
+      var m = /^\s*(?:[-–—•]\s+)?([^:]{1,80}?)\s*:\s+(\S.*)$/.exec(line);
+      if (m && descWords(m[1]) <= DESC_HEAD_WORDS) { head = m[1]; rest = m[2]; }
+      else head = line;
+    }
+    head = head.replace(DESC_BULLET, "").replace(/\*\*/g, "").trim().replace(/[\s.:;,!?…]+$/, "");
+    if (!head) return { err: "Поставьте курсор в строку, которая станет заголовком." };
+    if (head.length >= DESC_HEAD_MAX || descWords(head) > DESC_HEAD_WORDS || /[.!?…]\s/.test(head)) {
+      return { err: "Заголовок — короткая строка, до " + DESC_HEAD_WORDS + " слов. Выделите слова для него и нажмите ещё раз." };
+    }
+    // an empty line above the heading, unless it opens the text or there is one
+    var gap = before ? before + "\n\n" : pre && !/\n[ \t]*\n$/.test(pre) ? "\n" : "";
+    var mid = gap + head + ":" + (rest ? "\n" + rest : "");
+    var at = ls + gap.length + head.length + 1;
+    return { v: pre + mid + post, a: at, b: at };
+  }
+  function edFmtList(v, a, b) {
+    var ls = v.lastIndexOf("\n", a - 1) + 1;
+    var end = b > a && v.charAt(b - 1) === "\n" ? b - 1 : b;
+    var le = v.indexOf("\n", end);
+    if (le < 0) le = v.length;
+    var lines = v.slice(ls, le).split("\n");
+    var filled = lines.filter(function (l) { return l.trim(); });
+    if (!filled.length) return { v: v.slice(0, a) + "— " + v.slice(b), a: a + 2, b: a + 2 };
+    var all = filled.every(function (l) { return DESC_BULLET.test(l.trim()); });
+    var out = lines.map(function (l) {
+      var t = l.trim();
+      if (!t) return l;
+      return all ? t.replace(DESC_BULLET, "") : "— " + t.replace(DESC_BULLET, "");
+    }).join("\n");
+    var nv = v.slice(0, ls) + out + v.slice(le);
+    return a === b ? { v: nv, a: ls + out.length, b: ls + out.length } : { v: nv, a: ls, b: ls + out.length };
+  }
+  /** A format button pressed: the change into the box on screen, the selection around it. */
+  function edFmt(kind, btn) {
+    if (kind === "preview") {
+      S.goodsDescPrev = !S.goodsDescPrev;
+      if (btn) btn.setAttribute("aria-pressed", String(!!S.goodsDescPrev));
+      var pv = document.querySelector("[data-eddescprev]");
+      if (pv) pv.hidden = !S.goodsDescPrev;
+      edDescPrevPaint();
+      return;
+    }
+    var el = edDescBox();
+    if (!el) return;
+    var v = el.value, a = el.selectionStart, b = el.selectionEnd;
+    if (a == null || b == null) { a = v.length; b = v.length; }
+    var r = kind === "bold" ? edFmtBold(v, a, b) : kind === "head" ? edFmtHead(v, a, b) : kind === "list" ? edFmtList(v, a, b) : null;
+    try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    if (!r) return;
+    if (r.err) { toast(r.err); return; }
+    if (r.v === v) { el.setSelectionRange(r.a, r.b); return; }
+    if (r.v.length > 4000) { toast("Описание длиннее 4000 знаков — сократите текст"); return; }
+    var done = false;
+    try {
+      el.setSelectionRange(0, v.length);
+      done = typeof document.execCommand === "function" && document.execCommand("insertText", false, r.v) && el.value === r.v;
+    } catch (e) { done = false; }
+    if (!done) {
+      el.value = r.v;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    el.setSelectionRange(r.a, r.b);
   }
   function edSecDesc(p) {
     return '<section class="adm-edsec" data-edsec="desc">' +
       admSecHeadHTML("Описание", "ed-desc",
         "<span>У каждого языка свой текст. Пусто — на странице товара показывается стандартный текст магазина (он виден в поле серым).</span> " +
-        "<span>Русский — основной, остальные переводятся одной кнопкой.</span> <span>" + LANG_BAR_NOTE + "</span>") +
+        "<span>Русский — основной, остальные переводятся одной кнопкой.</span> " +
+        "<span>Короткая строка с двоеточием в конце — заголовок раздела, строка с «— » — пункт списка, **так** — жирное слово. Кнопки над полем ставят это сами.</span> " +
+        "<span>" + LANG_BAR_NOTE + "</span>") +
       edDescBody(p, p.id) + "</section>";
   }
 
@@ -51180,7 +51451,8 @@
     var preRoute = shopRouteOf(location.pathname);
     var preProd = preRoute && preRoute.rest.match(/^\/p\/([^/]+)\/$/);
     var preBox = preProd && preRendered ? preRendered.querySelector(".pdp .acc__rich") : null;
-    if (preBox) PRE_DESC = { id: safeDecode(preProd[1]), lang: S.lang, html: preBox.innerHTML };
+    // `own`: the owner's text, drawn by descHtml() at build (data-descown)
+    if (preBox) PRE_DESC = { id: safeDecode(preProd[1]), lang: S.lang, html: preBox.innerHTML, own: preBox.hasAttribute("data-descown") };
   } catch (e) { PRE_DESC = null; }
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
@@ -54617,7 +54889,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -55574,7 +55846,11 @@
           var box = document.querySelector(DESC_HOOKS[dL] || DESC_HOOKS.RU);
           var body = txt(r.body.text.description);
           var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
-          admFill(box, bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + txt(b); }).join("\n") : body);
+          /* the shop's format (src/lib/desc-format.mjs): the points under a
+             heading of their own, each a line starting with «— » — a bold
+             «Преимущества:» and a list on the page (02.11.2026; «• » before) */
+          var bHead = txt(r.body.text.heading || "").replace(/[\s:.]+$/, "");
+          admFill(box, bullets.length ? body + "\n\n" + (bHead ? bHead + ":\n" : "") + bullets.map(function (b) { return "— " + txt(b); }).join("\n") : body);
           edLangStatePaint();
           if (S.adminEdit === "new") { goodsNewPaint(); toast("Черновик написан — прочитайте и поправьте"); }
           else edAsTextNow("desc", "Черновик написан — прочитайте и поправьте");
@@ -55599,9 +55875,14 @@
       t.disabled = true; t.textContent = "…";
       apiSend("/api/admin/ai/text/", "POST", {
         task: "translate", lang: "RU",
-        input: { text: srcText, sourceLang: "RU", targetLangs: trTo, keepNames: [tp.brand, tp.name] },
+        // format "desc": headings, «— » points and ** stay where they are, line for line
+        input: { text: srcText, sourceLang: "RU", targetLangs: trTo, keepNames: [tp.brand, tp.name], format: "desc" },
       }).then(function (r) {
         trBtn.disabled = false; trBtn.textContent = trLabel;
+        if (r.body && r.body.error === "lost_structure") {
+          toast("Перевод потерял заголовки или пункты списка — нажмите «Перевести» ещё раз");
+          return;
+        }
         if (r.status === 200 && r.body.ok && r.body.texts) {
           trTo.forEach(function (L) {
             var el = document.querySelector(DESC_HOOKS[L]);
@@ -55617,6 +55898,40 @@
       }).catch(function () { trBtn.disabled = false; trBtn.textContent = trLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* «Разбить на разделы» (Dim, 02.11.2026): the language on screen, its own
+       words put under headings and into lists by the shop's AI — no fact and
+       no word of it changed; the route holds the answer to that (task
+       "sections", sectionsKeepWords() in src/lib/ai-prompts.ts) and refuses
+       one that is not. Fills the box like the two buttons above, «Вернуть»
+       on the toast. */
+    if (d.admdescsplit !== undefined) {
+      var sp = admEditProduct(d.admdescsplit);
+      var sL = String(S.goodsDescLang || "ru").toUpperCase();
+      var sEl = document.querySelector(DESC_HOOKS[sL] || DESC_HOOKS.RU);
+      var sText = sEl ? sEl.value.trim() : "";
+      if (!sp || !sEl) return;
+      if (!sText) { toast("Сначала напишите описание на этом языке — разбивать пока нечего"); refocus(DESC_HOOKS[sL]); return; }
+      admDescSnapshot(sp);
+      var spBtn = t, spLabel = t.textContent; t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", { task: "sections", lang: sL, input: { text: sText } }).then(function (r) {
+        spBtn.disabled = false; spBtn.textContent = spLabel;
+        if (r.status === 200 && r.body.ok && typeof r.body.text === "string" && r.body.text.trim()) {
+          // typed into while the AI worked: his words win, nothing is overwritten
+          if (sEl.value.trim() !== sText) { toast("Текст поменялся, пока ИИ работал — нажмите ещё раз"); return; }
+          if (r.body.text.trim() === sText) { toast("Текст уже разбит на разделы — менять нечего"); return; }
+          admFill(sEl, r.body.text);
+          edLangStatePaint();
+          if (S.adminEdit === "new") { goodsNewPaint(); toast("Разбили на разделы — прочитайте и поправьте"); }
+          else edAsTextNow("desc", "Разбили на разделы — прочитайте и поправьте");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
+        else if (r.body && r.body.error === "changed_words") toast("ИИ поменял слова текста — разбивку не взяли. Нажмите ещё раз или расставьте разделы кнопками над полем");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { spBtn.disabled = false; spBtn.textContent = spLabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    // «Описание»'s format bar — edFmt()
+    if (d.edfmt !== undefined) { edFmt(d.edfmt, t); return; }
     /* ---- «✨» — see admSpark(): each writes its draft and its field, no render() */
     if (d.herospark !== undefined) {
       var hs = heroDraft().slides[S.heroEdit];
@@ -57795,6 +58110,8 @@
     if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload],[data-figset],[data-figmove],[data-cardx]")) {
       e.preventDefault();
     }
+    // …and «Описание»'s format bar, for the same reason: the textarea keeps its selection and its focus
+    if (t && t.closest && t.closest("[data-edfmt]")) e.preventDefault();
   });
 
   /* blog: the picture controls. A tap on a picture in the editor rings it and

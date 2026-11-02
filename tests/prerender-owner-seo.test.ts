@@ -73,6 +73,39 @@ describe("seoPairs() — the build reads «Для Google» as the live page does
   });
 });
 
+/* 02.11.2026 — the owner's own page text on the static product page. app.js
+   has drawn product_overrides.description since the assistant work; the
+   static copy Google reads first carried the old Shopify text, and the live
+   page swapped it for his the moment the overrides feed landed. Now both draw
+   it with the one renderer (src/lib/desc-format.mjs). */
+describe("the owner's description on the static product page", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  it("the build reads the column exactly as the live feed does", async () => {
+    const { getDescriptionOverride, setDescriptionOverride } = await import("@/lib/product-descriptions");
+    const id = "proraso-beard-oil-azur-lime-30ml";
+    await setDescriptionOverride(id, { RU: "Масло.\r\n\r\n\r\nПреимущества:\n— мягкость\u0007", ET: "  ", EN: "Oil." });
+    const [row] = await query<Record<string, unknown>>("select * from product_overrides where product_id = $1", [id]);
+    expect(overrideRow(row).description).toEqual(await getDescriptionOverride(id));
+    expect(overrideRow({ price: null, sizes: null }).description).toBeNull();
+    expect(overrideRow({ price: null, sizes: null, description: '{"ET":"Õli."}' }).description).toEqual({ ET: "Õli." });
+  });
+
+  it("descFor() takes his text in the page's language first, drawn by descHtml(), and marks it for app.js", () => {
+    const pre = read("../tools/prerender-shop2.mjs");
+    expect(pre).toContain('import { descHtml } from "../src/lib/desc-format.mjs";');
+    expect(pre).toMatch(/function descFor\(p, code\) \{\s+const own = ownDesc\(p, code\);\s+if \(own\) return descHtml\(own\);/);
+    expect(pre).toContain(`'<div class="acc__rich"' + (ownDesc(p, code) ? " data-descown" : "") + ">" + descFor(p, code) + "</div>"`);
+    // …and refuses to write pages while app.js carries another copy of the renderer
+    expect(pre).toContain("x public/shop2/app.js does not carry the current src/lib/desc-format.mjs block");
+    const app = read("../public/shop2/app.js");
+    // the static copy stands until the overrides feed has spoken — no flash of the Shopify text
+    expect(app).toContain("own: preBox.hasAttribute(\"data-descown\")");
+    expect(app).toContain("if (PRE_DESC && PRE_DESC.own && !SRV.ovDone && PRE_DESC.id === p.id && PRE_DESC.lang === S.lang) return PRE_DESC.html;");
+  });
+});
+
 describe("a set's part photo when the part is off sale", () => {
   const src = read("../public/shop2/app.js");
   function slice(name: string): string {

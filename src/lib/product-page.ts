@@ -41,6 +41,7 @@ import { getOverrides, type Override } from "@/lib/orders";
 import { DEFAULT_SHIPPING_RULES, loadShippingRules, type ShippingRules } from "@/lib/shipping";
 import { pickDescription } from "@/lib/product-descriptions";
 import { pickSeo } from "@/lib/product-seo";
+import { descHtml } from "@/lib/desc-format.mjs";
 import {
   baseFrom,
   catName,
@@ -93,14 +94,12 @@ export function readShell(): string {
 
 /* ---------- the page ----------------------------------------------------- */
 
-/** The owner's paragraphs → <p> with <br> — descOvHtml() in app.js, for the body under #prerender. */
+/** The owner's text as the product page draws it — headings, lists, bold, all
+    escaped: descHtml() of src/lib/desc-format.mjs, the very block app.js's
+    descOvHtml() carries, so the page app.js takes over from moves nothing.
+    Kept under its old name for the callers and the tests. */
 export function descriptionHtml(text: string): string {
-  return String(text || "")
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>")
-    .join("");
+  return descHtml(String(text || ""));
 }
 
 /** Absolute for the JSON-LD and the card: an upload is already absolute, a catalogue path is not. */
@@ -242,7 +241,7 @@ export function renderCustomProductPage(
         sizes +
         (body
           ? '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' + esc(t.description) + "</h2>" +
-            '<div class="acc__rich">' + descriptionHtml(body) + "</div>"
+            '<div class="acc__rich" data-descown>' + descriptionHtml(body) + "</div>"
           : "") +
       "</div>" +
     "</div>" +

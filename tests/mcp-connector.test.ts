@@ -412,9 +412,13 @@ describe("the connector, end to end", () => {
     const { getDescriptionOverride } = await import("@/lib/product-descriptions");
     const t = await tokens();
     const id = "kevin-murphy-angel-wash";
+    /* **bold**, a heading ending in «:» and «— » points are the shop's own
+       format since 02.11.2026 (src/lib/desc-format.mjs) — the rest of
+       markdown is still printed as it is, so it is still refused */
     const refused = [
       { id, ru: "<p>Шампунь для волос.</p>" },
-      { id, ru: "**Шампунь** для волос." },
+      { id, ru: "* Шампунь\n* для волос." },
+      { id, ru: "__Шампунь__ для волос." },
       { id, ru: "## Шампунь\n\nДля волос." },
       { id, et: "Õrn шампунь peentele juustele." },
       { id, en: "A gentle shampoo. No further product details are given." },
@@ -428,6 +432,23 @@ describe("the connector, end to end", () => {
       expect(r.text).toContain("Nothing was saved");
     }
     expect(await getDescriptionOverride(id)).toBeNull();
+  });
+
+  it("takes the shop's description format — headings, «— » points, **bold** — in every language, and says so in its description", async () => {
+    const { getDescriptionOverride, setDescriptionOverride } = await import("@/lib/product-descriptions");
+    const t = await tokens();
+    const id = "kevin-murphy-angel-wash";
+    const ru = "Мягкий шампунь для **тонких** волос.\n\nПреимущества:\n— объём без утяжеления\n— лёгкий аромат\n\nОбъём: 250 мл";
+    const et = "Õrn šampoon **peentele** juustele.\n\nEelised:\n— kohevus ilma raskuseta\n— kerge lõhn\n\nMaht: 250 ml";
+    try {
+      const r = await tool(t.access_token, "save_product_description", { id, ru, et });
+      expect(r.isError, r.text).toBe(false);
+      expect(await getDescriptionOverride(id)).toMatchObject({ RU: ru, ET: et });
+      const listed = (await import("@/lib/mcp/tools")).TOOLS.find((x) => x.name === "save_product_description");
+      expect(String(listed?.description)).toContain("a short line of its own ending in «:» is a section heading");
+    } finally {
+      await setDescriptionOverride(id, null);
+    }
   });
 
   it("renames a catalogue product under the same id, moves its section, journals the old one — and refuses a name a language could not say", async () => {

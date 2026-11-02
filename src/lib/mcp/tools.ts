@@ -379,9 +379,13 @@ export const TOOLS: ToolDef[] = [
     title: "Записать описание товара",
     description:
       "Write the description on a product's page — the text a shopper reads under the price — in Russian (ru), Estonian (et) " +
-      "and/or English (en). Read the product with get_product first. Plain text only: the page shows every character as " +
-      "typed, so no HTML and no markdown (**, #, * lists); paragraphs are separated by an empty line, a list is lines " +
-      "starting with «— ». At most 4000 characters per language. Cosmetic effects only — no medical claims — and never " +
+      "and/or English (en). Read the product with get_product first. Plain text in the shop's description format: " +
+      "paragraphs separated by an empty line; a short line of its own ending in «:» is a section heading, drawn in bold " +
+      "(«Преимущества:», «Применение:», «Eelised:», «How to use:»); a line starting with «— » is a point of a list, the " +
+      "points on consecutive lines under their heading; **word** is bold inside a sentence. No HTML and no other markdown " +
+      "(no #, no * or + lists, no __). Example: «Шампунь для тонких волос.\\n\\nПреимущества:\\n— объём без утяжеления\\n— " +
+      "лёгкий свежий аромат\\n\\nПрименение:\\nНанесите на влажные волосы, вспеньте, смойте.» — the other languages keep " +
+      "the same lines, headings and points. At most 4000 characters per language. Cosmetic effects only — no medical claims — and never " +
       "invent an ingredient or an effect the owner did not give you. et and en are written in that language — a Russian " +
       "word there is refused. When the Russian text changes in substance, send all three, or the other languages go on " +
       "saying the old thing. Languages you leave out keep their current text. It is saved at once and is live; each save " +
@@ -494,7 +498,8 @@ export const TOOLS: ToolDef[] = [
       "section one of list_sections' ids, and subsection one of that section's subsections (what the product IS — a beard " +
       "balm is «Бальзамы», an aftershave balm «После бритья»; leave it out only when none fits); either price (one price) or " +
       "sizes [{size, price}] («100 мл», «250 мл»), euros " +
-      "with VAT, 1–500. description {ru, et, en} is optional, plain text as save_product_description takes it — only facts " +
+      "with VAT, 1–500. description {ru, et, en} is optional, plain text in the format save_product_description takes " +
+      "(headings ending in «:», «— » points, **bold**) — only facts " +
       "the owner gave you. Afterwards its Google texts can be written with save_product_google_text and its count with " +
       "save_product_stock, by the id this returns.",
     inputSchema: {
@@ -921,11 +926,14 @@ function descriptionTexts(src: Record<string, unknown>, who: { name: string; bra
     const text = v.replace(/\r\n?/g, "\n").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
     if (!text) return no(`${l.toLowerCase()} is empty — send the text, or leave ${l.toLowerCase()} out to keep the current one. ${done}`);
     if (text.length > DESC_MAX) return no(`The ${l} text is ${text.length} characters — at most ${DESC_MAX}. Shorten it. ${done}`);
-    /* descOvHtml() in public/shop2/app.js escapes the text and makes a <p> of
-       each block: a tag or a ** would be printed on the page as it is */
-    if (/<\/?[a-z][^>]*>/i.test(text) || /\*\*|__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) {
-      return no(`The ${l} text has HTML or markdown in it — the page shows every character as typed. Plain text: paragraphs ` +
-        `separated by an empty line, a list as lines starting with «— ». ${done}`);
+    /* descHtml() (src/lib/desc-format.mjs, the page's renderer) escapes the
+       text and draws only the shop's own marks — a heading line ending in «:»,
+       «— » points, **bold**. A tag, a # heading, a * list or __ would be
+       printed on the page as it is. */
+    if (/<\/?[a-z][^>]*>/i.test(text) || /__|^ {0,3}#{1,6} |^\s*[*+] /m.test(text)) {
+      return no(`The ${l} text has HTML or markdown in it — the page shows the shop's own format only: paragraphs ` +
+        `separated by an empty line, a heading as a short line ending in «:», a list as lines starting with «— », ` +
+        `**word** for bold. ${done}`);
     }
     const talk = text.split(/(?<=[.!?…])\s+/).find((s) => s && !seoDropMetaTalk(s));
     if (talk) return no(`The ${l} text talks about missing information («${talk.slice(0, 90)}») — write about the product instead. ${done}`);

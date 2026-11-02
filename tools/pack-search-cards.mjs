@@ -40,6 +40,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { chatParams, isReasoningModel, openaiModel } from "./lib/openai-model.mjs";
+// the owner's «**» marks are not words for the model (src/lib/desc-format.mjs; the identity on a text without them,
+// so no stored card is asked again)
+import { descPlain } from "../src/lib/desc-format.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public/shop/search-cards.json");
@@ -125,13 +128,13 @@ export function productInputs({ CATALOGUE, CAT_NAMES, CONTENT, CONTENT_RU, CONTE
       name: (o.name && String(o.name).trim()) || p.name,
       brand: (o.brand && String(o.brand).trim()) || p.brand,
       cat: (o.cat && String(o.cat).trim()) || p.cat,
-      ru: plain(d.RU || CONTENT_RU[p.id]), en: plain(d.EN || CONTENT[p.id]), et: plain(d.ET || CONTENT_ET[p.id]),
+      ru: plain(descPlain(d.RU) || CONTENT_RU[p.id]), en: plain(descPlain(d.EN) || CONTENT[p.id]), et: plain(descPlain(d.ET) || CONTENT_ET[p.id]),
     });
   }
   for (const r of own) {
     const d = tri(r.description);
     out.push({ id: String(r.id), name: String(r.name || ""), brand: String(r.brand || ""), cat: String(r.cat || ""),
-      ru: plain(d.RU), en: plain(d.EN), et: plain(d.ET) });
+      ru: plain(descPlain(d.RU)), en: plain(descPlain(d.EN)), et: plain(descPlain(d.ET)) });
   }
   for (const x of out) x.section = CAT_NAMES[x.cat] || x.cat;
   return out.filter((x) => x.id && x.name);
