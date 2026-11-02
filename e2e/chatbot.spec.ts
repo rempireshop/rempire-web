@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ipHeaders, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import { ipHeaders, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 /**
  * Chatbot widget (public/shop2/chat.js). Desktop only, single run — see
@@ -289,6 +289,102 @@ test("the article the assistant points at is a link, and it opens the article", 
   await link.click();
   await waitForScreen(page, "blogpost");
   expect(new URL(page.url()).pathname).toBe(`/ru/blogs/news/${SLUG}`);
+});
+
+/* 02.11.2026, Dim: «blogs become the source of truth for product choice». An
+   answer built on one of the salon's articles carries the article as data
+   (src/app/api/assistant/blog-digest.ts articleOfAnswer) and the widget draws
+   it as the design does (canvas-banner/project/Assist.dc.html): the sentence,
+   the article card — cover, «Из нашего блога», title — then the products,
+   then «Добавить всё в корзину». The model is stubbed, as above. */
+test("an answer from a salon article shows the article card above its products, «Добавить всё» under them", async ({ page }) => {
+  const SLUG = "uhod-za-borodoy-zimoy";
+  const COVER = "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp";
+  await page.route("**/api/assistant/**", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+    }
+    await route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({
+        reply: "В нашем гайде про бороду зимой — масло каждый день и бальзам, если борода длиннее сантиметра.",
+        product_ids: [PRODUCT.id, PRODUCT_2.id],
+        article: { slug: SLUG, title: "Борода зимой: как не дать ей пересохнуть", cover: COVER },
+      }),
+    });
+  });
+
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("борода зимой сохнет");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const answer = panel.locator(".sbot__msg--bot").filter({ has: page.locator(".sbot__art") });
+  await expect(answer).toHaveCount(1);
+  const card = answer.locator("a.sbot__art");
+  await expect(card).toBeVisible();
+  await expect(card).toHaveAttribute("href", `/ru/blogs/news/${SLUG}`);
+  await expect(card.locator(".sbot__art-eb")).toHaveText("Из нашего блога");
+  await expect(card.locator(".sbot__art-t")).toHaveText("Борода зимой: как не дать ей пересохнуть");
+  await expect(card.locator("img.sbot__art-ph")).toHaveAttribute("src", COVER);
+  // the cover is the design's 64-px square
+  const box = await card.locator("img.sbot__art-ph").boundingBox();
+  expect(Math.round(box!.width)).toBe(64);
+  expect(Math.round(box!.height)).toBe(64);
+
+  // the order of the design: card, then the two product rows, then «Добавить всё»
+  const order = await answer.evaluate((el) =>
+    Array.from(el.querySelectorAll(".sbot__art, .sbot__prod, .sbot__all")).map((n) => n.className.split(" ").pop()),
+  );
+  expect(order).toEqual(["sbot__art", "sbot__prod", "sbot__prod", "sbot__all"]);
+  const addAll = answer.getByRole("button", { name: "Добавить всё в корзину" });
+  await expect(addAll).toHaveAttribute("data-addall", `${PRODUCT.id},${PRODUCT_2.id}`);
+  await addAll.click();
+  await expect(page.locator("[data-cartbadge]").first()).toHaveText("2");
+
+  // the card is the shop's own link: the article opens in place
+  await card.click();
+  await waitForScreen(page, "blogpost");
+  expect(new URL(page.url()).pathname).toBe(`/ru/blogs/news/${SLUG}`);
+});
+
+/* window.openChatAbout(slug, title) — the door the blog article page's
+   «Спросить об этой статье» opens the chat through (chat.js). It pins the
+   article: the chat opens with it on top, and every question then carries
+   `article` to the route, which always reads that article first. */
+test("openChatAbout opens the chat about one article and sends it with every question", async ({ page }) => {
+  const SLUG = "uhod-za-borodoy-zimoy";
+  const asked: Array<Record<string, unknown>> = [];
+  await page.route("**/api/assistant/**", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+    }
+    asked.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reply: "По статье — масло каждый день.", product_ids: [] }) });
+  });
+
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  // a slug that is not one is refused, and nothing opens
+  expect(await page.evaluate(() => (window as unknown as { openChatAbout: (s: string, t?: string) => boolean }).openChatAbout("../admin"))).toBe(false);
+  await expect(page.getByRole("region", { name: "Чат с помощником" })).toBeHidden();
+
+  expect(await page.evaluate((s) => (window as unknown as { openChatAbout: (s: string, t?: string) => boolean }).openChatAbout(s, "Борода зимой"), SLUG)).toBe(true);
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await expect(panel).toBeVisible();
+  const pin = panel.locator(".sbot__msg--bot div.sbot__art");
+  await expect(pin.locator(".sbot__art-t")).toHaveText("Борода зимой");
+  await expect(panel.locator(".sbot__art-ask")).toHaveText("Спросите об этой статье — например, что из неё подойдёт вам.");
+
+  await panel.locator("[data-in]").fill("а что из этого мне взять?");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+  await expect(panel.locator(".sbot__msg--bot", { hasText: "По статье — масло каждый день." })).toBeVisible();
+  await panel.locator("[data-in]").fill("а бальзам?");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+  await expect.poll(() => asked.length).toBe(2);
+  expect(asked.map((b) => b.article)).toEqual([SLUG, SLUG]);
 });
 });
 

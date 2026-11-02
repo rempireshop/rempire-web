@@ -384,6 +384,36 @@ export async function listPublished(
   return { posts: rows.map(toSummary), total: Number(countRows[0]?.n || 0), page: p, perPage: size };
 }
 
+/**
+ * Every published article WITH its body, newest first — what the shop chat
+ * reads its salon guides from (src/app/api/assistant/blog-digest.ts). It is
+ * asked only when publishedStamp() below says something changed, so a chat
+ * message almost never pays for it.
+ */
+export async function listPublishedFull(limit = 40): Promise<Post[]> {
+  const rows = await query<PostRow>(
+    `select ${FULL_COLS} from posts where status = 'published' and deleted_at is null
+     order by published_at desc nulls last, created_at desc limit $1`,
+    [Math.min(200, Math.max(1, Math.trunc(limit) || 40))],
+  );
+  return rows.map(toPost);
+}
+
+/**
+ * One short string that changes whenever the published set does: how many
+ * there are and the latest `updated_at` among them. Every write the public can
+ * see — an edit, a publish, an unpublish, a delete — moves one or the other
+ * (each stamps `updated_at = now()`, and the last two also change the count).
+ * One indexed aggregate over a few dozen rows: the cheap question the chat's
+ * cache asks once a minute before it would ever re-read the bodies.
+ */
+export async function publishedStamp(): Promise<string> {
+  const rows = await query<{ n: string | number; v: string | null }>(
+    "select count(*) as n, max(updated_at)::text as v from posts where status = 'published' and deleted_at is null",
+  );
+  return `${Number(rows[0]?.n || 0)}|${rows[0]?.v ?? ""}`;
+}
+
 export async function getPublishedBySlug(slug: string): Promise<Post | null> {
   const rows = await query<PostRow>(
     `select ${FULL_COLS} from posts where slug = $1 and status = 'published' and deleted_at is null`,

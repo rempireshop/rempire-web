@@ -48,7 +48,9 @@
   // `convoGen` counts the conversations this panel has had: bumped whenever
   // the log and `convo` are thrown away, so an answer still in flight can tell
   // that the conversation it was asked in no longer exists (reply() below).
-  var aiEnabled = null, convo = [], convoGen = 0;
+  // `pinned` — {slug, title} of the article the chat was opened from
+  // (window.openChatAbout below), for as long as this conversation lasts
+  var aiEnabled = null, convo = [], convoGen = 0, pinned = null;
   function probeAI() {
     if (aiEnabled !== null) return;
     aiEnabled = false;
@@ -85,7 +87,9 @@
       aria: "Чат с помощником", close: "Закрыть", send: "Отправить", from: "от ",
       // the reminder bubble and the header's size toggle (NUDGE_* / WIDE_SS above)
       nudge: "Подобрать уход? Спросите ассистента", nudgeClose: "Закрыть подсказку",
-      wide: "Развернуть", narrow: "Свернуть"
+      wide: "Развернуть", narrow: "Свернуть",
+      // the article card above the products (articleCard) and the pinned article (openChatAbout)
+      fromBlog: "Из нашего блога", askAbout: "Спросите об этой статье — например, что из неё подойдёт вам."
     },
     ET: {
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
@@ -98,7 +102,8 @@
       placeholder: "Näiteks: habemeõli…",
       aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates ",
       nudge: "Vajad abi valikul? Küsi abiliselt", nudgeClose: "Sule vihje",
-      wide: "Laienda", narrow: "Ahenda"
+      wide: "Laienda", narrow: "Ahenda",
+      fromBlog: "Meie blogist", askAbout: "Küsi selle artikli kohta — näiteks, mis sellest sulle sobib."
     },
     EN: {
       title: "Rempire assistant", hint: "Demo: I understand simple phrases",
@@ -111,7 +116,8 @@
       placeholder: "e.g. beard oil…",
       aria: "Chat with the assistant", close: "Close", send: "Send", from: "from ",
       nudge: "Need help choosing? Ask the assistant", nudgeClose: "Close the tip",
-      wide: "Expand", narrow: "Shrink"
+      wide: "Expand", narrow: "Shrink",
+      fromBlog: "From our blog", askAbout: "Ask about this article — for example, what in it would suit you."
     }
   };
 
@@ -344,6 +350,40 @@
         '" data-go-blog="' + s + '">' + whole + "</a>";
     });
   }
+  /* «Из нашего блога» — the article an answer is built on, as a card above the
+     product rows (Dim, 02.11.2026: the blog is the source of truth for what to
+     choose; the design is canvas-banner/project/Assist.dc.html). The route
+     sends it as data — {slug, title in the shopper's language, cover} — only
+     for an article the shop really has published (articleOfAnswer in
+     src/app/api/assistant/blog-digest.ts), and it is checked again here: the
+     slug is [a-z0-9-] and nothing else, the cover a plain http(s) or
+     same-site address, every word escaped. The link is in the language the
+     shopper reads and carries `data-go-blog`, so app.js opens the article in
+     place, like a tile on /blogs/news. `link: false` draws the same card as a
+     plain box — the pinned article the shopper is already reading. */
+  var ART_SLUG = /^[a-z0-9-]{1,80}$/;
+  function safeCover(u) {
+    u = String(u || "");
+    return /^https?:\/\/[^\s"'<>()\\]+$/i.test(u) || /^\/(?!\/)[^\s"'<>()\\]*$/.test(u) ? u : "";
+  }
+  function articleCard(a, link) {
+    if (!a || typeof a !== "object" || !ART_SLUG.test(String(a.slug || ""))) return "";
+    var t = tt(), slug = String(a.slug), title = typeof a.title === "string" && a.title ? a.title : slug;
+    var img = safeCover(a.cover);
+    var inner = (img ? '<img class="sbot__art-ph" src="' + esc(img) + '" alt="" loading="lazy" width="64" height="64">' : "") +
+      '<span class="sbot__art-tx"><span class="sbot__art-eb">' + esc(t.fromBlog) + "</span>" +
+      '<span class="sbot__art-t">' + esc(title) + "</span></span>";
+    if (link === false) return '<div class="sbot__art">' + inner + "</div>";
+    return '<a class="sbot__art" href="' + (BLOG_SEG[lang()] || "") + "/blogs/news/" + slug +
+      '" data-go-blog="' + slug + '">' + inner + "</a>";
+  }
+  /* «Добавить всё в корзину» under the products of an article answer — the
+     guide's own set, one tap. Two products or more, and only what is in stock. */
+  function addAllButton(items) {
+    var ok = items.filter(inStock);
+    if (ok.length < 2) return "";
+    return '<button class="sbot__mini sbot__all" data-addall="' + ok.map(function (p) { return p.id; }).join(",") + '">' + tt().addAll + "</button>";
+  }
   function rulesReply(q) {
     var r = match(q), t = tt();
     /* Nothing to show is not «вот что подходит:» with a blank under it. Every
@@ -378,10 +418,13 @@
        «оформить заказ» happened in a panel the shopper had just reset. A reply
        to a conversation that no longer exists is dropped, action and all. */
     var gen = convoGen;
+    var ask = { messages: convo.slice(-8), lang: lang() };
+    // the article the chat was opened from (openChatAbout) — the route always reads it first
+    if (pinned) ask.article = pinned.slug;
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: convo.slice(-8), lang: lang() })
+      body: JSON.stringify(ask)
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
@@ -399,9 +442,15 @@
            the list from the shop's own match when the model promised options
            and named none (src/app/api/assistant/route.ts) — so a sentence
            that offers products arrives with the products under it. */
-        var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
-          .filter(Boolean).map(productRow).join("");
-        bubble("bot", withBlogLinks(esc(text)) + cards);
+        var prods = (Array.isArray(j.product_ids) ? j.product_ids : []).map(function (id) { return byIdMap[id]; })
+          .filter(Boolean);
+        /* An answer built on one of the salon's articles: the article card
+           first, then its products, then «Добавить всё в корзину» — the order
+           of the design (Assist.dc.html). Any other answer is drawn exactly as
+           before: the sentence and the product rows. */
+        var art = articleCard(j.article);
+        bubble("bot", withBlogLinks(esc(text)) + art + prods.map(productRow).join("") +
+          (art ? addAllButton(prods) : ""));
         runAction(j.action);
       })
       .catch(function () { wait.remove(); if (gen === convoGen) rulesReply(q); });
@@ -448,7 +497,7 @@
     }).join("");
     refreshHint();
     if (!log.childNodes.length || uiLang !== lang()) {
-      if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; convoGen++; }
+      if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; convoGen++; pinned = null; }
       bubble("bot", t.hello);
     }
     uiLang = lang();
@@ -465,6 +514,44 @@
     // exactly this — chat.js has no other way to reach it (docs/analytics.md)
     if (open && window.__rmpTrack) window.__rmpTrack("chat");
   }
+
+  /* ---- «Спросить об этой статье» ------------------------------------------
+     window.openChatAbout(slug, title) — for the blog article page, whose
+     button («Спросить об этой статье») app.js draws, not this file:
+
+       if (typeof window.openChatAbout === "function") window.openChatAbout(post.slug, post.title);
+
+     It opens the chat and PINS that article for the rest of the conversation:
+     every question then carries `article: "<slug>"` to POST /api/assistant/,
+     and the route always puts that article's digest first in the prompt,
+     whatever the question (shopGuides in src/app/api/assistant/blog-digest.ts)
+     — so «а что из этого подойдёт мне?» is answered from the article on the
+     screen and with its products. The log shows the article as a card, with a
+     one-line invitation under it.
+
+       slug   the article's address, [a-z0-9-] only; anything else → false.
+       title  the article's title in the language on screen, for the card; optional.
+       →      true when the chat opened; false when it may not show here — a
+              narrow window, the checkout, the chat switched off in Настройки.
+              On a phone this file is never loaded at all (app.js mountChat),
+              so the function does not exist there: feature-detect, as above.
+
+     Called again with another article it re-pins; with the same one it only
+     opens the chat. Switching the site's language starts a new conversation
+     (paintPanel) and the pin goes with it. */
+  window.openChatAbout = function (slug, title) {
+    var s = String(slug == null ? "" : slug).trim().toLowerCase();
+    if (!ART_SLUG.test(s) || !chatAllowed()) return false;
+    if (panel.hidden) openPanel(true); else input.focus();
+    var same = pinned && pinned.slug === s;
+    var name = typeof title === "string" ? title.replace(/\s+/g, " ").trim().slice(0, 200) : "";
+    pinned = { slug: s, title: name };
+    if (!same) {
+      bubble("bot", (name ? articleCard({ slug: s, title: name }, false) : "") +
+        '<span class="sbot__art-ask">' + esc(tt().askAbout) + "</span>");
+    }
+    return true;
+  };
   function refreshVisibility() {
     var ok = chatAllowed();
     root.style.display = ok ? "" : "none";

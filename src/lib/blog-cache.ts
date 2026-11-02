@@ -58,6 +58,18 @@ export const BLOG_CACHE_TAG = "blog";
 /** The response header that files it — spread into a route's headers. */
 export const BLOG_CACHE_HEADERS: Readonly<Record<string, string>> = { "Vercel-Cache-Tag": BLOG_CACHE_TAG };
 
+/* The same drop, for the one copy that is not on the CDN: the shop chat's
+   salon guides (src/app/api/assistant/blog-digest.ts) keep the published
+   articles in this instance's memory. A save moves this counter and the next
+   chat message on the same instance re-reads; every other instance notices
+   within a minute by the published set's stamp (publishedStamp in
+   src/lib/blog.ts) — a lambda's memory is not something a tag can reach. */
+let generation = 0;
+/** How many times this instance has seen the blog change — compared, never read for meaning. */
+export function blogGeneration(): number {
+  return generation;
+}
+
 /**
  * Drop every cached public blog answer — call after a write the public can
  * see (an edit to a published article, a publish, an unpublish, a delete).
@@ -65,6 +77,7 @@ export const BLOG_CACHE_HEADERS: Readonly<Record<string, string>> = { "Vercel-Ca
  * must not be reported as failed because a cache could not be told about it.
  */
 export function refreshBlogCache(): void {
+  generation += 1;
   try {
     revalidateTag(BLOG_CACHE_TAG);
   } catch (err) {
