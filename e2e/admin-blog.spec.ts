@@ -89,6 +89,7 @@ test.describe("blog — the visual editor", () => {
     await tab(page, "blog");
 
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box, "the body is not a visual editor").toBeVisible();
     expect(await page.locator('textarea[data-blogf="body"]').count(), "the markdown textarea is still there").toBe(0);
@@ -244,6 +245,7 @@ test.describe("blog — the visual editor", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     await page.locator('[data-blogf="title"]').fill(`Google ${marker}`);
     await page.locator('[data-blogf="excerpt"]').fill("Анонс для сниппета.");
     const box = page.locator("[data-blogbody]");
@@ -460,7 +462,8 @@ test.describe("blog — the visual editor", () => {
       expect(served).toContain('<meta property="og:locale" content="et_EE"');
       expect(served).toContain(`<meta property="og:image" content="${E2E_BASE_URL}/shop2/og/blog-${post.slug}.et.png?v=`);
       expect(served).toContain('"@type":"BlogPosting"');
-      expect(served).toContain(`<h1 class="display h1">Artikkel pärast ehitust ${marker}</h1>`);
+      // the magazine's article (src/lib/blog-magazine.mjs, 02.11.2026)
+      expect(served).toContain(`<h1 class="bmag-post__h1">Artikkel pärast ehitust ${marker}</h1>`);
       expect(served).toContain("<h2>Osa</h2><p>Tekst <strong>paks</strong>.</p>");
       expect(served).toContain(`href="/et/products/${PRODUCT.id}"`);
       expect(served).toContain('<script type="application/json" id="blogpost">');
@@ -647,6 +650,7 @@ test.describe("blog — the whole article", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     // 1a: the assistant is the «✨ Помощник напишет статью» fold
     await openFold(page, "blog-ai");
     const full = page.locator("[data-admblogfull]");
@@ -763,6 +767,7 @@ test.describe("blog — the whole article", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     await openFold(page, "blog-ai");
     await page.locator("[data-admblogtopic]").fill("уход за бородой зимой");
     await page.locator("[data-admblogfull]").click();
@@ -979,7 +984,9 @@ test.describe("blog — the sample posts", () => {
       await waitForScreen(page, "blog");
       const tiles = page.locator(".blog__tile");
       await expect(tiles.first()).toBeVisible();
-      expect(await tiles.count(), `the ${code} blog listing is short`).toBeGreaterThanOrEqual(3);
+      // the newest article is the story on top since the magazine (02.11.2026), the rest are tiles
+      expect(await tiles.count(), `the ${code} blog listing is short`).toBeGreaterThanOrEqual(2);
+      await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
       await assertClean(page, w, `blog listing (${code})`);
     }
   });
@@ -990,7 +997,8 @@ test.describe("blog — the sample posts", () => {
     await page.goto(shopUrl("", `/blog/${SLUGS[0]}/`));
     await waitForScreen(page, "blogpost");
 
-    await expect(page.locator(".blog__cover")).toBeVisible();
+    // the cover is an <img> in its own <figure> since the magazine (02.11.2026)
+    await expect(page.locator(".bmag-post__cover img")).toBeVisible();
     /* The real body, not the skeleton: since the blog paints from its cached
        summary first, `.blog__body` matches the `aria-busy` placeholder too, and
        `waitForScreen` + a visible cover are both true while that placeholder is
@@ -1065,6 +1073,7 @@ test.describe("blog — which language am I writing", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
 
@@ -1125,6 +1134,7 @@ test.describe("blog — which language am I writing", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
     const hint = page.locator("#blogtitlehint .adm-ashint");
@@ -1170,6 +1180,7 @@ test.describe("blog — which language am I writing", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
     await page.locator('[data-blogf="title"]').fill("Про бороду");
@@ -1234,6 +1245,7 @@ test.describe("blog — publishing with a language still empty", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
     await page.locator('[data-blogf="title"]').fill(`Только по-русски ${marker}`);
@@ -1359,6 +1371,7 @@ test.describe("blog — the product cards survive a translation", () => {
     await openAdmin(page);
     await tab(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     const box = page.locator("[data-blogbody]");
     await expect(box).toBeVisible();
     await page.locator('[data-blogf="title"]').fill(`Две карточки ${Date.now().toString().slice(-6)}`);
@@ -1462,6 +1475,7 @@ test.describe("blog — the product cards survive a translation", () => {
 
     /* ---- an article that already has both texts, saved and reopened ------ */
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     await expect(box).toBeVisible();
     const marker = `Две версии ${Date.now().toString().slice(-6)}`;
     await page.locator('[data-blogf="title"]').fill(marker);

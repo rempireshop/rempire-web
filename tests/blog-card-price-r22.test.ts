@@ -579,7 +579,11 @@ describe("the build writes the filled body, not the stored one", () => {
 
   it("tools/prerender-shop2.mjs fills the article before it writes it", () => {
     expect(prerender).toContain("fillBlogCardPrices");
-    expect(prerender).toContain('<div class="acc__rich blog__body">\' + bodyShown +');
+    /* Since the magazine (02.11.2026) the article is drawn by
+       src/lib/blog-magazine.mjs — handed the FILLED body, which it writes as is. */
+    expect(prerender).toMatch(/articleStaticHTML\(\{[\s\S]{0,200}\bbodyShown,/);
+    const magazine = readFileSync(fileURLToPath(new URL("../src/lib/blog-magazine.mjs", import.meta.url)), "utf8");
+    expect(magazine).toContain('<div class="acc__rich blog__body">\' + bodyShown +');
     // …and the snapshot keeps the stored body, exactly as the request-time page does
     expect(prerender).toContain("blogJsonScript(\"blogpost\"");
   });

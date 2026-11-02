@@ -150,13 +150,15 @@ describe("the page built at request time wears each frame's own setting", () => 
     const { GET } = await import("@/app/ru/blogs/news/[slug]/route");
     const html = await (await GET(new Request(`${ORIGIN}/ru/blogs/news/${main.slug}`), { params: Promise.resolve({ slug: main.slug }) })).text();
 
-    const cover = /<img class="pre__img blog__cover"[^>]*>/.exec(html)?.[0] ?? "";
+    /* The magazine (02.11.2026): a cover nobody measured stands in the old
+       1200×630 frame with the article frame's crop; the small «Читать дальше»
+       picture under it keeps the list frame's point. */
+    const cover = /<img class="bmag-post__img bmag-post__img--frame"[^>]*>/.exec(html)?.[0] ?? "";
     expect(cover).toContain(`style="${coverImgStyle(LONG, "post")}"`);
     expect(cover).not.toContain("scale(");
 
-    const tile = new RegExp(`<a class="pre__card blog__tile" href="/ru/blogs/news/${other.slug}">(<img[^>]*>)`).exec(html)?.[1] ?? "";
-    expect(tile).toContain(`style="${coverImgStyle(other.coverFocus, "list")}"`);
-    expect(tile).toContain("transform:scale(2.5);transform-origin:10% 20%");
+    const tile = new RegExp(`<a class="blog__tile bmag-next__i" href="/ru/blogs/news/${other.slug}">(<img[^>]*>)`).exec(html)?.[1] ?? "";
+    expect(tile).toContain('style="object-position:10% 20%"');
     // #blogpost carries the whole string, for the SPA that adopts it
     expect(html).toContain(`"coverFocus":"${LONG}"`);
   });

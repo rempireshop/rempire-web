@@ -230,6 +230,9 @@ export function markdownToHtml(md) {
 const HTML_ALLOWED = {
   p: true, h2: true, h3: true, strong: true, em: true, ul: true, ol: true, li: true,
   blockquote: true, figure: true, br: true, a: true, img: true,
+  /* A picture's caption, bare — «Картинка из буклета, стр. 4» under a figure
+     (the magazine, 02.11.2026). Text only: it takes no attribute at all. */
+  figcaption: true,
 };
 const HTML_VOID = new Set(["br", "img"]);
 /** Tags whose contents are not text — dropped together with what is inside. */

@@ -2,7 +2,9 @@
  * GET /api/blog/<slug>/?lang=RU — one published article.
  *
  * `{ ok, post: {slug,title,excerpt,bodyHtml,coverUrl,coverAlt,coverFocus,tags,products,
- *    seoTitle,seoDesc,author,publishedAt} }`. `bodyHtml` is the stored body
+ *    seoTitle,seoDesc,author,publishedAt,topic,minutes,coverW,coverH,sources} }` — `sources`
+ * stays empty unless the owner switched «Показать в статье, из чего она
+ * написана» on (names only, never a file). `bodyHtml` is the stored body
  * rendered to safe HTML server-side (@/lib/blog renderPostBody — the visual
  * editor's HTML through the allowlist, an older markdown body through
  * markdownToHtml) — the storefront injects it, it never renders a body itself.
@@ -14,7 +16,7 @@
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
 import { getPublishedBySlug, pickLang, renderPostBody } from "@/lib/blog";
-import { pickTags } from "@/lib/seo-head.mjs";
+import { publicPost } from "@/lib/blog-magazine.mjs";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -31,21 +33,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     return Response.json(
       {
         ok: true,
-        post: {
-          slug: post.slug,
-          title: pickLang(post.title, lang),
-          excerpt: pickLang(post.excerpt, lang),
-          bodyHtml: renderPostBody(pickLang(post.body, lang)),
-          coverUrl: post.coverUrl,
-          coverAlt: pickLang(post.coverAlt, lang),
-          coverFocus: post.coverFocus,
-          tags: pickTags(post.tags, post.tagsI18n, lang),
-          products: post.products,
-          seoTitle: pickLang(post.seoTitle, lang),
-          seoDesc: pickLang(post.seoDesc, lang),
-          author: post.author,
-          publishedAt: post.publishedAt,
-        },
+        /* src/lib/blog-magazine.mjs publicPost — the very shape #blogpost
+           embeds in the prerendered page, so app.js repaints only on a real
+           difference. */
+        post: publicPost(post, lang, renderPostBody(pickLang(post.body, lang))),
       },
       /* the tag lets a save in the panel drop this copy in every language at
          once — src/lib/blog-cache.ts */

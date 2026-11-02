@@ -43,7 +43,9 @@
  * twice. The safety argument for each door, and the story of those two drifts,
  * is in that file's header and above each function.
  */
+import catalogueMin from "@/data/catalogue.min.json";
 import { writeCoverFocus } from "@/lib/blog-cover.mjs";
+import { cleanSources, FEATURED_MAX, guessTopic, isTopic, readMinutes } from "@/lib/blog-magazine.mjs";
 import { jsonbParam, query } from "@/lib/db";
 import type { Lang3, Trilingual } from "@/lib/content";
 import {
@@ -84,7 +86,28 @@ export interface Post {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /* ---- the magazine (db/migrations/227_blog_magazine.sql) ---- */
+  /** Which chip the article sits under — the owner's choice, or the guess from
+      its words and products while he has made none (guessTopic in
+      src/lib/blog-magazine.mjs). Never empty. */
+  topic: BlogTopic;
+  /** Whether `topic` is a stored choice (true) or the guess (false). */
+  topicChosen: boolean;
+  /** «На главной блога» — the carousel on top of the blog. At most three. */
+  featured: boolean;
+  /** The cover's own size, when known (null for an older cover nobody measured). */
+  coverW: number | null;
+  coverH: number | null;
+  /** «Показать в статье, из чего она написана». */
+  showSources: boolean;
+  /** The materials it was written from, as short lines — names, never files. */
+  sources: string[];
+  /** Read time per language, in minutes — of the text that language's page
+      really shows (pickLang). Zeros on a row read without its body. */
+  minutes: { RU: number; ET: number; EN: number };
 }
+
+export type BlogTopic = "hair" | "beard" | "styling" | "skin" | "studio";
 
 /** The admin list and the prerender listing page never need the article body. */
 export type PostSummary = Omit<Post, "body">;
@@ -108,19 +131,39 @@ interface PostRow {
   published_at: Date | string | null;
   created_at: Date | string;
   updated_at: Date | string;
+  topic?: string | null;
+  featured?: boolean | null;
+  cover_w?: number | null;
+  cover_h?: number | null;
+  show_sources?: boolean | null;
+  sources?: string[] | null;
 }
 
 const EMPTY3: Trilingual = { RU: "", ET: "", EN: "" };
 const iso = (d: Date | string | null) => (d == null ? null : d instanceof Date ? d.toISOString() : String(d));
 
+/* The shop section of a catalogue product — what guessTopic() reads an
+   article's products by. The owner's own products («c-…») are not in the file
+   and simply do not vote. */
+const CAT_OF = new Map((catalogueMin as Array<{ id: string; c: string }>).map((p) => [p.id, p.c]));
+export const catOfProduct = (id: string): string => CAT_OF.get(id) || "";
+
+const posInt = (v: unknown): number | null => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= 1 && n <= 20000 ? n : null;
+};
+
 function toPost(r: PostRow): Post {
-  return {
+  const body = { ...EMPTY3, ...(r.body || {}) };
+  const hasBody = !!r.body;
+  const w = posInt(r.cover_w), h = posInt(r.cover_h);
+  const base = {
     id: r.id,
     slug: r.slug,
     status: r.status,
     title: { ...EMPTY3, ...(r.title || {}) },
     excerpt: { ...EMPTY3, ...(r.excerpt || {}) },
-    body: { ...EMPTY3, ...(r.body || {}) },
+    body,
     coverUrl: r.cover_url || null,
     coverAlt: { ...EMPTY3, ...(r.cover_alt || {}) },
     /* Through the same door on the way out as on the way in: a row written
@@ -137,6 +180,21 @@ function toPost(r: PostRow): Post {
     createdAt: iso(r.created_at) as string,
     updatedAt: iso(r.updated_at) as string,
   };
+  const chosen = isTopic(r.topic);
+  return {
+    ...base,
+    topic: (chosen ? r.topic : guessTopic(base, catOfProduct)) as BlogTopic,
+    topicChosen: chosen,
+    featured: r.featured === true,
+    // both or neither: a width without its height is no shape at all
+    coverW: base.coverUrl && w && h ? w : null,
+    coverH: base.coverUrl && w && h ? h : null,
+    showSources: r.show_sources === true,
+    sources: cleanSources(r.sources),
+    minutes: hasBody
+      ? { RU: readMinutes(pickLang(body, "RU")), ET: readMinutes(pickLang(body, "ET")), EN: readMinutes(pickLang(body, "EN")) }
+      : { RU: 0, ET: 0, EN: 0 },
+  };
 }
 function toSummary(r: PostRow): PostSummary {
   const { body: _body, ...rest } = toPost(r);
@@ -145,7 +203,8 @@ function toSummary(r: PostRow): PostSummary {
 }
 
 const SUMMARY_COLS =
-  "id, slug, status, title, excerpt, cover_url, cover_alt, cover_focus, tags, tags_i18n, products, seo_title, seo_desc, author, published_at, created_at, updated_at";
+  "id, slug, status, title, excerpt, cover_url, cover_alt, cover_focus, tags, tags_i18n, products, seo_title, seo_desc, author, published_at, created_at, updated_at, " +
+  "topic, featured, cover_w, cover_h, show_sources, sources";
 const FULL_COLS = SUMMARY_COLS.replace("excerpt,", "excerpt, body,");
 
 /** The language shown, falling back to Russian, then to whatever exists. */
@@ -350,6 +409,43 @@ export interface PostInput {
   seoTitle?: unknown;
   seoDesc?: unknown;
   author?: unknown;
+  /* The magazine's fields (227_blog_magazine.sql). Every one of them is
+     «absent keeps what is stored»: the assistant's draft, Claude's save_draft
+     and a cover-only save carry none of them and must not wipe them. */
+  /** One of the five chips; null or "" hands the article back to the guess. */
+  topic?: unknown;
+  /** «На главной блога» — a fourth is refused with `featured_full`. */
+  featured?: unknown;
+  /** The cover's size — sent with the cover it belongs to (see upsertPost). */
+  coverW?: unknown;
+  coverH?: unknown;
+  showSources?: unknown;
+  sources?: unknown;
+}
+
+/** The magazine's fields as a save carries them — `undefined` keeps the row's. */
+export function readMagazineInput(input: PostInput): {
+  topic: string | null | undefined;
+  featured: boolean | undefined;
+  coverW: number | null;
+  coverH: number | null;
+  showSources: boolean | undefined;
+  sources: string[] | undefined;
+} {
+  let topic: string | null | undefined;
+  if (input.topic === undefined) topic = undefined;
+  else if (input.topic === null || input.topic === "") topic = null;
+  else if (isTopic(input.topic)) topic = input.topic as string;
+  else throw new BlogError("bad_topic");
+  const w = posInt(input.coverW), h = posInt(input.coverH);
+  return {
+    topic,
+    featured: typeof input.featured === "boolean" ? input.featured : undefined,
+    coverW: w && h ? w : null,
+    coverH: w && h ? h : null,
+    showSources: typeof input.showSources === "boolean" ? input.showSources : undefined,
+    sources: input.sources === undefined ? undefined : cleanSources(input.sources),
+  };
 }
 
 /** One language's article, cleaned: a few pages of HTML. Past this, `upsertPost`
@@ -366,22 +462,37 @@ export class BlogError extends Error {
 
 /* ---------- reads ----------------------------------------------------------- */
 
+/* The list is read WITH the bodies — only to count each language's words for
+   «9 мин чтения» — and leaves without them (toSummary). Ten articles of a few
+   pages each; the answer is cached at the edge and dropped on a save. */
 export async function listPublished(
   page = 1,
   perPage = 10,
-): Promise<{ posts: PostSummary[]; total: number; page: number; perPage: number }> {
+): Promise<{ posts: PostSummary[]; total: number; page: number; perPage: number; featured: PostSummary[] }> {
   const p = Math.max(1, Math.trunc(page) || 1);
   const size = Math.min(50, Math.max(1, Math.trunc(perPage) || 10));
-  const [rows, countRows] = await Promise.all([
+  const [rows, countRows, featuredRows] = await Promise.all([
     query<PostRow>(
-      `select ${SUMMARY_COLS} from posts where status = 'published' and deleted_at is null
+      `select ${FULL_COLS} from posts where status = 'published' and deleted_at is null
        order by published_at desc nulls last, created_at desc
        limit $1 offset $2`,
       [size, (p - 1) * size],
     ),
     query<{ n: string | number }>("select count(*) as n from posts where status = 'published' and deleted_at is null"),
+    /* The carousel's articles, wherever they fall in the list — an article
+       marked «На главной блога» last spring is still on top of the blog. */
+    query<PostRow>(
+      `select ${FULL_COLS} from posts where status = 'published' and deleted_at is null and featured
+       order by published_at desc nulls last, created_at desc limit ${FEATURED_MAX}`,
+    ),
   ]);
-  return { posts: rows.map(toSummary), total: Number(countRows[0]?.n || 0), page: p, perPage: size };
+  return {
+    posts: rows.map(toSummary),
+    total: Number(countRows[0]?.n || 0),
+    page: p,
+    perPage: size,
+    featured: featuredRows.map(toSummary),
+  };
 }
 
 /**
@@ -480,6 +591,18 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
      point that was dragged onto the picture before it. */
   const coverFocus = writeCoverFocus(input.coverFocus);
   const author = (typeof input.author === "string" ? input.author.trim() : "").slice(0, 60) || "Rempire";
+  const mag = readMagazineInput(input);
+
+  /* «На главной блога» holds three. A fourth is refused rather than taken —
+     the panel says which three are on before it asks (Dim, 02.11.2026: max
+     3, and say so). An article already on keeps its place through any save. */
+  if (mag.featured === true) {
+    const on = await query<{ n: string | number }>(
+      `select count(*) as n from posts where featured and deleted_at is null${input.id ? " and id <> $1" : ""}`,
+      input.id ? [input.id] : [],
+    );
+    if (Number(on[0]?.n || 0) >= FEATURED_MAX) throw new BlogError("featured_full");
+  }
 
   /*
    * The slug: an explicit one always wins. Otherwise — creating a new post —
@@ -527,16 +650,40 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
     jsonbParam(seoDesc),
     author,
     tagsI18n ? jsonbParam(tagsI18n) : null,
+    /* $14…$21 — the magazine. `topic` needs two: whether the save says
+       anything about it ($14), and what ($15, null = back to the guess). */
+    mag.topic !== undefined,
+    mag.topic ?? null,
+    mag.featured ?? null,
+    mag.coverW,
+    mag.coverH,
+    mag.showSources ?? null,
+    mag.sources ?? null,
   ];
 
   if (input.id) {
+    /* The cover's size follows the cover. A save that sends one writes it; a
+       save that sends none keeps the stored size only while the picture is
+       the same picture — a new cover set by the assistant or by Claude
+       without a size gets none, and is framed 1200×630 until it is measured,
+       rather than drawn in the shape of the photo it replaced. (On the right
+       of `set`, the column names are the row before this update.) */
     const rows = await query<PostRow>(
       `update posts set
          slug = $1, title = $2::jsonb, excerpt = $3::jsonb, body = $4::jsonb,
          cover_url = $5, cover_alt = $6::jsonb, cover_focus = $7, tags = $8, products = $9,
          seo_title = $10::jsonb, seo_desc = $11::jsonb, author = $12,
-         tags_i18n = coalesce($13::jsonb, tags_i18n), updated_at = now()
-       where id = $14 and deleted_at is null${opts.onlyDraft ? " and status = 'draft'" : ""}
+         tags_i18n = coalesce($13::jsonb, tags_i18n),
+         topic = case when $14::boolean then $15::text else topic end,
+         featured = coalesce($16::boolean, featured),
+         cover_w = case when $17::int is not null and $18::int is not null then $17::int
+                        when cover_url is not distinct from $5 then cover_w else null end,
+         cover_h = case when $17::int is not null and $18::int is not null then $18::int
+                        when cover_url is not distinct from $5 then cover_h else null end,
+         show_sources = coalesce($19::boolean, show_sources),
+         sources = coalesce($20::text[], sources),
+         updated_at = now()
+       where id = $21 and deleted_at is null${opts.onlyDraft ? " and status = 'draft'" : ""}
        returning ${FULL_COLS}`,
       [...params, input.id],
     );
@@ -548,20 +695,70 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
     return toPost(rows[0]);
   }
 
+  /* A new article: no stored topic unless one was chosen ($14 is then true),
+     so the guess goes on following what the draft turns into; and a size
+     only with a cover to belong to. */
   const rows = await query<PostRow>(
-    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author, tags_i18n)
-     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10::jsonb, $11::jsonb, $12, coalesce($13::jsonb, '{}'::jsonb))
+    `insert into posts (slug, title, excerpt, body, cover_url, cover_alt, cover_focus, tags, products, seo_title, seo_desc, author, tags_i18n,
+                        topic, featured, cover_w, cover_h, show_sources, sources)
+     values ($1, $2::jsonb, $3::jsonb, $4::jsonb, $5, $6::jsonb, $7, $8, $9, $10::jsonb, $11::jsonb, $12, coalesce($13::jsonb, '{}'::jsonb),
+             case when $14::boolean then $15::text else null end, coalesce($16::boolean, false),
+             case when $5::text is not null then $17::int else null end, case when $5::text is not null then $18::int else null end,
+             coalesce($19::boolean, false), coalesce($20::text[], '{}'::text[]))
      returning ${FULL_COLS}`,
     params,
   );
   return toPost(rows[0]);
 }
 
-/** status → 'published'. Keeps the original publishedAt when republishing. */
+/**
+ * One language of a DRAFT, written on its own — the Estonian or English
+ * translation of a draft written from the materials (src/app/api/admin/blog/
+ * draft/route.ts). The two translations run side by side, and a whole-row
+ * save from either would put back the other's language as it was when it
+ * started; jsonb_set touches this language's keys and nothing else.
+ */
+export async function writePostLanguage(
+  id: string,
+  lang: "ET" | "EN",
+  t: { title: string; excerpt: string; body: string; seoTitle: string; seoDesc: string; tags: string[] },
+): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
+  const one = (v: string, max: number) => cleanLine(String(v || "")).slice(0, max);
+  const body = cleanBody(String(t.body || ""));
+  if (body.length > BODY_MAX) throw new BlogError("body_too_long");
+  const tags = cleanList(t.tags, 12, 30).filter((x) => !CYRILLIC.test(x));
+  const path = `{${lang}}`;
+  const rows = await query<PostRow>(
+    `update posts set
+       title = jsonb_set(coalesce(title, '{}'::jsonb), $2::text[], to_jsonb($3::text)),
+       excerpt = jsonb_set(coalesce(excerpt, '{}'::jsonb), $2::text[], to_jsonb($4::text)),
+       body = jsonb_set(coalesce(body, '{}'::jsonb), $2::text[], to_jsonb($5::text)),
+       seo_title = jsonb_set(coalesce(seo_title, '{}'::jsonb), $2::text[], to_jsonb($6::text)),
+       seo_desc = jsonb_set(coalesce(seo_desc, '{}'::jsonb), $2::text[], to_jsonb($7::text)),
+       tags_i18n = jsonb_set(coalesce(tags_i18n, '{}'::jsonb), $2::text[], $8::jsonb),
+       updated_at = now()
+     where id = $1 and deleted_at is null and status = 'draft'
+     returning ${FULL_COLS}`,
+    [id, path, one(t.title, 200), one(t.excerpt, 500), body, one(t.seoTitle, 70), one(t.seoDesc, 170), jsonbParam(tags)],
+  );
+  return rows.length ? toPost(rows[0]) : null;
+}
+
+/** status → 'published'. Keeps the original publishedAt when republishing.
+
+    …and takes the yellow marks out of the text: a draft written from the
+    materials (src/lib/blog-draft.ts) wraps every sentence the materials did
+    not support in <mark data-unsure>, the editor shows it yellow, and what the
+    owner left in is his to publish — unmarked. The words stay; the tags go,
+    in every language, in the same write. (A reader never saw them anyway: the
+    shop's allowlist has no <mark>.) */
 export async function publishPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(String(id ?? ""))) return null;
+  const strip = (l: string) => `regexp_replace(coalesce(body->>'${l}', ''), '<mark[^>]*>|</mark[^>]*>', '', 'gi')`;
   const rows = await query<PostRow>(
-    `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now()
+    `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now(),
+       body = case when body::text ilike '%<mark%' then jsonb_build_object('RU', ${strip("RU")}, 'ET', ${strip("ET")}, 'EN', ${strip("EN")}) else body end
      where id = $1 and deleted_at is null returning ${FULL_COLS}`,
     [id],
   );

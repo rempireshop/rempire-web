@@ -1,8 +1,8 @@
 /**
  * GET /api/blog/?lang=RU&page=1 — the published article list.
  *
- * `{ ok, posts: [{slug,title,excerpt,coverUrl,coverAlt,coverFocus,tags,publishedAt}],
- *    total, page, perPage }`. `lang` picks which language's title/excerpt
+ * `{ ok, posts: [{slug,title,excerpt,coverUrl,coverAlt,coverFocus,coverW,coverH,tags,publishedAt,
+ *    topic,minutes,productCount}], featured: [same], total, page, perPage }`. `lang` picks which language's title/excerpt
  * come back (falling back to Russian, `pickLang()` in @/lib/blog); `page` is
  * 1-based, 10 posts per page. Cached for a minute, and dropped at once by a
  * save in the panel (src/lib/blog-cache.ts) — a new post needs a redeploy to
@@ -11,8 +11,8 @@
  *
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
-import { listPublished, pickLang } from "@/lib/blog";
-import { pickTags } from "@/lib/seo-head.mjs";
+import { listPublished } from "@/lib/blog";
+import { publicListItem } from "@/lib/blog-magazine.mjs";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 
 export async function GET(req: Request) {
@@ -21,23 +21,19 @@ export async function GET(req: Request) {
   const page = Number(url.searchParams.get("page")) || 1;
 
   try {
-    const { posts, total, perPage } = await listPublished(page, 10);
+    const { posts, total, perPage, featured } = await listPublished(page, 10);
     return Response.json(
       {
         ok: true,
-        posts: posts.map((p) => ({
-          slug: p.slug,
-          title: pickLang(p.title, lang),
-          excerpt: pickLang(p.excerpt, lang),
-          coverUrl: p.coverUrl,
-          coverAlt: pickLang(p.coverAlt, lang),
-          /* The tile crops its cover the way the article does — same point,
-             same rule, src/lib/blog-cover.mjs. */
-          coverFocus: p.coverFocus,
-          // this language's set — never a Russian chip on the Estonian list (pickTags)
-          tags: pickTags(p.tags, p.tagsI18n, lang),
-          publishedAt: p.publishedAt,
-        })),
+        /* The shape lives in src/lib/blog-magazine.mjs (publicListItem): the
+           prerender embeds the very same object in #blogdata, so app.js sees
+           no difference where there is none. The tile crops its cover the way
+           the article does (src/lib/blog-cover.mjs), carries this language's
+           tags (pickTags) and, since 02.11.2026, the topic, the read time, the
+           cover's own size and how many products the article names. */
+        posts: posts.map((p) => publicListItem(p, lang)),
+        // the carousel's articles, wherever they fall in the list
+        featured: featured.map((p) => publicListItem(p, lang)),
         total,
         page,
         perPage,
@@ -50,6 +46,6 @@ export async function GET(req: Request) {
     /* An outage must look like one — the storefront shows «Блог временно
        недоступен» on ok:false (blog list loader in app.js) instead of an
        empty blog, and a 503 is what monitoring can see. */
-    return Response.json({ ok: false, error: "unavailable", posts: [], total: 0, page, perPage: 10 }, { status: 503 });
+    return Response.json({ ok: false, error: "unavailable", posts: [], featured: [], total: 0, page, perPage: 10 }, { status: 503 });
   }
 }

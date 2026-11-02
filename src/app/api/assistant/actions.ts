@@ -18,6 +18,7 @@ import { seoDropMetaTalk, seoOffLanguage } from "@/lib/ai-prompts";
 import { nameTranslatable } from "@/lib/product-name";
 import { NO_SUBSECTION, readSubsection } from "@/lib/subsections";
 import { PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
+import { isTopic as isBlogTopic } from "@/lib/blog-magazine.mjs";
 import { matchBrands } from "@/lib/home-brands";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
 import { heroLayout, type HeroFocus, type HeroKind, type HeroSide } from "@/lib/hero";
@@ -619,13 +620,22 @@ function blogList(raw: unknown, maxItems: number, maxLen: number): string[] {
    completion was the thing that got cut by max_tokens and reached the owner
    as raw JSON; a topic never is. */
 const BLOG_TOPIC_MAX = 200;
-export function sanitizeDraftTopic(raw: unknown): { topic: string; lang: string; hint: string } | null {
+/* The chip on the blog's home the new article sits under — `blog_topic`,
+   because `topic` here has always been the article's subject line. Optional:
+   left out (or not one of the five), the shop picks it from the text the way
+   it does for Claude's save_draft (guessTopic in src/lib/blog-magazine.mjs) —
+   the standing rule that the Помощник can do what Claude can. */
+function blogTopicOf(x: Record<string, unknown>): { blog_topic?: string } {
+  const t = typeof x.blog_topic === "string" ? x.blog_topic.trim().toLowerCase() : "";
+  return isBlogTopic(t) ? { blog_topic: t } : {};
+}
+export function sanitizeDraftTopic(raw: unknown): { topic: string; lang: string; hint: string; blog_topic?: string } | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const x = raw as Record<string, unknown>;
   const topic = oneLine(x.topic, BLOG_TOPIC_MAX);
   if (topic.length < 3) return null;
   const lang = x.lang === "ET" || x.lang === "EN" ? x.lang : "RU";
-  return { topic, lang, hint: oneLine(x.hint, 400) };
+  return { topic, lang, hint: oneLine(x.hint, 400), ...blogTopicOf(x) };
 }
 
 /* The owner's own words ride on a draft_post, put there by the route and
@@ -695,6 +705,7 @@ export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | nu
     tags: blogList(x.tags, BLOG_TAGS_MAX, BLOG_TAG_MAX),
     products: blogList(x.products, BLOG_PRODUCTS_MAX, 80).filter((id) => known.has(id)),
     ...(seo ? { seo } : {}),
+    ...blogTopicOf(x),
   };
 }
 
@@ -1102,6 +1113,23 @@ export interface SanitizeOptions {
   products?: Map<string, { name: string; brand: string; cat?: string }>;
   /** The brands the shop shows — the only brand pages set_page_texts may write. */
   brands?: Set<string>;
+  /** The material ids the prompt's BLOG MATERIALS block listed — the only ones draft_from_materials may name. */
+  materialIds?: Set<string>;
+}
+
+/* draft_from_materials — a NEW article written from the owner's uploaded
+   materials (src/lib/blog-materials.ts), by the panel's own «Новая статья»
+   writer once he confirms. Only ids the prompt listed; ten at most; the topic
+   is one plain line. The Помощник does what Claude does (list_materials,
+   get_material and save_draft in src/lib/mcp/tools.ts). */
+export function sanitizeDraftFromMaterials(raw: unknown, materialIds: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const ids = Array.isArray(x.materials)
+    ? [...new Set(x.materials.filter((v): v is string => typeof v === "string").map((v) => v.trim()))].filter((v) => materialIds.has(v)).slice(0, 10)
+    : [];
+  if (!ids.length) return null;
+  return { about: oneLine(x.about, BLOG_TOPIC_MAX), materials: ids, show_sources: x.show_sources === true };
 }
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean, opts: SanitizeOptions = {}): object | null {
@@ -1223,6 +1251,11 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   if (t === "publish_post") {
     const pub = sanitizePublishPost(x);
     return pub ? { type: t, ...pub } : null;
+  }
+  // a new article from the materials library — the ids the prompt listed, nothing else
+  if (t === "draft_from_materials") {
+    const fm = sanitizeDraftFromMaterials(x, opts.materialIds ?? new Set<string>());
+    return fm ? { type: t, ...fm } : null;
   }
   // …and the article open on the owner's screen, changed as he asked — that one only
   if (t === "edit_post") {

@@ -1029,26 +1029,41 @@ describe("every renderer reads its own frame", () => {
     expect(run("list", "/c.jpg", "a", LONG)).toContain(coverBgStyle(LONG, "list"));
     expect(run("post", "/c.jpg", "a", LONG)).toContain(coverBgStyle(LONG, "post"));
     expect(run("post", "/c.jpg", "a", LONG)).not.toContain("scale(");
-    // the shop's own two places pass the article's value through it
-    expect(app).toContain('blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title, p.coverFocus)');
-    expect(app).toContain('blogCoverFrameHTML("post", p.coverUrl, p.coverAlt || p.title, p.coverFocus)');
+    /* Since the magazine (02.11.2026) the shop's own two places draw an <img>
+       (bmagImgHTML) — in its own shape when the size is known, in the old
+       frame with the frame's crop when not; blogCoverFrameHTML is the panel's
+       preview. The crop is coverImgStyle()'s, word for word. */
+    const crop = new Function(`${VOCAB()} ${slice("bmagCropCss")} return bmagCropCss;`)() as (f: unknown, w: string) => string;
+    for (const f of [LONG, "fill 30 40", "fit 50 50", null, "nonsense"]) {
+      expect(crop(f, "list"), String(f)).toBe(coverImgStyle(f, "list"));
+      expect(crop(f, "post"), String(f)).toBe(coverImgStyle(f, "post"));
+    }
+    expect(slice("bmagCardHTML")).toContain('bmagImgHTML(p, "list", "bmag__img"');
+    expect(slice("bmagCoverHTML")).toContain('bmagImgHTML(p, "post", "bmag-post__img"');
+    expect(slice("bmagImgHTML")).toContain("bmagCropCss(p.coverFocus, where)");
   });
 
+  /* The static article and its tiles: one module draws them for the build and
+     for the request-time page (src/lib/blog-magazine.mjs coverImg) and reads
+     the crop from this one. */
   it("the request-time article and its tiles carry it as an inline style — tile by the list's, cover by the article's", () => {
+    const mag = read("../src/lib/blog-magazine.mjs");
+    expect(mag).toContain('import { readCoverFocus, coverImgStyle } from "./blog-cover.mjs"');
+    expect(mag).toContain("const crop = coverImgStyle(p.coverFocus, where);");
+    expect(mag).toContain('coverImg(p, "list", "bmag__img"');
+    expect(mag).toContain('coverImg(post, "post", "bmag-post__img"');
     const page = read("../src/lib/blog-page.ts");
-    expect(page).toContain('import { coverImgStyle } from "@/lib/blog-cover.mjs"');
-    expect(page.match(/coverStyle\(post\.coverFocus, "list"\)/g) ?? []).toHaveLength(1);
-    expect(page.match(/coverStyle\(post\.coverFocus, "post"\)/g) ?? []).toHaveLength(1);
-    expect(page).not.toMatch(/coverStyle\(post\.coverFocus\)/);
-    expect(page).toContain("coverFocus: p.coverFocus");   // #blogdata, for the SPA that adopts it
-    expect(page).toContain("coverFocus: post.coverFocus");  // #blogpost
+    expect(page).toContain("articleStaticHTML(");
+    expect(page).toContain("homeStaticHTML(");
+    // #blogdata and #blogpost carry the value for the SPA that adopts them — publicListItem / publicPost
+    expect(mag.match(/coverFocus: p\.coverFocus/g) ?? []).toHaveLength(2);
   });
 
   it("the prerendered article and its tiles carry the same style, from the same module", () => {
     const pre = read("../tools/prerender-shop2.mjs");
-    expect(pre.match(/coverStyle\(post\.coverFocus, "list"\)/g) ?? []).toHaveLength(1);
-    expect(pre.match(/coverStyle\(post\.coverFocus, "post"\)/g) ?? []).toHaveLength(1);
-    expect(pre).toContain("coverImgStyle(focus, where)");
+    expect(pre).toContain("articleStaticHTML(");
+    expect(pre).toContain("homeStaticHTML(");
+    expect(pre).toContain('from "../src/lib/blog-magazine.mjs"');
     // …and the card the build draws keeps the square the owner framed for social media
     expect(pre).toContain("drawBlogCard(f, post.coverUrl, post.coverFocus)");
     expect(pre).toContain('containingCrop(turned ? meta.height : meta.width, turned ? meta.width : meta.height, OG_W, OG_H, coverFocus, "og")');
@@ -1071,8 +1086,9 @@ describe("every renderer reads its own frame", () => {
   });
 
   it("the two public routes answer with it, or the SPA has nothing to draw", () => {
-    expect(read("../src/app/api/blog/route.ts")).toContain("coverFocus: p.coverFocus");
-    expect(read("../src/app/api/blog/[slug]/route.ts")).toContain("coverFocus: post.coverFocus");
+    // one writer of both shapes since the magazine — src/lib/blog-magazine.mjs
+    expect(read("../src/app/api/blog/route.ts")).toContain("publicListItem(p, lang)");
+    expect(read("../src/app/api/blog/[slug]/route.ts")).toContain("publicPost(post, lang,");
   });
 
   it("the panel sends it and counts it as an unsaved change", () => {
@@ -1123,9 +1139,13 @@ describe("the shop's frames: shape, clip and the tile's lift", () => {
      server's put the cover as a direct child of the tile and of the article. */
   it("the tile and the article holding a zoomed cover clip sideways, so the page cannot slide", () => {
     expect(css).toContain('.blog__tile:has(> [style*="scale("]), .blog__post:has(> .blog__cover[style*="scale("]) { overflow-x: clip; }');
-    const lf = (s: string) => s.replace(/\r\n/g, "\n");
-    expect(lf(app)).toMatch(/'<article class="sec blog__post blog__read">' \+\n\s*blogHeadHTML\(post\)/);
-    expect(lf(read("../src/lib/blog-page.ts"))).toMatch(/'<article class="sec blog__post blog__read">' \+\n\s*\(post\.coverUrl/);
+    /* Since the magazine (02.11.2026) the cover is an <img> inside its own
+       <figure> (app.js bmagCoverHTML, blog-magazine.mjs articleStaticHTML),
+       and the figure is what clips it; a card's picture is still the tile's
+       direct child, which the rule above already clips. */
+    expect(css).toMatch(/\.bmag-post__cover \{[^}]*overflow: hidden/);
+    expect(slice("bmagCoverHTML")).toContain("'<figure class=\"bmag-post__cover'");
+    expect(read("../src/lib/blog-magazine.mjs")).toContain("'<figure class=\"bmag-post__cover'");
   });
 });
 

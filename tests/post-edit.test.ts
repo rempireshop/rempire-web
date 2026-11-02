@@ -118,13 +118,16 @@ describe("edit_post in the chat assistant", () => {
 });
 
 describe("an article's products — forty in the list, eight on the shelf (20.10.2026)", () => {
-  it("the editor offers up to forty and says the shelf shows the first eight", () => {
+  /* Since the magazine (02.11.2026) the strip «В этой статье» at the top of
+     the article shows the first eight, and the shelf at its foot all of them
+     («Все N товаров» in the strip jumps there). */
+  it("the editor offers up to forty and says the strip shows the first eight, the shelf every one", () => {
     expect(APP).toContain("var BLOG_PRODUCTS_MAX = 40;");
-    expect(APP).toContain('"Товары в статье — внизу покажем карточками первые 8"');
+    expect(APP).toContain('"Товары в статье — вверху покажем первые 8, внизу все карточками"');
     expect(APP).toContain("В статье уже 40 товаров — больше не поместится.");
     expect(APP).not.toMatch(/d\.products\.length < 12/);
-    // the shelf itself is unchanged: the first eight the owner picked
-    expect(APP).toContain("var featured = productsById(post.products).slice(0, 8);");
+    expect(APP).toContain("var featured = productsById(post.products);");
+    expect(APP).toContain("bmagStripHTML(featured.slice(0, 8), featured.length)");
   });
 });
 

@@ -73,8 +73,10 @@ test.describe("policy pages and the blog route", () => {
       expect(res?.status()).toBe(200);
       await waitForScreen(page, "blog");
       await expect(page.locator("h1")).toHaveText(tr("Блог", lang.code));
-      await expect(page.locator(".blog__grid li").first()).toBeVisible();
-      expect(await page.locator(".blog__grid li").count()).toBeGreaterThanOrEqual(3);
+      // the magazine (02.11.2026): the newest is the story on top, the other two are the grid's tiles
+      await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
+      await expect(page.locator(".bmag__card").first()).toBeVisible();
+      expect(await page.locator(".bmag__card").count()).toBeGreaterThanOrEqual(2);
       await expect(page.getByText(tr("Статей пока нет — загляните позже.", lang.code))).toHaveCount(0);
     });
   }

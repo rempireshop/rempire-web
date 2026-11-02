@@ -114,6 +114,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     // ---- the blog editor ---------------------------------------------------
     await adminSection(page, "blog");
     await page.locator("[data-admblognew]").click();
+    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
     await expect(page.locator("[data-admblogback]")).toBeVisible();
     await back(page);
     await expect(page.locator("[data-admblogback]"), "Back did not close the blog editor").toHaveCount(0);

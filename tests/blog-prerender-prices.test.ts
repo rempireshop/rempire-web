@@ -278,8 +278,12 @@ describe("tools/prerender-shop2.mjs wiring", () => {
   /* The eight are the first eight the owner PICKED and then whatever of those
      is still for sale, exactly as src/lib/blog-page.ts takes them — so the
      static shelf and the live one hold the same products in the same order. */
-  it("puts «Товары из статьи» through that lookup, after the slice and not before", () => {
-    expect(prerender).toContain(".slice(0, 8)\n    .map(id => blogShelfProduct(id))\n    .filter(Boolean)");
+  /* Since the magazine (02.11.2026) the shelf holds every product the article
+     names and the strip at the top the first eight of what is left — the
+     lookup still comes first, so a hidden product leaves a gap, never a link. */
+  it("puts «Товары из статьи» through that lookup, then the strip takes its first eight", () => {
+    expect(prerender).toContain("(post.products || [])\n    .map(id => blogShelfProduct(id))\n    .filter(Boolean)");
+    expect(prerender).toContain("const strip = featured.slice(0, 8).map(");
     expect(prerender).not.toContain(".map(id => CATALOGUE.find(p => p.id === id))");
   });
 

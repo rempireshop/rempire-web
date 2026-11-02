@@ -70,6 +70,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+// …and the magazine's pages, the same builders src/lib/blog-page.ts draws them with
+import { articleStaticHTML, homeStaticHTML, publicListItem, publicPost, readNext } from "../src/lib/blog-magazine.mjs";
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles-export.mjs";
@@ -1806,34 +1808,14 @@ function giftPage(lang) {
    this static page (docs/blog.md); the SPA renders it live off the API the
    moment it is published, redeploy or not. */
 
-const dmy = iso => String(iso || "").slice(0, 10).split("-").reverse().join(".");
-/* Which part of the cover this frame keeps — the frame's own point and zoom
-   ("list" for a tile, "post" for the top of the article), read by
-   src/lib/blog-cover.mjs, which the request-time page (src/lib/blog-page.ts)
-   reads with the same call. Nothing written at all for a cover nobody has
-   chosen for, so every article written before this keeps the bytes it has. */
-const coverStyle = (focus, where) => {
-  const css = coverImgStyle(focus, where);
-  return css ? ' style="' + css + '"' : "";
-};
-
-function blogTile(post, seg, code, t, i) {
-  const title = pickLang(post.title, code) || post.slug;
-  const excerpt = pickLang(post.excerpt, code);
-  const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
-  return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
-    (post.coverUrl
-      /* 1200×630, like the cover on the article itself: the attributes are
-         what reserves the box before the stylesheet arrives, and a square
-         one there reserved the wrong shape on the very page that shows a
-         dozen of them. */
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="1200" height="630"' + coverStyle(post.coverFocus, "list") + ">"
-      : "") +
-    '<span class="pre__nm">' + esc(title) + "</span>" +
-    (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
-    (excerpt ? "<p>" + esc(clip(excerpt, 140)) + "</p>" : "") +
-    "</a></li>";
-}
+/* The magazine (Dim, 02.11.2026): the listing and the article are drawn by
+   src/lib/blog-magazine.mjs — the same builders src/lib/blog-page.ts uses at
+   request time and the same markup app.js paints over this page. Every cover
+   is an <img> with its own width and height, or — for an older cover nobody
+   measured — the old 1200×630 frame with the owner's own crop for it
+   (coverImgStyle in src/lib/blog-cover.mjs, called inside the builders), so
+   its box is reserved before it loads. */
+const blogHrefOf = (seg) => (slug) => langPath(seg, "/blog/" + encodeURIComponent(slug) + "/");
 
 /* Every page carries the blog list for its language (#blogdata — a few
    hundred bytes: titles, excerpts and covers, never a body), and an article
@@ -1849,20 +1831,17 @@ function blogJsonScript(id, obj) {
   return '<script type="application/json" id="' + id + '">' +
     JSON.stringify(obj).replace(/<\//g, "<\\/") + "</script>";
 }
-function blogListItem(p, code) {
-  return {
-    slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
-    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), coverFocus: p.coverFocus,
-    tags: pickTags(p.tags, p.tagsI18n, code), publishedAt: p.publishedAt
-  };
-}
+// the shape /api/blog/ lists an article in — src/lib/blog-magazine.mjs publicListItem
+const blogListItem = (p, code) => publicListItem(p, code);
+const BLOG_FEATURED = BLOG_POSTS.filter(p => p.featured).slice(0, 3);
 const blogStamp = post => Date.parse(post.updatedAt || post.publishedAt || "") || 0;
 const BLOG_STAMP = BLOG_POSTS.reduce((m, p) => Math.max(m, blogStamp(p)), 0);
 function blogDataScript(code) {
   if (!BLOG_POSTS.length) return "";
   return blogJsonScript("blogdata", {
     lang: code, stamp: BLOG_STAMP,
-    posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10
+    posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10,
+    featured: BLOG_FEATURED.map(p => blogListItem(p, code))
   });
 }
 /* The ids of the sets this build found on sale, on every page, beside
@@ -1879,16 +1858,14 @@ function blogListPage(lang) {
   const t = T[code];
   const rest = "/blog/";
   const heading = tr("Блог", code, false);
-  const content = '<div class="wrap">' +
-    crumbs([[t.home, langPath(seg, "/")], [heading, null]]) +
-    '<section class="sec">' +
-      '<h1 class="display h1">' + esc(heading) + "</h1>" +
-      (BLOG_POSTS.length
-        ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + BLOG_POSTS.map((p, i) => blogTile(p, seg, code, t, i)).join("") + "</ul>"
-        : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
-    "</section>" +
-    langNav(seg, rest, t) +
-    "</div>";   // #blogdata rides on every page — fullPage()/patchedShell() add it
+  /* The featured story, «Блог» with the count, the chips' names and the grid
+     of every article (the chips filter only in app.js). No visible crumbs, as
+     drawn — the BreadcrumbList below still says where the page sits. */
+  const items = BLOG_POSTS.map(p => blogListItem(p, code));
+  const content = (BLOG_POSTS.length
+      ? homeStaticHTML({ posts: items, featured: BLOG_FEATURED.map(p => blogListItem(p, code)), code, hrefOf: blogHrefOf(seg), total: BLOG_POSTS.length })
+      : '<div class="wrap"><section class="sec"><h1 class="display h1">' + esc(heading) + '</h1><p class="muted">' + esc(t.blogEmpty) + "</p></section></div>") +
+    '<div class="wrap">' + langNav(seg, rest, t) + "</div>";   // #blogdata rides on every page — fullPage()/patchedShell() add it
 
   const head = seoHead("blog", "", code, SEO_CTX);
   return {
@@ -1983,10 +1960,17 @@ function blogPostPage(post, lang) {
      eight the owner PICKED, then whatever of those is still for sale — so a
      hidden product leaves a gap rather than pulling a ninth one up, and the
      static shelf and the live one hold the same products in the same order. */
+  /* Since the magazine (02.11.2026) the shelf at the foot holds every product
+     the article names — «Все N товаров» in the strip at the top jumps to it —
+     and the strip itself the first eight, small. */
   const featured = (post.products || [])
-    .slice(0, 8)
     .map(id => blogShelfProduct(id))
     .filter(Boolean);
+  const strip = featured.slice(0, 8).map(p => ({
+    href: langPath(seg, "/p/" + encodeURIComponent(p.id) + "/"),
+    // the name alone, as drawn (and as app.js bmagStripHTML writes it) — the brand is the shelf's
+    img: p.img, name: tr(p.name, code, true), price: priceLabel(p, t)
+  }));
 
   // this language's tags — never a Russian chip on the Estonian page (pickTags)
   const tags = pickTags(post.tags, post.tagsI18n, code);
@@ -1994,35 +1978,23 @@ function blogPostPage(post, lang) {
     ? '<ul class="blog__tags">' + tags.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>"
     : "";
 
-  const others = BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 3);
+  // «Читать дальше»: two of the same topic (src/lib/blog-magazine.mjs readNext)
+  const next = readNext(post, BLOG_POSTS).map(p => blogListItem(p, code));
+  const shown = publicPost(post, code, bodyHtml);
 
   // the same shape screenBlogPost() in app.js paints, so the swap at boot
-  // moves nothing: crumbs in the ordinary .wrap, the article in a reading
-  // column (.blog__read), the products and the other articles at full width
-  const content = '<div class="wrap">' +
-    crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
-    '<article class="sec blog__post blog__read">' +
-      (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630"' + coverStyle(post.coverFocus, "post") + ">"
-        : "") +
-      '<h1 class="display h1">' + esc(title) + "</h1>" +
-      (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
-      tagsHtml +
-      '<div class="acc__rich blog__body">' + bodyShown + "</div>" +
-    "</article>" +
+  // moves nothing: the cover, the reading column (.blog__read) with the
+  // article in it, and the products at full width under it
+  const content = articleStaticHTML({
+      post: shown, code, blogHref: langPath(seg, "/blog/"), hrefOf: blogHrefOf(seg), bodyShown,
+      strip, productCount: featured.length, next, tagsHTML: tagsHtml, shelfId: "post-products"
+    }) +
+    '<div class="wrap">' +
     (featured.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
-      : "") +
-    (others.length
-      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.otherPosts) + "</h2>" +
-        '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(p => blogTile(p, seg, code, t)).join("") + "</ul></section>"
+      ? '<section class="sec blog__shelf" id="post-products"><h2 class="display h1 blog__h2">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
       : "") +
     langNav(seg, rest, t) +
-    blogJsonScript("blogpost", { lang: code, stamp: blogStamp(post), post: {
-      slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
-      coverFocus: post.coverFocus, tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
-      author: post.author, publishedAt: post.publishedAt
-    } }) +
+    blogJsonScript("blogpost", { lang: code, stamp: blogStamp(post), post: shown }) +
     "</div>";
 
   return {

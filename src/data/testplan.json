@@ -945,7 +945,7 @@
       "risk": "low",
       "writes": false,
       "mark": "redo",
-      "markedAt": "2026-09-24T15:02:43.537Z",
+      "markedAt": "2026-11-02T08:39:38.000Z",
       "en": {
         "title": "The blog",
         "steps": [
@@ -965,6 +965,143 @@
           "A product off sale: not under the article, its name in the text no longer links."
         ],
         "why": "Articles bring people from Google for free; a broken one brings nobody."
+      }
+    },
+    {
+      "id": "shop-blog-magazine",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Блог как журнал — телефон",
+      "steps": [
+        "Открыть «Блог» с телефона.",
+        "Посмотреть верх страницы и пролистать вниз.",
+        "Под «Блог» нажать тему, например «Борода».",
+        "Нажать «Все».",
+        "Найти статью без обложки, если такая есть."
+      ],
+      "expect": [
+        "Наверху большая статья на тёмной фотографии с белой кнопкой «Читать статью».",
+        "Рядом с «Блог» написано, сколько статей.",
+        "Ниже статьи идут одной колонкой, каждая обложка своей формы.",
+        "После нажатия темы остались только статьи этой темы.",
+        "Статья без обложки — бежевая плитка с её заголовком.",
+        "Тёмной карточки «Спросите помощника» на телефоне нет."
+      ],
+      "why": "Блог переделан как журнал (Dim, 02.11.2026): большая статья, темы и обложки своей формы.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "The blog as a magazine — phone",
+        "steps": [
+          "Open «Блог» on a phone.",
+          "Look at the top of the page and scroll down.",
+          "Under «Блог» tap a topic, for example «Борода».",
+          "Tap «Все».",
+          "Find an article without a cover, if there is one."
+        ],
+        "expect": [
+          "On top, a big article on a dark photo with a white «Читать статью» button.",
+          "Next to «Блог» it says how many articles there are.",
+          "Below, the articles run in one column, each cover in its own shape.",
+          "After the tap only that topic's articles are left.",
+          "An article without a cover is a beige tile with its title.",
+          "No dark «Спросите помощника» card on the phone."
+        ],
+        "why": "The blog was redone as a magazine (Dim, 02.11.2026): a big story, topics and covers in their own shape."
+      }
+    },
+    {
+      "id": "shop-blog-magazine-desktop",
+      "area": "shop",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "any",
+      "title": "Блог как журнал — компьютер",
+      "steps": [
+        "Открыть «Блог» на компьютере.",
+        "Если наверху несколько статей — нажать полоски под кнопкой.",
+        "Посмотреть сетку статей.",
+        "В тёмной карточке нажать «Задать вопрос».",
+        "Переключить язык на ET и на EN."
+      ],
+      "expect": [
+        "Полоски листают большие статьи наверху, сами они не листаются.",
+        "Статьи стоят в три колонки, обложки своей формы, без обрезки.",
+        "Узкая или вертикальная обложка наверху стоит справа на бежевом, не растянута.",
+        "«Задать вопрос» открывает чат помощника.",
+        "На ET и EN темы, счётчик и кнопки на своём языке."
+      ],
+      "why": "Компьютер показывает другую раскладку блога: три колонки, листалку и карточку помощника.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "The blog as a magazine — desktop",
+        "steps": [
+          "Open «Блог» on a computer.",
+          "If there are several articles on top, press the bars under the button.",
+          "Look at the grid of articles.",
+          "In the dark card press «Задать вопрос».",
+          "Switch the language to ET and to EN."
+        ],
+        "expect": [
+          "The bars move the big stories on top; they never move by themselves.",
+          "Articles stand in three columns, covers in their own shape, not cut.",
+          "A narrow or upright cover on top stands on the right on beige, not stretched.",
+          "«Задать вопрос» opens the assistant chat.",
+          "In ET and EN the topics, the count and the buttons are in that language."
+        ],
+        "why": "A computer shows a different layout of the blog: three columns, the carousel and the assistant card."
+      }
+    },
+    {
+      "id": "shop-blog-article-page",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Страница статьи в новом виде",
+      "steps": [
+        "Открыть статью, в которой есть товары.",
+        "Посмотреть начало: обложку и строки под ней.",
+        "Пролистать полосу «В этой статье» и нажать «Все … товаров».",
+        "Вернуться наверх и пролистать статью до конца."
+      ],
+      "expect": [
+        "Обложка во всю ширину, над заголовком «Блог / тема».",
+        "Под заголовком: «Команда салона Rempire · дата · N мин чтения».",
+        "Анонс стоит первым абзацем, крупнее текста.",
+        "«В этой статье» показывает товары с фото и ценой «от …».",
+        "«Все … товаров» ведёт к карточкам товаров внизу.",
+        "В конце «Читать дальше» — две статьи, сначала той же темы."
+      ],
+      "why": "Статья нарисована по макету: товары видны сразу, а внизу — что читать дальше.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "The article page, redone",
+        "steps": [
+          "Open an article that has products.",
+          "Look at the start: the cover and the lines under it.",
+          "Scroll the «В этой статье» strip and press «Все … товаров».",
+          "Go back up and scroll the article to the end."
+        ],
+        "expect": [
+          "The cover is full width, «Блог / topic» above the title.",
+          "Under the title: «Команда салона Rempire · date · N мин чтения».",
+          "The excerpt stands first, larger than the text.",
+          "«В этой статье» shows the products with a photo and a «from …» price.",
+          "«Все … товаров» leads to the product cards at the bottom.",
+          "At the end «Читать дальше» — two articles, the same topic first."
+        ],
+        "why": "The article follows the design: the products are visible at once, and at the end what to read next."
       }
     },
     {
@@ -8779,14 +8916,14 @@
       ],
       "expect": [
         "Тринадцатый товар добавляется — запрета на 12 больше нет.",
-        "Над списком написано, что внизу покажем первые 8.",
-        "Внизу статьи — первые 8 товаров из списка."
+        "Над списком написано: вверху покажем первые 8, внизу все карточками.",
+        "Вверху статьи — первые 8 товаров, внизу — все 13 карточками."
       ],
       "why": "Статья про целую линейку называет больше двенадцати товаров, а список не давал добавить тринадцатый.",
       "risk": "low",
       "writes": true,
-      "mark": "new",
-      "markedAt": "2026-10-20T15:13:26.492Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T08:39:38.000Z",
       "en": {
         "title": "An article with more than 12 products",
         "steps": [
@@ -8796,8 +8933,8 @@
         ],
         "expect": [
           "The thirteenth product goes in — the limit of 12 is gone.",
-          "Above the list it says the first 8 are shown at the bottom.",
-          "The bottom of the article shows the first 8 products of the list."
+          "Above the list it says: the first 8 on top, all of them as cards below.",
+          "On top of the article the first 8 products, below all 13 as cards."
         ],
         "why": "An article about a whole range names more than twelve products, and the list would not take a thirteenth."
       }
@@ -8925,6 +9062,235 @@
           "The brand site opens in a new tab, as before."
         ],
         "why": "Eight links in the Kevin.Murphy shampoo article led to claudeusercontent.com, and shoppers landed on a dead page."
+      }
+    },
+    {
+      "id": "blog-topic-featured",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Тема статьи и «На главной блога»",
+      "steps": [
+        "«Блог» → открыть статью.",
+        "Посмотреть поле «Тема» и выбрать другую тему.",
+        "Включить «На главной блога».",
+        "Включить «На главной блога» ещё у трёх других статей по очереди.",
+        "Открыть «Блог» в магазине."
+      ],
+      "expect": [
+        "У статьи уже стоит тема, подобранная по тексту, с подсказкой под полем.",
+        "Выбранная тема сохраняется сама, подсказка исчезает.",
+        "Три статьи включаются, четвёртая — нет.",
+        "На четвёртой всплывает, какие три уже на главной.",
+        "Наверху блога в магазине — включённые статьи.",
+        "Под выбранной темой в магазине статья находится."
+      ],
+      "why": "Тема ставит статью под нужную кнопку блога, а «На главной» — в большую листалку наверху (не больше трёх).",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "The article's topic and «На главной блога»",
+        "steps": [
+          "«Блог» → open an article.",
+          "Look at the «Тема» field and choose another topic.",
+          "Switch «На главной блога» on.",
+          "Switch «На главной блога» on for three other articles, one by one.",
+          "Open «Блог» in the shop."
+        ],
+        "expect": [
+          "The article already has a topic picked from its text, with a hint under the field.",
+          "The chosen topic saves itself and the hint goes away.",
+          "Three articles switch on, the fourth does not.",
+          "On the fourth a message names the three already on top.",
+          "On top of the blog in the shop: the switched-on articles.",
+          "Under the chosen topic in the shop the article is there."
+        ],
+        "why": "The topic puts an article under the right blog chip; «На главной» puts it in the big carousel on top (three at most)."
+      }
+    },
+    {
+      "id": "blog-sources-box",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "«Написано по материалам» под статьёй",
+      "steps": [
+        "«Блог» → открыть опубликованную статью.",
+        "Нажать «+ Строка» и написать «Буклет Kevin.Murphy, PDF».",
+        "Открыть статью в магазине.",
+        "Включить «Показать в статье, из чего она написана».",
+        "Открыть статью в магазине ещё раз.",
+        "Выключить переключатель снова."
+      ],
+      "expect": [
+        "Пока переключатель выключен, блока «Написано по материалам» в статье нет.",
+        "После включения внизу статьи серый блок с этой строкой.",
+        "В блоке только названия — ни ссылки, ни файла.",
+        "После выключения блок снова пропал."
+      ],
+      "why": "Dim, 02.11.2026: показывать, из чего написана статья, — по желанию и только названиями.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "«Написано по материалам» under the article",
+        "steps": [
+          "«Блог» → open a published article.",
+          "Press «+ Строка» and type «Буклет Kevin.Murphy, PDF».",
+          "Open the article in the shop.",
+          "Switch «Показать в статье, из чего она написана» on.",
+          "Open the article in the shop again.",
+          "Switch it off again."
+        ],
+        "expect": [
+          "While the switch is off the article has no «Написано по материалам» box.",
+          "Once it is on, a grey box with that line under the article.",
+          "The box holds names only — no link, no file.",
+          "After switching off the box is gone again."
+        ],
+        "why": "Dim, 02.11.2026: showing what an article was written from is optional, and names only."
+      }
+    },
+    {
+      "id": "blog-materials-pdf",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Новая статья: PDF бренда в материалы",
+      "steps": [
+        "«Блог» → «+ Статья».",
+        "В «О чём статья» написать тему, например «Angel для тонких волос».",
+        "Нажать «PDF / файл» и выбрать каталог бренда.",
+        "Дождаться сетки страниц с фото и посмотреть подписи.",
+        "Снять или поставить галочки и нажать «Готово»."
+      ],
+      "expect": [
+        "Строка «Читаю PDF: страница … из …» идёт, телефон не зависает.",
+        "Под фото подпись — заголовок страницы перед ним, «… — фото».",
+        "Фото по теме уже отмечены.",
+        "После «Готово» в списке PDF с числом страниц и картинок.",
+        "Отмеченные картинки видны маленькими под строкой PDF."
+      ],
+      "why": "Статьи пишутся из материалов бренда; PDF читается на телефоне, сервер его не получает.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "New article: a brand PDF into the materials",
+        "steps": [
+          "«Блог» → «+ Статья».",
+          "In «О чём статья» type a topic, e.g. «Angel для тонких волос».",
+          "Press «PDF / файл» and pick the brand's catalogue.",
+          "Wait for the grid of photo pages and read the captions.",
+          "Tick or untick and press «Готово»."
+        ],
+        "expect": [
+          "The line «Читаю PDF: страница … из …» moves; the phone does not freeze.",
+          "Under each photo: the heading of the page before it, «… — фото».",
+          "Photos on the topic are ticked already.",
+          "After «Готово» the list shows the PDF with its pages and pictures.",
+          "The ticked pictures show small under the PDF's row."
+        ],
+        "why": "Articles are written from the brand's materials; the PDF is read on the phone, the server never gets it."
+      }
+    },
+    {
+      "id": "blog-materials-link-sample",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Материалы: фото, ссылка и образец",
+      "steps": [
+        "«Блог» → «+ Статья».",
+        "Нажать «Фото» и выбрать два фото салона.",
+        "Нажать «Ссылка», вставить адрес открытой страницы и «Добавить».",
+        "Нажать «Ссылка» и вставить https://localhost/admin.",
+        "Нажать «Текст / образец», вставить статью, отметить «Это образец», «Добавить»."
+      ],
+      "expect": [
+        "Фото загружаются и видны маленькими в строке.",
+        "У ссылки написано «страница прочитана».",
+        "Адрес localhost отказан: только открытые страницы в интернете.",
+        "У образца написано «образец — писать так же: тон и длина»."
+      ],
+      "why": "Сервер читает только открытые страницы — никогда свои внутренние адреса.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "Materials: photos, a link and a sample",
+        "steps": [
+          "«Блог» → «+ Статья».",
+          "Press «Фото» and pick two salon photos.",
+          "Press «Ссылка», paste the address of a public page, «Добавить».",
+          "Press «Ссылка» and paste https://localhost/admin.",
+          "Press «Текст / образец», paste an article, tick «Это образец», «Добавить»."
+        ],
+        "expect": [
+          "The photos upload and show small in their row.",
+          "The link says «страница прочитана».",
+          "The localhost address is refused: public pages only.",
+          "The sample says «образец — писать так же: тон и длина»."
+        ],
+        "why": "The server reads public pages only — never its own internal addresses."
+      }
+    },
+    {
+      "id": "blog-draft-from-materials",
+      "area": "goods",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Черновик из материалов и публикация",
+      "steps": [
+        "После «blog-materials-pdf» нажать «Написать черновик» и подождать около минуты.",
+        "На шаге «Черновик» выбрать каждую из трёх обложек по очереди.",
+        "Переключить RU, ET, EN.",
+        "У одной картинки нажать «Убрать», у одного товара — ×.",
+        "Нажать «Открыть весь текст в редакторе» и найти жёлтые фразы.",
+        "Вернуться, нажать «Как в магазине», затем «Опубликовать»."
+      ],
+      "expect": [
+        "Черновик открылся сам; ET и EN получают ✓ без нажатий.",
+        "Фото из PDF стоят под заголовком своего товара.",
+        "Над кнопками сказано, сколько фраз не нашлось в материалах.",
+        "В редакторе эти фразы жёлтые.",
+        "В опубликованной статье жёлтого нет, фразы остались.",
+        "Текст пересказан своими словами, не скопирован из PDF."
+      ],
+      "why": "ИИ пишет только из фактов материалов, но всё, что он не смог подтвердить, видно владельцу до публикации.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "A draft from the materials, then publish",
+        "steps": [
+          "After «blog-materials-pdf» press «Написать черновик» and wait about a minute.",
+          "On the «Черновик» step pick each of the three covers in turn.",
+          "Switch RU, ET, EN.",
+          "Press «Убрать» on one picture and × on one product.",
+          "Press «Открыть весь текст в редакторе» and find the yellow sentences.",
+          "Go back, press «Как в магазине», then «Опубликовать»."
+        ],
+        "expect": [
+          "The draft opened by itself; ET and EN get their ✓ with no tap.",
+          "The PDF photos stand under their own product's heading.",
+          "Above the buttons it says how many sentences the materials did not support.",
+          "In the editor those sentences are yellow.",
+          "In the published article nothing is yellow and the sentences remain.",
+          "The text is retold in its own words, not copied from the PDF."
+        ],
+        "why": "The AI writes only from the materials' facts, and whatever it could not support is shown to the owner before publishing."
       }
     },
     {
@@ -9877,6 +10243,90 @@
           "With no article open the assistant asks you to open it and changes nothing."
         ],
         "why": "An article written elsewhere could not be fixed through the assistant: its products stayed plain words, with no links into the shop."
+      }
+    },
+    {
+      "id": "ai-blog-topic",
+      "area": "ai",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Помощник и Claude ставят статье тему",
+      "steps": [
+        "Попросить помощника в панели: «напиши статью про масло для бороды зимой».",
+        "Применить карточку и дождаться черновика.",
+        "Попросить Claude (коннектор Rempire) сохранить черновик про шампуни, тему не называя.",
+        "Открыть оба черновика в «Блоге»."
+      ],
+      "expect": [
+        "У черновика помощника тема «Борода».",
+        "У черновика Claude тема подобрана по тексту — «Волосы».",
+        "Тему можно поменять в поле «Тема».",
+        "Ничего не опубликовано само."
+      ],
+      "why": "Помощник умеет то же, что Claude: оба ставят тему статьи, а без неё магазин подбирает её сам.",
+      "risk": "low",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:39:38.000Z",
+      "en": {
+        "title": "The assistant and Claude set an article's topic",
+        "steps": [
+          "Ask the panel assistant: «напиши статью про масло для бороды зимой».",
+          "Apply the card and wait for the draft.",
+          "Ask Claude (the Rempire connector) to save a draft about shampoos, naming no topic.",
+          "Open both drafts in «Блог»."
+        ],
+        "expect": [
+          "The assistant's draft has the topic «Борода».",
+          "Claude's draft has a topic picked from its text — «Волосы».",
+          "The topic can be changed in the «Тема» field.",
+          "Nothing was published by itself."
+        ],
+        "why": "The assistant does what Claude does: both set an article's topic, and without one the shop picks it."
+      }
+    },
+    {
+      "id": "ai-blog-materials",
+      "area": "ai",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Claude и Помощник пишут из материалов",
+      "steps": [
+        "Загрузить PDF в «Материалы» (blog-materials-pdf).",
+        "Попросить Claude (коннектор Rempire): «напиши статью из моего PDF с фото».",
+        "Открыть его черновик в «Блоге».",
+        "Попросить Помощника в панели: «напиши статью из этого PDF».",
+        "Подтвердить карточку."
+      ],
+      "expect": [
+        "Claude видит PDF и его картинки, черновик сохранён с фото из PDF.",
+        "Обложка черновика Claude — фото из PDF, своей формы.",
+        "Помощник открывает «Новая статья» и пишет черновик сам.",
+        "Ничего не опубликовано само."
+      ],
+      "why": "Одна библиотека материалов для панели, Помощника и Claude — Помощник умеет то же, что Claude.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:11:17.000Z",
+      "en": {
+        "title": "Claude and the assistant write from the materials",
+        "steps": [
+          "Upload a PDF into «Материалы» (blog-materials-pdf).",
+          "Ask Claude (the Rempire connector): «напиши статью из моего PDF с фото».",
+          "Open its draft in «Блог».",
+          "Ask the panel assistant: «напиши статью из этого PDF».",
+          "Confirm the card."
+        ],
+        "expect": [
+          "Claude sees the PDF and its pictures; the draft is saved with PDF photos.",
+          "The cover of Claude's draft is a PDF photo, in its own shape.",
+          "The assistant opens «Новая статья» and writes the draft itself.",
+          "Nothing was published by itself."
+        ],
+        "why": "One materials library for the panel, the assistant and Claude — the assistant does what Claude does."
       }
     },
     {
