@@ -4076,9 +4076,115 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    clickable (the button is drawn as a span) and it must not run away with the
    panel's height. */
 .adm-heroprev { border: 1px solid var(--a-rule); overflow: hidden; }
+/* the band's own heights (styles.css .hero), shrunk to the panel's column */
+.adm-heroprev .hero { --hero-h: 320px; --hero-ph: 240px; --hero-hm: 420px; }
 .adm-heroprev .hero__box { min-height: 0; padding: 20px 18px; }
 .adm-heroprev .hero__title { font-size: clamp(20px, 3vw, 28px); }
 .adm-heroprev .hero__art { min-height: 120px; }
+/* a computer's slide in a column a third as wide: the words keep to their side */
+@media (min-width: 768px) {
+  .adm-heroprev .hero__slide--wide .hero__inner,
+  .adm-heroprev .hero__slide--half .hero__inner { max-width: 46%; }
+}
+
+/* ---------- «Вид баннера»: the slide's look (heroLookHTML, 02.11.2026) ------
+   The design is Rempire/canvas-banner/Panel: three kinds as large radio rows
+   with a little drawing of each, the photo to tap for its focus point, the
+   words' side, and the result as a phone and as a computer would show it. */
+.adm-herolook { gap: 18px; }
+.adm-herokinds { display: flex; flex-direction: column; gap: 8px; }
+.adm-herokinds button {
+  min-height: 60px; display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 10px 12px; border: 1px solid var(--a-edge); background: var(--a-field); color: var(--a-ink);
+  font: inherit; cursor: pointer;
+}
+.adm-herokinds button[aria-checked="true"] { border: 2px solid var(--a-ink); padding: 9px 11px; }
+.adm-herokinds button[disabled] { opacity: .55; cursor: progress; }
+.adm-herokind__ic { position: relative; flex-shrink: 0; width: 56px; height: 34px; }
+.adm-herokind__ic i { position: absolute; display: block; height: 3px; }
+.adm-herokind__ic--wide { background: #594230; }
+.adm-herokind__ic--wide i:first-child { left: 5px; top: 12px; width: 20px; background: #fff; }
+.adm-herokind__ic--wide i:last-child { left: 5px; top: 18px; width: 13px; background: #fff; }
+.adm-herokind__ic--half { background: linear-gradient(to right, #edeae1 38%, #a99b88 58%, #8d8170 100%); }
+.adm-herokind__ic--half i:first-child { left: 5px; top: 13px; width: 18px; background: var(--a-ink); }
+.adm-herokind__ic--half i:last-child { display: none; }
+.adm-herokind__ic--product { background: #edeae1; }
+.adm-herokind__ic--product i:first-child { left: 5px; top: 13px; width: 18px; background: var(--a-ink); }
+.adm-herokind__ic--product i:last-child { right: 12px; top: 5px; width: 8px; height: 24px; background: #c9b8d6; box-shadow: -10px 3px 0 #e7c9c9; }
+.adm-herokind__w { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.adm-herokind__t { font-size: 15px; font-weight: 600; line-height: 20px; }
+.adm-herokind__s { font-size: 12.5px; line-height: 17px; color: var(--a-muted); }
+/* the whole photo, so a tap is a place on the picture and not on a crop of it */
+.adm-herofocus {
+  position: relative; display: inline-block; align-self: flex-start; max-width: 100%;
+  padding: 0; border: 0; background: #2a2618; line-height: 0; cursor: crosshair;
+}
+.adm-herofocus img { display: block; width: auto; height: auto; max-width: 100%; max-height: 260px; }
+.adm-herofocus__dot {
+  position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
+  border: 2px solid #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, .45), inset 0 0 0 2px rgba(0, 0, 0, .25);
+  pointer-events: none;
+}
+.adm-heroside { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.adm-heroside button {
+  min-height: 48px; border: 1px solid var(--a-edge); background: var(--a-field); color: var(--a-ink);
+  font: inherit; font-size: 15px; cursor: pointer;
+}
+.adm-heroside button[aria-checked="true"] { border: 2px solid var(--a-ink); font-weight: 600; }
+/* «Как будет видно»: a phone (72 × 104) and a computer (the rest of the row) */
+.adm-heromini { display: flex; gap: 10px; align-items: flex-end; }
+.adm-heromini__one { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.adm-heromini__one--dt { flex: 1 1 auto; min-width: 0; }
+.adm-heromini__f {
+  position: relative; display: block; overflow: hidden; isolation: isolate;
+  height: 104px; border: 1px solid var(--a-edge); background: #edeae1;
+}
+.adm-heromini__one--ph .adm-heromini__f { width: 72px; }
+.adm-heromini__one--dt .adm-heromini__f { width: 100%; }
+.adm-heromini__cap { font-size: 12px; color: var(--a-muted); }
+.adm-heromini__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.adm-heromini__art { position: absolute; }
+.adm-heromini__f::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.adm-heromini__b { position: absolute; z-index: 2; display: block; background: var(--a-ink); }
+/* full width: the scrim and white words — from the bottom on a phone, from the words' side on a computer */
+.adm-heromini__f--wide { background: #2a2618; }
+.adm-heromini__f--wide .adm-heromini__b { background: #fff; }
+.adm-heromini__f--wide .adm-heromini__b--s { background: rgba(255, 255, 255, .7); }
+.adm-heromini__one--ph .adm-heromini__f--wide::after { background: linear-gradient(to top, rgba(22, 20, 4, .8) 0%, rgba(22, 20, 4, 0) 55%); }
+.adm-heromini__one--ph .adm-heromini__f--wide .adm-heromini__b--t { left: 6px; bottom: 30px; width: 40px; height: 5px; }
+.adm-heromini__one--ph .adm-heromini__f--wide .adm-heromini__b--s { left: 6px; bottom: 22px; width: 30px; height: 3px; }
+.adm-heromini__one--ph .adm-heromini__f--wide .adm-heromini__b--c { left: 6px; bottom: 9px; width: 26px; height: 8px; }
+.adm-heromini__one--ph .adm-heromini__f--center .adm-heromini__b { left: 50%; transform: translateX(-50%); }
+.adm-heromini__one--dt .adm-heromini__f--wide::after { background: linear-gradient(to right, rgba(22, 20, 4, .8) 0%, rgba(22, 20, 4, .5) 30%, rgba(22, 20, 4, 0) 62%); }
+.adm-heromini__one--dt .adm-heromini__f--wide.adm-heromini__f--right::after { background: linear-gradient(to left, rgba(22, 20, 4, .8) 0%, rgba(22, 20, 4, .5) 30%, rgba(22, 20, 4, 0) 62%); }
+.adm-heromini__one--dt .adm-heromini__f--wide.adm-heromini__f--center::after { background: radial-gradient(ellipse 50% 80% at 50% 50%, rgba(22, 20, 4, .72), rgba(22, 20, 4, .15)); }
+.adm-heromini__one--dt .adm-heromini__f--wide .adm-heromini__b--t { left: 12px; top: 36px; width: 74px; height: 8px; }
+.adm-heromini__one--dt .adm-heromini__f--wide .adm-heromini__b--s { left: 12px; top: 52px; width: 54px; height: 4px; }
+.adm-heromini__one--dt .adm-heromini__f--wide .adm-heromini__b--c { left: 12px; top: 64px; width: 34px; height: 10px; }
+.adm-heromini__one--dt .adm-heromini__f--right .adm-heromini__b { left: auto; right: 12px; }
+.adm-heromini__one--dt .adm-heromini__f--right .adm-heromini__b--s { right: 32px; }
+.adm-heromini__one--dt .adm-heromini__f--right .adm-heromini__b--c { right: 52px; }
+.adm-heromini__one--dt .adm-heromini__f--center .adm-heromini__b { left: 50%; transform: translateX(-50%); }
+/* half width: the square on top of a phone, the right 62 % of a computer, fading into the beige */
+.adm-heromini__one--ph .adm-heromini__f--half .adm-heromini__img { bottom: auto; height: 72px; }
+.adm-heromini__one--ph .adm-heromini__f--half::after { top: 44px; bottom: auto; height: 28px; background: linear-gradient(to top, #edeae1, rgba(237, 234, 225, 0)); }
+.adm-heromini__one--ph .adm-heromini__f--half .adm-heromini__b--t { left: 6px; top: 78px; width: 40px; height: 5px; }
+.adm-heromini__one--ph .adm-heromini__f--half .adm-heromini__b--s { display: none; }
+.adm-heromini__one--ph .adm-heromini__f--half .adm-heromini__b--c { left: 6px; top: 88px; width: 26px; height: 8px; }
+.adm-heromini__one--dt .adm-heromini__f--half .adm-heromini__img { left: 38%; width: 62%; }
+.adm-heromini__one--dt .adm-heromini__f--half::after { left: 38%; background: linear-gradient(to right, #edeae1 0%, rgba(237, 234, 225, .75) 7%, rgba(237, 234, 225, 0) 24%); }
+.adm-heromini__one--dt .adm-heromini__f--half .adm-heromini__b--t { left: 10px; top: 36px; width: 26%; height: 8px; }
+.adm-heromini__one--dt .adm-heromini__f--half .adm-heromini__b--s { left: 10px; top: 52px; width: 20%; height: 4px; }
+.adm-heromini__one--dt .adm-heromini__f--half .adm-heromini__b--c { left: 10px; top: 64px; width: 34px; height: 10px; }
+/* the cut-out on the beige: on top of a phone, on the right of a computer */
+.adm-heromini__one--ph .adm-heromini__f--product .adm-heromini__art { left: 4px; right: 4px; top: 4px; height: 62px; }
+.adm-heromini__one--ph .adm-heromini__f--product .adm-heromini__b--t { left: 6px; top: 72px; width: 40px; height: 5px; }
+.adm-heromini__one--ph .adm-heromini__f--product .adm-heromini__b--s { left: 6px; top: 81px; width: 30px; height: 3px; opacity: .6; }
+.adm-heromini__one--ph .adm-heromini__f--product .adm-heromini__b--c { left: 6px; top: 89px; width: 26px; height: 8px; }
+.adm-heromini__one--dt .adm-heromini__f--product .adm-heromini__art { right: 4%; top: 10%; bottom: 8%; width: 42%; }
+.adm-heromini__one--dt .adm-heromini__f--product .adm-heromini__b--t { left: 12px; top: 36px; width: 74px; height: 8px; }
+.adm-heromini__one--dt .adm-heromini__f--product .adm-heromini__b--s { left: 12px; top: 52px; width: 54px; height: 4px; opacity: .6; }
+.adm-heromini__one--dt .adm-heromini__f--product .adm-heromini__b--c { left: 12px; top: 64px; width: 34px; height: 10px; }
 
 /* ---------- О компании: the opening-hours grid ----------------------------- */
 

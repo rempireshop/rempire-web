@@ -19,6 +19,7 @@ import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
 import { cleanDelivery } from "@/lib/delivery";
 import { cleanHomeBrands } from "@/lib/home-brands";
+import { cleanHeroSetting } from "@/lib/hero";
 import { mergeParcel } from "@/lib/shipping/parcel";
 import { cleanBankFilter } from "@/lib/payments/methods";
 import { stampUnpaidFloor } from "@/lib/flows";
@@ -206,6 +207,10 @@ export async function PUT(req: Request) {
       /* «Строка брендов» (src/lib/home-brands.ts): the brands the home page's
          row leaves out — names only, one line each. */
       if (key === "home_brands") value = cleanHomeBrands(value);
+      /* «Баннер» (src/lib/hero.ts): the slides as the panel writes them, and
+         each slide's look — kind, focus point, text side, picture size — only
+         when it is one the storefront can draw. null stays «стандартный». */
+      if (key === "hero") value = cleanHeroSetting(value);
       /* What this PUT replaces, read just before it does: the audit row keeps
          it (`prev`, db/migrations/207_audit_prev.sql) so «Вернуть» works from
          any device. A key never written before is recorded as null. A read

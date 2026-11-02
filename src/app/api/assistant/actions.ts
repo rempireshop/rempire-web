@@ -20,6 +20,7 @@ import { NO_SUBSECTION, readSubsection } from "@/lib/subsections";
 import { PAGE_TEXT_CATS, PAGE_TEXT_LIMITS } from "@/lib/page-texts.mjs";
 import { matchBrands } from "@/lib/home-brands";
 import { CARRIER_CHOICE_COUNTRIES, carrierCost } from "@/lib/shipping/country-prices";
+import { heroLayout, type HeroFocus, type HeroKind, type HeroSide } from "@/lib/hero";
 
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
 export const INFO_PAGES = ["shipping", "returns", "terms", "contact", "privacy"];
@@ -134,6 +135,12 @@ export function sanitizeHero(raw: unknown, known: Set<string>): object | null {
     out.go = heroGo(row.go, known) || "cat:all";
     out.image = heroImage(row.image, known);
     out.on = row.on !== false;
+    /* The slide's look (02.11.2026, src/lib/hero.ts): «Фото на всю ширину» /
+       «на половину» / «Товар», the point that stays in the frame, the side
+       the words sit on, the picture's size. Kept only when valid and only
+       when sent — a slide the model copied through keeps the look the owner
+       gave it, and one it wrote from nothing is drawn by its picture. */
+    Object.assign(out, heroLayout(row));
     slides.push(out);
   }
   if (!slides.length) return null;
@@ -1505,6 +1512,11 @@ type HeroBrief = {
   go: string;
   image: string;
   on: boolean;
+  kind?: HeroKind;
+  side?: HeroSide;
+  focus?: HeroFocus;
+  w?: number;
+  h?: number;
 };
 
 /**
@@ -1549,6 +1561,8 @@ export function briefHero(raw: unknown): HeroBrief[] {
       go: clean(row.go, 80),
       image: clean(row.image, 300),
       on: row.on !== false,
+      // its look, when it has one — numbers and words from a closed list, so nothing here can read as prose
+      ...heroLayout(row),
     };
   });
 }

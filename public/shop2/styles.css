@@ -690,10 +690,24 @@ body:has(.stickybar) .ftr {
    display swapping, not an entrance animation) because the animation did not
    re-run when autoplay flipped the attribute, and display swapping blanked
    the hero for the whole transition. */
-.hero { position: relative; display: grid; background: var(--shell); overflow: hidden; touch-action: pan-y; }
+.hero {
+  position: relative; display: grid; background: var(--shell); overflow: hidden; touch-action: pan-y;
+  /* Three kinds of slide since 02.11.2026 (heroSlideHTML in app.js — the
+     design is Rempire/canvas-banner): a full-width photo, a photo on the
+     right part of the band, and the cut-out on the beige. They share ONE
+     height per screen, so a slide of one kind followed by one of another —
+     or the shop's own banner replaced by the owner's when /api/overrides
+     lands — never moves the page under the band. The slides stack in one
+     grid cell, so the band is its tallest slide; these are the heights each
+     kind is laid out to fill. */
+  --hero-h: clamp(420px, 41.7vw, 600px);       /* a computer: 600 px at 1440 */
+  --hero-ph: min(100vw, 480px);                /* a phone: the square of a half-width photo */
+  --hero-hm: calc(var(--hero-ph) + 190px);     /* a phone: the band — that square and two lines of title under it */
+}
 .hero__slide {
   grid-area: 1 / 1; opacity: 0; visibility: hidden;
   transition: opacity .5s var(--ease), visibility 0s linear .5s;
+  position: relative; display: flex; flex-direction: column; min-width: 0;
 }
 .hero__slide[data-on="1"] {
   opacity: 1; visibility: visible;
@@ -702,14 +716,16 @@ body:has(.stickybar) .ftr {
 .hero__box {
   max-width: var(--maxw); margin: 0 auto; width: 100%;
   padding: var(--s5) var(--gutter) 46px;
-  min-height: 380px;
+  flex: 1 1 auto; min-height: 380px;
+  /* above a slide's photo layer (.hero__photo), which is positioned */
+  position: relative;
   display: flex; align-items: center; gap: clamp(16px, 4vw, 56px);
 }
 .hero__inner { flex: 1 1 46ch; max-width: 52ch; min-width: 0; }
 /* --muted on the beige hero is 4.46:1 — just under AA. Darkened for this one
    surface rather than darkening --muted everywhere. */
 .hero__eyebrow { font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: #5c5947; margin-bottom: 8px; }
-.hero__title { font-family: Oswald, sans-serif; font-size: clamp(23px, 4.4vw, 40px); text-transform: uppercase; letter-spacing: .02em; line-height: 1.08; margin-bottom: 10px; }
+.hero__title { font-family: Oswald, sans-serif; font-size: clamp(23px, 4.4vw, 40px); text-transform: uppercase; letter-spacing: .02em; line-height: 1.08; margin-bottom: 10px; overflow-wrap: break-word; }
 .hero__sub { font-size: 14px; color: rgba(28, 26, 0, .78); margin-bottom: 18px; }
 .hero__art {
   flex: 0 1 36%; align-self: stretch; min-height: 210px;
@@ -769,35 +785,194 @@ body:has(.stickybar) .ftr {
    They sit over the PHOTO, not over the middle of the slide. The phone's
    hero is a column — picture on top, words underneath (.hero__art has
    order: -1 below) — so «the vertical centre» lands in the eyebrow line and
-   the arrow clipped the first letter of «TALLINN · MARDI 1 · EST 2018». The
-   band below is the picture's own height, written the same way .hero__art
-   writes it, with .hero__box's top padding above it. */
+   the arrow clipped the first letter of «TALLINN · MARDI 1 · EST 2018».
+
+   Each kind has its picture somewhere else (02.11.2026), so the arrows are
+   88 px tall and stand at the middle of the slide-on-screen's picture — the
+   cut-out's, the square's, the upper part of a full-width photo — which the
+   band says through its data-kind (paintSlide in app.js). They are moved
+   there with a transform, never with `top`: a slide of another kind coming
+   round must not count as the page shifting. */
 @media (max-width: 767px) {
+  .hero { --hero-ay: 100px; }
+  .hero[data-kind="half"] { --hero-ay: calc(var(--hero-ph) / 2 - 44px); }
+  .hero[data-kind="wide"] { --hero-ay: calc(var(--hero-hm) * .3 - 44px); }
   .hero__arrow {
-    width: 44px; top: var(--s5); transform: none;
-    height: 44vw; max-height: 230px; min-height: 150px;
+    width: 44px; height: 88px; top: 0;
+    transform: translate(var(--hero-ax, 0px), var(--hero-ay));
   }
   .hero__arrow svg { width: 13px; height: 29px; }
   .hero__arrow--prev { left: 0; }
   .hero__arrow--next { right: 0; }
   /* …so the hover nudge cannot put the -50% back */
-  .hero__arrow--prev:hover { transform: translateX(-2px); }
-  .hero__arrow--next:hover { transform: translateX(2px); }
+  .hero__arrow--prev:hover { transform: translate(-2px, var(--hero-ay)); }
+  .hero__arrow--next:hover { transform: translate(2px, var(--hero-ay)); }
 }
 
-/* UX fix 1: dot indicators removed (staging review) — arrows, swipe and
-   autoplay carry the carousel on their own; the .hero__dots rules they used
-   to draw are gone with them. */
+/* UX fix 1 took the dot indicators out (staging review). The design of
+   02.11.2026 draws them again on a computer — and only there: a phone has
+   the arrows and the swipe. Each dot is a real button (heroDotsHTML) that
+   goes to its slide: 44 × 44 to hit, the bar drawn inside it. */
+.hero__dots { display: none; }
+@media (min-width: 768px) {
+  .hero__dots {
+    position: absolute; left: 50%; bottom: 2px; z-index: 3; transform: translateX(-50%);
+    display: flex; gap: 4px;
+  }
+  .hero__dot {
+    width: 44px; height: 44px; padding: 0; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--ink);
+  }
+  .hero__dot::before { content: ""; width: 28px; height: 3px; background: currentColor; opacity: .3; transition: opacity .2s var(--ease); }
+  .hero__dot:hover::before { opacity: .65; }
+  .hero__dot[aria-current="true"]::before { opacity: 1; }
+}
 
 /* Phone: photo on top, words underneath — a wash behind the text made the
-   product unreadable and the merch shot unrecognisable. */
+   product unreadable and the merch shot unrecognisable. (A full-width photo
+   is the one exception, and it is a photograph, not a product: its words sit
+   on a scrim — below.) Every kind fills the same band, --hero-hm. */
 @media (max-width: 767px) {
-  .hero__box { flex-direction: column; align-items: stretch; gap: 14px; min-height: 0; padding-bottom: 50px; }
+  .hero__slide { min-height: var(--hero-hm); }
+  .hero__box { flex-direction: column; align-items: stretch; gap: 12px; min-height: 0; padding: 20px 20px 26px; }
   /* the column flex axis is vertical here, so the desktop `flex: 1 1 46ch`
      would set a 46ch *height* and blow the hero out to ~680px */
-  .hero__inner { flex: 0 0 auto; max-width: none; }
-  .hero__art { order: -1; flex: 0 0 auto; width: 100%; height: 44vw; max-height: 230px; min-height: 150px; }
-  .hero__title { font-size: 26px; }
+  .hero__inner { flex: 0 0 auto; max-width: none; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hero__eyebrow, .hero__title, .hero__sub { margin: 0; }
+  .hero__eyebrow { font-size: 11px; }
+  .hero__title { font-size: 30px; line-height: 1.04; }
+  .hero__sub { font-size: 15px; line-height: 1.45; }
+  .hero__inner .btn { margin-top: 4px; min-height: 48px; padding: 0 26px; font-size: 15px; }
+  /* the cut-out on top takes what the words leave of the band (Kind3Phone) */
+  .hero__art { order: -1; flex: 1 1 auto; width: 100%; height: auto; min-height: 200px; }
+}
+
+/* ---- «Фото на всю ширину» and «Фото на половину» (Dim, 02.11.2026) ------
+   The photograph is a layer of its own under the words (.hero__photo),
+   cropped by object-fit around the point the owner tapped in the panel —
+   object-position comes inline from the slide (heroImg in app.js). The
+   frame is sized by these rules before the file arrives, so nothing moves
+   while it loads. */
+.hero__photo { display: block; overflow: hidden; }
+.hero__photo > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; object-position: 50% 50%;
+}
+.hero__photo::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+
+/* A full-width photo: the whole band, a dark scrim on the words' side, white
+   words and a white button. The dark under it is what shows while the photo
+   is on its way. */
+.hero__slide--wide { background: #2a2618; }
+.hero__slide--wide .hero__photo { position: absolute; inset: 0; }
+.hero__slide--wide .hero__eyebrow { color: rgba(255, 255, 255, .86); }
+.hero__slide--wide .hero__title { color: #fff; }
+.hero__slide--wide .hero__sub { color: rgba(255, 255, 255, .9); }
+.hero__slide--wide .btn { background: #fff; border-color: #fff; color: var(--ink); }
+.hero__slide--wide.hero__slide--center .hero__inner { text-align: center; }
+/* the carousel's controls over a photograph: white, with a dark shadow */
+.hero[data-kind="wide"] .hero__arrow,
+.hero[data-kind="wide"] .hero__dot { color: #fff; }
+.hero[data-kind="wide"] .hero__arrow svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6)); }
+.hero[data-kind="wide"] .hero__dot::before { opacity: .45; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
+.hero[data-kind="wide"] .hero__dot:hover::before { opacity: .75; }
+.hero[data-kind="wide"] .hero__dot[aria-current="true"]::before { opacity: 1; }
+
+/* A half-width photo: the words on the beige, in ink, with the dark button
+   — the photo fades into the beige where it meets them. */
+.hero__slide--half .hero__photo { position: relative; }
+
+@media (min-width: 768px) {
+  .hero__slide { min-height: var(--hero-h); }
+  .hero__box { min-height: 0; padding-block: 40px; }
+  .hero__eyebrow { font-size: 12px; margin-bottom: 16px; }
+  .hero__title { font-size: clamp(30px, 4.3vw, 62px); line-height: 1; margin-bottom: 16px; text-wrap: balance; }
+  .hero__sub { font-size: clamp(15px, 1.25vw, 18px); line-height: 1.5; max-width: 34ch; margin-bottom: 24px; }
+  .hero__inner .btn { min-height: 54px; padding: 0 32px; font-size: 15px; }
+
+  /* the cut-out: a little larger than it was and on the right (Kind3Desk),
+     standing on a soft shadow */
+  .hero__slide--product .hero__inner { max-width: 540px; }
+  .hero__slide--product .hero__art {
+    flex: 0 1 44%; align-self: center; margin-left: auto;
+    height: calc(var(--hero-h) * .72); min-height: 0;
+  }
+
+  /* the scrim comes from the words' side and reaches as far as the words
+     do, measured from the shop's own column (--maxw), not from the window */
+  .hero__slide--wide .hero__photo::after {
+    background: linear-gradient(to right,
+      rgba(22, 20, 4, .8) 0,
+      rgba(22, 20, 4, .62) calc(max(0px, 50% - var(--maxw) / 2) + 380px),
+      rgba(22, 20, 4, .18) calc(max(0px, 50% - var(--maxw) / 2) + 700px),
+      rgba(22, 20, 4, 0) calc(max(0px, 50% - var(--maxw) / 2) + 900px));
+  }
+  .hero__slide--wide.hero__slide--right .hero__photo::after {
+    background: linear-gradient(to left,
+      rgba(22, 20, 4, .8) 0,
+      rgba(22, 20, 4, .62) calc(max(0px, 50% - var(--maxw) / 2) + 380px),
+      rgba(22, 20, 4, .18) calc(max(0px, 50% - var(--maxw) / 2) + 700px),
+      rgba(22, 20, 4, 0) calc(max(0px, 50% - var(--maxw) / 2) + 900px));
+  }
+  .hero__slide--wide.hero__slide--center .hero__photo::after {
+    background: radial-gradient(ellipse 46% 80% at 50% 50%, rgba(22, 20, 4, .74) 0%, rgba(22, 20, 4, .5) 55%, rgba(22, 20, 4, .16) 100%);
+  }
+  .hero__slide--wide .hero__inner { flex: 0 1 470px; max-width: 470px; }
+  .hero__slide--wide.hero__slide--center .hero__box { justify-content: center; }
+  .hero__slide--wide.hero__slide--right .hero__box { justify-content: flex-end; }
+
+  /* the photo fills the right 62 % of the band at its full height and fades
+     into the beige at its left edge (Kind2Desk) */
+  .hero__slide--half .hero__photo { position: absolute; top: 0; bottom: 0; left: 38%; right: 0; }
+  .hero__slide--half .hero__photo::after {
+    background: linear-gradient(to right, var(--shell) 0%, rgba(237, 234, 225, .75) 7%, rgba(237, 234, 225, 0) 24%);
+  }
+  .hero__slide--half .hero__inner { flex: 0 1 auto; max-width: min(460px, 36vw); }
+  /* smaller than the board's 56 px: Russian has the long words, and one that
+     cannot wrap («ПРОФЕССИОНАЛЬНЫЙ», Renat's own first slide) ran 140 px into
+     the photo at 56 — at 3vw it ends where the fade begins */
+  .hero__slide--half .hero__title { font-size: clamp(28px, 3vw, 46px); line-height: 1.02; }
+  /* the left arrow is on the beige, the right one and the dots on the photo */
+  .hero[data-kind="half"] .hero__arrow--next,
+  .hero[data-kind="half"] .hero__dot { color: #fff; }
+  .hero[data-kind="half"] .hero__arrow--next svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6)); }
+  .hero[data-kind="half"] .hero__dot::before { opacity: .55; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
+  .hero[data-kind="half"] .hero__dot[aria-current="true"]::before { opacity: 1; }
+}
+/* No floor shadow under the cut-out, although Kind3* draws one: the
+   catalogue's cut-outs carry transparent margins of their own, different on
+   every photo, so a shadow at the foot of the frame floated a hand's width
+   under the soap on the first screenshot. The product stays centred in its
+   frame, as it always was. */
+
+@media (max-width: 767px) {
+  /* a full-width photo: the words at its foot, over a scrim from the bottom (Main) */
+  .hero__slide--wide .hero__photo::after {
+    background: linear-gradient(to top, rgba(22, 20, 4, .86) 0%, rgba(22, 20, 4, .62) 30%, rgba(22, 20, 4, 0) 58%);
+  }
+  .hero__slide--wide .hero__box { justify-content: flex-end; padding-bottom: 28px; }
+  /* 36 px as drawn, less on a narrow phone: a sixteen-letter word has to fit the line */
+  .hero__slide--wide .hero__title { font-size: min(36px, calc((100vw - 40px) / 10)); }
+  .hero__slide--wide.hero__slide--center .hero__inner { align-items: center; }
+  /* a half-width photo: a full-width square fading into the beige at its
+     foot, the words under it — eyebrow, title and button (Kind2Phone) */
+  .hero__slide--half .hero__photo { flex: 0 0 auto; height: var(--hero-ph); }
+  .hero__slide--half .hero__photo::after {
+    top: auto; height: 90px;
+    background: linear-gradient(to top, var(--shell) 0%, rgba(237, 234, 225, .75) 30%, rgba(237, 234, 225, 0) 100%);
+  }
+  .hero__slide--half .hero__box { padding-top: 12px; justify-content: center; }
+  .hero__slide--half .hero__sub { display: none; }
+  /* over a photograph on a phone: both arrows of a half-width one, too */
+  .hero[data-kind="half"] .hero__arrow { color: #fff; }
+  .hero[data-kind="half"] .hero__arrow svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .55)); }
+}
+
+/* the crossfade, the arrows' nudge and the dots' fade are motion: none of it
+   for a visitor who asked for less (autoplay already stops — restartHero) */
+@media (prefers-reduced-motion: reduce) {
+  .hero__slide, .hero__slide[data-on="1"] { transition: none; }
+  .hero__arrow, .hero__dot::before { transition: none; }
 }
 
 /* ---------- drawers ---------- */

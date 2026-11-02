@@ -1051,6 +1051,25 @@
       "Ссылка на картинку — или выберите фото товара ниже": "Pildi link — või vali allpool toote foto",
       "https://… или /shop/img/…": "https://… või /shop/img/…",
       "Предпросмотр": "Eelvaade", "Баннер: стандартный": "Bänner: tavaline",
+      // «Вид баннера» — the three looks of a slide (heroLookHTML, 02.11.2026)
+      "Вид баннера": "Bänneri tüüp",
+      "Фото на всю ширину": "Foto kogu laiuses", "горизонтальное фото, текст поверх": "horisontaalne foto, tekst peal",
+      "Фото на половину": "Foto poolel laiusel", "квадратное фото справа, переходит в бежевый": "ruudukujuline foto paremal, sulandub beeži",
+      "фон убирается сам, товар на бежевом": "taust eemaldatakse ise, toode beežil taustal",
+      "Загрузили горизонтальное фото — вид выбран сам. Можно поменять.": "Laadisite üles horisontaalse foto — tüüp valiti ise. Saab muuta.",
+      "Загрузили фото — вид выбран сам. Можно поменять.": "Laadisite üles foto — tüüp valiti ise. Saab muuta.",
+      "Для этого вида нужна своя фотография — загрузите её выше. Пока слайд стоит как «Товар».":
+        "Selle tüübi jaoks on vaja oma fotot — laadige see üles eespool. Seni on slaid tüübiga „Toode“.",
+      "На фото остался фон.": "Fotol on taust alles.",
+      "Фон здесь убрать не получится — загрузите фото товара уже без фона.": "Tausta siin eemaldada ei saa — laadige üles toote foto juba ilma taustata.",
+      "Убираем фон… это до полутора минут.": "Eemaldame tausta… see võtab kuni poolteist minutit.",
+      "Фон убран ✓": "Taust eemaldatud ✓",
+      "Главное на фото": "Foto tähtsaim osa",
+      "Главное на фото: нажмите на то, что должно остаться в кадре": "Foto tähtsaim osa: vajutage sellele, mis peab kaadrisse jääma",
+      "Нажмите на то, что должно остаться в кадре.": "Vajutage sellele, mis peab kaadrisse jääma.",
+      "Где текст": "Kus on tekst", "По центру": "Keskel",
+      "Под текстом фото само затемняется — белый текст читается на любом снимке.": "Teksti all tumeneb foto ise — valget teksti saab lugeda igal pildil.",
+      "Как будет видно": "Kuidas see välja näeb", "Компьютер": "Arvuti",
       "Ничего не нашлось — попробуйте другое слово.": "Midagi ei leitud — proovi teist sõna.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“.",
       "Текст письма сохранён ✓": "Kirja tekst salvestatud ✓",
@@ -4697,6 +4716,25 @@
       "Ссылка на картинку — или выберите фото товара ниже": "Picture link — or pick a product photo below",
       "https://… или /shop/img/…": "https://… or /shop/img/…",
       "Предпросмотр": "Preview", "Баннер: стандартный": "Banner: default",
+      // «Вид баннера» — the three looks of a slide (heroLookHTML, 02.11.2026)
+      "Вид баннера": "Banner type",
+      "Фото на всю ширину": "Full-width photo", "горизонтальное фото, текст поверх": "landscape photo, words on top",
+      "Фото на половину": "Half-width photo", "квадратное фото справа, переходит в бежевый": "square photo on the right, fading into beige",
+      "фон убирается сам, товар на бежевом": "the background goes by itself, the product on beige",
+      "Загрузили горизонтальное фото — вид выбран сам. Можно поменять.": "You uploaded a landscape photo — the type was picked for you. You can change it.",
+      "Загрузили фото — вид выбран сам. Можно поменять.": "You uploaded a photo — the type was picked for you. You can change it.",
+      "Для этого вида нужна своя фотография — загрузите её выше. Пока слайд стоит как «Товар».":
+        "This type needs a photo of your own — upload it above. Until then the slide shows as “Product”.",
+      "На фото остался фон.": "The photo still has its background.",
+      "Фон здесь убрать не получится — загрузите фото товара уже без фона.": "The background cannot be removed here — upload a product photo that has none.",
+      "Убираем фон… это до полутора минут.": "Removing the background… this takes up to a minute and a half.",
+      "Фон убран ✓": "Background removed ✓",
+      "Главное на фото": "The main thing in the photo",
+      "Главное на фото: нажмите на то, что должно остаться в кадре": "The main thing in the photo: tap what must stay in the frame",
+      "Нажмите на то, что должно остаться в кадре.": "Tap what must stay in the frame.",
+      "Где текст": "Where the words go", "По центру": "Centre",
+      "Под текстом фото само затемняется — белый текст читается на любом снимке.": "The photo darkens under the words by itself — white text reads on any picture.",
+      "Как будет видно": "How it will look", "Компьютер": "Computer",
       "Ничего не нашлось — попробуйте другое слово.": "Nothing found — try another word.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”.",
       "Текст письма сохранён ✓": "The letter's text is saved ✓",
@@ -8231,6 +8269,8 @@
     [/^ИИ-чат для покупателей: (.+)$/, { ET: "AI-vestlus ostjatele: $1", EN: "The AI chat for shoppers: $1" }],
     [/^Наборы на сайте: (.+)$/, { ET: "Komplektid saidil: $1", EN: "Sets on the site: $1" }],
     [/^Набор «(.+)»: (.+)$/, { ET: "Komplekt «$1»: $2", EN: "Set “$1”: $2" }],
+    // the dots under the home banner (heroDotsHTML): «Баннер 2» on its button
+    [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
     [/^Баннер: 1 слайд, первый — «(.*)»$/,
       { ET: "Bänner: 1 slaid, esimene — «$1»", EN: "Banner: 1 slide, the first is “$1”" }],
     [/^Баннер: (\d+) (?:слайд|слайда|слайдов), первый — «(.*)»$/,
@@ -8732,13 +8772,15 @@
      slide the page opens on. A pasted URL gets an empty alt — the slide's own
      heading stands right beside it and says what it is about. */
   var HERO_GIFT_IMG = "gift";
-  function heroArt(image, cls, o) {
+  function heroArt(image, cls, o, s) {
     if (String(image || "") === HERO_GIFT_IMG) {
       return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
         tower("hero__giftmark") + "</span>";
     }
     var u = heroUrl(image);
     if (u) {
+      // the slide itself when the caller has it: its picture's size buys the srcset (heroImg)
+      if (o && s) return '<span class="' + (cls || "hero__art") + '">' + heroImg(s, "(min-width: 768px) 44vw, 100vw", o.first, false, true) + "</span>";
       if (o) return '<span class="' + (cls || "hero__art") + '">' + photoImg(u, "", o.first) + "</span>";
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
         esc(u).replace(/'/g, "%27") + '\')"></span>';
@@ -8747,32 +8789,116 @@
     if (o) return photo(hp, 0, cls || "hero__art", photoAlt(hp), o.first);
     return media(hp, 0, cls || "hero__art");
   }
+  /* ---------- the three looks of a slide (Dim, 02.11.2026) ----------------
+     Renat uploaded whole photographs as banners, and the banner was built for
+     a product cut-out: a photo with its own background stood as a small
+     framed picture on the beige band. So a slide says how its picture is
+     shown (the design is Rempire/canvas-banner — Main/Desktop, Kind2*, Kind3*):
+
+       "wide"     a landscape photo across the whole band, cropped around its
+                  focus point, a dark scrim on the words' side (from the
+                  bottom on a phone), white words and a white button
+       "half"     a square or upright photo filling the right ~62 % of the
+                  band and fading into the beige; on a phone it is a full-width
+                  square fading into the beige at its foot, words under it
+       "product"  the cut-out on the beige — the banner as it always was
+
+     The same rules as src/lib/hero.ts, line for line (tests/hero-kinds.test.ts
+     runs both on one table): a slide without `kind` is read off its picture,
+     so the banners stored before this look as they did — a catalogue product
+     or a cut-out is "product", a photograph of his own is "half" — and only a
+     photograph can fill the band at all. `focus` is the point that stays in
+     the frame, `side` where the words of a "wide" slide sit, `w`/`h` the
+     uploaded picture's size. */
+  var HERO_KINDS = ["wide", "half", "product"], HERO_SIDES = ["left", "center", "right"];
+  var HERO_WIDE_RATIO = 1.3;
+  function heroKindOfImage(image) {
+    var url = heroUrl(image);
+    if (!url) return "product";
+    var path = url.replace(/[?#].*$/, "");
+    if (/-cutout\.(png|webp)$/i.test(path) || /\/shop\/img\//.test(path) || /\/products\//.test(path)) return "product";
+    return "half";
+  }
+  function heroKind(s) {
+    if (!s || !heroUrl(s.image)) return "product";
+    return HERO_KINDS.indexOf(s.kind) >= 0 ? s.kind : heroKindOfImage(s.image);
+  }
+  /** What the panel picks by itself for a photo just uploaded. */
+  function heroKindForUpload(w, h) {
+    w = Number(w); h = Number(h);
+    if (!(w > 0) || !(h > 0)) return "half";
+    return w / h >= HERO_WIDE_RATIO ? "wide" : "half";
+  }
+  function heroSide(s) { return s && HERO_SIDES.indexOf(s.side) >= 0 ? s.side : "left"; }
+  function heroFocus(s) {
+    var f = s && s.focus;
+    var ok = function (n) { return typeof n === "number" && isFinite(n) && n >= 0 && n <= 1; };
+    return f && ok(f.x) && ok(f.y) ? { x: f.x, y: f.y } : { x: 0.5, y: 0.5 };
+  }
+  function heroPos(s) {
+    var f = heroFocus(s);
+    return Math.round(f.x * 1000) / 10 + "% " + Math.round(f.y * 1000) / 10 + "%";
+  }
+  /** A picture's side in pixels as src/lib/hero.ts keeps it, or 0. */
+  function heroPx(v) { return typeof v === "number" && v % 1 === 0 && v >= 1 && v <= 20000 ? v : 0; }
+  /* The photograph of a slide as an <img>, cropped by its focus point. When
+     the slide knows its picture's size and the picture is one of the bucket's
+     own banner uploads, the upload's small copy (…-thumb.webp, 400 px on the
+     long side — src/app/api/admin/upload) is offered beside it, so a small
+     screen does not fetch 1600 px; the size is the panel's, from the upload's
+     answer, and a picture it does not know gets no srcset at all. width and
+     height are the file's, for its ratio — the frame around it is what sizes
+     it (CSS), before the file arrives, so nothing moves while it loads.
+     `first` is the slide the page opens on: fetched first, never lazy.
+     `flat` (the panel) asks for neither. `noPos` for a cut-out, which stands
+     whole on the beige rather than being cropped. */
+  function heroImg(s, sizes, first, flat, noPos) {
+    var u = heroUrl(s.image), w = heroPx(s.w), h = heroPx(s.h), set = "";
+    if (w && h && Math.max(w, h) > 400 && u.indexOf(",") < 0 && /\/hero\/[^?#]+\.webp$/.test(u)) {
+      var k = 400 / Math.max(w, h);
+      set = ' srcset="' + esc(u.replace(/\.webp$/, "-thumb.webp")) + " " + Math.max(1, Math.round(w * k)) + "w, " +
+        esc(u) + " " + w + 'w" sizes="' + sizes + '"';
+    }
+    return '<img src="' + esc(u) + '"' + set + ' alt=""' + (w && h ? ' width="' + w + '" height="' + h + '"' : "") +
+      (noPos ? "" : ' style="object-position:' + heroPos(s) + '"') +
+      (flat ? "" : first ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"') + ">";
+  }
   /* `flat` draws the admin preview: the same markup with a dead button, so a
      click inside the panel cannot navigate the owner out of the panel. On the
-     shop the button is a link to the page it opens (linkHref). */
+     shop the button is a link to the page it opens (linkHref).
+
+     "product" keeps the slide it always was — the words, then the picture
+     (.hero__art). "wide" and "half" put the photograph in a layer of its own
+     (.hero__photo) under the column of words; styles.css places it per kind. */
   function heroSlideHTML(s, i, cur, flat) {
-    var cta = heroT(s.cta);
-    return '<div class="hero__slide" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">' +
-      '<div class="hero__box">' +
-        '<div class="hero__inner"><div class="hero__eyebrow">' + esc(heroT(s.eyebrow)) + "</div>" +
+    var cta = heroT(s.cta), kind = heroKind(s);
+    var words = '<div class="hero__inner"><div class="hero__eyebrow">' + esc(heroT(s.eyebrow)) + "</div>" +
         '<h2 class="hero__title">' + esc(heroT(s.title)) + "</h2>" +
         '<p class="hero__sub">' + esc(heroT(s.sub)) + "</p>" +
         (cta
           ? (flat ? '<span class="btn">' + esc(cta) + "</span>"
                   : '<a class="btn" href="' + heroHref(s.go) + '" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</a>")
-          : "") + "</div>" +
-        heroArt(s.image, null, flat ? null : { first: i === cur }) +
-      "</div></div>";
+          : "") + "</div>";
+    var head = '<div class="hero__slide hero__slide--' + kind + (kind === "wide" ? " hero__slide--" + heroSide(s) : "") +
+      '" data-kind="' + kind + '" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">';
+    if (kind === "product") {
+      return head + '<div class="hero__box">' + words +
+        heroArt(s.image, null, flat ? null : { first: i === cur }, s) + "</div></div>";
+    }
+    return head +
+      '<span class="hero__photo">' + heroImg(s, kind === "wide" ? "100vw" : "(min-width: 768px) 62vw, 100vw", i === cur, flat) + "</span>" +
+      '<div class="hero__box">' + words + "</div></div>";
   }
   function heroHTML() {
     var list = heroSlides();
     if (!list.length) return "";                       // every slide switched off
     var cur = ((S.slide % list.length) + list.length) % list.length;
-    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
+    /* data-kind is the slide on screen's look: the arrows and dots are the
+       carousel's, not a slide's, and they turn white over a photograph and
+       stay ink on the beige (paintSlide moves it with the slide). */
+    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель" data-kind="' + heroKind(list[cur]) + '">' +
       list.map(function (s, i) { return heroSlideHTML(s, i, cur, false); }).join("") +
-      // one slide is a picture, not a carousel — no arrows, no autoplay
-      // UX fix 1: dot indicators removed (staging review) — arrows, swipe and
-      // autoplay still work off S.slide alone, no dots required
+      // one slide is a picture, not a carousel — no arrows, no dots, no autoplay
       (list.length > 1
         /* A drawn chevron, not the ‹ › glyphs: Ренат, 20.09.2026 — «убрать
            квадратное оформление и оставить просто стрелки и чуть их
@@ -8780,10 +8906,23 @@
            A glyph's weight and height are the font's to decide and a plate
            behind it was the only thing making it legible; a stroked path is
            sized here and carries its own shadow instead. */
-        ? '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">' + chevron("left") + "</button>" +
-          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">' + chevron("right") + "</button>"
+        ? '<button class="hero__arrow hero__arrow--prev" type="button" data-slide="-1" aria-label="Предыдущий баннер">' + chevron("left") + "</button>" +
+          '<button class="hero__arrow hero__arrow--next" type="button" data-slide="1" aria-label="Следующий баннер">' + chevron("right") + "</button>" +
+          heroDotsHTML(list.length, cur)
         : "") +
       "</section>";
+  }
+  /* The dots are back on a computer (the design of 02.11.2026 draws them
+     there, and only there — a phone has the arrows and the swipe). They were
+     taken out in the staging review as decoration; now each is a real button
+     that goes to its slide, 44 px tall to hit, with the bar drawn inside it. */
+  function heroDotsHTML(n, cur) {
+    var out = "";
+    for (var i = 0; i < n; i++) {
+      out += '<button class="hero__dot" type="button" data-slideto="' + i + '" aria-label="Баннер ' + (i + 1) +
+        '" aria-current="' + (i === cur) + '"></button>';
+    }
+    return '<div class="hero__dots">' + out + "</div>";
   }
 
   /* Free-shipping floors per country, quoted by the announce bar, the footer,
@@ -34374,6 +34513,13 @@
         });
         o[f] = keep;
       });
+      /* the slide's look (heroKind, src/lib/hero.ts heroLayout): each field
+         only when it is there and valid, the size as a pair */
+      if (HERO_KINDS.indexOf(s.kind) >= 0) o.kind = s.kind;
+      if (HERO_SIDES.indexOf(s.side) >= 0) o.side = s.side;
+      var fc = s.focus, fOk = function (n) { return typeof n === "number" && isFinite(n) && n >= 0 && n <= 1; };
+      if (fc && fOk(fc.x) && fOk(fc.y)) o.focus = { x: Math.round(fc.x * 1000) / 1000, y: Math.round(fc.y * 1000) / 1000 };
+      if (heroPx(s.w) && heroPx(s.h)) { o.w = s.w; o.h = s.h; }
       out.slides.push(o);
     });
     return out;
@@ -34569,6 +34715,10 @@
         /* media: a picture of the owner's own — «+ своя» */
         galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
       "</div>" +
+      /* the slide's look (02.11.2026): which of the three, the point that
+         stays in the frame, the words' side, and how it will look on a phone
+         and a computer — repainted in place (paintHeroLook) */
+      '<div class="adm-form adm-herolook" data-herolook>' + heroLookHTML(s) + "</div>" +
       '<div class="adm-field"><span>Предпросмотр</span>' +
         '<div class="adm-heroprev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div></div>" +
       admSetMoreHTML("slide",
@@ -34761,8 +34911,159 @@
     if (goHint) { goHint.textContent = "Кнопка ведёт на: " + heroGoLabel(go); translateTree(goHint); }
     var thumb = document.querySelector('[data-herorow="' + i + '"] .adm-thumb');
     if (thumb) { thumb.innerHTML = heroArt(s.image, "ph"); translateTree(thumb); }
+    paintHeroLook();
     paintHeroPreview();
   }
+
+  /* ---- «Вид баннера»: the slide's look, in the panel (02.11.2026) ---------
+     The design is Rempire/canvas-banner/Panel: three kinds to pick from, the
+     photo to tap for the point that must stay in the frame, the words' side
+     for a full-width photo, and two small pictures of the result — a phone
+     and a computer. Every press saves at once, like the rest of the banner
+     (admHeroCommit, «Вернуть» on its toast).
+
+     An upload picks the kind by itself (heroUpload): a landscape photo is
+     «Фото на всю ширину», anything else «Фото на половину» — and says so in
+     one line. «Товар» is the cut-out: chosen for a photo of his own, the
+     background goes (heroCutout — the gallery's ✂, same route, same model).
+     Only a photograph can fill the band: a catalogue product or the gift
+     card is always drawn as «Товар», and the line under the kinds says so
+     instead of the choice silently doing nothing. */
+  var HERO_KIND_OPTS = [
+    ["wide", "Фото на всю ширину", "горизонтальное фото, текст поверх"],
+    ["half", "Фото на половину", "квадратное фото справа, переходит в бежевый"],
+    ["product", "Товар", "фон убирается сам, товар на бежевом"]
+  ];
+  var HERO_SIDE_OPTS = [["left", "Слева"], ["center", "По центру"], ["right", "Справа"]];
+  /** The slide a reply is for — by id, so an answer that lands after the owner moved on still finds its own slide. */
+  function heroSlideById(id) {
+    var list = heroDraft().slides;
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
+    return null;
+  }
+  /** The kind the owner chose — his own word when there is one, else what the shop draws. */
+  function heroKindPicked(s) { return HERO_KINDS.indexOf(s.kind) >= 0 ? s.kind : heroKind(s); }
+  /** A photo of his own the background can still be taken from: a banner upload that is not a cut-out yet. */
+  function heroCanCut(s) {
+    var u = heroUrl(s && s.image);
+    return !!u && /\/hero\/[^?#]+\.(webp|png|jpe?g)$/i.test(u) && heroKindOfImage(u) !== "product";
+  }
+  var HERO_CUT = { id: "" };
+  function heroKindHint(s) {
+    var picked = heroKindPicked(s), shown = heroKind(s);
+    if (HERO_CUT.id && HERO_CUT.id === s.id) return { t: "Убираем фон… это до полутора минут." };
+    if (S.heroKindAuto && S.heroKindAuto === s.id && picked === shown) {
+      return { t: shown === "wide" ? "Загрузили горизонтальное фото — вид выбран сам. Можно поменять." : "Загрузили фото — вид выбран сам. Можно поменять." };
+    }
+    if (picked !== shown) return { t: "Для этого вида нужна своя фотография — загрузите её выше. Пока слайд стоит как «Товар».", warn: true };
+    if (picked === "product" && heroCanCut(s)) {
+      return MEDIA.cutout
+        ? { t: "На фото остался фон.", cut: true }
+        : { t: "Фон здесь убрать не получится — загрузите фото товара уже без фона.", warn: true };
+    }
+    return { t: "" };
+  }
+  function heroLookHTML(s) {
+    var picked = heroKindPicked(s), shown = heroKind(s), side = heroSide(s), hint = heroKindHint(s);
+    var f = heroFocus(s), photo = shown === "wide" || shown === "half", busy = HERO_CUT.id === s.id;
+    var radio = function (attr, v, cur, inner) {
+      return '<button type="button" role="radio" aria-checked="' + (v === cur) + '" ' + attr + '="' + v + '"' +
+        (busy ? " disabled" : "") + ">" + inner + "</button>";
+    };
+    return '<div class="adm-field"><span>Вид баннера</span>' +
+        '<div class="adm-herokinds" role="radiogroup" aria-label="Вид баннера">' +
+          HERO_KIND_OPTS.map(function (o) {
+            return radio("data-herokind", o[0], picked,
+              '<span class="adm-herokind__ic adm-herokind__ic--' + o[0] + '" aria-hidden="true"><i></i><i></i></span>' +
+              '<span class="adm-herokind__w"><span class="adm-herokind__t">' + o[1] + '</span><span class="adm-herokind__s">' + o[2] + "</span></span>");
+          }).join("") + "</div>" +
+        '<span class="adm-hint' + (hint.warn ? " adm-hint--warn" : "") + '" data-herokindhint' + (hint.t ? "" : " hidden") + ">" + esc(hint.t) +
+          (hint.cut ? ' <button class="adm-link" type="button" data-herocut>Убрать фон</button>' : "") + "</span>" +
+      "</div>" +
+      // always in the tree, hidden when it does not apply — see heroFormHTML on the index-based morph
+      '<div class="adm-field" data-herofocusbox' + (photo ? "" : " hidden") + "><span>Главное на фото</span>" +
+        '<button class="adm-herofocus" type="button" data-herofocus aria-label="Главное на фото: нажмите на то, что должно остаться в кадре">' +
+          (photo ? '<img src="' + esc(heroUrl(s.image)) + '" alt="" draggable="false">' +
+            '<span class="adm-herofocus__dot" aria-hidden="true" style="left:' + Math.round(f.x * 1000) / 10 + "%;top:" + Math.round(f.y * 1000) / 10 + '%"></span>' : "") +
+        "</button>" +
+        '<span class="adm-hint">Нажмите на то, что должно остаться в кадре.</span>' +
+      "</div>" +
+      '<div class="adm-field" data-herosidebox' + (shown === "wide" ? "" : " hidden") + "><span>Текст</span>" +
+        '<div class="adm-heroside" role="radiogroup" aria-label="Где текст">' +
+          HERO_SIDE_OPTS.map(function (o) { return radio("data-heroside", o[0], side, o[1]); }).join("") + "</div>" +
+        '<span class="adm-hint">Под текстом фото само затемняется — белый текст читается на любом снимке.</span>' +
+      "</div>" +
+      '<div class="adm-field"><span>Как будет видно</span>' +
+        '<div class="adm-heromini" data-heromini>' + heroMiniHTML(s) + "</div>" +
+      "</div>";
+  }
+  /* The two small pictures under «Как будет видно» — the design's own: the
+     slide's photo framed as a phone and as a computer would frame it (its
+     focus point, the scrim, the fade), with bars where the words go. Drawn by
+     admin.css from the kind and side classes; nothing in them is a control. */
+  function heroMiniHTML(s) {
+    var kind = heroKind(s), side = heroSide(s);
+    var art = kind === "product"
+      ? '<span class="adm-heromini__art">' + heroArt(s.image, "ph") + "</span>"
+      : '<img class="adm-heromini__img" src="' + esc(heroUrl(s.image)) + '" alt="" style="object-position:' + heroPos(s) + '">';
+    var bars = '<i class="adm-heromini__b adm-heromini__b--t"></i><i class="adm-heromini__b adm-heromini__b--s"></i><i class="adm-heromini__b adm-heromini__b--c"></i>';
+    var one = function (dev, cap) {
+      return '<span class="adm-heromini__one adm-heromini__one--' + dev + '">' +
+        '<span class="adm-heromini__f adm-heromini__f--' + kind + (kind === "wide" ? " adm-heromini__f--" + side : "") + '" aria-hidden="true">' + art + bars + "</span>" +
+        '<span class="adm-heromini__cap">' + cap + "</span></span>";
+    };
+    return one("ph", "Телефон") + one("dt", "Компьютер");
+  }
+  /** The look block of the open slide, again — after a kind, a side, a point or a picture changed. No render(): the
+      owner's place on the page and the button he pressed stay where they are. */
+  function paintHeroLook() {
+    var box = document.querySelector("[data-herolook]");
+    var s = heroDraft().slides[S.heroEdit];
+    if (!box || !s) return;
+    var a = document.activeElement, keep = "";
+    if (a && box.contains(a)) {
+      keep = a.hasAttribute("data-herokind") ? '[data-herokind="' + a.getAttribute("data-herokind") + '"]'
+        : a.hasAttribute("data-heroside") ? '[data-heroside="' + a.getAttribute("data-heroside") + '"]'
+        : a.hasAttribute("data-herofocus") ? "[data-herofocus]" : a.hasAttribute("data-herocut") ? "[data-herokind=\"product\"]" : "";
+    }
+    box.innerHTML = heroLookHTML(s);
+    translateTree(box);
+    var back = keep && box.querySelector(keep);
+    if (back && back.focus) back.focus({ preventScroll: true });
+  }
+  /* «Товар» for a banner photo of his own: the background is taken away by
+     the same route as the gallery's ✂ (POST /api/admin/upload/cutout/, which
+     takes a banner photo since 02.11.2026 and answers with a WebP cut-out of
+     it). Up to ninety seconds (src/lib/photo-cutout.ts); the line under the
+     kinds says so meanwhile. The answer is written to the slide by its id and
+     only while it still shows the photo that was cut — the owner may have
+     picked another picture by then. The original stays in the bucket. */
+  function heroCutout(s) {
+    if (!s || HERO_CUT.id || !MEDIA.cutout || !heroCanCut(s)) return false;
+    var job = { id: s.id, url: heroUrl(s.image) }, out = false;
+    HERO_CUT.id = job.id;
+    paintHeroLook();
+    apiSend("/api/admin/upload/cutout/", "POST", { url: job.url }).then(function (r) {
+      // signed out meanwhile — the panel's own sign-in screen, as the gallery's ✂ does
+      if (r.status === 401) { SRV.admin = false; out = true; return; }
+      var sl = heroSlideById(job.id);
+      if (r.status === 200 && r.body && r.body.ok && r.body.url && sl && sl.image === job.url) {
+        sl.image = String(r.body.url);
+        if (heroPx(r.body.width) && heroPx(r.body.height)) { sl.w = r.body.width; sl.h = r.body.height; }
+        else { delete sl.w; delete sl.h; }
+        sl.kind = "product";
+        delete sl.focus;
+        admHeroCommit("Фон убран ✓");
+      } else if (sl && sl.image === job.url) toast("Не получилось убрать фон — фото осталось как было");
+    }).catch(function () { toast("Не получилось убрать фон — фото осталось как было"); }).then(function () {
+      HERO_CUT.id = "";
+      if (out) { render(); return; }
+      paintHeroPick();
+    });
+    return true;
+  }
+  /** «Главное на фото» moved by the arrow keys: drawn at once, saved when the keys stop. */
+  var HERO_FOCUS_T = 0;
   /* «Перевести с русского» on the slide's ET or EN strip: the four Russian
      texts through the same translate task the product editor uses
      (POST /api/admin/ai/text, task "translate"), written into the other two
@@ -39501,15 +39802,34 @@
     };
     step();
   }
+  /* The photo becomes the open slide's picture and is saved at once. Its look
+     is chosen by itself from its shape (Dim, 02.11.2026): a landscape photo
+     — at least 1.3 times wider than tall — is «Фото на всю ширину», anything
+     else «Фото на половину», and the line under «Вид баннера» says so; one
+     tap changes it. A slide the owner had already set to «Товар» keeps it,
+     and the photo's background is taken away (heroCutout). The size from the
+     upload's answer goes with it (the storefront's srcset), and the point
+     tapped on the old photo does not: 62 % across one picture is not 62 %
+     across another. */
   function heroUpload(files) {
     if (!files || !files.length) return;
     UP.err = ""; UP.total = 1; UP.busy = 1; render();
+    var forId = (heroDraft().slides[S.heroEdit] || {}).id;
     uploadPhoto(files[0], "hero").then(function (r) {
       UP.busy = 0; UP.total = 0;
-      var s = heroDraft().slides[S.heroEdit];
-      if (s) { s.image = r.url; admHeroCommit(""); }
+      var s = (forId && heroSlideById(forId)) || heroDraft().slides[S.heroEdit], cut = false;
+      if (s) {
+        cut = s.kind === "product";
+        s.image = r.url;
+        delete s.focus;
+        if (heroPx(r.width) && heroPx(r.height)) { s.w = r.width; s.h = r.height; }
+        else { delete s.w; delete s.h; }
+        if (!cut) { s.kind = heroKindForUpload(r.width, r.height); S.heroKindAuto = s.id; }
+        admHeroCommit("");
+      }
       render();
       toast("Картинка загружена ✓");
+      if (cut) heroCutout(s);
     }).catch(upFail);
   }
   // blog: same one-file upload as the banner, but onto the post draft's cover
@@ -48293,7 +48613,7 @@
       return { RU: String(o.RU || ""), ET: String(o.ET || ""), EN: String(o.EN || "") };
     }
     return heroConf().slides.slice(0, 5).map(function (s) {
-      return {
+      var o = {
         id: String(s.id || ""),
         eyebrow: tri(s.eyebrow),
         title: tri(s.title),
@@ -48303,6 +48623,11 @@
         image: String(s.image || ""),
         on: s.on !== false
       };
+      /* …and its look (02.11.2026): «Фото на всю ширину» has to come back as
+         one, with its focus point and side, when the model copies the slide.
+         As stored; the route keeps only what is valid (briefHero → heroLayout). */
+      ["kind", "side", "focus", "w", "h"].forEach(function (k) { if (s[k] !== undefined && s[k] !== null) o[k] = s[k]; });
+      return o;
     });
   }
   /* content: the same idea for the shop's own details — «поменяй телефон»
@@ -52786,6 +53111,12 @@
       s.setAttribute("data-on", i === S.slide ? "1" : "0");
       s.setAttribute("aria-hidden", String(i !== S.slide));
     });
+    /* the carousel's own controls follow the slide on screen: their colour
+       (the section's data-kind — white over a photograph) and the dot that
+       says which one it is */
+    var band = document.querySelector(".hero[aria-roledescription]");
+    if (band && slides[S.slide]) band.setAttribute("data-kind", slides[S.slide].getAttribute("data-kind") || "product");
+    document.querySelectorAll(".hero__dot").forEach(function (d, i) { d.setAttribute("aria-current", String(i === S.slide)); });
     return true;
   }
   function setSlide(n, manual) {
@@ -52836,7 +53167,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -52992,6 +53323,8 @@
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
+    // a dot under the banner: straight to its slide
+    if (d.slideto !== undefined) { setSlide(Number(d.slideto), true); return; }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
     // a language from the switcher — setLang() says what changes with it
     if (d.lang) {
@@ -54276,8 +54609,8 @@
       // the row's own button toggles: a second tap is «Свернуть» (heroRowHTML)
       if (S.heroEdit === Number(d.heroedit)) { heroCloseEdit(); return; }
       admAutosaveFlush();   // the slide left owes its last words first
-      S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
-      UP.err = ""; ensureMedia();   // media: the «Загрузить» button under the picture
+      S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = ""; S.heroKindAuto = "";
+      UP.err = ""; ensureMedia();   // media: the «Загрузить» button under the picture — and whether ✂ can run (MEDIA.cutout)
       render(); heroOpenEdit(); return;
     }
     if (d.heroclose !== undefined) { heroCloseEdit(); return; }
@@ -54330,8 +54663,45 @@
     // page stays where the finger is (paintHeroPick — defect 10, 10.09.2026)
     if (d.heroimg) {
       var hImg = heroDraft().slides[S.heroEdit];
+      // another picture: the old one's size and focus point are not its (heroUpload)
+      if (hImg && hImg.image !== d.heroimg) { delete hImg.w; delete hImg.h; delete hImg.focus; S.heroKindAuto = ""; }
       if (hImg) { hImg.image = d.heroimg; admHeroCommit(); }
       paintHeroPick(); return;
+    }
+    /* «Вид баннера» (02.11.2026): one of the three, saved at once. «Товар»
+       for a photo of his own takes its background away (heroCutout). */
+    if (d.herokind) {
+      var hk = heroDraft().slides[S.heroEdit];
+      if (!hk || HERO_KINDS.indexOf(d.herokind) < 0 || HERO_CUT.id) return;
+      S.heroKindAuto = "";
+      if (heroKindPicked(hk) !== d.herokind) {
+        hk.kind = d.herokind;
+        admHeroCommit();
+        if (d.herokind === "product") heroCutout(hk);
+      }
+      paintHeroPick(); return;
+    }
+    if (d.herocut !== undefined) { heroCutout(heroDraft().slides[S.heroEdit]); return; }
+    // «Текст: слева / по центру / справа» — a full-width photo's words
+    if (d.heroside) {
+      var hs = heroDraft().slides[S.heroEdit];
+      if (!hs || HERO_SIDES.indexOf(d.heroside) < 0) return;
+      if (heroSide(hs) !== d.heroside) { hs.side = d.heroside; admHeroCommit(); }
+      paintHeroLook(); paintHeroPreview(); return;
+    }
+    /* «Главное на фото»: the point tapped on the whole photo is the point the
+       crop keeps (object-position). The photo is drawn whole here, so a tap
+       is a place on the picture, not on a crop of it. Enter / Space carry no
+       position (detail 0) — the arrow keys move the point instead. */
+    if (d.herofocus !== undefined) {
+      var hf = heroDraft().slides[S.heroEdit], hfImg = t.querySelector("img");
+      if (!hf || !hfImg || e.detail === 0) return;
+      var hfR = hfImg.getBoundingClientRect();
+      if (!hfR.width || !hfR.height) return;
+      var hfAt = function (v) { return Math.round(Math.max(0, Math.min(1, v)) * 1000) / 1000; };
+      hf.focus = { x: hfAt((e.clientX - hfR.left) / hfR.width), y: hfAt((e.clientY - hfR.top) / hfR.height) };
+      admHeroCommit();
+      paintHeroLook(); paintHeroPreview(); return;
     }
     if (d.herogopick) {
       var hGo = heroDraft().slides[S.heroEdit];
@@ -56082,7 +56452,9 @@
     }
     else if (t.matches("[data-heroimgurl]")) {
       var uSl = heroDraft().slides[S.heroEdit], uV = t.value.trim();
-      if (uSl && uV) { uSl.image = uV; admHeroCommit(); paintHeroPick(); }   // in place — see paintHeroPick
+      // in place — see paintHeroPick; a pasted picture's size is not known (heroImg)
+      if (uSl && uV && uSl.image !== uV) { delete uSl.w; delete uSl.h; delete uSl.focus; S.heroKindAuto = ""; }
+      if (uSl && uV) { uSl.image = uV; admHeroCommit(); paintHeroPick(); }
     }
     /* media: the file picker — «Загрузить фото» in the goods editor and the
        banner's own button both land here. On a phone the same input offers the
@@ -56298,6 +56670,21 @@
     e.preventDefault();
   }
   document.addEventListener("keydown", coverKey);
+  /* «Главное на фото» without a finger: the arrow keys move the banner's
+     focus point 5 % a press, drawn at once and saved when the keys stop. */
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !t.matches("[data-herofocus]")) return;
+    var step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    var s = heroDraft().slides[S.heroEdit];
+    if (!step || !s) return;
+    e.preventDefault();
+    var f = heroFocus(s), at = function (v) { return Math.round(Math.max(0, Math.min(1, v)) * 1000) / 1000; };
+    s.focus = { x: at(f.x + step[0] * 0.05), y: at(f.y + step[1] * 0.05) };
+    paintHeroLook(); paintHeroPreview();
+    clearTimeout(HERO_FOCUS_T);
+    HERO_FOCUS_T = setTimeout(function () { admHeroCommit(); }, 700);
+  });
 
   /* media: drag-and-drop onto the same zone. Desktop only in practice — a
      phone has no drag — and it never swallows a drop outside the panel. */

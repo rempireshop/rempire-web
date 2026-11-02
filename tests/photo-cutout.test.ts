@@ -172,10 +172,37 @@ describe("photo cutout", () => {
     expect(calls.some((c) => c.url === CUTOUT_ENDPOINT)).toBe(false);
   });
 
-  it("refuses a key that is not a product photo of ours, and anyone without the cookie", async () => {
+  /* «Товар» in the banner editor (02.11.2026): a banner photo's background
+     goes by the same route — and comes back as a WebP, not the model's
+     full-size PNG, because it is the first thing the home page paints. Its
+     small copy follows the uploads' own rule (thumbKey), which the
+     storefront's srcset counts on. */
+  it("cuts out a banner photo too, as a WebP next to it", async () => {
     const { POST } = await import("@/app/api/admin/upload/cutout/route");
     const calls = stubNet();
-    expect((await POST(post({ key: "hero/1-a.webp" }))).status).toBe(400);
+    const res = await POST(post({ key: "hero/1700000000000-bottle.webp" }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      ok: true,
+      key: "hero/1700000000000-bottle-cutout.webp",
+      url: "https://media.rempireshop.com/hero/1700000000000-bottle-cutout.webp",
+      thumbUrl: "https://media.rempireshop.com/hero/1700000000000-bottle-cutout-thumb.webp",
+    });
+    expect(body.width).toBeGreaterThan(0);
+    expect(body.height).toBeGreaterThan(0);
+    const puts = calls.filter((c) => c.method === "PUT").map((c) => c.url);
+    expect(puts).toEqual([
+      "https://acc123.r2.cloudflarestorage.com/rempire-media/hero/1700000000000-bottle-cutout.webp",
+      "https://acc123.r2.cloudflarestorage.com/rempire-media/hero/1700000000000-bottle-cutout-thumb.webp",
+    ]);
+  });
+
+  it("refuses a key that is not a product or banner photo of ours, and anyone without the cookie", async () => {
+    const { POST } = await import("@/app/api/admin/upload/cutout/route");
+    const calls = stubNet();
+    expect((await POST(post({ key: "blog/1-a.webp" }))).status).toBe(400);
+    expect((await POST(post({ key: "reviews/x/1-a.webp" }))).status).toBe(400);
     expect((await POST(post({ key: "../etc/passwd" }))).status).toBe(400);
     expect((await POST(post({ url: "https://evil.example/products/x/1.webp" }))).status).toBe(400);
     expect((await POST(post({ key: KEY }, ""))).status).toBe(401);

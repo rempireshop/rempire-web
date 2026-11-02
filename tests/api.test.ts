@@ -149,6 +149,23 @@ describe("api routes", () => {
     expect(back.settings.hero).toBeNull();
   });
 
+  /* The slide's look (02.11.2026, src/lib/hero.ts): kept when the storefront
+     can draw it, dropped field by field when it cannot — whoever writes it. */
+  it("PUT /api/admin/settings keeps a slide's look and drops one the storefront cannot draw", async () => {
+    const { PUT } = await import("@/app/api/admin/settings/route");
+    const { GET: publicGet } = await import("@/app/api/overrides/route");
+    const slide = { id: "s1", eyebrow: {}, title: { RU: "Борода" }, sub: {}, cta: { RU: "Смотреть" }, go: "cat:beard", image: "https://img.example.com/hero/1-x.webp", on: true };
+    const look = { kind: "wide", side: "center", focus: { x: 0.3, y: 0.6 }, w: 1600, h: 900 };
+    const res = await PUT(put("/api/admin/settings/", {
+      hero: { slides: [{ ...slide, ...look }, { ...slide, id: "s2", kind: "huge", side: "up", focus: { x: 5, y: 0 }, w: 10, evil: "<script>" }], interval: 6000 },
+    }, admin));
+    expect(res.status).toBe(200);
+    const body = await (await publicGet()).json();
+    expect(body.settings.hero.slides[0]).toEqual({ ...slide, ...look });
+    expect(body.settings.hero.slides[1]).toEqual({ ...slide, id: "s2" });
+    await PUT(put("/api/admin/settings/", { hero: null }, admin));
+  });
+
   /* Nothing capped this route's body, and a key outside the five validated
      ones is stored as raw jsonb AND written a second time into admin_audit —
      so one request could persist twice its own size for good. Same cap and
