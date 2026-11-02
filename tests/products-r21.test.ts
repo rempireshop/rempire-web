@@ -335,8 +335,12 @@ describe("the «Остаток» box of the sizes grid", () => {
 describe("«Товары» — the search box over the catalogue list", () => {
   it("promises only the fields admCatalogRows() reads", () => {
     const filter = slice("admCatalogRows");
-    // the haystack, verbatim: brand + name + id …
-    expect(filter).toContain('p.brand + " " + p.name + " " + p.id');
+    /* the haystack: brand + name + id + sizes — since 02.11.2026 the panel's
+       one product search (admProdMatch), which adds the name as the ET and EN
+       panels draw it and the product's subsection */
+    expect(filter).toContain("admProdMatch(p, words)");
+    expect(slice("admProdHay")).toContain('admHay(p.id, p.brand, p.name, p.id, (p.sizes || []).join(" "), p)');
+    expect(slice("admHay")).toContain('trName(name, "ET"), trName(name, "EN"), id');
     /* … and, since 1a, the barcodes: «Товары» loads the warehouse list on
        every tab (the «Склад» badge), so a code typed here is looked up there */
     expect(filter).toContain("r.ean");
@@ -463,10 +467,16 @@ describe("«Наборы» — the product picker inside the set editor", () => 
        var esc = function (s) { return String(s); };
        var eur = function (n) { return String(n); };
        var sizePrice = function () { return 10; };
+       ${slice("admPickMoreHTML")}
        ${slice("bundlePickRows")}
        return bundlePickRows();`,
     ) as (...a: unknown[]) => string;
-    return run({ bundleQ: "a" }, () => found, (_attr: string, id: string) => `<b>${id}</b>`);
+    // heroFind as the shop has it since 02.11.2026: `keep` filters before the eight are cut
+    const find = (_q: string, keep?: (p: Record<string, unknown>) => boolean) => {
+      const hit = found.filter((p) => !keep || keep(p));
+      return Object.assign(hit.slice(0, 8), { total: hit.length });
+    };
+    return run({ bundleQ: "a" }, find, (_attr: string, id: string) => `<b>${id}</b>`);
   }
 
   it("offers only what src/lib/bundles.ts can resolve", () => {

@@ -18170,19 +18170,19 @@
     }
     return "";
   }
-  /* The same catalogue search «Товары в статьи» uses, one list lower down. */
+  /* The same catalogue search «Товары в статьи» uses, one list lower down —
+     the panel's one product search (admProdMatch), eight rows and the count. */
   function blogToolMatches() {
-    var q = (S.adminBlogToolQ || "").trim().toLowerCase();
-    if (!q) return "";
-    var matches = CATALOGUE.filter(function (p) {
-      return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
-    }).slice(0, 8);
+    var words = admQueryWords(S.adminBlogToolQ);
+    if (!words.length) return "";
+    var all = CATALOGUE.filter(function (p) { return admProdMatch(p, words); });
+    var matches = all.slice(0, 8);
     if (!matches.length) return "";
     return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-blogtoolpick="' + esc(p.id) + '">Вставить</button></div>';
-    }).join("") + "</div>";
+    }).join("") + "</div>" + admPickMoreHTML(matches.length, all.length);
   }
   function blogToolDraw(focusIt) {
     var slot = document.querySelector("[data-blogtool]");
@@ -26482,9 +26482,10 @@
        is exactly how the owner types. One tab away the identical typing
        worked, and this one answered «Таких товаров нет» about a product on
        the screen below. Sizes are in the haystack too, so «awapuhi 300»
-       narrows to the one bottle. */
-    var q = scanFold(S.goodsQ);
-    var words = q ? q.split(" ") : [];
+       narrows to the one bottle. Since 02.11.2026 the name is searched as
+       the ET and EN panels draw it as well (admProdMatch): «Shampoo» found
+       27 of the 40 shampoos on the screen, «šampoon» and «шампуни» none. */
+    var words = admQueryWords(S.goodsQ);
     var f = goodsFilterNow();
     var all = admCatalogList().filter(function (p) { return goodsMatchesFilter(p, f); });
     /* …and the barcodes (1a): the warehouse rows carry them, and «Товары»
@@ -26499,10 +26500,7 @@
       ? all.filter(function (p) {
           var own = codes[p.id] || [];
           if (rawQ.length >= 3 && own.some(function (c) { return c.indexOf(rawQ) === 0; })) return true;
-          var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " + (p.sizes || []).join(" "));
-          var hayWords = hay.split(" ");
-          for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
-          return true;
+          return admProdMatch(p, words);
         })
       : all;
     // 40 at a time, «Показать ещё» for the rest — a search narrows it faster,
@@ -29163,10 +29161,7 @@
     blogMediaAsk();    // «+ Обложка» and «Картинка» are on this screen
     var as = blogAsKey(d);
     var picked = productsById(d.products);
-    var q = (S.adminBlogQ || "").trim().toLowerCase();
-    var matches = q ? CATALOGUE.filter(function (p) {
-      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
-    }).slice(0, 8) : [];
+    var matches = admBlogMatches(d, S.adminBlogQ);
     /* «Перевести с русского» under the Estonian and the English tab (the
        design's place for it): the Russian article into THIS language. The
        older «Перевести на ET и EN» — every other language at once — stays in
@@ -29220,13 +29215,25 @@
       '<div class="adm-err" role="alert" data-blogerr' + (S.adminBlogErr ? "" : " hidden") + ">" + esc(S.adminBlogErr || "") + "</div>" +
       '<p class="adm-blog2__st" data-blogpubstate>' + blogPubStateHTML(d) + "</p>";
   }
+  /** «Товары в статье»'s search: every product not in the article yet that
+      answers the words (admProdMatch). The screen and the box's own
+      keystroke both draw from this one — they were two copies of a raw
+      substring that could not find «kevin murphy». */
+  function admBlogMatches(d, q) {
+    var words = admQueryWords(q);
+    return words.length ? CATALOGUE.filter(function (p) {
+      return d.products.indexOf(p.id) < 0 && admProdMatch(p, words);
+    }) : [];
+  }
+  /** …the first eight of them, and how many there are. */
   function admBlogPicksHTML(matches) {
     if (!matches.length) return "";
-    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
+    var shown = matches.slice(0, 8);
+    return '<div class="adm-list adm-list--flat">' + shown.map(function (p) {
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
-    }).join("") + "</div>";
+    }).join("") + "</div>" + admPickMoreHTML(shown.length, matches.length);
   }
   /** «Товары в статье» — the article's products: a row each with ×, and
       «+ Товар» that opens the search. Forty is what the server keeps
@@ -30963,9 +30970,11 @@
     }
     // products: the ones the search finds; with nothing typed only when a product is what is being picked
     if (only === "product" || words.length) {
-      heroFind(q || "").forEach(function (p) {
+      var found = heroFind(q || "");
+      found.forEach(function (p) {
         out.push(newsPickRowHTML("product:" + p.id, "Товар", esc(p.brand + " " + p.name), media(p, 0, "ph"), "adm-nbpick__nm adm-nb__nm"));
       });
+      if (found.total > found.length) out.push(admPickMoreHTML(found.length, found.total));
     }
     if (only !== "product" && words.length) {
       var posts = 0;
@@ -36241,17 +36250,14 @@
      box is empty, so the owner always has something to tap. */
   /** Eight tiles, and how many matched — the cap used to be silent, so a
       search that found forty looked like a search that found eight. The full
-      count rides on the array so the caller can say so. */
-  function heroFind(q) {
-    var s = scanFold(q);
-    if (!s) { var top = spread(8, false); top.total = top.length; return top; }
-    var words = s.split(" ");
-    var hit = CATALOGUE.filter(function (p) {
-      var hay = scanFold(p.brand + " " + p.name);
-      var hayWords = hay.split(" ");
-      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
-      return true;
-    });
+      count rides on the array so the caller can say so (admPickMoreHTML).
+      `keep`, when given, drops products before the eight are cut — the set
+      picker's «no own products» used to run after, so eight matches could
+      come out as two. */
+  function heroFind(q, keep) {
+    var words = admQueryWords(q);
+    if (!words.length) { var top = spread(8, false); top.total = top.length; return top; }
+    var hit = CATALOGUE.filter(function (p) { return (!keep || keep(p)) && admProdMatch(p, words); });
     var out = hit.slice(0, 8);
     out.total = hit.length;
     return out;
@@ -36284,13 +36290,15 @@
     var gift = String(S.heroImgQ || "").trim() ? "" : heroGiftTile(cur.image === HERO_GIFT_IMG);
     var list = heroFind(S.heroImgQ);
     if (!list.length) return gift || HERO_NOHIT;
-    return gift + list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
+    return gift + list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("") +
+      admPickMoreHTML(list.length, list.total);
   }
   function heroGoRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
     var list = heroFind(S.heroGoQ);
     if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-herogopick", p.id, p, cur.go === "product:" + p.id); }).join("");
+    return list.map(function (p) { return admPickTile("data-herogopick", p.id, p, cur.go === "product:" + p.id); }).join("") +
+      admPickMoreHTML(list.length, list.total);
   }
   /* One slide as a row: the picture, the title, where the button goes, then
      ↑ ↓ and the switch (design). The title is the button that opens the
@@ -38323,12 +38331,14 @@
   function promoBrandList() {
     return brands().map(function (b) { return b.name; }).sort(function (a, b) { return a.localeCompare(b, "en"); });
   }
+  /** The first PROMO_PICKS products that answer the words (admProdMatch), and how many did. */
   function promoProductMatches() {
-    var q = String(S.promoQ || "").trim().toLowerCase();
-    if (!q) return [];
-    return CATALOGUE.filter(function (p) {
-      return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
-    }).slice(0, PROMO_PICKS);
+    var words = admQueryWords(S.promoQ);
+    if (!words.length) return [];
+    var hit = CATALOGUE.filter(function (p) { return admProdMatch(p, words); });
+    var out = hit.slice(0, PROMO_PICKS);
+    out.total = hit.length;
+    return out;
   }
   /** The rust edge and the one line under a box the form refused (promoProblem). */
   function promoBad(k) {
@@ -38401,7 +38411,7 @@
       return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-promoprodpick="' + esc(p.id) + '">Выбрать</button></div>';
-    }).join("") + "</div>";
+    }).join("") + "</div>" + admPickMoreHTML(matches.length, matches.total);
   }
 
   /* ---- what the form will not send ----------------------------------------
@@ -39786,8 +39796,8 @@
      bottle added twice is one more of it (design). */
   function bundlePickRows() {
     if (!scanFold(S.bundleQ)) return "";
-    var found = heroFind(S.bundleQ);
-    var list = found.filter(function (p) { return !p.custom; });
+    // the own products out BEFORE the eight are cut, not after (heroFind's `keep`)
+    var list = heroFind(S.bundleQ, function (p) { return !p.custom; });
     if (!list.length) return HERO_NOHIT;
     return list.map(function (p) {
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
@@ -39799,9 +39809,7 @@
     }).join("") +
       /* «показаны 8 из 41» — the eight are the first eight of the catalogue's
          own order, and without this line a narrower word looks pointless. */
-      (found.total > list.length
-        ? '<p class="adm-hint adm-picks__more"><span>показаны ' + list.length + " из " + found.total + "</span></p>"
-        : "");
+      admPickMoreHTML(list.length, list.total);
   }
   /** …and why his own product is not in that list — only once he has one. */
   function bundleOwnHint() {
@@ -44523,9 +44531,11 @@
        catalogue writes «Kevin.Murphy»), «un tangled» or «300 ml», which is
        exactly how the owner types — and «Склад» is the screen he searches on
        to fix a shelf. The size is in the haystack now too, so «awapuhi 300»
-       narrows to the one bottle. */
-    var q = scanFold(S.stockQ);
-    var words = q ? q.split(" ") : [];
+       narrows to the one bottle. Since 02.11.2026 it is the panel's one
+       product search (admStockRowMatch): the name in all three languages,
+       the subsection, «шампуни» for «шампунь». */
+    var words = admQueryWords(S.stockQ);
+    var ix = words.length ? admProdIndex() : null;
     var f = S.stockFilter || "all";
     var rows = (S.stockLevels || []).filter(function (r) {
       /* «Мало» and «Нет» are the reorder list, so a product that is not for
@@ -44537,10 +44547,7 @@
          too. */
       if (!stockInFilter(r, f)) return false;
       if (!words.length) return true;
-      var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
-      var hayWords = hay.split(" ");
-      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
-      return true;
+      return admStockRowMatch(r, words, ix);
     }).slice();
     rows.sort(function (a, b) {
       /* This list is «what is running out» first, so the emptiest shelf is at
@@ -44901,35 +44908,118 @@
     }
     return false;
   }
+
+  /* ---- the panel's one product search ----------------------------------------
+     Eight boxes in the panel look for a product: «Товары», «Склад», «Салон»,
+     the scanner's «привязать код», the banner, set and newsletter pickers
+     (heroFind), the blog's two and the promo's. Until 02.11.2026 each one
+     read the brand, the RAW Russian name, the id and the sizes — three of
+     them as one plain substring — while an Estonian or English panel draws
+     the name translated (trName: «ANGEL.WASH — shampoo»). Renat typed
+     «Shampoo» and got 27 of the 40 shampoos; «šampoon», «шампуни» and
+     «shampoos» found none at all. All eight ask admProdMatch() now: the name
+     as each of the three panels draws it, the product's own subsection, the
+     accents off, and every typed word one ending shorter, the way the shop's
+     own search reads a word (srchStem). */
+  /** scanFold with the accents off first — srchNorm's rule, й kept — so
+      «šampoon» and «sampoon» are one word. */
+  function admFold(s) {
+    var t = String(s || "").toLowerCase();
+    if (t.normalize) t = t.normalize("NFD").replace(/[\u0300-\u0305\u0307-\u036f]/g, "").normalize("NFC");
+    return scanFold(t);
+  }
+  /** The typed words, folded. A word with a letter in it loses one ending
+      («шампуни» → «шампун», «shampoos» → «shampoo»): a stem is the start of
+      its word, so whatever the whole word found, the stem finds too. A
+      number stays whole — «40» is still the 40 мл bottle (scanWordHas). */
+  function admQueryWords(q) {
+    var f = admFold(q);
+    return f ? f.split(" ").map(function (w) { return /^\d+$/.test(w) ? w : srchStem(w); }) : [];
+  }
+  var ADM_HAY = {};
+  /** The words one product answers to, folded once and kept under `slot`
+      while its brand, name, sizes and subsection stay what they were: `t`
+      is the brand, the name in Russian, Estonian and English (what each
+      panel draws), the id and the subsection's name — in the languages whose
+      dictionary is here; the panel's own always is, and a search fetches
+      none. `z` is the sizes, apart: the scanner's rows are picked by the
+      words only a size label carried. `p` is the product the subsection is
+      read off, null for none. Measured on the live catalogue (02.11.2026):
+      ~10 µs to build one, ~0.5 µs to match it — a keystroke over «Товары»
+      costs ~0.1 ms once the first one has built them. */
+  function admHay(slot, brand, name, id, sizes, p) {
+    brand = String(brand || ""); name = String(name || "");
+    var sub = p ? subcatNow(p) : "";
+    var key = brand + "|" + name + "|" + sizes + "|" + (p ? p.cat : "") + "/" + sub + "|" + uiHas("ET") + uiHas("EN");
+    var c = ADM_HAY[slot];
+    if (c && c.key === key) return c;
+    var d = sub ? (SUBCATS[p.cat] || []).filter(function (x) { return x.id === sub; })[0] : null;
+    var t = admFold([brand, name, trName(name, "ET"), trName(name, "EN"), id,
+      d ? d.name + " " + trText(d.name, "ET") + " " + trText(d.name, "EN") : ""].join(" "));
+    var z = admFold(sizes);
+    return (ADM_HAY[slot] = { key: key, t: t, tw: t.split(" "), z: z, zw: z.split(" ") });
+  }
+  function admProdHay(p) { return admHay(p.id, p.brand, p.name, p.id, (p.sizes || []).join(" "), p); }
+  /** Is every typed word (admQueryWords) somewhere on the haystack — in its
+      text, on one of its sizes, or in `more` (the till's barcodes)? `onSize`,
+      when given, collects the words that only a size carried. */
+  function admHayHas(h, words, more, onSize) {
+    var m = null;
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (scanWordHas(h.t, h.tw, w)) continue;
+      if (scanWordHas(h.z, h.zw, w)) { if (onSize) onSize.push(w); continue; }
+      if (more && !m) { var mf = admFold(more); m = { t: mf, w: mf.split(" ") }; }
+      if (!m || !scanWordHas(m.t, m.w, w)) return false;
+    }
+    return true;
+  }
+  /** The panel's product search: does `p` answer every word typed? */
+  function admProdMatch(p, words, more, onSize) { return admHayHas(admProdHay(p), words, more, onSize); }
+  /** …and «Склад»'s, whose rows are sizes named by the warehouse: the same
+      haystack from the row's brand and name, its size and code for the
+      sizes, the subsection off the product it belongs to (`ix`). */
+  function admStockRowMatch(r, words, ix) {
+    return admHayHas(admHay("stock|" + r.productId + "|" + (r.variant || ""), r.brand, r.name, r.productId,
+      (r.variant || "") + " " + (r.ean || ""), ix[r.productId] || null), words);
+  }
+  /** Every product the panel knows, by id — hidden and own ones too; built once per search, not per row. */
+  function admProdIndex() {
+    var ix = {}, i;
+    for (i = 0; i < FILE_PRODUCTS.length; i++) ix[FILE_PRODUCTS[i].id] = FILE_PRODUCTS[i];
+    for (i = 0; i < CATALOGUE.length; i++) ix[CATALOGUE[i].id] = CATALOGUE[i];
+    return ix;
+  }
+  /** «показаны 8 из 41» under a picker that stops at a few (bundlePickRows
+      had it first): without it a search that found forty looked like a
+      search that found eight. "" when every match is on screen. */
+  function admPickMoreHTML(shown, total) {
+    return total > shown ? '<p class="adm-hint adm-picks__more"><span>показаны ' + shown + " из " + total + "</span></p>" : "";
+  }
   /** «···1234» — the code a size already carries, by its last four characters. */
   function scanCodeTail(ean) { return "есть код ···" + String(ean).slice(-4); }
   function scanAssignResultsHTML() {
-    var q = scanFold(S.scanAssignQ);
-    if (!q) return '<p class="scan__hint scan__hint--sm">Начните вводить название — товар найдётся.</p>';
-    var words = q.split(" ");
+    var words = admQueryWords(S.scanAssignQ);
+    if (!words.length) return '<p class="scan__hint scan__hint--sm">Начните вводить название — товар найдётся.</p>';
     var code = S.scanHit ? S.scanHit.code : "";
-    var rows = [];
-    for (var i = 0; i < CATALOGUE.length && rows.length < 8; i++) {
+    var rows = [], total = 0;
+    for (var i = 0; i < CATALOGUE.length; i++) {
       var p = CATALOGUE[i];
-      var hay = scanFold(p.brand + " " + p.name + " " + p.id);
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
-      var sizeHays = sizes.map(scanFold);
       /* every word has to be somewhere on the bottle — in the name, or on a
-         size label; the size words then pick the rows («awapuhi 300» is the
-         one bottle in the hand, not the three the product comes in) */
-      var sizeWords = [], ok = true;
-      for (var wi = 0; wi < words.length && ok; wi++) {
-        var w = words[wi];
-        if (hay.indexOf(w) >= 0) continue;
-        var onSize = false;
-        for (var si = 0; si < sizeHays.length && !onSize; si++) onSize = scanSizeHas(sizeHays[si], w);
-        if (onSize) sizeWords.push(w); else ok = false;
-      }
-      if (!ok) continue;
-      for (var j = 0; j < sizes.length && rows.length < 8; j++) {
+         size label (admProdMatch); the size words then pick the rows
+         («awapuhi 300» is the one bottle in the hand, not the three the
+         product comes in) */
+      var sizeWords = [];
+      if (!admProdMatch(p, words, "", sizeWords)) continue;
+      var sizeHays = sizes.map(admFold);
+      for (var j = 0; j < sizes.length; j++) {
         var fits = true;
         for (var sw = 0; sw < sizeWords.length && fits; sw++) fits = scanSizeHas(sizeHays[j], sizeWords[sw]);
         if (!fits) continue;
+        // eight rows drawn, every row that fits counted for «показаны 8 из N»
+        total++;
+        if (rows.length >= 8) continue;
         var lv = edStockFor(p, sizes[j]);
         var key = p.id + "|" + sizes[j];
         var taken = !!(lv && lv.ean && lv.ean !== code);
@@ -44952,7 +45042,7 @@
       }
     }
     if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
-    return '<div class="scan__cands">' + rows.join("") + "</div>";
+    return '<div class="scan__cands">' + rows.join("") + "</div>" + admPickMoreHTML(rows.length, total);
   }
   /** The candidate list alone, patched in place — the search box above it
       keeps its caret and the keyboard stays where it is. */
@@ -46389,7 +46479,7 @@
        now (posCodeHit), where «Склад» and the scanner get their answer; the
        badge only decides what a NAME search offers. */
     var q = scanFold(S.posQ);
-    var words = q ? q.split(" ") : [];
+    var words = admQueryWords(S.posQ);
     var eans = posEanIndex();
     /* A whole barcode is answered by the warehouse, not by the catalogue
        search: it names one bottle, and it names it whatever the shop's badge
@@ -46401,11 +46491,8 @@
       : words.length
       ? CATALOGUE.filter(function (p) {
           if (p.stock === "out") return false;
-          var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " +
-            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans.byProduct[p.id] || ""));
-          var hayWords = hay.split(" ");
-          for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
-          return true;
+          // the panel's one product search, the product's barcodes beside it
+          return admProdMatch(p, words, eans.byProduct[p.id] || "");
         }).map(function (p) { return { p: p, only: -1 }; })
       : [];
     /* An empty box answers nothing here: «Часто продают» (posTopHTML) stands
@@ -46417,7 +46504,8 @@
        the till's side it is exactly the same refusal. */
     if (coded && !coded.p) return '<div class="adm-empty">' + POS_GONE + "</div>";
     if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
-    return '<div class="adm-poslist">' + list.slice(0, 8).map(posRowHTML).join("") + "</div>";
+    return '<div class="adm-poslist">' + list.slice(0, 8).map(posRowHTML).join("") + "</div>" +
+      admPickMoreHTML(Math.min(8, list.length), list.length);
   }
   /** One product, one row (1a, screen 05): its photo, the brand over the
       name, and one chip per size. The search and «Часто продают» both draw
@@ -58164,18 +58252,7 @@
       S.adminBlogQ = t.value;
       var plist = document.getElementById("admblogproducts");
       if (plist && S.adminBlogEdit) {
-        var pd = S.adminBlogEdit;
-        var pq = (S.adminBlogQ || "").trim().toLowerCase();
-        var pmatches = pq ? CATALOGUE.filter(function (p) {
-          return pd.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(pq) >= 0;
-        }).slice(0, 8) : [];
-        plist.innerHTML = pmatches.length
-          ? '<div class="adm-list adm-list--flat">' + pmatches.map(function (p) {
-              return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
-                '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
-                '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
-            }).join("") + "</div>"
-          : "";
+        plist.innerHTML = admBlogPicksHTML(admBlogMatches(S.adminBlogEdit, S.adminBlogQ));
         translateTree(plist);
       }
     }
