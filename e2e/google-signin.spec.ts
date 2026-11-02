@@ -102,11 +102,18 @@ test.describe("«Продолжить с Google» — on", () => {
       });
       expect(order).toEqual([0, 1, 2, 3, 4]);
       // Google's light button, by its own rules
-      const look = await btn.evaluate((el) => {
+      /* Read in the page, on the button that is there at that moment: the
+         shop redraws «Кабинет» when late data lands (the banner feed, the
+         session answer), and a node read across that redraw is detached —
+         every computed value comes back "" (release run, 02.11.2026). */
+      const readLook = () => page.evaluate(() => {
+        const el = document.querySelector("a[data-gsignin]");
+        if (!el || !el.isConnected) return null;
         const cs = getComputedStyle(el);
         return { bg: cs.backgroundColor, border: cs.borderTopColor, bw: cs.borderTopWidth, radius: cs.borderTopLeftRadius, color: cs.color, weight: cs.fontWeight, h: el.getBoundingClientRect().height, font: cs.fontFamily };
       });
-      expect(look).toMatchObject({ bg: "rgb(255, 255, 255)", border: "rgb(116, 119, 117)", bw: "1px", radius: "4px", color: "rgb(31, 31, 31)", weight: "500" });
+      await expect.poll(readLook).toMatchObject({ bg: "rgb(255, 255, 255)", border: "rgb(116, 119, 117)", bw: "1px", radius: "4px", color: "rgb(31, 31, 31)", weight: "500" });
+      const look = (await readLook())!;
       expect(look.h).toBeGreaterThanOrEqual(52);
       expect(look.font).toMatch(/^Roboto, Arial, sans-serif$/);
       await expect(btn.locator("svg path")).toHaveCount(4);

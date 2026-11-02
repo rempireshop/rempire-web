@@ -118,8 +118,9 @@ for (const lang of LANGS) {
 
       await navBlog.click();
       await waitForScreen(page, "blog");
-      await expect(page.locator("h1.display")).toHaveText(tr("Блог", lang.code));
-      await expect(page.locator(".crumbs")).toContainText(tr("Блог", lang.code));
+      // the magazine blog (02.11.2026): its own heading, no visible
+      // breadcrumb on the blog home — Dim's OK; the structured-data one stays
+      await expect(page.locator("h1.bmag__h")).toHaveText(tr("Блог", lang.code));
 
       // The old word must not survive anywhere on the screen.
       await expect(page.locator("body")).not.toContainText("Ajaveeb");
