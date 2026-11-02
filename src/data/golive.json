@@ -1612,10 +1612,26 @@
       ],
       "status": "todo",
       "title": "Google-аккаунт магазина rempireshopinfo@",
-      "detail": "Через него входят Search Console, Merchant Center, профиль на Картах, Cloudflare, Resend, GitHub, Vercel, Railway. Ренат меняет пароль сам, ставит 2FA на свой телефон, проверяет восстановление на blackboxestonia@.",
+      "detail": "Через него входят Search Console, Merchant Center, Google Реклама, Google Cloud (вход покупателей через Google), профиль на Картах, Cloudflare, Resend, GitHub, Vercel, Railway. Ренат меняет пароль сам, ставит 2FA на свой телефон, проверяет восстановление на blackboxestonia@. Двухэтапная проверка включена 02.11 — не выключать: без неё Google Cloud не пускает.",
       "en": {
         "title": "The shop's Google account rempireshopinfo@",
-        "detail": "Search Console, Merchant Center, the Maps profile, Cloudflare, Resend, GitHub, Vercel and Railway are all signed into through it. Renat changes the password himself, puts the 2FA on his own phone, checks recovery to blackboxestonia@."
+        "detail": "Search Console, Merchant Center, Google Ads, Google Cloud (customers' Google sign-in), the Maps profile, Cloudflare, Resend, GitHub, Vercel and Railway are all signed into through it. Renat changes the password himself, puts the 2FA on his own phone, checks recovery to blackboxestonia@. 2-step verification is on since 02.11 — never switch it off: Google Cloud refuses entry without it."
+      }
+    },
+    {
+      "area": "ho-accounts",
+      "blocking": false,
+      "id": "ho-google-cloud",
+      "who": [
+        "dim",
+        "renat"
+      ],
+      "status": "done",
+      "title": "Google Cloud — вход покупателей через Google",
+      "detail": "Работает с 02.11: «Продолжить с Google» в кабинете и при оформлении заказа (вход по коду из письма остаётся). Всё на аккаунте магазина rempireshopinfo@: console.cloud.google.com → проект «Rempire shop» (rempire-shop) → Google Auth Platform: оформление (название REMPIRE, почта rempireshopinfo@, сайт, политика конфиденциальности и условия на rempireshop.com, домен rempireshop.com), аудитория External, «In production» (только openid, email, profile — проверка Google не нужна), клиент «REMPIRE shop login». В Vercel — только публичный GOOGLE_CLIENT_ID (Production); секретного ключа нет нигде. Убрать переменную и перезапустить — кнопка исчезнет. Ренату: проект не удалять; письма Google о проекте приходят на rempireshopinfo@; сейчас Google пишет «продолжить на rempireshop.com» — название и логотип REMPIRE требуют проверки бренда (Verification Center, по желанию); сменится домен — поменять адрес возврата в «Clients». Технически — docs/google-login.md.",
+      "en": {
+        "title": "Google Cloud — customers sign in with Google",
+        "detail": "Live since 02.11: «Продолжить с Google» on the account page and, signed out, at checkout (the e-mailed code login stays). All on the shop's account rempireshopinfo@: console.cloud.google.com → project «Rempire shop» (rempire-shop) → Google Auth Platform: branding (app name REMPIRE, rempireshopinfo@ as support and developer e-mail, home, privacy and terms pages on rempireshop.com, authorised domain rempireshop.com), audience External, «In production» (openid, email, profile only — no Google review needed), web client «REMPIRE shop login». Vercel holds only the public GOOGLE_CLIENT_ID (Production); no secret exists anywhere. Remove the variable and redeploy and the button disappears. For Renat: never delete the project; Google's notices about it arrive at rempireshopinfo@; Google shows «continue to rempireshop.com» for now — the REMPIRE name and logo need brand verification (Verification Center, optional); if the domain changes, the redirect URI under «Clients» changes too. Technical: docs/google-login.md."
       }
     },
     {
@@ -1690,10 +1706,10 @@
       ],
       "status": "todo",
       "title": "Остальные сервисы: владелец — магазин, Дим — участник",
-      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Реклама, Bing Webmaster (вход — rempireshopinfo@, Дим 25.10) — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
+      "detail": "Проверить в каждом: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Реклама, Google Cloud, Bing Webmaster (вход — rempireshopinfo@, Дим 25.10) — владелец аккаунт магазина; Дим — участник (поддержка). Shopify — пока не закрыт.",
       "en": {
         "title": "Every other service: the shop owns it, Dim is a member",
-        "detail": "Check each one: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Ads, Bing Webmaster (signed in as rempireshopinfo@, Dim 25.10) — the shop's account owns it; Dim is a member (support). Shopify — not closed yet."
+        "detail": "Check each one: Cloudflare, Resend, Railway, Search Console, Merchant Center, Google Ads, Google Cloud, Bing Webmaster (signed in as rempireshopinfo@, Dim 25.10) — the shop's account owns it; Dim is a member (support). Shopify — not closed yet."
       }
     },
     {
