@@ -160,13 +160,20 @@ describe("POST /api/admin/upload/cutout", () => {
     }
   });
 
-  it("only a product photo of ours: no traversal, no other prefix, no other host, no other type", async () => {
+  /* A banner photo (hero/…) is the one other prefix since 02.11.2026 — «Товар»
+     in the banner editor takes its background away (tests/photo-cutout.test.ts);
+     every other prefix, and any way round the two, is still refused. */
+  it("only a product or banner photo of ours: no traversal, no other prefix, no other host, no other type", async () => {
     const calls = stubNet();
     const { POST } = await import("@/app/api/admin/upload/cutout/route");
     const bodies: unknown[] = [
       { key: "products/../hero/1.webp" },
+      { key: "hero/../blog/1.webp" },
       { key: "products/x/1.webp/../../y.webp" },
-      { key: "hero/1.webp" },
+      { key: "blog/1.webp" },
+      { key: "news/1.webp" },
+      { key: "hero/1.svg" },
+      { key: "Hero/1.webp" },
       { key: "reviews/x/1.webp" },
       { key: "videos/x/1.mp4" },
       { key: "giftcards/rmp-acde-fghj.pdf" },
@@ -181,7 +188,8 @@ describe("POST /api/admin/upload/cutout", () => {
       { url: "https://evil.example/products/x/1.webp" },
       { url: "https://media.rempireshop.com.evil.example/products/x/1.webp" },
       { url: "https://media.rempireshop.com/../products/x/1.webp" },
-      { url: "https://media.rempireshop.com/hero/1.webp" },
+      { url: "https://media.rempireshop.com/blog/1.webp" },
+      { url: "https://evil.example/hero/1.webp" },
       { url: "https://media.rempireshop.com/products/x/1.webp/../../giftcards/x.pdf" },
       { url: "javascript:alert(1)" },
       { key: ["products/x/1.webp"] },

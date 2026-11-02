@@ -157,7 +157,50 @@
         "why": "A broken home page loses the buyer the ad just paid for."
       },
       "mark": "redo",
-      "markedAt": "2026-09-20T10:06:00.000Z"
+      "markedAt": "2026-11-02T08:24:17.000Z"
+    },
+    {
+      "id": "shop-banner-photos",
+      "area": "shop",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Фото в баннере на главной",
+      "steps": [
+        "Открыть главную на телефоне и пролистать баннеры стрелками.",
+        "Открыть главную на компьютере и пролистать баннеры точками под картинкой.",
+        "Найти баннер с вашей фотографией и баннер с товаром."
+      ],
+      "expect": [
+        "Ваше фото занимает правую часть баннера и переходит в бежевый.",
+        "На телефоне фото во всю ширину, текст и кнопка под ним.",
+        "Товар стоит на бежевом справа и крупнее, чем раньше.",
+        "Текст и кнопка не обрезаны и не налезают на стрелки.",
+        "На компьютере под баннером точки; точка открывает свой баннер.",
+        "Когда баннер меняется, страница под ним не прыгает."
+      ],
+      "why": "Фото в маленькой рамке на бежевом выглядело как ошибка на самом видном месте.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "Photos in the home banner",
+        "steps": [
+          "Open the home page on a phone and page through the banners with the arrows.",
+          "Open the home page on a computer and page through them with the dots under the picture.",
+          "Find a banner with your own photo and one with a product."
+        ],
+        "expect": [
+          "Your photo fills the right part of the banner and fades into the beige.",
+          "On a phone the photo is full width, the words and button under it.",
+          "The product stands on the beige on the right, larger than before.",
+          "The words and the button are not cut off and clear of the arrows.",
+          "On a computer there are dots under the banner; a dot opens its banner.",
+          "When the banner changes, the page under it does not jump."
+        ],
+        "why": "A photo in a small frame on the beige looked like a mistake on the shop's best screen."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T08:24:17.000Z"
     },
     {
       "id": "shop-menu",
@@ -10671,7 +10714,54 @@
         "why": "A button leading to the wrong place wastes the shop's best screen."
       },
       "mark": "redo",
-      "markedAt": "2026-09-25T10:51:07.148Z"
+      "markedAt": "2026-11-02T08:24:17.000Z"
+    },
+    {
+      "id": "settings-hero-kinds",
+      "area": "reports",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Вид баннера: на всю ширину, на половину, товар",
+      "steps": [
+        "«Настройки» → «Главная страница» → «Баннер», открыть слайд.",
+        "Загрузить горизонтальное фото и посмотреть на «Вид баннера».",
+        "Нажать на фото под «Главное на фото» там, где главное, и выбрать текст «Справа».",
+        "Выбрать «Фото на половину» и открыть главную на телефоне и на компьютере.",
+        "Вернуться, выбрать «Товар» и загрузить фото товара с фоном."
+      ],
+      "expect": [
+        "После загрузки выбрано «Фото на всю ширину» и написано, что вид выбран сам.",
+        "Кружок встаёт туда, куда нажали; «Телефон» и «Компьютер» меняются сразу.",
+        "На всю ширину: фото на весь баннер, белый текст на затемнении справа.",
+        "На половину: фото справа переходит в бежевый, тёмный текст слева.",
+        "«Товар»: фон убирается сам — или строка под видами объясняет, почему нельзя.",
+        "Каждое нажатие сохраняется само, «Вернуть» внизу экрана его отменяет."
+      ],
+      "why": "Баннер — первое, что видит покупатель; фото должно стоять так, как задумано.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "Banner type: full width, half width, product",
+        "steps": [
+          "«Настройки» → «Главная страница» → «Баннер», open a slide.",
+          "Upload a landscape photo and look at «Вид баннера».",
+          "Tap the photo under «Главное на фото» where the main thing is, and pick «Справа» for the words.",
+          "Pick «Фото на половину» and open the home page on a phone and on a computer.",
+          "Go back, pick «Товар» and upload a product photo with a background."
+        ],
+        "expect": [
+          "After the upload «Фото на всю ширину» is picked, saying it was chosen for you.",
+          "The ring lands where you tapped; «Телефон» and «Компьютер» change at once.",
+          "Full width: the photo fills the banner, white words on a darkened right side.",
+          "Half width: the photo on the right fades into the beige, dark words on the left.",
+          "«Товар»: the background goes by itself — or the line under the types says why not.",
+          "Every tap saves itself; «Вернуть» at the bottom of the screen takes it back."
+        ],
+        "why": "The banner is the first thing a buyer sees; the photo must sit the way it was meant to."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T08:24:17.000Z"
     },
     {
       "id": "settings-content",

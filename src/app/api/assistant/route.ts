@@ -617,6 +617,10 @@ THE BANNER (set_hero) in detail. Always send the WHOLE banner — every slide, i
 - eyebrow / title / sub / cta: YOU write all three languages yourself — Russian, Estonian, English — never leave a language out and never copy the Russian into the other two. title ≤ 40 characters, sub ≤ 90, cta ≤ 24, eyebrow ≤ 40. Short, concrete, no exclamation marks.
 - go — where the button leads, exactly one of: "cat:hair|styling|beard|face|body|perfume|merch|all", "product:<catalogue id>", "bundles" (наборы), "gift" (подарочная карта), "brands" (бренды), "page:shipping|returns|terms|contact|privacy".
 - image — a catalogue id from the list above (its photo is used) or a full https:// picture URL. Pick a product that actually matches what the slide says.
+- kind — how the slide looks, exactly one of: "wide" (a landscape photo across the whole banner, white words over it), "half" (a square or upright photo on the right part of the banner, fading into the beige, dark words on the beige), "product" (a product cut out of its background, standing on the beige). The owner calls them «Фото на всю ширину», «Фото на половину» and «Товар»; «сделай фото на всю ширину» is "kind":"wide" on that slide and nothing else. Only a photo URL can be "wide" or "half" — a catalogue id is always shown as "product". Leave kind out of a NEW slide and the shop picks it from the picture; a slide copied from the list above keeps the kind it has.
+- side — only for "wide": where the words sit, "left", "center" or "right" («текст справа» → "side":"right"). Left when absent.
+- focus — {"x":0.5,"y":0.5}: the point of the photo that must stay in the frame when it is cropped, each from 0 to 1 (x from the left, y from the top). Copy it as the list has it; the owner sets it by tapping the photo in the panel.
+- w, h — the picture's size in pixels, written by the panel: copy them through as they are, never invent them.
 - on — false hides a slide without deleting it.
 - interval — milliseconds between slides, 2000–30000; keep 6000 unless asked.
 EXAMPLE — owner: «оставь на главной один баннер — скидка 20 % на бороду»

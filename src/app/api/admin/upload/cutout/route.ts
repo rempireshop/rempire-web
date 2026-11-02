@@ -4,7 +4,8 @@
  *   { "key": "products/<id>/<stamp>-<slug>.webp" }   or   { "url": "<its public URL>" }
  *   → { ok, key, url, thumbUrl, bytes }     the new PNG, stored next to the original
  *   → 503 cutout_disabled                   PHOTO_CUTOUT is not "openai" (or no key)
- *   → 400 bad_key                           not a product photo of ours
+ *   → 400 bad_key                           not a product or banner photo of ours
+ *   a banner photo (`hero/…`) comes back as `…-cutout.webp` instead of a PNG
  *   → 502 cutout_failed / source_unavailable — the original stays, nothing changes
  *
  * Only ever ADDS an object: `<original>-cutout.png` and its `-cutout-thumb.webp`.
@@ -16,7 +17,7 @@ import { ADMIN_COOKIE, clientIp, rateLimit, readCookie, requireAdmin } from "@/l
 import { ImageError, MAX_UPLOAD_BYTES, processImage } from "@/lib/images";
 import { writeAuditSafe } from "@/lib/orders";
 import { cutoutEnabled, CutoutError, cutoutImage, cutoutKey, cutoutTimeoutMs } from "@/lib/photo-cutout";
-import { isAllowedKey, keyFromUrl, publicUrl, putObject, StorageError, storageConfigured } from "@/lib/storage";
+import { isAllowedKey, keyFromUrl, publicUrl, putObject, StorageError, storageConfigured, thumbKey } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,7 +49,11 @@ export async function POST(req: Request) {
   }
   if (!body || typeof body !== "object" || Array.isArray(body)) return bad("bad_json");
   const key = isAllowedKey(body.key) ? body.key : typeof body.url === "string" ? keyFromUrl(body.url) : null;
-  if (!key || !key.startsWith("products/") || !/\.(webp|png|jpe?g)$/.test(key)) return bad("bad_key");
+  /* …or a banner photo (02.11.2026): «Товар» in the banner editor is a
+     product photo whose background the panel takes away, the same model and
+     the same rules as the gallery's ✂ (src/lib/hero.ts). */
+  const banner = !!key && key.startsWith("hero/");
+  if (!key || !(key.startsWith("products/") || banner) || !/\.(webp|png|jpe?g)$/.test(key)) return bad("bad_key");
   if (!storageConfigured()) return bad("storage_not_configured", 503);
   if (!cutoutEnabled()) return bad("cutout_disabled", 503);
   if (rateLimit("admin_cutout", limiterKey(req), CUTOUTS_PER_HOUR, HOUR)) return bad("rate_limited", 429);
@@ -71,6 +76,24 @@ export async function POST(req: Request) {
     const png = await cutoutImage(original);
     // the thumbnail the grid shows — a WebP with alpha, like every other thumb
     const img = await processImage(png);
+
+    /* A banner's cut-out is the first thing the home page paints, so it is
+       kept as the WebP processImage() has just made anyway (alpha kept, 1600
+       px at most) rather than as the model's full-size PNG — and named
+       `…-cutout.webp`, so its small copy is `…-cutout-thumb.webp` by the same
+       rule as every upload's (thumbKey), which is what the storefront's
+       srcset counts on. */
+    if (banner) {
+      const webpKey = cutoutKey(key).replace(/\.png$/, ".webp");
+      const thumbWebp = thumbKey(webpKey);
+      const putMain = await putObject({ key: webpKey, body: img.main, contentType: "image/webp" });
+      await putObject({ key: thumbWebp, body: img.thumb, contentType: "image/webp" });
+      await writeAuditSafe("admin", "media.cutout", { from: key, key: webpKey, bytes: putMain.bytes });
+      return Response.json(
+        { ok: true, key: webpKey, url: putMain.url, thumbUrl: publicUrl(thumbWebp), bytes: putMain.bytes, width: img.width, height: img.height },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
 
     const outKey = cutoutKey(key);
     const thumbOut = outKey.replace(/\.png$/, "-thumb.webp");
