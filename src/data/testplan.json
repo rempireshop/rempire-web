@@ -10221,6 +10221,8 @@
       "why": "Кружок чата поверх кнопки «Оплатить» — это несостоявшаяся покупка.",
       "risk": "med",
       "writes": false,
+      "mark": "redo",
+      "markedAt": "2026-11-02T08:20:09.000Z",
       "en": {
         "title": "The customer chat on a computer",
         "steps": [
@@ -10239,6 +10241,94 @@
           "On a phone it is not there at all."
         ],
         "why": "A chat circle over the «Оплатить» button is a lost sale."
+      }
+    },
+    {
+      "id": "ai-chat-blog-guide",
+      "area": "ai",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Чат советует по статье из блога",
+      "steps": [
+        "Открыть магазин на компьютере в широком окне и открыть чат.",
+        "Спросить «тонкие окрашенные волосы без объёма — что взять?».",
+        "Прочитать ответ и посмотреть, что под ним.",
+        "Нажать «Добавить всё в корзину», потом нажать на карточку статьи.",
+        "Вернуться в магазин и спросить в чате «доставка в Финляндию»."
+      ],
+      "expect": [
+        "Ответ говорит, что так советует гайд салона.",
+        "Над товарами — карточка «Из нашего блога» с обложкой и названием статьи.",
+        "Товары — из статьи про шампуни Kevin.Murphy, и все есть в наличии.",
+        "«Добавить всё в корзину» кладёт в корзину все товары из ответа.",
+        "Карточка открывает статью на русском.",
+        "На вопрос про доставку карточки статьи нет."
+      ],
+      "why": "Статьи блога — это то, что советует салон, и чат не должен советовать другое.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:20:09.000Z",
+      "en": {
+        "title": "The chat recommends from a blog article",
+        "steps": [
+          "Open the shop on a computer in a wide window and open the chat.",
+          "Ask «тонкие окрашенные волосы без объёма — что взять?» (fine coloured hair, no volume).",
+          "Read the answer and look at what is under it.",
+          "Press «Добавить всё в корзину», then press the article card.",
+          "Go back to the shop and ask the chat «доставка в Финляндию» (delivery to Finland)."
+        ],
+        "expect": [
+          "The answer says this is what the salon's guide advises.",
+          "Above the products a «Из нашего блога» card with the article's cover and title.",
+          "The products come from the Kevin.Murphy shampoo article, all of them in stock.",
+          "«Добавить всё в корзину» puts every product of the answer in the cart.",
+          "The card opens the article in Russian.",
+          "The delivery question gets no article card."
+        ],
+        "why": "The blog is what the salon advises, and the chat must not advise something else."
+      }
+    },
+    {
+      "id": "ai-chat-blog-lang",
+      "area": "ai",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "ET",
+      "title": "Карточка статьи в чате на эстонском и английском",
+      "steps": [
+        "Переключить магазин на эстонский и открыть чат.",
+        "Спросить «habe kuivab talvel, mida teha?».",
+        "Переключить магазин на английский и спросить «thin coloured hair with no volume».",
+        "Нажать на карточку статьи."
+      ],
+      "expect": [
+        "По-эстонски над названием статьи написано «Meie blogist».",
+        "Название статьи — на языке магазина, не на русском.",
+        "По-английски там написано «From our blog».",
+        "Статья открывается на том же языке."
+      ],
+      "why": "Покупатель на эстонском не должен читать русскую карточку.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:20:09.000Z",
+      "en": {
+        "title": "The article card in the chat, in Estonian and English",
+        "steps": [
+          "Switch the shop to Estonian and open the chat.",
+          "Ask «habe kuivab talvel, mida teha?» (the beard dries out in winter).",
+          "Switch the shop to English and ask «thin coloured hair with no volume».",
+          "Press the article card."
+        ],
+        "expect": [
+          "In Estonian the article title has «Meie blogist» above it.",
+          "The article title is in the shop's language, not in Russian.",
+          "In English it says «From our blog».",
+          "The article opens in the same language."
+        ],
+        "why": "A shopper reading Estonian must not get a Russian card."
       }
     },
     {

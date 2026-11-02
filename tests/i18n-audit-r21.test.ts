@@ -524,6 +524,15 @@ function chatHarness(fetchStub: () => Promise<unknown>): ChatHarness {
        below can look for the sentence in it. */
     function probeAI() {}
     function withBlogLinks(html) { return String(html); }
+    /* …and three more of 02.11.2026, the shop chat reading the blog: the
+       article card above the products, «Добавить всё в корзину» under them,
+       and the article the chat was opened from (openChatAbout), which
+       paintPanel drops with the conversation. Their own tests are
+       tests/chat-blog-card.test.ts and e2e/chatbot.spec.ts; here they draw
+       nothing, so the sentence is what the bubble holds. */
+    var pinned = null;
+    function articleCard() { return ""; }
+    function addAllButton() { return ""; }
     var fetch = FETCH;
     ${fn(chat, "reply", "public/shop2/chat.js")}
     ${fn(chat, "paintPanel", "public/shop2/chat.js")}
