@@ -3854,6 +3854,51 @@
       }
     },
     {
+      "id": "checkout-google-contact",
+      "area": "checkout",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«Продолжить с Google» на шаге «Контакт»",
+      "steps": [
+        "Не входя в кабинет, положить товар в корзину и открыть оформление.",
+        "Нажать «Продолжить с Google — заполнит имя и e-mail».",
+        "Выбрать аккаунт Google.",
+        "Нажать «Далее — доставка».",
+        "Войдя в кабинет, открыть оформление ещё раз."
+      ],
+      "expect": [
+        "Кнопка Google стоит над полем e-mail.",
+        "Магазин вернул на тот же шаг «Контакт», корзина та же.",
+        "E-mail вписан из Google, над ним «Вы вошли как …».",
+        "На шаге «Доставка» имя уже вписано.",
+        "Вошедшему покупателю кнопка Google не показывается."
+      ],
+      "why": "Покупатель не печатает имя и почту на телефоне — быстрее заказ и меньше опечаток в адресе.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:21:00.000Z",
+      "en": {
+        "title": "«Продолжить с Google» at the «Контакт» step",
+        "steps": [
+          "Without signing in, put a product in the cart and open the checkout.",
+          "Press «Продолжить с Google — заполнит имя и e-mail» (continue with Google).",
+          "Pick a Google account.",
+          "Press «Далее — доставка» (next — delivery).",
+          "Signed in, open the checkout once more."
+        ],
+        "expect": [
+          "The Google button sits above the e-mail box.",
+          "The shop is back on the same «Контакт» step with the same cart.",
+          "The e-mail is Google's, with «Вы вошли как …» above it.",
+          "On the «Доставка» step the name is already filled in.",
+          "A signed-in shopper sees no Google button."
+        ],
+        "why": "The shopper does not type a name and e-mail on a phone — a faster order, fewer typos."
+      }
+    },
+    {
       "id": "checkout-wallet-mark",
       "area": "checkout",
       "who": "dim",
@@ -5401,6 +5446,90 @@
           "A new code comes no more than three times per quarter-hour."
         ],
         "why": "Without this a six-digit code can be guessed into somebody's account."
+      }
+    },
+    {
+      "id": "acct-google-login",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Вход через Google",
+      "steps": [
+        "Когда Google-вход настроен (docs/google-login.md), открыть в магазине «Кабинет».",
+        "Нажать «Продолжить с Google».",
+        "Выбрать аккаунт Google с той почтой, на которую уже были заказы.",
+        "Открыть «Конфиденциальность» внизу магазина и найти строку про Google."
+      ],
+      "expect": [
+        "Кнопка Google — первая, под ней «или кодом на почту» и поле e-mail.",
+        "После нажатия кнопка серая, на ней «Открываем Google…».",
+        "Вернулись в «Кабинет» с надписью «Вы вошли как …» и числом заказов.",
+        "Видны те же заказы, что при входе по коду с этой почты.",
+        "В политике сказано: от Google магазин получает только имя и e-mail."
+      ],
+      "why": "Тот же e-mail — тот же аккаунт: вход через Google не должен заводить второй аккаунт или прятать заказы.",
+      "risk": "high",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:21:00.000Z",
+      "en": {
+        "title": "Signing in with Google",
+        "steps": [
+          "Once Google sign-in is set up (docs/google-login.md), open «Кабинет» (the account) in the shop.",
+          "Press «Продолжить с Google» (continue with Google).",
+          "Pick a Google account whose e-mail already has orders.",
+          "Open «Конфиденциальность» (privacy) at the foot of the shop and find the Google line."
+        ],
+        "expect": [
+          "The Google button comes first, then «или кодом на почту» and the e-mail box.",
+          "After the tap the button turns grey and says «Открываем Google…».",
+          "Back on «Кабинет» with «Вы вошли как …» (signed in as) and the order count.",
+          "The same orders show as when signing in with a code.",
+          "The policy says the shop gets only the name and e-mail from Google."
+        ],
+        "why": "Same e-mail, same account: Google must not make a second account or hide orders."
+      }
+    },
+    {
+      "id": "acct-google-cancel",
+      "area": "account",
+      "who": "dim",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Вход через Google — передумал",
+      "steps": [
+        "Выйти из кабинета и нажать «Продолжить с Google».",
+        "На странице Google нажать «Назад» в браузере.",
+        "Нажать кнопку ещё раз и на странице Google выбрать «Отмена».",
+        "Ввести почту и войти по коду."
+      ],
+      "expect": [
+        "После «Назад» кнопка снова белая и нажимается.",
+        "После «Отмена» магазин вернул в «Кабинет» с надписью «Вход через Google отменён…».",
+        "В адресной строке нет «?google=».",
+        "Вход по коду работает как раньше."
+      ],
+      "why": "Покупатель, который передумал, остаётся в магазине и может войти по коду.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T08:21:00.000Z",
+      "en": {
+        "title": "Signing in with Google — changed my mind",
+        "steps": [
+          "Sign out of the account and press «Продолжить с Google».",
+          "On Google's page press the browser's Back.",
+          "Press the button again and choose «Cancel» on Google's page.",
+          "Type the e-mail and sign in with a code."
+        ],
+        "expect": [
+          "After Back the button is white again and can be pressed.",
+          "After «Cancel» the shop is back on «Кабинет» saying «Вход через Google отменён…».",
+          "The address bar has no «?google=».",
+          "Signing in with a code works as before."
+        ],
+        "why": "A shopper who changes their mind stays in the shop and can still use the code."
       }
     },
     {

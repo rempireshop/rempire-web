@@ -189,6 +189,10 @@ export default defineConfig({
       // skipped rather than actually sent (docs/mail.md, docs/testing.md).
       OPENAI_API_KEY: "",
       RESEND_API_KEY: "",
+      // …and «Продолжить с Google» off: e2e/google-signin.spec.ts asserts the
+      // button is absent and the routes 404 without a client ID, and turns
+      // the storefront half on for itself by answering the feed's flag
+      GOOGLE_CLIENT_ID: "",
     },
   },
 
