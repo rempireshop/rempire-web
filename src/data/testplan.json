@@ -168,15 +168,15 @@
       "title": "Фото в баннере на главной",
       "steps": [
         "Открыть главную на телефоне и пролистать баннеры стрелками.",
-        "Открыть главную на компьютере и пролистать баннеры точками под картинкой.",
+        "Открыть главную на компьютере и пролистать баннеры стрелками по краям.",
         "Найти баннер с вашей фотографией и баннер с товаром."
       ],
       "expect": [
-        "Ваше фото занимает правую часть баннера и переходит в бежевый.",
+        "Баннер ниже, чем был; фото чёткое, не растянутое.",
+        "Ваше фото справа переходит в бежевый, на большом экране — с обеих сторон.",
         "На телефоне фото во всю ширину, текст и кнопка под ним.",
-        "Товар стоит на бежевом справа и крупнее, чем раньше.",
-        "Текст и кнопка не обрезаны и не налезают на стрелки.",
-        "На компьютере под баннером точки; точка открывает свой баннер.",
+        "Товар стоит на бежевом справа и не размыт.",
+        "Под баннером нет точек; текст и кнопка не налезают на стрелки.",
         "Когда баннер меняется, страница под ним не прыгает."
       ],
       "why": "Фото в маленькой рамке на бежевом выглядело как ошибка на самом видном месте.",
@@ -186,21 +186,21 @@
         "title": "Photos in the home banner",
         "steps": [
           "Open the home page on a phone and page through the banners with the arrows.",
-          "Open the home page on a computer and page through them with the dots under the picture.",
+          "Open the home page on a computer and page through them with the arrows at its edges.",
           "Find a banner with your own photo and one with a product."
         ],
         "expect": [
-          "Your photo fills the right part of the banner and fades into the beige.",
+          "The banner is lower than it was; the photo is sharp, not stretched.",
+          "Your photo on the right fades into the beige, on a big screen on both sides.",
           "On a phone the photo is full width, the words and button under it.",
-          "The product stands on the beige on the right, larger than before.",
-          "The words and the button are not cut off and clear of the arrows.",
-          "On a computer there are dots under the banner; a dot opens its banner.",
+          "The product stands on the beige on the right and is not blurry.",
+          "No dots under the banner; the words and the button are clear of the arrows.",
           "When the banner changes, the page under it does not jump."
         ],
         "why": "A photo in a small frame on the beige looked like a mistake on the shop's best screen."
       },
-      "mark": "new",
-      "markedAt": "2026-11-02T08:24:17.000Z"
+      "mark": "redo",
+      "markedAt": "2026-11-02T13:05:01.000Z"
     },
     {
       "id": "shop-menu",
@@ -1025,7 +1025,7 @@
         "Найти статью без обложки, если такая есть."
       ],
       "expect": [
-        "Наверху большая статья на тёмной фотографии с белой кнопкой «Читать статью».",
+        "Наверху статья выглядит как баннер на главной: фото, заголовок, «Читать статью».",
         "Рядом с «Блог» написано, сколько статей.",
         "Ниже статьи идут одной колонкой, каждая обложка своей формы.",
         "После нажатия темы остались только статьи этой темы.",
@@ -1035,8 +1035,8 @@
       "why": "Блог переделан как журнал (Dim, 02.11.2026): большая статья, темы и обложки своей формы.",
       "risk": "low",
       "writes": false,
-      "mark": "new",
-      "markedAt": "2026-11-02T08:39:38.000Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T13:05:01.000Z",
       "en": {
         "title": "The blog as a magazine — phone",
         "steps": [
@@ -1047,7 +1047,7 @@
           "Find an article without a cover, if there is one."
         ],
         "expect": [
-          "On top, a big article on a dark photo with a white «Читать статью» button.",
+          "On top, the article looks like the home banner: photo, title, «Читать статью».",
           "Next to «Блог» it says how many articles there are.",
           "Below, the articles run in one column, each cover in its own shape.",
           "After the tap only that topic's articles are left.",
@@ -1066,36 +1066,38 @@
       "title": "Блог как журнал — компьютер",
       "steps": [
         "Открыть «Блог» на компьютере.",
-        "Если наверху несколько статей — нажать полоски под кнопкой.",
+        "Если наверху несколько статей — пролистать их стрелками по краям.",
         "Посмотреть сетку статей.",
         "В тёмной карточке нажать «Задать вопрос».",
         "Переключить язык на ET и на EN."
       ],
       "expect": [
-        "Полоски листают большие статьи наверху, сами они не листаются.",
+        "Верх блога — тот же баннер, что на главной, той же высоты.",
+        "Стрелки листают статьи наверху; сами они не листаются, точек нет.",
+        "Квадратная обложка справа уходит в бежевый, широкая — на весь верх с белым текстом.",
         "Статьи стоят в три колонки, обложки своей формы, без обрезки.",
-        "Узкая или вертикальная обложка наверху стоит справа на бежевом, не растянута.",
         "«Задать вопрос» открывает чат помощника.",
         "На ET и EN темы, счётчик и кнопки на своём языке."
       ],
       "why": "Компьютер показывает другую раскладку блога: три колонки, листалку и карточку помощника.",
       "risk": "low",
       "writes": false,
-      "mark": "new",
-      "markedAt": "2026-11-02T08:39:38.000Z",
+      "mark": "redo",
+      "markedAt": "2026-11-02T13:05:01.000Z",
       "en": {
         "title": "The blog as a magazine — desktop",
         "steps": [
           "Open «Блог» on a computer.",
-          "If there are several articles on top, press the bars under the button.",
+          "If there are several articles on top, page through them with the arrows at the edges.",
           "Look at the grid of articles.",
           "In the dark card press «Задать вопрос».",
           "Switch the language to ET and to EN."
         ],
         "expect": [
-          "The bars move the big stories on top; they never move by themselves.",
+          "The top of the blog is the same banner as on the home page, as tall.",
+          "The arrows move the stories on top; they never move by themselves, no dots.",
+          "A square cover fades into the beige on the right; a wide one fills the top.",
           "Articles stand in three columns, covers in their own shape, not cut.",
-          "A narrow or upright cover on top stands on the right on beige, not stretched.",
           "«Задать вопрос» opens the assistant chat.",
           "In ET and EN the topics, the count and the buttons are in that language."
         ],

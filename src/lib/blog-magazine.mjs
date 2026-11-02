@@ -247,19 +247,19 @@ export function masonry(items, cols = 3) {
    beside this file holds the two together. */
 export const STR = {
   RU: {
-    featured: "Избранные статьи", read: "Читать статью", slide: "Статья", topics: "Темы", all: "Все",
+    featured: "Избранные статьи", read: "Читать статью", prevSlide: "Предыдущая статья", nextSlide: "Следующая статья", of: "из", topics: "Темы", all: "Все",
     askEye: "Не знаете, что подойдёт?", askText: "Спросите помощника — он отвечает по этим статьям и подборкам нашего салона.",
     askBtn: "Задать вопрос", team: "Команда салона Rempire", inThis: "В этой статье", inThisLabel: "Товары в этой статье",
     sources: "Написано по материалам", askPost: "Спросить об этой статье", next: "Читать дальше", none: "В этой теме пока нет статей.",
   },
   ET: {
-    featured: "Esiletõstetud artiklid", read: "Loe artiklit", slide: "Artikkel", topics: "Teemad", all: "Kõik",
+    featured: "Esiletõstetud artiklid", read: "Loe artiklit", prevSlide: "Eelmine artikkel", nextSlide: "Järgmine artikkel", of: "/", topics: "Teemad", all: "Kõik",
     askEye: "Ei tea, mis sobib?", askText: "Küsi abilise käest — ta vastab nende artiklite ja meie salongi valikute põhjal.",
     askBtn: "Esita küsimus", team: "Rempire salongi meeskond", inThis: "Selles artiklis", inThisLabel: "Tooted selles artiklis",
     sources: "Kirjutatud materjalide põhjal", askPost: "Küsi selle artikli kohta", next: "Loe veel", none: "Selles teemas pole veel artikleid.",
   },
   EN: {
-    featured: "Featured articles", read: "Read the article", slide: "Article", topics: "Topics", all: "All",
+    featured: "Featured articles", read: "Read the article", prevSlide: "Previous article", nextSlide: "Next article", of: "of", topics: "Topics", all: "All",
     askEye: "Not sure what fits you?", askText: "Ask the assistant — it answers from these articles and our salon's picks.",
     askBtn: "Ask a question", team: "Rempire salon team", inThis: "In this article", inThisLabel: "Products in this article",
     sources: "Written from", askPost: "Ask about this article", next: "Read next", none: "No articles in this topic yet.",
@@ -310,9 +310,10 @@ const dmy = (iso) => String(iso || "").slice(0, 10).split("-").reverse().join(".
    an article already in ONE language: { slug, title, excerpt, coverUrl,
    coverAlt, coverFocus, coverW, coverH, topic, minutes, productCount,
    publishedAt }. `hrefOf(slug)` is the article's address in this language.
-   No script and no button here — the chips, the carousel's dots and «Спросить»
-   are app.js's; the static page is for a crawler and a reader with scripts
-   off, and shows every article. */
+   No script here, and no button but the featured band's two arrows, drawn
+   as app.js draws them so the band is the same box before and after the
+   script — the chips and «Спросить» are app.js's alone; the static page is
+   for a crawler and a reader with scripts off, and links every article. */
 
 /** An <img> for a cover: its own shape when known, the old 1200×630 frame (and
     the owner's crop for it) when not. `eager` for the first screen. */
@@ -329,10 +330,10 @@ export function coverImg(p, where, cls, eager, altText) {
     load + ' decoding="async"' + (crop ? ' style="' + crop + '"' : "") + ">";
 }
 
-/** The carousel picture keeps the owner's point for the top of the article. */
+/** The carousel's photo keeps the owner's point for the top of the article; the middle when there is none. */
 function heroPos(focus) {
   const f = readCoverFocus(focus);
-  return f ? "object-position:" + f.post.x + "% " + f.post.y + "%" : "";
+  return f ? f.post.x + "% " + f.post.y + "%" : "50% 50%";
 }
 
 function eyebrow(p, code, withProducts) {
@@ -343,39 +344,85 @@ function eyebrow(p, code, withProducts) {
   return parts.map((x) => "<span>" + esc(x) + "</span>").join(" · ");
 }
 
-/* A picture narrower than the banner, or standing upright — a page out of a
+/* A picture narrower than the page, or standing upright — a page out of a
    brand's PDF is ~830 px wide and portrait — is never stretched across a
-   1440-px banner or a 1240-px article top: the carousel puts it on the right
-   half, whole, on beige (the half-banner style); the article keeps it in the
-   reading column, cut 4:5. app.js bmagHalf() is the twin. */
+   1240-px article top: the article keeps it in the reading column, cut 4:5.
+   app.js bmagHalf() is the twin. (The featured band has its own rule,
+   coverKind() below.) */
 export function isNarrow(p) {
   const d = coverDims(p);
   return !!(d && (d.w < 1200 || d.h > d.w * 0.9));
 }
 
-/** One slide of the featured carousel. */
-export function heroSlideHTML(p, code, hrefOf, i) {
-  const half = isNarrow(p);
-  const pos = half ? "" : heroPos(p.coverFocus);
-  return '<article class="bmag-hero__slide' + (!p.coverUrl ? " bmag-hero__slide--none" : half ? " bmag-hero__slide--half" : "") + '" id="bmag-s' + i + '">' +
-    (p.coverUrl
-      ? '<img class="bmag-hero__img" src="' + esc(p.coverUrl) + '" alt=""' +
-        (coverDims(p) ? ' width="' + coverDims(p).w + '" height="' + coverDims(p).h + '"' : ' width="1200" height="630"') +
-        (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async"' + (pos ? ' style="' + pos + '"' : "") + ">"
-      : "") +
-    '<span class="bmag-hero__shade" aria-hidden="true"></span>' +
-    '<div class="bmag-hero__tx">' +
-      '<p class="bmag-hero__eye">' + eyebrow(p, code, true) + "</p>" +
-      '<h2 class="bmag-hero__t">' + esc(p.title) + "</h2>" +
-      (p.excerpt ? '<p class="bmag-hero__lead">' + esc(p.excerpt) + "</p>" : "") +
-      '<a class="bmag-hero__btn" href="' + esc(hrefOf(p.slug)) + '">' + esc(S(code).read) + "</a>" +
-    "</div></article>";
+/* ---------- the featured articles: the home banner ----------------------
+   Dim, 02.11.2026: the blog's featured story «must look and behave EXACTLY
+   like the home banner». So it IS the home banner: the band app.js draws on
+   the home page (heroFrameHTML / heroBandHTML there), the same classes, the
+   same arrows, styles.css .hero for all of it. These are the twins the
+   static page is drawn with — app.js paints its own copy over this one in
+   the same task, and tests/blog-magazine.test.ts draws the same articles
+   through both and holds them to one markup, so the band neither moves nor
+   changes when the script arrives. */
+
+/** A picture this much wider than tall is a landscape photo — src/lib/hero.ts HERO_WIDE_RATIO. */
+export const HERO_WIDE_RATIO = 1.3;
+/** …and only one at least this wide is drawn across the whole band: a smaller one would be blown up past its pixels. */
+export const HERO_WIDE_MIN_W = 1200;
+
+/**
+ * The look an article's slide gets, by its cover's shape — the rule a photo
+ * uploaded for the home banner picks its own by (heroKindForUpload in
+ * src/lib/hero.ts): a landscape cover is "wide" (white words on the darkened
+ * photo), anything else "half" (the photo on the right of the column, fading
+ * into the beige). A landscape cover under 1200 px and one nobody measured
+ * are "half" too. No cover: "product" — the words alone on the beige.
+ * app.js bmagKind() is the twin.
+ */
+export function coverKind(p) {
+  if (!p || !p.coverUrl) return "product";
+  const d = coverDims(p);
+  return d && d.w >= HERO_WIDE_MIN_W && d.w / d.h >= HERO_WIDE_RATIO ? "wide" : "half";
 }
 
+/* app.js chevron(), the band's arrows. */
+const CHEVRON = {
+  left: '<svg viewBox="0 0 12 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3L3 14l6 11"/></svg>',
+  right: '<svg viewBox="0 0 12 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l6 11-6 11"/></svg>',
+};
+
+/** «Следующая статья — 2 из 3»: which slide an arrow goes to, of how many (app.js heroArrowLabel). */
+function arrowLabel(name, to, n, code) {
+  return name + " — " + (((to % n) + n) % n + 1) + " " + S(code).of + " " + n;
+}
+
+/** One article as a slide of the band (app.js bmagSlideHTML). `cur` is the slide on screen. */
+export function heroSlideHTML(p, code, hrefOf, i, cur = 0) {
+  const kind = coverKind(p), d = coverDims(p), on = i === cur;
+  const words = '<div class="hero__inner"><div class="hero__eyebrow">' + eyebrow(p, code, true) + "</div>" +
+    '<h2 class="hero__title">' + esc(p.title) + "</h2>" +
+    (p.excerpt ? '<p class="hero__sub">' + esc(p.excerpt) + "</p>" : "") +
+    '<a class="btn" href="' + esc(hrefOf(p.slug)) + '">' + esc(S(code).read) + "</a></div>";
+  const img = kind === "product" ? ""
+    : '<img src="' + esc(p.coverUrl) + '" alt=""' + (d ? ' width="' + d.w + '" height="' + d.h + '"' : "") +
+      ' style="object-position:' + heroPos(p.coverFocus) + '"' +
+      (on ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"') + ">";
+  return '<div class="hero__slide hero__slide--' + kind + (kind === "wide" ? " hero__slide--left" : "") +
+    '" data-kind="' + kind + '" data-on="' + (on ? 1 : 0) + '" aria-hidden="' + !on + '">' +
+    (kind === "product" ? "" : '<span class="hero__photo">' + img + "</span>") +
+    '<div class="hero__box">' + words + "</div></div>";
+}
+
+/** The band (app.js heroBandHTML): the slides, and two arrows when there is more than one. */
 export function heroHTML(slides, code, hrefOf) {
   if (!slides.length) return "";
-  return '<section class="bmag-hero" aria-label="' + esc(S(code).featured) + '">' +
-    '<div class="bmag-hero__track">' + slides.map((p, i) => heroSlideHTML(p, code, hrefOf, i)).join("") + "</div></section>";
+  const s = S(code), n = slides.length;
+  return '<section class="hero" aria-label="' + esc(s.featured) + '" aria-roledescription="карусель" data-kind="' + coverKind(slides[0]) + '">' +
+    slides.map((p, i) => heroSlideHTML(p, code, hrefOf, i, 0)).join("") +
+    (n > 1
+      ? '<button class="hero__arrow hero__arrow--prev" type="button" data-slide="-1" aria-label="' + esc(arrowLabel(s.prevSlide, -1, n, code)) + '">' + CHEVRON.left + "</button>" +
+        '<button class="hero__arrow hero__arrow--next" type="button" data-slide="1" aria-label="' + esc(arrowLabel(s.nextSlide, 1, n, code)) + '">' + CHEVRON.right + "</button>"
+      : "") +
+    "</section>";
 }
 
 /** One card of the grid: the cover in its own shape, or the beige tile. */

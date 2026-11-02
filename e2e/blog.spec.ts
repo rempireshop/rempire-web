@@ -236,7 +236,7 @@ for (const lang of LANGS) {
     await expect(tiles.first()).toBeVisible({ timeout: 2000 });
     // the newest of the three samples is the story on top (the magazine, 02.11.2026), the other two are tiles
     expect(await tiles.count()).toBeGreaterThanOrEqual(2);
-    await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
+    await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
     expect(Date.now() - t0, "the list waited for the API").toBeLessThan(3500);
     await expect(page.locator(".blog__sk"), "a skeleton was shown although the list was known").toHaveCount(0);
 

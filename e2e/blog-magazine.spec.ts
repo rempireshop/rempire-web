@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page, type Route } from "@playwright/test";
+import sharp from "sharp";
 import { ipHeaders, loginAsAdmin, PRODUCT, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
 /** The blog as a magazine (Dim, 02.11.2026 — canvas-banner/project/BlogHome,
@@ -54,7 +55,7 @@ test.describe("blog home", () => {
 
     await page.goto(shopUrl("", "/blog/"));
     await waitForScreen(page, "blog");
-    await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
+    await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
     await expect(page.locator(".bmag__h")).toBeVisible();
 
     const tile = page.locator(`.bmag__card[data-go-blog="${bare.slug}"]`);
@@ -90,6 +91,150 @@ test.describe("blog home", () => {
     // nothing slides sideways on a phone
     const sw = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(sw).toBeLessThanOrEqual(1);
+  });
+});
+
+/* Dim, 02.11.2026: the featured story on top of the blog «must look and
+   behave EXACTLY like the home banner» — his screenshot showed the square
+   Kevin.Murphy cover as a framed square box on the right of a beige band.
+   So it is the home banner: the same band and classes, the look picked by
+   the cover's shape as an upload of the home banner picks its own, the same
+   heights and arrows, no dots — and the static page the same box as the one
+   the script paints over it. */
+test.describe("blog home — the featured band is the home banner", () => {
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "sets its own phone and computer viewports — desktop project only");
+  });
+
+  async function picture(w: number, h: number): Promise<Buffer> {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a5a6b"/><stop offset="1" stop-color="#c9b79c"/></linearGradient></defs>
+      <rect width="100%" height="100%" fill="url(#g)"/><circle cx="${w * 0.5}" cy="${h * 0.45}" r="${Math.min(w, h) * 0.22}" fill="#efe6d6"/></svg>`;
+    return sharp(Buffer.from(svg)).webp({ quality: 70 }).toBuffer();
+  }
+  async function servePictures(page: Page): Promise<void> {
+    await page.addInitScript(() => { try { sessionStorage.setItem("rempire-intro", "1"); } catch { /* private mode */ } });
+    const wide = await picture(1600, 900);
+    const square = await picture(1095, 1095);
+    await page.route(/\/e2e-blog\/(wide|square)\.webp$/, (route: Route) =>
+      route.fulfill({ status: 200, contentType: "image/webp", body: /wide/.test(route.request().url()) ? wide : square }));
+  }
+  /** The band's box, its slides' kinds in order, and the one on screen. */
+  async function readBand(page: Page) {
+    const band = page.locator("section.hero");
+    await expect(band).toBeVisible();
+    return {
+      box: await band.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { width: r.width, height: r.height };
+      }),
+      kinds: await band.locator(".hero__slide").evaluateAll((els) => els.map((e) => e.className)),
+      on: await band.locator('.hero__slide[data-on="1"]').getAttribute("data-kind"),
+    };
+  }
+  async function noScript(browser: Browser, url: string, vp: { width: number; height: number }) {
+    const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: vp, extraHTTPHeaders: ipHeaders(84), locale: "ru-RU" });
+    const page = await ctx.newPage();
+    const wide = await picture(1600, 900), square = await picture(1095, 1095);
+    await page.route(/\/e2e-blog\/(wide|square)\.webp$/, (route: Route) =>
+      route.fulfill({ status: 200, contentType: "image/webp", body: /wide/.test(route.request().url()) ? wide : square }));
+    await page.goto(url);
+    const got = await readBand(page);
+    await ctx.close();
+    return got;
+  }
+
+  test("a landscape cover is «на всю ширину», a square one «на половину» — the home banner's band, heights and arrows", async ({ page, browser }, testInfo) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    const stamp = Date.now().toString(36);
+    // the square one first, so the landscape one is the newest — the first slide
+    const sq = await post(page, {
+      title: { RU: `Квадратная обложка ${stamp}` }, excerpt: { RU: "Как выбрать шампунь Kevin.Murphy под свои волосы." },
+      body: { RU: words(40) }, coverUrl: "/e2e-blog/square.webp", coverW: 1095, coverH: 1095, topic: "hair", featured: true,
+    });
+    const wd = await post(page, {
+      title: { RU: `Широкая обложка ${stamp}` }, excerpt: { RU: "Тонер с кислотами: как выбрать и как пользоваться." },
+      body: { RU: words(40) }, coverUrl: "/e2e-blog/wide.webp", coverW: 1600, coverH: 900, topic: "skin", featured: true,
+    });
+    await servePictures(page);
+    const url = shopUrl("", "/blog/");
+
+    for (const vp of [{ width: 1440, height: 900 }, { width: 2000, height: 1100 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(vp);
+      await page.goto(url);
+      await waitForScreen(page, "blog");
+      const band = page.locator("section.hero");
+      await expect(band).toHaveAttribute("aria-label", "Избранные статьи");
+      // the two featured articles, the newest first, each in the home banner's look for its shape
+      const wide = band.locator(".hero__slide").filter({ hasText: `Широкая обложка ${stamp}` });
+      const half = band.locator(".hero__slide").filter({ hasText: `Квадратная обложка ${stamp}` });
+      await expect(wide).toHaveClass("hero__slide hero__slide--wide hero__slide--left");
+      await expect(wide).toHaveAttribute("data-kind", "wide");
+      await expect(half).toHaveClass("hero__slide hero__slide--half");
+      await expect(half).toHaveAttribute("data-kind", "half");
+      await expect(wide).toHaveAttribute("data-on", "1");
+      await expect(band).toHaveAttribute("data-kind", "wide");
+      expect(await wide.locator(".hero__title").evaluate((el) => getComputedStyle(el).color)).toBe("rgb(255, 255, 255)");
+      expect(await half.locator(".hero__title").evaluate((el) => getComputedStyle(el).color)).toBe("rgb(28, 26, 0)");
+      // none of the old carousel: no dots, no scroll track
+      await expect(page.locator(".bmag-hero, .bmag-hero__dot, [data-bmagdot], .hero__dot")).toHaveCount(0);
+      const b = (await band.boundingBox())!;
+      const title = (await wide.locator(".hero__title").boundingBox())!;
+      const btn = (await wide.locator(".btn").boundingBox())!;
+      for (const [name, x] of [["title", title], ["button", btn]] as const) {
+        expect(x.y, `${name} above the band at ${vp.width}`).toBeGreaterThanOrEqual(b.y - 1);
+        expect(x.y + x.height, `${name} below the band at ${vp.width}`).toBeLessThanOrEqual(b.y + b.height + 1);
+      }
+      await expect(wide.locator(".btn")).toHaveAttribute("href", new RegExp(`/${wd.slug}/?$`));
+      await expect(wide.locator(".btn")).toHaveAttribute("data-go-blog", wd.slug);
+      if (vp.width === 390) {
+        expect(b.height, `phone band ${b.height}`).toBeGreaterThanOrEqual(465);
+        expect(b.height, `phone band ${b.height}`).toBeLessThanOrEqual(495);
+      } else {
+        expect(b.height, `band ${b.height} at ${vp.width}`).toBeLessThanOrEqual(450);
+      }
+      await band.screenshot({ path: testInfo.outputPath(`blog-band-${vp.width}-wide.png`) });
+
+      // the home banner's arrows move it, and say where they go
+      const next = band.locator(".hero__arrow--next");
+      await expect(next).toHaveAttribute("aria-label", "Следующая статья — 2 из 2");
+      await next.click();
+      await expect(half).toHaveAttribute("data-on", "1");
+      await expect(band).toHaveAttribute("data-kind", "half");
+      // the crossfade has finished (the screenshots below are of the slide, not of the two halfway)
+      await expect(half).toHaveCSS("opacity", "1");
+      await expect(wide).toHaveCSS("opacity", "0");
+      await expect(next).toHaveAttribute("aria-label", "Следующая статья — 1 из 2");
+      if (vp.width !== 390) {
+        // the square photo: the right part of the shop's column, never wider than the column
+        const ph = (await half.locator(".hero__photo").boundingBox())!;
+        const box = (await half.locator(".hero__box").boundingBox())!;
+        expect(ph.width, JSON.stringify({ ph, box })).toBeLessThanOrEqual(Math.min(b.width, 1240) * 0.62 + 1);
+        expect(ph.x + ph.width).toBeLessThanOrEqual(box.x + box.width + 1);
+        expect(Math.abs(ph.height - b.height)).toBeLessThan(2);
+        expect(Math.max(ph.width, ph.height), "the 1095-px cover is blown up").toBeLessThanOrEqual(1095);
+      }
+      await band.screenshot({ path: testInfo.outputPath(`blog-band-${vp.width}-half.png`) });
+      await page.screenshot({ path: testInfo.outputPath(`blog-page-${vp.width}.png`) });
+      // the band is as tall as the home page's at this width: one band, one height
+      const blogH = (await band.boundingBox())!.height;
+      await page.goto(shopUrl("", "/"));
+      await waitForScreen(page, "home");
+      const homeH = (await page.locator("section.hero").boundingBox())!.height;
+      expect(Math.abs(homeH - blogH), `home ${homeH} vs blog ${blogH} at ${vp.width}`).toBeLessThanOrEqual(1);
+
+      // the static page (a crawler's, a reader's with scripts off) draws the same band — the same box, the same slides
+      await page.goto(url);
+      await waitForScreen(page, "blog");
+      const live = await readBand(page);
+      const cold = await noScript(browser, url, vp);
+      expect(cold.kinds).toEqual(live.kinds);
+      expect(cold.on).toBe(live.on);
+      expect(Math.abs(cold.box.height - live.box.height), `static ${cold.box.height} vs live ${live.box.height} at ${vp.width}`).toBeLessThanOrEqual(1);
+      expect(Math.abs(cold.box.width - live.box.width)).toBeLessThanOrEqual(1);
+    }
+    expect(sq.slug).toBeTruthy();
   });
 });
 

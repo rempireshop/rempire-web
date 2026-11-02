@@ -986,7 +986,7 @@ test.describe("blog — the sample posts", () => {
       await expect(tiles.first()).toBeVisible();
       // the newest article is the story on top since the magazine (02.11.2026), the rest are tiles
       expect(await tiles.count(), `the ${code} blog listing is short`).toBeGreaterThanOrEqual(2);
-      await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
+      await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
       await assertClean(page, w, `blog listing (${code})`);
     }
   });

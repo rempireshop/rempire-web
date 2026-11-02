@@ -68,8 +68,13 @@ const shop = new Function(`
   function heroHref() { return "/c/all/"; }
   function heroGoAttr() { return 'data-go-cat="all"'; }
   function heroArt(image, cls, o, s) { return '<span class="hero__art" data-art="' + esc(image) + '"></span>'; }
+  ${fn("chevron")}
+  ${fn("heroFrameHTML")}
+  ${decl("var HERO_ARROWS = ")}
+  ${fn("heroArrowLabel")}
+  ${fn("heroBandHTML")}
   ${fn("heroSlideHTML")}
-  return { heroKindOfImage, heroKind, heroKindForUpload, heroSide, heroFocus, heroImg, heroSlideHTML };
+  return { heroKindOfImage, heroKind, heroKindForUpload, heroSide, heroFocus, heroImg, heroSlideHTML, heroBandHTML, HERO_ARROWS };
 `)() as {
   heroKindOfImage: (image: unknown) => string;
   heroKind: (s: unknown) => string;
@@ -78,6 +83,8 @@ const shop = new Function(`
   heroFocus: (s: unknown) => { x: number; y: number };
   heroImg: (s: unknown, sizes: string, first: boolean, flat: boolean, noPos?: boolean) => string;
   heroSlideHTML: (s: unknown, i: number, cur: number, flat: boolean) => string;
+  heroBandHTML: (label: string, slides: string[], kind: string, cur: number, names: string[]) => string;
+  HERO_ARROWS: string[];
 };
 
 /** The panel's own cleaner — what it sends as settings.hero. */
@@ -338,5 +345,61 @@ describe("the storefront's slide, per kind", () => {
     expect(shop.heroSide({ side: "up" })).toBe("left");
     expect(shop.heroFocus({})).toEqual({ x: 0.5, y: 0.5 });
     expect(shop.heroFocus({ focus: { x: 3, y: 0 } })).toEqual({ x: 0.5, y: 0.5 });
+  });
+
+  it("asks for a «half» photo no wider than the shop's column it stands in", () => {
+    const html = shop.heroSlideHTML({ ...base, image: `${BUCKET}/hero/1700000000000-x.webp`, kind: "half", w: 1024, h: 1360 }, 0, 0, false);
+    expect(html).toContain('sizes="(min-width: 1240px) 769px, (min-width: 768px) 62vw, 100vw"');
+  });
+});
+
+/* Dim, 02.11.2026: the dots under the banner had come back by mistake —
+   they go, on every screen; the arrows and the swipe stay, and the arrows
+   say where they lead and how many there are. */
+describe("the band around the slides", () => {
+  const slides = ["<i>1</i>", "<i>2</i>", "<i>3</i>"];
+
+  it("draws two arrows and no dots", () => {
+    const html = shop.heroBandHTML("Баннеры", slides, "half", 0, shop.HERO_ARROWS);
+    expect(html).toMatch(/^<section class="hero" aria-label="Баннеры" aria-roledescription="карусель" data-kind="half">/);
+    expect(html.match(/class="hero__arrow /g)).toHaveLength(2);
+    expect(html).not.toContain("hero__dot");
+    expect(html).not.toContain("data-slideto");
+    expect(app).not.toContain("hero__dot");
+  });
+
+  it("says in each arrow which slide it goes to, of how many", () => {
+    const html = shop.heroBandHTML("Баннеры", slides, "half", 0, shop.HERO_ARROWS);
+    expect(html).toContain('data-slide="-1" aria-label="Предыдущий баннер — 3 из 3"');
+    expect(html).toContain('data-slide="1" aria-label="Следующий баннер — 2 из 3"');
+    const last = shop.heroBandHTML("Баннеры", slides, "half", 2, shop.HERO_ARROWS);
+    expect(last).toContain('aria-label="Следующий баннер — 1 из 3"');
+    // …and the dictionary says it in Estonian and English, the arrow's name its own entry
+    expect(app).toContain('"Следующий баннер": "Järgmine bänner"');
+    expect(app).toContain(
+      '[/^(Предыдущий баннер|Следующий баннер|Предыдущая статья|Следующая статья) — (\\d+) из (\\d+)$/,\n' +
+      '      { ET: "$1 — $2 / $3", EN: "$1 — $2 of $3" }],');
+  });
+
+  it("draws one slide as a picture: no arrows", () => {
+    expect(shop.heroBandHTML("Баннеры", slides.slice(0, 1), "wide", 0, shop.HERO_ARROWS)).not.toContain("hero__arrow");
+  });
+});
+
+/* The band's own measures (Dim, 02.11.2026, measured at 1440: 594 px was too
+   tall, and the photos were blown up past their pixels). */
+describe("styles.css — the band's heights and the photo's frame", () => {
+  const css = readFileSync(fileURLToPath(new URL("../public/shop2/styles.css", import.meta.url)), "utf8").replace(/\r\n/g, "\n");
+
+  it("is ~440 px on a computer and a 4:3 photo plus the words on a phone", () => {
+    expect(css).toContain("--hero-h: clamp(360px, 30vw, 440px);");
+    expect(css).toContain("--hero-ph: calc(min(100vw, 480px) * .75);");
+    expect(css).toContain("--hero-hm: calc(var(--hero-ph) + 190px);");
+  });
+
+  it("keeps the «half» photo inside the shop's column, and never draws a cut-out larger than its file", () => {
+    expect(css).toMatch(/\.hero__slide--half \.hero__photo \{\n\s+position: absolute; top: 0; bottom: 0;\n\s+right: max\(0px, \(100% - var\(--maxw\)\) \/ 2\);\n\s+width: calc\(min\(100%, var\(--maxw\)\) \* \.62\);/);
+    expect(css).toMatch(/\.hero__slide--product \.hero__art > img \{\n\s+inset: 0; margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%;/);
+    expect(css).not.toContain(".hero__dot");
   });
 });

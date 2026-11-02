@@ -699,10 +699,20 @@ body:has(.stickybar) .ftr {
      or the shop's own banner replaced by the owner's when /api/overrides
      lands — never moves the page under the band. The slides stack in one
      grid cell, so the band is its tallest slide; these are the heights each
-     kind is laid out to fill. */
-  --hero-h: clamp(420px, 41.7vw, 600px);       /* a computer: 600 px at 1440 */
-  --hero-ph: min(100vw, 480px);                /* a phone: the square of a half-width photo */
-  --hero-hm: calc(var(--hero-ph) + 190px);     /* a phone: the band — that square and two lines of title under it */
+     kind is laid out to fill.
+
+     Dim, 02.11.2026, measured on the live shop at 1440: 594 px was too tall
+     (the banner before the kinds stood at about 380) and the photos looked
+     soft, stretched past their own pixels — Renat's are 1024 px. So the band
+     is ~440 px on a computer and stops there, the «half» photo stays inside
+     the shop's column (below) and the cut-out is never drawn larger than its
+     file. The blog's featured articles are this same band (bmagHeroHTML in
+     app.js, heroHTML in src/lib/blog-magazine.mjs). */
+  --hero-h: clamp(360px, 30vw, 440px);         /* a computer: 432 px at 1440, 440 from 1467 up */
+  --hero-ph: calc(min(100vw, 480px) * .75);    /* a phone: the photo, 4:3 — 292 px on a 390 phone */
+  --hero-hm: calc(var(--hero-ph) + 190px);     /* a phone: the band — that photo and two lines of title under it */
+  /* the band is what the «half» photo's right-hand fade measures (100cqw) */
+  container-type: inline-size;
 }
 .hero__slide {
   grid-area: 1 / 1; opacity: 0; visibility: hidden;
@@ -726,7 +736,12 @@ body:has(.stickybar) .ftr {
    surface rather than darkening --muted everywhere. */
 .hero__eyebrow { font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: #5c5947; margin-bottom: 8px; }
 .hero__title { font-family: Oswald, sans-serif; font-size: clamp(23px, 4.4vw, 40px); text-transform: uppercase; letter-spacing: .02em; line-height: 1.08; margin-bottom: 10px; overflow-wrap: break-word; }
-.hero__sub { font-size: 14px; color: rgba(28, 26, 0, .78); margin-bottom: 18px; }
+/* three lines at most: an article's lead on the blog's band can run to a
+   paragraph, and the band keeps its height */
+.hero__sub {
+  font-size: 14px; color: rgba(28, 26, 0, .78); margin-bottom: 18px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
 .hero__art {
   flex: 0 1 36%; align-self: stretch; min-height: 210px;
   background-size: contain; background-position: center; background-repeat: no-repeat;
@@ -740,6 +755,14 @@ body:has(.stickybar) .ftr {
    page its button opens. */
 .hero__art--gift { display: flex; align-items: center; justify-content: center; background: var(--shell); }
 .hero__giftmark { width: 42px; height: 66px; color: var(--ink); }
+/* The cut-out is never drawn larger than its own file (Dim, 02.11.2026):
+   the frame above is the most it may take, and a smaller photo — the
+   catalogue has cut-outs of 200 px — stands at its own size in the middle
+   of it instead of being blown up soft. `auto` is the file's own size; the
+   two maxima keep its shape inside the frame. */
+.hero__slide--product .hero__art > img {
+  inset: 0; margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%;
+}
 /* Ренат, 20.09.2026: «убрать квадратное оформление и оставить просто стрелки
    и чуть их увеличить», with a drawing — a red cross over a boxed chevron, a
    green tick beside a bare one. So the plate is gone and the chevron is the
@@ -789,8 +812,8 @@ body:has(.stickybar) .ftr {
 
    Each kind has its picture somewhere else (02.11.2026), so the arrows are
    88 px tall and stand at the middle of the slide-on-screen's picture — the
-   cut-out's, the square's, the upper part of a full-width photo — which the
-   band says through its data-kind (paintSlide in app.js). They are moved
+   cut-out's, the 4:3 photo's, the upper part of a full-width photo — which
+   the band says through its data-kind (heroPaint in app.js). They are moved
    there with a transform, never with `top`: a slide of another kind coming
    round must not count as the page shifting. */
 @media (max-width: 767px) {
@@ -809,24 +832,11 @@ body:has(.stickybar) .ftr {
   .hero__arrow--next:hover { transform: translate(2px, var(--hero-ay)); }
 }
 
-/* UX fix 1 took the dot indicators out (staging review). The design of
-   02.11.2026 draws them again on a computer — and only there: a phone has
-   the arrows and the swipe. Each dot is a real button (heroDotsHTML) that
-   goes to its slide: 44 × 44 to hit, the bar drawn inside it. */
-.hero__dots { display: none; }
-@media (min-width: 768px) {
-  .hero__dots {
-    position: absolute; left: 50%; bottom: 2px; z-index: 3; transform: translateX(-50%);
-    display: flex; gap: 4px;
-  }
-  .hero__dot {
-    width: 44px; height: 44px; padding: 0; border: none; background: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; color: var(--ink);
-  }
-  .hero__dot::before { content: ""; width: 28px; height: 3px; background: currentColor; opacity: .3; transition: opacity .2s var(--ease); }
-  .hero__dot:hover::before { opacity: .65; }
-  .hero__dot[aria-current="true"]::before { opacity: 1; }
-}
+/* No dots under the band, on any screen. UX fix 1 took them out in the
+   staging review, the design of 02.11.2026 brought them back, and Dim took
+   them out again the same day: the arrows and the swipe carry the carousel,
+   and each arrow says which banner it goes to and how many there are
+   (heroPaint in app.js). */
 
 /* Phone: photo on top, words underneath — a wash behind the text made the
    product unreadable and the merch shot unrecognisable. (A full-width photo
@@ -870,13 +880,9 @@ body:has(.stickybar) .ftr {
 .hero__slide--wide .hero__sub { color: rgba(255, 255, 255, .9); }
 .hero__slide--wide .btn { background: #fff; border-color: #fff; color: var(--ink); }
 .hero__slide--wide.hero__slide--center .hero__inner { text-align: center; }
-/* the carousel's controls over a photograph: white, with a dark shadow */
-.hero[data-kind="wide"] .hero__arrow,
-.hero[data-kind="wide"] .hero__dot { color: #fff; }
+/* the carousel's arrows over a photograph: white, with a dark shadow */
+.hero[data-kind="wide"] .hero__arrow { color: #fff; }
 .hero[data-kind="wide"] .hero__arrow svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6)); }
-.hero[data-kind="wide"] .hero__dot::before { opacity: .45; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
-.hero[data-kind="wide"] .hero__dot:hover::before { opacity: .75; }
-.hero[data-kind="wide"] .hero__dot[aria-current="true"]::before { opacity: 1; }
 
 /* A half-width photo: the words on the beige, in ink, with the dark button
    — the photo fades into the beige where it meets them. */
@@ -884,18 +890,20 @@ body:has(.stickybar) .ftr {
 
 @media (min-width: 768px) {
   .hero__slide { min-height: var(--hero-h); }
-  .hero__box { min-height: 0; padding-block: 40px; }
-  .hero__eyebrow { font-size: 12px; margin-bottom: 16px; }
-  .hero__title { font-size: clamp(30px, 4.3vw, 62px); line-height: 1; margin-bottom: 16px; text-wrap: balance; }
-  .hero__sub { font-size: clamp(15px, 1.25vw, 18px); line-height: 1.5; max-width: 34ch; margin-bottom: 24px; }
-  .hero__inner .btn { min-height: 54px; padding: 0 32px; font-size: 15px; }
+  .hero__box { min-height: 0; padding-block: 36px; }
+  .hero__eyebrow { font-size: 12px; margin-bottom: 14px; }
+  /* sized for the ~440 px band: two lines of title, two of text and the
+     button stand in it with room to spare */
+  .hero__title { font-size: clamp(30px, 3.4vw, 50px); line-height: 1; margin-bottom: 14px; text-wrap: balance; }
+  .hero__sub { font-size: clamp(15px, 1.2vw, 17px); line-height: 1.5; max-width: 34ch; margin-bottom: 22px; }
+  .hero__inner .btn { min-height: 52px; padding: 0 30px; font-size: 15px; }
 
-  /* the cut-out: a little larger than it was and on the right (Kind3Desk),
-     standing on a soft shadow */
+  /* the cut-out on the right (Kind3Desk), in a frame as tall as the band's
+     column — the most it may take, never more than its own size (above) */
   .hero__slide--product .hero__inner { max-width: 540px; }
   .hero__slide--product .hero__art {
     flex: 0 1 44%; align-self: center; margin-left: auto;
-    height: calc(var(--hero-h) * .72); min-height: 0;
+    height: calc(var(--hero-h) - 72px); min-height: 0;
   }
 
   /* the scrim comes from the words' side and reaches as far as the words
@@ -921,23 +929,51 @@ body:has(.stickybar) .ftr {
   .hero__slide--wide.hero__slide--center .hero__box { justify-content: center; }
   .hero__slide--wide.hero__slide--right .hero__box { justify-content: flex-end; }
 
-  /* the photo fills the right 62 % of the band at its full height and fades
-     into the beige at its left edge (Kind2Desk) */
-  .hero__slide--half .hero__photo { position: absolute; top: 0; bottom: 0; left: 38%; right: 0; }
+  /* The photo is the right 62 % of the shop's column (--maxw, the box the
+     words stand in), at the band's full height, fading into the beige at its
+     left edge (Kind2Desk). The beige runs to the window's edges; the photo
+     does not: across a 2000-px screen it was 1240 px wide and Renat's
+     1024-px photos were blown up to fill it. Inside the column it is at most
+     769 px wide, so a 1024-px photo is only ever drawn smaller. */
+  .hero__slide--half .hero__photo {
+    position: absolute; top: 0; bottom: 0;
+    right: max(0px, (100% - var(--maxw)) / 2);
+    width: calc(min(100%, var(--maxw)) * .62);
+  }
   .hero__slide--half .hero__photo::after {
     background: linear-gradient(to right, var(--shell) 0%, rgba(237, 234, 225, .75) 7%, rgba(237, 234, 225, 0) 24%);
+  }
+  /* …and where the column ends before the window does, the photo's right
+     edge fades into the beige too — a soft edge, never a cut-off rectangle.
+     As wide as the beige beside it, 120 px at most; none at all while the
+     photo reaches the window's edge. */
+  @supports (width: 1cqw) {
+    .hero__slide--half .hero__photo::after {
+      background:
+        linear-gradient(to right, var(--shell) 0%, rgba(237, 234, 225, .75) 7%, rgba(237, 234, 225, 0) 24%),
+        linear-gradient(to left, var(--shell) 0, rgba(237, 234, 225, .6) clamp(0px, (100cqw - var(--maxw)) / 6, 40px),
+          rgba(237, 234, 225, 0) clamp(0px, (100cqw - var(--maxw)) / 2, 120px));
+    }
   }
   .hero__slide--half .hero__inner { flex: 0 1 auto; max-width: min(460px, 36vw); }
   /* smaller than the board's 56 px: Russian has the long words, and one that
      cannot wrap («ПРОФЕССИОНАЛЬНЫЙ», Renat's own first slide) ran 140 px into
      the photo at 56 — at 3vw it ends where the fade begins */
   .hero__slide--half .hero__title { font-size: clamp(28px, 3vw, 46px); line-height: 1.02; }
-  /* the left arrow is on the beige, the right one and the dots on the photo */
-  .hero[data-kind="half"] .hero__arrow--next,
-  .hero[data-kind="half"] .hero__dot { color: #fff; }
+  /* the left arrow is on the beige, the right one on the photo while the
+     photo reaches the window's edge — on the beige again once it does not */
+  .hero[data-kind="half"] .hero__arrow--next { color: #fff; }
   .hero[data-kind="half"] .hero__arrow--next svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6)); }
-  .hero[data-kind="half"] .hero__dot::before { opacity: .55; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
-  .hero[data-kind="half"] .hero__dot[aria-current="true"]::before { opacity: 1; }
+}
+/* From a band of 1344 px the column stops 52 px short of the window, which
+   is where the right arrow ends (4 px from the edge, 48 wide): it stands on
+   the beige, not on the photo — ink again. Measured on the band itself
+   (container-type above), so the panel's narrow preview never matches. */
+@container (min-width: 1344px) {
+  .hero[data-kind="half"] .hero__arrow--next { color: var(--ink); }
+  .hero[data-kind="half"] .hero__arrow--next svg {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, .95)) drop-shadow(0 1px 2px rgba(255, 255, 255, .8));
+  }
 }
 /* No floor shadow under the cut-out, although Kind3* draws one: the
    catalogue's cut-outs carry transparent margins of their own, different on
@@ -954,8 +990,10 @@ body:has(.stickybar) .ftr {
   /* 36 px as drawn, less on a narrow phone: a sixteen-letter word has to fit the line */
   .hero__slide--wide .hero__title { font-size: min(36px, calc((100vw - 40px) / 10)); }
   .hero__slide--wide.hero__slide--center .hero__inner { align-items: center; }
-  /* a half-width photo: a full-width square fading into the beige at its
-     foot, the words under it — eyebrow, title and button (Kind2Phone) */
+  /* a half-width photo: full width and 4:3 (--hero-ph — a square made the
+     band 580 px of a 844-px phone), cropped round its focus point and fading
+     into the beige at its foot, the words under it — eyebrow, title and
+     button (Kind2Phone) */
   .hero__slide--half .hero__photo { flex: 0 0 auto; height: var(--hero-ph); }
   .hero__slide--half .hero__photo::after {
     top: auto; height: 90px;
@@ -968,11 +1006,11 @@ body:has(.stickybar) .ftr {
   .hero[data-kind="half"] .hero__arrow svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .55)); }
 }
 
-/* the crossfade, the arrows' nudge and the dots' fade are motion: none of it
-   for a visitor who asked for less (autoplay already stops — restartHero) */
+/* the crossfade and the arrows' nudge are motion: none of it for a visitor
+   who asked for less (autoplay already stops — restartHero) */
 @media (prefers-reduced-motion: reduce) {
   .hero__slide, .hero__slide[data-on="1"] { transition: none; }
-  .hero__arrow, .hero__dot::before { transition: none; }
+  .hero__arrow { transition: none; }
 }
 
 /* ---------- drawers ---------- */
@@ -2756,57 +2794,10 @@ button, a, summary, label { touch-action: manipulation; }
    from src/lib/blog-magazine.mjs — the prerender's and the request-time one.
    Every cover is an <img> with its width and height, so its box is there
    before it loads; an older cover nobody measured stands in the old 1200×630
-   frame (…--frame) with the owner's crop for it, written on the element. */
-.bmag-hero { position: relative; height: 580px; overflow: hidden; background: #2a2618; color: #fff; }
-.bmag-hero__track {
-  display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
-  scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
-}
-.bmag-hero__track::-webkit-scrollbar { display: none; }
-.bmag-hero__slide { position: relative; flex: 0 0 100%; height: 100%; scroll-snap-align: start; overflow: hidden; }
-.bmag-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.bmag-hero__shade {
-  position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(to right, rgba(22, 20, 4, .82) 0%, rgba(22, 20, 4, .6) 34%, rgba(22, 20, 4, .1) 60%, rgba(22, 20, 4, 0) 70%);
-}
-.bmag-hero__tx {
-  position: absolute; top: 0; bottom: 0; width: min(560px, 46%);
-  left: max(var(--gutter), calc((100% - var(--maxw)) / 2 + var(--gutter)));
-  display: flex; flex-direction: column; justify-content: center; gap: 18px;
-}
-.bmag-hero__eye {
-  margin: 0; font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: rgba(255, 255, 255, .86);
-}
-.bmag-hero__t {
-  margin: 0; font-family: Oswald, sans-serif; font-weight: 600; font-size: 56px; line-height: 1.04;
-  text-transform: uppercase; text-wrap: balance; overflow-wrap: anywhere;
-}
-.bmag-hero__lead { margin: 0 0 6px; font-size: 18px; line-height: 1.5; color: rgba(255, 255, 255, .9); max-width: 40ch; }
-.bmag-hero__btn {
-  align-self: flex-start; background: #fff; color: var(--ink); text-decoration: none;
-  font-family: Oswald, sans-serif; font-weight: 500; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; padding: 18px 32px;
-}
-.bmag-hero__btn:hover { background: var(--shell); color: var(--ink); }
-.bmag-hero__dots {
-  position: absolute; bottom: 26px; display: flex; gap: 4px;
-  left: max(var(--gutter), calc((100% - var(--maxw)) / 2 + var(--gutter)));
-}
-.bmag-hero__dot { width: 44px; height: 24px; border: 0; background: none; padding: 0; display: flex; align-items: center; cursor: pointer; }
-.bmag-hero__dot span { width: 32px; height: 3px; background: rgba(255, 255, 255, .45); }
-.bmag-hero__dot[aria-current="true"] span { background: #fff; }
-/* A picture narrower than the banner or standing upright — a page out of a
-   brand's PDF — is never stretched across it: the half style, the photo
-   whole on the right half on beige, the words dark on the left. */
-.bmag-hero__slide--half { background: var(--shell); color: var(--ink); }
-.bmag-hero__slide--half .bmag-hero__img { left: 50%; width: 50%; object-fit: contain; padding: 24px 0; box-sizing: border-box; }
-.bmag-hero__slide--half .bmag-hero__shade { display: none; }
-.bmag-hero__slide--half .bmag-hero__eye { color: #5c5947; }
-.bmag-hero__slide--half .bmag-hero__lead { color: #3f3c2c; }
-.bmag-hero__slide--half .bmag-hero__btn { background: var(--ink); color: #fff; }
-.bmag-hero:has(.bmag-hero__slide--half) .bmag-hero__dot span { background: rgba(28, 26, 0, .3); }
-.bmag-hero:has(.bmag-hero__slide--half) .bmag-hero__dot[aria-current="true"] span { background: var(--ink); }
-.bmag-hero__slide--none .bmag-hero__shade { display: none; }
+   frame (…--frame) with the owner's crop for it, written on the element.
 
+   The featured articles on top are the home banner itself — .hero above,
+   the same band, slides, arrows and heights (Dim, 02.11.2026). */
 .bmag { padding-top: 56px; }
 .bmag__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
 .bmag__ttl { display: flex; align-items: baseline; gap: 16px; }
@@ -2852,7 +2843,6 @@ button, a, summary, label { touch-action: manipulation; }
 .bmag__empty { margin: 32px 0; }
 @media (min-width: 768px) and (max-width: 1099px) {
   .bmag__grid { gap: 24px; }
-  .bmag-hero__t { font-size: 42px; }
 }
 
 /* The article. */
@@ -2926,16 +2916,6 @@ button, a, summary, label { touch-action: manipulation; }
 @media (hover: hover) { .bmag-next__i:hover .bmag-next__t { text-decoration: underline; text-underline-offset: 3px; } }
 
 @media (max-width: 767px) {
-  .bmag-hero { height: 520px; }
-  .bmag-hero__shade { background: linear-gradient(to top, rgba(22, 20, 4, .88) 0%, rgba(22, 20, 4, .64) 36%, rgba(22, 20, 4, 0) 64%); }
-  .bmag-hero__tx { top: auto; left: 0; right: 0; width: auto; padding: 0 20px 56px; justify-content: flex-end; gap: 10px; }
-  .bmag-hero__eye { font-size: 11px; }
-  .bmag-hero__t { font-size: 30px; line-height: 1.06; }
-  .bmag-hero__lead { display: none; }
-  .bmag-hero__btn { margin-top: 6px; font-size: 14px; padding: 15px 24px; }
-  .bmag-hero__dots { left: 20px; bottom: 16px; gap: 2px; }
-  .bmag-hero__dot span { width: 28px; }
-  .bmag-hero__slide--half .bmag-hero__img { left: 0; width: 100%; height: 58%; padding: 20px 20px 0; }
   .bmag { padding-top: 32px; }
   /* nowrap: in a wrapping flex container a stretched item takes the LINE's
      width, which is the chips' own full width — the page then slid sideways */

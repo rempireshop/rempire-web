@@ -375,10 +375,11 @@ describe("the listing at request time", () => {
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/et/blogs/news`);
     expect(meta(html, "og:type")).toBe("website");
     expect(meta(html, "og:image")).toContain(`/shop2/og/blog-${post.slug}.et.png?v=`);
-    // the magazine (02.11.2026): the only article is the featured story on top
+    // the magazine (02.11.2026): the only article is the featured story on top — in the home banner's band
     expect(html).toContain('<h1 class="bmag__h">Blogi</h1>');
-    expect(html).toContain(`<a class="bmag-hero__btn" href="/et/blogs/news/${post.slug}">Loe artiklit</a>`);
-    expect(html).toContain('<h2 class="bmag-hero__t">Kuidas hooldada habet talvel</h2>');
+    expect(html).toContain('<section class="hero" aria-label="Esiletõstetud artiklid" aria-roledescription="карусель"');
+    expect(html).toContain(`<a class="btn" href="/et/blogs/news/${post.slug}">Loe artiklit</a>`);
+    expect(html).toContain('<h2 class="hero__title">Kuidas hooldada habet talvel</h2>');
     expect(html).not.toContain("chernovik");
     const ld = ldBlocks(html);
     const items = ld.find((o) => o["@type"] === "ItemList") as Record<string, unknown> & { itemListElement: Array<{ url: string; name: string }> };

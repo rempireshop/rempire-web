@@ -1860,6 +1860,7 @@
          two together. «Волосы», «Борода», «Стайлинг» and «Все» are above. */
       "Кожа": "Nahk", "Студия": "Stuudio", "Темы": "Teemad",
       "Избранные статьи": "Esiletõstetud artiklid", "Читать статью": "Loe artiklit",
+      "Предыдущая статья": "Eelmine artikkel", "Следующая статья": "Järgmine artikkel",
       "Не знаете, что подойдёт?": "Ei tea, mis sobib?",
       "Спросите помощника — он отвечает по этим статьям и подборкам нашего салона.":
         "Küsi abilise käest — ta vastab nende artiklite ja meie salongi valikute põhjal.",
@@ -5527,6 +5528,7 @@
       // the magazine (02.11.2026) — see the ET table above
       "Кожа": "Skin", "Студия": "The studio", "Темы": "Topics",
       "Избранные статьи": "Featured articles", "Читать статью": "Read the article",
+      "Предыдущая статья": "Previous article", "Следующая статья": "Next article",
       "Не знаете, что подойдёт?": "Not sure what fits you?",
       "Спросите помощника — он отвечает по этим статьям и подборкам нашего салона.":
         "Ask the assistant — it answers from these articles and our salon's picks.",
@@ -7888,13 +7890,12 @@
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^1 товар$/, { ET: "1 toode", EN: "1 product" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
-    // the blog (02.11.2026): «9 мин чтения», «Все 34 товара», a carousel mark («6 статей» is above, «Обзор»'s own)
+    // the blog (02.11.2026): «9 мин чтения», «Все 34 товара» («6 статей» is above, «Обзор»'s own)
     [/^(\d+) мин чтения$/, { ET: "$1 min lugemist", EN: "$1 min read" }],
     // …and the «+» of a product card inside an article (blogProductHTML) — the name is already the reader's language
     [/^Добавить (.+) в корзину$/, { ET: "Lisa ostukorvi: $1", EN: "Add $1 to the cart" }],
     [/^(.+): нет в наличии$/, { ET: "$1: otsas", EN: "$1: out of stock" }],
     [/^Все (\d+) товар(?:|а|ов)$/, { ET: "Kõik $1 toodet", EN: "All $1 products" }],
-    [/^Статья (\d+)$/, { ET: "Artikkel $1", EN: "Article $1" }],
     [/^Корзина \((\d+)\)$/, { ET: "Ostukorv ($1)", EN: "Cart ($1)" }],
     [/^До бесплатной доставки \((.+), от (.+)\) — ещё (.+)$/, { ET: "Tasuta tarneni ($1, alates $2) — veel $3", EN: "$3 more to free delivery ($1, from $2)" }],
     [/^Бесплатная доставка — порог (.+) достигнут ✓$/, { ET: "Tasuta tarne — piir $1 saavutatud ✓", EN: "Free delivery — $1 threshold reached ✓" }],
@@ -8335,8 +8336,10 @@
     [/^ИИ-чат для покупателей: (.+)$/, { ET: "AI-vestlus ostjatele: $1", EN: "The AI chat for shoppers: $1" }],
     [/^Наборы на сайте: (.+)$/, { ET: "Komplektid saidil: $1", EN: "Sets on the site: $1" }],
     [/^Набор «(.+)»: (.+)$/, { ET: "Komplekt «$1»: $2", EN: "Set “$1”: $2" }],
-    // the dots under the home banner (heroDotsHTML): «Баннер 2» on its button
-    [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
+    /* the band's arrows (heroArrowLabel): «Следующий баннер — 2 из 5», the
+       home banner's and the blog's; their names are the dictionary's own */
+    [/^(Предыдущий баннер|Следующий баннер|Предыдущая статья|Следующая статья) — (\d+) из (\d+)$/,
+      { ET: "$1 — $2 / $3", EN: "$1 — $2 of $3" }],
     [/^Баннер: 1 слайд, первый — «(.*)»$/,
       { ET: "Bänner: 1 slaid, esimene — «$1»", EN: "Banner: 1 slide, the first is “$1”" }],
     [/^Баннер: (\d+) (?:слайд|слайда|слайдов), первый — «(.*)»$/,
@@ -8945,50 +8948,62 @@
           ? (flat ? '<span class="btn">' + esc(cta) + "</span>"
                   : '<a class="btn" href="' + heroHref(s.go) + '" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</a>")
           : "") + "</div>";
-    var head = '<div class="hero__slide hero__slide--' + kind + (kind === "wide" ? " hero__slide--" + heroSide(s) : "") +
-      '" data-kind="' + kind + '" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">';
     if (kind === "product") {
-      return head + '<div class="hero__box">' + words +
-        heroArt(s.image, null, flat ? null : { first: i === cur }, s) + "</div></div>";
+      return heroFrameHTML(kind, "", i === cur, "", words + heroArt(s.image, null, flat ? null : { first: i === cur }, s));
     }
-    return head +
-      '<span class="hero__photo">' + heroImg(s, kind === "wide" ? "100vw" : "(min-width: 768px) 62vw, 100vw", i === cur, flat) + "</span>" +
-      '<div class="hero__box">' + words + "</div></div>";
+    return heroFrameHTML(kind, heroSide(s), i === cur,
+      // a "half" photo is 62 % of the shop's column, 769 px at most (styles.css)
+      heroImg(s, kind === "wide" ? "100vw" : "(min-width: 1240px) 769px, (min-width: 768px) 62vw, 100vw", i === cur, flat), words);
   }
-  function heroHTML() {
-    var list = heroSlides();
-    if (!list.length) return "";                       // every slide switched off
-    var cur = ((S.slide % list.length) + list.length) % list.length;
-    /* data-kind is the slide on screen's look: the arrows and dots are the
-       carousel's, not a slide's, and they turn white over a photograph and
-       stay ink on the beige (paintSlide moves it with the slide). */
-    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель" data-kind="' + heroKind(list[cur]) + '">' +
-      list.map(function (s, i) { return heroSlideHTML(s, i, cur, false); }).join("") +
-      // one slide is a picture, not a carousel — no arrows, no dots, no autoplay
-      (list.length > 1
+  /* ---------- the band: the home banner and the blog's featured articles ---
+     Dim, 02.11.2026: the blog's featured story «must look and behave EXACTLY
+     like the home banner». So both are drawn by these two — the same slide,
+     the same band, the same arrows, styles.css .hero for all of it — and only
+     what fills a slide differs (heroSlideHTML above, bmagSlideHTML for an
+     article). src/lib/blog-magazine.mjs draws the static blog page with their
+     twins, and tests/blog-magazine.test.ts holds the two to one markup.
+
+     One slide: its kind, its side (a "wide" one's words), whether it is the
+     one on screen, the photograph of a "wide" or "half" slide, and what
+     stands in its box — the words, and a "product" slide's picture after
+     them. */
+  function heroFrameHTML(kind, side, on, photo, box) {
+    return '<div class="hero__slide hero__slide--' + kind + (kind === "wide" ? " hero__slide--" + (side || "left") : "") +
+      '" data-kind="' + kind + '" data-on="' + (on ? 1 : 0) + '" aria-hidden="' + !on + '">' +
+      (kind === "product" ? "" : '<span class="hero__photo">' + photo + "</span>") +
+      '<div class="hero__box">' + box + "</div></div>";
+  }
+  /* The band around them. data-kind is the slide on screen's look: the
+     arrows are the carousel's, not a slide's, and they turn white over a
+     photograph and stay ink on the beige (heroPaint moves it with the slide).
+     No dots (Dim, 02.11.2026 — they had come back by mistake): each arrow's
+     label says which slide it goes to and how many there are. */
+  var HERO_ARROWS = ["Предыдущий баннер", "Следующий баннер"];
+  var BMAG_ARROWS = ["Предыдущая статья", "Следующая статья"];
+  function heroArrowLabel(name, to, n) { return name + " — " + (((to % n) + n) % n + 1) + " из " + n; }
+  function heroBandHTML(label, slides, kind, cur, names) {
+    var n = slides.length;
+    return '<section class="hero" aria-label="' + label + '" aria-roledescription="карусель" data-kind="' + kind + '">' +
+      slides.join("") +
+      // one slide is a picture, not a carousel — no arrows, no autoplay
+      (n > 1
         /* A drawn chevron, not the ‹ › glyphs: Ренат, 20.09.2026 — «убрать
            квадратное оформление и оставить просто стрелки и чуть их
            увеличить», with a sketch of a bare chevron against a boxed one.
            A glyph's weight and height are the font's to decide and a plate
            behind it was the only thing making it legible; a stroked path is
            sized here and carries its own shadow instead. */
-        ? '<button class="hero__arrow hero__arrow--prev" type="button" data-slide="-1" aria-label="Предыдущий баннер">' + chevron("left") + "</button>" +
-          '<button class="hero__arrow hero__arrow--next" type="button" data-slide="1" aria-label="Следующий баннер">' + chevron("right") + "</button>" +
-          heroDotsHTML(list.length, cur)
+        ? '<button class="hero__arrow hero__arrow--prev" type="button" data-slide="-1" aria-label="' + heroArrowLabel(names[0], cur - 1, n) + '">' + chevron("left") + "</button>" +
+          '<button class="hero__arrow hero__arrow--next" type="button" data-slide="1" aria-label="' + heroArrowLabel(names[1], cur + 1, n) + '">' + chevron("right") + "</button>"
         : "") +
       "</section>";
   }
-  /* The dots are back on a computer (the design of 02.11.2026 draws them
-     there, and only there — a phone has the arrows and the swipe). They were
-     taken out in the staging review as decoration; now each is a real button
-     that goes to its slide, 44 px tall to hit, with the bar drawn inside it. */
-  function heroDotsHTML(n, cur) {
-    var out = "";
-    for (var i = 0; i < n; i++) {
-      out += '<button class="hero__dot" type="button" data-slideto="' + i + '" aria-label="Баннер ' + (i + 1) +
-        '" aria-current="' + (i === cur) + '"></button>';
-    }
-    return '<div class="hero__dots">' + out + "</div>";
+  function heroHTML() {
+    var list = heroSlides();
+    if (!list.length) return "";                       // every slide switched off
+    var cur = ((S.slide % list.length) + list.length) % list.length;
+    return heroBandHTML("Баннеры", list.map(function (s, i) { return heroSlideHTML(s, i, cur, false); }),
+      heroKind(list[cur]), cur, HERO_ARROWS);
   }
 
   /* Free-shipping floors per country, quoted by the announce bar, the footer,
@@ -14481,7 +14496,7 @@
     try {
       sessionStorage.setItem(BLOG_STORE + lang, JSON.stringify({
         v: 1,
-        list: { posts: l.posts.slice(0, l.perPage || 10), total: l.total, page: 1, perPage: l.perPage || 10, at: l.at },
+        list: { posts: l.posts.slice(0, l.perPage || 10), featured: l.featured || [], total: l.total, page: 1, perPage: l.perPage || 10, at: l.at },
         posts: posts
       }));
     } catch (e) {}
@@ -14549,13 +14564,20 @@
       .then(function (j) {
         if (!j || !j.ok || !Array.isArray(j.posts)) throw new Error("blog");
         var was = S.blogLists[lang];
-        var next = { posts: j.posts, total: j.total, page: 1, perPage: j.perPage || 10, at: Date.now() };
+        /* `featured` — the articles of the band on top («На главной блога»),
+           wherever they fall in the list. It was left behind here and on the
+           way in from the page (hydrateBlog), so the band always fell back to
+           the newest article alone in the browser while the static page drew
+           the marked ones (02.11.2026). */
+        var feat = Array.isArray(j.featured) ? j.featured : [];
+        var next = { posts: j.posts, featured: feat, total: j.total, page: 1, perPage: j.perPage || 10, at: Date.now() };
         // «Показать ещё» was pressed meanwhile: the longer list stays, only
         // its first page is refreshed
         if (was && !was.failed && was.page > 1) {
-          next = { posts: j.posts.concat(was.posts.slice(next.perPage)), total: j.total, page: was.page, perPage: next.perPage, at: next.at };
+          next = { posts: j.posts.concat(was.posts.slice(next.perPage)), featured: feat, total: j.total, page: was.page, perPage: next.perPage, at: next.at };
         }
-        var changed = !was || was.failed || was.total !== next.total || blogSig(was.posts) !== blogSig(next.posts);
+        var changed = !was || was.failed || was.total !== next.total || blogSig(was.posts) !== blogSig(next.posts) ||
+          blogSig(was.featured || []) !== blogSig(next.featured);
         var navBefore = S.lang === lang && blogShown();
         S.blogLists[lang] = next;
         blogStoreWrite(lang);
@@ -14844,7 +14866,7 @@
         S.blogListBusy = false;
         var cur = S.blogLists[lang];
         if (!j || !j.ok || !cur) { render(); return; }
-        S.blogLists[lang] = { posts: cur.posts.concat(j.posts), total: j.total, page: j.page, perPage: j.perPage || cur.perPage, at: cur.at };
+        S.blogLists[lang] = { posts: cur.posts.concat(j.posts), featured: cur.featured || [], total: j.total, page: j.page, perPage: j.perPage || cur.perPage, at: cur.at };
         render();
         blogPrefetchPosts(lang);
       })
@@ -14874,10 +14896,10 @@
     var w = Math.round(Number(p && p.coverW)), h = Math.round(Number(p && p.coverH));
     return w > 0 && h > 0 ? { w: w, h: h } : null;
   }
-  /* A picture narrower than the screen it would fill, or one standing upright
-     — a page out of a brand's PDF is ~830 px wide and portrait — is not
-     stretched across a 1440-px banner: it stands on the right half, whole, on
-     beige, the text on the left (the half-banner style of the shop's hero). */
+  /* A picture narrower than the page, or one standing upright — a page out
+     of a brand's PDF is ~830 px wide and portrait — is not stretched across
+     the top of its article: it keeps the reading column (isNarrow() in
+     src/lib/blog-magazine.mjs). The featured band has its own rule, bmagKind. */
   function bmagHalf(p) {
     var d = bmagDims(p);
     return !!(d && (d.w < 1200 || d.h > d.w * 0.9));
@@ -14927,49 +14949,52 @@
     var f = (l && Array.isArray(l.featured) ? l.featured : []).slice(0, 3);
     return f.length ? f : (l && l.posts.length ? [l.posts[0]] : []);
   }
-  function bmagSlideHTML(p, i) {
-    var f = blogCoverFocus(p.coverFocus), d = bmagDims(p);
-    var pos = f ? "object-position:" + f.post.x + "% " + f.post.y + "%" : "";
-    return '<article class="bmag-hero__slide' + (!p.coverUrl ? " bmag-hero__slide--none" : bmagHalf(p) ? " bmag-hero__slide--half" : "") + '">' +
-      (p.coverUrl
-        ? '<img class="bmag-hero__img" src="' + esc(p.coverUrl) + '" alt="" width="' + (d ? d.w : 1200) + '" height="' + (d ? d.h : 630) + '"' +
-          (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + (pos && !bmagHalf(p) ? ' style="' + pos + '"' : "") + ">"
-        : "") +
-      '<span class="bmag-hero__shade" aria-hidden="true"></span>' +
-      '<div class="bmag-hero__tx">' +
-        '<p class="bmag-hero__eye">' + bmagEyebrowHTML(p, true) + "</p>" +
-        '<h2 class="bmag-hero__t">' + esc(p.title) + "</h2>" +
-        (p.excerpt ? '<p class="bmag-hero__lead">' + esc(p.excerpt) + "</p>" : "") +
-        '<a class="bmag-hero__btn" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">Читать статью</a>' +
-      "</div></article>";
+  /* The featured articles are the home banner (Dim, 02.11.2026: «must look
+     and behave EXACTLY like the home banner») — heroFrameHTML/heroBandHTML,
+     the same classes, the same arrows and swipe, no dots. Which of its looks
+     an article gets is its cover's shape, by the rule a photo uploaded for
+     the home banner picks its own (heroKindForUpload): a landscape cover is
+     «Фото на всю ширину», white words on a darkened photo; anything else is
+     «Фото на половину», the photo on the right of the column fading into
+     the beige. A landscape cover under 1200 px is «на половину» too — across
+     the whole band it would be blown up past its own pixels — and so is one
+     nobody has measured, whose shape is not known. An article without a
+     cover is its words on the beige. src/lib/blog-magazine.mjs coverKind()
+     is the twin. */
+  function bmagKind(p) {
+    if (!p || !p.coverUrl) return "product";
+    var d = bmagDims(p);
+    return d && d.w >= 1200 && heroKindForUpload(d.w, d.h) === "wide" ? "wide" : "half";
   }
-  /* Swiped (scroll-snap) or moved by its marks — no timer: a story that slides
-     away while it is being read is the one thing a carousel must not do. */
+  /* One article as a slide: the eyebrow, the title, the lead, «Читать
+     статью», and its cover cropped round the point the owner chose for the
+     top of the article. */
+  function bmagSlideHTML(p, i, cur) {
+    var kind = bmagKind(p), f = blogCoverFocus(p.coverFocus), d = bmagDims(p), on = i === cur;
+    var words = '<div class="hero__inner"><div class="hero__eyebrow">' + bmagEyebrowHTML(p, true) + "</div>" +
+      '<h2 class="hero__title">' + esc(p.title) + "</h2>" +
+      (p.excerpt ? '<p class="hero__sub">' + esc(p.excerpt) + "</p>" : "") +
+      '<a class="btn" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">Читать статью</a></div>';
+    var img = kind === "product" ? ""
+      : '<img src="' + esc(p.coverUrl) + '" alt=""' + (d ? ' width="' + d.w + '" height="' + d.h + '"' : "") +
+        ' style="object-position:' + (f ? f.post.x + "% " + f.post.y + "%" : "50% 50%") + '"' +
+        (on ? ' fetchpriority="high"' : ' loading="lazy" decoding="async"') + ">";
+    return heroFrameHTML(kind, "left", on, img, words);
+  }
+  /* Arrows and swipe, as on the home page — and no timer: a story that
+     slides away while it is being read is the one thing this carousel must
+     not do (the home banner's autoplay runs on the home page only). */
   function bmagHeroHTML(slides) {
     if (!slides.length) return "";
     var at = Math.min(S.blogHeroAt || 0, slides.length - 1);
-    return '<section class="bmag-hero" aria-label="Избранные статьи">' +
-      '<div class="bmag-hero__track" data-bmagtrack>' + slides.map(bmagSlideHTML).join("") + "</div>" +
-      (slides.length > 1
-        ? '<div class="bmag-hero__dots">' + slides.map(function (p, i) {
-            return '<button type="button" class="bmag-hero__dot" data-bmagdot="' + i + '" aria-label="Статья ' + (i + 1) + '"' +
-              (i === at ? ' aria-current="true"' : "") + "><span></span></button>";
-          }).join("") + "</div>"
-        : "") +
-      "</section>";
+    return heroBandHTML("Избранные статьи", slides.map(function (p, i) { return bmagSlideHTML(p, i, at); }),
+      bmagKind(slides[at]), at, BMAG_ARROWS);
   }
   function bmagGo(i) {
-    var track = document.querySelector("[data-bmagtrack]");
-    if (!track) return;
-    S.blogHeroAt = i;
-    track.scrollTo({ left: i * track.clientWidth, behavior: window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    bmagPaintDots(i);
-  }
-  function bmagPaintDots(i) {
-    [].forEach.call(document.querySelectorAll("[data-bmagdot]"), function (b) {
-      if (Number(b.getAttribute("data-bmagdot")) === i) b.setAttribute("aria-current", "true");
-      else b.removeAttribute("aria-current");
-    });
+    var n = document.querySelectorAll(".hero[aria-roledescription] .hero__slide").length;
+    if (!n) return;
+    S.blogHeroAt = ((i % n) + n) % n;
+    heroPaint(S.blogHeroAt);
   }
   function bmagCardHTML(p, order) {
     var topic = blogTopicName(p.topic);
@@ -29255,7 +29280,7 @@
          a plain set, mostly air above and below. Cut to 4:5 around its middle:
          that fills the reading column without a page and a half of scrolling,
          and stands as a card in the grid; the shop never stretches it across
-         the banner (bmagHalf). */
+         the banner (bmagKind). */
       var out = c;
       if (c.height > c.width * 1.25) {
         out = document.createElement("canvas");
@@ -53567,11 +53592,7 @@
     // cold miss) — a fresh answer or one already in flight costs nothing
     if (S.screen === "blog") blogSyncList(S.lang);
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
-    // …and the blog's carousel stays on the story it was on through a redraw
-    if (S.screen === "blog" && S.blogHeroAt) {
-      var bmagTrack = document.querySelector("[data-bmagtrack]");
-      if (bmagTrack) bmagTrack.scrollLeft = S.blogHeroAt * bmagTrack.clientWidth;
-    }
+    // (the blog's carousel stays on its story through a redraw by itself: bmagHeroHTML draws S.blogHeroAt)
     // …with the editor open too: on a desktop the list stands beside it (1a, screen 16)
     if (S.screen === "admin" && S.adminTab === "blog") loadAdminBlog(false);
     // …and the other two languages' words for the cards an article carries (uiWantAll)
@@ -54826,21 +54847,28 @@
 
   // ---------- hero ----------
   var heroTimer = null;
-  function paintSlide() {
-    var slides = document.querySelectorAll(".hero__slide");
-    if (!slides.length) return false;
-    slides.forEach(function (s, i) {
-      s.setAttribute("data-on", i === S.slide ? "1" : "0");
-      s.setAttribute("aria-hidden", String(i !== S.slide));
-    });
-    /* the carousel's own controls follow the slide on screen: their colour
-       (the section's data-kind — white over a photograph) and the dot that
-       says which one it is */
+  /* The band on screen — the home banner, or the blog's featured articles
+     (heroBandHTML; one per screen) — turned to its slide `at`, without a
+     redraw. The carousel's own controls follow the slide on screen: their
+     colour (the band's data-kind — white over a photograph) and the words
+     each arrow says, which slide it goes to of how many. */
+  function heroPaint(at) {
     var band = document.querySelector(".hero[aria-roledescription]");
-    if (band && slides[S.slide]) band.setAttribute("data-kind", slides[S.slide].getAttribute("data-kind") || "product");
-    document.querySelectorAll(".hero__dot").forEach(function (d, i) { d.setAttribute("aria-current", String(i === S.slide)); });
+    var slides = band ? band.querySelectorAll(".hero__slide") : [];
+    if (!slides.length) return false;
+    var n = slides.length, names = S.screen === "blog" ? BMAG_ARROWS : HERO_ARROWS;
+    for (var i = 0; i < n; i++) {
+      slides[i].setAttribute("data-on", i === at ? "1" : "0");
+      slides[i].setAttribute("aria-hidden", String(i !== at));
+    }
+    band.setAttribute("data-kind", (slides[at] && slides[at].getAttribute("data-kind")) || "product");
+    [].forEach.call(band.querySelectorAll(".hero__arrow"), function (b) {
+      var d = Number(b.getAttribute("data-slide")) < 0 ? -1 : 1;
+      b.setAttribute("aria-label", trText(heroArrowLabel(names[d < 0 ? 0 : 1], at + d, n), S.lang));
+    });
     return true;
   }
+  function paintSlide() { return heroPaint(S.slide); }
   function setSlide(n, manual) {
     var total = heroCount();
     if (!total) { S.slide = 0; return; }
@@ -54859,15 +54887,17 @@
     }, heroInterval());
   }
 
-  /* Swipe. Two swipeable surfaces — the home banner and the product gallery —
-     so the handler resolves which one the finger started on rather than
-     assuming the hero. A horizontal move of 40px+ that is clearly more
-     horizontal than vertical counts; anything else is a scroll. */
+  /* Swipe. Two swipeable surfaces — the banner (the home page's, or the
+     blog's featured articles) and the product gallery — so the handler
+     resolves which one the finger started on rather than assuming the hero.
+     A horizontal move of 40px+ that is clearly more horizontal than vertical
+     counts; anything else is a scroll. The band is the carousel's own
+     (aria-roledescription), never the panel's still preview of one slide. */
   var swX = 0, swY = 0, swTarget = null;
   document.addEventListener("touchstart", function (e) {
     swTarget = null;
     if (e.touches.length !== 1 || !e.target.closest) return;
-    var el = e.target.closest(".hero, .pdp__stage");
+    var el = e.target.closest(".hero[aria-roledescription], .pdp__stage");
     if (!el) return;
     swTarget = el.classList.contains("hero") ? "hero" : "gallery";
     swX = e.touches[0].clientX; swY = e.touches[0].clientY;
@@ -54879,7 +54909,11 @@
     var t = e.changedTouches[0], dx = t.clientX - swX, dy = t.clientY - swY;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
     var dir = dx < 0 ? 1 : -1;
-    if (which === "hero") { setSlide(S.slide + dir, true); return; }
+    if (which === "hero") {
+      if (S.screen === "blog") bmagGo((S.blogHeroAt || 0) + dir);
+      else setSlide(S.slide + dir, true);
+      return;
+    }
     var p = byId(S.productId), g = gal(p);
     if (g.length < 2) return;
     S.gallery = (S.gallery + dir + g.length) % g.length;
@@ -54889,7 +54923,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -55044,9 +55078,12 @@
       return;
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
-    if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
-    // a dot under the banner: straight to its slide
-    if (d.slideto !== undefined) { setSlide(Number(d.slideto), true); return; }
+    // a banner's arrow — the home page's, or the blog's featured articles (the same band)
+    if (d.slide) {
+      if (S.screen === "blog") bmagGo((S.blogHeroAt || 0) + Number(d.slide));
+      else setSlide(S.slide + Number(d.slide), true);
+      return;
+    }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
     // a language from the switcher — setLang() says what changes with it
     if (d.lang) {
@@ -57097,7 +57134,6 @@
       refocus('[data-blogchip="' + (S.blogTopic || "") + '"]');
       return;
     }
-    if (d.bmagdot !== undefined) { bmagGo(Number(d.bmagdot) || 0); return; }
     if (d.blogask !== undefined) { blogAskChat(d.blogask || ""); return; }
     if (d.blogshelf !== undefined) {
       e.preventDefault();
@@ -58088,19 +58124,6 @@
   document.addEventListener("pointerover", blogTileNear, { passive: true });
   document.addEventListener("pointerdown", blogTileNear, { passive: true });
   document.addEventListener("focusin", blogTileNear, { passive: true });
-  /* The blog's carousel, swiped: its marks follow the slide that has come to
-     rest. A scroll does not bubble, so this listens in the capture phase. */
-  var bmagScrollT = 0;
-  document.addEventListener("scroll", function (e) {
-    var tr = e.target;
-    if (!tr || !tr.matches || !tr.matches("[data-bmagtrack]")) return;
-    clearTimeout(bmagScrollT);
-    bmagScrollT = setTimeout(function () {
-      var i = tr.clientWidth ? Math.round(tr.scrollLeft / tr.clientWidth) : 0;
-      S.blogHeroAt = i;
-      bmagPaintDots(i);
-    }, 80);
-  }, { capture: true, passive: true });
 
   /* blog: pressing a toolbar button must not blur the box — mousedown is
      where the browser moves the focus, so it is stopped here and the caret
@@ -59416,7 +59439,7 @@
       if (listEl) {
         var j = JSON.parse(listEl.textContent || "null");
         if (j && j.lang === lang && Array.isArray(j.posts)) {
-          S.blogLists[lang] = { posts: j.posts, total: j.total || j.posts.length, page: 1, perPage: j.perPage || 10, at: 0 };
+          S.blogLists[lang] = { posts: j.posts, featured: Array.isArray(j.featured) ? j.featured : [], total: j.total || j.posts.length, page: 1, perPage: j.perPage || 10, at: 0 };
           listStamp = Number(j.stamp) || 0;
         }
       }

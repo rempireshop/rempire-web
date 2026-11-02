@@ -74,7 +74,7 @@ test.describe("policy pages and the blog route", () => {
       await waitForScreen(page, "blog");
       await expect(page.locator("h1")).toHaveText(tr("Блог", lang.code));
       // the magazine (02.11.2026): the newest is the story on top, the other two are the grid's tiles
-      await expect(page.locator(".bmag-hero__slide").first()).toBeVisible();
+      await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
       await expect(page.locator(".bmag__card").first()).toBeVisible();
       expect(await page.locator(".bmag__card").count()).toBeGreaterThanOrEqual(2);
       await expect(page.getByText(tr("Статей пока нет — загляните позже.", lang.code))).toHaveCount(0);

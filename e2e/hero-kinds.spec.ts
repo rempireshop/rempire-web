@@ -16,6 +16,13 @@ import { adminSection, ipHeaders, loginAsAdmin, shopUrl, waitForScreen } from ".
  * that every kind fills the SAME band, which is what keeps the page under it
  * from moving when a slide of one kind follows another.
  *
+ * And the measures Dim asked for on 02.11.2026, after he had measured the
+ * live band at 594 px on a 1440 screen and seen Renat's 1024-px photos blown
+ * up on his own 2000-px one: the band is ~440 px on a computer, a «half»
+ * photo stays inside the shop's column, a cut-out is never drawn larger than
+ * its file, the phone's band is a 4:3 photo and its words (~480 px), and
+ * there are no dots under it on any screen.
+ *
  * It sets its own viewports, so it runs on the desktop project only.
  */
 test.beforeEach(async ({}, testInfo) => {
@@ -26,7 +33,10 @@ test.use({ extraHTTPHeaders: ipHeaders(61) });
 const VIEWPORTS = [
   { name: "phone", width: 390, height: 844 },
   { name: "desktop", width: 1440, height: 900 },
+  { name: "wide", width: 2000, height: 1100 },
 ] as const;
+/** styles.css --maxw: the shop's column, the box the banner's words stand in. */
+const MAXW = 1240;
 
 type Kind = "wide" | "half" | "product";
 
@@ -55,13 +65,22 @@ async function photo(w: number, h: number): Promise<Buffer> {
   return sharp(Buffer.from(svg)).webp({ quality: 70 }).toBuffer();
 }
 
+/** A small cut-out: a bottle on nothing, 200 × 300 — smaller than the band's frame for it. */
+async function cutout(): Promise<Buffer> {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300"><rect x="60" y="20" width="80" height="270" rx="30" fill="#3d3a2a"/></svg>`;
+  return sharp(Buffer.from(svg)).webp({ quality: 80 }).toBuffer();
+}
+
 async function serveBanner(page: Page, slides: unknown[]): Promise<void> {
   // the tower drawing that opens a first visit (intro() in app.js) would cover the band on every screenshot
   await page.addInitScript(() => { try { sessionStorage.setItem("rempire-intro", "1"); } catch { /* private mode */ } });
   const wide = await photo(1600, 900);
   const square = await photo(1000, 1000);
-  await page.route(/\/e2e-hero\/hero\/(wide|square)(-thumb)?\.webp$/, (route: Route) =>
-    route.fulfill({ status: 200, contentType: "image/webp", body: /wide/.test(route.request().url()) ? wide : square }));
+  const bottle = await cutout();
+  await page.route(/\/e2e-hero\/hero\/(wide|square|bottle-cutout)(-thumb)?\.webp$/, (route: Route) => {
+    const url = route.request().url();
+    return route.fulfill({ status: 200, contentType: "image/webp", body: /wide/.test(url) ? wide : /bottle/.test(url) ? bottle : square });
+  });
   await page.route(/\/api\/overrides\/?(\?.*)?$/, async (route: Route) => {
     const res = await route.fetch();
     const json = await res.json().catch(() => ({ ok: true, overrides: {}, settings: {} }));
@@ -108,9 +127,19 @@ for (const vp of VIEWPORTS) {
         else await expect(page.locator('.hero__slide[data-on="1"] .hero__sub')).toBeHidden();
 
         const on = page.locator('.hero__slide[data-on="1"]');
+        const band = (await page.locator(".hero").boundingBox())!;
         if (kind === "product") {
-          await expect(on.locator(".hero__art img")).toBeVisible();
+          const img = on.locator(".hero__art img");
+          await expect(img).toBeVisible();
           await expect(on.locator(".hero__photo")).toHaveCount(0);
+          // a catalogue cut-out (900 × 689) is never drawn larger than its file
+          await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+          const fit = await img.evaluate((el: HTMLImageElement) => ({ w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height, nw: el.naturalWidth, nh: el.naturalHeight }));
+          expect(fit.w, JSON.stringify(fit)).toBeLessThanOrEqual(fit.nw + 1);
+          expect(fit.h, JSON.stringify(fit)).toBeLessThanOrEqual(fit.nh + 1);
+          // …and it stands in the middle of the band's height (its frame is centred, the picture in it)
+          const ib = (await img.boundingBox())!;
+          if (vp.name !== "phone") expect(Math.abs(ib.y + ib.height / 2 - (band.y + band.height / 2)), JSON.stringify({ ib, band })).toBeLessThan(3);
         } else {
           const img = on.locator(".hero__photo img");
           await expect(img).toBeVisible();
@@ -122,25 +151,67 @@ for (const vp of VIEWPORTS) {
         // white words on a full-width photo, ink on the beige otherwise
         const color = await on.locator(".hero__title").evaluate((el) => getComputedStyle(el).color);
         expect(color).toBe(kind === "wide" ? "rgb(255, 255, 255)" : "rgb(28, 26, 0)");
-        if (kind === "half" && vp.name === "desktop") {
-          // the photo fills the right ~62 % of the band at its full height
-          const band = (await page.locator(".hero").boundingBox())!;
+        if (kind === "half") {
           const ph = (await on.locator(".hero__photo").boundingBox())!;
-          expect(Math.abs(ph.x - (band.x + band.width * 0.38))).toBeLessThan(2);
-          expect(Math.abs(ph.height - band.height)).toBeLessThan(2);
+          const box = (await on.locator(".hero__box").boundingBox())!;
+          if (vp.name === "phone") {
+            // a full-width 4:3 photo on top (of the window's width: a desktop browser's scrollbar takes 15 px of the band)
+            expect(Math.abs(ph.width - band.width)).toBeLessThan(2);
+            const vw = await page.evaluate(() => window.innerWidth);
+            expect(Math.abs(ph.height - Math.min(vw, 480) * 0.75), JSON.stringify({ ph, vw })).toBeLessThan(2);
+          } else {
+            // the right 62 % of the shop's column, at the band's full height — never wider than the column
+            const col = Math.min(band.width, MAXW);
+            expect(ph.width, JSON.stringify({ ph, box })).toBeLessThanOrEqual(col * 0.62 + 1);
+            expect(ph.width).toBeLessThanOrEqual(box.width + 1);
+            expect(ph.x + ph.width, "the photo runs past the shop's column").toBeLessThanOrEqual(box.x + box.width + 1);
+            expect(Math.abs(ph.x + ph.width - (box.x + box.width))).toBeLessThan(2);
+            expect(Math.abs(ph.height - band.height)).toBeLessThan(2);
+            // a 1000-px photo is only ever drawn smaller than its file, never blown up
+            expect(Math.max(ph.width, ph.height) / 1000).toBeLessThanOrEqual(1);
+            if (band.width > MAXW) {
+              // the photo ends before the window does: its right edge fades into the beige too
+              const fades = await on.locator(".hero__photo").evaluate((el) => getComputedStyle(el, "::after").backgroundImage);
+              expect(fades.match(/linear-gradient/g), fades).toHaveLength(2);
+            }
+          }
         }
         if (kind === "wide") {
-          const band = (await page.locator(".hero").boundingBox())!;
           const ph = (await on.locator(".hero__photo").boundingBox())!;
           expect(Math.abs(ph.width - band.width)).toBeLessThan(2);
           expect(Math.abs(ph.height - band.height)).toBeLessThan(2);
         }
-        heights[kind] = (await page.locator(".hero").boundingBox())!.height;
+        // the band's height (Dim, 02.11.2026): ~440 on a computer, a 4:3 photo and the words (~480) on a phone
+        if (vp.name === "phone") {
+          expect(band.height, `phone band ${band.height}`).toBeGreaterThanOrEqual(465);
+          expect(band.height, `phone band ${band.height}`).toBeLessThanOrEqual(495);
+        } else {
+          expect(band.height, `band ${band.height} at ${vp.width}`).toBeLessThanOrEqual(450);
+          expect(band.height).toBeGreaterThanOrEqual(360);
+        }
+        await expect(page.locator(".hero__dot, .hero__dots")).toHaveCount(0);
+        heights[kind] = band.height;
         // for a human to look at: the band, and the page around it
         await page.locator(".hero").screenshot({ path: testInfo.outputPath(`${vp.name}-${kind}.png`) });
         await page.screenshot({ path: testInfo.outputPath(`${vp.name}-${kind}-page.png`) });
       });
     }
+
+    test("a cut-out smaller than its frame stands at its own size, never blown up", async ({ page }) => {
+      await serveBanner(page, [slide("product", { image: "/e2e-hero/hero/bottle-cutout.webp", kind: "product", w: 200, h: 300 })]);
+      await openHome(page, "product");
+      const img = page.locator('.hero__slide[data-on="1"] .hero__art img');
+      await expect(img).toBeVisible();
+      await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBe(200);
+      const b = (await img.boundingBox())!;
+      expect(Math.round(b.width), JSON.stringify(b)).toBeLessThanOrEqual(200);
+      expect(Math.round(b.height), JSON.stringify(b)).toBeLessThanOrEqual(300);
+      // its frame is larger than the file, so it is the file's own size, in the frame's middle
+      const art = (await page.locator('.hero__slide[data-on="1"] .hero__art').boundingBox())!;
+      if (art.height > 300) expect(Math.round(b.height)).toBe(300);
+      expect(Math.abs(b.x + b.width / 2 - (art.x + art.width / 2))).toBeLessThan(2);
+      expect(Math.abs(b.y + b.height / 2 - (art.y + art.height / 2))).toBeLessThan(2);
+    });
 
     test("every kind fills the same band — a slide of another kind moves nothing under it", async () => {
       const got = Object.values(heights);
@@ -148,7 +219,7 @@ for (const vp of VIEWPORTS) {
       for (const h of got) expect(Math.abs(h - got[0]), JSON.stringify(heights)).toBeLessThanOrEqual(1);
     });
 
-    test("the carousel's controls are real buttons, 44 px to hit, and follow the slide's kind", async ({ page }, testInfo) => {
+    test("the carousel is two arrows, 44 px to hit, that say where they go and follow the slide's kind — no dots", async ({ page }, testInfo) => {
       await serveBanner(page, [slide("wide"), slide("half"), slide("product")]);
       await openHome(page, "wide");
       await page.locator(".hero").screenshot({ path: testInfo.outputPath(`${vp.name}-carousel.png`) });
@@ -164,29 +235,25 @@ for (const vp of VIEWPORTS) {
         // white over the photograph
         expect(await b.evaluate((el) => getComputedStyle(el).color)).toBe("rgb(255, 255, 255)");
       }
-      const dots = page.locator(".hero__dot");
-      await expect(dots).toHaveCount(3);
-      if (vp.name === "phone") {
-        // the design draws no dots on a phone: the arrows and the swipe carry it
-        await expect(dots.first()).toBeHidden();
-        await page.locator(".hero__arrow--next").click();
-        await expect(page.locator('.hero__slide--half[data-on="1"]')).toBeVisible();
-        await expect(band).toHaveAttribute("data-kind", "half");
-        return;
-      }
-      for (let i = 0; i < 3; i++) {
-        const box = (await dots.nth(i).boundingBox())!;
-        expect(box.width).toBeGreaterThanOrEqual(44);
-        expect(box.height).toBeGreaterThanOrEqual(44);
-      }
-      await expect(dots.first()).toHaveAttribute("aria-current", "true");
-      await dots.nth(2).click();
+      // Dim, 02.11.2026: the dots had come back by mistake — none, on any screen
+      await expect(page.locator(".hero__dot, .hero__dots, [data-slideto]")).toHaveCount(0);
+      // the count lives in the arrows' names
+      await expect(page.locator(".hero__arrow--prev")).toHaveAttribute("aria-label", "Предыдущий баннер — 3 из 3");
+      await expect(page.locator(".hero__arrow--next")).toHaveAttribute("aria-label", "Следующий баннер — 2 из 3");
+
+      await page.locator(".hero__arrow--next").click();
+      await expect(page.locator('.hero__slide--half[data-on="1"]')).toBeVisible();
+      await expect(band).toHaveAttribute("data-kind", "half");
+      await expect(page.locator(".hero__arrow--next")).toHaveAttribute("aria-label", "Следующий баннер — 3 из 3");
+      await page.locator(".hero__arrow--next").click();
       await expect(page.locator('.hero__slide--product[data-on="1"]')).toBeVisible();
       await expect(band).toHaveAttribute("data-kind", "product");
-      await expect(dots.nth(2)).toHaveAttribute("aria-current", "true");
-      await expect(dots.first()).toHaveAttribute("aria-current", "false");
+      await expect(page.locator(".hero__arrow--prev")).toHaveAttribute("aria-label", "Предыдущий баннер — 2 из 3");
       // on the beige the arrows are ink again
       expect(await page.locator(".hero__arrow--prev").evaluate((el) => getComputedStyle(el).color)).toBe("rgb(28, 26, 0)");
+      // …and round again to the first
+      await page.locator(".hero__arrow--next").click();
+      await expect(page.locator('.hero__slide--wide[data-on="1"]')).toBeVisible();
       // the first slide only is fetched first
       await expect(page.locator(".hero__slide").nth(1).locator("img")).toHaveAttribute("loading", "lazy");
     });

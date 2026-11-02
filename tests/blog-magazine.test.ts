@@ -13,10 +13,11 @@ const nextCache = vi.hoisted(() => ({ revalidateTag: vi.fn(), revalidatePath: vi
 vi.mock("next/cache", () => nextCache);
 
 import {
-  allProductsWord, articleStaticHTML, articlesWord, BLOG_TOPICS, cardHTML, cleanSources, gridHTML, guessTopic,
-  homeStaticHTML, isNarrow, masonry, minutesWord, pickFeatured, publicListItem, publicPost, readMinutes, readNext,
-  SOURCE_MAX_LEN, SOURCES_MAX, STR, TOPIC_NAMES, wordCount,
+  allProductsWord, articleStaticHTML, articlesWord, BLOG_TOPICS, cardHTML, cleanSources, coverKind, gridHTML, guessTopic,
+  HERO_WIDE_RATIO, heroHTML, homeStaticHTML, isNarrow, masonry, minutesWord, pickFeatured, publicListItem, publicPost,
+  readMinutes, readNext, SOURCE_MAX_LEN, SOURCES_MAX, STR, TOPIC_NAMES, wordCount,
 } from "@/lib/blog-magazine.mjs";
+import { HERO_WIDE_RATIO as HOME_WIDE_RATIO, heroKindForUpload } from "@/lib/hero";
 import { BlogError, catOfProduct, getPostById, listPublished, publishPost, readMagazineInput, upsertPost } from "@/lib/blog";
 import { magazineFields } from "../tools/lib/blog-export.mjs";
 import { exec } from "@/lib/db";
@@ -291,11 +292,27 @@ describe("the carousel, «Читать дальше» and the grid's columns", (
     expect(masonry([{}, { coverUrl: "/x" }, { coverUrl: "/x" }, tall], 3)).toEqual([[0], [1, 3], [2]]);
   });
 
-  it("a page out of a PDF (narrow, or upright) is never stretched across the banner", () => {
+  it("a page out of a PDF (narrow, or upright) is never stretched across the top of its article", () => {
     expect(isNarrow({ coverUrl: "/p.webp", coverW: 828, coverH: 1170 })).toBe(true);
     expect(isNarrow({ coverUrl: "/p.webp", coverW: 1600, coverH: 1600 })).toBe(true);
     expect(isNarrow({ coverUrl: "/p.webp", coverW: 1600, coverH: 1067 })).toBe(false);
     expect(isNarrow({ coverUrl: "/p.webp" })).toBe(false);
+  });
+
+  /* The featured band is the home banner (Dim, 02.11.2026), so a cover gets
+     the look a photo of its shape gets there when it is uploaded. */
+  it("gives a featured cover the home banner's look for its shape", () => {
+    const shapes: Array<[w: number, h: number]> = [[1600, 900], [1500, 1000], [1300, 1000], [1299, 1000], [1095, 1095], [1024, 1360], [828, 1170], [1243, 543]];
+    for (const [w, h] of shapes) {
+      expect(coverKind({ coverUrl: "/c.webp", coverW: w, coverH: h }), `${w}×${h}`).toBe(heroKindForUpload(w, h));
+    }
+    // …except a landscape cover too small to cross the band: it would be blown up past its pixels
+    expect(coverKind({ coverUrl: "/c.webp", coverW: 569, coverH: 404 })).toBe("half");
+    expect(heroKindForUpload(569, 404)).toBe("wide");
+    // one nobody measured is «на половину», as an upload of unknown size is; no cover is the words on the beige
+    expect(coverKind({ coverUrl: "/c.webp" })).toBe("half");
+    expect(coverKind({ coverUrl: null })).toBe("product");
+    expect(HERO_WIDE_RATIO).toBe(HOME_WIDE_RATIO);
   });
 });
 
@@ -325,8 +342,9 @@ describe("the static builders (prerender and request-time page)", () => {
   it("the home: the featured story on top, the rest in the grid, every article for a crawler, no script controls", () => {
     const posts = [item("a", { featured: true }), item("b", { topic: "hair" }), item("c")];
     const html = homeStaticHTML({ posts, featured: [], code: "ET", hrefOf, total: 3 });
-    expect(html).toContain('<section class="bmag-hero" aria-label="Esiletõstetud artiklid">');
-    expect(html).toContain('<a class="bmag-hero__btn" href="/ru/blogs/news/a">Loe artiklit</a>');
+    // the home banner's own band (styles.css .hero) — one article, so no arrows
+    expect(html).toContain('<section class="hero" aria-label="Esiletõstetud artiklid" aria-roledescription="карусель" data-kind="product">');
+    expect(html).toContain('<a class="btn" href="/ru/blogs/news/a">Loe artiklit</a>');
     expect(html).toContain('<h1 class="bmag__h">Blogi</h1><span class="bmag__n">3 artiklit</span>');
     // only the topics the blog has, «Kõik» first
     expect(html).toContain("<li>Kõik</li><li>Juuksed</li><li>Habe</li></ul>");
@@ -336,6 +354,28 @@ describe("the static builders (prerender and request-time page)", () => {
     // the chips, the carousel marks and «Спросите помощника» are app.js's alone — the chat is desktop-only
     expect(html).not.toContain("<button");
     expect(html).not.toContain("bmag__ask");
+  });
+
+  it("the featured band is the home banner: its classes, a look per cover, two arrows and no dots", () => {
+    const slides = [
+      item("w", { coverUrl: "/w.webp", coverW: 1600, coverH: 900, coverFocus: "fill 30 60" }),
+      item("h", { coverUrl: "/h.webp", coverW: 1095, coverH: 1095 }),
+      item("n"),
+    ];
+    const html = heroHTML(slides, "EN", hrefOf);
+    expect(html).toMatch(/^<section class="hero" aria-label="Featured articles" aria-roledescription="карусель" data-kind="wide">/);
+    expect(html).toContain('<div class="hero__slide hero__slide--wide hero__slide--left" data-kind="wide" data-on="1" aria-hidden="false">' +
+      '<span class="hero__photo"><img src="/w.webp" alt="" width="1600" height="900" style="object-position:30% 60%" fetchpriority="high"></span>' +
+      '<div class="hero__box"><div class="hero__inner"><div class="hero__eyebrow"><span>Beard</span> · <span>4 min read</span> · <span>2 products</span></div>' +
+      '<h2 class="hero__title">Статья w</h2><p class="hero__sub">Анонс w</p><a class="btn" href="/ru/blogs/news/w">Read the article</a></div></div></div>');
+    expect(html).toContain('<div class="hero__slide hero__slide--half" data-kind="half" data-on="0" aria-hidden="true">' +
+      '<span class="hero__photo"><img src="/h.webp" alt="" width="1095" height="1095" style="object-position:50% 50%" loading="lazy" decoding="async"></span>');
+    // no cover: the words alone on the beige
+    expect(html).toContain('<div class="hero__slide hero__slide--product" data-kind="product" data-on="0" aria-hidden="true"><div class="hero__box"><div class="hero__inner">');
+    expect(html).toContain('<button class="hero__arrow hero__arrow--prev" type="button" data-slide="-1" aria-label="Previous article — 3 of 3">');
+    expect(html).toContain('<button class="hero__arrow hero__arrow--next" type="button" data-slide="1" aria-label="Next article — 2 of 3">');
+    expect(heroHTML(slides, "ET", hrefOf)).toContain('aria-label="Järgmine artikkel — 2 / 3"');
+    expect(html).not.toMatch(/hero__dot|bmag-hero/);
   });
 
   it("the article: byline, lead, strip with «Все N товаров», the sources box only when there are sources", () => {
@@ -415,12 +455,73 @@ describe("app.js draws the same magazine", () => {
     expect(fns.bmagReadNext(posts[1], posts)).toEqual(readNext(posts[1], posts));
   });
 
+  /* The featured band on the blog's home IS the home banner (Dim, 02.11.2026):
+     app.js draws it with the home banner's own heroFrameHTML/heroBandHTML,
+     the static page with their twins — the same articles through both must
+     come out as one markup, or the band changes under the reader the moment
+     the script paints over the static copy. */
+  it("draws the featured band exactly as the static page does — with the home banner's own band", () => {
+    const run = new Function("S", "blogPath", `
+      ${slice("esc")} ${slice("chevron")} ${slice("pl")} ${slice("plural")}
+      ${sliceVar("BLOG_TOPIC_RU")} ${slice("blogTopicName")}
+      ${sliceVar("COVER_FRAMES")} ${sliceVar("BLOG_FOCUS_RX")} ${sliceVar("BLOG_FRAMES_RX")} ${slice("blogCoverFocus")}
+      ${sliceVar("HERO_WIDE_RATIO")} ${slice("heroKindForUpload")}
+      ${slice("bmagDims")} ${slice("bmagKind")} ${slice("bmagEyebrowHTML")}
+      ${slice("heroFrameHTML")} ${sliceVar("BMAG_ARROWS")} ${slice("heroArrowLabel")} ${slice("heroBandHTML")}
+      ${slice("bmagSlideHTML")} ${slice("bmagHeroHTML")}
+      return { bmagHeroHTML: bmagHeroHTML, bmagKind: bmagKind };`) as (
+      S: { blogHeroAt: number }, blogPath: (slug: string) => string,
+    ) => { bmagHeroHTML: (slides: unknown[]) => string; bmagKind: (p: unknown) => string };
+    const href = (slug: string) => "/ru/blogs/news/" + slug;
+    const P = (slug: string, extra: Record<string, unknown>) => ({
+      slug, title: "Статья & <" + slug + ">", excerpt: "Анонс " + slug, coverUrl: null, coverFocus: null, coverW: null, coverH: null,
+      topic: "hair", minutes: 4, productCount: 3, ...extra,
+    });
+    const slides = [
+      P("w", { coverUrl: "https://img.rempireshop.com/blog/1-w.webp", coverW: 1500, coverH: 1000, coverFocus: "fill list 50 23.6 100 post 50 36.5 100 og 0 50 135" }),
+      P("h", { coverUrl: "https://img.rempireshop.com/blog/2-h.webp", coverW: 1095, coverH: 1095, coverFocus: "fill 50 50", excerpt: "" }),
+      P("s", { coverUrl: "/shop/img/night-rider-0.webp", coverW: 569, coverH: 404, productCount: 0 }),
+      P("u", { coverUrl: "/shop/img/x-0.webp" }),
+      P("n", { minutes: 0 }),
+    ];
+    for (const at of [0, 2]) {
+      const shop = run({ blogHeroAt: at }, href);
+      const ours = shop.bmagHeroHTML(slides).replace(/ data-go-blog="[^"]*"/g, "");
+      // the static page always opens on the first article
+      if (at === 0) expect(ours).toBe(heroHTML(slides, "RU", href));
+      else expect(ours).toContain('data-kind="half" data-on="1" aria-hidden="false"><span class="hero__photo"><img src="/shop/img/night-rider-0.webp"');
+    }
+    for (const p of slides) expect(run({ blogHeroAt: 0 }, href).bmagKind(p)).toBe(coverKind(p));
+    // the button is the shop's own link to the article, as everywhere else on the blog
+    expect(run({ blogHeroAt: 0 }, href).bmagHeroHTML(slides)).toContain('<a class="btn" href="/ru/blogs/news/w" data-go-blog="w">Читать статью</a>');
+  });
+
+  /* The marked articles reach the band in the browser too: the list kept in
+     the tab carried only `posts`, so app.js drew the newest article alone
+     over a static page that showed the marked ones. */
+  it("keeps the marked articles on the list it holds — from the page, from the API, and across «Показать ещё»", () => {
+    expect(slice("blogSyncList")).toContain("var feat = Array.isArray(j.featured) ? j.featured : [];");
+    expect(slice("blogSyncList")).toContain("blogSig(was.featured || []) !== blogSig(next.featured)");
+    expect(slice("hydrateBlog")).toContain("featured: Array.isArray(j.featured) ? j.featured : []");
+    expect(slice("loadBlogList")).toContain("featured: cur.featured || []");
+    expect(slice("blogStoreWrite")).toContain("featured: l.featured || []");
+    expect(slice("bmagSlides")).toContain("l.featured");
+  });
+
+  it("moves the blog's band with the home banner's arrows and swipe, and has no dots of its own", () => {
+    expect(app).not.toContain("bmag-hero");
+    expect(app).not.toContain("data-bmagdot");
+    expect(app).toContain('if (S.screen === "blog") bmagGo((S.blogHeroAt || 0) + Number(d.slide));');
+    expect(app).toContain('if (S.screen === "blog") bmagGo((S.blogHeroAt || 0) + dir);');
+    expect(slice("bmagGo")).toContain("heroPaint(S.blogHeroAt)");
+  });
+
   /* The static page says these in its own words (STR); app.js says them in
      Russian and translateTree() turns them into ET and EN from its UI table —
      the two must be the same sentences, or the page changes its words the
      moment the shop boots. */
   it("every interface sentence has the same ET and EN words in both places", () => {
-    const keys = ["featured", "read", "topics", "all", "askEye", "askText", "askBtn", "team", "inThis", "inThisLabel", "sources", "askPost", "next", "none"] as const;
+    const keys = ["featured", "read", "prevSlide", "nextSlide", "topics", "all", "askEye", "askText", "askBtn", "team", "inThis", "inThisLabel", "sources", "askPost", "next", "none"] as const;
     const table = (code: "ET" | "EN") => {
       const m = app.match(new RegExp(`\\n    ${code}: \\{`));
       return m && m.index !== undefined ? app.slice(m.index) : "";
