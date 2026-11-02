@@ -449,8 +449,8 @@ export const FREE_THRESHOLD_LISTED_UPTO = 100;
  * others:
  *   · the terms of delivery, 7.2 in public/shop/legal.{en,et,ru}.js —
  *     «Delivery inside Estonia normally takes 1–3 working days; to Latvia,
- *     Lithuania and Finland 2–5 working days; elsewhere in Europe 3–8
- *     working days»;
+ *     Lithuania and Finland 2–5 working days; to the other EU countries we
+ *     deliver to, 3–8 working days»;
  *   · the «Сроки» list of «Доставка и оплата» (DELIVERY_ROWS in
  *     public/shop2/app.js), whose note calls them the carriers' estimate.
  * tests/merchant-feed.test.ts holds this table to both, so a number reaches
@@ -868,6 +868,55 @@ const SET_CONTENTS: Record<FeedLang, string> = { EN: "In the set", ET: "Komplekt
 /** A set's own text in the feed's language, else English, else the Russian it always has. */
 const setText = (t: Record<FeedLang, string>, lang: FeedLang) => (t[lang] || t.EN || t.RU || "").trim();
 
+/**
+ * The photos a set's item carries, main first: the owner's own picture for
+ * the set — a product of the shop, or an uploaded photo — then the photo the
+ * product page shows for each product in it (that size's own, else the
+ * product's first usable one). A set with none is left out of the feed.
+ */
+function setPhotos(b: Bundle, productById: Map<string, FeedProduct>, overrides: Record<string, Override>): string[] {
+  const photoOf = (productId: string, index: number): string | undefined => {
+    const p = productById.get(productId);
+    if (!p) return undefined;
+    const o = overrides[productId];
+    const { photos, varImg } = photosOf(p, o, rungsOf(p, o).length);
+    const own = photos[varImg[index] ?? 0];
+    return own && usableImage(own) ? own : photos.find(usableImage);
+  };
+  const chosen = !b.image
+    ? undefined
+    : productById.has(b.image)
+      ? photoOf(b.image, 0)
+      : b.image.startsWith("//") ? "https:" + b.image : b.image;
+  return [chosen, ...(b.items as BundleItemOut[]).map((it) => photoOf(it.productId, it.variant))]
+    .filter((u): u is string => !!u && usableImage(u))
+    .filter((u, i, all) => all.indexOf(u) === i);
+}
+
+/** One item of the feeds as a store's stock list states it — src/lib/local-inventory.ts. */
+export type ListedOffer = { id: string; price: number; available: boolean };
+
+/**
+ * Every item the product feeds carry, in their order — each size of each
+ * product (feedOffers()), then each set with a photo — with the id, price and
+ * availability buildFeed() writes for it. The ids do not depend on the
+ * language, so this is the list for all three feeds at once. The local
+ * inventory feed is this list and nothing else: Google matches a store's
+ * stock to the product feed by id, and one it cannot match is an error.
+ */
+export function listedOffers(input: Pick<FeedInput, "overrides" | "descriptions" | "custom" | "bundles">): ListedOffer[] {
+  const out: ListedOffer[] = feedOffers(input).map((o) => ({ id: o.id, price: o.price, available: o.available }));
+  const products = [...catalogueProducts(input.descriptions, input.overrides), ...customProducts(input.custom)];
+  const productById = new Map(products.map((p) => [p.id, p]));
+  const offerOfSet = new Map(setOffers(input.bundles).map((s) => [s.bundleId, s]));
+  for (const b of (input.bundles ?? []).filter(listableSet)) {
+    if (!setPhotos(b, productById, input.overrides).length) continue;
+    const s = offerOfSet.get(b.id)!;
+    out.push({ id: s.id, price: s.price, available: s.available });
+  }
+  return out;
+}
+
 /* ---------- the feed ---------------------------------------------------- */
 
 export type FeedStats = {
@@ -1041,29 +1090,11 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
 
   /* ---- the sets, after the products — see setOffers() ---- */
   const productById = new Map(products.map((p) => [p.id, p]));
-  /** The photo the product page shows for one size of a product: that size's own, else the first usable one. */
-  const photoOf = (productId: string, index: number): string | undefined => {
-    const p = productById.get(productId);
-    if (!p) return undefined;
-    const o = overrides[productId];
-    const { photos, varImg } = photosOf(p, o, rungsOf(p, o).length);
-    const own = photos[varImg[index] ?? 0];
-    return own && usableImage(own) ? own : photos.find(usableImage);
-  };
   const offerOfSet = new Map(setOffers(opts.bundles).map((s) => [s.bundleId, s]));
   for (const b of (opts.bundles ?? []).filter(listableSet)) {
     const offer = offerOfSet.get(b.id)!;
-    /* the owner's own picture for the set first — a product of the shop, or
-       an uploaded photo — then the photo of every product in it */
-    const chosen = !b.image
-      ? undefined
-      : productById.has(b.image)
-        ? photoOf(b.image, 0)
-        : b.image.startsWith("//") ? "https:" + b.image : b.image;
     const parts = b.items as BundleItemOut[];
-    const photos = [chosen, ...parts.map((it) => photoOf(it.productId, it.variant))]
-      .filter((u): u is string => !!u && usableImage(u))
-      .filter((u, i, all) => all.indexOf(u) === i);
+    const photos = setPhotos(b, productById, overrides);
     if (!photos.length) {
       stats.skippedNoImage.push(offer.id);
       continue;

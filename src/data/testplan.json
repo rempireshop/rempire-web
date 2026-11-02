@@ -1295,7 +1295,7 @@
         "Латвия и Литва: пакомат от 3,79 €, курьер от 8,09 €.",
         "Финляндия: пакомат от 9,39 €, курьер от 15,69 €.",
         "Бесплатно от 59 €: Эстония, Латвия, Литва, Финляндия.",
-        "Для остальной Европы бесплатно от 200 €.",
+        "Ещё 21 страна ЕС: бесплатно от 200 €.",
         "Отмечена сразу самая дешёвая карточка, её цена та же до цента."
       ],
       "why": "Разницу между ценой на странице и ценой на кассе покупатель потребует назад.",
@@ -1313,13 +1313,62 @@
           "Latvia and Lithuania: locker from €3.79, courier from €8.09.",
           "Finland: locker from €9.39, courier from €15.69.",
           "Free from 59 €: Estonia, Latvia, Lithuania, Finland.",
-          "The rest of Europe: free from 200 €.",
+          "The 21 other EU countries: free from 200 €.",
           "The cheapest card is ticked on arrival and costs the same, to the cent."
         ],
         "why": "A buyer can claim back the gap between the page price and the till."
       },
       "mark": "redo",
       "markedAt": "2026-09-24T14:58:11.284Z"
+    },
+    {
+      "id": "shop-delivery-countries",
+      "area": "shop",
+      "who": "dim",
+      "device": "phone",
+      "lang": "any",
+      "title": "«Доставка и оплата»: все страны по отдельности",
+      "steps": [
+        "С телефона открыть «Доставка и оплата» и прочитать строку под заголовком.",
+        "Под таблицей нажать «Ещё 21 страна ЕС» и пролистать список до конца.",
+        "Найти в списке Польшу и Грецию.",
+        "Переключить язык на English, потом на Eesti, и снова открыть список.",
+        "В панели, «Настройки → Доставка», выключить Швецию и сохранить.",
+        "Обновить страницу, затем включить Швецию обратно и сохранить."
+      ],
+      "expect": [
+        "Под заголовком: «…Финляндию и ещё 21 страну ЕС» — без «остальной Европы».",
+        "21 страна по алфавиту: у каждой пакомат, курьер и «бесплатно от».",
+        "Польша: пакомат от 5,49 €, курьер от 7,09 €. Греция: пакомата нет.",
+        "Вбок ничего не листается, над каждой ценой своя подпись.",
+        "English: «21 more EU countries», первой Austria. Eesti: «Veel 21 ELi riiki».",
+        "Без Швеции: «Ещё 20 стран ЕС», Швеции нет. После включения она вернулась."
+      ],
+      "why": "Одна строка «Другие страны Европы» обещала всю Европу, а магазин возит в 25 стран — без Норвегии, Швейцарии и Британии.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "«Доставка и оплата»: every country on its own",
+        "steps": [
+          "On a phone open «Доставка и оплата» and read the line under the title.",
+          "Under the table tap «Ещё 21 страна ЕС» and scroll the list to the end.",
+          "Find Poland and Greece in the list.",
+          "Switch the language to English, then to Eesti, and open the list again.",
+          "In the panel, «Настройки → Доставка», switch Sweden off and save.",
+          "Reload the page, then switch Sweden back on and save."
+        ],
+        "expect": [
+          "Under the title: «…Финляндию и ещё 21 страну ЕС» — no «остальной Европы».",
+          "21 countries in alphabetical order: each with locker, courier and «free from».",
+          "Poland: locker from 5,49 €, courier from 7,09 €. Greece: no locker.",
+          "Nothing scrolls sideways, and every price has its own label above it.",
+          "English: «21 more EU countries», Austria first. Eesti: «Veel 21 ELi riiki».",
+          "Without Sweden: «Ещё 20 стран ЕС», no Sweden. Switched back on, it returns."
+        ],
+        "why": "One row «Другие страны Европы» promised all of Europe, while the shop ships to 25 countries — not Norway, Switzerland or the UK."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T14:30:00.000Z"
     },
     {
       "id": "shop-locker-europe",
@@ -12547,6 +12596,51 @@
       },
       "mark": "new",
       "markedAt": "2026-09-23T13:19:35.546Z"
+    },
+    {
+      "id": "live-local-listings",
+      "area": "live",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "any",
+      "title": "Наличие в салоне в Google: фид локальных товаров",
+      "steps": [
+        "До привязки профиля салона открыть rempireshop.com/feed/google-local.xml.",
+        "Привязать профиль и сохранить код магазина — по docs/google-local-listings.md.",
+        "Снова открыть rempireshop.com/feed/google-local.xml.",
+        "Через день-два открыть в Merchant Center источник локального наличия.",
+        "Найти салон Rempire на Google Картах и открыть его товары."
+      ],
+      "expect": [
+        "До кода магазина адрес отвечает 404: фид выключен.",
+        "После: в каждой строке ваш код магазина, наличие и цена.",
+        "Товаров столько же, сколько в фиде google-en.xml.",
+        "В Merchant Center нет ошибок «Store code not found» и «Item not found».",
+        "На Картах у салона видны товары с пометкой «в наличии»."
+      ],
+      "why": "Товар лежит на полке в салоне на Mardi 1; бесплатные локальные объявления показывают это в Google Картах.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "In stock at the salon on Google: the local inventory feed",
+        "steps": [
+          "Before the salon's profile is linked, open rempireshop.com/feed/google-local.xml.",
+          "Link the profile and store the store code — see docs/google-local-listings.md.",
+          "Open rempireshop.com/feed/google-local.xml again.",
+          "A day or two later open the local inventory source in Merchant Center.",
+          "Find the Rempire salon on Google Maps and open its products."
+        ],
+        "expect": [
+          "Before the store code the address answers 404: the feed is off.",
+          "After: every line carries your store code, availability and price.",
+          "As many items as the google-en.xml feed has.",
+          "Merchant Center shows no «Store code not found» or «Item not found».",
+          "On Maps the salon shows products marked «in stock»."
+        ],
+        "why": "The stock sits on the salon's shelf at Mardi 1; free local listings show that on Google Maps."
+      },
+      "mark": "new",
+      "markedAt": "2026-11-02T14:30:00.000Z"
     }
   ]
 }

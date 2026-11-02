@@ -248,6 +248,13 @@ is what to do about it:
 
    Send Dim a screenshot of either one.
 
+## G. Later: «in stock at the salon» (free local listings)
+
+A fourth address, `https://rempireshop.com/feed/google-local.xml`, says which
+items are on the shelf at Mardi 1. It is **off** (a 404) until the salon's
+Business Profile is linked and its store code is stored in the shop.
+Everything about it, step by step: **docs/google-local-listings.md**.
+
 ---
 
 ## For the next developer

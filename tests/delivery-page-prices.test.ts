@@ -49,10 +49,13 @@ function pageTable(raw: unknown): Record<string, [string, string, string]> {
   const html = D.page({
     lang: "RU", tr: (s: string) => s, esc, eur: eurRU, title: "Доставка и оплата",
     rules: D.liveRules(raw), carriers: D.carriers, carrierNames: D.carrierNames, rows: D.rows, montonio: D.montonio,
+    europe: D.europe, courierCarriers: D.courierCarriers,
     tableOnly: true,
   }) as string;
   const out: Record<string, [string, string, string]> = {};
-  const rows = D.rows as Array<[string, string, string]>;
+  /* the four home rows — every other country has a row of its own in the
+     fold below them since 02.11.2026 (tests/delivery-page-countries.test.ts) */
+  const rows = (D.rows as Array<[string, string, string]>).filter((r) => r[0] !== "EU");
   for (const [cc, name] of rows) {
     const at = html.indexOf("<span>" + name + "</span>");
     expect(at, name).toBeGreaterThan(-1);

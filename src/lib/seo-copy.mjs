@@ -694,7 +694,7 @@
         RU: {
           head: "Доставка в {n} {countries} Европы", any: "Доставка по Европе", countries: ["страну", "страны", "стран"],
           free: "Бесплатно: {parts}.", baltic: "по Балтии от {free}", estonia: "по Эстонии от {free}",
-          both: "в Финляндию и остальную Европу от {free}", fi: "в Финляндию от {free}", eu: "в остальную Европу от {free}",
+          both: "в Финляндию и остальные страны от {free}", fi: "в Финляндию от {free}", eu: "в остальные страны от {free}",
           shop: "магазин Rempire, Таллинн.", pickup: "Самовывоз на Mardi 1.",
           intro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне.",
           sets: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по ЕС."
@@ -702,7 +702,7 @@
         ET: {
           head: "Tarne {n} Euroopa {countries}", any: "Tarne üle Euroopa", countries: ["riiki", "riiki", "riiki"],
           free: "Tasuta: {parts}.", baltic: "Baltikumis alates {free}", estonia: "Eestis alates {free}",
-          both: "Soome ja mujale Euroopasse alates {free}", fi: "Soome alates {free}", eu: "mujale Euroopasse alates {free}",
+          both: "Soome ja teistesse riikidesse alates {free}", fi: "Soome alates {free}", eu: "teistesse riikidesse alates {free}",
           shop: "Rempire'i pood, Tallinn.", pickup: "Järeletulek Mardi 1.",
           intro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas.",
           sets: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle ELi."
@@ -710,7 +710,7 @@
         EN: {
           head: "Delivery to {n} {countries} in Europe", any: "Delivery across Europe", countries: ["country", "countries", "countries"],
           free: "Free: {parts}.", baltic: "in the Baltics from {free}", estonia: "in Estonia from {free}",
-          both: "to Finland and the rest of Europe from {free}", fi: "to Finland from {free}", eu: "to the rest of Europe from {free}",
+          both: "to Finland and the other countries from {free}", fi: "to Finland from {free}", eu: "to the other countries from {free}",
           shop: "Rempire shop, Tallinn.", pickup: "Pickup at Mardi 1.",
           intro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn.",
           sets: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, EU-wide delivery."
@@ -942,10 +942,11 @@
   /**
    * Where the shop delivers and from what it is free, in one or two
    * sentences: «Доставка в 25 стран Европы. Бесплатно: по Балтии от 70 €, в
-   * Финляндию и остальную Европу от 200 €.» Latvia and Lithuania fold into
-   * «Балтия» only while they share Estonia's floor, Finland into «остальная
-   * Европа» only while it shares Europe's; a floor the owner cleared drops
-   * its clause.
+   * Финляндию и остальные страны от 200 €.» Latvia and Lithuania fold into
+   * «Балтия» only while they share Estonia's floor, Finland into «остальные
+   * страны» only while it shares Europe's; a floor the owner cleared drops
+   * its clause. «Остальные страны», not «остальная Европа» (02.11.2026):
+   * the sentence has just counted them, and Europe is more than the 25.
    */
   function seoShipLine(lang, rules) {
     var w = seoCopy().ship[lang] || seoCopy().ship.EN;

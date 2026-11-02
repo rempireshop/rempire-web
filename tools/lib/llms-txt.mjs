@@ -104,7 +104,7 @@ export function buildLlmsTxt(o) {
     if (o.delivery.pickup) out.push("- " + md(o.delivery.pickup));
     for (const n of o.delivery.notes || []) out.push("- " + md(n));
   } else {
-    out.push("- Delivery to Estonia, Latvia, Lithuania, Finland and the rest of the EU; pickup at the salon in Tallinn. Prices: [Shipping policy](" + url("EN", "/info/shipping/") + ").");
+    out.push("- Delivery to Estonia, Latvia, Lithuania, Finland and other EU countries; pickup at the salon in Tallinn. Prices: [Shipping policy](" + url("EN", "/info/shipping/") + ").");
   }
   out.push("");
 
@@ -158,21 +158,36 @@ const text = h => unentity(String(h).replace(/<[^>]+>/g, " ")).replace(/\s+/g, "
  * that page prints: the price table, the delivery times, the pickup line, the
  * notes under the table and the returns summary (the paragraph under the
  * heading `returnsHeading`, the page's own word for «Возврат товара»).
+ *
+ * Since 02.11.2026 the table is two: the four home countries, and every other
+ * country the shop delivers to folded under «21 more EU countries»
+ * (<details class="dlv__all">, a <table class="dlv__eu"> whose cells carry
+ * their column's name for the phone layout — dropped here). Those rows take
+ * the days the «Сроки» list gives that fold's own summary.
  */
 export function deliveryFromPage(pageHtml, { returnsHeading } = {}) {
   const html = String(pageHtml);
   const days = {};
   for (const m of html.matchAll(/<div><dt>([\s\S]*?)<\/dt><dd>([\s\S]*?)<\/dd><\/div>/g)) days[text(m[1])] = text(m[2]);
-  const table = (/<table class="dlv__table">([\s\S]*?)<\/table>/.exec(html) || [])[1] || "";
   const rows = [];
-  for (const tr of (table.split("<tbody>")[1] || "").split("</tr>")) {
-    const th = /<th scope="row">([\s\S]*?)<\/th>/.exec(tr);
-    if (!th) continue;
-    const country = text(th[1].replace(/<small[\s\S]*?<\/small>/, ""));
-    const carriers = text((/<small[^>]*>([\s\S]*?)<\/small>/.exec(th[1]) || [])[1] || "");
-    const cells = [...tr.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(m => text(m[1]));
-    rows.push({ country, carriers, locker: cells[0] || "", courier: cells[1] || "", free: cells[2] || "", days: days[country] || "" });
-  }
+  const readTable = (cls, fallbackDays) => {
+    const table = (new RegExp('<table class="' + cls + '">([\\s\\S]*?)</table>').exec(html) || [])[1] || "";
+    for (const tr of (table.split("<tbody>")[1] || "").split("</tr>")) {
+      const th = /<th scope="row">([\s\S]*?)<\/th>/.exec(tr);
+      if (!th) continue;
+      const country = text(th[1].replace(/<small[\s\S]*?<\/small>/, ""));
+      const carriers = text((/<small[^>]*>([\s\S]*?)<\/small>/.exec(th[1]) || [])[1] || "");
+      const cells = [...tr.matchAll(/<td>([\s\S]*?)<\/td>/g)]
+        .map(m => text(m[1].replace(/<span class="dlv__lbl">[\s\S]*?<\/span>/g, "")));
+      rows.push({
+        country, carriers, locker: cells[0] || "", courier: cells[1] || "", free: cells[2] || "",
+        days: days[country] || fallbackDays || "",
+      });
+    }
+  };
+  readTable("dlv__table", "");
+  const fold = text((/<details class="dlv__all"><summary>([\s\S]*?)<\/summary>/.exec(html) || [])[1] || "");
+  readTable("dlv__eu", fold ? days[fold] : "");
   const pickup = text((/<div class="dlv__pickup">([\s\S]*?)<\/div>/.exec(html) || [])[1] || "");
   const notes = [...html.matchAll(/<p class="dlv__note">([\s\S]*?)<\/p>/g)].map(m => text(m[1])).filter(Boolean);
   let returns = "";

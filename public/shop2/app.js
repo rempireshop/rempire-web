@@ -1496,6 +1496,16 @@
       "Самовывоз": "Järeletulek", "Страна": "Riik",
       "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
       "Другие страны Европы": "Muud Euroopa riigid", "Остальные страны": "Ülejäänud riigid",
+      /* «Доставка и оплата» names every European country since 02.11.2026
+         (DELIVERY_EUROPE) — the names the checkout's own select shows, which
+         are the browser's Intl.DisplayNames */
+      "Австрия": "Austria", "Бельгия": "Belgia", "Болгария": "Bulgaaria", "Хорватия": "Horvaatia",
+      "Кипр": "Küpros", "Чехия": "Tšehhi", "Дания": "Taani", "Франция": "Prantsusmaa", "Германия": "Saksamaa",
+      "Греция": "Kreeka", "Венгрия": "Ungari", "Ирландия": "Iirimaa", "Италия": "Itaalia",
+      "Люксембург": "Luksemburg", "Мальта": "Malta", "Нидерланды": "Holland", "Польша": "Poola",
+      "Португалия": "Portugal", "Румыния": "Rumeenia", "Словакия": "Slovakkia", "Словения": "Sloveenia",
+      "Испания": "Hispaania", "Швеция": "Rootsi", "Исландия": "Island", "Лихтенштейн": "Liechtenstein",
+      "Норвегия": "Norra", "Швейцария": "Šveits", "Великобритания": "Ühendkuningriik",
       // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
       "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
         "„Tasuta alates“: 0 — tarne on alati tasuta, tühi — sellesse riiki tasuta tarnet ei ole.",
@@ -3440,8 +3450,10 @@
         "Näeme märget ja kirjutame teile e-postiga: räägime, kuidas pakk tagasi saata, ja tagastame raha pärast kontrolli.",
       "Полные условия возврата": "Tagastamise täistingimused", "Все контакты": "Kõik kontaktid",
       "Полные условия доставки": "Tarne täistingimused",
-      "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
-        "Saadame Tallinnast üle Eesti, Lätti, Leetu, Soome ja mujale Euroopasse. Allpool on tarneviisid, tarneajad, hinnad ja makseviisid.",
+      /* the intro with no European country left on — the counted one is a
+         UI_RX rule («…и ещё 21 страну ЕС…») */
+      "Отправляем из Таллинна по Эстонии, в Латвию, Литву и Финляндию. Ниже — способы доставки, сроки, цены и как можно заплатить.":
+        "Saadame Tallinnast üle Eesti, Lätti, Leetu ja Soome. Allpool on tarneviisid, tarneajad, hinnad ja makseviisid.",
       "Способы и цены": "Viisid ja hinnad",
       "Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.": "Tasuta tarne lävi arvestatakse ostukorvi kaupade summast enne soodustusi ja sooduskoode.",
       "Сроки": "Tarneajad", "Вопросы": "Küsimused",
@@ -5188,6 +5200,16 @@
       "Самовывоз": "Pickup", "Страна": "Country",
       "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
       "Другие страны Европы": "Other European countries", "Остальные страны": "All other countries",
+      /* «Доставка и оплата» names every European country since 02.11.2026
+         (DELIVERY_EUROPE) — the names the checkout's own select shows, which
+         are the browser's Intl.DisplayNames */
+      "Австрия": "Austria", "Бельгия": "Belgium", "Болгария": "Bulgaria", "Хорватия": "Croatia",
+      "Кипр": "Cyprus", "Чехия": "Czechia", "Дания": "Denmark", "Франция": "France", "Германия": "Germany",
+      "Греция": "Greece", "Венгрия": "Hungary", "Ирландия": "Ireland", "Италия": "Italy",
+      "Люксембург": "Luxembourg", "Мальта": "Malta", "Нидерланды": "Netherlands", "Польша": "Poland",
+      "Португалия": "Portugal", "Румыния": "Romania", "Словакия": "Slovakia", "Словения": "Slovenia",
+      "Испания": "Spain", "Швеция": "Sweden", "Исландия": "Iceland", "Лихтенштейн": "Liechtenstein",
+      "Норвегия": "Norway", "Швейцария": "Switzerland", "Великобритания": "United Kingdom",
       // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
       "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
         "«Free from»: 0 means delivery is always free, empty means there is no free delivery to that country.",
@@ -7098,8 +7120,10 @@
         "We will see the tick and write to you by e-mail: we will tell you how to send the parcel back, and refund the money once we have checked it.",
       "Полные условия возврата": "Full returns policy", "Все контакты": "All contact details",
       "Полные условия доставки": "Full terms of delivery",
-      "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
-        "We ship from Tallinn across Estonia, to Latvia, Lithuania, Finland and the rest of Europe. Below: delivery methods, times, prices and ways to pay.",
+      /* the intro with no European country left on — the counted one is a
+         UI_RX rule («…и ещё 21 страну ЕС…») */
+      "Отправляем из Таллинна по Эстонии, в Латвию, Литву и Финляндию. Ниже — способы доставки, сроки, цены и как можно заплатить.":
+        "We ship from Tallinn across Estonia, to Latvia, Lithuania and Finland. Below: delivery methods, times, prices and ways to pay.",
       "Способы и цены": "Methods and prices",
       "Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.": "The free-delivery threshold is the basket's goods total before discounts and promo codes.",
       "Сроки": "Delivery times", "Вопросы": "Questions",
@@ -7594,6 +7618,17 @@
         EN: "How this works out on an order of $1" }],
     /* «Доставка и оплата» and «Клиенты → партнёры»: the lines built around a
        number, an address or the confirm card's two-line text */
+    /* …the intro and the fold's summary, counting the European countries the
+       page lists (02.11.2026). Russian takes three forms of «страна»; English
+       and Estonian two, and only a literal 1 is singular. */
+    [/^Отправляем из Таллинна по Эстонии, в Латвию, Литву, Финляндию и ещё 1 страну ЕС\. Ниже — способы доставки, сроки, цены и как можно заплатить\.$/,
+      { ET: "Saadame Tallinnast üle Eesti, Lätti, Leetu, Soome ja veel 1 ELi riiki. Allpool on tarneviisid, tarneajad, hinnad ja makseviisid.",
+        EN: "We ship from Tallinn across Estonia, to Latvia, Lithuania, Finland and 1 more EU country. Below: delivery methods, times, prices and ways to pay." }],
+    [/^Отправляем из Таллинна по Эстонии, в Латвию, Литву, Финляндию и ещё (\d+) стран[уы]? ЕС\. Ниже — способы доставки, сроки, цены и как можно заплатить\.$/,
+      { ET: "Saadame Tallinnast üle Eesti, Lätti, Leetu, Soome ja veel $1 ELi riiki. Allpool on tarneviisid, tarneajad, hinnad ja makseviisid.",
+        EN: "We ship from Tallinn across Estonia, to Latvia, Lithuania, Finland and $1 more EU countries. Below: delivery methods, times, prices and ways to pay." }],
+    [/^Ещё 1 страна ЕС$/, { ET: "Veel 1 ELi riik", EN: "1 more EU country" }],
+    [/^Ещё (\d+) стран[аы]? ЕС$/, { ET: "Veel $1 ELi riiki", EN: "$1 more EU countries" }],
     [/^от (€\d.*)$/, { ET: "alates $1", EN: "from $1" }],
     [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
@@ -9386,8 +9421,9 @@
   /* ---------- «Доставка и оплата» — the page a customer actually reads ------
      One builder, two renderers. screenDelivery() draws it live from
      SHIP_RULES and the content layer; tools/prerender-shop2.mjs lifts this
-     very function — with DELIVERY_ROWS, SHIP_RULES, CARRIER_NAMES and
-     CARRIERS_BY_COUNTRY above — out of this file the way it lifts the
+     very function — with DELIVERY_ROWS, DELIVERY_EUROPE, SHIP_RULES,
+     CARRIER_NAMES, CARRIERS_BY_COUNTRY and COURIER_CARRIERS — out of this
+     file (tools/lib/delivery-lift.mjs) the way it lifts the
      dictionary, and writes the static /info/shipping/ pages with it. So it
      is a pure function of `ctx` and of nothing else: no S, no DEMO, no helper
      from the closure, and its first and last lines keep their exact shape
@@ -9405,6 +9441,24 @@
     ["LT", "Литва", "2–5 рабочих дней"],
     ["FI", "Финляндия", "2–5 рабочих дней"],
     ["EU", "Другие страны Европы", "3–8 рабочих дней"]
+  ];
+  /* The countries behind the «EU» row, each with a row of its own on the page
+     since 02.11.2026 (Dim, owner-approved): «Other European countries — from
+     €5.49» read as «the rest of Europe», and the shop serves 25 countries, not
+     Europe. The same 28 codes as EUROPE_ISO above and EUROPE in
+     src/lib/shipping.ts (tests/delivery-page-countries.test.ts holds all three
+     equal); the page draws the ones the owner has not switched off
+     (SHIP_RULES.countriesOff), so a country he switches off in Настройки →
+     Доставка leaves the page and the intro's count by itself. The names are
+     the Russian source text — the dictionary carries them in ET and EN, as
+     the browser's own Intl names them in the checkout's country select. */
+  var DELIVERY_EUROPE = [
+    ["AT", "Австрия"], ["BE", "Бельгия"], ["BG", "Болгария"], ["HR", "Хорватия"], ["CY", "Кипр"],
+    ["CZ", "Чехия"], ["DK", "Дания"], ["FR", "Франция"], ["DE", "Германия"], ["GR", "Греция"],
+    ["HU", "Венгрия"], ["IE", "Ирландия"], ["IT", "Италия"], ["LU", "Люксембург"], ["MT", "Мальта"],
+    ["NL", "Нидерланды"], ["PL", "Польша"], ["PT", "Португалия"], ["RO", "Румыния"], ["SK", "Словакия"],
+    ["SI", "Словения"], ["ES", "Испания"], ["SE", "Швеция"], ["IS", "Исландия"], ["LI", "Лихтенштейн"],
+    ["NO", "Норвегия"], ["CH", "Швейцария"], ["GB", "Великобритания"]
   ];
   function deliveryPageHTML(ctx) {
     var tr = ctx.tr, esc = ctx.esc, eur = ctx.eur, rules = ctx.rules || {};
@@ -9492,13 +9546,20 @@
       });
       return min;
     }
+    /* Does the checkout offer a locker in this country at all? A carrier with
+       points there, and the owner has not switched it off — pickupOpen() in
+       the checkout, pickupOffered() on the server. A country whose lockers
+       are off prints a dash, not the price of a delivery nobody can pick. */
+    function dlvLockerOpen(c) {
+      if (!(carriers[c] || []).length) return false;
+      return ((rules && rules.pickupOff) || []).indexOf(c) < 0;
+    }
     function parcelCell(c) {
-      var list = carriers[c] || [];
       if (c === "EU") {
         var pf = zonePickupFloor();
         return pf === null ? "—" : '<span class="num">' + tr("от " + eur(pf)) + "</span>";
       }
-      if (!list.length) return "—";
+      if (!dlvLockerOpen(c)) return "—";
       return fromCell(lockerPrices(c));
     }
     /* «Другие страны Европы» stopped being one price on 07.09.2026: every
@@ -9534,24 +9595,72 @@
       }
       return fromCell(courierPrices(c));
     }
+    /* «Бесплатно от»: the country's own threshold, then its zone's — «EU» for
+       a European country — then the shop-wide one. The three steps
+       quoteFromRules() takes on the server and threshold() at the checkout;
+       without the middle one a German row read the home countries' 70 € while
+       the bill asks 200 €. */
     function freeCell(c) {
       var by = rules.freeFromByCountry;
-      var v = by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : rules.freeFrom;
+      var has = function (k) { return !!by && Object.prototype.hasOwnProperty.call(by, k); };
+      var v = has(c) ? by[c] : euCodes.indexOf(c) >= 0 && has("EU") ? by.EU : rules.freeFrom;
       if (v === null || v === undefined) return t("не бывает");
       return typeof v === "number" && isFinite(v) ? '<span class="num">' + eur(v) + "</span>" : "—";
     }
+    /* Every carrier the shopper can pick in the country, for a locker (while
+       the checkout offers one) and for a courier, in Montonio's own order —
+       Greece has no locker and still has DPD and SmartPosti at the door. In
+       the four home countries the courier's carriers are among the locker's,
+       so their line is what it always was. */
+    var CARRIER_ORDER = ["novapost", "dpd", "omniva", "unisend", "smartpost"];
     function carriersLine(c) {
-      var list = (carriers[c] || []).map(function (k) { return names[k] || k; });
+      var list = (dlvLockerOpen(c) ? (carriers[c] || []) : []).slice();
+      ((ctx.courierCarriers || {})[c] || []).forEach(function (k) { if (list.indexOf(k) < 0) list.push(k); });
+      var rank = function (k) { var i = CARRIER_ORDER.indexOf(k); return i < 0 ? CARRIER_ORDER.length : i; };
+      list = list.map(function (k, i) { return [k, i]; })
+        .sort(function (a, b) { return rank(a[0]) - rank(b[0]) || a[1] - b[1]; })
+        .map(function (p) { return names[p[0]] || p[0]; });
       return list.length ? '<small class="dlv__carriers">' + esc(list.join(" · ")) + "</small>" : "";
     }
+    function dlvForm(n, one, few, many) {
+      return n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many;
+    }
+    function dlvHeadHTML() {
+      return '<thead><tr><th scope="col">' + t("Страна") + '</th><th scope="col">' + t("Пакомат") +
+        '</th><th scope="col">' + t("Курьер") + '</th><th scope="col">' + t("Бесплатно от") + "</th></tr></thead>";
+    }
+    /* One country's row. `labelled` puts the column's name inside each cell
+       too — the European table drops its header row on a phone and stacks a
+       country into one block, and a price with no word beside it is a guess. */
+    function dlvRowHTML(c, name, labelled) {
+      var td = function (label, html) {
+        return "<td>" + (labelled ? '<span class="dlv__lbl">' + tr(label) + "</span>" : "") + html + "</td>";
+      };
+      return '<tr><th scope="row">' + t(name) + carriersLine(c) + "</th>" +
+        td("Пакомат", parcelCell(c)) + td("Курьер", courierCell(c)) + td("Бесплатно от", freeCell(c)) + "</tr>";
+    }
     var rows = ctx.rows || [];
+    /* The European countries (ctx.europe = DELIVERY_EUROPE): the ones the
+       owner has not switched off, in the page's own alphabet — `collate` is
+       the name the reader sees (the dictionary's, live as in the prerender),
+       so «Austria, Belgium, Bulgaria» in English and «Австрия, Бельгия,
+       Болгария» in Russian. Without ctx.europe — the panel's preview — the
+       «EU» zone row stays, priced «от» the cheapest of them. */
+    var euCodes = (ctx.europe || []).map(function (r) { return r[0]; });
+    var shipOff = (rules && Array.isArray(rules.countriesOff)) ? rules.countriesOff : [];
+    var collate = ctx.collate || tr;
+    var langTag = ctx.lang === "ET" ? "et" : ctx.lang === "EN" ? "en" : "ru";
+    var europe = ctx.europe ? ctx.europe
+      .filter(function (r) { return shipOff.indexOf(r[0]) < 0; })
+      .map(function (r) { return { c: r[0], name: r[1], key: String(collate(r[1])) }; })
+      .sort(function (a, b) { return a.key.localeCompare(b.key, langTag) || (a.c < b.c ? -1 : 1); }) : null;
+    var euN = europe ? europe.length : 0;
+    // «Ещё 21 страна ЕС» — the fold's summary, and the line of «Сроки» it times
+    var moreLabel = euN ? "Ещё " + euN + " " + dlvForm(euN, "страна", "страны", "стран") + " ЕС" : "";
+    var homeRows = europe ? rows.filter(function (r) { return r[0] !== "EU"; }) : rows;
     var table = '<div class="dlv__scroll" role="region" tabindex="0" aria-label="' + tr("Цены доставки по странам") + '">' +
-      '<table class="dlv__table"><thead><tr><th scope="col">' + t("Страна") + '</th><th scope="col">' + t("Пакомат") +
-      '</th><th scope="col">' + t("Курьер") + '</th><th scope="col">' + t("Бесплатно от") + "</th></tr></thead><tbody>" +
-      rows.map(function (r) {
-        return '<tr><th scope="row">' + t(r[1]) + carriersLine(r[0]) + "</th>" +
-          "<td>" + parcelCell(r[0]) + "</td><td>" + courierCell(r[0]) + "</td><td>" + freeCell(r[0]) + "</td></tr>";
-      }).join("") + "</tbody></table></div>";
+      '<table class="dlv__table">' + dlvHeadHTML() + "<tbody>" +
+      homeRows.map(function (r) { return dlvRowHTML(r[0], r[1], false); }).join("") + "</tbody></table></div>";
     /* …and the same table on its own, for the panel's «Что увидит покупатель»
        (admShipPreviewTableHTML()). One renderer, so the preview cannot drift
        from the page it is previewing — which is the whole reason it exists.
@@ -9559,6 +9668,22 @@
        assembling (the policy text, the bank marks, the contacts), so the
        early return is here rather than a second function down there. */
     if (ctx.tableOnly) return table;
+    /* Every other country, folded under the four home rows: twenty-one rows
+       open on a phone would push «Сроки» and «Оплата» a screen and a half
+       down for the shopper in Tallinn, and the one in Madrid opens the fold.
+       A table, with the home table's columns; on a phone each row becomes one
+       block (styles.css, .dlv__eu). */
+    var others = moreLabel
+      ? '<details class="dlv__all"><summary>' + tr(moreLabel) + "</summary>" +
+        '<table class="dlv__eu">' + dlvHeadHTML() + "<tbody>" +
+        europe.map(function (e) { return dlvRowHTML(e.c, e.name, true); }).join("") + "</tbody></table></details>"
+      : "";
+    /* The sentence under the title counts what the fold holds — never «и
+       остальной Европе», which promised Norway, Switzerland and the UK. */
+    var intro = moreLabel
+      ? "Отправляем из Таллинна по Эстонии, в Латвию, Литву, Финляндию и ещё " + euN + " " +
+        dlvForm(euN, "страну", "страны", "стран") + " ЕС. Ниже — способы доставки, сроки, цены и как можно заплатить."
+      : "Отправляем из Таллинна по Эстонии, в Латвию, Литву и Финляндию. Ниже — способы доставки, сроки, цены и как можно заплатить.";
     /* The column is one price for one method, and that method is Montonio's
        `pickupPoint` — a machine most of the time and a manned counter the rest
        of it (Nova Post in LV/LT, DPD in Finland). Widening the header to
@@ -9573,7 +9698,12 @@
       "<p><b>" + t("Самовывоз в салоне") + "</b> — " + t("бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.") + "</p>" +
       (ctx.address ? '<p class="dlv__addr">' + esc(ctx.address) + "</p>" : "") +
       (ctx.hoursHTML ? '<p class="dlv__hours">' + ctx.hoursHTML + "</p>" : "") + "</div>";
-    var times = '<dl class="dlv__times">' + rows.map(function (r) {
+    /* the «EU» row's days are the fold's: «Ещё 21 страна ЕС — 3–8 рабочих
+       дней», and no line at all when every European country is off */
+    var timeRows = !europe ? rows : rows.map(function (r) {
+      return r[0] !== "EU" ? r : moreLabel ? [r[0], moreLabel, r[2]] : null;
+    }).filter(Boolean);
+    var times = '<dl class="dlv__times">' + timeRows.map(function (r) {
         return "<div><dt>" + t(r[1]) + "</dt><dd>" + t(r[2]) + "</dd></div>";
       }).join("") +
       "<div><dt>" + t("Самовывоз") + "</dt><dd>" + t("напишем, когда заказ можно забрать — обычно в день оплаты") + "</dd></div></dl>" +
@@ -9628,8 +9758,8 @@
         "</details>"
       : "";
     return '<h1 class="display h1">' + esc(ctx.title) + "</h1>" +
-      '<p class="sec__intro">' + tr("Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.") + "</p>" +
-      h2("Способы и цены") + table + kinds +
+      '<p class="sec__intro">' + tr(intro) + "</p>" +
+      h2("Способы и цены") + table + others + kinds +
       '<p class="dlv__note">' + t("Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.") + "</p>" +
       pickup +
       h2("Сроки") + times +
@@ -15683,14 +15813,14 @@
       /* «Балтия» quotes {EE} and Finland shares {EU}: one amount per group
          while the rules keep them equal — split them and this line needs an edit. */
       text: {
-        RU: "Бесплатная доставка по Балтии от {EE} €, в Финляндию и остальную Европу — от {EU} €",
-        ET: "Tasuta tarne Baltikumis alates {EE} €, Soome ja mujale Euroopasse alates {EU} €",
-        EN: "Free delivery in the Baltics from {EE} €, to Finland and the rest of Europe from {EU} €"
+        RU: "Бесплатная доставка по Балтии от {EE} €, в Финляндию и другие страны ЕС — от {EU} €",
+        ET: "Tasuta tarne Baltikumis alates {EE} €, Soome ja teistesse ELi riikidesse alates {EU} €",
+        EN: "Free delivery in the Baltics from {EE} €, to Finland and other EU countries from {EU} €"
       },
       short: {
-        RU: "Бесплатно: Балтия от {EE} €, Европа от {EU} €",
-        ET: "Tasuta: Baltikum alates {EE} €, Euroopa alates {EU} €",
-        EN: "Free delivery: Baltics from {EE} €, Europe from {EU} €"
+        RU: "Бесплатно: Балтия от {EE} €, ЕС от {EU} €",
+        ET: "Tasuta: Baltikum alates {EE} €, EL alates {EU} €",
+        EN: "Free delivery: Baltics from {EE} €, EU from {EU} €"
       },
       link: ""
     },
@@ -16434,7 +16564,11 @@
         tr: function (s) { return s; },   // translateTree() does it after render
         esc: esc, eur: eur, title: title,
         rules: SHIP_RULES, carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES, rows: DELIVERY_ROWS,
-        montonio: MONTONIO_PRICE,
+        montonio: MONTONIO_PRICE, europe: DELIVERY_EUROPE, courierCarriers: COURIER_CARRIERS,
+        /* the European rows sort by the name the reader will see — the
+           dictionary's, which translateTree() puts in a moment later and the
+           prerender puts in at once — so the two pages list them alike */
+        collate: function (s) { return trText(s, S.lang); },
         address: c.company.address, hoursHTML: cHoursRows(), phoneHTML: cPhoneHTML(), mailHTML: cMailHTML(),
         logos: typeof PAYLOGOS !== "undefined" ? PAYLOGOS : {}, banks: PAYMETHODS.banks,
         loyalty: LOYALTY_PUBLIC,
@@ -52345,7 +52479,7 @@
         RU: {
           head: "Доставка в {n} {countries} Европы", any: "Доставка по Европе", countries: ["страну", "страны", "стран"],
           free: "Бесплатно: {parts}.", baltic: "по Балтии от {free}", estonia: "по Эстонии от {free}",
-          both: "в Финляндию и остальную Европу от {free}", fi: "в Финляндию от {free}", eu: "в остальную Европу от {free}",
+          both: "в Финляндию и остальные страны от {free}", fi: "в Финляндию от {free}", eu: "в остальные страны от {free}",
           shop: "магазин Rempire, Таллинн.", pickup: "Самовывоз на Mardi 1.",
           intro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне.",
           sets: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по ЕС."
@@ -52353,7 +52487,7 @@
         ET: {
           head: "Tarne {n} Euroopa {countries}", any: "Tarne üle Euroopa", countries: ["riiki", "riiki", "riiki"],
           free: "Tasuta: {parts}.", baltic: "Baltikumis alates {free}", estonia: "Eestis alates {free}",
-          both: "Soome ja mujale Euroopasse alates {free}", fi: "Soome alates {free}", eu: "mujale Euroopasse alates {free}",
+          both: "Soome ja teistesse riikidesse alates {free}", fi: "Soome alates {free}", eu: "teistesse riikidesse alates {free}",
           shop: "Rempire'i pood, Tallinn.", pickup: "Järeletulek Mardi 1.",
           intro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas.",
           sets: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle ELi."
@@ -52361,7 +52495,7 @@
         EN: {
           head: "Delivery to {n} {countries} in Europe", any: "Delivery across Europe", countries: ["country", "countries", "countries"],
           free: "Free: {parts}.", baltic: "in the Baltics from {free}", estonia: "in Estonia from {free}",
-          both: "to Finland and the rest of Europe from {free}", fi: "to Finland from {free}", eu: "to the rest of Europe from {free}",
+          both: "to Finland and the other countries from {free}", fi: "to Finland from {free}", eu: "to the other countries from {free}",
           shop: "Rempire shop, Tallinn.", pickup: "Pickup at Mardi 1.",
           intro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn.",
           sets: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, EU-wide delivery."
@@ -52593,10 +52727,11 @@
   /**
    * Where the shop delivers and from what it is free, in one or two
    * sentences: «Доставка в 25 стран Европы. Бесплатно: по Балтии от 70 €, в
-   * Финляндию и остальную Европу от 200 €.» Latvia and Lithuania fold into
-   * «Балтия» only while they share Estonia's floor, Finland into «остальная
-   * Европа» only while it shares Europe's; a floor the owner cleared drops
-   * its clause.
+   * Финляндию и остальные страны от 200 €.» Latvia and Lithuania fold into
+   * «Балтия» only while they share Estonia's floor, Finland into «остальные
+   * страны» only while it shares Europe's; a floor the owner cleared drops
+   * its clause. «Остальные страны», not «остальная Европа» (02.11.2026):
+   * the sentence has just counted them, and Europe is more than the 25.
    */
   function seoShipLine(lang, rules) {
     var w = seoCopy().ship[lang] || seoCopy().ship.EN;

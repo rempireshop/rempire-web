@@ -46,22 +46,27 @@ describe("the countries it counts", () => {
 });
 
 describe("the sentence", () => {
-  it("names the Baltics, Finland and the rest of Europe with the live amounts", () => {
+  /* «the other countries», not «the rest of Europe» (02.11.2026): the
+     sentence has just counted the 25, and Europe is more than they are */
+  it("names the Baltics, Finland and the other countries with the live amounts", () => {
     expect(seoShipLine("RU", LIVE)).toBe(
-      "Доставка в 25 стран Европы. Бесплатно: по Балтии от 70 €, в Финляндию и остальную Европу от 200 €.",
+      "Доставка в 25 стран Европы. Бесплатно: по Балтии от 70 €, в Финляндию и остальные страны от 200 €.",
     );
     expect(seoShipLine("ET", LIVE)).toBe(
-      "Tarne 25 Euroopa riiki. Tasuta: Baltikumis alates 70 €, Soome ja mujale Euroopasse alates 200 €.",
+      "Tarne 25 Euroopa riiki. Tasuta: Baltikumis alates 70 €, Soome ja teistesse riikidesse alates 200 €.",
     );
     expect(seoShipLine("EN", LIVE)).toBe(
-      "Delivery to 25 countries in Europe. Free: in the Baltics from €70, to Finland and the rest of Europe from €200.",
+      "Delivery to 25 countries in Europe. Free: in the Baltics from €70, to Finland and the other countries from €200.",
     );
+    for (const lang of ["RU", "ET", "EN"] as const) {
+      expect(seoShipLine(lang, LIVE)).not.toMatch(/rest of Europe|остальн\S* Европ|mujale Euroopa/);
+    }
   });
 
   it("splits a group whose amounts the owner split, instead of quoting one for both", () => {
     const split = { ...LIVE, freeFromByCountry: { EU: 200, FI: 150, LV: 80 } };
     expect(seoShipLine("RU", split)).toBe(
-      "Доставка в 25 стран Европы. Бесплатно: по Эстонии от 70 €, в Финляндию от 150 €, в остальную Европу от 200 €.",
+      "Доставка в 25 стран Европы. Бесплатно: по Эстонии от 70 €, в Финляндию от 150 €, в остальные страны от 200 €.",
     );
   });
 

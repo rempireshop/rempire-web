@@ -2169,19 +2169,62 @@ button, a, summary, label { touch-action: manipulation; }
 .dlv__contact p { margin: 0 0 10px; font-size: 14.5px; }
 .dlv__contact a { color: var(--ink); }
 .dlv__legal { margin-top: 32px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.dlv__legal summary {
+.dlv__legal summary, .dlv__all summary {
   cursor: pointer; list-style: none; position: relative; min-height: 48px; display: flex; align-items: center;
   padding: 12px 26px 12px 0; font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
 }
-.dlv__legal summary::-webkit-details-marker { display: none; }
-.dlv__legal summary::after {
+.dlv__legal summary::-webkit-details-marker, .dlv__all summary::-webkit-details-marker { display: none; }
+.dlv__legal summary::after, .dlv__all summary::after {
   content: "+"; position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
   font-size: 16px; color: var(--muted);
 }
-.dlv__legal[open] summary::after { content: "−"; }
+.dlv__legal[open] summary::after, .dlv__all[open] summary::after { content: "−"; }
 .dlv__legal > .legal { padding-bottom: 16px; }
+/* «Ещё 21 страна ЕС» (02.11.2026): every European country the checkout
+   offers, folded under the four home rows with the summary «Полные условия
+   доставки» uses. Inside, the home table's columns on a desktop; on a phone
+   one block per country — the name and its carriers on a line, then the three
+   prices, each under its column's own small label (.dlv__lbl) — so twenty-one
+   countries read top to bottom with nothing to scroll sideways. */
+.dlv__all { border-bottom: 1px solid var(--rule); }
+.dlv__eu { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.4; }
+.dlv__eu th, .dlv__eu td {
+  padding: 11px 14px 11px 0; border-bottom: 1px solid var(--rule-soft); text-align: left; vertical-align: top;
+}
+.dlv__eu th:last-child, .dlv__eu td:last-child { padding-right: 0; }
+.dlv__eu thead th {
+  font-family: Oswald, sans-serif; font-weight: 500; font-size: 11.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); border-bottom-color: var(--rule);
+}
+.dlv__eu tbody th { font-weight: 500; }
+.dlv__eu tbody tr:last-child > * { border-bottom: 0; }
+.dlv__lbl { display: none; }
+@media (max-width: 767px) {
+  .dlv__eu, .dlv__eu tbody { display: block; }
+  .dlv__eu thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+  .dlv__eu tr {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .dlv__eu tbody tr:last-child { border-bottom: 0; }
+  .dlv__eu th, .dlv__eu td { padding: 0; border: 0; }
+  .dlv__eu tbody th {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; margin-bottom: 5px;
+  }
+  .dlv__eu .dlv__carriers { display: inline; margin-top: 0; }
+  .dlv__lbl {
+    display: block; margin-bottom: 1px; font-family: Oswald, sans-serif; font-weight: 500; font-size: 10.5px;
+    letter-spacing: .12em; line-height: 1.35; text-transform: uppercase; color: var(--muted);
+  }
+}
 @media (min-width: 768px) {
   .dlv__scroll { margin: 0; padding: 0; }
+  /* the two tables' columns line up, one under the other — on the customer
+     page only: the panel's preview (.adm-preview) keeps its own widths */
+  .dlv .dlv__table, .dlv .dlv__eu { table-layout: fixed; }
+  .dlv .dlv__table thead th:first-child, .dlv .dlv__eu thead th:first-child { width: 34%; }
 }
 .ftr__acc .link { font-size: inherit; color: inherit; border-bottom-color: var(--rule); }
 .ftr__acc .link:hover { border-bottom-color: var(--ink); }

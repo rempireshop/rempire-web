@@ -2,12 +2,16 @@
  * GET /feed/google-en.xml — the Google Merchant Center feed in English
  * GET /feed/google-et.xml — in Estonian
  * GET /feed/google-ru.xml — in Russian
+ * GET /feed/google-local.xml — the salon's local product inventory (off until
+ *                              settings.gbp_store_code is set: a 404 till then)
  *
  * RSS 2.0 with the `g:` namespace, built on every request from the live
  * catalogue: the owner's prices, sizes, stock and «Показывать в магазине»,
  * the counted shelf, the shipping rules the checkout bills with. What each
- * field is and where it comes from: src/lib/merchant-feed.ts. What the owner
- * does with these three addresses in Merchant Center: docs/merchant-feed.md.
+ * field is and where it comes from: src/lib/merchant-feed.ts (and
+ * src/lib/local-inventory.ts for the local one). What the owner does with
+ * these addresses in Merchant Center: docs/merchant-feed.md and
+ * docs/google-local-listings.md.
  *
  * `trailingSlash: true` leaves a path with an extension alone, so this
  * answers at the exact address, like /sitemap-products.xml and /shop2/og/…
@@ -20,6 +24,7 @@
  * give. An hour is what a hidden product or a sold-out size may lag by.
  */
 import { buildFeed, feedBase, feedLangOf, loadFeedInput, type FeedInput } from "@/lib/merchant-feed";
+import { buildLocalFeed, LOCAL_FEED_FILE, loadStoreCode } from "@/lib/local-inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,23 +34,49 @@ type Ctx = { params: Promise<{ file: string }> };
 const XML = "application/xml; charset=utf-8";
 const CACHE = "public, max-age=0, s-maxage=3600";
 
+const notFound = () =>
+  Response.json({ ok: false, error: "not_found" }, { status: 404, headers: { "cache-control": "no-store" } });
+
+/* A 503, not a feed from the files alone — see loadFeedInput(). Merchant
+   Center keeps yesterday's items and fetches again. */
+const unavailable = (err: unknown) => {
+  console.error("[feed] live catalogue unavailable:", err);
+  return Response.json(
+    { ok: false, error: "unavailable" },
+    { status: 503, headers: { "cache-control": "no-store", "retry-after": "600" } },
+  );
+};
+
+/**
+ * The local inventory feed: a 404 while no store code is set — the feed is
+ * prepared, not switched on (docs/google-local-listings.md) — and `no-store`
+ * on that 404, so the hour after Dim sets the code is not spent serving a
+ * cached «off».
+ */
+async function localFeed(): Promise<Response> {
+  let storeCode: string;
+  let input: FeedInput;
+  try {
+    storeCode = await loadStoreCode();
+    if (!storeCode) return notFound();
+    input = await loadFeedInput();
+  } catch (err) {
+    return unavailable(err);
+  }
+  const { xml } = buildLocalFeed({ ...input, storeCode, base: feedBase(process.env.PUBLIC_BASE_URL) });
+  return new Response(xml, { headers: { "content-type": XML, "cache-control": CACHE } });
+}
+
 export async function GET(_req: Request, ctx: Ctx) {
   const { file } = await ctx.params;
+  if (file === LOCAL_FEED_FILE) return localFeed();
   const lang = feedLangOf(file);
-  if (!lang) {
-    return Response.json({ ok: false, error: "not_found" }, { status: 404, headers: { "cache-control": "no-store" } });
-  }
+  if (!lang) return notFound();
   let input: FeedInput;
   try {
     input = await loadFeedInput();
   } catch (err) {
-    /* A 503, not a feed from the files alone — see loadFeedInput(). Merchant
-       Center keeps yesterday's items and fetches again. */
-    console.error("[feed] live catalogue unavailable:", err);
-    return Response.json(
-      { ok: false, error: "unavailable" },
-      { status: 503, headers: { "cache-control": "no-store", "retry-after": "600" } },
-    );
+    return unavailable(err);
   }
   const { xml } = buildFeed({ ...input, lang, base: feedBase(process.env.PUBLIC_BASE_URL) });
   return new Response(xml, { headers: { "content-type": XML, "cache-control": CACHE } });

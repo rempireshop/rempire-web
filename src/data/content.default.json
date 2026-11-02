@@ -32,14 +32,14 @@
   "announcement": {
     "on": true,
     "text": {
-      "RU": "Бесплатная доставка по Балтии от {EE} €, в Финляндию и остальную Европу — от {EU} €",
-      "ET": "Tasuta tarne Baltikumis alates {EE} €, Soome ja mujale Euroopasse alates {EU} €",
-      "EN": "Free delivery in the Baltics from {EE} €, to Finland and the rest of Europe from {EU} €"
+      "RU": "Бесплатная доставка по Балтии от {EE} €, в Финляндию и другие страны ЕС — от {EU} €",
+      "ET": "Tasuta tarne Baltikumis alates {EE} €, Soome ja teistesse ELi riikidesse alates {EU} €",
+      "EN": "Free delivery in the Baltics from {EE} €, to Finland and other EU countries from {EU} €"
     },
     "short": {
-      "RU": "Бесплатно: Балтия от {EE} €, Европа от {EU} €",
-      "ET": "Tasuta: Baltikum alates {EE} €, Euroopa alates {EU} €",
-      "EN": "Free delivery: Baltics from {EE} €, Europe from {EU} €"
+      "RU": "Бесплатно: Балтия от {EE} €, ЕС от {EU} €",
+      "ET": "Tasuta: Baltikum alates {EE} €, EL alates {EU} €",
+      "EN": "Free delivery: Baltics from {EE} €, EU from {EU} €"
     },
     "link": ""
   },

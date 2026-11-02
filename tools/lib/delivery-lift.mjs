@@ -28,7 +28,7 @@
 const DECL_END = /^ {2}[}\]];$/;
 const FN_END = /^ {2}}$/;
 
-/** The lifted builder: { rules, montonio, carrierNames, carriers, rows, page, liveRules }. */
+/** The lifted builder: { rules, montonio, carrierNames, carriers, rows, europe, courierCarriers, page, liveRules }. */
 export function liftDelivery(appSrc) {
   const lines = String(appSrc).replace(/\r\n?/g, "\n").split("\n");
   const sliceFrom = (startRx, endRx) => {
@@ -46,7 +46,9 @@ export function liftDelivery(appSrc) {
     SHIP_STORED_DEFAULT: sliceFrom(/^ {2}var SHIP_STORED_DEFAULT = \{$/, DECL_END),
     CARRIER_NAMES: sliceFrom(/^ {2}var CARRIER_NAMES = \{$/, DECL_END),
     CARRIERS_BY_COUNTRY: sliceFrom(/^ {2}var CARRIERS_BY_COUNTRY = \{$/, DECL_END),
+    COURIER_CARRIERS: sliceFrom(/^ {2}var COURIER_CARRIERS = \{$/, DECL_END),
     DELIVERY_ROWS: sliceFrom(/^ {2}var DELIVERY_ROWS = \[$/, DECL_END),
+    DELIVERY_EUROPE: sliceFrom(/^ {2}var DELIVERY_EUROPE = \[$/, DECL_END),
     deliveryPageHTML: sliceFrom(/^ {2}function deliveryPageHTML\(ctx\) \{$/, FN_END),
     shipRulesBase: sliceFrom(/^ {2}function shipRulesBase\(\) \{$/, FN_END),
     shipStoredMerge: sliceFrom(/^ {2}function shipStoredMerge\(base, raw\) \{$/, FN_END),
@@ -57,7 +59,7 @@ export function liftDelivery(appSrc) {
   if (missing.length) throw new Error("could not lift " + missing.join(", ") + " out of app.js");
   const D = new Function(Object.values(pieces).join("\n") + "\nreturn {" +
     " rules: SHIP_RULES, montonio: MONTONIO_PRICE, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY," +
-    " rows: DELIVERY_ROWS, page: deliveryPageHTML," +
+    " rows: DELIVERY_ROWS, europe: DELIVERY_EUROPE, courierCarriers: COURIER_CARRIERS, page: deliveryPageHTML," +
     " defaults: function () { return cloneRules(SHIP_RULES_DEFAULT); }," +
     " fromStored: function (raw) {" +
     /* adoptServer(): no row (or `{}`) leaves the shop on its own defaults … */
@@ -68,8 +70,11 @@ export function liftDelivery(appSrc) {
     "   return shipRulesFrom(shipStoredMerge(SHIP_STORED_DEFAULT, row));" +
     " } };")();
   if (typeof D.page !== "function" || !D.rules || !D.rules.methods) throw new Error("the lifted delivery page has the wrong shape");
+  if (!Array.isArray(D.europe) || !D.europe.length) throw new Error("the lifted DELIVERY_EUROPE is empty");
   return {
     rules: D.rules, montonio: D.montonio, carrierNames: D.carrierNames, carriers: D.carriers, rows: D.rows, page: D.page,
+    /** DELIVERY_EUROPE and COURIER_CARRIERS — every European country's own row (02.11.2026); pass both to page(). */
+    europe: D.europe, courierCarriers: D.courierCarriers,
     /** The table the shop bills from for settings.shipping_rules = `raw` (undefined/null = no row). */
     liveRules: raw => D.fromStored(raw),
   };

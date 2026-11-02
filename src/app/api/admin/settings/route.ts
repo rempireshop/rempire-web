@@ -24,6 +24,7 @@ import { mergeParcel } from "@/lib/shipping/parcel";
 import { cleanBankFilter } from "@/lib/payments/methods";
 import { stampUnpaidFloor } from "@/lib/flows";
 import { cleanPageTexts } from "@/lib/page-texts.mjs";
+import { cleanStoreCode, STORE_CODE_KEY } from "@/lib/store-code";
 import { requestRebuild } from "@/lib/rebuild";
 
 export const runtime = "nodejs";
@@ -211,6 +212,10 @@ export async function PUT(req: Request) {
          each slide's look — kind, focus point, text side, picture size — only
          when it is one the storefront can draw. null stays «стандартный». */
       if (key === "hero") value = cleanHeroSetting(value);
+      /* The salon's Google Business Profile store code — the switch of
+         /feed/google-local.xml (src/lib/local-inventory.ts): text up to
+         Google's 64 characters, or "" for «off». */
+      if (key === STORE_CODE_KEY) value = cleanStoreCode(value);
       /* What this PUT replaces, read just before it does: the audit row keeps
          it (`prev`, db/migrations/207_audit_prev.sql) so «Вернуть» works from
          any device. A key never written before is recorded as null. A read

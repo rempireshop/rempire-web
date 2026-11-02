@@ -1542,6 +1542,9 @@ function infoPage(slug, lang) {
       esc, eur: n => eurFor(n, code), title: heading,
       rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
       montonio: DELIVERY.montonio,
+      /* every European country the owner left on, a row each, sorted by its
+         name in this page's language (ctx.collate defaults to tr) */
+      europe: DELIVERY.europe, courierCarriers: DELIVERY.courierCarriers,
       address: c.address, hoursHTML: contactHours(code), phoneHTML, mailHTML,
       logos: PAYLOGOS, banks: null, loyalty: LOYALTY_LIVE,
       /* No `invoiceHint`: the payment term is settings.invoice.dueDays and this
@@ -2326,7 +2329,8 @@ await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsSt
   const facts = DELIVERY && SHIP_RULES_LIVE ? deliveryFromPage(DELIVERY.page({
     lang: "EN", tr: EN, esc, eur: n => eurFor(n, "EN"), title: "",
     rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
-    montonio: DELIVERY.montonio, address: IDENTITY.address, hoursHTML: "", phoneHTML: "", mailHTML: "",
+    montonio: DELIVERY.montonio, europe: DELIVERY.europe, courierCarriers: DELIVERY.courierCarriers,
+    address: IDENTITY.address, hoursHTML: "", phoneHTML: "", mailHTML: "",
     logos: {}, banks: null, loyalty: LOYALTY_LIVE, link: (s, label) => esc(label), legalHtml: ""
   }), { returnsHeading: EN("Возврат товара") }) : null;
   const delivery = facts && facts.rows.length ? facts : null;

@@ -42,7 +42,8 @@ const LIVE_ROW = { freeFrom: 70, freeFromByCountry: { FI: 200, EU: 200 }, method
 const RULES = D.liveRules(LIVE_ROW);
 const facts = deliveryFromPage(D.page({
   lang: "EN", tr: EN, esc, eur: eurEN, title: "", rules: RULES, carriers: D.carriers, carrierNames: D.carrierNames,
-  rows: D.rows, montonio: D.montonio, address: "Mardi 1, 10145 Tallinn", hoursHTML: "", phoneHTML: "", mailHTML: "",
+  rows: D.rows, montonio: D.montonio, europe: D.europe, courierCarriers: D.courierCarriers,
+  address: "Mardi 1, 10145 Tallinn", hoursHTML: "", phoneHTML: "", mailHTML: "",
   logos: {}, banks: null, loyalty: { enabled: true, earnPct: 5 }, link: (_s: string, label: string) => esc(label), legalHtml: "",
 }), { returnsHeading: EN("Возврат товара") });
 
@@ -88,6 +89,11 @@ describe("llms.txt", () => {
     expect(TXT).toMatch(/\| Estonia \| DPD · Omniva · Unisend · SmartPosti \| from €2\.49 \| from €6\.89 \| €70 \| 1–3 working days \|/);
     expect(TXT).toMatch(/\| Latvia \| [^|]+ \| from €3\.79 \| from €8\.09 \| €70 \|/);
     expect(TXT).toMatch(/\| Finland \| [^|]+ \| [^|]+ \| [^|]+ \| €200 \|/);
+    // every European country the checkout offers has its own line (02.11.2026), timed like the page's fold
+    expect(TXT).toMatch(/\| Poland \| Nova Post · DPD · SmartPosti \| from €5\.49 \| from €7\.09 \| €200 \| 3–8 working days \|/);
+    expect(TXT).toMatch(/\| Greece \| DPD · SmartPosti \| — \| [^|]+ \| €200 \| 3–8 working days \|/);
+    expect(TXT).not.toContain("Other European countries");
+    expect(TXT).not.toMatch(/\| Norway \|/);
     expect(TXT).toContain("Pickup at the salon");
     expect(TXT).not.toMatch(/[А-Яа-яЁё]{3}.*\| €/);
   });
