@@ -2083,16 +2083,47 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   .adm-edbar .adm-acts .adm-btn { max-width: 100%; height: auto; min-height: 44px; padding: 8px 14px; line-height: 18px; white-space: normal; }
 }
 .adm-edlang { display: flex; flex-direction: column; gap: 16px; }
-/* «Описание»'s format bar — «Ж», «Заголовок», «• Список», «Как в магазине»
-   (Dim, 02.11.2026; canvas-banner/project/Desc.dc.html): thumb-sized on every
-   screen, the preview toggle at the far end, ink while it is on — and under
-   the box the text as the product page draws it (.acc__rich in styles.css) */
+/* «Описание»'s format bar — «Ж», «Заголовок», «• Список» (Dim, 02.11.2026;
+   canvas-banner/project/Desc.dc.html): thumb-sized on every screen */
 .adm-fmtbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
 .adm-fmtbar .adm-btn { height: auto; min-height: 44px; min-width: 44px; padding: 0 14px; font-size: 15px; }
 .adm-fmtbar__bold { font-weight: 700; }
-.adm-fmtbar__prev { margin-left: auto; }
-.adm-fmtbar__prev[aria-pressed="true"] { background: var(--a-ink); color: var(--a-onink); }
-.adm-descprev { margin-top: 12px; padding: 14px; border: 1px solid var(--a-edge); background: var(--a-field); color: var(--a-ink); font-size: 15px; line-height: 1.6; }
+/* the box and «Так увидит покупатель» — the text as the product page draws
+   it (.acc__rich in styles.css), live: under the box on a phone, beside it
+   once the page has room for two columns; the box grows with the preview */
+.adm-descgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: stretch; }
+.adm-descgrid__box { display: flex; flex-direction: column; min-width: 0; }
+.adm-descgrid__box .adm-area { flex: 1 1 auto; }
+@container admpage (min-width: 700px) { .adm-descgrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; } }
+.adm-descprev { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--a-edge); background: var(--a-field); color: var(--a-ink); }
+.adm-descprev__h { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 12px; border-bottom: 1px solid var(--a-rule); }
+.adm-descprev__k { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--a-muted); }
+.adm-descprev__open { height: auto; min-height: 44px; }
+@media (max-width: 899px) { .adm-descprev__open { padding: 0 10px; } }
+.adm-descprev__v { padding: 14px; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+/* «Разбить на разделы»: the proposal (what is there now beside it on a
+   desktop; on a phone the preview under the box is the «now»), then the
+   one line with «Вернуть как было» once it is applied */
+.adm-descshop-slot:empty { display: none; }
+.adm-descsplit { border: 1px solid var(--a-ink); padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--a-paper); }
+.adm-descsplit__t { margin: 0; font-size: 15px; line-height: 21px; font-weight: 600; }
+.adm-descsplit__cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@container admpage (min-width: 700px) { .adm-descsplit__cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.adm-descsplit__col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+@media (max-width: 899px) { .adm-descsplit__col--was { display: none; } }
+.adm-descsplit__v { padding: 12px 14px; border: 1px solid var(--a-edge); background: var(--a-field); font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+.adm-descsplit .adm-hint { margin: 0; }
+.adm-descsplit .adm-btn, .adm-descdone .adm-btn { height: auto; min-height: 44px; }
+.adm-descsplit .adm-link { min-height: 44px; padding: 0 8px; }
+.adm-descdone { border-color: var(--a-green); border-left-width: 4px; color: var(--a-ink); }
+/* «Как в магазине»: the text over the whole window, in the shop's own fold */
+.adm-descshop { position: fixed; inset: 0; z-index: 80; overflow-y: auto; overscroll-behavior: contain; background: var(--a-paper); color: var(--a-ink); }
+.adm-descshop__bar {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: var(--a-panel); border-bottom: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-descshop__bar .adm-btn { height: auto; min-height: 44px; }
+.adm-descshop__page { padding-top: 16px; padding-bottom: 48px; }
 .adm-seg { display: flex; border: 1px solid var(--a-ink); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
 .adm-seg__b[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }

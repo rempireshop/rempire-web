@@ -2780,6 +2780,44 @@
       "Язык описания": "Kirjelduse keel",
       "Написать черновик": "Kirjuta mustand",
       "Перевести с русского": "Tõlgi vene keelest",
+      /* «Описание»: the format bar, «Так увидит покупатель», «Как в магазине»
+         and «Разбить на разделы»'s proposal (Dim, 02.11.2026: «although my
+         admin is in english — texts are in russian») */
+      "Разбить на разделы": "Jaota osadeks",
+      "Разложит текст открытого языка по разделам с заголовками и пунктами списка, не меняя слов. Сначала покажет, что получится.": "Jaotab avatud keele teksti pealkirjade ja loendipunktidega osadeks, sõnu muutmata. Enne näitab, mis tuleb.",
+      "Оформление описания": "Kirjelduse vormindus",
+      "Ж": "B",
+      "Жирный: **текст**": "Paks: **tekst**",
+      "Заголовок раздела": "Vahepealkiri",
+      "Заголовок раздела: короткая строка с «:» в конце": "Vahepealkiri: lühike rida, mille lõpus on «:»",
+      "Пункт списка: «— » в начале строки": "Loendi punkt: «— » rea alguses",
+      "Так увидит покупатель": "Nii näeb seda ostja",
+      "Как в магазине": "Poe vaade",
+      "Описание на весь экран — так, как его покажет страница товара": "Kirjeldus täisekraanil — nii, nagu tooteleht seda näitab",
+      "Так описание выглядит на странице товара": "Nii näeb kirjeldus tootelehel välja",
+      "Пусто — на странице товара будет стандартный текст магазина.": "Tühi — tootelehel on poe tavaline tekst.",
+      "Предложение для русского текста: те же слова, но с заголовками и пунктами списка.": "Ettepanek vene teksti jaoks: samad sõnad, aga pealkirjade ja loendipunktidega.",
+      "Предложение для эстонского текста: те же слова, но с заголовками и пунктами списка.": "Ettepanek eesti teksti jaoks: samad sõnad, aga pealkirjade ja loendipunktidega.",
+      "Предложение для английского текста: те же слова, но с заголовками и пунктами списка.": "Ettepanek inglise teksti jaoks: samad sõnad, aga pealkirjade ja loendipunktidega.",
+      "Русский текст разбит на разделы — прочитайте и поправьте.": "Vene tekst on osadeks jaotatud — lugege üle ja parandage.",
+      "Эстонский текст разбит на разделы — прочитайте и поправьте.": "Eesti tekst on osadeks jaotatud — lugege üle ja parandage.",
+      "Английский текст разбит на разделы — прочитайте и поправьте.": "Inglise tekst on osadeks jaotatud — lugege üle ja parandage.",
+      "Сейчас в поле": "Praegu kastis",
+      "После разбивки": "Pärast jaotamist",
+      "Пока вы не нажмёте «Применить», текст в поле не меняется.": "Kuni te ei vajuta «Rakenda», kastis olev tekst ei muutu.",
+      "Вернуть как было": "Võta tagasi",
+      "Текст поменялся после разбивки — нажмите «Разбить на разделы» ещё раз": "Tekst on pärast ettepanekut muutunud — vajutage uuesti «Jaota osadeks»",
+      "Сначала напишите описание на этом языке — разбивать пока нечего": "Kirjutage esmalt selles keeles kirjeldus — praegu pole midagi jaotada",
+      "Текст поменялся, пока ИИ работал — нажмите ещё раз": "Tekst muutus, kui tehisintellekt töötas — vajutage uuesti",
+      "Текст уже разбит на разделы — менять нечего": "Tekst on juba osadeks jaotatud — pole midagi muuta",
+      "ИИ поменял слова текста — разбивку не взяли. Нажмите ещё раз или расставьте разделы кнопками над полем": "Tehisintellekt muutis teksti sõnu, seega jaotust ei kasutatud. Vajutage uuesti või märkige osad kasti kohal olevate nuppudega",
+      "Перевод потерял заголовки или пункты списка — нажмите «Перевести» ещё раз": "Tõlkes kadusid pealkirjad või loendipunktid — vajutage uuesti «Tõlgi»",
+      "Поставьте курсор в строку, которая станет заголовком.": "Pange kursor reale, millest saab pealkiri.",
+      "Заголовок — короткая строка, до 8 слов. Выделите слова для него и нажмите ещё раз.": "Pealkiri on lühike rida, kuni 8 sõna. Valige selle sõnad ja vajutage uuesti.",
+      "Описание длиннее 4000 знаков — сократите текст": "Kirjeldus on pikem kui 4000 märki — lühendage teksti",
+      "Короткая строка с двоеточием в конце — заголовок раздела, строка с «— » — пункт списка, **так** — жирное слово. Кнопки над полем ставят это сами.": "Lühike rida, mille lõpus on koolon, on vahepealkiri, «— »-ga algav rida on loendi punkt, **nii** on paks sõna. Kasti kohal olevad nupud lisavad need ise.",
+      "Окно «Так увидит покупатель» показывает текст так, как его нарисует страница товара, — сразу, пока вы пишете. «Как в магазине» открывает его на весь экран.": "«Nii näeb seda ostja» näitab teksti nii, nagu tooteleht selle joonistab, kohe kirjutamise ajal. «Poe vaade» avab selle täisekraanil.",
+      "«Разбить на разделы» раскладывает текст открытого языка по разделам с заголовками и пунктами списка, слов не меняет. Сначала покажет, что получится, — «Применить» или «Отмена», а после применения можно «Вернуть как было».": "«Jaota osadeks» jaotab avatud keele teksti pealkirjade ja loendipunktidega osadeks ega muuda sõnu. Enne näitab tulemust — «Rakenda» või «Tühista» — ja pärast rakendamist saab veel «Võta tagasi».",
       "Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).": "Vene keel on põhikeel. Eesti ja inglise keele saab ühe nupuga tõlkida ja üle vaadata. Tühi — tootelehel näidatakse poe enda teksti (see on välja vihjes näha).",
       "Заголовок для Google": "Pealkiri Google'i jaoks",
       "Описание для Google": "Kirjeldus Google'i jaoks",
@@ -6443,6 +6481,43 @@
       "Язык описания": "Description language",
       "Написать черновик": "Write a draft",
       "Перевести с русского": "Translate from Russian",
+      /* «Описание»: the format bar, «Так увидит покупатель», «Как в магазине»
+         and «Разбить на разделы»'s proposal (Dim, 02.11.2026) */
+      "Разбить на разделы": "Split into sections",
+      "Разложит текст открытого языка по разделам с заголовками и пунктами списка, не меняя слов. Сначала покажет, что получится.": "Lays the open language's text out in sections with headings and bullet points, without changing the words. Shows you the result first.",
+      "Оформление описания": "Description formatting",
+      "Ж": "B",
+      "Жирный: **текст**": "Bold: **text**",
+      "Заголовок раздела": "Heading",
+      "Заголовок раздела: короткая строка с «:» в конце": "Heading: a short line ending in “:”",
+      "Пункт списка: «— » в начале строки": "List point: “— ” at the start of a line",
+      "Так увидит покупатель": "What the customer sees",
+      "Как в магазине": "Shop view",
+      "Описание на весь экран — так, как его покажет страница товара": "The description full screen, the way the product page shows it",
+      "Так описание выглядит на странице товара": "This is how the product page shows the description",
+      "Пусто — на странице товара будет стандартный текст магазина.": "Empty — the product page will show the shop's standard text.",
+      "Предложение для русского текста: те же слова, но с заголовками и пунктами списка.": "Proposal for the Russian text: the same words, with headings and bullet points.",
+      "Предложение для эстонского текста: те же слова, но с заголовками и пунктами списка.": "Proposal for the Estonian text: the same words, with headings and bullet points.",
+      "Предложение для английского текста: те же слова, но с заголовками и пунктами списка.": "Proposal for the English text: the same words, with headings and bullet points.",
+      "Русский текст разбит на разделы — прочитайте и поправьте.": "The Russian text is split into sections — read it through and adjust it.",
+      "Эстонский текст разбит на разделы — прочитайте и поправьте.": "The Estonian text is split into sections — read it through and adjust it.",
+      "Английский текст разбит на разделы — прочитайте и поправьте.": "The English text is split into sections — read it through and adjust it.",
+      "Сейчас в поле": "In the box now",
+      "После разбивки": "After the split",
+      "Пока вы не нажмёте «Применить», текст в поле не меняется.": "The text in the box stays as it is until you press “Apply”.",
+      "Вернуть как было": "Undo",
+      "Текст поменялся после разбивки — нажмите «Разбить на разделы» ещё раз": "The text has changed since the proposal — press “Split into sections” again",
+      "Сначала напишите описание на этом языке — разбивать пока нечего": "Write the description in this language first — there is nothing to split yet",
+      "Текст поменялся, пока ИИ работал — нажмите ещё раз": "The text changed while the AI was working — press again",
+      "Текст уже разбит на разделы — менять нечего": "The text is already split into sections — nothing to change",
+      "ИИ поменял слова текста — разбивку не взяли. Нажмите ещё раз или расставьте разделы кнопками над полем": "The AI changed the wording, so the split was not used. Press again, or set the sections with the buttons above the box",
+      "Перевод потерял заголовки или пункты списка — нажмите «Перевести» ещё раз": "The translation lost headings or list points — press “Translate” again",
+      "Поставьте курсор в строку, которая станет заголовком.": "Put the cursor in the line that should become the heading.",
+      "Заголовок — короткая строка, до 8 слов. Выделите слова для него и нажмите ещё раз.": "A heading is a short line of up to 8 words. Select the words for it and press again.",
+      "Описание длиннее 4000 знаков — сократите текст": "The description is longer than 4000 characters — shorten it",
+      "Короткая строка с двоеточием в конце — заголовок раздела, строка с «— » — пункт списка, **так** — жирное слово. Кнопки над полем ставят это сами.": "A short line ending in a colon is a section heading, a line starting with “— ” is a list point, **like this** is a bold word. The buttons above the box write these for you.",
+      "Окно «Так увидит покупатель» показывает текст так, как его нарисует страница товара, — сразу, пока вы пишете. «Как в магазине» открывает его на весь экран.": "“What the customer sees” shows the text the way the product page will draw it, as you type. “Shop view” opens it full screen.",
+      "«Разбить на разделы» раскладывает текст открытого языка по разделам с заголовками и пунктами списка, слов не меняет. Сначала покажет, что получится, — «Применить» или «Отмена», а после применения можно «Вернуть как было».": "“Split into sections” lays the open language's text out in sections with headings and bullet points and keeps the words. It shows the result first — “Apply” or “Cancel” — and after applying you can still “Undo”.",
       "Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).": "Russian is the source. Estonian and English can be translated with one button and edited. Empty — the product page shows the shop's own text (visible in the field's hint).",
       "Заголовок для Google": "Title for Google",
       "Описание для Google": "Description for Google",
@@ -41113,7 +41188,33 @@
         translateTree(slot);
       });
     });
-    edDescPrevPaint();   // «Как в магазине» follows the box the same way
+    edDescPrevPaint();   // «Так увидит покупатель» follows the box the same way
+    edDescSplitCheck();  // …and «Вернуть как было» goes once the box is changed again
+  }
+  /** One language on screen in «Описание» (`seo` false) or «Google» — the
+      tab pressed, or «Применить» of a proposal made on another tab. */
+  function edLangShow(seo, pickL) {
+    if (seo) S.goodsSeoLang = pickL; else S.goodsDescLang = pickL;
+    var boxes = seo
+      ? { ru: '[data-edseopair="ru"]', et: '[data-edseopair="et"]', en: '[data-edseopair="en"]' }
+      : { ru: "[data-eddescru]", et: "[data-eddescet]", en: "[data-eddescen]" };
+    for (var lk in boxes) {
+      if (!Object.prototype.hasOwnProperty.call(boxes, lk)) continue;
+      var bel = document.querySelector(boxes[lk]);
+      if (bel) bel.hidden = lk !== pickL;
+    }
+    var segAttr = seo ? "data-edseolang" : "data-eddesclang";
+    var segs = document.querySelectorAll("[" + segAttr + "]");
+    for (var si2 = 0; si2 < segs.length; si2++) {
+      segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute(segAttr) === pickL));
+    }
+    /* «Перевести на ET и EN» from the Russian tab, «Перевести с русского»
+       (that one language) from the other two — the word follows the tab */
+    if (!seo) {
+      var trB = document.querySelector("[data-edtrlabel]");
+      if (trB && !trB.disabled) { trB.textContent = edTrLabel(pickL); translateTree(trB); }
+    }
+    edLangStatePaint();   // …and what the two languages you left behind hold
   }
   function admSeoFill(p, langs, btn) {
     if (btn.disabled) return;
@@ -42899,6 +43000,19 @@
      screen (the route takes `lang`); «Перевести с русского» is ET + EN from the
      Russian tab and that one language from its own. */
   function edTrLabel(lang) { return lang === "ru" ? "Перевести на ET и EN" : "Перевести с русского"; }
+  /** The tab «Описание» opens on: the panel's own language when it is
+      Estonian or English and that text is there (Dim, 02.11.2026: «my admin
+      is in english — texts are in russian»); Russian otherwise, as before. */
+  function edDescLangStart(id) {
+    var L = String((typeof S !== "undefined" && S.lang) || "RU").toUpperCase();
+    var p = L === "ET" || L === "EN" ? admEditProduct(id) : null;
+    var dov = (p && p.descOv) || {};
+    return (L === "ET" || L === "EN") && String(dov[L] || "").trim() ? L.toLowerCase() : "ru";
+  }
+  /* What «Разбить на разделы» does, on the button itself (its tooltip) — the
+     owner could not tell (Dim, 02.11.2026), so it says it before it is pressed
+     and shows the result before anything changes (edDescSplitHTML). */
+  var ED_SPLIT_TIP = "Разложит текст открытого языка по разделам с заголовками и пунктами списка, не меняя слов. Сначала покажет, что получится.";
   function edDescBody(p, id) {
     var dov = p.descOv || {};
     var lang = S.goodsDescLang || "ru";
@@ -42921,13 +43035,29 @@
         '<div class="adm-acts">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescgen="' + esc(id) + '">Написать черновик</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admtranslate="' + esc(id) + '" data-edtrlabel>' + edTrLabel(lang) + "</button>" +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescsplit="' + esc(id) + '">Разбить на разделы</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admdescsplit="' + esc(id) + '" title="' + ED_SPLIT_TIP + '">Разбить на разделы</button>' +
         "</div>" +
       "</div>" +
-      edFmtBarHTML() +
-      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
-      '<div class="acc__rich adm-descprev" data-eddescprev' + (S.goodsDescPrev ? "" : " hidden") + ">" +
-        (S.goodsDescPrev ? edDescPrevHTML(dov[lang.toUpperCase()] || "") : "") + "</div>";
+      /* «Разбить на разделы»'s proposal, then its «Вернуть как было» — drawn
+         from S, so a render() keeps it. The live region is always in the
+         page (an empty block, no height) and shares a wrapper with the bar,
+         so it adds no gap of the section's while there is nothing in it. */
+      '<div class="adm-descctl"><div data-eddescsplit="' + esc(id) + '" aria-live="polite">' + edDescSplitHTML(id) + "</div>" +
+      edFmtBarHTML() + "</div>" +
+      /* the box and, beside it on a desktop and under it on a phone, the text
+         as the product page draws it — always there, following every keystroke */
+      '<div class="adm-descgrid">' +
+        '<div class="adm-descgrid__box">' +
+          box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
+        "</div>" +
+        '<div class="adm-descprev">' +
+          '<div class="adm-descprev__h"><span class="adm-descprev__k">Так увидит покупатель</span>' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row adm-descprev__open" type="button" data-edfmt="preview" aria-haspopup="dialog" ' +
+              'title="Описание на весь экран — так, как его покажет страница товара">Как в магазине</button></div>' +
+          '<div class="acc__rich adm-descprev__v" data-eddescprev>' + edDescPrevHTML(dov[lang.toUpperCase()] || "") + "</div>" +
+        "</div>" +
+      "</div>" +
+      '<div class="adm-descshop-slot" data-eddescshop="' + esc(id) + '">' + (S.goodsDescShop === id ? edDescShopHTML(dov[lang.toUpperCase()] || "", lang) : "") + "</div>";
   }
 
   /* ---- «Описание»: the format bar (Dim, 02.11.2026) -------------------------
@@ -42942,8 +43072,12 @@
                         («Применение: нанесите…») is cut at its colon
        «• Список»       «— » in front of every line the selection touches —
                         or off them all, when they all have it
-       «Как в магазине» the text under the box as the product page draws it,
-                        with the page's own renderer (descHtml), live
+     Each one's tooltip names the mark it writes. Beside the box (under it on
+     a phone) «Так увидит покупатель» draws the text with the page's own
+     renderer (descHtml) on every keystroke, so what turns bold, what becomes
+     a heading and what a list is never a guess (Dim, 02.11.2026: «I do not see
+     what becomes bold and what doesn't»); its «Как в магазине» opens the same
+     text over the whole window in the product page's own «Описание» fold.
      The box is a <textarea>, so the caret and the selection are its own
      selectionStart/End — they survive the tap (mousedown on the bar is
      stopped, the focus never leaves the box), and each button puts them back
@@ -42952,18 +43086,21 @@
      `input` a keystroke does: the autosave, «есть текст» and the preview
      follow on their own. Pure functions of (text, selection) → {v, a, b}, so
      tests/desc-format.test.ts runs them without a page. */
+  /* Each button's tooltip names the mark it writes. «Заголовок» is looked up
+     as «Заголовок раздела» (data-trkey): the panel's «Заголовок» is a
+     banner's «Title», and this one is a section's «Heading». Whole tags, so
+     tools/i18n-gaps.mjs reads every attribute for what it is. */
   function edFmtBarHTML() {
-    var on = !!S.goodsDescPrev;
-    var b = function (kind, label, extra) {
-      return '<button class="adm-btn adm-btn--ghost' + (extra || "") + '" type="button" data-edfmt="' + kind + '"' +
-        (kind === "preview" ? ' aria-pressed="' + on + '"' : "") + (kind === "bold" ? ' aria-label="Жирный"' : "") + ">" + label + "</button>";
-    };
     return '<div class="adm-fmtbar" role="toolbar" aria-label="Оформление описания">' +
-      b("bold", "Ж", " adm-fmtbar__bold") + b("head", "Заголовок") + b("list", "• Список") +
-      b("preview", "Как в магазине", " adm-fmtbar__prev") + "</div>";
+      '<button class="adm-btn adm-btn--ghost adm-fmtbar__bold" type="button" data-edfmt="bold" aria-label="Жирный" title="Жирный: **текст**">Ж</button>' +
+      '<button class="adm-btn adm-btn--ghost" type="button" data-edfmt="head" data-trkey="Заголовок раздела" title="Заголовок раздела: короткая строка с «:» в конце">Заголовок</button>' +
+      '<button class="adm-btn adm-btn--ghost" type="button" data-edfmt="list" title="Пункт списка: «— » в начале строки">• Список</button>' +
+      "</div>";
   }
+  /** The owner's text as the page draws it — his words, so [data-notr]
+      keeps the panel's dictionary off them on an ET/EN panel. */
   function edDescPrevHTML(text) {
-    return String(text || "").trim() ? descHtml(text)
+    return String(text || "").trim() ? "<div data-notr>" + descHtml(text) + "</div>"
       : '<p class="adm-hint">Пусто — на странице товара будет стандартный текст магазина.</p>';
   }
   /** The box of the language on screen. */
@@ -42971,12 +43108,135 @@
     var L = String(S.goodsDescLang || "ru").toUpperCase();
     return typeof document === "undefined" ? null : document.querySelector(DESC_HOOKS[L] || DESC_HOOKS.RU);
   }
-  /** «Как в магазине», redrawn from the box on screen — edLangStatePaint() calls it on every keystroke. */
+  /** «Так увидит покупатель» (and «Как в магазине» while it is open), redrawn
+      from the box on screen — edLangStatePaint() calls it on every keystroke. */
   function edDescPrevPaint() {
-    var pv = typeof document === "undefined" ? null : document.querySelector("[data-eddescprev]");
-    if (!pv || pv.hidden) return;
+    if (typeof document === "undefined") return;
+    var el = edDescBox(), v = el ? el.value : "";
+    var pv = document.querySelector("[data-eddescprev]");
+    if (pv) { pv.innerHTML = edDescPrevHTML(v); translateTree(pv); }
+    var sh = document.querySelector("[data-eddescshopv]");
+    if (sh) { sh.innerHTML = edDescPrevHTML(v); translateTree(sh); }
+  }
+
+  /* ---- «Как в магазине»: the text over the whole window ---------------------
+     The tab on screen in the product page's own «Описание» fold, open, at the
+     shop's column width and type (styles.css .acc, .acc__rich) — the panel is
+     the same document as the shop. The fold's title is the TEXT's language,
+     as a shopper of that language reads it; the rest is the panel's. */
+  var ED_DESC_FOLD = { ru: "Описание", et: "Kirjeldus", en: "Description" };
+  function edDescShopHTML(text, lang) {
+    return '<div class="adm-descshop" role="dialog" aria-modal="true" aria-label="Как в магазине">' +
+      '<div class="adm-descshop__bar"><span>Так описание выглядит на странице товара</span>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edfmt="shopclose">Закрыть</button></div>' +
+      '<div class="wrap wrap--narrow adm-descshop__page"><details class="acc" open><summary data-notr>' + (ED_DESC_FOLD[lang] || ED_DESC_FOLD.ru) + "</summary>" +
+        '<div class="acc__body"><div class="acc__rich" data-eddescshopv>' + edDescPrevHTML(text) + "</div></div></details></div></div>";
+  }
+  function edDescShopOpen(open) {
+    var slot = document.querySelector("[data-eddescshop]");
+    if (!slot) return;
+    S.goodsDescShop = open ? slot.getAttribute("data-eddescshop") : "";
     var el = edDescBox();
-    pv.innerHTML = edDescPrevHTML(el ? el.value : "");
+    slot.innerHTML = open ? edDescShopHTML(el ? el.value : "", String(S.goodsDescLang || "ru")) : "";
+    translateTree(slot);
+    var to = document.querySelector(open ? '[data-edfmt="shopclose"]' : '[data-edfmt="preview"]');
+    if (to) { try { to.focus({ preventScroll: true }); } catch (e) { to.focus(); } }
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && S.goodsDescShop && document.querySelector(".adm-descshop")) {
+        e.preventDefault(); e.stopPropagation();
+        edDescShopOpen(false);
+      }
+    }, true);
+  }
+
+  /* ---- «Разбить на разделы»: shown first, applied only when asked ------------
+     The AI's answer is not put into the box (Dim, 02.11.2026: «I do not see
+     what «Разбить на разделы» really does»): it comes back as a proposal for
+     ONE language — named — drawn as the page will draw it, beside what is
+     there now on a desktop, with «Применить» and «Отмена». «Применить» puts
+     it into that language's box and saves it like typing; «Вернуть как было»
+     then stands until the box is changed again. S.goodsDescSplit:
+       { id, L, from, to }                  a proposal (from = the text it was made of)
+       { id, L, prev, now, done: true }     applied — prev is what «Вернуть» puts back */
+  var ED_SPLIT_WHO = {
+    RU: ["Предложение для русского текста: те же слова, но с заголовками и пунктами списка.", "Русский текст разбит на разделы — прочитайте и поправьте."],
+    ET: ["Предложение для эстонского текста: те же слова, но с заголовками и пунктами списка.", "Эстонский текст разбит на разделы — прочитайте и поправьте."],
+    EN: ["Предложение для английского текста: те же слова, но с заголовками и пунктами списка.", "Английский текст разбит на разделы — прочитайте и поправьте."]
+  };
+  function edDescSplitHTML(id) {
+    var sp = S.goodsDescSplit;
+    if (!sp || sp.id !== id) return "";
+    var who = ED_SPLIT_WHO[sp.L] || ED_SPLIT_WHO.RU;
+    if (sp.done) {
+      return '<div class="adm-note adm-descdone"><span>' + who[1] + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edfmt="splitundo">Вернуть как было</button></div>';
+    }
+    return '<div class="adm-descsplit" data-eddescsplitcard>' +
+      '<p class="adm-descsplit__t">' + who[0] + "</p>" +
+      '<div class="adm-descsplit__cols">' +
+        '<div class="adm-descsplit__col adm-descsplit__col--was"><p class="adm-descprev__k">Сейчас в поле</p>' +
+          '<div class="acc__rich adm-descsplit__v">' + edDescPrevHTML(sp.from) + "</div></div>" +
+        '<div class="adm-descsplit__col"><p class="adm-descprev__k">После разбивки</p>' +
+          '<div class="acc__rich adm-descsplit__v" data-eddescsplitto>' + edDescPrevHTML(sp.to) + "</div></div>" +
+      "</div>" +
+      '<p class="adm-hint">Пока вы не нажмёте «Применить», текст в поле не меняется.</p>' +
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edfmt="splitok">Применить</button>' +
+        '<button class="adm-link adm-link--muted" type="button" data-edfmt="splitno">Отмена</button>' +
+      "</div></div>";
+  }
+  function edDescSplitPaint() {
+    var slot = typeof document === "undefined" ? null : document.querySelector("[data-eddescsplit]");
+    if (!slot) return;
+    slot.innerHTML = edDescSplitHTML(slot.getAttribute("data-eddescsplit"));
+    translateTree(slot);
+  }
+  /** «Применить»: the proposal into its own language's box — refused when
+      that box no longer holds the words it was made of. */
+  function edDescSplitApply() {
+    var sp = S.goodsDescSplit;
+    if (!sp || sp.done) return;
+    var el = document.querySelector(DESC_HOOKS[sp.L] || DESC_HOOKS.RU);
+    if (!el) return;
+    if (el.value.trim() !== sp.from) {
+      S.goodsDescSplit = null; edDescSplitPaint();
+      toast("Текст поменялся после разбивки — нажмите «Разбить на разделы» ещё раз");
+      return;
+    }
+    if (String(S.goodsDescLang || "ru").toUpperCase() !== sp.L) edLangShow(false, sp.L.toLowerCase());
+    var prev = el.value;
+    admFill(el, sp.to);
+    S.goodsDescSplit = { id: sp.id, L: sp.L, prev: prev, now: el.value, done: true };
+    edLangStatePaint();
+    edDescSplitPaint();
+    if (S.adminEdit === "new") goodsNewPaint(); else edAsTextNow("desc", "");
+  }
+  /** «Вернуть как было»: the text before «Применить», saved the same way. */
+  function edDescSplitUndo() {
+    var sp = S.goodsDescSplit;
+    if (!sp || !sp.done) return;
+    S.goodsDescSplit = null;
+    var el = document.querySelector(DESC_HOOKS[sp.L] || DESC_HOOKS.RU);
+    if (el) {
+      if (String(S.goodsDescLang || "ru").toUpperCase() !== sp.L) edLangShow(false, sp.L.toLowerCase());
+      admFill(el, sp.prev);
+      edLangStatePaint();
+    }
+    edDescSplitPaint();
+    if (!el) return;
+    if (S.adminEdit === "new") { goodsNewPaint(); toast("Вернули как было"); }
+    else edAsTextNow("desc", "Вернули как было");
+  }
+  /** Typed into after «Применить»: «Вернуть как было» would throw the new
+      words away, so it goes (edLangStatePaint() asks on every keystroke). */
+  function edDescSplitCheck() {
+    var sp = S.goodsDescSplit;
+    if (!sp || !sp.done || typeof document === "undefined") return;
+    var el = document.querySelector(DESC_HOOKS[sp.L] || DESC_HOOKS.RU);
+    if (!el || el.value.trim() === String(sp.now).trim()) return;
+    S.goodsDescSplit = null; edDescSplitPaint();
   }
   function edFmtBold(v, a, b) {
     if (a === b) {
@@ -43031,7 +43291,8 @@
     head = head.replace(DESC_BULLET, "").replace(/\*\*/g, "").trim().replace(/[\s.:;,!?…]+$/, "");
     if (!head) return { err: "Поставьте курсор в строку, которая станет заголовком." };
     if (head.length >= DESC_HEAD_MAX || descWords(head) > DESC_HEAD_WORDS || /[.!?…]\s/.test(head)) {
-      return { err: "Заголовок — короткая строка, до " + DESC_HEAD_WORDS + " слов. Выделите слова для него и нажмите ещё раз." };
+      // one whole sentence, so the panel's dictionary knows it (the 8 is DESC_HEAD_WORDS — tests/desc-editor-polish holds them equal)
+      return { err: "Заголовок — короткая строка, до 8 слов. Выделите слова для него и нажмите ещё раз." };
     }
     // an empty line above the heading, unless it opens the text or there is one
     var gap = before ? before + "\n\n" : pre && !/\n[ \t]*\n$/.test(pre) ? "\n" : "";
@@ -43056,16 +43317,16 @@
     var nv = v.slice(0, ls) + out + v.slice(le);
     return a === b ? { v: nv, a: ls + out.length, b: ls + out.length } : { v: nv, a: ls, b: ls + out.length };
   }
-  /** A format button pressed: the change into the box on screen, the selection around it. */
+  /** A format button pressed: the change into the box on screen, the selection
+      around it. The block's other buttons come through the same hook (the
+      click list has [data-edfmt] already): «Как в магазине» and its
+      «Закрыть», and «Разбить на разделы»'s «Применить» / «Отмена» /
+      «Вернуть как было». */
   function edFmt(kind, btn) {
-    if (kind === "preview") {
-      S.goodsDescPrev = !S.goodsDescPrev;
-      if (btn) btn.setAttribute("aria-pressed", String(!!S.goodsDescPrev));
-      var pv = document.querySelector("[data-eddescprev]");
-      if (pv) pv.hidden = !S.goodsDescPrev;
-      edDescPrevPaint();
-      return;
-    }
+    if (kind === "preview" || kind === "shopclose") { edDescShopOpen(kind === "preview"); return; }
+    if (kind === "splitok") { edDescSplitApply(); return; }
+    if (kind === "splitno") { S.goodsDescSplit = null; edDescSplitPaint(); return; }
+    if (kind === "splitundo") { edDescSplitUndo(); return; }
     var el = edDescBox();
     if (!el) return;
     var v = el.value, a = el.selectionStart, b = el.selectionEnd;
@@ -43093,6 +43354,8 @@
         "<span>У каждого языка свой текст. Пусто — на странице товара показывается стандартный текст магазина (он виден в поле серым).</span> " +
         "<span>Русский — основной, остальные переводятся одной кнопкой.</span> " +
         "<span>Короткая строка с двоеточием в конце — заголовок раздела, строка с «— » — пункт списка, **так** — жирное слово. Кнопки над полем ставят это сами.</span> " +
+        "<span>Окно «Так увидит покупатель» показывает текст так, как его нарисует страница товара, — сразу, пока вы пишете. «Как в магазине» открывает его на весь экран.</span> " +
+        "<span>«Разбить на разделы» раскладывает текст открытого языка по разделам с заголовками и пунктами списка, слов не меняет. Сначала покажет, что получится, — «Применить» или «Отмена», а после применения можно «Вернуть как было».</span> " +
         "<span>" + LANG_BAR_NOTE + "</span>") +
       edDescBody(p, p.id) + "</section>";
   }
@@ -55535,8 +55798,10 @@
       S.goodsSizes = null; S.goodsNew = null;   // product creation: the size rows start from what is saved
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       // a fresh product opens at its top, in the language and the video kind
-      // the design starts from — not on whatever the last one was left on
-      S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      // the design starts from — not on whatever the last one was left on;
+      // «Описание» on the panel's own language when that text is there
+      S.goodsDescLang = edDescLangStart(d.admgoods); S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      S.goodsDescSplit = null; S.goodsDescShop = "";
       loadWaiting(false);   // q41: «N человек ждут» — a count older than WAIT_MS is asked again
       window.scrollTo({ top: 0 }); render(); return;
     }
@@ -55567,28 +55832,7 @@
     if (d.edtab !== undefined) { edScrollTo(d.edtab); return; }
     // the same control on «Описание» and on «Google»: one language on screen
     if (d.eddesclang !== undefined || d.edseolang !== undefined) {
-      var seoSeg = d.edseolang !== undefined, pickL = seoSeg ? d.edseolang : d.eddesclang;
-      if (seoSeg) S.goodsSeoLang = pickL; else S.goodsDescLang = pickL;
-      var boxes = seoSeg
-        ? { ru: '[data-edseopair="ru"]', et: '[data-edseopair="et"]', en: '[data-edseopair="en"]' }
-        : { ru: "[data-eddescru]", et: "[data-eddescet]", en: "[data-eddescen]" };
-      for (var lk in boxes) {
-        if (!Object.prototype.hasOwnProperty.call(boxes, lk)) continue;
-        var bel = document.querySelector(boxes[lk]);
-        if (bel) bel.hidden = lk !== pickL;
-      }
-      var segAttr = seoSeg ? "data-edseolang" : "data-eddesclang";
-      var segs = document.querySelectorAll("[" + segAttr + "]");
-      for (var si2 = 0; si2 < segs.length; si2++) {
-        segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute(segAttr) === pickL));
-      }
-      /* «Перевести на ET и EN» from the Russian tab, «Перевести с русского»
-         (that one language) from the other two — the word follows the tab */
-      if (!seoSeg) {
-        var trB = document.querySelector("[data-edtrlabel]");
-        if (trB && !trB.disabled) { trB.textContent = edTrLabel(pickL); translateTree(trB); }
-      }
-      edLangStatePaint();   // …and what the two languages you left behind hold
+      edLangShow(d.edseolang !== undefined, d.edseolang !== undefined ? d.edseolang : d.eddesclang);
       return;
     }
     // The chip only decides which door is shown; the value stays in the one
@@ -55652,6 +55896,7 @@
       S.adminTab = "goods"; S.adminEdit = "new";
       S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); ensureMedia();
       S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = ""; UP.err = "";
+      S.goodsDescSplit = null; S.goodsDescShop = "";
       window.scrollTo({ top: 0 }); render();
       /* a blank page starts in «Бренд» on a desktop; a restored draft does
          not, and neither does a phone — there the focus raised the keyboard
@@ -55939,8 +56184,8 @@
        words put under headings and into lists by the shop's AI — no fact and
        no word of it changed; the route holds the answer to that (task
        "sections", sectionsKeepWords() in src/lib/ai-prompts.ts) and refuses
-       one that is not. Fills the box like the two buttons above, «Вернуть»
-       on the toast. */
+       one that is not. The answer is a proposal, shown before anything
+       changes — edDescSplitHTML(); «Применить» puts it in. */
     if (d.admdescsplit !== undefined) {
       var sp = admEditProduct(d.admdescsplit);
       var sL = String(S.goodsDescLang || "ru").toUpperCase();
@@ -55949,17 +56194,15 @@
       if (!sp || !sEl) return;
       if (!sText) { toast("Сначала напишите описание на этом языке — разбивать пока нечего"); refocus(DESC_HOOKS[sL]); return; }
       admDescSnapshot(sp);
-      var spBtn = t, spLabel = t.textContent; t.disabled = true; t.textContent = "…";
+      var spBtn = t, spLabel = t.textContent, spFor = d.admdescsplit; t.disabled = true; t.textContent = "…";
       apiSend("/api/admin/ai/text/", "POST", { task: "sections", lang: sL, input: { text: sText } }).then(function (r) {
         spBtn.disabled = false; spBtn.textContent = spLabel;
         if (r.status === 200 && r.body.ok && typeof r.body.text === "string" && r.body.text.trim()) {
           // typed into while the AI worked: his words win, nothing is overwritten
           if (sEl.value.trim() !== sText) { toast("Текст поменялся, пока ИИ работал — нажмите ещё раз"); return; }
           if (r.body.text.trim() === sText) { toast("Текст уже разбит на разделы — менять нечего"); return; }
-          admFill(sEl, r.body.text);
-          edLangStatePaint();
-          if (S.adminEdit === "new") { goodsNewPaint(); toast("Разбили на разделы — прочитайте и поправьте"); }
-          else edAsTextNow("desc", "Разбили на разделы — прочитайте и поправьте");
+          S.goodsDescSplit = { id: spFor, L: sL, from: sText, to: r.body.text.trim() };
+          edDescSplitPaint();
         } else if (r.status === 401) { SRV.admin = false; render(); }
         else if (r.body && r.body.error === "rate_limited") toast(busyMsg());
         else if (r.body && r.body.error === "changed_words") toast("ИИ поменял слова текста — разбивку не взяли. Нажмите ещё раз или расставьте разделы кнопками над полем");
