@@ -340,6 +340,67 @@ export function modernShopHref(href) {
   return moved === null ? s : origin + moved + (cut >= 0 ? rel.slice(cut) : "");
 }
 
+/* ---------- a shop link pasted from somewhere else ------------------------
+
+   An article is often written somewhere other than the panel — in Claude, in
+   a preview of the shop, on a laptop running it locally — and pasted in, and
+   its links to the shop's own pages arrive on the host they were copied
+   from. On 02.11.2026 the Russian Kevin.Murphy shampoo guide held eight
+   links to https://www.claudeusercontent.com/ru/products/… (the host of a
+   Claude artifact preview) and the Estonian System 4 guide one to the
+   staging host; each opened a new tab and took the shopper off the shop to
+   a dead page.
+
+   `localShopHref()` is the address such a link should have had: the shop
+   path alone, relative, so the reader stays on the host they are on and
+   respellShopLinks() can put it into the reader's language. Only on a host
+   that is never a real destination for a reader — the shop's own, the
+   staging host, the old Shopify store, Claude's preview hosts, a local
+   server, a Vercel preview — and only for a path that is one of the shop's
+   page shapes. The path alone decides nothing: a brand's own Shopify store
+   answers at the very same /products/… and /collections/…, and a link to it
+   stays the external link it is.
+
+   claude.ai and claude.site are a step further out: Claude's own pages,
+   which an article may link to on purpose. There only a page two segments
+   deep (/ru/products/x, /collections/hair-care, /blogs/news) is taken for a
+   shop link; Claude's home and its one-word screens stay Claude's. */
+const hostRe = (alts) => new RegExp("^(?:" + alts.join("|") + ")$", "i");
+const STAND_IN_HOST = hostRe([
+  "(?:www\\.)?rempireshop\\.com",
+  "rempireshop\\.diipsolutions\\.eu",
+  "rempireshop\\.myshopify\\.com",
+  "(?:[a-z0-9-]+\\.)*claudeusercontent\\.com",
+  "[a-z0-9-]+\\.vercel\\.app",
+  "(?:[a-z0-9-]+\\.)*localhost",
+  "127\\.0\\.0\\.1",
+  "0\\.0\\.0\\.0",
+  "\\[::1\\]",
+]);
+const CLAUDE_HOST = hostRe(["(?:[a-z0-9-]+\\.)*claude\\.(?:ai|site)"]);
+
+/**
+ * The relative shop address an absolute link on a stand-in host stands for —
+ * "/ru/products/x" for https://www.claudeusercontent.com/ru/products/x, a
+ * /shop2/ path moved to its page first, the query and fragment kept — or
+ * null when the link is not one (another host, or not a shop page).
+ */
+export function localShopHref(href) {
+  const m = /^(?:https?:)?\/\/([^/?#\s]*)(.*)$/i.exec(String(href == null ? "" : href).trim());
+  if (!m) return null;
+  const host = m[1].replace(/^.*@/, "").replace(/:\d*$/, "").replace(/\.$/, "");
+  const claude = CLAUDE_HOST.test(host);
+  if (!claude && !STAND_IN_HOST.test(host)) return null;
+  const rest = m[2].startsWith("/") ? m[2] : "/" + m[2];
+  const rel = modernShopHref(rest);
+  if (rel.startsWith("//") || !/^\/[^\s<>"']*$/.test(rel)) return null;
+  const cut = rel.search(/[?#]/);
+  const path = cut >= 0 ? rel.slice(0, cut) : rel;
+  if (!parseShopPath(path)) return null;
+  if (claude && path.split("/").filter(Boolean).filter((s, i) => i > 0 || !/^(?:ru|et)$/i.test(s)).length < 2) return null;
+  return rel;
+}
+
 /**
  * Every link into one of the shop's own pages inside a piece of stored HTML
  * (a policy text, an article), spelled in `lang` — so a policy page read in
