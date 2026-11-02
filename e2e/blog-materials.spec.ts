@@ -187,6 +187,31 @@ test("step 2: the draft's pictures, products, yellow count, shop preview — and
   }
 });
 
+test("«Удалить» in the library asks first, then the material is gone from it", async ({ page }) => {
+  await loginAsAdmin(page);
+  const name = `Удаляемый образец ${Date.now().toString(36)}`;
+  const made = await page.request.post("/api/admin/blog/materials/", { data: { kind: "text", name, text: "Текст, который сейчас удалят." } });
+  expect(made.status()).toBe(200);
+  const id = (await made.json()).material.id as string;
+  try {
+    await adminSection(page, "blog");
+    await page.locator("[data-admblognew]:visible").first().click();
+    await page.locator("[data-bnewlib]").click();
+    const del = page.locator(`[data-bnewlibdel="${id}"]`);
+    await expect(del).toBeVisible();
+    await del.click();
+    // the panel's own question, in Dim's words
+    await expect(page.getByText("Удалить материал?")).toBeVisible();
+    await expect(page.getByText("Статьи, уже написанные по нему, не изменятся.")).toBeVisible();
+    await page.locator("[data-admapply]").click();
+    await expect(del).toHaveCount(0);
+    const lib = await (await page.request.get("/api/admin/blog/materials/")).json();
+    expect(lib.materials.some((m: { id: string }) => m.id === id)).toBe(false);
+  } finally {
+    await page.request.delete(`/api/admin/blog/materials/?id=${id}`);
+  }
+});
+
 test("«Писать самому» still opens the blank editor", async ({ page }) => {
   await loginAsAdmin(page);
   await adminSection(page, "blog");

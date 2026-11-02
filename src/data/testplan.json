@@ -1062,6 +1062,47 @@
       }
     },
     {
+      "id": "shop-blog-card-add",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«+» у товара внутри статьи",
+      "steps": [
+        "Открыть статью, в тексте которой стоит карточка товара с несколькими объёмами.",
+        "Нажать тёмный квадрат «+» справа на карточке.",
+        "Открыть корзину.",
+        "Найти в статье карточку товара, которого нет в наличии, если такая есть."
+      ],
+      "expect": [
+        "Всплывает то же «Добавлено в корзину», что у карточек в каталоге.",
+        "В корзине самый дешёвый объём, который есть в наличии, одна штука.",
+        "Нажатие на саму карточку по-прежнему открывает товар.",
+        "У товара без наличия «+» бледный и не нажимается."
+      ],
+      "why": "Dim, 02.11.2026: из статьи можно положить товар в корзину одним нажатием, как в макете.",
+      "risk": "med",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:47:26.000Z",
+      "en": {
+        "title": "«+» on a product inside an article",
+        "steps": [
+          "Open an article whose text has a product card for a product sold in several sizes.",
+          "Press the dark «+» square on the right of the card.",
+          "Open the cart.",
+          "Find a card in the article for a product that is sold out, if there is one."
+        ],
+        "expect": [
+          "The same «Добавлено в корзину» pops up as for the catalogue's cards.",
+          "The cart holds the cheapest size in stock, one of it.",
+          "Tapping the card itself still opens the product.",
+          "A sold-out product's «+» is faded and does not press."
+        ],
+        "why": "Dim, 02.11.2026: a product goes from an article into the cart in one tap, as drawn."
+      }
+    },
+    {
       "id": "shop-empty-after-reset",
       "area": "shop",
       "who": "dim",
@@ -9031,6 +9072,45 @@
           "The sample says «образец — писать так же: тон и длина»."
         ],
         "why": "The server reads public pages only — never its own internal addresses."
+      }
+    },
+    {
+      "id": "blog-materials-delete",
+      "area": "goods",
+      "who": "renat",
+      "device": "any",
+      "lang": "RU",
+      "title": "Удалить материал из библиотеки",
+      "steps": [
+        "«Блог» → «+ Статья» → «Из библиотеки — материалы прошлых статей».",
+        "У материала, по которому уже написана статья, нажать «Удалить».",
+        "Прочитать вопрос и нажать «Удалить».",
+        "Открыть ту статью в магазине."
+      ],
+      "expect": [
+        "Перед удалением спрашивает: «Удалить материал? Статьи, уже написанные по нему, не изменятся.»",
+        "Материал исчез из библиотеки.",
+        "В статье все картинки из него на месте."
+      ],
+      "why": "Dim, 02.11.2026: лишнее из библиотеки можно убрать; картинки, которые показывает статья, остаются.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T09:47:26.000Z",
+      "en": {
+        "title": "Delete a material from the library",
+        "steps": [
+          "«Блог» → «+ Статья» → «Из библиотеки — материалы прошлых статей».",
+          "On a material an article was already written from, press «Удалить».",
+          "Read the question and press «Удалить».",
+          "Open that article in the shop."
+        ],
+        "expect": [
+          "Before deleting it asks: «Удалить материал? Статьи, уже написанные по нему, не изменятся.»",
+          "The material is gone from the library.",
+          "Every picture from it is still in the article."
+        ],
+        "why": "Dim, 02.11.2026: what is not needed can leave the library; pictures an article shows stay."
       }
     },
     {

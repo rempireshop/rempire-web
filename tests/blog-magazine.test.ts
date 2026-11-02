@@ -452,4 +452,45 @@ describe("app.js draws the same magazine", () => {
     expect(s).toContain("posts.filter(function (p) { return p.topic === topic; })");
     expect(app).toContain("if (d.blogchip !== undefined) {");
   });
+
+  /* «+» on a product card inside an article (Dim, 02.11.2026 — Article.dc.html):
+     the shop's own `data-add`, so the same addToCart() every card runs. */
+  it("gives the card inside the text the shop's own add button — disabled when sold out", () => {
+    const make = new Function(
+      "productsById", "linkHref", "media", "esc", "blogProductName", "blogProductPrice", "S",
+      `${slice("blogProductHTML")} return blogProductHTML;`,
+    );
+    const stock: Record<string, string> = { "a-id": "in", "b-id": "out" };
+    const html = make(
+      (ids: string[]) => ids.map((id) => ({ id, stock: stock[id] })),
+      (_k: string, id: string) => "/ru/products/" + id,
+      () => '<span class="ph"></span>',
+      (s: string) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"),
+      (p: { id: string }) => "Kevin.Murphy " + p.id,
+      () => "от 6 €",
+      { lang: "RU" },
+    ) as (id: string) => string;
+    const card = html("a-id");
+    expect(card).toMatch(/^<span class="blog__prodcard"><a class="blog__prod" href="\/ru\/products\/a-id" data-go-product="a-id">/);
+    expect(card).toContain('<button type="button" class="blog__prodadd" data-add="a-id" aria-label="Добавить Kevin.Murphy a-id в корзину">');
+    expect(card.indexOf("</a>")).toBeLessThan(card.indexOf("<button"));   // a sibling of the link, never inside it
+    const out = html("b-id");
+    expect(out).toContain('<button type="button" class="blog__prodadd" disabled aria-label="Kevin.Murphy b-id: нет в наличии">');
+    expect(out).not.toContain("data-add=");
+    // the same click branch every product card's «В корзину» goes through
+    expect(app).toContain("if (d.add) { e.stopPropagation(); addToCart(d.add); return; }");
+  });
+
+  it("says the button in Estonian and English, the name kept as the page shows it", () => {
+    const ruleOf = (src: string) => {
+      const m = app.match(new RegExp(src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ", \\{ ET: \"([^\"]+)\", EN: \"([^\"]+)\" \\}"));
+      return m ? { ET: m[1], EN: m[2] } : null;
+    };
+    expect(ruleOf("[/^Добавить (.+) в корзину$/")).toEqual({ ET: "Lisa ostukorvi: $1", EN: "Add $1 to the cart" });
+    expect(ruleOf("[/^(.+): нет в наличии$/")).toEqual({ ET: "$1: otsas", EN: "$1: out of stock" });
+    // the static page has no script to add with — the button is the shop's alone
+    const mag = readFileSync(fileURLToPath(new URL("../src/lib/blog-magazine.mjs", import.meta.url)), "utf8");
+    const seo = readFileSync(fileURLToPath(new URL("../src/lib/seo-head.mjs", import.meta.url)), "utf8");
+    expect(mag + seo).not.toContain("blog__prodadd");
+  });
 });

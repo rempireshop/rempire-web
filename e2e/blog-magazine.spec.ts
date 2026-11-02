@@ -145,6 +145,38 @@ test.describe("article page", () => {
     expect((await api.json()).post.sources).toEqual([]);
   });
 
+  /* «+» on a product card inside the text (Dim, 02.11.2026 — Article.dc.html):
+     the shop's own add, so the same basket line a card's «В корзину» makes —
+     the cheapest size that can be sold, one of it, and the shop's toast. */
+  test("the «+» on a card inside the text puts the product in the cart the way every card does", async ({ page }) => {
+    await loginAsAdmin(page);
+    const card = (id: string) => `<p><a data-product="${id}" data-price="live" href="/ru/products/${id}">${id}</a></p>`;
+    const p = await post(page, {
+      title: { RU: `С карточкой ${Date.now().toString(36)}` },
+      body: { RU: "<h2>Шампунь</h2><p>Берите этот.</p>" + card(PRODUCT.id) + card(PRODUCT_2.id) },
+      products: [PRODUCT.id, PRODUCT_2.id],
+    });
+    await page.goto(shopUrl("/ru", `/blog/${p.slug}/`));
+    await waitForScreen(page, "blogpost");
+    const add = page.locator(`.blog__body .blog__prodcard .blog__prodadd[data-add="${PRODUCT.id}"]`);
+    await expect(add).toBeVisible();
+    await expect(add).toHaveAttribute("aria-label", /^Добавить System 4 .+ в корзину$/);
+    const box = await add.boundingBox();
+    expect(Math.round(box!.width)).toBe(48);
+    expect(Math.round(box!.height)).toBe(48);
+    await add.click();
+    await expect(page.getByRole("status")).toBeVisible();
+    const cart = await page.evaluate(() => JSON.parse(localStorage.getItem("rempire-shop-proto") || "{}").cart);
+    // 75 мл — the cheapest of 75/250/500, the volume a catalogue card's «В корзину» baskets too
+    expect(cart).toEqual([{ id: PRODUCT.id, size: 0, qty: 1 }]);
+    // and the link beside it still opens the product
+    await expect(page.locator(`.blog__body .blog__prod[data-go-product="${PRODUCT.id}"]`)).toHaveAttribute("href", `/ru/products/${PRODUCT.id}`);
+    // the English page says it in English
+    await page.goto(shopUrl("en", `/blog/${p.slug}/`));
+    await waitForScreen(page, "blogpost");
+    await expect(page.locator(`.blog__prodadd[data-add="${PRODUCT_2.id}"]`)).toHaveAttribute("aria-label", /^Add Kevin\.Murphy .+ to the cart$/);
+  });
+
   test("the English article says its byline and strip in English", async ({ page }) => {
     await loginAsAdmin(page);
     const p = await post(page, {

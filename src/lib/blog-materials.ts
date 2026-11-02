@@ -235,6 +235,32 @@ export async function updateMaterial(id: string, patch: { name?: unknown; images
   return rows.length ? toMaterial(rows[0]) : null;
 }
 
+/**
+ * The material's pictures some article still shows — as its cover or inside
+ * any language of its text — or another material still lists. Every post
+ * row counts, a deleted one too: its row stays, and a picture taken from
+ * under it would be a hole the day somebody brings it back. A plain
+ * substring of the stored text, not a pattern (an address may hold «%» or
+ * «_»), against the address exactly as the upload answered it — which is
+ * exactly how every writer of a body (the draft, the editor, Claude) stores it.
+ */
+export async function picturesInUse(urls: string[], exceptMaterial = ""): Promise<Set<string>> {
+  const used = new Set<string>();
+  for (const url of [...new Set(urls)]) {
+    // …and as an HTML attribute writes it, should the address ever carry an «&»
+    const asAttr = url.replace(/&/g, "&amp;");
+    const rows = await query<{ n: number }>(
+      `select 1 as n from posts where cover_url = $1 or position($1 in body::text) > 0 or position($3 in body::text) > 0
+       union all
+       select 1 as n from blog_materials where deleted_at is null and id::text <> $2 and position($1 in images::text) > 0
+       limit 1`,
+      [url, exceptMaterial, asAttr],
+    );
+    if (rows.length) used.add(url);
+  }
+  return used;
+}
+
 export async function deleteMaterial(id: string): Promise<boolean> {
   if (!UUID_RE.test(String(id || ""))) return false;
   const rows = await query<{ id: string }>(
