@@ -161,9 +161,12 @@ test.describe("article page", () => {
     const add = page.locator(`.blog__body .blog__prodcard .blog__prodadd[data-add="${PRODUCT.id}"]`);
     await expect(add).toBeVisible();
     await expect(add).toHaveAttribute("aria-label", /^Добавить System 4 .+ в корзину$/);
-    const box = await add.boundingBox();
-    expect(Math.round(box!.width)).toBe(48);
-    expect(Math.round(box!.height)).toBe(48);
+    /* The article is redrawn once late data lands; a box read across that
+       redraw is null (release run, 02.11.2026) — poll until it holds. */
+    await expect.poll(async () => {
+      const box = await add.boundingBox();
+      return box ? [Math.round(box.width), Math.round(box.height)] : null;
+    }).toEqual([48, 48]);
     await add.click();
     await expect(page.getByRole("status")).toBeVisible();
     const cart = await page.evaluate(() => JSON.parse(localStorage.getItem("rempire-shop-proto") || "{}").cart);
