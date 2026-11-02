@@ -182,7 +182,21 @@ function cleanTranslateInput(
   const sourceLang = isLang3(src.sourceLang) ? src.sourceLang : fallbackSourceLang;
   const targetLangs = [...new Set(targets)].filter((l) => l !== sourceLang);
   if (!targetLangs.length) throw new AiInputError("missing_target_langs");
-  return { text, targetLangs, sourceLang, keepNames: listOf(src.keepNames, 20, 80) };
+  return { text, targetLangs, sourceLang, keepNames: keepForTargets(listOf(src.keepNames, 20, 80), targetLangs) };
+}
+
+/* A catalogue name is «<maker's name> — <Russian type tail>» («Beard Oil Azur
+ * Lime — масло для бороды»). Handed over whole as a name to keep, the model
+ * copied the Russian tail into the Estonian and English texts — the weekly
+ * check of 02.11.2026 found three Proraso beard oils opening with «… —
+ * масло для бороды» in both. Only the maker's part is a name: a Russian tail
+ * after « — » is cut off, and a name still carrying Russian letters is not
+ * kept at all when no target language is Russian. */
+function keepForTargets(names: string[], targets: Lang3[]): string[] {
+  if (targets.includes("RU")) return names;
+  return names
+    .map((n) => n.replace(/\s+[—–]\s+[^—–]*[а-яё][^—–]*$/i, "").trim())
+    .filter((n) => n && !/[а-яё]/i.test(n));
 }
 
 /* A blog body reaches a translation task with its product cards taken out and

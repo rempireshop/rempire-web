@@ -85,6 +85,31 @@ describe("buildTranslatePrompt", () => {
     expect(() => buildTranslatePrompt("RU", { text: "hello", targetLangs: [] })).toThrow(AiInputError);
   });
 
+  /* Weekly check, 02.11.2026: three Proraso beard oils opened their ET and EN
+     descriptions with «… — масло для бороды», because the panel handed the
+     whole Russian catalogue name over as a name to keep. */
+  it("keeps only the maker's part of a catalogue name when translating out of Russian", () => {
+    const { system } = buildTranslatePrompt("RU", {
+      text: "Proraso Azur Lime — масло для бороды",
+      targetLangs: ["ET", "EN"],
+      keepNames: ["Proraso", "Beard Oil Azur Lime — масло для бороды", "Proraso Hydrate-Me.Wash — шампунь", "Тестовый товар"],
+    });
+    const keepLine = system.split("\n").find((l) => l.startsWith("Names that must appear unchanged")) ?? "";
+    expect(keepLine).toContain("Beard Oil Azur Lime");
+    expect(keepLine).toContain("Proraso Hydrate-Me.Wash");
+    expect(keepLine).not.toMatch(/[а-яё]/i);
+  });
+
+  it("leaves names whole when Russian is one of the targets", () => {
+    const { system } = buildTranslatePrompt("ET", {
+      text: "Habemeõli",
+      sourceLang: "ET",
+      targetLangs: ["RU"],
+      keepNames: ["Beard Oil Azur Lime — масло для бороды"],
+    });
+    expect(system).toContain("Beard Oil Azur Lime — масло для бороды");
+  });
+
   it("drops the source language from its own target list", () => {
     const { system } = buildTranslatePrompt("RU", { text: "Привет", targetLangs: ["RU", "ET", "EN"] });
     // asks to translate INTO Estonian and English only, not back into Russian
