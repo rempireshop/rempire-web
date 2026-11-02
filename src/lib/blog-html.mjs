@@ -44,7 +44,7 @@
    page loads without a build step cannot import this file. That one is a
    deliberate twin; docs/blog.md holds the comparison. */
 
-import { modernShopHref } from "./shop-paths.mjs";
+import { localShopHref, modernShopHref } from "./shop-paths.mjs";
 
 /* ---------- markdown → safe HTML ------------------------------------------
  *
@@ -427,8 +427,67 @@ export function looksLikeHtmlBody(body) {
   return HTML_BODY_RE.test(String(body || ""));
 }
 
+/* ---------- shop links pasted from another host ---------------------------
+ *
+ * A body as it is stored, with every link to a shop page that arrived on a
+ * stand-in host — Claude's preview, the staging host, a local server; the
+ * list and the 02.11.2026 story are beside localShopHref() in
+ * src/lib/shop-paths.mjs — made the relative shop path it stands for, and
+ * every link that is now relative without the new tab a paste gave it. An
+ * external link is left exactly as it was, new tab and all.
+ *
+ * Runs on the RAW body, before any allowlist, because it is also what a save
+ * writes into the row (upsertPost in src/lib/blog.ts — the panel, the
+ * assistant and the Claude connector all save through it): the stored text
+ * itself is right, not only the page made from it. The allowlist never
+ * writes `target` on a relative link, so on the way to a reader the second
+ * half is a no-op; in the row it is what keeps «открыть в новой вкладке»
+ * off a link that now goes to the shop. Touches nothing but the `href`,
+ * `target` and `rel` of an <a>, and a markdown link's address.
+ */
+const A_OPEN_RE = /<a(\s(?:"[^"]*"|'[^']*'|[^>"'])*)?>/gi;
+const ATTR_TOKEN_RE = /(\s*)([^\s"'>/=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|[^\s"'>]+))?/g;
+const MD_LINK_RE = /(\]\(\s*)([^)\s]+)(?=\s*\))/g;
+const isRelativePath = (u) => /^\/(?!\/)/.test(u);
+
+function localizeATag(tag, attrs) {
+  if (!attrs) return tag;
+  let href = null;
+  ATTR_TOKEN_RE.lastIndex = 0;
+  let m;
+  while ((m = ATTR_TOKEN_RE.exec(attrs))) {
+    if (m[2].toLowerCase() === "href" && href === null) href = (m[4] || "").replace(/^(["'])([\s\S]*)\1$/, "$2");
+  }
+  if (href === null) return tag;
+  const rel = localShopHref(href);
+  if (!isRelativePath(rel ?? href.trim())) return tag;
+  let seenHref = false;
+  const out = attrs.replace(ATTR_TOKEN_RE, (whole, sp, name, eq) => {
+    const key = name.toLowerCase();
+    if (key === "target" || key === "rel") return "";
+    if (key === "href" && !seenHref) {
+      seenHref = true;
+      return rel ? `${sp}${name}${eq || "="}"${rel}"` : whole;
+    }
+    return whole;
+  });
+  return out === attrs ? tag : `${tag.slice(0, 2)}${out}>`;
+}
+
+export function localizeShopLinks(body) {
+  const src = String(body || "");
+  if (!looksLikeHtmlBody(src)) {
+    return src.replace(MD_LINK_RE, (whole, open, url) => {
+      const rel = localShopHref(url);
+      return rel ? open + rel : whole;
+    });
+  }
+  return src.replace(A_OPEN_RE, localizeATag);
+}
+
 /** The one place a stored body becomes the HTML a reader sees. */
 export function renderPostBody(body) {
-  const src = String(body || "");
+  /* the stored row is repaired on its next save; this is the page until then */
+  const src = localizeShopLinks(String(body || ""));
   return looksLikeHtmlBody(src) ? sanitizeHtml(src) : markdownToHtml(src);
 }

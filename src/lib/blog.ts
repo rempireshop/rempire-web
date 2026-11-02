@@ -47,6 +47,7 @@ import { writeCoverFocus } from "@/lib/blog-cover.mjs";
 import { jsonbParam, query } from "@/lib/db";
 import type { Lang3, Trilingual } from "@/lib/content";
 import {
+  localizeShopLinks as localizeShopLinksJs,
   looksLikeHtmlBody as looksLikeHtmlBodyJs,
   markdownToHtml as markdownToHtmlJs,
   renderPostBody as renderPostBodyJs,
@@ -221,6 +222,7 @@ export const markdownToHtml: (md: string) => string = markdownToHtmlJs;
 export const sanitizeHtml: (input: string) => string = sanitizeHtmlJs;
 export const looksLikeHtmlBody: (body: string) => boolean = looksLikeHtmlBodyJs;
 export const renderPostBody: (body: string) => string = renderPostBodyJs;
+export const localizeShopLinks: (body: string) => string = localizeShopLinksJs;
 
 /* ---------- validation ----------------------------------------------------- */
 
@@ -430,6 +432,10 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
   const title = trilingual(input.title, 200);
   const excerpt = trilingual(input.excerpt, 500);
   const body = trilingual(input.body, BODY_MAX, true, "body_too_long"); // the one field where "\n" is content
+  /* A shop link pasted from Claude's preview or the staging host is stored
+     as the shop path it stands for — the panel, the assistant and the Claude
+     connector all save through here (localizeShopLinks in blog-html.mjs). */
+  for (const l of LANGS) body[l] = localizeShopLinks(body[l]);
   const coverAlt = trilingual(input.coverAlt, 160);
   const seoTitle = trilingual(input.seoTitle, 70);
   const seoDesc = trilingual(input.seoDesc, 170);

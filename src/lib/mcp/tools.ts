@@ -46,7 +46,7 @@
  * and save_draft holds an article to it: a link or a card for an id the
  * shop does not sell loses its link and keeps its words.
  */
-import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
+import { BLOG_PRODUCTS_MAX, BlogError, BODY_MAX, getPostBySlug, listAllPosts, localizeShopLinks, looksLikeHtmlBody, markdownToHtml, sanitizeHtml, upsertPost, type Post } from "@/lib/blog";
 import { feedBase, loadFeedInput, shopProducts, type ShopProduct } from "@/lib/merchant-feed";
 import { query } from "@/lib/db";
 import { getOverrideRow, getSettingRaw, setSetting, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
@@ -193,7 +193,10 @@ export function shopPhotos(list: ShopProduct[]): Set<string> {
 }
 
 export function shopBody(raw: string, lang: L3, byId: Map<string, ShopProduct>, photos: Set<string> = new Set()): { html: string; ids: string[] } {
-  const src = String(raw || "").trim();
+  /* a shop link copied from Claude's preview (claudeusercontent.com) or the
+     staging host becomes the shop path first, so the product check below
+     judges it like any other product link */
+  const src = localizeShopLinks(String(raw || "").trim());
   if (!src) return { html: "", ids: [] };
   const ids: string[] = [];
   const named = (id: string) => { if (!ids.includes(id)) ids.push(id); };

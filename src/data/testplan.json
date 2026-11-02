@@ -8717,6 +8717,45 @@
       "markedAt": "2026-09-25T23:23:02.337Z"
     },
     {
+      "id": "blog-pasted-shop-link",
+      "area": "goods",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Ссылка на товар, вставленная из Claude, ведёт в магазин",
+      "steps": [
+        "«Блог» → открыть черновик статьи.",
+        "Кнопкой «Ссылка» вставить https://www.claudeusercontent.com/ru/products/super-goo.",
+        "Второй ссылкой вставить https://www.kevinmurphy.com.au — сайт бренда.",
+        "Опубликовать, открыть статью на сайте и нажать обе ссылки."
+      ],
+      "expect": [
+        "Первая ссылка открывает Super.Goo в магазине, в той же вкладке.",
+        "Её адрес начинается с rempireshop.com, а не с claudeusercontent.com.",
+        "Сайт бренда открывается в новой вкладке, как раньше."
+      ],
+      "why": "В статье про шампуни Kevin.Murphy восемь ссылок вели на claudeusercontent.com, и покупатель попадал на мёртвую страницу.",
+      "risk": "med",
+      "writes": true,
+      "mark": "new",
+      "markedAt": "2026-11-02T07:48:05.000Z",
+      "en": {
+        "title": "A product link pasted from Claude leads to the shop",
+        "steps": [
+          "«Блог» → open a draft article.",
+          "With «Ссылка», insert https://www.claudeusercontent.com/ru/products/super-goo.",
+          "Insert a second link, https://www.kevinmurphy.com.au — the brand site.",
+          "Publish, open the article on the site and tap both links."
+        ],
+        "expect": [
+          "The first link opens Super.Goo in the shop, in the same tab.",
+          "Its address starts with rempireshop.com, not claudeusercontent.com.",
+          "The brand site opens in a new tab, as before."
+        ],
+        "why": "Eight links in the Kevin.Murphy shampoo article led to claudeusercontent.com, and shoppers landed on a dead page."
+      }
+    },
+    {
       "id": "goods-hide-burst",
       "area": "goods",
       "who": "renat",
