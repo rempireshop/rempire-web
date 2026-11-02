@@ -4108,8 +4108,16 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-row--open[data-herorow]::before { opacity: 1; }
 /* …and the pane itself, tied to that row by the same ink bar, with the ✕ that
-   closes it at the top where the pane starts rather than a screenful down */
-#heroform { border-left: 4px solid var(--a-ink); scroll-margin-top: 16px; }
+   closes it at the top where the pane starts rather than a screenful down.
+   The bar is the .adm-sub one (a group that belongs to the row above it):
+   4 px of ink down the left and the content indented 14 px past it. As a
+   plain border-left with no indent it ran flush against every label and
+   input in the pane (Dim, 02.11.2026). */
+#heroform { position: relative; padding-left: 14px; scroll-margin-top: 16px; }
+#heroform::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 8px; width: 4px;
+  background: var(--a-ink);
+}
 #heroform:focus { outline: none; }
 .adm-iconbtn--x { width: 36px; height: 36px; font-size: 15px; }
 .adm-row__nm .adm-badge { margin-left: 6px; vertical-align: 2px; }
