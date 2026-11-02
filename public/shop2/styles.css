@@ -2681,7 +2681,7 @@ button, a, summary, label { touch-action: manipulation; }
 .blog__body figure[data-fig="half-left"] { float: left; margin: 6px 22px 10px 0; }
 .blog__body figure[data-fig="half-right"] { float: right; margin: 6px 0 10px 22px; }
 .blog__body figure[data-fig="small"] { width: 50%; max-width: 260px; }
-.blog__body h2, .blog__body h3, .blog__body blockquote, .blog__body .blog__prod { clear: both; }
+.blog__body h2, .blog__body h3, .blog__body blockquote, .blog__body .blog__prod, .blog__body .blog__prodcard { clear: both; }
 .blog__body::after { content: ""; display: block; clear: both; }
 @media (max-width: 767px) {
   .blog__body figure[data-fig="half-left"],
@@ -2709,9 +2709,25 @@ button, a, summary, label { touch-action: manipulation; }
 .blog__prodtx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .blog__prodname { font-size: 13.5px; line-height: 1.35; overflow-wrap: anywhere; }
 .blog__prodprice { font-size: 13px; color: var(--muted); }
+/* The card and its «+» (02.11.2026, Article.dc.html): the frame moves from
+   the link to the pair, the link fills it, the dark square sits at its end. */
+.blog__prodcard {
+  display: flex; align-items: center; gap: 4px; width: fit-content; max-width: 100%; margin: 16px 0;
+  border: 1px solid var(--rule); background: var(--page); box-sizing: border-box;
+}
+.blog__prodcard:hover { border-color: var(--ink); }
+.blog__prodcard .blog__prod { margin: 0; border: 0; flex: 1; min-width: 0; width: auto; background: none; }
+.blog__prodadd {
+  width: 48px; height: 48px; flex: none; margin-right: 8px; border: 0; padding: 0; cursor: pointer;
+  background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center;
+}
+.blog__prodadd svg { width: 20px; height: 20px; }
+.blog__prodadd:hover { background: #3a3720; }
+.blog__prodadd:disabled { opacity: .3; cursor: default; }
 @media (max-width: 767px) {
   .blog__tiletitle { font-size: 14px; }
   .blog__prod { width: 100%; }
+  .blog__prodcard { width: 100%; }
 }
 /* While the API really is still answering (a cold miss — nothing embedded
    in the page, nothing in the tab yet): the shapes of what is coming, grey
@@ -2877,7 +2893,9 @@ button, a, summary, label { touch-action: manipulation; }
 .bmag-post .blog__body figure { margin: 24px 0; }
 .bmag-post .blog__body figure img { margin: 0; }
 .bmag-post .blog__body figcaption { padding-top: 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
-.bmag-post .blog__prod { gap: 14px; padding: 12px; border-color: rgba(28, 26, 0, .15); background: #fff; width: 100%; box-sizing: border-box; }
+.bmag-post .blog__prodcard { width: 100%; border-color: rgba(28, 26, 0, .15); background: #fff; }
+.bmag-post .blog__prodcard:hover { border-color: var(--ink); }
+.bmag-post .blog__prod { gap: 14px; padding: 12px; box-sizing: border-box; }
 .bmag-post .blog__prodimg { width: 76px; height: 96px; background-color: var(--shell); background-origin: content-box; padding: 6px; box-sizing: border-box; }
 .bmag-post .blog__prodname { font-size: 15px; font-weight: 600; line-height: 1.3; }
 .bmag-post .blog__prodprice { font-size: 14px; color: #5c5947; }

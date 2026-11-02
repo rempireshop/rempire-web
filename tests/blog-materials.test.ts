@@ -12,6 +12,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 
 const nextCache = vi.hoisted(() => ({ revalidateTag: vi.fn(), revalidatePath: vi.fn() }));
 vi.mock("next/cache", () => nextCache);
+/* The bucket, stood in for: «Удалить» in the library takes a material's
+   unused pictures out of it, and what it asked to delete is what is checked. */
+const bucket = vi.hoisted(() => ({ deleted: [] as string[] }));
+vi.mock("@/lib/storage", async (importOriginal) => {
+  const real = await importOriginal<typeof import("@/lib/storage")>();
+  return { ...real, deleteObject: async (key: string) => { bucket.deleted.push(key); } };
+});
 
 import { checkUrl, fetchPublicPage, guardedLookup, htmlToText, isPrivateAddress, SafeFetchError, type SafeRequest } from "@/lib/safe-fetch";
 import {
@@ -25,7 +32,7 @@ import {
 import { getPostById, getPostBySlug, publishPost, renderPostBody, sanitizeHtml, upsertPost } from "@/lib/blog";
 import { INSTRUCTIONS, productsNow, resetProductCache, runTool, shopBody, TOOLS } from "@/lib/mcp/tools";
 import { sanitizeAction, sanitizeDraftFromMaterials } from "@/app/api/assistant/actions";
-import { exec } from "@/lib/db";
+import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 /* ---------- the SSRF guard --------------------------------------------------- */
@@ -323,6 +330,64 @@ beforeAll(async () => {
   await setupDb();
 });
 afterAll(teardownDb);
+
+describe("«Удалить» in the library", () => {
+  beforeEach(async () => {
+    await exec("truncate posts restart identity cascade");
+    await exec("truncate blog_materials");
+    bucket.deleted = [];
+  });
+
+  it("hides the material and takes out of the bucket only the pictures no article uses", async () => {
+    const keep = { ...process.env };
+    Object.assign(process.env, {
+      R2_ACCOUNT_ID: "a", R2_ACCESS_KEY_ID: "b", R2_SECRET_ACCESS_KEY: "c", R2_BUCKET: "d", R2_PUBLIC_BASE: "https://img.example",
+      ADMIN_PASSWORD_HASH: (await import("@/lib/auth")).hashPassword("a long enough password"),
+    });
+    try {
+      const pic = (n: string) => `https://img.example/blog/170000000000${n}-page.webp`;
+      const m = await createMaterial(readMaterialInput({
+        kind: "image", name: "Фото салона",
+        images: ["1", "2", "3", "4"].map((n) => ({ id: "f" + n, url: pic(n), w: 800, h: 1000, label: n })),
+      }, OURS));
+      // 1 inside an article's text, 2 an article's cover, 3 inside a DELETED article — all kept; 4 nobody's
+      await upsertPost({ title: { RU: "Статья" }, body: { RU: `<figure><img src="${pic("1")}" alt=""></figure>` } });
+      await upsertPost({ title: { RU: "С обложкой" }, coverUrl: pic("2") });
+      const gone = await upsertPost({ title: { RU: "Удалённая" }, body: { ET: `<p><img src="${pic("3")}" alt=""></p>` } });
+      await query("update posts set deleted_at = now() where id = $1", [gone.id]);
+      expect([...(await (await import("@/lib/blog-materials")).picturesInUse(m.images.map((i) => i.url), m.id))].sort())
+        .toEqual([pic("1"), pic("2"), pic("3")]);
+
+      const { ADMIN_COOKIE, makeSessionToken } = await import("@/lib/auth");
+      const { DELETE } = await import("@/app/api/admin/blog/materials/route");
+      const res = await DELETE(new Request(`https://rempireshop.com/api/admin/blog/materials/?id=${m.id}`, {
+        method: "DELETE", headers: { cookie: `${ADMIN_COOKIE}=${makeSessionToken()}` },
+      }));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true, removed: 1, kept: 3 });
+      expect(bucket.deleted).toContain("blog/1700000000004-page.webp");
+      expect(bucket.deleted.some((k) => /170000000000[123]-page/.test(k))).toBe(false);
+      // gone from every list — Claude's too
+      expect(JSON.parse((await runTool("list_materials", {})).text).found).toBe(0);
+      // asked again: there is nothing to delete
+      const again = await DELETE(new Request(`https://rempireshop.com/api/admin/blog/materials/?id=${m.id}`, {
+        method: "DELETE", headers: { cookie: `${ADMIN_COOKIE}=${makeSessionToken()}` },
+      }));
+      expect(again.status).toBe(404);
+    } finally {
+      process.env = keep;
+    }
+  });
+
+  it("the panel asks first, in Dim's words, and lists «Удалить» beside every library material", () => {
+    const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
+    expect(app).toContain('title: "Удалить материал?"');
+    expect(app).toContain('var BNEW_DEL_WARN = "Статьи, уже написанные по нему, не изменятся.";');
+    expect(app).toContain('data-bnewlibdel="');
+    expect(app).toContain('if (pa.type === "bnew_matdel") { bnewDeleteMaterial(pa.id); return; }');
+    expect(app).toContain('apiJson("/api/admin/blog/materials/?id=" + encodeURIComponent(id), { method: "DELETE" })');
+  });
+});
 
 describe("in the database", () => {
   beforeEach(async () => {

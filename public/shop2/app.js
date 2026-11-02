@@ -7890,6 +7890,9 @@
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
     // the blog (02.11.2026): «9 мин чтения», «Все 34 товара», a carousel mark («6 статей» is above, «Обзор»'s own)
     [/^(\d+) мин чтения$/, { ET: "$1 min lugemist", EN: "$1 min read" }],
+    // …and the «+» of a product card inside an article (blogProductHTML) — the name is already the reader's language
+    [/^Добавить (.+) в корзину$/, { ET: "Lisa ostukorvi: $1", EN: "Add $1 to the cart" }],
+    [/^(.+): нет в наличии$/, { ET: "$1: otsas", EN: "$1: out of stock" }],
     [/^Все (\d+) товар(?:|а|ов)$/, { ET: "Kõik $1 toodet", EN: "All $1 products" }],
     [/^Статья (\d+)$/, { ET: "Artikkel $1", EN: "Article $1" }],
     [/^Корзина \((\d+)\)$/, { ET: "Ostukorv ($1)", EN: "Cart ($1)" }],
@@ -15357,13 +15360,29 @@
   function blogProductHTML(id) {
     var p = productsById([id])[0];
     if (!p) return "";
-    var pro = proPrice(p, 0);
-    return '<a class="blog__prod" href="' + linkHref("product", p.id) + '" data-go-product="' + esc(p.id) + '">' +
+    var name = blogProductName(p, S.lang);
+    /* «+» beside the card (Dim, 02.11.2026 — Article.dc.html): the shop's own
+       add button, `data-add`, so it is the very same addToCart() every
+       product card's «В корзину» runs — the cheapest size that can be sold
+       (cardSizeIdx), the same backstops, the same toast. A sibling of the
+       link, not inside it (a control inside a link is invalid and every tap
+       would open the product); the two stand in one phrasing <span>, valid
+       where the marker stood inside a sentence's <p>. Sold out: the button
+       stays, disabled, so the card keeps its shape. Only the shop draws it —
+       the static page has no script to add with, and the shop redraws the
+       article over it the moment it boots. */
+    var out = p.stock === "out";
+    return '<span class="blog__prodcard">' +
+      '<a class="blog__prod" href="' + linkHref("product", p.id) + '" data-go-product="' + esc(p.id) + '">' +
         media(p, 0, "ph blog__prodimg") +
         '<span class="blog__prodtx">' +
-          '<span class="blog__prodname">' + esc(blogProductName(p, S.lang)) + "</span>" +
+          '<span class="blog__prodname">' + esc(name) + "</span>" +
           '<span class="blog__prodprice num">' + esc(blogProductPrice(p, S.lang)) + "</span>" +
-        "</span></a>";
+        "</span></a>" +
+      '<button type="button" class="blog__prodadd"' + (out ? " disabled" : ' data-add="' + esc(p.id) + '"') +
+        ' aria-label="' + esc(out ? name + ": нет в наличии" : "Добавить " + name + " в корзину") + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' +
+      "</button></span>";
   }
   /** «Kevin.Murphy PLUMPING.WASH — шампунь» → «… — shampoo» for an EN reader.
    *  trText with allowName is exactly what a catalogue card's own name gets
@@ -29385,12 +29404,39 @@
     if (!st.lib) return '<div class="adm-skel"><i></i><i></i></div>';
     var have = {};
     st.items.forEach(function (it) { if (it.id) have[it.id] = 1; });
-    var rest = st.lib.filter(function (m) { return !have[m.id]; });
-    if (!rest.length) return '<p class="adm-hint">В библиотеке больше ничего нет.</p>';
-    return '<ul class="adm-bnew__lib">' + rest.slice(0, 30).map(function (m) {
-      return '<li><span data-notr>' + esc(m.name) + "</span>" +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewlibadd="' + esc(m.id) + '">Добавить</button></li>';
+    if (!st.lib.length) return '<p class="adm-hint">В библиотеке пока ничего нет.</p>';
+    /* Every material the library holds — the ones already in this article
+       too, so «Удалить» reaches a file uploaded by mistake a minute ago. */
+    return '<ul class="adm-bnew__lib">' + st.lib.slice(0, 60).map(function (m) {
+      return '<li><span class="adm-bnew__libnm" data-notr>' + esc(m.name) + "</span>" +
+        (have[m.id]
+          ? '<span class="adm-hint">в статье</span>'
+          : '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewlibadd="' + esc(m.id) + '">Добавить</button>') +
+        '<button class="adm-link adm-link--muted" type="button" data-bnewlibdel="' + esc(m.id) + '">Удалить</button></li>';
     }).join("") + "</ul>";
+  }
+  /* «Удалить» in the library, after the panel's own question (Dim,
+     02.11.2026). The server keeps every picture an article still shows and
+     takes the rest out of the bucket (DELETE /api/admin/blog/materials/). */
+  function bnewAskDelete(id) {
+    var st = bnewState(), m = (st.lib || []).filter(function (x) { return x.id === id; })[0];
+    pendingAction = {
+      type: "bnew_matdel", overlay: true, danger: true, id: id, title: "Удалить материал?",
+      detail: (m ? "«" + m.name + "»\n" : "") + BNEW_DEL_WARN, ok: "Удалить"
+    };
+    render(); refocus("[data-admapply]");
+  }
+  var BNEW_DEL_WARN = "Статьи, уже написанные по нему, не изменятся.";
+  function bnewDeleteMaterial(id) {
+    var st = bnewState();
+    apiJson("/api/admin/blog/materials/?id=" + encodeURIComponent(id), { method: "DELETE" }).then(function (r) {
+      if (r.status === 200 && r.body.ok) {
+        st.lib = (st.lib || []).filter(function (m) { return m.id !== id; });
+        st.items = st.items.filter(function (it) { return it.id !== id; });
+        toast("Материал удалён");
+      } else toast(r.status === 401 ? "Вы вышли из админки — войдите снова." : "Не получилось удалить — попробуйте ещё раз.");
+      render();
+    }).catch(function () { toast("Нет связи — попробуйте ещё раз."); render(); });
   }
   function bnewStep1HTML(st) {
     var ready = st.items.filter(function (it) { return it.status === "ok"; }).length;
@@ -54498,7 +54544,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-slideto],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-bmagdot],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -55686,6 +55732,8 @@
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
         if (pa.type === "draft_from_materials") { startDraftFromMaterials(pa); return; }
+        // «Удалить материал?» from the library (bnewAskDelete)
+        if (pa.type === "bnew_matdel") { bnewDeleteMaterial(pa.id); return; }
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
@@ -56761,6 +56809,7 @@
       return;
     }
     if (d.bnewlib !== undefined) { var bsb = bnewState(); bsb.libOpen = true; if (!bsb.lib) bnewLibLoad(); render(); return; }
+    if (d.bnewlibdel) { bnewAskDelete(d.bnewlibdel); return; }
     if (d.bnewlibadd) {
       var bsa = bnewState(), lm = (bsa.lib || []).filter(function (m) { return m.id === d.bnewlibadd; })[0];
       if (lm) { bnewSaved(bnewAddItem(lm.kind, lm.name), lm); render(); }

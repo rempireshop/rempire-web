@@ -3617,6 +3617,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-bnew__page span { font-size: 11.5px; line-height: 1.3; overflow-wrap: anywhere; }
 .adm-bnew__lib { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .adm-bnew__lib li { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.adm-bnew__libnm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.adm-bnew__lib .adm-hint { margin: 0; }
 .adm-bnew__go { display: flex; flex-direction: column; gap: 8px; }
 .adm-bnew__write { min-height: 54px; font-family: Oswald, sans-serif; font-weight: 500; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; }
 .adm-bnew__covers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }

@@ -12,7 +12,8 @@
  *                                                                   guard (src/lib/safe-fetch.ts) — its text only
  * PATCH  /api/admin/blog/materials/  { id, name?, images? }
  *                                            → { ok, material }    more pages ticked, a better name
- * DELETE /api/admin/blog/materials/?id=<id>  → { ok }             gone from every list (the row stays)
+ * DELETE /api/admin/blog/materials/?id=<id>  → { ok, removed, kept }  gone from every list (the row stays);
+ *                                                                   its pictures no article uses leave the bucket
  *
  * A PDF never travels here: the panel reads it on the phone (pdf.js) and
  * sends its text and the pictures it uploaded through /api/admin/upload/ —
@@ -21,10 +22,11 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import {
-  createMaterial, deleteMaterial, getMaterial, listMaterials, MaterialError, readMaterialInput, updateMaterial,
+  createMaterial, deleteMaterial, getMaterial, listMaterials, MaterialError, picturesInUse, readMaterialInput, updateMaterial,
 } from "@/lib/blog-materials";
 import { writeAuditSafe } from "@/lib/orders";
 import { fetchPublicPage, SafeFetchError } from "@/lib/safe-fetch";
+import { deleteObject, keyFromUrl, storageConfigured, thumbKey } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,12 +133,37 @@ export async function PATCH(req: Request) {
   }
 }
 
+/* «Удалить» in the panel's library (Dim, 02.11.2026): the material leaves
+   every list, and its uploaded pictures leave the bucket — but only the ones
+   no article uses (picturesInUse: a cover, or a picture inside any language
+   of any post's text, deleted posts included) and no other material lists.
+   An article already written from it keeps every picture it shows. A file
+   that will not delete is left where it is: the material is gone either way. */
 export async function DELETE(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   const id = new URL(req.url).searchParams.get("id") || "";
   try {
-    return (await deleteMaterial(id)) ? Response.json({ ok: true }, { headers: NO_STORE }) : bad("not_found", 404);
+    const was = await getMaterial(id);
+    if (!was || !(await deleteMaterial(id))) return bad("not_found", 404);
+    let removed = 0, kept = 0;
+    if (was.images.length && storageConfigured()) {
+      const used = await picturesInUse(was.images.map((i) => i.url), was.id);
+      for (const img of was.images) {
+        const key = keyFromUrl(img.url);
+        if (used.has(img.url) || !key || !key.startsWith("blog/")) { kept++; continue; }
+        try {
+          await deleteObject(key);
+          await deleteObject(thumbKey(key)).catch(() => {});
+          removed++;
+        } catch (err) {
+          kept++;
+          console.error("admin/blog/materials DELETE: picture left in the bucket", key, err);
+        }
+      }
+    } else kept = was.images.length;
+    await writeAuditSafe("admin", "blog.material_delete", { id: was.id, kind: was.kind, name: was.name, removed, kept });
+    return Response.json({ ok: true, removed, kept }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/blog/materials DELETE failed", err);
     return bad("unavailable", 503);
