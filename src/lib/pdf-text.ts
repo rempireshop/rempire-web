@@ -20,6 +20,7 @@
  * a scan (no text at all) and a file whose fonts carry no way back to letters
  * are refused with a code, never returned as nonsense.
  */
+import { constants as zlibConstants, inflateSync } from "node:zlib";
 import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFRawStream, ParseSpeeds, type PDFObject } from "pdf-lib";
 import { pageHeading } from "@/lib/pdf-heading";
 
@@ -33,7 +34,17 @@ export class PdfTextError extends Error {
   }
 }
 
-export const PDF_TEXT_LIMITS = { pages: 300, pageText: 20_000, total: 300_000, contentBytes: 4 * 1024 * 1024, tokens: 3_000_000 } as const;
+/* `decoded` is what one document may unpack in all — content streams, ToUnicode
+   maps and the object streams pdf-lib opens while loading — so a small file that
+   inflates to gigabytes stops at the cap instead of filling the function's
+   memory. `cmapSteps` bounds the code ranges one font may expand (a W array or a
+   bfrange can name 65 536 codes per entry), `fonts` the fonts one document reads. */
+export const PDF_TEXT_LIMITS = {
+  pages: 300, pageText: 20_000, total: 300_000, contentBytes: 4 * 1024 * 1024, tokens: 3_000_000,
+  decoded: 64 * 1024 * 1024, cmapSteps: 200_000, fonts: 400,
+} as const;
+
+type Budget = { tokens: number; bytes: number };
 
 export interface PdfPage {
   n: number;
@@ -122,7 +133,8 @@ export function parseToUnicode(src: string): { map: Map<number, string>; bytes: 
   let buf: Array<string | string[]> = [];
   let arr: string[] | null = null;
   let m: RegExpExecArray | null;
-  while ((m = tok.exec(src))) {
+  let steps = 0;
+  while ((m = tok.exec(src)) && steps < PDF_TEXT_LIMITS.cmapSteps) {
     if (m[4]) {
       mode = m[4].startsWith("begin") ? m[4].slice(5) : "";
       buf = [];
@@ -136,15 +148,19 @@ export function parseToUnicode(src: string): { map: Map<number, string>; bytes: 
       buf = [];
     } else if (mode === "bfchar" && buf.length === 2) {
       map.set(hexInt(String(buf[0])), utf16(String(buf[1])));
+      steps++;
       buf = [];
     } else if (mode === "bfrange" && buf.length === 3) {
       const lo = hexInt(String(buf[0])), hi = hexInt(String(buf[1]));
       if (hi >= lo && hi - lo <= 0xffff) {
         const dst = buf[2];
-        if (Array.isArray(dst)) dst.forEach((d, i) => { if (lo + i <= hi) map.set(lo + i, utf16(d)); });
+        if (Array.isArray(dst)) dst.forEach((d, i) => { if (lo + i <= hi) map.set(lo + i, utf16(d)); steps++; });
         else {
           const base = utf16(dst);
-          for (let c = lo; c <= hi; c++) {
+          // the range is charged to the whole map's step budget, not to its own length
+          const top = Math.min(hi, lo + Math.max(0, PDF_TEXT_LIMITS.cmapSteps - steps) - 1);
+          steps += hi - lo + 1;
+          for (let c = lo; c <= top; c++) {
             const last = base.charCodeAt(base.length - 1) + (c - lo);
             map.set(c, base.slice(0, -1) + String.fromCharCode(last & 0xffff));
           }
@@ -161,20 +177,79 @@ const N = (n: string) => PDFName.of(n);
 const num = (o: PDFObject | undefined, d = 0) => (o instanceof PDFNumber ? o.asNumber() : d);
 const nameOf = (o: PDFObject | undefined) => (o instanceof PDFName ? o.decodeText().replace(/^\//, "") : "");
 
-function streamText(s: PDFObject | undefined, max = PDF_TEXT_LIMITS.contentBytes): string {
+/** Flate inflated by zlib with a hard output cap: past `cap` it throws instead of
+ *  growing (pdf-lib's own decoder has no cap). Truncated streams still read. */
+function inflateCapped(data: Uint8Array, cap: number): Buffer {
+  return inflateSync(data, { maxOutputLength: Math.max(1, cap), finishFlush: zlibConstants.Z_SYNC_FLUSH });
+}
+
+/**
+ * A stream's text, unpacked within the document's byte budget. Read here: no
+ * filter, Flate (capped, see inflateCapped), and the two ASCII filters, which
+ * only shrink their input. LZW, RunLength and filter chains can blow up and text
+ * streams rarely use them — skipped, like a picture's DCT.
+ */
+function streamText(s: PDFObject | undefined, budget: Budget, max: number = PDF_TEXT_LIMITS.contentBytes): string {
   if (!(s instanceof PDFRawStream)) return "";
+  const cap = Math.min(max, budget.bytes);
+  if (cap <= 0) return "";
+  const f = s.dict.lookup(N("Filter"));
+  const filters = f instanceof PDFName ? [nameOf(f)] : f instanceof PDFArray ? f.asArray().map((x) => nameOf(x)) : [];
   try {
-    const bytes = decodePDFRawStream(s).decode();
-    return Buffer.from(bytes.subarray(0, max)).toString("latin1");
+    let out: Uint8Array;
+    if (!filters.length) out = s.contents;
+    else if (filters.length === 1 && filters[0] === "FlateDecode") {
+      const parms = s.dict.lookup(N("DecodeParms"));
+      if (parms instanceof PDFDict && num(parms.lookup(N("Predictor")), 1) > 1) return "";
+      out = inflateCapped(s.contents, cap);
+    } else if (filters.every((x) => x === "ASCIIHexDecode" || x === "ASCII85Decode")) out = decodePDFRawStream(s).decode();
+    else return "";
+    const n = Math.min(out.length, cap);
+    budget.bytes -= n;
+    return Buffer.from(out.subarray(0, n)).toString("latin1");
   } catch {
-    return "";   // a filter pdf-lib does not do (a picture's DCT, say): nothing to read there
+    return "";   // over the cap, broken, or a filter not read here: nothing to read there
   }
 }
 
-function fontInfo(font: PDFDict): FontInfo {
+/**
+ * pdf-lib inflates every object stream (and the cross-reference stream) while it
+ * loads, with no limit. Before that, inflate those few streams here against the
+ * document's byte budget: a file whose object streams unpack past it is refused
+ * as broken. Page contents and pictures are not touched — they are read later,
+ * capped, or never.
+ */
+function checkObjectStreams(bytes: Uint8Array, budget: Budget): void {
+  const s = Buffer.from(bytes).toString("latin1");
+  const re = /stream(\r\n|\n|\r)/g;
+  let m: RegExpExecArray | null;
+  let seen = 0;
+  while ((m = re.exec(s))) {
+    if (s.slice(m.index - 3, m.index) === "end") continue;
+    const head = s.slice(Math.max(0, m.index - 2048), m.index);
+    const dict = head.slice(head.lastIndexOf(" obj"));
+    if (!/\/Type\s*\/(ObjStm|XRef)\b/.test(dict) || !/\/FlateDecode\b/.test(dict)) continue;
+    if (++seen > 20_000) throw new PdfTextError("broken");
+    const start = m.index + m[0].length;
+    const end = s.indexOf("endstream", start);
+    if (end < 0) break;
+    let out: Buffer;
+    try {
+      out = inflateCapped(bytes.subarray(start, end), budget.bytes);
+    } catch (err) {
+      if ((err as { code?: string }).code === "ERR_BUFFER_TOO_LARGE") throw new PdfTextError("broken");
+      continue;   // a stream zlib will not read: pdf-lib decides about it
+    }
+    budget.bytes -= out.length;
+    if (budget.bytes <= 0) throw new PdfTextError("broken");
+    re.lastIndex = end;
+  }
+}
+
+function fontInfo(font: PDFDict, budget: Budget): FontInfo {
   const sub = nameOf(font.lookup(N("Subtype")));
   const tu = font.lookup(N("ToUnicode"));
-  const cmap = tu instanceof PDFRawStream ? parseToUnicode(streamText(tu)) : null;
+  const cmap = tu instanceof PDFRawStream ? parseToUnicode(streamText(tu, budget)) : null;
   if (sub === "Type0") {
     const desc = font.lookupMaybe(N("DescendantFonts"), PDFArray)?.lookup(0);
     const d = desc instanceof PDFDict ? desc : null;
@@ -182,15 +257,21 @@ function fontInfo(font: PDFDict): FontInfo {
     const w = new Map<number, number>();
     const W = d?.lookupMaybe(N("W"), PDFArray);
     if (W) {
-      for (let i = 0; i < W.size() && w.size < 70_000;) {
+      // every code an entry names is charged to one step budget, so repeating a
+      // wide range cannot loop past it even when it adds nothing new to the map
+      let steps = 0;
+      for (let i = 0; i < W.size() && steps < PDF_TEXT_LIMITS.cmapSteps;) {
         const first = num(W.lookup(i));
         const next = W.lookup(i + 1);
         if (next instanceof PDFArray) {
-          for (let k = 0; k < next.size(); k++) w.set(first + k, num(next.lookup(k)));
+          const k1 = Math.min(next.size(), PDF_TEXT_LIMITS.cmapSteps - steps);
+          for (let k = 0; k < k1; k++) w.set(first + k, num(next.lookup(k)));
+          steps += Math.max(1, k1);
           i += 2;
         } else {
-          const last = num(next), width = num(W.lookup(i + 2));
-          for (let c = first; c <= last && c - first < 70_000; c++) w.set(c, width);
+          const last = Math.min(num(next), first + (PDF_TEXT_LIMITS.cmapSteps - steps) - 1), width = num(W.lookup(i + 2));
+          for (let c = first; c <= last; c++) w.set(c, width);
+          steps += Math.max(1, last - first + 1);
           i += 3;
         }
       }
@@ -325,7 +406,7 @@ class Lexer {
   }
 }
 
-interface RunState { budget: { tokens: number }; pieces: Piece[]; unknown: number; known: number; fonts: Map<PDFDict, FontInfo>; seen: Set<PDFObject> }
+interface RunState { budget: Budget; pieces: Piece[]; unknown: number; known: number; fonts: Map<PDFDict, FontInfo>; seen: Set<PDFObject> }
 
 function runContent(src: string, resources: PDFDict | undefined, ctm0: M6, st: RunState, depth: number): void {
   const lex = new Lexer(src, st.budget);
@@ -370,8 +451,8 @@ function runContent(src: string, resources: PDFDict | undefined, ctm0: M6, st: R
         const fname = ops.find((o) => o.t === "name");
         size = n.length ? n[n.length - 1] : size;
         const fd = fname && fontsDict ? fontsDict.lookup(N((fname as { v: string }).v)) : undefined;
-        if (fd instanceof PDFDict) {
-          if (!st.fonts.has(fd)) st.fonts.set(fd, fontInfo(fd));
+        if (fd instanceof PDFDict && (st.fonts.has(fd) || st.fonts.size < PDF_TEXT_LIMITS.fonts)) {
+          if (!st.fonts.has(fd)) st.fonts.set(fd, fontInfo(fd, st.budget));
           font = st.fonts.get(fd)!;
         } else font = null;
         break;
@@ -416,7 +497,7 @@ function runContent(src: string, resources: PDFDict | undefined, ctm0: M6, st: R
         const mx = xo.dict.lookupMaybe(N("Matrix"), PDFArray);
         const m6 = mx && mx.size() === 6 ? ([0, 1, 2, 3, 4, 5].map((i) => num(mx.lookup(i))) as M6) : ID;
         const res = xo.dict.lookupMaybe(N("Resources"), PDFDict) ?? resources;
-        runContent(streamText(xo), res, mul(m6, ctm), st, depth + 1);
+        runContent(streamText(xo, st.budget), res, mul(m6, ctm), st, depth + 1);
         break;
       }
       case "BI": lex.skipInlineImage(); break;
@@ -447,19 +528,19 @@ function linesOf(pieces: Piece[]): string[] {
   }).filter(Boolean);
 }
 
-function contentsOf(page: { node: { Contents(): PDFObject | undefined } }): string {
+function contentsOf(page: { node: { Contents(): PDFObject | undefined } }, budget: Budget): string {
   const c = page.node.Contents();
   if (c instanceof PDFArray) {
     const parts: string[] = [];
     let total = 0;
-    for (let i = 0; i < c.size() && total < PDF_TEXT_LIMITS.contentBytes; i++) {
-      const t = streamText(c.lookup(i), PDF_TEXT_LIMITS.contentBytes - total);
+    for (let i = 0; i < c.size() && total < PDF_TEXT_LIMITS.contentBytes && budget.bytes > 0; i++) {
+      const t = streamText(c.lookup(i), budget, PDF_TEXT_LIMITS.contentBytes - total);
       parts.push(t);
       total += t.length;
     }
     return parts.join("\n");
   }
-  return streamText(c);
+  return streamText(c, budget);
 }
 
 /**
@@ -470,6 +551,8 @@ function contentsOf(page: { node: { Contents(): PDFObject | undefined } }): stri
  */
 export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; pageCount: number }> {
   if (!Buffer.from(bytes.subarray(0, 1024)).toString("latin1").includes("%PDF-")) throw new PdfTextError("not_pdf");
+  const budget: Budget = { tokens: PDF_TEXT_LIMITS.tokens, bytes: PDF_TEXT_LIMITS.decoded };
+  checkObjectStreams(bytes, budget);
   let doc: PDFDocument;
   try {
     doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false, throwOnInvalidObject: false, parseSpeed: ParseSpeeds.Fastest });
@@ -483,14 +566,14 @@ export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; p
   } catch {
     throw new PdfTextError("broken");
   }
-  const st: RunState = { budget: { tokens: PDF_TEXT_LIMITS.tokens }, pieces: [], unknown: 0, known: 0, fonts: new Map(), seen: new Set() };
+  const st: RunState = { budget, pieces: [], unknown: 0, known: 0, fonts: new Map(), seen: new Set() };
   const pages: PdfPage[] = [];
   let total = 0;
   for (let i = 0; i < Math.min(list.length, PDF_TEXT_LIMITS.pages) && total < PDF_TEXT_LIMITS.total && st.budget.tokens > 0; i++) {
     st.pieces = [];
     st.seen = new Set();
     try {
-      runContent(contentsOf(list[i]), list[i].node.Resources(), ID, st, 0);
+      runContent(contentsOf(list[i], budget), list[i].node.Resources(), ID, st, 0);
     } catch {
       continue;   // one page that will not read is one page without text
     }
@@ -507,4 +590,4 @@ export async function pdfPages(bytes: Uint8Array): Promise<{ pages: PdfPage[]; p
 }
 
 /** For tests: the lexer and the line setter on their own. */
-export const _test = { Lexer, linesOf };
+export const _test = { Lexer, linesOf, streamText, fontInfo, checkObjectStreams };

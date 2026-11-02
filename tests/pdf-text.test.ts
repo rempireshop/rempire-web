@@ -8,10 +8,11 @@
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { deflateSync } from "node:zlib";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDict, PDFDocument, PDFRawStream, StandardFonts } from "pdf-lib";
 import { describe, expect, it } from "vitest";
-import { glyphToText, pageHeading, parseToUnicode, pdfPages, PdfTextError, _test } from "@/lib/pdf-text";
+import { glyphToText, pageHeading, parseToUnicode, PDF_TEXT_LIMITS, pdfPages, PdfTextError, _test } from "@/lib/pdf-text";
 
 const GOLOS = readFileSync(fileURLToPath(new URL("../public/fonts/GolosText-Regular.ttf", import.meta.url)));
 
@@ -105,5 +106,49 @@ describe("a PDF's text, read on the server", () => {
       toks.push(t);
     }
     expect(toks).toEqual([{ t: "str", v: "a(b)A" }, { t: "str", v: "HI" }, { t: "op", v: "Q" }]);
+  });
+});
+
+/* A PDF comes from a stranger's address: a small file must not unpack into
+   gigabytes, nor a font table into millions of loop steps (security review of
+   3c035572, 02.11.2026). */
+describe("a hostile PDF stays inside its limits", () => {
+  it("does not inflate a Flate stream past the document's byte budget", async () => {
+    const doc = await PDFDocument.create();
+    const bomb = deflateSync(Buffer.alloc(8 * 1024 * 1024));
+    const s = PDFRawStream.of(doc.context.obj({ Filter: "FlateDecode" }) as PDFDict, bomb);
+    const budget = { tokens: 1000, bytes: 64 * 1024 };
+    const t0 = Date.now();
+    expect(_test.streamText(s, budget)).toBe("");
+    expect(budget.bytes).toBe(64 * 1024);
+    expect(Date.now() - t0).toBeLessThan(2000);
+    // a stream inside the budget still reads, and is charged to it
+    const ok = PDFRawStream.of(doc.context.obj({ Filter: "FlateDecode" }) as PDFDict, deflateSync(Buffer.from("BT (Hi) Tj ET")));
+    expect(_test.streamText(ok, budget)).toBe("BT (Hi) Tj ET");
+    expect(budget.bytes).toBe(64 * 1024 - 13);
+  });
+
+  it("refuses a file whose object streams unpack past the budget, before pdf-lib opens them", () => {
+    const huge = deflateSync(Buffer.alloc(PDF_TEXT_LIMITS.decoded + 1024 * 1024));
+    const head = Buffer.from(`%PDF-1.7\n1 0 obj\n<< /Type /ObjStm /N 1 /First 4 /Filter /FlateDecode /Length ${huge.length} >>\nstream\n`, "latin1");
+    const tail = Buffer.from("\nendstream\nendobj\n%%EOF\n", "latin1");
+    const file = new Uint8Array(Buffer.concat([head, huge, tail]));
+    expect(() => _test.checkObjectStreams(file, { tokens: 1, bytes: PDF_TEXT_LIMITS.decoded })).toThrow(PdfTextError);
+    return expect(pdfPages(file)).rejects.toMatchObject({ code: "broken" });
+  });
+
+  it("charges wide ToUnicode ranges and W widths to one step budget", async () => {
+    const t0 = Date.now();
+    const lines = Array.from({ length: 2000 }, () => "<0000> <FFFF> <0041>").join("\n");
+    const { map } = parseToUnicode(`1 begincodespacerange <0000> <FFFF> endcodespacerange\n2000 beginbfrange\n${lines}\nendbfrange`);
+    expect(map.size).toBeLessThanOrEqual(PDF_TEXT_LIMITS.cmapSteps);
+
+    const doc = await PDFDocument.create();
+    const W = doc.context.obj(Array.from({ length: 3000 }, () => [0, 65535, 500]).flat());
+    const desc = doc.context.obj({ Type: "Font", Subtype: "CIDFontType2", W });
+    const font = doc.context.obj({ Type: "Font", Subtype: "Type0", DescendantFonts: [desc] }) as PDFDict;
+    const info = _test.fontInfo(font, { tokens: 1000, bytes: 1024 });
+    expect(info.widths(10)).toBe(500);
+    expect(Date.now() - t0).toBeLessThan(3000);
   });
 });
