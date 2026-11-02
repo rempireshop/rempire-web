@@ -7819,9 +7819,7 @@
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^1 товар$/, { ET: "1 toode", EN: "1 product" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
-    // the blog (02.11.2026): «6 статей», «9 мин чтения», «Все 34 товара», a carousel mark
-    [/^1 статья$/, { ET: "1 artikkel", EN: "1 article" }],
-    [/^(\d+) стать(?:я|и|ей)$/, { ET: "$1 artiklit", EN: "$1 articles" }],
+    // the blog (02.11.2026): «9 мин чтения», «Все 34 товара», a carousel mark («6 статей» is above, «Обзор»'s own)
     [/^(\d+) мин чтения$/, { ET: "$1 min lugemist", EN: "$1 min read" }],
     [/^Все (\d+) товар(?:|а|ов)$/, { ET: "Kõik $1 toodet", EN: "All $1 products" }],
     [/^Статья (\d+)$/, { ET: "Artikkel $1", EN: "Article $1" }],
