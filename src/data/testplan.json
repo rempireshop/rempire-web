@@ -9223,7 +9223,7 @@
       "risk": "med",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-11-02T11:36:06.874Z",
+      "markedAt": "2026-11-02T11:58:13.375Z",
       "en": {
         "title": "New article: a brand PDF into the materials",
         "steps": [
@@ -9353,7 +9353,7 @@
       "risk": "high",
       "writes": true,
       "mark": "redo",
-      "markedAt": "2026-11-02T11:36:06.874Z",
+      "markedAt": "2026-11-02T11:58:13.375Z",
       "en": {
         "title": "A draft from the materials, then publish",
         "steps": [
@@ -9389,17 +9389,18 @@
         "Переключить ET, затем EN, и найти цитату Кевина."
       ],
       "expect": [
+        "Черновик — про линию Hydrate; других линий каталога в нём нет.",
         "В списке товаров черновика есть NIGHT.SHIFT 100ml.",
         "В разделе NIGHT.SHIFT стоит его карточка.",
         "Название товара над его карточкой — обычный текст, не ссылка.",
         "В ET цитата в кавычках „…“.",
         "В EN цитата в кавычках “…”."
       ],
-      "why": "В первом черновике NIGHT.SHIFT остался без товара, каждый товар был ссылкой дважды подряд, а в ET стояли русские «…».",
+      "why": "В первом черновике NIGHT.SHIFT остался без товара, каждый товар был ссылкой дважды подряд, в ET стояли русские «…», а ИИ читал страницы всего каталога.",
       "risk": "med",
       "writes": true,
       "mark": "new",
-      "markedAt": "2026-11-02T11:36:06.874Z",
+      "markedAt": "2026-11-02T11:58:13.375Z",
       "en": {
         "title": "Draft: one card per product, each language's quotation marks",
         "steps": [
@@ -9409,13 +9410,14 @@
           "Switch to ET, then EN, and find Kevin's quote."
         ],
         "expect": [
+          "The draft is about the Hydrate line; no other line of the catalogue appears.",
           "The draft's product list has NIGHT.SHIFT 100ml.",
           "The NIGHT.SHIFT section has its card.",
           "A product's name above its card is plain text, not a link.",
           "In ET the quote is in „…“ marks.",
           "In EN the quote is in “…” marks."
         ],
-        "why": "The first draft left NIGHT.SHIFT without its product, linked every product twice in a row, and kept the Russian «…» in ET."
+        "why": "The first draft left NIGHT.SHIFT without its product, linked every product twice in a row, kept the Russian «…» in ET, and the AI read pages from the whole catalogue."
       }
     },
     {

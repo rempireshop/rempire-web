@@ -22,9 +22,10 @@ vi.mock("@/lib/storage", async (importOriginal) => {
 
 import { checkUrl, fetchPublicPage, guardedLookup, htmlToText, isPrivateAddress, SafeFetchError, type SafeRequest } from "@/lib/safe-fetch";
 import {
-  createMaterial, isOurBlogImage, materialPart, MaterialError, readMaterialInput, selectMaterialText, topicStems,
+  createMaterial, isOurBlogImage, materialKeys, materialPart, MaterialError, readMaterialInput, selectMaterialText, topicStems,
   type Material,
 } from "@/lib/blog-materials";
+import { BRAND_CYRILLIC, brandStems, GENERIC_ROOTS, isLineOpener, keyHits, LATIN_OF, topicKeys } from "@/lib/blog-words.mjs";
 import {
   buildDraftPrompt, buildTranslatePrompt, countUnsure, draftProducts, headingProducts, nameKey, pictureList, placePictures, protectUnsure,
   QUOTE_MARKS, readDraftJson, restoreUnsure, shapeDraftBody, sourcesOf, stripUnsure, unfence, unlinkCarded,
@@ -229,6 +230,41 @@ describe("selectMaterialText — never the whole catalogue", () => {
     expect(text).toContain("[стр. 119");                 // the text page before the ticked photo on p. 120
     expect(text.indexOf("стр. 41")).toBeLessThan(text.indexOf("стр. 119"));
     expect(text).not.toContain("HYDRATE-ME.WASH");
+  });
+
+  /* Real test, 02.11.2026: «kevin», «волос» and «уход» are on every page of
+     the catalogue, so every page scored and the 45 000 characters filled up
+     with pages about other lines. */
+  it("reads the ticked photos' pages, then the named line, then the best text matches — the brand and everybody's words score nothing", () => {
+    const page = (n: number, heading: string, words: string) => ({ n, heading, text: `${heading}\n${words} ` + "x".repeat(300) });
+    const pages = [
+      page(2, "НАША МИССИЯ", "Kevin.Murphy: уход за волосами, шампунь, кондиционер и маска."),
+      page(16, "DETOX", "Очищение кожи головы. Kevin.Murphy."),
+      page(18, "MAXI.WASH", "Шампунь для волос. Kevin.Murphy, уход."),
+      page(20, "SMOOTH.AGAIN", "Для волос зимой."),                 // another line's page that says one topic word
+      page(24, "HYDRATE", "Увлажняющая линия."),                    // the line the topic names opens…
+      page(26, "HYDRATE-ME.WASH", "Шампунь."),
+      page(32, "UN.TANGLED", "Спрей."),
+      page(36, "NIGHT.SHIFT", "Масло на ночь."),                    // …the ticked photo's page is in it…
+      page(38, "EVERLASTING.", "Цвет."),                            // …and the next line closes it
+      page(40, "EVERLASTING.COLOUR WASH", "Шампунь."),
+      page(60, "ANGEL.WASH", "Шампунь для тонких."),
+    ];
+    const m = material({ pages, text: pages.map((p) => p.text).join("\n\n"), images: [img(37, 37, "NIGHT.SHIFT — фото")] });
+    const about = "Сухие волосы зимой: увлажняющая линия Hydrate от Kevin.Murphy — шампунь, кондиционер, маска и ночной уход. И ANGEL.WASH.";
+    expect(materialKeys(about)).toEqual(["сухие", "зимой", "увлаж", "hydra", "ночно", "angel"]);
+    const s = selectMaterialText([m], about);
+    // the ticked photo's page, the line's pages, then a page outside the line whose heading the topic names
+    expect(s.headings).toEqual(["NIGHT.SHIFT", "HYDRATE", "HYDRATE-ME.WASH", "UN.TANGLED", "ANGEL.WASH"]);
+    // the brand's and everybody's words read nothing; outside a named line, neither does «зимой» in a page's text
+    for (const out of ["НАША МИССИЯ", "DETOX", "MAXI.WASH", "EVERLASTING", "SMOOTH.AGAIN"]) expect(s.blocks[0].text).not.toContain(out);
+    expect(s.blocks[0].text.indexOf("стр. 24")).toBeLessThan(s.blocks[0].text.indexOf("стр. 36"));   // read in page order
+    // a short budget keeps the order of importance
+    expect(selectMaterialText([m], about, 1100).headings).toEqual(["NIGHT.SHIFT", "HYDRATE", "HYDRATE-ME.WASH"]);
+    // no line named: after the ticked photo's page, the pages whose text says the topic
+    expect(selectMaterialText([m], "Ночной уход для сухих волос зимой").headings).toEqual(["NIGHT.SHIFT", "SMOOTH.AGAIN"]);
+    // nothing but the brand and everybody's words, and no picture: the first pages, as before
+    expect(selectMaterialText([{ ...m, images: [] }], "Уход за волосами Kevin.Murphy", 1000).blocks[0].text.startsWith("[стр. 2 · НАША МИССИЯ]")).toBe(true);
   });
 
   it("cuts a sample to its tone, and reads a link or a text as it is", () => {
@@ -608,18 +644,21 @@ describe("the Помощник can start a draft from materials too", () => {
       throw new Error(name);
     };
     const varOf = (name: string) => app.slice(app.indexOf(`var ${name} = `), app.indexOf(";", app.indexOf(`var ${name} = `)) + 1);
-    const CATALOGUE = [{ brand: "Kevin.Murphy" }, { brand: "Davines" }, { brand: "Paul Mitchell" }];
-    return new Function("CATALOGUE", `var BNEW_PRETICK_MAX = 8; ${varOf("BNEW_STOP")} ${varOf("BNEW_GENERIC")} ${varOf("BNEW_LAT")}
-      ${slice("bnewStems")} ${slice("bnewPageInfo")} ${slice("bnewPair")} ${slice("bnewBrandStems")} ${slice("bnewKeys")} ${slice("bnewOpener")} ${slice("bnewPreTick")}
-      return { bnewStems, bnewPageInfo, bnewPair, bnewPreTick, bnewKeys, bnewOpener };`)(CATALOGUE) as {
+    return new Function("CATALOGUE", `var BNEW_PRETICK_MAX = 8; ${varOf("BNEW_STOP")} ${varOf("BNEW_GENERIC")} ${varOf("BNEW_LAT")} ${varOf("BNEW_BRAND_CYR")}
+      ${slice("bnewStems")} ${slice("bnewPageInfo")} ${slice("bnewPair")} ${slice("bnewFold")} ${slice("bnewBrandStems")} ${slice("bnewKeys")} ${slice("bnewOpener")} ${slice("bnewPreTick")}
+      return { bnewStems, bnewPageInfo, bnewPair, bnewPreTick, bnewKeys, bnewOpener, BNEW_GENERIC, BNEW_LAT, BNEW_BRAND_CYR };`)(PANEL_BRANDS.map((brand) => ({ brand }))) as {
       bnewStems: (s: string) => string[];
       bnewPageInfo: (tc: unknown, ops: unknown, OPS: unknown, n: number) => PanelPage;
       bnewPair: (item: unknown) => void;
       bnewPreTick: (item: unknown, stems: string[]) => void;
       bnewKeys: (stems: string[]) => string[];
       bnewOpener: (heading: string) => boolean;
+      BNEW_GENERIC: string[];
+      BNEW_LAT: Record<string, string>;
+      BNEW_BRAND_CYR: string[];
     };
   };
+  const PANEL_BRANDS = ["Kevin.Murphy", "Davines", "Paul Mitchell"];
   const OPS = { paintImageXObject: 85, paintInlineImageXObject: 86, paintImageXObjectRepeat: 88 };
   const line = (str: string, y: number, x = 50) => ({ str, transform: [1, 0, 0, 1, x, y] });
 
@@ -733,6 +772,36 @@ describe("the Помощник can start a draft from materials too", () => {
     fns.bnewPreTick(longItem, fns.bnewStems("Volume"));
     expect(long.filter((p) => p.tick)).toHaveLength(8);
     expect(long.filter((p) => p.tick)[0].n).toBe(2);
+  });
+
+  /* One word list for the two pickers: the panel cannot import, so it
+     mirrors src/lib/blog-words.mjs — and the mirror is held to it here. */
+  it("the panel's word lists are the server's, and they answer alike", () => {
+    const fns = panel();
+    expect(fns.BNEW_GENERIC).toEqual(GENERIC_ROOTS);
+    expect(fns.BNEW_LAT).toEqual(LATIN_OF);
+    expect(fns.BNEW_BRAND_CYR).toEqual(BRAND_CYRILLIC);
+    const brands = brandStems(PANEL_BRANDS);
+    for (const about of [
+      "Сухие волосы зимой: увлажняющая линия Hydrate от Kevin.Murphy — шампунь, кондиционер, маска и ночной уход. Как выбрать и пользоваться.",
+      "Кевин Мёрфи о тонких волосах: Angel и Plumping", "Ёжик и объём: Davines и Paul Mitchell", "Juuksehooldus talvel: Hydrate-Me.Wash", "MAXI.WASH для кожи головы",
+    ]) {
+      expect(fns.bnewKeys(fns.bnewStems(about)), about).toEqual(topicKeys(topicStems(about), brands));
+    }
+    for (const h of ["HYDRATE", "EVERLASTING.", "EVERLASTING. COLOUR", "STYLE/CONTROL", "STYLE / CONTROL", "R&D", "CURL", "NIGHT.SHIFT", "КЕВИН:", "HYDRATE-ME.WASH", "BLOW DRY", "NEW", ""]) {
+      expect(fns.bnewOpener(h), h).toBe(isLineOpener(h));
+    }
+  });
+
+  it("knows the brand in Cyrillic too: «Мёрфи», «Мерфи», «Кевин Мёрфи», «Кевина Мёрфи» pick nothing", () => {
+    const fns = panel();
+    const brands = brandStems(PANEL_BRANDS);
+    for (const about of ["Мёрфи", "Мерфи", "Кевин Мёрфи", "Кевина Мёрфи", "КЕВИНА МЕРФИ", "Kevin Murphy", "Kevin.Murphy"]) {
+      expect(topicKeys(topicStems(about), brands), about).toEqual([]);
+      expect(fns.bnewKeys(fns.bnewStems(about)), about).toEqual([]);
+    }
+    expect(topicKeys(topicStems("Ёжик от Кевина Мёрфи: Hydrate"), brands)).toEqual(["ежик", "hydra"]);   // ё folded, the rest stays
+    expect(keyHits("Объём ЁЖИКА", ["ежик", "объем"])).toBe(2);
   });
 
   it("the panel reads PDFs itself, lazily, from the self-hosted pinned build — and never on a shop page", () => {

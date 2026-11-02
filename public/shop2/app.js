@@ -29178,7 +29178,10 @@
      02.11.2026: «Сухие волосы зимой: … Hydrate от Kevin.Murphy — шампунь,
      кондиционер, маска и ночной уход» ticked the catalogue's first eight
      photo pages, because «kevin», «волос» and «уход» are on every one of them
-     and the eight were taken in page order. */
+     and the eight were taken in page order.
+     A MIRROR of src/lib/blog-words.mjs (GENERIC_ROOTS, BRAND_CYRILLIC,
+     LATIN_OF, topicKeys, isLineOpener), which the server's choice of pages
+     reads; tests/blog-materials.test.ts holds the two equal. Change both. */
   var BNEW_GENERIC = ["волос", "уход", "ухаж", "лини", "линей", "шампу", "конди", "маск", "масл", "спре", "крем", "гел", "паст", "воск",
     "средс", "проду", "товар", "косме", "бренд", "салон", "профе", "приме", "преим", "ингре", "основ", "испол", "польз", "выбра", "выбор",
     "нанес", "кожа", "кожи", "кожу", "голов", "hair", "care", "line", "shamp", "condi", "mask", "masqu", "wash", "rinse", "spray", "oil",
@@ -29186,24 +29189,30 @@
   var BNEW_LAT = { "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z", "и": "i", "й": "i", "к": "k",
     "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ц": "c", "ч": "ch",
     "ш": "sh", "щ": "sh", "ы": "y", "э": "e", "ю": "yu", "я": "ya" };
+  var BNEW_BRAND_CYR = ["кевин", "мерфи", "мэрфи", "мурфи"];
+  /** Lower case, ё as е — a key and the text it is looked for in, alike. */
+  function bnewFold(s) { return String(s || "").toLowerCase().replace(/ё/g, "е"); }
   /** Every brand the shop sells, as stems: «Kevin.Murphy» → kevin, murph. */
   function bnewBrandStems() {
     var out = {};
     (typeof CATALOGUE === "undefined" ? [] : CATALOGUE).forEach(function (p) {
-      String((p && p.brand) || "").toLowerCase().split(/[^a-z0-9а-яёõäöüšž]+/).forEach(function (w) {
+      bnewFold((p && p.brand) || "").split(/[^a-z0-9а-яёõäöüšž]+/).forEach(function (w) {
         if (w.length >= 3) out[w.length > 5 ? w.slice(0, 5) : w] = 1;
       });
     });
     return out;
   }
-  /** The topic's stems that can pick a page: no generic word, no brand — «Кевина» is the brand too. */
+  /** The topic's stems that can pick a page, folded: no generic word, no brand — «Кевина Мёрфи» is the brand too. */
   function bnewKeys(stems) {
-    var brands = bnewBrandStems();
-    return (stems || []).filter(function (s) {
-      for (var g = 0; g < BNEW_GENERIC.length; g++) if (s.indexOf(BNEW_GENERIC[g]) === 0) return false;
-      var lat = s.replace(/[а-яё]/g, function (c) { return BNEW_LAT[c] || ""; }).slice(0, 5);
-      return !brands[s] && !brands[lat];
+    var brands = bnewBrandStems(), out = [];
+    (stems || []).forEach(function (raw) {
+      var s = bnewFold(raw), g;
+      for (g = 0; g < BNEW_GENERIC.length; g++) if (s.indexOf(BNEW_GENERIC[g]) === 0) return;
+      for (g = 0; g < BNEW_BRAND_CYR.length; g++) if (s.indexOf(BNEW_BRAND_CYR[g]) === 0) return;
+      var lat = s.replace(/[а-я]/g, function (c) { return BNEW_LAT[c] || ""; }).slice(0, 5);
+      if (!brands[s] && !brands[lat] && out.indexOf(s) < 0) out.push(s);
     });
+    return out;
   }
   /* A line's own opening page — «HYDRATE», «REPAIR», «DETOX», «EVERLASTING.
      COLOUR», «STYLE/CONTROL», or «CURL» printed on a picture: Latin capitals,
@@ -29224,7 +29233,7 @@
   function bnewPreTick(item, stems) {
     var keys = bnewKeys(stems);
     var hits = function (text) {
-      var low = String(text || "").toLowerCase(), n = 0;
+      var low = bnewFold(text), n = 0;
       keys.forEach(function (k) { if (low.indexOf(k) >= 0) n++; });
       return n;
     };
