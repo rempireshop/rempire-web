@@ -94,7 +94,11 @@ export async function POST(req: Request) {
       const input = readMaterialInput({
         kind: "link",
         url: page.url,
-        name: typeof body.name === "string" && body.name.trim() ? body.name : (page.title ? `${host} — ${page.title}` : host),
+        /* The host, not the page's own <title>: a name goes into the panel
+           assistant's prompt and Claude's tool output, and a title is text
+           a stranger wrote (security review, 02.11.2026). The owner can
+           rename it. */
+        name: typeof body.name === "string" && body.name.trim() ? body.name : host,
         text: page.text,
       });
       const material = await createMaterial(input);

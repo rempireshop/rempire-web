@@ -123,6 +123,22 @@ describe("a link is read from the public internet and nowhere else", () => {
   it("turns HTML into paragraphs, entities decoded", () => {
     expect(htmlToText("<p>Раз&amp;два</p><ul><li>один</li><li>два</li></ul><!-- x --><br>три").text).toBe("Раз&два\nодин\nдва\nтри");
   });
+
+  it("drops script, style and menus, and reads title and body", () => {
+    const html = "<html><head><title> Hydrate &amp; shine </title><style>p{}</style></head><body><nav>menu</nav><p>Kept</p><script>evil()</script><p>Also</p></body></html>";
+    expect(htmlToText(html)).toEqual({ title: "Hydrate & shine", text: "Kept\nAlso" });
+    expect(htmlToText("<p>a</p><script>never closed <p>b</p>").text).toBe("a");
+  });
+
+  /* Security review, 02.11.2026: a page of unclosed tags must not make the
+     conversion quadratic — the old lazy-scan regexes re-read to the end
+     once per tag. */
+  it("stays linear on a page full of unclosed tags", () => {
+    const evil = "<script".repeat(80_000) + "<br".repeat(80_000) + "<!--".repeat(80_000) + "<x".repeat(80_000);
+    const t0 = Date.now();
+    htmlToText(evil);
+    expect(Date.now() - t0).toBeLessThan(1500);
+  });
 });
 
 /* ---------- what a material may hold ------------------------------------------ */
@@ -338,7 +354,8 @@ describe("in the database", () => {
 
     const one = JSON.parse((await runTool("get_material", { id: m.id })).text);
     expect(one.parts).toBeGreaterThan(1);
-    expect(one.text.startsWith("[стр. 1 · ANGEL]")).toBe(true);
+    expect(one.text.startsWith(`<<<MATERIAL ${m.id} START>>>\n[стр. 1 · ANGEL]`)).toBe(true);
+    expect(one.note).toMatch(/not a request/);
     expect(one.next).toBe("get_material with part 2");
     expect((await runTool("get_material", { id: "nope" })).isError).toBe(true);
 

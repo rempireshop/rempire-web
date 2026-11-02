@@ -194,7 +194,10 @@ async function bundleLinesForPrompt(): Promise<string> {
 async function adminMaterialLinesForPrompt(): Promise<string> {
   try {
     const all = await listMaterials(15);
-    return all.map((m) => `${m.id}|${m.kind}${m.sample ? " sample" : ""}|${m.name}|${m.pageCount ? m.pageCount + " pages|" : ""}${m.images.length} pictures`).join("\n");
+    /* A name is data: it may come from a file name or a web address, so the
+       field separator and line breaks are taken out, and it is quoted. */
+    const safeName = (s: string) => JSON.stringify(String(s || "").replace(/[|\r\n\t]+/g, " ").trim().slice(0, 80));
+    return all.map((m) => `${m.id}|${m.kind}${m.sample ? " sample" : ""}|${safeName(m.name)}|${m.pageCount ? m.pageCount + " pages|" : ""}${m.images.length} pictures`).join("\n");
   } catch {
     return "";
   }

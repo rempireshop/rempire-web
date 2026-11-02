@@ -264,16 +264,59 @@ function decode(s: string): string {
   });
 }
 
+/* Everything below runs on a page somebody else wrote, so every step is
+ * linear: no lazy scans to a closing tag, no unbounded `[^>]*` that a page
+ * full of unclosed «<br» would rescan to the end once per tag (security
+ * review, 02.11.2026). Only the first HTML_SCAN_MAX characters are read;
+ * the text kept is capped at 60k anyway. */
+const HTML_SCAN_MAX = 600_000;
+const SKIP_TAGS = /<(script|style|noscript|svg|template|iframe|head|nav|footer|form)\b/gi;
+
+/** `src` with every `open … close` span cut out; an unclosed one cuts to the end. */
+function cutSpans(src: string, lower: string, open: string, close: (m: string) => string, rx?: RegExp): string {
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    let at: number;
+    let closeTag: string;
+    if (rx) {
+      rx.lastIndex = pos;
+      const m = rx.exec(lower);
+      if (!m) break;
+      at = m.index;
+      closeTag = close(m[1]);
+    } else {
+      at = lower.indexOf(open, pos);
+      if (at < 0) break;
+      closeTag = close("");
+    }
+    out += src.slice(pos, at) + " ";
+    const end = lower.indexOf(closeTag, at + 1);
+    if (end < 0) return out;
+    const gt = closeTag.endsWith(">") ? end + closeTag.length : lower.indexOf(">", end);
+    if (gt < 0) return out;
+    pos = closeTag.endsWith(">") ? gt : gt + 1;
+  }
+  return out + src.slice(pos);
+}
+
 /** The words a reader of the page sees, as paragraphs; no script, style or menu markup. */
 export function htmlToText(html: string): { title: string; text: string } {
-  const src = String(html || "");
-  const title = decode((src.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "").replace(/\s+/g, " ").trim()).slice(0, 200);
-  const body = (src.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? src)
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<(script|style|noscript|svg|template|iframe|head|nav|footer|form)[\s\S]*?<\/\1\s*>/gi, " ")
-    .replace(/<(br|hr)\b[^>]*>/gi, "\n")
-    .replace(/<\/?(p|div|section|article|li|ul|ol|h[1-6]|tr|table|blockquote|header|main|figure|figcaption|dd|dt)\b[^>]*>/gi, "\n")
-    .replace(/<[^>]+>/g, " ");
+  const src = String(html || "").slice(0, HTML_SCAN_MAX);
+  const lower = src.toLowerCase();
+  const ts = lower.indexOf("<title");
+  const tgt = ts < 0 ? -1 : lower.indexOf(">", ts);
+  const te = tgt < 0 ? -1 : lower.indexOf("</title", tgt);
+  const title = decode((te < 0 ? "" : src.slice(tgt + 1, te)).replace(/\s+/g, " ").trim()).slice(0, 200);
+  const bs = lower.indexOf("<body");
+  const bgt = bs < 0 ? -1 : lower.indexOf(">", bs);
+  const be = bgt < 0 ? -1 : lower.lastIndexOf("</body");
+  const inner = bgt >= 0 ? src.slice(bgt + 1, be > bgt ? be : src.length) : src;
+  const noComments = cutSpans(inner, inner.toLowerCase(), "<!--", () => "-->");
+  const body = cutSpans(noComments, noComments.toLowerCase(), "", (tag) => "</" + tag, SKIP_TAGS)
+    .replace(/<(br|hr)\b[^<>]{0,500}>/gi, "\n")
+    .replace(/<\/?(p|div|section|article|li|ul|ol|h[1-6]|tr|table|blockquote|header|main|figure|figcaption|dd|dt)\b[^<>]{0,2000}>/gi, "\n")
+    .replace(/<[^<>]{0,2000}>/g, " ");
   const text = decode(body)
     .split("\n")
     .map((l) => l.replace(/[\t\f\v  ]+/g, " ").trim())
