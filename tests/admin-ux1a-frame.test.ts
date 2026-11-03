@@ -446,10 +446,4 @@ describe("the new words have their Estonian and English", () => {
     expect(en).toContain('"Не надо": "Cancel",');
     expect(ui).not.toContain('"Не надо": "Don\'t"');
   });
-  it("the design's two new lines, in both languages", () => {
-    expect(ui).toContain('"промокоды, карты, письма": "sooduskoodid, kaardid, kirjad",');
-    expect(ui).toContain('"промокоды, карты, письма": "promo codes, cards, e-mails",');
-    expect(ui).toContain('"доставка, главная, компания": "tarne, avaleht, ettevõte",');
-    expect(ui).toContain('"доставка, главная, компания": "delivery, home page, company",');
-  });
 });

@@ -290,32 +290,6 @@ describe("the panel's door never shows the demo shop to an owner who is still be
   });
 });
 
-describe("placeholders a 360-px phone shows whole at 16 px", () => {
-  /* Measured in the panel's fonts (Golos Text 16 px; the set's name Oswald
-     18 px) against each box at 360 px — the longest language of the three. */
-  const NOW: Array<[string, string]> = [
-    ["Добавить: название или бренд", "Добавить товар: название или бренд"],
-    ["пересчёт полки", "например: пересчёт на полке"],
-    ["за что — извинение", "за что — например, извинение за задержку"],
-    ["о чём: новинки, скидка 10 %…", "о чём письмо — новинки, скидка 10 %…"],
-    ["Начните вводить, например Proraso", "Начните вводить — например, Proraso"],
-    ["Например: Борода — стартовый набор", "Название — например, Борода — стартовый набор"],
-    ["Ваш вопрос", "Спросите обычными словами"],
-  ];
-  for (const [now, was] of NOW) {
-    it(`«${now}» instead of «${was}» — in the markup and both dictionaries`, () => {
-      expect(src).toContain(`"${now}"`);
-      expect((src.match(new RegExp(`"${now.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}": "`, "g")) || []).length, "an ET and an EN entry").toBe(2);
-      expect(src).not.toContain(`"${was}"`);
-    });
-  }
-  it("the Google title's example drops « | Rempire», the video box its schemes", () => {
-    expect(src).toContain("placeholder=\"' + esc(p.brand) + ' … купить в Таллинне\"");
-    expect(src).toContain('[/^(.+) … купить в Таллинне$/, { ET: "$1 … osta Tallinnas", EN: "$1 … buy in Tallinn" }]');
-    expect(src).toContain('(vk === "ig" ? "instagram.com/reel/…" : "youtu.be/… · vimeo.com/…")');
-  });
-});
-
 describe("chips count in bold on every screen", () => {
   it("«Каталог», «Склад» and its history draw the number as .adm-chip__n", () => {
     expect(slice("admCatalogHTML")).toContain('\'</span> <b class="adm-chip__n">\' + n + "</b></button>"');

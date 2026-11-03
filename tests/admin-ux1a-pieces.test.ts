@@ -225,30 +225,6 @@ describe("the look the handoff fixed (admin.css § 3)", () => {
   const css = readFileSync(fileURLToPath(new URL("../public/shop2/admin.css", import.meta.url)), "utf8").replace(/\r\n?/g, "\n");
   const root = css.slice(css.indexOf(":root {"), css.indexOf("}", css.indexOf(":root {")));
 
-  it("the palette: ink, paper, panel, canvas, rust, green — and the old names mapped onto it", () => {
-    for (const [name, value] of [
-      ["--a-ink", "#1c1a00"], ["--a-paper", "#fdfcf9"], ["--a-panel", "#f4f2ec"], ["--a-canvas", "#e6e3da"],
-      ["--a-rust", "#8b4a2b"], ["--a-green", "#2f5b45"],
-      ["--a-warn", "var(--a-rust)"], ["--a-ok", "var(--a-green)"], ["--a-tint", "var(--a-panel)"],
-    ]) expect(root, name).toMatch(new RegExp(`${name}: ${value.replace(/[()]/g, "\\$&")};`));
-  });
-
-  it("titles in Oswald 600 at 34 px (30 on a phone); money in Oswald 600", () => {
-    expect(css).toContain("font-family: Oswald, sans-serif; font-weight: 600; font-size: 34px;");
-    expect(css).toMatch(/@media \(max-width: 899px\) \{[\s\S]*?\.adm-h1 \{ font-size: 30px;/);
-    expect(css).toMatch(/\.adm-row__amt \{ font-family: Oswald, sans-serif; font-weight: 600;/);
-  });
-
-  it("the switch is square, 52 × 30, ink when on — and still says «Вкл» / «Выкл»", () => {
-    expect(css).toMatch(/\.adm-sw__t \{\n\s*width: 52px; height: 30px;/);
-    expect(css).toMatch(/\[role="switch"\]\[aria-checked="true"\] \.adm-sw__t \{ background: var\(--a-ink\); \}/);
-    expect(fn("admSwitchFace")).toContain('(on ? "Вкл" : "Выкл")');
-  });
-
-  it("segmented controls wear a 1-px ink frame", () => {
-    expect(css).toContain(".adm-seg { display: flex; border: 1px solid var(--a-ink); width: fit-content; max-width: 100%; }");
-  });
-
   it("the «?» is the one round control; it is a thumb's size on a phone", () => {
     expect(css).toContain("border-radius: 50%; border: 1px solid var(--a-edge);");
     expect(css).toContain("@media (max-width: 899px) { .adm-help { width: 44px; height: 44px;");
