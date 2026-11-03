@@ -86,11 +86,8 @@ describe("the editor's «Салон, €» column", () => {
   });
 
   it("is what the size grid actually renders below its first row", () => {
-    // 1a: one grid for a catalogue product and the owner's own (edSecSizes);
-    // the two old names hand over to it
-    for (const pane of ["edPaneSizesOwn", "edPaneSizes"]) {
-      expect(slice(pane), pane).toContain("edSecSizes(p)");
-    }
+    // 1a: one grid for a catalogue product and the owner's own (edSecSizes)
+    expect(slice("goodsEditor")).toContain("edSecSizes(p)");
     expect(slice("edSecSizes")).toContain("edSalonRung(");
     // q19: the rows below the first are calculated and grey, never typed
     expect(slice("edSecSizes")).toContain('adm-input--calc" value="\' + salon + \'" readonly');

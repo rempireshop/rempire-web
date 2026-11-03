@@ -184,11 +184,10 @@ describe("one way back per screen — the card's own «← X» steps aside for t
     expect(frame({}, ["section", "setpage", "more"]).pageBack("data-admsetback", "Настройки")).not.toContain("adm-pageback");
   });
 
-  it("hidden only where the top bar stands — and not while a save bar is the phone's header", () => {
+  it("hidden only where the top bar stands", () => {
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(rules).toContain("@media (min-width: 768px) and (max-width: 899px) {\n  .adm2 .adm-pageback { display: none; }\n}");
-    expect(rules).toContain("@media (max-width: 767px) {\n  body:not(.adm-saving) .adm2 .adm-pageback { display: none; }\n}");
-    expect(rules.match(/\.adm-pageback/g), "a desktop rule hides the card's way back").toHaveLength(2);
+    expect(rules).toContain("@media (max-width: 899px) {\n  .adm2 .adm-pageback { display: none; }\n}");
+    expect(rules.match(/\.adm-pageback/g), "a desktop rule hides the card's way back").toHaveLength(1);
   });
 
   it("the set editor's «← Наборы» and the product card's «← Товары» are the same kind of link", () => {
@@ -234,8 +233,7 @@ describe("no site bar above the panel", () => {
     expect(fn("admScrollUnderHeader")).toContain('document.querySelector(".adm-top")');
   });
 
-  it("the phone bar gives way to a save bar while one is the phone's header (≤ 767)", () => {
-    expect(css).toMatch(/@media \(max-width: 767px\) \{[\s\S]*?body\.adm-saving \.adm-top \{ display: none; \}/);
+  it("the phone bar is drawn below 900 px", () => {
     expect(css).toMatch(/\.adm-top \{ display: none; \}\n@media \(max-width: 899px\) \{\n\s*\.adm-top \{\n\s*display: flex;/);
   });
 });
@@ -378,8 +376,6 @@ describe("«Ещё» — one line per section (1a, screen 14)", () => {
     const phone = media("(max-width: 899px)");
     expect(phone).toContain(".adm2--more .adm-page { display: none; }");
     expect(phone).toMatch(/\.adm-more \{ display: block; padding: 20px 16px calc\(var\(--a-barh\) \+ 28px\);/);
-    // …over a form whose save bar is the phone's header, the page keeps the top bar
-    expect(phone).toContain("body.adm-saving .adm2--more .adm-top { display: flex; }");
     // a desktop has the sidebar: a page left open by a window that grew stays out of the way
     expect(css).toContain(".adm-more { display: none; }");
     expect(media("(min-width: 900px)")).not.toContain("adm-more");

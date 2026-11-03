@@ -78,11 +78,9 @@ const page = new Function(
    function goodsEditDirty() { return !!S.adminEdit && DIRTY.goods; }
    function blogReadForm() {}
    function blogDirty() { return false; }
-   function mailDirty() { return false; }
    function newsDirty() { return false; }
    function newsCloseEditor() { S.newsEdit = null; }
    function mailCloseEditor() { S.mailOpen = false; }
-   function mailRevertOne() {}
    function mailTpl() { return null; }
    function goodsBackToRow() {}
    function closeScannerState() { S.scanOpen = false; }

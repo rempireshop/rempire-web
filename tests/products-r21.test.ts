@@ -321,9 +321,7 @@ describe("the «Остаток» box of the sizes grid", () => {
   });
 
   it("is what the size grid actually renders — with − and + beside it (1a)", () => {
-    for (const pane of ["edPaneSizesOwn", "edPaneSizes"]) {
-      expect(slice(pane), pane).toContain("edSecSizes(p)");
-    }
+    expect(slice("goodsEditor")).toContain("edSecSizes(p)");
     expect(slice("edSecSizes")).toContain("edQtyCell(");
     expect(slice("edQtyCell")).toContain("data-edqtystep=\"-1\"");
     expect(slice("edQtyCell")).toContain("data-edqtystep=\"1\"");

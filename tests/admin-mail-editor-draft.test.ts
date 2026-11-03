@@ -12,8 +12,8 @@
  *     draft, unseen, to go out with the next «Сохранить» of another letter;
  *   · «Отменить правки» dropped the whole draft — every letter's edits at
  *     once, not the one on the screen.
- * Now the test sends the open letter's words, and discarding is scoped to
- * the open letter. Since 1a (25.09.2026) a letter saves itself (Dim, q6), so
+ * Now the test sends the open letter's words, and «Отменить правки» went with
+ * the save bar. Since 1a (25.09.2026) a letter saves itself (Dim, q6), so
  * the way out no longer asks: what the letter still owes goes first
  * (admAutosaveFlush), and a text the letter refused — an unfinished «{…}» —
  * is dropped with a toast that says so, never in silence.
@@ -130,15 +130,12 @@ function editor(loaded = true): Env {
      ${fn("objKeys")}
      ${fn("setMailDraftField")}
      ${fn("mailSig")}
-     ${maybe("mailOne")}
-     ${fn("mailDirty")}
      ${arr("MAIL_PH")}
      ${fn("mailTokensOf")}
      ${fn("mailTextProblem")}
      ${fn("mailFieldAs")}
      ${fn("mailDropRefused")}
      var MAIL_PH_UNFINISHED = "u", MAIL_PH_UNKNOWN = "k";
-     ${maybe("mailRevertOne")}
      ${maybe("mailCloseEditor")}
      ${fn("admSection")}
      ${fn("admTrailSync")}
@@ -156,7 +153,6 @@ function editor(loaded = true): Env {
          ${branch("if (d.mailback !== undefined || d.mailbackyes !== undefined)")}
          ${branch("if (d.mailbackno !== undefined)")}
          ${branch("if (d.mailtest !== undefined)")}
-         ${branch("if (d.mailrevert !== undefined)")}
        },
        back: admCloseTop,
        type: setMailDraftField,
@@ -256,17 +252,5 @@ describe("«← Все письма» closes at once — the letter saves itself
     expect(e.S.adminTab).toBe("promos");
     expect(e.S.mailOpen).toBe(false);
     expect(e.draft()["order-confirmed"].ru.subject).toBe("Новая тема");
-  });
-});
-
-describe("«Отменить правки» is about the open letter", () => {
-  it("puts this letter back and leaves another letter's edits alone", () => {
-    const e = editor();
-    e.type("subject", "Отправлен, ура", "order-shipped");   // another letter, typed earlier
-    e.type("subject", "Новая тема");                         // the open one
-    e.press({ mailrevert: "" });
-    expect(e.draft()["order-confirmed"], "this letter was not put back").toEqual(SAVED["order-confirmed"]);
-    expect(e.draft()["order-shipped"], "«Отменить правки» threw another letter's edits away")
-      .toEqual({ ru: { subject: "Отправлен, ура" } });
   });
 });

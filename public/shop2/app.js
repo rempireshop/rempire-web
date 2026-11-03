@@ -11114,12 +11114,6 @@
                        заказы» card; stockSaved — the warehouse row key that
                        «Править» just wrote, for its «Сохранено ✓» badge. */
     admSetSaved: "", orderNote: null, custNoteSaved: false, unpaidSaved: false, stockSaved: "",
-    /* The save bar's status word on a phone, where the bar is the header
-       (admBarNoteState, 11.09.2026): barTouched — the draftless form (the
-       product editor, a promo, a set, a partner) typed in since it opened,
-       keyed on the open form itself (admBarIdent); barSaved — which bar just
-       saved, for its «Сохранено ✓» moment. */
-    barTouched: null, barSaved: "",
     /* The profile form's draft — what the fields show, compared against
        S.cust field by field (acctFieldDirty) to decide what each field's
        own save sends. `ship` is «Доставка по умолчанию» in the checkout's
@@ -11193,8 +11187,8 @@
     admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
     /* «Правки не сохранены — если выйти, они пропадут.» — raised by any way
-       out of the product editor while the save bar says «Не сохранено»,
-       cleared by «Остаться» and by the editor closing for real. */
+       out of the product editor while a box in it could not be saved
+       (goodsEditDirty), cleared by «Остаться» and by the editor closing for real. */
     goodsConfirmBack: false,
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
     goodsQ: "",      // admin goods search
@@ -12360,17 +12354,6 @@
     var s = 0;
     promoLines().forEach(function (l) { if (promoLineIn(p, l)) s += l.sum; });
     return Math.round(s * 100) / 100;
-  }
-  /** How many lines of the basket it applies to — «на 2 товара из 5». */
-  function promoMatchCount(p) {
-    if (!p || !p.scope || p.scope === "order") return 0;
-    var n = 0;
-    S.cart.forEach(function (l) {
-      if (l.type === "gift") return;
-      var line = { id: l.id, kind: l.type === "bundle" ? "bundle" : "product", brand: (byIdOrNull(l.id) || {}).brand || "" };
-      if (promoLineIn(p, line)) n += l.qty;
-    });
-    return n;
   }
   function discount() {
     var p = S.promoInfo;
@@ -15044,19 +15027,6 @@
     var crop = blogCoverBgStyle(focus, BLOG_COVER_CLS[where] ? where : "post");
     return '<span class="' + cls + '" style="background-image:url(\'' + esc(url) + "')" + (crop ? ";" + crop : "") +
       '" role="img" aria-label="' + esc(alt || "") + '"></span>';
-  }
-  /* A real link (href), not a bare <a>: the pointer says «clickable», the
-     keyboard reaches it, Ctrl/⌘-click opens a tab — a plain click is caught
-     by the [data-go-blog] branch of the click handler and stays in the SPA. */
-  function blogTileHTML(p) {
-    return '<li><a class="card blog__tile" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">' +
-      blogCoverFrameHTML("list", p.coverUrl, p.coverAlt || p.title, p.coverFocus) +
-      '<span class="blog__tilebody">' +
-        (p.publishedAt ? '<span class="muted blog__date">' + blogDate(p.publishedAt) + "</span>" : "") +
-        '<span class="blog__tiletitle">' + esc(p.title) + "</span>" +
-        (p.excerpt ? "<p>" + esc(p.excerpt) + "</p>" : "") +
-        (p.tags && p.tags.length ? '<span class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</span>" : "") +
-      "</span></a></li>";
   }
   /* The shape of a tile while the real ones are on their way — grey blocks
      where the cover, the date, the title and the excerpt will be. */
@@ -18454,7 +18424,7 @@
        already has the nav bar drawn over it, so «Ниже» ends up under
        «Товары» and cannot be pressed at all. `nearest` scrolls the least
        that makes the whole bar reachable, and the scroll-margins in
-       admin.css are what keep it clear of the nav and the save bar. */
+       admin.css are what keep it clear of the nav and the top bar. */
     try { bar.scrollIntoView({ block: "nearest" }); } catch (e) {}
   }
   /** Re-draw the bar against the picture where it now is — a preset or a move
@@ -19664,14 +19634,6 @@
     var msg = blogSaveErrText(e);
     S.adminBlogErr = msg;
     toast(msg);
-  }
-  /** «Сохранить» is gone from the editor (it saves itself); the hook it had
-      now means «send what is owed, now» — for anything that still presses it. */
-  function saveBlogDraft() {
-    if (!S.adminBlogEdit) return;
-    blogReadForm();   // before the title is judged, not after
-    if (blogTitleMissing(S.adminBlogEdit)) { S.adminBlogErr = BLOG_TITLE_NEEDED; blogPaintErr(); return; }
-    blogAutosave("change");
   }
   /** «Опубликовать» — the one dark button (README rule 2). The article goes
       as it is on screen: the form is read, what is owed is saved first, then
@@ -26373,25 +26335,6 @@
     return !!((p.custom && p.active === false) || shopHidden(p.id));
   }
   /**
-   * «Нет в наличии» here and «Нет» on «Склад» used to count two different
-   * things.
-   *
-   * `p.stock` is the MANUAL in/low/out flag — the «Наличие» select in the
-   * editor. `state` on a warehouse row is the COUNTED quantity against that
-   * row's own threshold. They are two layers by design (src/lib/inventory.ts),
-   * and reading only the first of them meant a bottle «Склад» listed under
-   * «Нет» wore a green «В наличии» badge one tab away, while a custom product
-   * — `customProduct()` hard-codes `stock: "in"` — could never appear under
-   * this chip at all.
-   *
-   * The chip and the row's badge read ONE word now, goodsStockWord() below.
-   * Until 24.09.2026 only the chip did: the badge still read `p.stock` alone,
-   * so a row listed under «Нет в наличии» could wear a green «В наличии»
-   * (map-defects #6), and the chip read the FIRST shelf row of a product, so
-   * a 500 мл at zero put a product whose 75 мл was on the shelf under «Нет».
-   */
-  function goodsIsOut(p) { return goodsStockWord(p) === "out"; }
-  /**
    * "in" | "low" | "out" — the one word «Каталог» has for a product's stock,
    * in the order the shop itself sells by (getOverrides in src/lib/orders.ts,
    * stockStates in src/lib/inventory.ts):
@@ -26871,9 +26814,7 @@
                 'stroke-width="1.8" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>';
           }).join("") +
           /* No «Помощник» row (Dim, 25.09.2026, q12): the assistant's icon is
-             in the phone's top bar, and this page always has that bar — even
-             opened over a form whose save bar is the phone's header (≤ 767),
-             because the save bar belongs to the screen hidden under it. */
+             in the phone's top bar, and this page always has that bar. */
         "</div>" +
         '<div class="adm-more__foot">' +
           '<div class="adm-more__lang"><span>Язык панели</span>' + admLangsHTML() + "</div>" +
@@ -27788,8 +27729,8 @@
   /** A card's own «← X» while the top bar says «← X» for the same card: one
       way back per screen, as the design draws the phone (screens 02–16 show
       only the bar's). The class lets admin.css hide the card's own link
-      wherever the top bar stands (≤ 899 px, and not while a save bar is the
-      phone's header); a desktop has no top bar and keeps it. A link whose
+      wherever the top bar stands (≤ 899 px); a desktop has no top bar and
+      keeps it. A link whose
       words differ from the bar's goes somewhere else and stays. */
   function admPageBackCls(label) {
     return label && label === admTopBackLabel() ? " adm-pageback" : "";
@@ -28109,17 +28050,6 @@
   var ED_LANGS = [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]];
   /** «пусто» / «есть текст» — the state of a plain per-language string. */
   function admLangHas(v) { return String(v || "").trim() ? ["есть текст"] : ["пусто"]; }
-  /** One tab in a section's own strip, still addressed by its old section key
-      — «Отзывы» is `data-admtab="reviews"`, «Письма» is `"mail"` — so the
-      assistant's «Открыть …» buttons and the e2e suite keep working. */
-  function admTabBtn(key, label, warn, on) {
-    return '<button class="adm-tab" data-admtab="' + key + '" aria-current="' + !!on +
-      '" title="' + label + '">' + label +
-      (warn ? ' <span class="adm-tab__warn">' + warn + "</span>" : "") + "</button>";
-  }
-  function admTabsHTML(inner) {
-    return '<div class="adm-tabs" role="group" aria-label="Что показываем">' + inner + "</div>";
-  }
   /** «← Куда-то» — the one way back out of every sub-screen. */
   function admBackHTML(attrs, label) {
     // the arrow outside the label's own node — «← Настройки» as one string
@@ -28222,7 +28152,7 @@
     return false;
   }
   /* [key, name, the phone's shorter word]. The segmented control of 1a, with
-     the full name in `title` as every section tab has it (admTabBtn) — the
+     the full name in `title` as every section tab had it — the
      phone shows «Промо» and «Подарки», the name is still there to read. */
   var MK_TABS = [
     ["promos", "Промокоды", "Промо"],
@@ -28525,10 +28455,6 @@
       BIRTHDAY_DAY_CHOICES.map(function (x) {
         return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
       }).join("") + "</select></label>";
-  }
-  function admMailName(tpl) {
-    for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
-    return tpl;
   }
   /* «Запустить сейчас» (10.09.2026) inside «Брошенная корзина», its
      discounted twin and «Скидка ко дню рождения» — the letters whose moment
@@ -30719,11 +30645,6 @@
      `done:false` until the queue is empty (docs/mail.md); the card on the
      right shows the count climbing, and a loop that broke off leaves a
      «Продолжить» that picks it up where it stopped. */
-  var NEWS_LANG_NOTE = {
-    RU: "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.",
-    ET: "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.",
-    EN: "Вы правите английскую версию. Это язык письма, а не язык панели — русский и эстонский текст живут отдельно."
-  };
   var NEWS_INSERTED_IN = {
     RU: "Товар добавлен в русский текст письма",
     ET: "Товар добавлен в эстонский текст письма",
@@ -33967,131 +33888,6 @@
     admAutosaveFlush();
     S.admSetPage = page; S.shipErr = "";
   }
-  /* ---- the save bar on a phone: the header's status word ------------------
-     Since 11.09.2026 the bar is the phone's top header (admin.css ≤ 767):
-     «Отмена» on the left, one word in the middle, «Сохранить» on the right.
-     The word is the draft's state — «Не сохранено» while something differs,
-     «Сохранено ✓» for a moment after a save that leaves the form open,
-     nothing while all is quiet. The bars with a draft read it (mailDirty(),
-     newsDirty(); the settings bar has its own line, admSetBarInnerHTML); the
-     forms that keep no draft and read their fields off the DOM on
-     «Сохранить» — the product editor, a promo code, a set, a partner — count
-     as dirty from the first keystroke in them (admBarTouch, keyed on the
-     open form so the next one starts quiet), and close on save, so they never
-     show the tick. A desktop hides the word: its bar says enough there. */
-  function admBarIdent() {
-    return S.goodsNew || S.adminEdit || S.bundleForm || S.promoForm || S.partnerForm || null;
-  }
-  /* ---- the cancel on the left, in two lengths ------------------------------
-     Ренат, 14.09.2026: «I'm not sure about on mobile if everything fits in the
-     upper save bar in each language… Check the sizes of the letters.» It did
-     not. The three bars that carry a status word — the mail texts, a
-     newsletter draft and the settings pages — said «Отменить правки» at every
-     width, and on a phone that word is the widest thing in the row: 144 px in
-     Russian, 165 px in Estonian («Tühista muudatused»). The status word is the
-     one element with `flex: 1 1 0`, so it is the one that gives way, and at
-     360 px it had 75 px for a «Не сохранено» that needs 89 — cut mid-word by
-     the ellipsis. At 375 px it cleared by 0,7 px in Russian and by nothing at
-     all in Estonian, which is not «fits», it is luck.
-
-     So the phone says «Отмена», the same word the four bars without a status
-     word have always used there and the one the row was designed around
-     (admin.css, «Отмена · state · Сохранить»); the desktop keeps the precise
-     «Отменить правки», where there is room for it. Same trick as the status
-     line's own `--long` / `--short` (admin.css ≤ 767 and ≥ 768), and each word
-     is its own text node so the dictionary translates it as the whole key it
-     already is.
-
-     One constant for all three bars: the squeeze is the shared bar's, not one
-     screen's, and a fix that lived in one of them would leave the other two
-     clipped. */
-  var SAVEBAR_CANCEL =
-    '<span class="adm-savebar__cancel--long">Отменить правки</span>' +
-    '<span class="adm-savebar__cancel--short">Отмена</span>';
-  /* ---- unsaved changes: one look, everywhere ------------------------------
-     The owner's /test pass, 23.09.2026 (the blog's cover frames and its
-     languages): «The "Есть несохранённые изменения — нажмите «Сохранить»." is
-     hard to see.» It was a 13-px line in the warn ink, the same size and
-     weight as every grey hint around it; the bars said the same thing with
-     one small word — and on a desktop, for the letters, the newsletter and
-     the product editor, not at all. So the state is one thing now, drawn one
-     way wherever a draft can be lost (admin.css § «unsaved changes»):
-       · the notice over the form, `.adm-dirty` — a warm block with a warn
-         edge and dark text, never a line of small print (admDirtyNoteHTML);
-       · `.is-dirty` on the save bar — the bar takes the warm ground and a
-         warn rule, its status word becomes a solid chip, and «Сохранить» is
-         ringed as THE button to press;
-       · `.is-dirty` on a Save button that stands outside any bar (the blog's
-         «Публикация» card) — the same ring.
-     The render writes the class into the markup (admDirtyCls) and the paints
-     that run under a caret toggle it in place (admDirtyMark), from the same
-     dirty flag in both cases, so the two can never disagree.
-     `aria-live`, not `role="status"`: that role is the toast's, and the one
-     hook everything listening for a toast reads (paintToast). With it on this
-     note too, a notice standing over an unsaved form answered for the toast
-     under it — «Черновик сохранён» read back as «Есть несохранённые…». */
-  function admDirtyNoteHTML(attr, dirty) {
-    return '<p class="adm-dirty" ' + attr + ' aria-live="polite"' + (dirty ? "" : " hidden") + ">" +
-      "Есть несохранённые изменения — нажмите «Сохранить».</p>";
-  }
-  function admDirtyCls(dirty) { return dirty ? " is-dirty" : ""; }
-  function admDirtyMark(el, dirty) {
-    if (el && el.classList) el.classList.toggle("is-dirty", !!dirty);
-  }
-  function admBarNoteState(kind) {
-    var dirty = kind === "mail" ? mailDirty()
-      : kind === "news" ? newsDirty()
-      : admFormDirty();   // typed in, or a draft a button changed (admFill, beside admBarTouched)
-    if (dirty) return "dirty";
-    return S.barSaved && S.barSaved === kind ? "saved" : "";
-  }
-  function admBarNoteClass(st) {
-    return "adm-savebar__note adm-savebar__note--phone" +
-      (st === "dirty" ? " adm-savebar__note--warn" : st === "saved" ? " adm-savebar__note--ok" : "");
-  }
-  function admBarNoteText(st) { return st === "dirty" ? "Не сохранено" : st === "saved" ? "Сохранено ✓" : ""; }
-  function admBarNoteHTML(kind) {
-    var st = admBarNoteState(kind);
-    return '<span class="' + admBarNoteClass(st) + '" data-barnote="' + kind + '" aria-live="polite">' + admBarNoteText(st) + "</span>";
-  }
-  /** In place — under a caret, never a render(): the touch listener, the tick's timer. */
-  function admBarPaintNote() {
-    var el = document.querySelector("[data-barnote]");
-    if (!el) return;
-    var st = admBarNoteState(el.getAttribute("data-barnote"));
-    el.className = admBarNoteClass(st);
-    el.textContent = admBarNoteText(st);
-    translateTree(el);
-    // …and the bar around it, which is what the eye finds first
-    admDirtyMark(el.closest && el.closest(".adm-savebar"), st === "dirty");
-  }
-  /** «Сохранено ✓» in the bar for a moment after a save that leaves the form open (the mail texts, a newsletter draft). */
-  function admBarFlash(kind) {
-    S.barSaved = kind;
-    clearTimeout(admBarFlash._t);
-    admBarFlash._t = setTimeout(function () { S.barSaved = ""; admBarPaintNote(); }, 2500);
-  }
-  /* The bar-as-header's height, measured: `--a-hdrh` is what the page's top
-     padding and the root's scroll padding clear (admin.css ≤ 767). Measured
-     rather than declared because the bar grows by a row while a refusal
-     stands in it («Цена — число от 1 до 500 €…» — goodsFail paints that in
-     place, no render), and by the notch inset on the phones that report one.
-     One observer, on whichever bar the last render left standing. */
-  var admBarRO = null, admBarEl = null, admWasSaving = false;
-  function admBarObserve(bar) {
-    if (bar === admBarEl) return;
-    if (admBarRO) { admBarRO.disconnect(); admBarRO = null; }
-    admBarEl = bar;
-    if (!bar) { document.documentElement.style.removeProperty("--a-hdrh"); return; }
-    if (typeof ResizeObserver !== "function") return;
-    admBarRO = new ResizeObserver(function () {
-      if (admBarEl) document.documentElement.style.setProperty("--a-hdrh", admBarEl.offsetHeight + "px");
-    });
-    /* the border box, not the default content box: the notch inset comes in
-       as padding, and a padding change leaves the content box as it was —
-       the observer would sleep through the very growth it is here for */
-    try { admBarRO.observe(bar, { box: "border-box" }); } catch (e) { admBarRO.observe(bar); }
-  }
   /* «Письма» in the settings index — a door, not a page (23.09.2026). The mail
      settings live in «Маркетинг → Письма», beside the letters they time, but
      «Настройки» is where the owner looked for the daily limit («There is no
@@ -36200,31 +35996,6 @@
     });
     return out.join("\n");
   }
-  /* The draft covers all the letters, but the editor shows ONE: its «Не
-     сохранено», «Отменить правки» and the question on the way out are about
-     the letter that is open — all three languages of it — and never about
-     one the owner cannot see (map of the panel, 23.09.2026, #14: «Отменить
-     правки» threw away the edits of every letter at once). */
-  function mailOne(map, tpl) {
-    var o = {};
-    if (map && map[tpl]) o[tpl] = map[tpl];
-    return o;
-  }
-  /* Both ask S.mailDraft itself, never mailDraft(): the exits call them
-     before the texts may have landed, and a draft made then would be made
-     from an empty «saved» — the owner's own texts would read as edits to
-     throw away, or be saved over. No draft yet is nothing typed yet. */
-  function mailDirty() {
-    if (!MAIL_TEXTS || !S.mailDraft) return false;
-    var tpl = mailTpl();
-    return mailSig(mailOne(S.mailDraft, tpl)) !== mailSig(mailOne(mailSaved(), tpl));
-  }
-  /** One letter back to what is saved; the others keep whatever they hold. */
-  function mailRevertOne(tpl) {
-    if (!MAIL_TEXTS || !S.mailDraft) return;
-    var d = S.mailDraft, s = mailSaved();
-    if (s[tpl]) d[tpl] = s[tpl]; else delete d[tpl];
-  }
   /** Out of the letter editor. Everything it still owes goes first; a text the
       letter refused (an unfinished «{…}», q6) never went out, so it goes back
       to what the letter says — and the toast says so rather than dropping it
@@ -36419,13 +36190,6 @@
       catch (e) { S.heroDraft = heroDefault(); }
     }
     return S.heroDraft;
-  }
-  /* Does the copy show something the shop does not? Between a keystroke and
-     its save, and while a delete is held. */
-  function heroDirty() {
-    if (!S.heroDraft) return false;
-    try { return JSON.stringify(heroClean(S.heroDraft)) !== JSON.stringify(heroClean(heroConf())); }
-    catch (e) { return true; }
   }
   /* What actually gets saved: trimmed strings, no empty translations, sane
      interval. The server's own sanitiser is the strict one — this only keeps
@@ -36767,9 +36531,6 @@
     try {
       var bar = document.querySelector(".adm-top");
       hdr = bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0;
-      // …or the save bar, where it is the phone's header (≤ 767, admin.css)
-      var sb = document.querySelector(".adm-savebar"), sbr = sb && sb.getBoundingClientRect();
-      if (sbr && sbr.top <= 1 && sbr.bottom > hdr) hdr = Math.round(sbr.bottom);
     } catch (e) { hdr = 0; }
     var r = el.getBoundingClientRect();
     // «it is already on screen» — never move a page that does not need moving
@@ -37141,10 +36902,6 @@
     var ef = cTriDiff(base.emailFooter, draft.emailFooter);
     if (ef) out.emailFooter = ef;
     return out;
-  }
-  function contentDirty() {
-    try { return Object.keys(contentDiff(contentConf(), contentDraft())).length > 0; }
-    catch (e) { return false; }
   }
   /* «Вернуть стандартные …» keeps to its page: the strip's reset on
      «Главная страница» puts back the strip and nothing else; «О компании»'s
@@ -37724,9 +37481,6 @@
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
     return S.pricingDraft;
-  }
-  function pricingDirty() {
-    return JSON.stringify(pricingDraft()) !== JSON.stringify(S.pricingLoaded || normalisePricing(null));
   }
   /* The same bounds cleanPricing() enforces on the server (src/lib/loyalty.ts
      PRICING_BOUNDS), kept next to the sentence that explains each one so the
@@ -41614,11 +41368,6 @@
       }).catch(function () { failed = "error"; done(); });
     });
   }
-  /** A content-editor field on screen, patched to what the draft now holds. */
-  function cPatchField(path, value) {
-    var el = document.querySelector('[data-contentf="' + path + '"]');
-    if (el) el.value = value;
-  }
   /** Under the name box of the owner's product: what the ET and EN shop will show for the tail the name has. */
   function edNameHintText(name) {
     var et = trName(name, "ET"), en = trName(name, "EN");
@@ -41696,11 +41445,6 @@
        also what makes a «Вернуть» (toast or journal) show at once. */
     GAL.list = galPhotos(p);
     return GAL.list;
-  }
-  function galDirty(p) {
-    if (GAL.id !== p.id) return false;
-    if (GAL.reset) return !!(DEMO.gallery && DEMO.gallery[p.id]);
-    return JSON.stringify(GAL.list) !== JSON.stringify(galPhotos(p));
   }
   /** What «Сохранить» sends: an empty list means «фото из каталога». */
   function galSaveList() {
@@ -43186,9 +42930,6 @@
       '<button class="adm-btn adm-btn--ghost adm-btn--row adm-grid__add" type="button" data-edsizeadd>+ Объём</button>' +
       "</section>";
   }
-  // the names the unit tests and the older call sites know the grid by
-  function edPaneSizes(p) { return edSecSizes(p); }
-  function edPaneSizesOwn(p) { return edSecSizes(p); }
 
   /* ---- «Фото» -------------------------------------------------------------- */
   function edPhotoOpsHTML(i, n, busy, cut) {
@@ -43293,8 +43034,6 @@
         : "") +
       "</section>";
   }
-  /* the name the video-limit test knows the photo-and-video block by */
-  function edPaneMedia(p) { return edSecPhotos(p) + edSecVarPhotos(p) + edSecVideo(p); }
 
   /* ---- «Описание» ------------------------------------------------------------
      RU / ET / EN — the language of the TEXT, not of the panel — with what each
@@ -43729,30 +43468,6 @@
   function customFail(code, focusSel) {
     var e = CUSTOM_ERR[code] || ["Не удалось сохранить товар — проверьте поля.", null];
     goodsFail(e[0], focusSel || e[1]);
-  }
-  /** The row the form describes, or null after goodsFail() said why not. */
-  /* migration 147: the size ladder as the form has it right now, [{size,
-     price}], or null when something in it is wrong (the offending cell is
-     focused and the error line written, exactly as customRowFromForm does —
-     this is the same validation, shared so a catalogue product and the
-     owner's own cannot start disagreeing about what a volume may be called). */
-  function edLadderFromForm(p) {
-    var rows = edSizeRowsRead(p);
-    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
-    var out = [], seen = {};
-    for (var i = 0; i < rows.length; i++) {
-      var price = goodsPrice(rows[i].price);
-      if (price === null) { customFail("bad_price", '[data-edpx="' + i + '"]'); return null; }
-      var label = multi ? String(rows[i].size || "").trim() : "";
-      if (multi) {
-        if (!label) { customFail("bad_size", '[data-edsz="' + i + '"]'); return null; }
-        if (seen[label.toLowerCase()]) { customFail("sizes_duplicate", '[data-edsz="' + i + '"]'); return null; }
-        seen[label.toLowerCase()] = true;
-      }
-      out.push({ size: label, price: price });
-    }
-    if (out.length > 12) { customFail("too_many_sizes"); return null; }
-    return out;
   }
   /** The ladder the shop has for a product now — what the form is compared to. */
   function edLadderNow(p) {
@@ -50825,7 +50540,6 @@
       if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
       S.mailDraft = null;
       mailPreviewV += 1;
-      admBarFlash("mail");   // the bar's «Сохранено ✓» moment (the phone header's word)
     }
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_names") namesApply(a);
@@ -54463,23 +54177,6 @@
     else if (SCANEL) { scanUnmount(); }
     // the toast has to clear the camera view — see .is-scanning in styles.css
     document.body.classList.toggle("is-scanning", !!S.scanOpen);
-    /* A save bar is on screen: on a phone the page's bottom padding, the
-       storefront shell's (.screen--co) and the assistant's button all make
-       room for it — admin.css `body.adm-saving`. A body class rather than
-       `:has()` because two of those three are above .adm2 in the tree, and
-       because a rule dropped by an older browser is exactly the kind of
-       thing that puts a button under a nav bar on one phone and not the
-       next. */
-    var savebar = S.screen === "admin" ? bodySlot.querySelector(".adm-savebar") : null;
-    if (admWasSaving && !savebar) S.barTouched = null;   // the form closed — the next one starts quiet
-    admWasSaving = !!savebar;
-    document.body.classList.toggle("adm-saving", !!savebar);
-    /* …and on <html> too: scroll-padding-top belongs to the root element,
-       and on a phone it is what keeps a focused field from landing under
-       the bar-as-header (admin.css ≤ 767). The bar's height is measured
-       while it stands — admBarObserve(). */
-    document.documentElement.classList.toggle("adm-saving", !!savebar);
-    admBarObserve(savebar);
     /* …and the ONE dark button pinned above the tab bar (admPinnedHTML): the
        page and the toast make room for it on a phone. */
     document.body.classList.toggle("adm-pinned", S.screen === "admin" && !!bodySlot.querySelector(".adm-pin"));
@@ -54488,7 +54185,7 @@
     if (S.screen === "admin") admSaveEnd(true);
     /* …and the assistant sheet, while it is open on a phone, is sized by
        the visual viewport — the keyboard is what it must keep clear of
-       (admVvFollow, beside admBarTouch). Run here because the sheet
+       (admVvFollow). Run here because the sheet
        opening or closing is a render, not a viewport event. */
     if (S.screen === "admin" || admVvH) admVvFollow();
     /* (…and the root says the panel is what is on screen — `adm2-on`, written
@@ -55865,7 +55562,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -57316,8 +57013,6 @@
       mailResetLang(mailTpl(), d.mailreset); return;
     }
     // «Отменить правки» and «Сохранить» have no button any more (1a: the letter saves itself)
-    if (d.mailrevert !== undefined) { mailRevertOne(mailTpl()); render(); return; }
-    if (d.mailsave !== undefined) { admAutosaveFlush(); mailSaveNow(); return; }
     if (d.admchatbot !== undefined) {
       var chatOn = !DEMO.chatbot;
       admSetApply({ type: "toggle_chatbot", value: chatOn }, chatOn ? "Чат включён ✓" : "Чат выключен ✓");
@@ -58494,7 +58189,6 @@
       return;
     }
     // «Сохранить» is gone (the editor saves itself); the hook means «send what is owed now»
-    if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
     if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
     /* The questions these four answered inline are the confirm sheet now
        (data-admapply / data-admcancel); the hooks keep their meaning. */
@@ -60007,72 +59701,10 @@
     });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
-  /* The forms that keep no draft — the product editor, a promo code, a set,
-     a partner — are «dirty» from the first keystroke: the bar's status word
-     turns to «Не сохранено» (admBarNoteState). Keyed on what is open
-     (admBarIdent), so the next form starts quiet; renderImpl clears the key
-     when the bar leaves the screen. */
-  function admBarTouch(e) {
-    if (S.screen !== "admin") return;
-    var t = e.target;
-    if (!t || !t.closest || !t.closest(".adm-page")) return;
-    if (!document.querySelector('[data-barnote="touch"]')) return;
-    admBarTouched();
-  }
-  /* The same mark, made by hand. `input` and `change` cover every field the
-     owner types in, but not a change he makes with a button — and a size
-     deleted with «×» is exactly that: the ladder in S.goodsSizes is a rung
-     shorter, «Сохранить» would write it, and the bar went on saying nothing
-     at all, so the deletion could be walked away from and lost. «The deletion
-     does not trigger or inform that it needs to be saved» (Renat,
-     12.09.2026). Every button that edits the draft should say so here. */
-  function admBarTouched() {
-    var id = admBarIdent();
-    if (!id || S.barTouched === id) return;
-    S.barTouched = id;
-    admBarPaintNote();
-  }
-  /* «Every button that edits the draft should say so here» was a rule each
-     new button had to remember, and most did not: ★, ✂, a dropped photo, a
-     size's photo, the video's chips, «Загрузить» and ×, «Отвязать», a code
-     from the scanner and every AI fill left the bar at «Изменений нет» and
-     the way out unguarded (map of the panel, 23.09.2026, #3). So the rule
-     now lives in three shared places instead of forty handlers:
-       · a field filled by code goes through admFill(), which marks the bar
-         the way a keystroke does;
-       · the product editor's photo list, size photos and video are drafts
-         (GAL, VID) and are asked whether they differ from what is saved —
-         edMediaDirty();
-       · the forms that keep their draft in S (a set, a promo code, a partner)
-         are asked the same of their draft — admDraftDiffers(). */
+  /** A field filled by code — an AI fill, a scanned code — set the way a keystroke would. */
   function admFill(el, value) {
     if (!el) return;
     el.value = value;
-    // a box filled after its form was closed marks nothing
-    if (el.isConnected !== false) admBarTouched();
-  }
-  /** The product card has no draft of its media any more (1a): every photo
-      button, a size's photo, the video's upload and its × save at once. */
-  function edMediaDirty() { return false; }
-  /* The yardstick of a form with a draft in S is the draft as it was when the
-     form's bar was first drawn — the render that opened it — so no opener has
-     to remember to take it. `lang` is which language is on screen, not
-     something the save writes. */
-  var ADM_FORM_BASE = { form: null, sig: "" };
-  function admFormSig(f) {
-    return JSON.stringify(f, function (k, v) { return k === "lang" ? undefined : v; });
-  }
-  function admDraftDiffers() {
-    var f = S.bundleForm || S.promoForm || S.partnerForm;
-    if (!f || typeof f !== "object" || f !== admBarIdent()) return false;
-    if (ADM_FORM_BASE.form !== f) { ADM_FORM_BASE.form = f; ADM_FORM_BASE.sig = admFormSig(f); return false; }
-    return admFormSig(f) !== ADM_FORM_BASE.sig;
-  }
-  /** «Не сохранено» for the forms with the touch bar: typed in, or a draft that differs. */
-  function admFormDirty() {
-    if (S.barTouched && S.barTouched === admBarIdent()) return true;
-    if (S.adminEdit) return edMediaDirty();
-    return admDraftDiffers();
   }
   /** Is there anything in the open product card worth asking about? 1a:
       only a box whose value COULD NOT be sent — an empty price, a size with
@@ -60088,15 +59720,7 @@
     }
     return false;
   }
-  document.addEventListener("input", admBarTouch);
-  document.addEventListener("change", admBarTouch);
-  /* iOS: with the keyboard up the visual viewport slides inside the layout
-     viewport once the page cannot scroll any further, and a fixed top bar
-     stays with the layout viewport — off the screen. The bar-as-header
-     follows the visual viewport instead (admin.css: a translate by
-     `--a-vvtop`). Zero whenever the two agree, so nothing moves elsewhere.
-
-     The assistant sheet follows it the same way while it is open on a phone
+  /* The assistant sheet follows the visual viewport while it is open on a phone
      (r14 — Dim, 11.09.2026: on Chrome Android the box and «→» sat under the
      keys, and he typed blind). Chrome keeps the layout viewport as it is
      when the keyboard comes up and shrinks only the visual one, so a sheet
@@ -60115,7 +59739,7 @@
      — the keyboard came up — the newest message is scrolled into view
      above it. renderImpl() runs this after every admin paint, since the
      sheet opening or closing is not a viewport event. */
-  var admVvTop = 0, admVvH = 0, admVvBot = 0;
+  var admVvH = 0, admVvBot = 0;
   var ADM_PHONE_MQ = null;
   try { ADM_PHONE_MQ = window.matchMedia("(max-width: 899px)"); } catch (e) {}
   /* the sheet, while it is on screen AS a sheet — the same markup is a
@@ -60128,8 +59752,6 @@
     var vv = window.visualViewport;
     if (!vv) return;
     var root = document.documentElement.style;
-    var top = document.body.classList.contains("adm-saving") ? Math.max(0, Math.round(vv.offsetTop)) : 0;
-    if (top !== admVvTop) { admVvTop = top; root.setProperty("--a-vvtop", top + "px"); }
     var sheet = admVvSheet();
     var h = sheet ? Math.max(0, Math.round(vv.height)) : 0;
     var bot = sheet ? Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height)) : 0;

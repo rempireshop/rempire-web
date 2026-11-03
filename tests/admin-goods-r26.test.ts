@@ -56,7 +56,6 @@ function matches(p: Product, f: string, levels: Shelf[] = [], hidden: string[] =
     var S = { stockLevels: LEVELS };
     function shopHidden(id) { return HIDDEN.indexOf(id) >= 0; }
     ${slice("goodsOffSale")}
-    ${slice("goodsIsOut")}
     ${slice("goodsStockWord")}
     ${slice("goodsRunsLow")}
     ${slice("goodsMatchesFilter")}
@@ -164,9 +163,8 @@ describe("what the source says about the callers", () => {
    so «← Товары», the phone's Back and the nav ask about one thing only: a box
    whose value could not be sent (tests/admin-ux1a-product.test.ts drives it). */
 describe("the product card never throws work away", () => {
-  /* «Every button that edits the draft should say so here» — the rule above
-     admBarTouched(), written when «×» on a size was fixed for Renat on
-     12.09.2026. 1a: every photo button SAVES the list it leaves, with
+  /* «Every button that edits the draft should say so here» — the save bar's
+     rule, written when «×» on a size was fixed for Renat on 12.09.2026. 1a: every photo button SAVES the list it leaves, with
      «Вернуть» on the toast (edGallerySave). */
   it("every photo button saves the list at once, with a toast that can take it back", () => {
     const handler = src.slice(src.indexOf("if (d.galmove !== undefined || d.galmain !== undefined || d.galdel !== undefined)"),

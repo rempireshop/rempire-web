@@ -46,17 +46,13 @@
   /* …and the bar as it is actually drawn. index.html asks for
      viewport-fit=cover, so an iPhone adds its home-indicator inset (34 px on
      an iPhone 14) under the bar, and Chrome on Android 15 does the same for
-     an installed app. Everything that stacks on the bar — the save bar, the
-     toast, the assistant's button, the page's own bottom padding — offsets
-     by THIS. Offset by the bare 64 px, as they were, the save bar's lower
-     third went under the nav on the owner's phone: «Сохранить» and «Отмена»
-     half over the nav, «Снять с продажи» cut off (Renat, 10.09.2026). */
+     an installed app. Everything that stacks on the bar — the toast, the
+     assistant's button, the page's own bottom padding — offsets by THIS.
+     Offset by the bare 64 px, as they were, the lowest buttons went half
+     under the nav on the owner's phone (Renat, 10.09.2026). */
   --a-barh: calc(var(--a-bar) + env(safe-area-inset-bottom, 0px));
-  /* The save bar as the phone's top header (the `.adm-savebar` block below,
-     ≤ 767): one 52-px row plus the notch inset. This is the fallback only —
-     renderImpl() measures the bar while it stands and writes the real height
-     here, a refusal row and all, so the page's top padding and the scroll
-     padding always clear exactly what is on screen. */
+  /* Room under the phone's top header for a field scrolled into view: one
+     52-px row plus the notch inset (.adm-*__… scroll-margin-top). */
   --a-hdrh: calc(52px + env(safe-area-inset-top, 0px));
   /* the phone's own top bar (app.js admTopHTML): one 52-px row under the notch */
   --a-toph: calc(52px + env(safe-area-inset-top, 0px));
@@ -164,7 +160,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   font-size: 12px; font-weight: 600; border: 0; background: var(--a-paper); color: var(--a-ink);
 }
 .adm-langs button[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); }
-.adm-side__foot .adm-link, .adm-sheet__foot .adm-link { font-size: 13px; }
+.adm-side__foot .adm-link { font-size: 13px; }
 
 /* ---------- main column --------------------------------------------------- */
 
@@ -421,10 +417,8 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
    in the panel is scrolled by the same root.
 
    The panel's own two numbers, on the panel's own root class (app.js writes
-   `html.adm2-on` beside the `html.adm-saving` it already wrote). 899, not
-   767: that is where the bottom bar appears. The `html.adm-saving` rule far
-   below overrides the top half while a save bar is the phone's header — same
-   specificity, later in the file, which is what makes it win. */
+   `html.adm2-on`). 899, not
+   767: that is where the bottom bar appears. */
 @media (max-width: 899px) {
   html.adm2-on {
     scroll-padding-top: calc(var(--a-toph) + 12px);
@@ -1155,28 +1149,6 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 /* ---------- overlays: scrim, sheet, confirm, toast ------------------------- */
 
 .adm-scrim { position: fixed; inset: 0; background: var(--a-scrim); z-index: 60; border: 0; padding: 0; width: 100%; }
-.adm-sheet {
-  position: fixed; left: 0; right: 0; bottom: 0; background: var(--a-paper);
-  border-top: 1px solid var(--a-ink); z-index: 61; animation: adm-up .2s;
-  max-height: 90vh; display: flex; flex-direction: column;
-}
-.adm-sheet__grab { display: flex; justify-content: center; padding: 10px 0 2px; flex: none; }
-.adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-canvas); }
-.adm-sheet__body { overflow: auto; padding: 8px 20px 0; }
-/* The sheet stands on the bottom edge of the screen, so its last row clears
-   the iPhone's home indicator the way the bar does (--a-barh) — 24 px on a
-   phone without one, 24 px plus the inset on one with it. */
-.adm-sheet__foot {
-  padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; justify-content: center;
-  gap: 12px 24px; flex-wrap: wrap; flex: none;
-}
-.adm-sheet--tall { height: 75%; }
-.adm-sheet__row {
-  display: flex; align-items: center; justify-content: space-between; width: 100%; height: 56px;
-  border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper); text-align: left; padding: 0;
-  color: var(--a-ink);
-}
-.adm-sheet__row .adm-row__sub { margin-top: 0; }
 
 /* «Ещё» on a phone (1a, screen 14) is a page: the tab bar stays under it with
    «Ещё» lit, the top bar shows the wordmark, and the screen it was opened
@@ -1216,15 +1188,12 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 @media (max-width: 899px) {
   .adm-more { display: block; padding: 20px 16px calc(var(--a-barh) + 28px); animation: adm-up .25s; }
   .adm2--more .adm-page { display: none; }
-  /* the page has the panel's own top bar, even over a form whose save bar is
-     the phone's header — that bar belongs to the screen hidden under it */
-  body.adm-saving .adm2--more .adm-top { display: flex; }
 }
 
 /* The assistant is a bottom sheet only where there is a bottom bar; on a
    desktop it is a 380-px pane, so a phone sheet stays out of the way. */
 @media (min-width: 900px) {
-  .adm-sheet--phone, .adm-scrim--phone { display: none; }
+  .adm-scrim--phone { display: none; }
 }
 
 /* ---------- the confirm sheet (1a rule 4) ----------------------------------
@@ -1295,9 +1264,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- the phone's top bar (1a § 4) ------------------------------------
    «← back» inside a card, or the wordmark — the save status — the
-   assistant's icon. Sticky at the top, one 52-px row under the notch. It
-   gives way to a save bar while one is the phone's header (≤ 767, below):
-   the screens still on a save bar keep working exactly as before. */
+   assistant's icon. Sticky at the top, one 52-px row under the notch. */
 .adm-top { display: none; }
 @media (max-width: 899px) {
   .adm-top {
@@ -1323,14 +1290,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 }
 /* One way back per screen: a card's own «← X» steps aside wherever the top
    bar says «← X» for the same card (app.js admPageBackCls) — the design draws
-   the phone with the bar's only. Not while a save bar is the phone's header:
-   the top bar steps aside then (≤ 767, body.adm-saving), and the card's link
-   is the way back again. A desktop has no top bar and keeps it. */
-@media (min-width: 768px) and (max-width: 899px) {
+   the phone with the bar's only. A desktop has no top bar and keeps it. */
+@media (max-width: 899px) {
   .adm2 .adm-pageback { display: none; }
-}
-@media (max-width: 767px) {
-  body:not(.adm-saving) .adm2 .adm-pageback { display: none; }
 }
 
 /* ---------- the assistant folded: a strip (desktop, 1a rule 6) -------------- */
@@ -1643,7 +1605,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
    § «Сканер». Same tokens, same geometry: radius 0, no shadows, 1 px rules.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ---------- Товар: panes, fields, sticky save bar -------------------------- */
+/* ---------- Товар: panes and fields ----------------------------------------- */
 
 /* The panes and the three description boxes are switched with `hidden`, and
    an author `display` beats the UA sheet's `[hidden] { display: none }` every
@@ -2129,202 +2091,13 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-seg { display: flex; border: 1px solid var(--a-ink); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
 .adm-seg__b[aria-current="true"] { background: var(--a-ink); color: var(--a-onink); font-weight: 600; }
-
-/* The save bar follows the page to the bottom of every tab. */
-.adm-savebar {
-  position: sticky; bottom: 0; z-index: 2; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-  padding: 12px 0; margin-top: 8px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
-}
-.adm-savebar__sp { flex: 1; }
-/* the editor's refusal («Цена — число от 1 до 500 €…») rides in the bar, a
-   full line above the buttons, so it is on screen wherever the owner is */
-.adm-savebar__err { flex-basis: 100%; margin: 0 0 4px; }
-/* The settings pages' bar (app.js admSetBarHTML, r12) carries a status line
-   as well as the buttons: what is unsaved and where — «Изменения не
-   сохранены: Главный баннер» — or «Изменений нет» while nothing differs.
-   Desktop: right after the buttons in the bar's row — beside what it
-   describes, and clear of the assistant's button fixed in the viewport's
-   corner (a right-aligned line ran under it at 1280 px). Phone (the media
-   block below): its own line ABOVE the buttons, so the words are read
-   before the thumb reaches «Сохранить». The colour is never the only cue —
-   the words differ too. */
-.adm-savebar__note { font-size: 13px; line-height: 18px; color: var(--a-muted); order: 1; margin-left: 8px; }
-.adm-savebar__note--warn { color: var(--a-warn); font-weight: 500; }
-.adm-savebar__note--ok { color: var(--a-ok); font-weight: 500; }
 /* «Сохранено ✓» beside a small form's own button (the blog's «Публикация»
    card); the warn twin is .adm-hint--warn above */
 .adm-hint--ok { color: var(--a-ok); }
-/* On a phone the order from the bottom is: the nav, the save bar on it, the
-   form above both. `body.adm-saving` is set by render() whenever a save bar
-   is on screen (renderImpl), which is what lets the rules reach the page
-   column and `main.screen--co` above the panel without a :has(). What was
-   here before — `.adm2:has(.adm-savebar) .adm-fab { bottom: bar + 88px }` —
-   did hold wherever :has() exists (every phone the owner has); it was the
-   idea that was wrong: it lifted the assistant's button clear of the bar and
-   straight onto the form's last rows («+ Размер», the size boxes). Since
-   1a there is no floating button at all (the assistant is an icon in the
-   phone's top bar): nothing floats over the form, nothing over the nav. The
-   toast rule above loses to this on purpose — while the bar is up the toast
-   passes over it.
-
-   The bottom padding goes to exactly the nav's height while a bar is on
-   screen. With the usual 96 px of breathing room (plus the 150 px
-   `.screen--co` keeps for the storefront's own sticky bar) the bar came
-   unstuck at the end of the scroll and stood 250 px above the nav — the
-   owner scrolls to the last field, and the buttons float mid-screen.
-
-   The toast climbs over the bar too. «Код считан — нажмите «Сохранить»»
-   and «Штрихкод убран — …» land on the bar the moment it matters, and at
-   its usual 20 px they sat on «Сохранить» — the very button they ask for.
-   140 px clears the bar at its tallest (two rows of buttons and the rule);
-   over a one-row bar the toast simply floats a little higher. */
-@media (max-width: 899px) {
-  /* 1a: the assistant has no floating button any more, so the bar keeps no
-     corner free for one */
-  .adm-savebar { bottom: var(--a-barh); }
-  /* the status line takes the row above the buttons */
-  .adm-savebar__note { flex-basis: 100%; order: -1; margin-left: 0; text-align: left; }
-  body.adm-saving .screen--co { padding-bottom: 0; }
-  body.adm-saving .adm-page { padding-bottom: var(--a-barh); }
-  body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 140px); }
-}
-
-/* ---- phone (≤ 767): the bar IS the header ----------------------------------
-   On the nav the bar took a quarter of an iPhone 14's usable screen: two
-   rows — «Сохранить» + «Отмена», then the destructive link with the
-   assistant's button parked in the corner (Dim, 11.09.2026). So while a save
-   bar is on screen it moves to the top and wears the phone's own idiom —
-   Notes, Contacts: «Отмена · state · Сохранить» in one 52-px row over a
-   hairline — and the panel's header (logo, languages, «← В магазин») steps
-   aside until the form is closed. The same on EVERY screen that saves, so
-   the panel behaves one way throughout; a tablet (768 and up) keeps the bar
-   on the nav exactly as above.
-
-   Fixed, not sticky: the bar sits at the END of each form in the DOM, and a
-   sticky header would have to come first. `--a-hdrh` is the bar's measured
-   height (renderImpl's ResizeObserver) — the row, the notch inset, and the
-   refusal row while one stands — and is what the page's top padding and the
-   scroll padding clear, so a field the caret jumps to never lands under the
-   bar. `--a-vvtop` follows iOS's visual viewport when the keyboard pushes it
-   inside the layout viewport (the visualViewport listener beside
-   admEnterTarget); zero everywhere else, so nothing moves.
-
-   The row: the cancel («Отмена», «Отменить правки») as quiet text on the
-   left, the status word in the middle — «Не сохранено» / «Сохранено ✓» /
-   «Изменений нет», one line, cut with an ellipsis, never a second row — and
-   the primary on the right: a 40-px ink block inside a 44-px thumb target
-   (the transparent 2-px border), a ring instead of ink while there is
-   nothing to save. The destructive link is not here: it ends the form
-   (.adm-danger). The refusal («Цена — число от 1 до 500 €…») is a second row
-   under the header, full width, only while it stands. */
-@media (max-width: 767px) {
-  /* the panel's own top bar (1a) steps aside while the save bar is the header */
-  body.adm-saving .adm-top { display: none; }
-  body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 20px); }
-  body.adm-saving .adm-page { padding-top: calc(var(--a-hdrh) + 16px); padding-bottom: calc(var(--a-barh) + 24px); }
-  html.adm-saving { scroll-padding-top: calc(var(--a-hdrh) + 12px); }
-  /* the screen's fade-in slides by a transform, and a transform makes the
-     screen the fixed bar's containing block for the length of the animation
-     — the header would ride in with the form. Opacity only here. */
-  body.adm-saving .adm-page--enter > .adm-screen { animation-name: adm-fade; }
-  .adm-savebar {
-    position: fixed; top: 0; left: 0; right: 0; bottom: auto; z-index: 50;
-    margin: 0; padding: calc(env(safe-area-inset-top, 0px) + 4px) 12px 4px;
-    border-top: 0; border-bottom: 1px solid var(--a-rule);
-    gap: 0 4px; flex-wrap: wrap; align-items: center;
-    transform: translate3d(0, var(--a-vvtop, 0px), 0);
-  }
-  .adm-savebar__sp { display: none; }
-  .adm-savebar__cancel {
-    order: 1; height: 44px; min-height: 44px; padding: 0 8px; margin: 0;
-    border: 0; background: none; color: var(--a-ink); font-size: 15px; font-weight: 400;
-    text-decoration: none; white-space: nowrap;
-  }
-  .adm-savebar__note {
-    order: 2; flex: 1 1 0; min-width: 0; margin: 0; text-align: center;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  /* the settings pages' long sentence («Изменения не сохранены: Главный
-     баннер, Верхняя полоска») is the desktop's; the phone says one word */
-  .adm-savebar__note--long { display: none; }
-  /* …and so is «Отменить правки». The status word between the two buttons is
-     the row's only flexible element, so whatever the cancel takes comes out of
-     it: at 360 px the long word left 75 px for a «Не сохранено» that needs 89,
-     and Estonian's «Loobu muudatustest» left 70 for an 86-px «Salvestamata».
-     «Отмена» / «Tühista» / «Cancel» are around half that, which is what puts
-     ~150 px under a word that needs 89 — and it is the same «Отмена» the bars
-     without a status word have always shown here. */
-  .adm-savebar__cancel--long { display: none; }
-  /* margin-left auto: the button keeps the right edge even when it is the
-     row's only child — the settings bar after a save has no status word and
-     no «Отменить правки», and «Сохранено ✓» must not jump to the left */
-  .adm-savebar__main {
-    order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 auto; font-size: 15px;
-    border: 2px solid transparent; background-clip: padding-box;
-    background-color: var(--a-ink); color: var(--a-onink);
-  }
-  .adm-savebar__main--quiet { background-color: var(--a-paper); color: var(--a-ink); box-shadow: inset 0 0 0 1px var(--a-ink); }
-  .adm-savebar__main[disabled] { border-color: transparent; background-color: var(--a-tint); color: var(--a-muted); box-shadow: inset 0 0 0 1px var(--a-rule); }
-  .adm-savebar__err { order: 4; flex-basis: 100%; margin: 0; padding: 2px 4px 8px; }
-}
 @keyframes adm-fade { from { opacity: 0; } to { opacity: 1; } }
-/* the status word of the bars that had none is the phone header's; on a
-   desktop the settings bar keeps its own line. The other bars' word shows
-   there too once it SAYS something — «Не сохранено», «Сохранено ✓» — and
-   stays out of the way while there is nothing to say: «their buttons say
-   enough» was what left a desktop with no word at all that a letter, a
-   newsletter or a product had not been saved (23.09.2026). */
-@media (min-width: 768px) {
-  .adm-savebar__note--short { display: none; }
-  .adm-savebar__note--phone:not(.adm-savebar__note--warn):not(.adm-savebar__note--ok) { display: none; }
-  /* the desktop has room for the exact word, so it says it */
-  .adm-savebar__cancel--short { display: none; }
-}
 
-/* ---------- unsaved changes: one look, everywhere --------------------------
-   The owner's /test pass, 23.09.2026: «The "Есть несохранённые изменения —
-   нажмите «Сохранить»." is hard to see.» It was 13 px of warn ink among grey
-   hints of the same size and weight. One state, one look, set by app.js
-   (admDirtyNoteHTML, admDirtyCls, admDirtyMark) and nowhere else:
-     · .adm-dirty — the notice over a form: a warm ground, a warn edge and
-       dark ink, 14 px semibold (about 10:1 against its ground);
-     · .adm-savebar.is-dirty — the bar takes the same ground and a warn rule,
-       its status word becomes a solid chip (white on warn, 6.7:1), and
-       «Сохранить» is ink with a warn ring: THE button to press;
-     · .adm-btn.is-dirty — the same ring on a Save outside any bar (the
-       blog's «Публикация» card); a ghost Save turns ink for as long.
-   Colour is never the only cue: the words say it too. */
+/* the warm ground and ink of a word that wants him (.adm-msg__st--out) */
 :root { --a-warmbg: #fbefe4; --a-warmink: #5c2c12; }
-.adm-dirty {
-  display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px;
-  background: var(--a-warmbg); border-left: 4px solid var(--a-warn);
-  color: var(--a-warmink); font-size: 14px; line-height: 20px; font-weight: 600;
-}
-.adm-dirty::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 6px; background: var(--a-warn); }
-/* display:flex above beats the browser's own [hidden] rule — a saved form
-   must not go on saying it is not saved */
-.adm-dirty[hidden] { display: none; }
-.adm-savebar__note--warn, .adm-dirtyword { background: var(--a-warn); color: var(--a-onink); font-weight: 600; padding: 2px 8px; }
-.adm-dirtyword { display: inline-block; font-size: 13px; line-height: 18px; }
-/* the ground bleeds past the column's edges, like a lit row, and the rule is
-   the existing hairline recoloured and doubled inside — nothing in the bar
-   moves by a pixel when the first key is pressed */
-.adm-savebar.is-dirty {
-  background: var(--a-warmbg); border-top-color: var(--a-warn);
-  box-shadow: inset 0 1px 0 var(--a-warn), -12px 0 0 var(--a-warmbg), 12px 0 0 var(--a-warmbg);
-}
-.adm-savebar.is-dirty .adm-savebar__main:not([disabled]), .adm-btn.is-dirty:not([disabled]) {
-  background-color: var(--a-ink); border-color: var(--a-ink); color: var(--a-onink);
-  box-shadow: 0 0 0 3px var(--a-warn);
-}
-@media (max-width: 767px) {
-  /* the bar is the phone's header here: the rule is the one under it */
-  .adm-savebar.is-dirty { border-bottom-color: var(--a-warn); box-shadow: inset 0 -1px 0 var(--a-warn); }
-  /* the status word is a chip in the middle of the row, not a stretched band */
-  .adm-savebar.is-dirty .adm-savebar__note--warn { flex: 0 1 auto; margin: 0 auto; }
-  /* the 2-px transparent border is the button's thumb margin (44 around 40) — it stays transparent */
-  .adm-savebar.is-dirty .adm-savebar__main:not([disabled]) { border-color: transparent; box-shadow: 0 0 0 2px var(--a-warn); }
-}
 
 /* ---------- Салон (POS), direction 1a ----------------------------------------
    README § 5 «Салон (POS) + сканер», screens 05-salon-*. The search with
@@ -3464,7 +3237,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   /* A tall picture puts its bar below the fold, and on a phone the fold has
      the nav bar sitting over it — «Ниже» under «Товары» is a button that
      cannot be pressed. admFigOpen() scrolls the bar into view; these two say
-     how much room to leave it, so the scroll clears the nav and the save bar
+     how much room to leave it, so the scroll clears the nav and the top bar
      rather than stopping flush against them. */
   scroll-margin-bottom: calc(var(--a-barh) + 12px);
   scroll-margin-top: calc(var(--a-hdrh) + 12px);

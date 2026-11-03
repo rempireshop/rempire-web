@@ -1,6 +1,5 @@
 /**
- * An edit made with a button is an edit: «Не сохранено» says so, and leaving
- * asks.
+ * An edit made with a button is an edit, and it is saved like a typed one.
  *
  * The product editor keeps no draft in S; it counted as «dirty» from the
  * first keystroke (admBarTouch on `input`/`change`) and from the four buttons
@@ -14,9 +13,10 @@
  * description), the promo form (kind, scope, product chips) and the banner's
  * ✨ texts on «Главная страница».
  *
- * Each handler is sliced out of public/shop2/app.js and run over stubs; the
- * assertion is the one the owner reads — the bar's state and the leave
- * question's goodsEditDirty().
+ * Since 1a (25.09.2026) there is no save bar and nothing is «unsaved»: each
+ * of those buttons saves what it changed, or hands it to its form's own save.
+ * That hand-over is what is asserted here; the handlers are sliced out of
+ * public/shop2/app.js and run over stubs.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -68,9 +68,8 @@ type Env = {
   DEMO: Record<string, any>;
   els: Record<string, ReturnType<typeof el>>;
   paintsSetBar: () => number;
+  changed: string[];
   click: (d: Record<string, string>) => void;
-  dirty: () => boolean;
-  bar: () => string;
   f: Record<string, (...a: any[]) => any>;
 };
 
@@ -81,7 +80,7 @@ function editor(): Env {
   };
   const S: Record<string, any> = {
     screen: "admin", adminTab: "goods", adminEdit: "azur", goodsNew: null, bundleForm: null, promoForm: null,
-    partnerForm: null, barTouched: null, barSaved: "", scanFor: "", goodsSeoLang: "ru", heroLang: "RU", heroEdit: 0,
+    partnerForm: null, scanFor: "", goodsSeoLang: "ru", heroLang: "RU", heroEdit: 0,
   };
   const GAL: Record<string, any> = { id: "", list: [], fresh: {}, reset: false, cutting: null, picks: {} };
   const VID: Record<string, any> = { id: "", url: null };
@@ -94,6 +93,7 @@ function editor(): Env {
   }
   els["[data-edname]"].value = "Мыло";
   let setBarPaints = 0;
+  const changed: string[] = [];
   const hero = { slides: [{ title: { RU: "" }, sub: {}, eyebrow: {}, cta: {}, go: "", image: "" }] };
   const doc = { querySelector: (s: string) => els[s] ?? null, querySelectorAll: () => [] };
   /* AI: every request answers at once with a text for whatever was asked */
@@ -109,7 +109,7 @@ function editor(): Env {
   };
 
   const f = new Function(
-    "S", "GAL", "VID", "DEMO", "document", "apiSend", "admSpark", "heroDraft", "admHeroCommit", "product",
+    "S", "GAL", "VID", "DEMO", "document", "apiSend", "admSpark", "heroDraft", "admHeroCommit", "product", "CHANGED",
     `var UP = { busy: 0, total: 0, err: "" }, MEDIA = { on: true }, SRV = { admin: true };
      var AI_UNDO = { descRU: "", descET: "", descEN: "", seoT: "", seoD: "", seoTet: "", seoDet: "", seoTen: "", seoDen: "" };
      var BUNDLE_AI_UNDO = { desc: { RU: "", ET: "", EN: "" } };
@@ -118,16 +118,13 @@ function editor(): Env {
      ${line("MAX_PHOTOS")}
      ${line("VIDEO_SEND_MAX")}
      ${obj("VIDEO_ERR")}
-     ${obj("ADM_FORM_BASE")}
      function render() {}
      function refocus() {}
      function toast() {}
      function translateTree() {}
-     function admBarPaintNote() {}
-     function mailDirty() { return false; }
      function newsDirty() { return false; }
-     // 1a: a chip on an OPEN code saves it (promoAutosave); a new code keeps its draft — neither is this test's
-     function promoChanged() {}
+     // 1a: a chip on an OPEN code saves it (promoAutosave); a new code keeps its draft — what this test sees is the hand-over
+     function promoChanged(ev) { CHANGED.push(ev); }
      function admEditProduct(id) { return id === product.id ? product : null; }
      function gal() { return ["https://cdn/a.jpg", "https://cdn/b.jpg"]; }
      function txt(s) { return String(s == null ? "" : s); }
@@ -151,19 +148,10 @@ function editor(): Env {
      function galDrop() {}
      function uploadPhoto() { return Promise.resolve({ url: "https://cdn/new.jpg", thumbUrl: "https://cdn/new.jpg", key: "k" }); }
      function uploadVideo() { return Promise.resolve({ url: "https://cdn/v.mp4" }); }
-     ${fn("admBarIdent")}
-     ${fn("admBarTouched")}
      ${maybe("admFill")}
-     ${maybe("edMediaDirty")}
-     ${maybe("admFormSig")}
-     ${maybe("admDraftDiffers")}
-     ${maybe("admFormDirty")}
-     ${fn("goodsEditDirty")}
      ${fn("promoSetKind")}
-     ${fn("admBarNoteState")}
      ${fn("galPhotos")}
      ${fn("galDraft")}
-     ${fn("galDirty")}
      ${fn("varImgChanged")}
      ${fn("galSizePick")}
      ${fn("galCutIndex")}
@@ -177,10 +165,10 @@ function editor(): Env {
      function click(d, t) {
        ${BRANCHES.map(branch).join("\n")}
      }
-     return { click: click, goodsEditDirty: goodsEditDirty, admBarNoteState: admBarNoteState,
+     return { click: click,
        galDraft: galDraft, vidValue: vidValue, videoUpload: videoUpload, galUpload: galUpload,
        scanToEditor: scanToEditor, admSeoFill: admSeoFill, edBrandPick: edBrandPick };`,
-  )(S, GAL, VID, DEMO, doc, apiSend, admSpark, () => hero, () => { setBarPaints++; }, product) as Record<string, (...a: any[]) => any>;
+  )(S, GAL, VID, DEMO, doc, apiSend, admSpark, () => hero, () => { setBarPaints++; }, product, changed) as Record<string, (...a: any[]) => any>;
 
   // the render that opens the editor: the media pane drafts the photos and the video
   f.galDraft(product);
@@ -188,9 +176,8 @@ function editor(): Env {
   return {
     S, GAL, VID, DEMO, els, f,
     paintsSetBar: () => setBarPaints,
+    changed,
     click: (d) => f.click(d, { textContent: "✨", disabled: false }),
-    dirty: () => f.goodsEditDirty() as boolean,
-    bar: () => f.admBarNoteState("touch") as string,
   };
 }
 
@@ -225,24 +212,22 @@ describe("the product card: a button edit is saved at once", () => {
     expect(at("scanToEditor")).toContain("edEanScanned(");
     expect(at("admSeoFill")).toContain('edAsTextNow("seo",');
     expect(at("edBrandPick")).toContain("edAsPoke(e.input, true)");
-    // nothing about the card's media is «unsaved» any more
-    expect(at("edMediaDirty")).toContain("return false;");
   });
 });
 
 describe("the promo form: the chips are edits", () => {
   it.each([
-    [{ promokind: "fixed" }],
-    [{ promoscope: "brand" }],
-    [{ promoprodpick: "azur" }],
-  ])("%j", (d) => {
+    [{ promokind: "fixed" }, { kind: "fixed" }],
+    [{ promoscope: "brand" }, { scope: "brand", scopeValue: "" }],
+    [{ promoprodpick: "azur" }, { scopeValue: "azur" }],
+  ])("%j", (d, form) => {
     const e = editor();
     e.S.adminEdit = "";
     e.S.promoForm = { code: "", kind: "percent", value: 10, minSubtotal: 0, startsAt: null, endsAt: "", maxUses: "",
-      note: "", active: true, scope: "order", scopeValue: "" };
-    expect(e.bar()).toBe("");
+      note: "", active: true, scope: "order", scopeValue: "x" };
     e.click(d);
-    expect(e.bar()).toBe("dirty");
+    expect(e.S.promoForm).toMatchObject(form);
+    expect(e.changed, "the chip did not hand the change to the form's save").toEqual(["change"]);
   });
 });
 

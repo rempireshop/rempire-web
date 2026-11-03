@@ -55,8 +55,8 @@ const S: Record<string, unknown> = { adminBlogErr: "", adminBlogEdit: null };
 const toasts: string[] = [];
 
 /**
- * The real saveBlogDraft() path: saveBlogFields() against a stubbed apiSend,
- * and the catch the editor's «Сохранить» hangs on it. Everything that decides
+ * The real save path: saveBlogFields() against a stubbed apiSend, and the
+ * catch (blogFail) every save hangs on it. Everything that decides
  * what the owner reads — blogHttpErr, blogSaveErrText, BLOG_ERR_TEXT — comes
  * out of app.js, nothing is retyped here.
  */

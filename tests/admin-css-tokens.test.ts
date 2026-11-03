@@ -8,10 +8,11 @@
  *     zoom figure fell back to whatever it inherited. Now every custom
  *     property the panel's CSS reads is declared in admin.css or styles.css,
  *     or written at run time by app.js.
- *   · the phone's bottom sheets — «Ещё», the confirm card, the assistant's
- *     compose row — stand on the bottom edge of the screen and had no
- *     safe-area inset, so on an iPhone their last row ran under the home
- *     indicator. The bar has had one since the start (--a-barh).
+ *   · the phone's bottom sheets — the confirm card, the assistant's compose
+ *     row («Ещё» was one too; it is a page now) — stand on the bottom edge
+ *     of the screen and had no safe-area inset, so on an iPhone their last
+ *     row ran under the home indicator. The bar has had one since the start
+ *     (--a-barh).
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -65,10 +66,6 @@ describe("every custom property admin.css reads is defined", () => {
 
 describe("the phone's bottom sheets clear the home indicator", () => {
   const INSET = "env(safe-area-inset-bottom";
-
-  it("«Ещё»: the sheet's last row", () => {
-    expect(rule(css, ".adm-sheet__foot")).toContain(INSET);
-  });
 
   it("the confirm card, which is a bottom sheet on a phone", () => {
     expect(rule(phone(), ".adm-confirm__card")).toContain(INSET);

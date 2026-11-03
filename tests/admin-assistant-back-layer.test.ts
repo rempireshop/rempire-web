@@ -75,7 +75,6 @@ function panel(phone: boolean): Panel {
      function goodsBackToRow() {}
      function newsDirty() { return false; }
      function newsCloseEditor() { S.newsEdit = null; }
-     function mailDirty() { return false; }
      function render() {}
      function refocus() {}
      // 1a: Back and the nav send what a field still owes first (admAutosaveFlush) — nothing is owed here

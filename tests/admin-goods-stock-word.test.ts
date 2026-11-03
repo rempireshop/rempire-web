@@ -51,7 +51,6 @@ function catalogue(p: Product, levels: Shelf[]): { badge: string; runsLow: boole
     ${slice("admSwitchFace")}
     ${slice("admSwitch")}
     ${slice("goodsOffSale")}
-    ${slice("goodsIsOut")}
     ${slice("goodsRunsLow")}
     ${slice("goodsMatchesFilter")}
     ${slice("goodsStockWord")}
