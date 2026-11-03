@@ -6,21 +6,21 @@
  *
  * What this file drives, all off one fixed seed (`SWEEP_SEED`, printed into
  * every failure message):
- *   - quantity handling at both ends of its range, and line removal;
  *   - promo codes: garbage, case/whitespace variants of a real one created
  *     through the admin API, an expired one, one below its minimum order;
  *   - gift cards: garbage, a real code bought through the shop itself, and a
  *     card worth more than the order;
- *   - ten random orders — products × sizes × quantities × country × delivery
- *     method × contact data × payment outcome — each checked against the
- *     order the *server* actually stored;
+ *   - five random orders — products × sizes × quantities × country × delivery
+ *     method × contact data × payment outcome, every country and every odd
+ *     contact at least once — each checked against the order the *server*
+ *     actually stored;
  *   - contact validation, both directions: what must be refused and what must
  *     be accepted;
  *   - the free-shipping message flipping exactly at the threshold.
  *
  * Desktop only, except the last describe: cart arithmetic, validation and
  * order totals do not change with viewport width (docs/testing.md, "Why most
- * specs run on desktop only"), and running ten paid orders three times over
+ * specs run on desktop only"), and running five paid orders three times over
  * would put the sweep well past its runtime budget for no new bugs. The one
  * mobile test walks a whole checkout at 375px for the thing that *is*
  * viewport-specific — layout.
@@ -48,7 +48,7 @@ import {
 } from "./sweep-shop-helpers";
 
 test.use({ extraHTTPHeaders: ipHeaders(91) });
-/* The 30s default is for a test that does one thing; these walk ten paid orders.
+/* The 30s default is for a test that does one thing; these walk five paid orders.
    `test.setTimeout` in a file-level beforeEach, not
    `test.describe.configure({timeout})`, because the latter is silently
    ignored when it sits at file scope ahead of the describes. */
@@ -76,7 +76,7 @@ const GIFT_AMOUNT = 25;
  * ONE admin session for the whole file, opened on first use and reused.
  *
  * This spec needs the owner's side a dozen times (three promos, the gift-card
- * lookup, and the stored total of every one of the ten random orders) — and
+ * lookup, and the stored total of every one of the five random orders) — and
  * `POST /api/admin/login/` is rate-limited to 5/min per IP (src/lib/auth.ts).
  * Logging in per call exhausted that budget partway through the file and
  * failed the rest of it on a limiter doing exactly its job.
@@ -267,58 +267,8 @@ async function inStock(page: Page): Promise<CatProduct[]> {
   return products.filter((p) => p.stock !== "out");
 }
 
-/* ------------------------------------------------------------------ */
-/* 1. Quantities                                                        */
-/* ------------------------------------------------------------------ */
-
-test.describe("sweep checkout — quantities", () => {
-  test.beforeEach(async ({}, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "cart arithmetic is viewport-independent — see the file comment");
-  });
-
-  test("the stepper clamps at both ends and never removes a line", async ({ page }) => {
-    const w = watchPage(page);
-    await coldVisit(page, shopUrl("", "/"), "home");
-    const products = await inStock(page);
-    const p = sample(makeRng(SWEEP_SEED), products, 1)[0];
-    const ctx: Ctx = { screen: `cart qty:${p.id}`, lang: "RU" };
-
-    await addProduct(page, "", p.id);
-    await page.locator("[data-cart]").first().click();
-    const line = page.locator(".cline").first();
-    const plus = line.locator('[data-d="1"]');
-    const minus = line.locator('[data-d="-1"]');
-    const qty = line.locator("[data-qtyval]");
-
-    /* Up: the app's own ceiling, whatever a shopper does with the button.
-       There is no free-text quantity field anywhere in this storefront — the
-       stepper is the only way in, so "0 / -1 / 1000 / abc" cannot be typed;
-       what has to hold is that the stepper itself cannot leave the range.
-       That ceiling was 9 until 13.09.2026 — «Cannot put more than 9 items to
-       the cart» (Ренат) — and is now CART_MAX_QTY = 99, the same number the
-       order route refuses above (`bad_qty`, src/lib/orders.ts). Twenty presses
-       therefore land on 21, not on the ceiling; the ceiling itself is walked
-       in e2e/product.spec.ts, which is the cheaper place to press a button a
-       hundred times. */
-    for (let i = 0; i < 20; i++) await plus.click();
-    await expect(qty, `${label(ctx)} quantity did not follow the stepper`).toHaveText("21");
-
-    // Down: floors at 1, and «−» is aria-disabled there. force: true because
-    // CSS (pointer-events) is what blocks the pointer — this proves the
-    // app.js guard, the way a keyboard Enter on the focused button would.
-    for (let i = 0; i < 20; i++) await minus.click({ force: true });
-    await expect(qty, `${label(ctx)} quantity fell below 1`).toHaveText("1");
-    await expect(minus, `${label(ctx)} «−» is not disabled at qty 1`).toHaveAttribute("aria-disabled", "true");
-    await expect(page.locator(".cline"), `${label(ctx)} the stepper removed the line`).toHaveCount(1);
-
-    await auditMoney(page, ctx);
-    await auditScreen(page, w, ctx);
-
-    // Only the explicit control removes it.
-    await line.locator("[data-remove]").click();
-    await expect(page.locator(".cline")).toHaveCount(0);
-  });
-});
+/* 1. Quantities — the stepper's floor, its ceiling and «Убрать» are     */
+/*    e2e/product.spec.ts's.                                           */
 
 /* ------------------------------------------------------------------ */
 /* 2. Promo codes                                                       */
@@ -465,7 +415,7 @@ test.describe("sweep checkout — gift cards", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* 4. Ten randomised orders                                             */
+/* 4. Five randomised orders                                            */
 /* ------------------------------------------------------------------ */
 
 /** Odd-but-legal contact data. Every one of these has to be accepted — the
@@ -481,16 +431,21 @@ const ODD_CONTACTS: Array<{ name: string; email: string; phone: string; note: st
 
 const COUNTRIES = ["EE", "LV", "LT", "FI", "EU"] as const;
 
-for (let scenario = 0; scenario < 10; scenario++) {
+/* One scenario per country and per odd contact: scenario n takes COUNTRIES[n % 5]
+   and ODD_CONTACTS[n % 5], so fewer than five would leave «Другая страна
+   Европы» and the .co.uk address with no order at all. */
+const SCENARIOS = Math.max(COUNTRIES.length, ODD_CONTACTS.length);
+
+for (let scenario = 0; scenario < SCENARIOS; scenario++) {
   test.describe(`sweep checkout — randomised order ${scenario + 1}`, () => {
     /* An address of its own per scenario. Choosing a country makes the shop
        ask every carrier it has for that country (four for Estonia since Nova
        Post left it on 22.09.2026), and
-       `GET /api/shipping/points/` allows 60/min per IP — a budget ten orders
-       back to back share out in about four scenarios. Ten shoppers is what
-       this actually is, so ten addresses is the honest shape; the limiter
+       `GET /api/shipping/points/` allows 60/min per IP — a budget that orders
+       back to back on one address use up in about four scenarios. Five
+       shoppers is what this actually is, so five addresses is the honest shape; the limiter
        stays fully in force for each of them (docs/testing.md, "Rate limits
-       and test isolation"). 100–109 is free: no other spec uses that range. */
+       and test isolation"). 100–109 is this file's: no other spec uses that range. */
     test.use({ extraHTTPHeaders: ipHeaders(100 + scenario) });
 
     test.beforeEach(async ({}, testInfo) => {

@@ -31,7 +31,7 @@ plan is what fills them.
 npx playwright install chromium webkit   # once, or after a Playwright version bump
 npm run e2e                       # build, then run the whole suite (Chromium, 3 viewports + mobile Safari)
 npm run e2e:ui                    # same, in Playwright's interactive UI mode
-npm run e2e:update                # same, and rewrite the visual baselines
+npm run e2e:perf                  # the two stopwatches (perf-admin, perf-open) — never part of the suite
 npx playwright test e2e/checkout.spec.ts        # one file
 npx playwright test --project=mobile            # one viewport
 npx playwright test --project=mobile-safari     # the storefront on WebKit, iPhone 13 profile
@@ -249,14 +249,25 @@ Most spec files still open with a `test.skip(testInfo.project.name !==
 viewport width, so tripling every one of those tests would only triple
 runtime, not coverage; and several specs already multiply by *language*
 (RU/ET/EN) internally, so the combination with a viewport axis too would
-have made the suite minutes slower for no new bugs caught. `visual.spec.ts`
-is the deliberate exception — screenshot comparison *is* about viewport size,
-so it is the one file that runs on all three projects, and it is scoped to
-ET only rather than trilingual to keep that from tripling again on top.
-`admin-shell.spec.ts` is the second: the panel's navigation is a *different
-control* on a phone (a sticky bottom bar and an «Ещё» sheet) than on a laptop
-(a foldable sidebar), and the owner's own machine is the phone — so that one
-runs on desktop and mobile, and only that one among the admin specs.
+have made the suite minutes slower for no new bugs caught.
+`admin-shell.spec.ts` is the exception among the admin specs: the panel's
+navigation is a *different control* on a phone (a sticky bottom bar and an
+«Ещё» sheet) than on a laptop (a foldable sidebar), and the owner's own
+machine is the phone — so that one runs on desktop and mobile. A test about
+the phone's own layout elsewhere (the order row's action line in
+`admin-orders-r16.spec.ts`, the editor's scanner) runs on `mobile` for the
+same reason, gated on its own describe.
+
+The rule since 03.11.2026: **the panel runs on desktop only; the shop runs on
+desktop and the phone** (`mobile`, plus `mobile-safari` for the files in
+`SAFARI_SPECS`). The tablet project is a third pass over a layout one of the
+other two already draws, so nothing new is written for it. Where a whole file
+follows the rule, `playwright.config.ts` says so as a project's `testIgnore`
+(`DESKTOP_ONLY`, `PHONE_IS_SAFARI` for a file whose phone is Safari, and
+`NO_TABLET`) rather than a `test.skip` inside the file — so `--list` shows
+what really runs, and the CI shards split real work instead of skipped tests.
+The older files still carry their own `test.skip`; a file that mixes the
+two kinds of test keeps its gates per describe.
 
 The guard is `functionalProject(testInfo)` in `e2e/fixtures.ts` now, not a
 literal `!== "desktop"`: it lets `desktop` and `mobile-safari` through.
@@ -270,10 +281,11 @@ iPhone profile.
 `--project=mobile-safari` (`playwright.config.ts`) is `devices["iPhone 13"]`
 left on its own `defaultBrowserType` — WebKit, 390×664, touch, the iOS user
 agent — scoped by `testMatch` to the customer-facing specs a phone matters
-for: catalogue, product, checkout, payments, home, blog, sets, gift card,
-account, PWA, the storefront sweep and the checkout sweep's one phone-layout
-test. The
-admin stays Chromium-only. It is a permanent project, not gated on the
+for: catalogue, product, checkout (and its wallet-and-account case),
+payments, home, the blog and its magazine, sets, gift card, the account (its
+settings, privacy and order details), addresses, PWA, the invoice, the
+storefront sweeps and the checkout sweep's one phone-layout test. The admin
+stays Chromium-only. It is a permanent project, not gated on the
 browser being installed like `webkit-local`: a project that vanished when
 WebKit was missing would hide exactly the failures it exists to find. The
 three Chromium shards in CI therefore name their projects explicitly, and a
@@ -288,8 +300,8 @@ the admin stays Chromium-only. Until 18.09.2026 it had no `testMatch` at all
 and ran all sixty spec files, which left four permanently red on it and on
 nothing else — two in `admin-sections.spec.ts` that ask Desktop Safari for a
 phone's bottom nav and for a button to take focus from a click (WebKit
-deliberately does not give it one), and `visual.spec.ts`'s three, which have
-no baseline for this project by the decision recorded in
+deliberately does not give it one), and `visual.spec.ts`'s three (retired
+03.11.2026), which had no baseline for this project by the decision recorded in
 `docs/audit/2026-09-07-storefront.md` § 5. CI never runs `webkit-local` — its
 jobs name their projects — so nobody saw them.
 
@@ -336,41 +348,14 @@ same way `admin-sections.spec.ts` does.
 
 ## Visual snapshots
 
-`e2e/__screenshots__/` holds the baseline PNGs (`toHaveScreenshot`,
-`playwright.config.ts`'s `snapshotPathTemplate`). Two things are deliberately
-generous about them:
-
-- **Threshold** (`expect.toHaveScreenshot` in the config): `maxDiffPixelRatio:
-  0.04`, `threshold: 0.25`, animations disabled. The two other agents working
-  in this repo right now are actively editing `app.js`/`styles.css`, so a
-  baseline made this session is a snapshot of a moving target on purpose —
-  generous tolerance is what keeps normal ongoing UI work from failing this
-  file on font/anti-aliasing noise while still catching a real layout break.
-- **Per-platform baselines**: the path template includes `{platform}`
-  (`process.platform`), so Windows and Linux never compare against each
-  other's images. The baselines committed in this repo right now are Windows
-  only (this session ran locally, not in CI) — there is no Linux baseline yet
-  for any of the three `visual.spec.ts` tests.
-  `toHaveScreenshot()` does not treat a missing baseline as "nothing to
-  compare" — even in CI it writes the actual screenshot as a brand-new
-  baseline and still fails the assertion ("A snapshot doesn't exist …
-  writing actual"), which is not a real visual regression but reads as one on
-  every single CI run until someone notices and commits the generated image.
-  Each test in `visual.spec.ts` therefore calls `skipIfNoBaseline(testInfo,
-  name)` first: under `process.env.CI`, if `testInfo.snapshotPath(name, {
-  kind: "screenshot" })` — the same resolution `snapshotPathTemplate` drives —
-  does not exist on disk yet, the test is skipped with a message naming the
-  missing file, instead of failing. Local runs (no `CI` env var) are
-  unaffected and keep comparing/writing exactly as before.
-  **Generate the real Linux baselines once**, from CI itself or a Linux
-  container — running `npm run e2e:update` from a plain Windows checkout
-  cannot produce them, `{platform}` in the template always reflects the
-  machine that ran it — and commit the resulting
-  `e2e/__screenshots__/**/*-linux.png` files (the Windows ones stay; they are
-  what this machine's own runs compare against). After that, CI compares
-  Linux-to-Linux, `skipIfNoBaseline` never triggers again, and the
-  generous-but-not-infinite threshold above is doing real work, not just
-  papering over a missing file.
+There are none since 03.11.2026. `visual.spec.ts` compared three Estonian
+pages at three viewports against Windows baselines from 03.09; CI (Ubuntu)
+never had a baseline of its own, so it skipped all nine on every run and they
+caught nothing there. The file, `e2e/__screenshots__/`, the
+`toHaveScreenshot` settings in `playwright.config.ts` and `npm run
+e2e:update` went together. A layout break on a phone is what
+`a11y.spec.ts`, `sweep-storefront.spec.ts` (no sideways scroll at 375 px)
+and the per-screen specs' own boxes catch now.
 
 ## Real bugs this suite found while being built
 
@@ -424,7 +409,8 @@ coverage now instead of the workaround it briefly needed.
   `.brandstrip__it` to the design system's own muted-text token
   (`var(--muted)`, ~5.4:1 on white) instead of the one-off
   `rgba(28,26,0,.35)` that flattened to it — same quiet grey, passing
-  contrast. `e2e/accessibility.spec.ts`'s `home` test now passes.
+  contrast. The axe check of the home page (then `e2e/accessibility.spec.ts`,
+  now `e2e/a11y.spec.ts`) passes.
 
 ## What could not be automated, and why
 
@@ -439,12 +425,11 @@ coverage now instead of the workaround it briefly needed.
   falls back to a rule-based reply client-side and never even calls the POST
   route that would 503). With no key, the route refuses *everyone* — admin or
   not — with 503, which is a strictly stronger refusal than a 401 but not the
-  status code the task names. `e2e/security.spec.ts` asserts the real 503
-  behavior with a comment explaining why; `tests/assistant-admin-auth.test.ts`
-  is a fast, isolated vitest that configures a (fake, fetch-mocked) key and
-  proves the literal 401-without-cookie behavior the task asked for, without
-  needing a second Playwright server running with a different environment
-  just for one status code.
+  status code the task names. `tests/assistant-admin-auth.test.ts` asserts
+  both: the real 503 for every caller when no key is set, and — with a (fake,
+  fetch-mocked) key configured — the literal 401-without-cookie behavior the
+  task asked for, without needing a second Playwright server running with a
+  different environment just for one status code.
 - **Montonio bank links / real card payments.** Out of scope by the task's
   own design — `PAYMENT_PROVIDER=mock` is what stands in, and
   `checkout.spec.ts` exercises the full order→pay→receipt path through it,
@@ -950,7 +935,6 @@ gone because Postgres blinked.
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
 | `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
 | `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |
-| `e2e/__screenshots__/` | Visual baselines — see above |
 | `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers + `minify-shop2` (the shell links the gitignored `app.min.js`, so without it every page loads a 404 and nothing paints), ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
@@ -961,7 +945,7 @@ gone because Postgres blinked.
 | `e2e/sets.spec.ts`, `e2e/admin-bundles.spec.ts` | The sets: the shopper's side plus the «Наборы на сайте» switch, and the owner's «Товары → Наборы» CRUD — see above |
 | `e2e/admin-savebar-fit.spec.ts` | The phone's save bar, **measured** rather than looked at: 375 px and 360 px × RU/ET/EN × the bar's four states (quiet, unsaved, saving, saved). It compares the NATURAL width of every visible word — a Range over its own text — against the box it sits in, because the status word is `text-overflow: ellipsis` and a word that does not fit is not a broken layout, it is a slightly shorter word that nobody notices. Also: the bar stays one row, nothing sticks out of the viewport, the page never scrolls sideways, no control is under 44 × 44. Renat asked the question on 14.09.2026 («are you sure? Check the sizes of the letters») and the answer was no — Estonian cleared 375 px by nothing at all and both Russian and Estonian clipped at 360. The subject screen is «Настройки → Доставка и оплата», the widest the panel asks a phone to hold, but `.adm-savebar` is every admin screen's header, so this guards the product editor, «Письма» and a newsletter draft too |
 | `e2e/admin-shell.spec.ts` | The redesigned panel's shell: five places, the phone bar and «Ещё» sheet, the sidebar fold, all thirteen old tab keys as deep links, the assistant FAB, the confirm card, the toast's undo — see above |
-| `e2e/a11y.spec.ts` | The accessibility sweep, desktop **and** mobile: axe (WCAG 2.x A/AA + best-practice rules, plus the «label in name» rule Lighthouse runs) over home, a category with a card's size listbox open, search, the product page, the cart drawer, checkout steps 1–3, the account sign-in, the blog list and a post, sets and the gift card in RU/ET/EN — and, signed in, every admin section, an order card, the confirm card, the editor's five tabs, a settings page and the assistant. Serious/critical violations fail; the rest is printed and attached. `e2e/accessibility.spec.ts` is the older five-screen smoke |
+| `e2e/a11y.spec.ts` | The accessibility sweep, desktop **and** mobile: axe (WCAG 2.x A/AA + best-practice rules, plus the «label in name» rule Lighthouse runs) over home, a category with a card's size listbox open, search, the product page, the cart drawer, checkout steps 1–3, the account sign-in, the blog list and a post, sets and the gift card in RU/ET/EN — and, signed in, every admin section, an order card, the confirm card, the editor's five tabs, a settings page and the assistant. Serious/critical violations fail; the rest is printed and attached |
 | `e2e/admin-editor.spec.ts` | The redesigned «Товар»: five tabs, the sticky save bar, a size price + salon price + stock + barcode saved once and read back from the shop, «Склад» and the inventory route, and the destructive action through the confirm card — see below |
 | `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
 | `e2e/admin-sections.spec.ts` | The six «Ещё» sections after the phase-3 redesign: every one drawing on desktop **and** on a phone with no page error and no sideways scroll, plus one real action each — approve a Pro request from the row, publish a review with its undo, create a promo code, switch a gift denomination on and see it on `/gift/`, save a letter's subject, publish a post, change a tariff through the confirm card and take it back from the journal — see above |

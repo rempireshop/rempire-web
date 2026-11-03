@@ -146,50 +146,14 @@ test.describe("the language comes from the address, never from the browser", () 
  *
  * src/middleware.ts + src/lib/legacy-redirects.ts. Shopify's own addresses
  * ARE the shop's now and answer 200 directly; everything else moves with ONE
- * 301. The rules are pinned by tests/legacy-redirects.test.ts against every
- * row of tools/harvest/old-urls.txt; what is worth proving through a real
- * server is that the middleware is reached at all, that the hop ends on 200
- * rather than on the shop's 404, and on the right page in the right language.
- * Every URL is copied out of the Search Console export (docs/audit/2026-09-07-seo.md). */
-const SHOPIFY: Array<[string, string, number, string]> = [
-  // old URL,                                             final path,                                       hops, why
-  ["/products/system-4-bio-botanical-shampoo", "/products/system-4-bio-botanical-shampoo", 0, "the best-earning product page — Shopify's address IS the page"],
-  ["/ru/products/system-4-bio-botanical-serum", "/ru/products/system-4-bio-botanical-serum", 0, "/ru keeps Russian"],
-  ["/et/products/hair-resort-spray", "/et/products/hair-resort-spray", 0, "/et stays Estonian"],
-  ["/en-lv/products/xerjoff-1861-naxos-eau-de-parfum-100ml", "/products/xerjoff-1861-naxos-eau-de-parfum-100ml", 1, "the en-* storefronts fold onto the unprefixed English page"],
-  ["/collections/system-4", "/collections/system-4", 0, "a collection that is a brand"],
-  // a published subcollection is a page of its own at Shopify's handle since 09.10.2026 (8943f498)…
-  ["/et/collections/habemeolid", "/et/collections/habemeolid", 0, "an Estonian sub-collection with a page"],
-  // …and one that is not still moves to its section
-  // (naomaskid became a page of its own in the SEO pass of 26.10.2026)
-  ["/et/collections/naomaskid", "/et/collections/naomaskid", 0, "an Estonian sub-collection with a page since 26.10"],
-  ["/et/collections/raseerimine", "/et/collections/habemehooldus", 1, "an Estonian sub-collection → its section"],
-  ["/ru/collections/uhod-za-volosami", "/ru/collections/uhod-za-volosami", 0, "a section under its own Russian handle"],
-  ["/policies/shipping-policy", "/policies/shipping-policy", 0, "Shopify's own policy page"],
-  ["/pages/right-to-return", "/policies/refund-policy", 1, "a hand-made Shopify page → the policy"],
-  ["/et/pages/contact", "/et/pages/contact", 0, "contact"],
-  ["/blogs/blog", "/blogs/news", 1, "the old blog"],
-  ["/et", "/et", 0, "a bare storefront prefix"],
-  ["/products/blow-dry-ever-thicken", "/products/blow-dry-ever-smooth", 1, "a product that is gone, its line is not"],
-  ["/products/captain-fawcett-barberism%C2%AE-beard-oil", "/products/captain-fawcett-barberism-beard-oil", 1, "a handle Shopify percent-escaped"],
-];
-
+ * 301. The rules — Shopify's addresses and the /shop2/ ones of the weeks
+ * before alike — are pinned by tests/legacy-redirects.test.ts against every
+ * row of tools/harvest/old-urls.txt, and which paths reach the middleware by
+ * tests/middleware-matcher.test.ts; the two URL tables that used to repeat
+ * them here through a server went on 03.11.2026. What is worth proving through
+ * a real server is that the middleware is reached at all, that the hop ends on
+ * 200 rather than on the shop's 404, and on the right page. */
 test.describe("Shopify's addresses", () => {
-  for (const [from, want, hops, why] of SHOPIFY) {
-    test(`${from} → ${want} in ${hops} hop(s) (${why})`, async ({ request }) => {
-      const first = await request.get(from, { maxRedirects: 0 });
-      if (hops === 0) {
-        expect(first.status(), from).toBe(200);
-      } else {
-        expect(first.status(), from).toBe(301);
-        const to = new URL(first.headers().location, E2E_BASE_URL);
-        expect(to.pathname, from).toBe(want);
-        const second = await request.get(to.pathname + to.search, { maxRedirects: 0 });
-        expect(second.status(), `${from} → ${to.pathname} is a chain`).toBe(200);
-      }
-    });
-  }
-
   test("Shopify's product-feed query is served with the page, and the canonical folds it", async ({ request }) => {
     const feed = "?variant=48667959099731&country=AE&currency=EUR&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic";
     const noisy = await request.get("/products/gatsby-moving-rubber-hair-wax-80g" + feed, { maxRedirects: 0 });
@@ -215,25 +179,6 @@ test.describe("Shopify's addresses", () => {
 });
 
 test.describe("the shop's own addresses of the weeks before (/shop2/…)", () => {
-  for (const [from, want] of [
-    [`/shop2/p/${PRODUCT.id}/`, `/ru/products/${PRODUCT.id}`],
-    [`/shop2/en/p/${PRODUCT.id}/?size=250ml`, `/products/${PRODUCT.id}?size=250ml`],
-    ["/shop2/et/c/hair/", "/et/collections/juuksehooldus"],
-    ["/shop2/", "/ru"],
-    ["/shop2/info/returns/", "/ru/policies/refund-policy"],
-    ["/shop2/done/?n=R-100042&s=paid", "/ru/checkout/done?n=R-100042&s=paid"],
-    ["/shop2/admin/?order=R-100042", "/admin?order=R-100042"],
-    ["/shop2/scan/", "/admin/scan"],
-  ] as const) {
-    test(`${from} → ${want}, one 301, its query kept`, async ({ request }) => {
-      const res = await request.get(from, { maxRedirects: 0 });
-      expect(res.status(), from).toBe(301);
-      const to = new URL(res.headers().location, E2E_BASE_URL);
-      expect(to.pathname + to.search).toBe(want);
-      expect((await request.get(to.pathname + to.search, { maxRedirects: 0 })).status(), want).toBe(200);
-    });
-  }
-
   test("the assets under /shop2/ did not move", async ({ request }) => {
     for (const path of ["/shop2/styles.css", "/shop2/manifest.webmanifest", "/shop2/icons/favicon.svg"]) {
       expect((await request.get(path, { maxRedirects: 0 })).status(), path).toBe(200);

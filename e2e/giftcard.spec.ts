@@ -219,8 +219,8 @@ test.describe("gift card — digital checkout and the printable card", () => {
  * grid offers the card's own mark too. So Renat can put the slide up before
  * Christmas and take it down after, himself.
  *
- * This flips a shop-wide setting other specs read (visual.spec.ts screenshots
- * the home page's hero), so it puts the banner back in a `finally` — the same
+ * This flips a shop-wide setting other specs read (home.spec.ts reads the
+ * home page's hero), so it puts the banner back in a `finally` — the same
  * rule as e2e/sets.spec.ts and e2e/admin-sections.spec.ts.
  */
 test.describe("the gift card as a banner slide", () => {

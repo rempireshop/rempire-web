@@ -1311,6 +1311,12 @@ test.describe("blog — publishing with a language still empty", () => {
       expect(await page.locator(".adm-confirm").count()).toBe(0);
       await clearToast(page);
       await assertClean(page, w, "publishing a post written in three languages");
+
+      // …and the list shows it with its tag
+      await page.locator("[data-admblogback]").click();
+      const listed = page.locator(".adm-brow", { hasText: `Только по-русски ${marker}` }).first();
+      await expect(listed).toBeVisible();
+      await expect(listed).toContainText("Опубликована");
     } finally {
       // this suite leaves the blog as it found it
       await page.request.delete(`/api/admin/blog/?id=${post.id}`);

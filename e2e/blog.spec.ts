@@ -95,7 +95,8 @@ test.describe("blog — tiles read as links", () => {
    article takes the page's full width again. */
 for (const lang of LANGS) {
   test(`the listing's heading and the article's reading column line up with the page — ${lang.code}`, async ({ page }) => {
-    await page.goto(shopUrl(lang.seg, "/blog/"));
+    const res = await page.goto(shopUrl(lang.seg, "/blog/"));
+    expect(res?.status(), "the listing is not served on a full load").toBe(200);
     await waitForScreen(page, "blog");
     // measure only once the real tiles are in: the cold skeleton → list
     // repaint replaces <main>, and a node measured across that swap is a

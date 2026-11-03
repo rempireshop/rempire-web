@@ -23,7 +23,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import LEGAL_SLUGS from "../src/data/legal-slugs.json";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import { ipHeaders, LANGS, shopUrl, shopUrlRe } from "./fixtures";
+import { ipHeaders, LANGS, shopUrl, shopUrlRe, tr } from "./fixtures";
 import {
   auditScreen,
   clientNav,
@@ -476,16 +476,24 @@ for (const lang of LANGS) {
       await check(page, w, { screen: "checkout:step3", lang: L });
 
       /* All three receipt states. Each is walked for real through the mock
-         bank elsewhere — sweep-checkout.spec.ts for `paid`/`failed`, and
-         checkout.spec.ts for the cancel that leaves a payment `pending`.
-         Here they are reached by landing on the receipt URL directly and
-         **without** an order id, which is the thinner receipt a shopper gets
-         when the return route could not name the order (a rate limit, a
-         database it could not reach): no retry, just the state. */
-      for (const status of ["paid", "failed", "pending"]) {
-        const ctx: Ctx = { screen: `done:${status}`, lang: L };
-        await coldVisit(page, shopUrl(lang.seg, `/done/?n=R-100000&s=${status}`), "done");
-        await expect(page.locator("h1"), `${label(ctx)} the receipt has no heading`).toBeVisible();
+         bank elsewhere, in Russian — sweep-checkout.spec.ts and
+         checkout.spec.ts for `paid`/`failed`, checkout.spec.ts for the cancel
+         that leaves a payment `pending`. Here they are reached by landing on
+         the receipt URL directly, which is where their headings are read in
+         every language. Three **without** an order id, the thinner receipt a
+         shopper gets when the return route could not name the order (a rate
+         limit, a database it could not reach): no retry, just the state. And
+         the cancelled payment's receipt, which names its order (`o`) so it
+         can be paid again — «Заказ не оплачен», not «Платёж обрабатывается». */
+      for (const [status, order, heading] of [
+        ["paid", "", "Заказ оплачен"],
+        ["failed", "", "Оплата не прошла"],
+        ["pending", "", "Платёж обрабатывается"],
+        ["pending", "&o=00000000-0000-4000-8000-000000000001", "Заказ не оплачен"],
+      ] as const) {
+        const ctx: Ctx = { screen: `done:${status}${order ? "+order" : ""}`, lang: L };
+        await coldVisit(page, shopUrl(lang.seg, `/done/?n=R-100000&s=${status}${order}`), "done");
+        await expect(page.locator("h1"), `${label(ctx)} the receipt heading`).toHaveText(tr(heading, L));
         await expect(page.locator(".done__num"), `${label(ctx)} the receipt drops the order number`)
           .toContainText("R-100000");
         await check(page, w, ctx);
@@ -502,7 +510,7 @@ for (const lang of LANGS) {
 /**
  * Cross-cutting behaviour that is about the *transition* rather than about
  * any one screen, so it is not per-language: one language proves the
- * mechanism (docs/testing.md, same reasoning as visual.spec.ts being ET-only).
+ * mechanism (docs/testing.md).
  */
 test.describe("sweep crawl — navigation invariants", () => {
   test("a language switch keeps the cart and stays on the same screen", async ({ page }) => {

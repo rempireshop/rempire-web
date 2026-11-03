@@ -3,38 +3,42 @@ import { carrierPriceTable } from "@/lib/shipping/country-prices";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 import { eur, ipHeaders, LANGS, type LangCode, shopUrl, tr, waitForScreen } from "./fixtures";
 
-/** Info/legal pages and the blog listing route. Desktop only — see
- *  docs/testing.md — except the «Доставка и оплата» describe at the bottom,
- *  which has one phone-layout test of its own. */
+/** Info/legal pages. Desktop only — see docs/testing.md — except the
+ *  «Доставка и оплата» describe at the bottom, which has one phone-layout
+ *  test of its own. The blog listing is blog.spec.ts's. */
 
 /** public/shop/legal.*.js — the 5 slugs the router (and the prerender tool)
  *  actually recognise. */
 const INFO_SLUGS = ["shipping", "returns", "terms", "privacy", "contact"];
 
-test.describe("policy pages and the blog route", () => {
+test.describe("policy pages", () => {
   test.beforeEach(async ({}, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
   });
   test.use({ extraHTTPHeaders: ipHeaders(80) });
 
+  /* Every page in every language answers 200 on a full load and boots into
+     the info screen. One test walking all fifteen rather than fifteen tests:
+     each is a page load and nothing else. The universal screen marker
+     (document.body.dataset.screen, app.js) is deliberately the only content
+     check: the prerendered SEO shell (#prerender, tools/prerender-shop2.mjs)
+     and app.js's own live render both carry an <h1> once booted, worded
+     differently enough between the two ("Delivery and payment" vs. "Terms of
+     delivery" for /info/shipping/) that asserting on any one of them would be
+     asserting content this check is not about. */
+  test("every /info/ page loads, in every language", async ({ page }) => {
+    test.setTimeout(120_000);
+    for (const lang of LANGS) {
+      for (const slug of INFO_SLUGS) {
+        const res = await page.goto(shopUrl(lang.seg, `/info/${slug}/`));
+        expect(res?.status(), `${lang.code} /info/${slug}/`).toBe(200);
+        await waitForScreen(page, "info");
+      }
+    }
+  });
+
   for (const lang of LANGS) {
     test.describe(`info pages — ${lang.code}`, () => {
-      for (const slug of INFO_SLUGS) {
-        test(`/info/${slug}/ loads`, async ({ page }) => {
-          const res = await page.goto(shopUrl(lang.seg, `/info/${slug}/`));
-          expect(res?.status()).toBe(200);
-          // The universal screen marker (document.body.dataset.screen, app.js)
-          // is deliberately the only content check here: the prerendered SEO
-          // shell (#prerender, tools/prerender-shop2.mjs) and app.js's own live
-          // render both carry an <h1> once booted, worded differently enough
-          // between the two ("Delivery and payment" vs. "Terms of delivery"
-          // for /info/shipping/) that asserting on any one of them would be
-          // asserting content this task doesn't ask for — "exists (200)" is
-          // the ask, and screen-attached is the robust proof of that.
-          await waitForScreen(page, "info");
-        });
-      }
-
       /* /info/returns/ carries one paragraph that is not the harvested policy:
          the shop's own «tick it in your account, we write back»
          (returnsAskHTML in app.js, the other half of the tick in «Мои
@@ -58,26 +62,6 @@ test.describe("policy pages and the blog route", () => {
         expect(html, "the prerendered page is missing the paragraph").toContain("data-returnsask");
         expect(html).toContain(tr("Как попросить возврат", lang.code));
       });
-    });
-  }
-
-  for (const lang of LANGS) {
-    test(`blog listing route — ${lang.code}`, async ({ page }) => {
-      // screenBlog() / S.screen === "blog", routed at /shop2[/<lang>]/blog/
-      // (app.js router strips the language prefix before matching) and
-      // prerendered per next.config.ts's prerenderedRewrites(). Migration
-      // 071_blog_samples.sql seeds three published posts, so a fresh database
-      // lists them in every language — the route resolving, the list rendering
-      // and the seed all at once. The empty-state copy must not be on screen.
-      const res = await page.goto(shopUrl(lang.seg, "/blog/"));
-      expect(res?.status()).toBe(200);
-      await waitForScreen(page, "blog");
-      await expect(page.locator("h1")).toHaveText(tr("Блог", lang.code));
-      // the magazine (02.11.2026): the newest is the story on top, the other two are the grid's tiles
-      await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
-      await expect(page.locator(".bmag__card").first()).toBeVisible();
-      expect(await page.locator(".bmag__card").count()).toBeGreaterThanOrEqual(2);
-      await expect(page.getByText(tr("Статей пока нет — загляните позже.", lang.code))).toHaveCount(0);
     });
   }
 });

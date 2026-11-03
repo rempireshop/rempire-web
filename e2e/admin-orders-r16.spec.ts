@@ -87,46 +87,13 @@ test.describe("admin — «Выдан клиенту» takes one tap", () => {
 /**
  * «I think also in orders section we should initially show "all"», and «a
  * return … needs a separate category as it's quite hard to find that order».
+ * The chip strip itself — «Все» first, lit on arrival, every step one tap — is
+ * admin-sweep-4.spec.ts's «the order chips» test; this one is the returns chip.
  */
 test.describe("admin — «Заказы» opens on «Все» and has a place for returns", () => {
   test.use({ extraHTTPHeaders: ipHeaders(242) });
-
-  test("«Все» leads and is lit; the steps and «Возвраты» are each one tap", async ({ page }) => {
-    test.setTimeout(180_000);
-    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
-    await waitForScreen(page, "product");
-    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
-    await expect(page.getByRole("status")).toBeVisible();
-    await page.goto(shopUrl("", "/checkout/"));
-    await waitForScreen(page, "checkout");
-    const number = await payOrder(page, freshEmail("r16-all"), "paid");
-
-    await loginAsAdmin(page);
-    await adminSection(page, "orders");
-
-    const chips = page.locator("#app [data-admfilter]");
-    await expect(chips.first(), "«Все» is not the first chip").toHaveText(/^Все/);
-    await expect(page.locator('[data-admfilter="all"]'), "the screen does not open on «Все»")
-      .toHaveAttribute("aria-current", "true");
-    // a paid order is in the opening list without touching a chip
-    await expect(page.locator("#orderlist .adm-row--lines").filter({ hasText: number })).toBeVisible();
-
-    // every state filter is still one tap from here, in the order they happen
-    for (const key of ["new", "shipped", "invoice", "returns"]) {
-      const chip = page.locator(`[data-admfilter="${key}"]`);
-      await expect(chip, `«${key}» is not on the strip`).toHaveCount(1);
-      await chip.scrollIntoViewIfNeeded();
-      await chip.click();
-      await expect(chip).toHaveAttribute("aria-current", "true");
-    }
-
-    /* «Возвраты» holds nothing but return requests, and this brand-new paid
-       order is not one. (Not «the list is empty»: the suite shares one
-       database and an earlier spec may well have left a request in it.) */
-    await expect(page.locator('[data-admfilter="returns"]')).toHaveAttribute("aria-current", "true");
-    await expect(page.locator("#orderlist"), "a plain paid order turned up under «Возвраты»")
-      .not.toContainText(number);
-    await expect(page.locator("#orderlist")).toContainText(/Таких заказов нет|Просит возврат/);
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the panel's own flow — desktop project only, see docs/testing.md");
   });
 
   test("a customer's return request lands on its own chip, and is marked in «Все»", async ({ page }) => {
@@ -180,6 +147,7 @@ test.describe("admin — «Заказы» opens on «Все» and has a place fo
     // and the chip holds it — and holds nothing that was not asked about
     await chip.scrollIntoViewIfNeeded();
     await chip.click();
+    await expect(chip).toHaveAttribute("aria-current", "true");
     const rows = page.locator("#orderlist .adm-row--lines");
     await expect(rows.filter({ hasText: number }), "the request is not under its own chip").toHaveCount(1);
     // …every one of them is a return: still asking, or already refunded
@@ -194,6 +162,9 @@ test.describe("admin — «Заказы» opens on «Все» and has a place fo
  */
 test.describe("admin — the payment's number can be taken away", () => {
   test.use({ extraHTTPHeaders: ipHeaders(243) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the panel's own flow — desktop project only, see docs/testing.md");
+  });
 
   test("the order card offers the payment number with a copy button", async ({ page, context }) => {
     test.setTimeout(180_000);
@@ -240,6 +211,9 @@ test.describe("admin — the payment's number can be taken away", () => {
  */
 test.describe("admin — the label sheet carries the order", () => {
   test.use({ extraHTTPHeaders: ipHeaders(244) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the panel's own flow — desktop project only, see docs/testing.md");
+  });
 
   test("the A4 sheet prints the drop-off code and the delivery details; A6 does not", async ({ page }) => {
     test.setTimeout(180_000);
