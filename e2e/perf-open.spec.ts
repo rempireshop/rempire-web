@@ -13,8 +13,7 @@
  * and asserts only that the screen came up at all. NOT named `admin-*` or
  * `checkout-*` so it does not join those suites.
  *
- *   node tools/e2e-build.mjs
- *   E2E_PORT=4417 npx playwright test e2e/perf-open.spec.ts --project=desktop
+ *   E2E_PORT=4417 npm run e2e:perf -- perf-open      (playwright.perf.config.ts)
  *
  * The three latencies
  *   Everything here runs against PGlite in the same node process as the route

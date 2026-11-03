@@ -116,7 +116,7 @@ const CONSOLE_ALLOW: RegExp[] = [
   /* The fourth pass of search asks a model (POST /api/search/) only when the
      catalogue's own three passes found almost nothing. The e2e environment has
      no OPENAI_API_KEY, so the route answers 503 {enabled:false} — the same
-     posture as the assistant route, and security.spec.ts pins it: an
+     posture as the assistant route, and tests/assistant-admin-auth.test.ts pins it: an
      unconfigured AI route never answers 200. app.js reads the 503 and switches
      the pass off for the session, so the shopper sees the local results and no
      message at all. WebKit prints a console line for every failed resource

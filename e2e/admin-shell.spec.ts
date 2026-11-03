@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { assertClean, watch } from "./sweep-helpers";
 
 test.beforeEach(async ({}, testInfo) => {
   // phone + desktop are the two designed layouts (docs/design/admin-handoff-README.md);
@@ -96,6 +97,7 @@ test.describe("admin shell — the five places", () => {
 
   test("desktop: the sidebar folds to icons and stays folded", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "the sidebar is the desktop nav");
+    const w = watch(page);
     await loginAsAdmin(page);
 
     /* Poll rather than measure once: the sidebar is rebuilt by every render,
@@ -116,8 +118,30 @@ test.describe("admin shell — the five places", () => {
     // labels gone, the icons and their titles still there to click
     await expect(page.locator(".adm-side").getByText("Обзор", { exact: true })).toBeHidden();
     await expect(nav(page, "orders")).toBeVisible();
+    await expect(page.locator(".adm2--navmin")).toBeVisible();
+
+    // The fold has to survive the next render — every tab click rebuilds the
+    // whole panel from S, so a state key that is not read back would silently
+    // spring the nav open again.
+    for (const key of ["orders", "goods", "setup"]) {
+      await nav(page, key).click();
+      await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).first()).toBeVisible();
+      await expect(page.locator("[data-admnav]"), `sidebar sprang open on tab ${key}`)
+        .toHaveAttribute("aria-expanded", "false");
+    }
+    await assertClean(page, w, "sidebar folded across tabs");
+
+    // …and a reload: the owner works on a laptop and reopens this page all
+    // day; a preference that resets every visit is not a preference.
+    await page.reload();
+    await waitForScreen(page, "admin");
+    await expect(page.locator("[data-admnav]"), "sidebar collapse did not survive a reload")
+      .toHaveAttribute("aria-expanded", "false");
+    await expect.poll(width).toBe(68);
+    await assertClean(page, w, "sidebar after reload");
 
     await page.locator("[data-admnav]").click();
+    await expect(page.locator("[data-admnav]")).toHaveAttribute("aria-expanded", "true");
     await expect.poll(width).toBe(232);
   });
 });
@@ -125,30 +149,35 @@ test.describe("admin shell — the five places", () => {
 test.describe("admin shell — every old tab key is still a deep link", () => {
   test.use({ extraHTTPHeaders: ipHeaders(121) });
 
-  /** old key → the section it lives in now, and the title that section shows. */
-  const KEYS: Array<[string, string, string]> = [
-    ["over", "over", "Обзор"],
-    ["orders", "orders", "Заказы"],
-    ["goods", "goods", "Товары"],
-    ["stock", "goods", "Товары"],
+  /** old key → the section it lives in now, the title that section shows, and
+   *  the label (`title`) of the control that ends up current on a desktop: a
+   *  nav item for a section of its own, the tab itself for a key that moved
+   *  into one (ADM_SECTION_OF in app.js). */
+  const KEYS: Array<[string, string, string, string]> = [
+    ["over", "over", "Обзор", "Обзор"],
+    ["orders", "orders", "Заказы", "Заказы"],
+    ["goods", "goods", "Товары", "Каталог"],
+    ["stock", "goods", "Товары", "Склад"],
     // the nav item is «Салон», and since 1a so is the screen's own title
-    ["pos", "pos", "Салон"],
-    ["people", "people", "Клиенты"],
-    ["reviews", "people", "Клиенты"],
-    ["promos", "promos", "Маркетинг"],
-    ["mail", "promos", "Маркетинг"],
-    ["blog", "blog", "Блог"],
-    ["stats", "stats", "Аналитика"],
-    ["apps", "apps", "Подключения"],
-    ["setup", "setup", "Настройки"],
+    ["pos", "pos", "Салон", "Салон"],
+    ["people", "people", "Клиенты", "Клиенты"],
+    ["reviews", "people", "Клиенты", "Отзывы"],
+    ["promos", "promos", "Маркетинг", "Промокоды"],
+    ["gift", "promos", "Маркетинг", "Подарочные карты"],
+    ["mail", "promos", "Маркетинг", "Письма"],
+    ["blog", "blog", "Блог", "Блог"],
+    ["stats", "stats", "Аналитика", "Аналитика"],
+    ["apps", "apps", "Подключения", "Подключения"],
+    ["setup", "setup", "Настройки", "Настройки"],
   ];
 
-  test("all thirteen open their section, whichever viewport", async ({ page }, testInfo) => {
+  test("all fourteen open their section, whichever viewport", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     const mobile = testInfo.project.name === "mobile";
+    const w = watch(page);
     await loginAsAdmin(page);
 
-    for (const [key, section, title] of KEYS) {
+    for (const [key, section, title, label] of KEYS) {
       /* Exactly what the assistant's «Открыть …» buttons do: reach a section
          by the old key. A section of its own is one click in the nav — on a
          phone, six of them live behind «Ещё»; a key that moved into a sub-tab
@@ -175,6 +204,14 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
         : page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).first();
       await expect(marked, `${key} is not marked current`).toBeVisible();
       await expect(page.locator("h1.adm-h1").first(), `${key} did not open ${title}`).toHaveText(new RegExp(title));
+      /* On a desktop the current control names what was opened — `.last()`,
+         because a key that moved into a sub-tab marks TWO controls current, the
+         section's nav item and the tab — and the screen is clean: no uncaught
+         error, no console.error, no 5xx, no raw JS value on screen. */
+      if (!mobile) {
+        await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).last()).toHaveAttribute("title", label);
+        await assertClean(page, w, `tab ${key} (${label})`);
+      }
     }
   });
 });

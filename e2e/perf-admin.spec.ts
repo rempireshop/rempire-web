@@ -8,10 +8,10 @@
  *
  * NOT named `admin-*.spec.ts` on purpose: it must not join the admin suite in
  * CI — it is slow, it is a stopwatch, and a stopwatch that fails a build tells
- * you about the runner's mood, not about the panel.
+ * you about the runner's mood, not about the panel. playwright.config.ts never
+ * collects it; its own config does (playwright.perf.config.ts):
  *
- *   node tools/e2e-build.mjs
- *   E2E_PORT=3817 npx playwright test e2e/perf-admin.spec.ts --project=desktop
+ *   E2E_PORT=3817 npm run e2e:perf -- perf-admin
  *
  * What each number means
  *   sync  — milliseconds the click handler blocks the main thread: the whole

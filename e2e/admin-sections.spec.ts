@@ -12,7 +12,8 @@ import {
  * desktop without throwing, and that one real action on it actually reaches the
  * server. A screen that renders but whose buttons do nothing is the failure
  * this file exists to catch — every section here sits on an API the panel had
- * before the redesign, and a restyle must not have cut a wire.
+ * before the redesign, and a restyle must not have cut a wire. «Блог»'s action
+ * — writing, publishing and withdrawing a post — is admin-blog.spec.ts's.
  *
  * Both projects on purpose: this is the half of the panel Renat uses from an
  * iPhone (the reviews queue, the letters, the journal), so 375 px is not an
@@ -334,52 +335,6 @@ test.describe("admin sections — Маркетинг", () => {
   });
 });
 
-test.describe("admin sections — Блог", () => {
-  test.use({ extraHTTPHeaders: ipHeaders(183) });
-
-  test("a post written in the redesigned editor is published and withdrawn", async ({ page }) => {
-    test.setTimeout(150_000);
-    test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
-    await loginAsAdmin(page);
-    await adminSection(page, "blog");
-
-    await page.locator("[data-admblognew]").click();
-    await page.locator("[data-bnewblank]").click();   // «Писать самому» — the blank editor (02.11.2026)
-    const title = `E2E раздел ${Date.now().toString().slice(-6)}`;
-    // the Oswald title input with only a bottom rule — same [data-blogf] hook
-    await page.locator('[data-blogf="title"]').fill(title);
-    await page.locator("[data-blogbody]").click();
-    await page.keyboard.type("Проверка редактора после редизайна.");
-    await page.locator('[data-blogf="excerpt"]').fill("Короткий анонс.");
-
-    // 1a: the line at the foot says where the article stands; «Опубликовать» is the dark button
-    await expect(page.locator("[data-blogpubstate]")).not.toContainText("Опубликована");
-    const slug = await page.locator("[data-blogslug]").inputValue();
-    /* Written in Russian only, so «Опубликовать» first asks what the Estonian
-       and English readers will get — on the confirm sheet; its own test is in
-       admin-blog.spec.ts. */
-    await page.locator("[data-admblogpublish]").click();
-    await page.locator(".adm-confirm [data-admapply]").click();
-    await expect(page.getByRole("status")).toBeVisible();
-    await expect(page.locator("[data-blogpubstate]")).toContainText("Опубликована — правки видны сразу");
-
-    const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);
-    expect(api.status(), "the published post is not on the public API").toBe(200);
-
-    // …and the list shows it with its tag
-    await page.locator("[data-admblogback]").click();
-    const row = page.locator(".adm-brow", { hasText: title }).first();
-    await expect(row).toBeVisible();
-    await expect(row).toContainText("Опубликована");
-
-    // leave the blog as it was found — «Снять с публикации» is in «⋯» (1a)
-    await row.click();
-    await page.locator("[data-admblogmenu]").click();
-    await page.locator("[data-admblogunpublish]").click();
-    await expect(page.getByRole("status")).toBeVisible();
-  });
-});
-
 test.describe("admin sections — Настройки", () => {
   test.use({ extraHTTPHeaders: ipHeaders(184) });
 
@@ -433,46 +388,25 @@ test.describe("admin sections — Настройки", () => {
 });
 
 /**
- * The four cards the phase-4 sweep rebuilt in the panel's own markup — the
- * banner editor, the shop's details, prices & points, the accountant's report.
- * Since 1a (25.09.2026, README § 2) each one saves itself — a text a second
- * after the last keystroke, a number when its box is left — with no confirm
- * card, and lands on the server; the report is a link, and the link is the
- * one the API serves.
+ * Two of the cards the phase-4 sweep rebuilt in the panel's own markup — the
+ * shop's details and the accountant's report. Since 1a (25.09.2026, README
+ * § 2) the details save themselves when a box is left, with no confirm card,
+ * and «Вернуть стандартные данные» really puts them back; the report is a
+ * link, and the link is the one the API serves. The banner's autosave is
+ * «pages that save themselves» below, the prices' is sweep-admin.spec.ts
+ * «sweep — prices & points».
  */
 test.describe("admin sections — Настройки: the rebuilt cards", () => {
   test.use({ extraHTTPHeaders: ipHeaders(185) });
 
-  test("banner, shop details and prices save themselves; the report link points at the export", async ({ page }) => {
+  test("the shop's details save themselves and reset; the report link points at the export", async ({ page }) => {
     test.setTimeout(180_000);
     test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
     await loginAsAdmin(page);
     const stored = async () => (await (await page.request.get("/api/admin/settings/")).json()).settings;
-    const before = await stored();
-
-    /* ---- Главная страница: the banner ------------------------------------ */
-    const title = `E2E баннер ${Date.now().toString().slice(-6)}`;
-    try {
-      await adminSection(page, "setup");
-      await page.locator('[data-admsetpage="home"]').click();
-      // a slide is a row with its own switch, order buttons, and its title opens it
-      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
-      await page.locator('[data-heroedit="0"]').click();
-      await page.locator('[data-herof="title"]').fill(title);
-      // a long text saves a second after the last keystroke, no card asks
-      await expect(page.getByRole("status")).toContainText("Баннер сохранён", { timeout: 10_000 });
-      await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU,
-        { timeout: 20_000, message: "the title never reached settings.hero" }).toBe(title);
-      await page.locator("[data-heroclose]").first().click();
-    } finally {
-      await page.request.put("/api/admin/settings/", { data: { hero: before.hero ?? null } });
-    }
 
     /* ---- О компании: the shop's own details ----------------------------- */
     try {
-      await page.reload();
-      await waitForScreen(page, "admin");
       await adminSection(page, "setup");
       await page.locator('[data-admsetpage="company"]').click();
       await openFold(page, "content:company");
@@ -491,23 +425,6 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await openMore(page, "company");
       await page.locator('[data-contentreset="company"]').click();
       await expect.poll(async () => (await stored()).content?.company?.phone ?? "").not.toBe("+372 5000001");
-    }
-
-    /* ---- Цены и баллы ---------------------------------------------------- */
-    const originalPricing = JSON.parse(JSON.stringify(before.pricing || {}));
-    try {
-      // the nav item always lands on the index of the six pages
-      await adminSection(page, "setup");
-      await page.locator('[data-admsetpage="prices"]').click();
-      const pct = page.locator('[data-pricingf="proDiscountPct"]');
-      await pct.fill("22");
-      await pct.press("Tab");
-      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены", { timeout: 15_000 });
-      await expect(page.locator(".adm-confirm"), "q40: the prices ask no question").toHaveCount(0);
-      await expect.poll(async () => (await stored()).pricing?.proDiscountPct,
-        { timeout: 20_000, message: "the discount never reached settings.pricing" }).toBe(22);
-    } finally {
-      await page.request.put("/api/admin/settings/", { data: { pricing: originalPricing } });
     }
 
     /* ---- Отчёт для бухгалтера: the download link ------------------------- */
@@ -811,12 +728,16 @@ test.describe("admin sections — Настройки: pages that save themselves
       expect(await page.locator(".adm-page").getByRole("button", { name: "Сохранить", exact: true }).count(),
         "a card kept a «Сохранить» of its own").toBe(0);
 
+      // a slide is a row with its own switch, order buttons, and its title opens it
+      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
       await page.locator('[data-heroedit="0"]').click();
       const title = page.locator('[data-herof="title"]');
       const was = await title.inputValue();
       await title.fill("E2E — сохраняется само");
       const toast = page.getByRole("status");
+      // a long text saves a second after the last keystroke, no card asks
       await expect(toast).toContainText("Баннер сохранён", { timeout: 10_000 });
+      await expect(page.locator(".adm-confirm")).toHaveCount(0);
       await expect.poll(async () => (await stored()).hero?.slides?.[0]?.title?.RU).toBe("E2E — сохраняется само");
 
       // «Вернуть» on that toast: the banner as it was, on the server too

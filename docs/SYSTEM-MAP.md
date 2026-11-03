@@ -1049,7 +1049,7 @@ test.ts`, `tests/assistant-admin-auth.test.ts`, `tests/security-assistant.
 test.ts`, `tests/openai-chat.test.ts`, `tests/photo-cutout.test.ts`; e2e (all with the model stubbed or
 absent) `admin-blog.spec.ts`, `admin-shell.spec.ts` (assistant, JSON-looking
 answers, photo attachment), `admin-products.spec.ts` (`create_product`),
-`chatbot.spec.ts`, `security.spec.ts`, `sweep-admin.spec.ts` (prompt
+`chatbot.spec.ts`, `sweep-admin.spec.ts` (prompt
 injection). Manual: FAB → «Какие заказы ждут отправки?»; product → «Описание» →
 «Написать черновик».
 
@@ -1366,8 +1366,8 @@ fixed hash (`e2e/env.mjs`). Rate limits are in-memory per instance
 
 **How to test it.** `tests/auth.test.ts`, `tests/fuzz-routes.test.ts` (locks on
 every route, cookie forgery, cross-cookie), `tests/security-*.test.ts`,
-`tests/account-code-e2e-hook.test.ts`; e2e `security.spec.ts`, `sweep-admin.
-spec.ts` (wrong passwords refused, the right one still gets in). Manual:
+`tests/account-code-e2e-hook.test.ts`, `tests/csp-default-src.test.ts`; e2e
+`sweep-admin.spec.ts` (wrong passwords refused, the right one still gets in). Manual:
 every wrong password → «Неверный пароль», each answered a little later than
 the last. No lockout sentence any more: the panel prints «Слишком много
 попыток — подождите минуту.» only on a 429, and this route no longer
@@ -1446,8 +1446,10 @@ changed; per-spec fake IPs beat the rate limits; `e2e/fixtures.ts` holds
 `PRODUCT`/`PRODUCT_2`/`BUNDLE` and the RU→ET/EN lookups. **CI**
 (`.github/workflows/ci.yml`): `checks` (typecheck + vitest), `e2e` in 4 shards
 (Chromium projects), `safari` (WebKit); ~15 min per shard; docs-only pushes
-skip; **CI never deploys**. Visual baselines are Windows-only
-(`e2e/__screenshots__`, `skipIfNoBaseline` in CI). Flakiness notes: a second
+skip; **CI never deploys**. No visual baselines since 03.11.2026; the panel
+runs on desktop only, the shop on desktop + phone (`DESKTOP_ONLY` /
+`PHONE_IS_SAFARI` / `NO_TABLET` in the config); the perf-* stopwatches run
+from `playwright.perf.config.ts`. Flakiness notes: a second
 `next dev` in the same checkout corrupts `.next`; the parcel-point test hits
 the live Omniva feed; agents in parallel must use their own port and worktree
 (project memory: 3617/4117 conventions).

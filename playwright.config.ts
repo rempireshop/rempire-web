@@ -35,19 +35,46 @@ import { adminPasswordHash, E2E_BASE_URL, E2E_PORT, E2E_SESSION_SECRET } from ".
  * One constant rather than one regex per project, because the rule is one
  * rule: «the admin stays Chromium-only» (docs/testing.md § «Safari»). It was
  * written on `mobile-safari` only, and `webkit-local` — added earlier, for
- * poking at the shop by hand — went on running all sixty spec files. Four of
- * them cannot hold on that project and have been red there since the day they
- * were written: `admin-sections.spec.ts` asks Desktop Safari for a phone's
- * bottom nav, and for a button to take focus from a click, which WebKit
- * deliberately does not give it; `visual.spec.ts` compares against baselines
- * that exist for the three viewport projects and, by the decision of
- * docs/audit/2026-09-07-storefront.md § 5, not for this one. Nothing in CI
- * runs `webkit-local` (.github/workflows/ci.yml names its projects), so those
- * four were red only on the machine of whoever had WebKit installed, and only
- * in a run that named no --project at all.
+ * poking at the shop by hand — went on running all sixty spec files. Two tests
+ * in `admin-sections.spec.ts` could not hold on that project: they ask Desktop
+ * Safari for a phone's bottom nav, and for a button to take focus from a
+ * click, which WebKit deliberately does not give it. Nothing in CI runs
+ * `webkit-local` (.github/workflows/ci.yml names its projects), so they were
+ * red only on the machine of whoever had WebKit installed, and only in a run
+ * that named no --project at all.
  */
 const SAFARI_SPECS =
-  /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|account-settings|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/;
+  /[\\/](catalogue|product|checkout|checkout-wallet-account|invoice|payments|storefront-sweep-2|home|blog|blog-magazine|sets|giftcard|account|account-settings|account-privacy|account-order-details|addresses|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/;
+
+/** `e2e/<name>.spec.ts` for each name, as one pattern anchored on the separator. */
+const specs = (...names: string[]) => new RegExp(`[\\\\/](${names.join("|")})\\.spec\\.ts$`);
+
+/**
+ * Never collected by this config. e2e/smoke.spec.ts runs against a deployed
+ * shop from playwright.smoke.config.ts — its robots.txt, sitemap host and
+ * security headers are legitimately different on a `next dev` on localhost.
+ * The perf-* stopwatches print a table and assert nothing, so they run by
+ * hand from playwright.perf.config.ts (`npm run e2e:perf`).
+ */
+const ALWAYS_IGNORED = [specs("smoke"), specs("perf-admin", "perf-open")];
+
+/**
+ * Which Chromium projects run a whole file, for the files whose every test
+ * follows one rule (docs/testing.md § «Why most specs run on desktop only»): the panel
+ * on desktop only, the shop on desktop and the phone. Written here, as
+ * `testIgnore`, rather than as a `test.skip` in each file, so `--list` shows
+ * what really runs and the CI shards split real work, not skipped tests.
+ * A file that mixes the two — a panel test about the phone's own layout next
+ * to desktop ones — keeps its gates per describe instead.
+ */
+const DESKTOP_ONLY = specs(
+  "admin-customer-card", "admin-home-brands", "admin-lang-r20", "admin-search-langs",
+  "blog-files-simple", "blog-materials", "salon-sale",
+);
+/** The shop's phone is Safari here: desktop + mobile-safari, no Chromium phone or tablet. */
+const PHONE_IS_SAFARI = specs("invoice", "pwa");
+/** Desktop + phone; a tablet run of these is a third pass over the same layout. */
+const NO_TABLET = specs("blog", "sweep-checkout", "sweep-storefront");
 
 const webkitInstalled = (() => {
   try {
@@ -61,31 +88,14 @@ const webkitInstalled = (() => {
 
 export default defineConfig({
   testDir: "./e2e",
-  /* e2e/smoke.spec.ts is the one file in this directory that is NOT about the
-     server below: it runs against a deployed shop, from its own config
-     (playwright.smoke.config.ts, `npm run smoke`), and asserting its
-     robots.txt, its sitemap host and its security headers against a `next dev`
-     on localhost would fail for reasons that are all correct. Excluded by
-     name so the two suites can share one directory. */
-  testIgnore: /smoke\.spec\.ts$/,
+  /* e2e/smoke.spec.ts runs against a deployed shop, from its own config
+     (playwright.smoke.config.ts, `npm run smoke`); the two perf-* stopwatches
+     run from playwright.perf.config.ts. See ALWAYS_IGNORED above. A project
+     that sets its own `testIgnore` replaces this one, so each of those lists
+     starts with ALWAYS_IGNORED too. */
+  testIgnore: ALWAYS_IGNORED,
   timeout: 30_000,
-  expect: {
-    timeout: 8_000,
-    toHaveScreenshot: {
-      // Real, still-moving UI (two other agents are editing app.js/styles.css
-      // in this same repo) plus normal cross-run font/AA jitter — generous on
-      // purpose, see docs/testing.md "Visual snapshots". {platform} in the
-      // path template below keeps Windows and Linux baselines separate, so
-      // this does not have to paper over a whole different font stack too.
-      maxDiffPixelRatio: 0.04,
-      threshold: 0.25,
-      animations: "disabled",
-    },
-  },
-  // {-platform} matters: baselines made on this machine (Windows) and the
-  // ones CI (Ubuntu) will need are kept as separate files instead of one
-  // fighting the other — see docs/testing.md.
-  snapshotPathTemplate: "{snapshotDir}/__screenshots__/{testFilePath}/{arg}{-projectName}{-platform}{ext}",
+  expect: { timeout: 8_000 },
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
@@ -202,12 +212,18 @@ export default defineConfig({
     // (a real iPad/iPhone runs Safari) — browserName here overrides that back
     // to Chromium, which is what "3 projects, Chromium only in CI" (the task)
     // means by tablet/mobile: viewport + touch + UA emulation, still Chromium
-    // underneath. Confirmed the hard way: every other spec in this suite
-    // restricts itself to --project=desktop, so this device/engine mismatch
-    // was never exercised until visual.spec.ts (deliberately the one file
-    // that runs on all three) tried to launch a webkit that isn't installed.
-    { name: "tablet", use: { ...devices["iPad Mini"], browserName: "chromium" } }, // 768×1024
-    { name: "mobile", use: { ...devices["iPhone X"], browserName: "chromium" } }, // 375×812
+    // underneath. Without the override a spec that runs on all three tries to
+    // launch a webkit that may not be installed.
+    {
+      name: "tablet",
+      use: { ...devices["iPad Mini"], browserName: "chromium" }, // 768×1024
+      testIgnore: [...ALWAYS_IGNORED, DESKTOP_ONLY, PHONE_IS_SAFARI, NO_TABLET],
+    },
+    {
+      name: "mobile",
+      use: { ...devices["iPhone X"], browserName: "chromium" }, // 375×812
+      testIgnore: [...ALWAYS_IGNORED, DESKTOP_ONLY, PHONE_IS_SAFARI],
+    },
     /* Safari, for real. devices["iPhone 13"] keeps its own defaultBrowserType
        ("webkit"), so this is the one project that runs the storefront on the
        engine every iPhone actually uses — 390×664, touch, iOS user agent —

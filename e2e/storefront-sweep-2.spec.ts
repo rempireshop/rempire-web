@@ -496,34 +496,6 @@ test.describe("account — «Доставка по умолчанию»", () => 
   });
 });
 
-for (const lang of LANGS) {
-  if (lang.code === "RU") continue;
-
-  test.describe(`«Бренды» — the head of the one page with no prerender (${lang.code})`, () => {
-    test.use({ extraHTTPHeaders: ipHeaders(201 + LANGS.indexOf(lang)) });
-
-    test("title and description are the page's own language, not the Russian shell's", async ({ page }) => {
-      await page.goto(shopUrl(lang.seg, "/brands/"));
-      await waitForScreen(page, "brands");
-      const head = await page.evaluate(() => ({
-        title: document.title,
-        desc: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
-        intro: (document.querySelector(".sec__intro")?.textContent || "").trim(),
-        htmlLang: document.documentElement.lang,
-        canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "",
-      }));
-      expect(head.htmlLang).toBe(lang.htmlLang);
-      expect(head.canonical, "the canonical still points at the shell it was served from").toContain(
-        shopUrl(lang.seg, "/brands/"),
-      );
-      expect(head.title, `Cyrillic left in the ${lang.code} tab title: ${head.title}`).not.toMatch(/[Ѐ-ӿ]/);
-      expect(head.desc, `Cyrillic left in the ${lang.code} description: ${head.desc}`).not.toMatch(/[Ѐ-ӿ]/);
-      // the description IS the sentence the page opens with — one string, one translation
-      expect(head.desc.slice(0, 60)).toBe(head.intro.slice(0, 60));
-    });
-  });
-}
-
 test.describe("checkout — a keyboard shopper", () => {
   test.use({ extraHTTPHeaders: ipHeaders(204) });
 
@@ -672,88 +644,6 @@ test.describe("the gift tile names what is on sale", () => {
   }
 });
 
-test.describe("account — the default delivery reaches the checkout", () => {
-  test.use({ extraHTTPHeaders: ipHeaders(208) });
-
-  test("a parcel machine chosen in the account is the one the checkout starts on", async ({ page }) => {
-    const email = freshEmail("acct-pref");
-    await page.goto(shopUrl("", "/account/"));
-    await waitForScreen(page, "account");
-    await page.locator("[data-email]").fill(email);
-    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
-    await page.locator("[data-login]").click();
-    const body = (await (await codeResponse).json()) as { code?: string };
-    expect(body.code, "the e2e login-code hook did not answer").toMatch(/^\d{6}$/);
-    await page.locator("[data-acctcode]").fill(body.code!);
-    await page.locator("[data-logincode]").click();
-    await expect(page.locator("[data-logout]")).toBeVisible();
-
-    /* «Пакомат Omniva» is not the card the checkout ticks on arrival (since
-       24.09.2026 that is the CHEAPEST card — SmartPosti's 2,59 € in an e2e
-       run, where DPD and Unisend have no points — against Omniva's 3,19 €)
-       — and the account checks no row at all until a preference exists — so
-       finding it selected at the till can only mean the preference
-       travelled. SmartPosti stood here until the tick moved to the cheapest
-       card, and would now pass with no preference at all. The block
-       promised «Подставим это при следующем заказе» and did nothing at all
-       until 07.09.2026. */
-    const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат Omniva" }).first();
-    await expect(row).toBeVisible();
-    /* The machine list is the checkout's own live feed now, not the static
-       copy the account used to keep — so the name saved here is one the till
-       can find again. Wait for that carrier's feed before reading it. */
-    const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=omniva"));
-    await row.locator("input[data-acctm]").check();
-    await feed;
-    /* The checkout's own picker since 23.09.2026, for every country: the
-       button opens on nothing chosen — a machine is chosen, never assumed —
-       and since 12.09.2026 the block saves itself: a parcel row waits for its
-       machine and says so under the rows, and the tap on a machine in the
-       sheet is what puts the choice on the row (account-settings.spec.ts has
-       the whole flow). */
-    const line = page.locator('[data-acctst="ship"]');
-    await expect(line).toHaveText("Выберите пакомат — тогда сохраним");
-    const picker = page.locator('[data-pointopen="acct"]');
-    await expect(picker).toContainText("Выберите пакомат");
-    await picker.click();
-    const sheet = page.getByRole("dialog", { name: "Выбор пакомата" });
-    await expect(sheet).toBeVisible();
-    const first = sheet.locator("[data-pointpick]").first();
-    await expect(first).toBeVisible({ timeout: 15_000 });
-    const machine = ((await first.locator(".prow__nm").textContent()) || "").trim();
-    expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
-    await first.click();
-    await expect(sheet).toBeHidden();
-    await expect(picker).toContainText(machine);
-    await expect(line).toContainText("✓");
-
-    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
-    await waitForScreen(page, "product");
-    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
-    await expect(page.getByRole("status")).toBeVisible();
-    await page.goto(shopUrl("", "/checkout/"));
-    await waitForScreen(page, "checkout");
-    await page.locator("[data-email]").fill(email);
-    await continueButton(page, 2).click();
-
-    await expect(page.locator('input[data-dm="parcel"]')).toBeChecked();
-    await expect(page.locator('[data-carrier="omniva"]')).toHaveAttribute("aria-current", "true");
-    // …and the machine itself, matched by name against the live list
-    await expect(page.locator("[data-pointopen]")).toContainText(machine);
-
-    // …and the shopper's own choice still wins over it, in this session
-    await page.locator('input[data-dm="pickup"]').check();
-    await expect(page.locator('input[data-dm="pickup"]')).toBeChecked();
-
-    // a reload is a new session, so the standing preference is back
-    await page.reload();
-    await waitForScreen(page, "checkout");
-    await page.locator("[data-email]").fill(email);
-    await continueButton(page, 2).click();
-    await expect(page.locator('[data-carrier="omniva"]')).toHaveAttribute("aria-current", "true");
-  });
-});
-
 test.describe("checkout — the skip link", () => {
   test.use({ extraHTTPHeaders: ipHeaders(209) });
 
@@ -846,11 +736,16 @@ test.describe("the Estonian blog is «Blogi»", () => {
   });
 });
 
-test.describe("«Бренды» — a page of its own, before any script runs", () => {
+/* One test per language for both halves of the page's head: the bytes a
+   crawler gets, and what the script leaves there once it has drawn the page.
+   The served HTML is written by tools/prerender-shop2.mjs brandsPage(), which
+   no unit test can call without running the whole prerender — so it is read
+   here, off the dev server. */
+test.describe("«Бренды» — a page of its own, before any script runs and after", () => {
   test.use({ extraHTTPHeaders: ipHeaders(212) });
 
   for (const lang of LANGS) {
-    test(`«${lang.code}» — the served HTML is the brands page, not the Russian shell`, async ({ page }) => {
+    test(`«${lang.code}» — the served HTML is the brands page, not the Russian shell, and the drawn page keeps its head`, async ({ page }) => {
       /* The crawler's view: the bytes off the wire, no JavaScript. Until
          07.09.2026 this was the home page's head at every prefix, with a
          canonical pointing at the home page. */
@@ -874,6 +769,27 @@ test.describe("«Бренды» — a page of its own, before any script runs", 
       // …and it is in the sitemap now that it is a page
       const sm = await page.request.get("/sitemap-1.xml");
       expect((await sm.text()).includes(`${shopUrl(lang.seg, "/brands/")}<`)).toBe(true);
+
+      /* Once the script has drawn it, title and description are still the
+         page's own language, not the Russian shell's. */
+      if (lang.code === "RU") return;
+      await page.goto(shopUrl(lang.seg, "/brands/"));
+      await waitForScreen(page, "brands");
+      const head = await page.evaluate(() => ({
+        title: document.title,
+        desc: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
+        intro: (document.querySelector(".sec__intro")?.textContent || "").trim(),
+        htmlLang: document.documentElement.lang,
+        canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "",
+      }));
+      expect(head.htmlLang).toBe(lang.htmlLang);
+      expect(head.canonical, "the canonical still points at the shell it was served from").toContain(
+        shopUrl(lang.seg, "/brands/"),
+      );
+      expect(head.title, `Cyrillic left in the ${lang.code} tab title: ${head.title}`).not.toMatch(/[Ѐ-ӿ]/);
+      expect(head.desc, `Cyrillic left in the ${lang.code} description: ${head.desc}`).not.toMatch(/[Ѐ-ӿ]/);
+      // the description IS the sentence the page opens with — one string, one translation
+      expect(head.desc.slice(0, 60)).toBe(head.intro.slice(0, 60));
     });
   }
 });

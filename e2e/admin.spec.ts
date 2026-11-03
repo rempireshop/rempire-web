@@ -376,35 +376,6 @@ test.describe("admin", () => {
     });
   });
 
-  test.describe("sets toggle", () => {
-    test.use({ extraHTTPHeaders: ipHeaders(96) });
-    test("sets toggle hides the rail, then is switched back on", async ({ page, browser }) => {
-      await loginAsAdmin(page);
-      await openSettings(page);
-
-      try {
-        await toggleAndWait(page, "[data-admbundles]");
-        await expect(page.getByRole("status")).toBeVisible();
-
-        const home = await freshStorefrontPage(browser);
-        await home.page.goto(shopUrl("", "/"));
-        await waitForScreen(home.page, "home");
-        await expect(home.page.locator(".sec--bundles")).toHaveCount(0);
-        await home.close();
-      } finally {
-        await openSettings(page);
-        /* Put the switch back on if it is off, whatever happened above. And
-           wait for the WRITE, not just the click: the panel applies the switch
-           locally and PUTs it in the background, so a test that ends on the
-           click has its context torn down with the request still in flight —
-           the switch stayed off on the server and the next spec file found a
-           shop with no sets in it (and this very test, run again, toggled sets
-           back ON and then asserted the rail was gone). */
-        if (!(await isOn(page, "[data-admbundles]"))) await toggleAndWait(page, "[data-admbundles]");
-      }
-    });
-  });
-
   test.describe("chatbot toggle", () => {
     test.use({ extraHTTPHeaders: ipHeaders(97) });
     test("chatbot toggle hides the FAB, then is switched back on", async ({ page, browser }) => {

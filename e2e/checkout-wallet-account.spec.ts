@@ -65,7 +65,9 @@ test.describe("checkout — wallet button from a filled-in account", () => {
     await page.locator(`.btn--express[data-buynow="${PRODUCT.id}"]`).click();
     await waitForScreen(page, "checkout");
     await expect(payButton(page)).toBeVisible();
-    await expect(payButton(page)).toContainText("€");
+    // the amount to pay: on the button on a laptop («Оплатить 12,90 €»), beside
+    // it on a phone, where the sticky bar's button says «Оплатить» next to «Итого»
+    await expect(page.locator(".co__pay:visible, .stickybar__tot:visible").first()).toContainText("€");
     await expect(continueButton(page, 2)).toHaveCount(0);
     await expect(continueButton(page, 3)).toHaveCount(0);
     // folded, not gone: the delivery step's head is still there to reopen

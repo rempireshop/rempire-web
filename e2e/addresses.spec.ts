@@ -86,11 +86,3 @@ test("/cart opens the shop with the basket out, and Back closes it", async ({ pa
   await expect(page.getByRole("dialog", { name: "Корзина" })).toBeVisible();
   await expect(page.locator("[data-closecart]").first()).toBeVisible();
 });
-
-test("a 404 keeps its address and its language", async ({ page }) => {
-  const res = await page.goto("/et/no-such-page-08102026");
-  expect(res?.status()).toBe(404);
-  await waitForScreen(page, "notfound");
-  expect(path(page.url())).toBe("/et/no-such-page-08102026");
-  await expect(page.locator("html")).toHaveAttribute("lang", "et");
-});

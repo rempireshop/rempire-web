@@ -363,18 +363,11 @@ test.describe("admin assistant — a microphone the page itself bars", () => {
 test.describe("admin assistant — the page may ask for the microphone at all", () => {
   test.use({ extraHTTPHeaders: ipHeaders(136) });
 
-  test("Permissions-Policy opens the microphone (and the camera) to this origin on the admin and the shop, nothing else", async ({ page, request }) => {
-    for (const path of ["/admin", "/ru"]) {
-      const res = await request.get(path);
-      expect(res.status(), path).toBe(200);
-      const policy = res.headers()["permissions-policy"] || "";
-      expect(policy, path).toContain("microphone=(self)");
-      expect(policy, path).toContain("camera=(self)");
-      for (const denied of ["geolocation=()", "payment=()", "usb=()", "display-capture=()"]) {
-        expect(policy, `${path}: ${denied}`).toContain(denied);
-      }
-    }
-    // …and the browser agrees: what the assistant's script sees on the admin page
+  /* The header itself — microphone and camera (self) on the admin and the
+     shop, everything else denied — is pinned rule by rule in
+     tests/security-product-page.test.ts. What only a browser can say is
+     whether the page it reaches is allowed to ask. */
+  test("the browser lets the admin page use the microphone and the camera, and nothing else", async ({ page }) => {
     await loginAsAdmin(page);
     expect(await page.evaluate(() => {
       const fp = (document as unknown as { featurePolicy?: { allowsFeature: (f: string) => boolean } }).featurePolicy;

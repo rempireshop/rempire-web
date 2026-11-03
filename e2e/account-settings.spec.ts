@@ -141,6 +141,13 @@ test.describe("account — the settings reach the checkout", () => {
     // the shopper's own hand still wins over the stored default, in this session
     await page.locator('input[data-dm="courier"]').check();
     await expect(page.locator('input[data-dm="courier"]')).toBeChecked();
+
+    // a reload is a new session, so the standing preference is back
+    await page.reload();
+    await waitForScreen(page, "checkout");
+    await page.locator("[data-email]").fill(email);
+    await continueButton(page, 2).click();
+    await expect(page.locator('[data-carrier="omniva"]')).toHaveAttribute("aria-current", "true");
   });
 });
 
