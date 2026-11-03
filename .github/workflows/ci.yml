@@ -57,9 +57,15 @@ on:
     # Mondays 03:40 UTC (06:40 in Tallinn) — the full browser suite, weekly
     - cron: "40 3 * * 1"
 
+# A push cancels the push run before it — only the newest commit matters. The
+# weekly full run and the «Run workflow» button are a group of their own and
+# are never cancelled: the full runs of 26.10 and 02.11.2026 were, by pushes
+# landing mid-run, and the browser suite went two weeks without a complete run
+# (03.11.2026). «Promote to production» acts on push runs only, so a full run
+# finishing never moves `production`.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'push' }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 env:
   NEXT_TELEMETRY_DISABLED: "1"
