@@ -513,6 +513,10 @@ export function legacyTarget(pathname: string, search = ""): LegacyRedirect | nu
   if (kind === "password") return out(publicPath(lang, "/"), "home", "drop");
   /* Shopify's app proxies — a link from an installed app, never a real page. */
   if (kind === "apps" || kind === "a" || kind === "tools") return out(publicPath(lang, "/"), "home", "drop");
+  /* `/contact`, `/contact-us` with no /pages/ in front: the address Merchant
+     Center had copied for the shop's customer service (03.11.2026), a 404
+     until then — the contact page, one hop. */
+  if (n === 1 && INFO_SLUG[kind] === "contact") return out(publicPath(lang, "/info/contact/"), "info", "drop");
 
   /* Nothing the shop knows. A trailing slash is still never an address here,
      and a foreign or upper-case prefix is still folded — the catch-all route

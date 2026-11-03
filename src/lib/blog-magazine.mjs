@@ -47,6 +47,22 @@ function pickNum(t, lang) {
   const L = LANGS3.includes(lang) ? lang : "RU";
   return (t && Number(t[L])) || 0;
 }
+/** The Google pair (`seoTitle` / `seoDesc`) in this language — "" when an
+    article translated into it has no pair of its own there, so its own title
+    and excerpt stand in. Until 03.11.2026 that case fell back to the Russian
+    pair: the Claude connector's save_draft took a Russian pair only, and four
+    of Renat's articles went to Google with a Russian headline on their
+    English and Estonian pages. An article never translated into this language
+    shows Russian there anyway, and keeps the Russian pair. Every renderer of
+    the head calls this: the prerender, src/lib/blog-page.ts, and publicPost
+    below, whose answer setHead() in app.js reads. */
+export function pickSeo(seo, title, lang) {
+  const L = LANGS3.includes(lang) ? lang : "RU";
+  const own = seo && typeof seo[L] === "string" ? seo[L].trim() : "";
+  if (own) return own;
+  const translated = L !== "RU" && title && typeof title[L] === "string" && title[L].trim();
+  return translated ? "" : pick(seo, L);
+}
 export function publicListItem(p, lang) {
   return {
     slug: p.slug, title: pick(p.title, lang), excerpt: pick(p.excerpt, lang),
@@ -63,7 +79,7 @@ export function publicPost(p, lang, bodyHtml) {
     coverUrl: p.coverUrl, coverAlt: pick(p.coverAlt, lang), coverFocus: p.coverFocus,
     coverW: p.coverW ?? null, coverH: p.coverH ?? null,
     tags: pickTags(p.tags, p.tagsI18n, lang), products: p.products,
-    seoTitle: pick(p.seoTitle, lang), seoDesc: pick(p.seoDesc, lang),
+    seoTitle: pickSeo(p.seoTitle, p.title, lang), seoDesc: pickSeo(p.seoDesc, p.title, lang),
     author: p.author, publishedAt: p.publishedAt,
     topic: p.topic, minutes: pickNum(p.minutes, lang),
     // the materials' names go out only when the owner shows them (Dim, 02.11.2026)

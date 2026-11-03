@@ -4,7 +4,8 @@
  *
  *   · its page at request time — src/lib/blog-page.ts behind
  *     src/app/{,ru/,et/}blogs/news/[slug]/route.ts — carries the head the
- *     prerender writes (per-language Google pair with the Russian fallback,
+ *     prerender writes (per-language Google pair, the Russian one only on a
+ *     language the article was never translated into,
  *     canonical, hreflang, OpenGraph with the card /shop2/og/blog-<slug>…png,
  *     BlogPosting JSON-LD), the article inside #prerender and the #blogpost /
  *     #blogdata snapshots hydrateBlog() paints from; a draft → 404 and noindex;
@@ -200,6 +201,30 @@ describe("a post's page at request time", () => {
     await publishPost(bare.id);
     html = await (await postPage("ru", bare.slug)).text();
     expect(meta(html, "description")).toBe("Первый абзац статьи. Второй.");
+  });
+
+  it("a translated article with only a Russian pair: its own title and excerpt, never the Russian headline (03.11.2026)", async () => {
+    // how Claude's save_draft stored Renat's articles: ET/EN text, a Russian pair only
+    const post = await upsertPost({
+      title: { RU: "Шампуни System 4: какой выбрать", ET: "System 4 šampoonid: milline valida", EN: "System 4 shampoos: which to choose" },
+      excerpt: { RU: "Номер — это тип кожи головы.", ET: "Number on peanaha tüüp.", EN: "The number stands for the scalp type." },
+      body: { RU: "Текст.", ET: "Tekst.", EN: "Text." },
+      seoTitle: { RU: "System 4 №1–№4: какой шампунь выбрать" },
+      seoDesc: { RU: "Как выбрать шампунь System 4 под кожу головы." },
+    });
+    await publishPost(post.id);
+    let html = await (await postPage("", post.slug)).text();
+    expect(title(html)).toBe("System 4 shampoos: which to choose — REMPIRE");
+    expect(meta(html, "description")).toBe("The number stands for the scalp type.");
+    expect(meta(html, "og:title")).not.toMatch(/[а-яё]/i);
+    expect((jsonScript(html, "blogpost") as { post: Record<string, unknown> }).post).toMatchObject({ seoTitle: "", seoDesc: "" });
+    html = await (await postPage("et", post.slug)).text();
+    expect(title(html)).toBe("System 4 šampoonid: milline valida — REMPIRE");
+    expect(meta(html, "description")).toBe("Number on peanaha tüüp.");
+    // the Russian page keeps its own pair
+    html = await (await postPage("ru", post.slug)).text();
+    expect(title(html)).toBe("System 4 №1–№4: какой шампунь выбрать — REMPIRE");
+    expect(meta(html, "description")).toBe("Как выбрать шампунь System 4 под кожу головы.");
   });
 
   it("an SEO title too long for «— REMPIRE» still wins over the article's own title (09.10.2026)", async () => {

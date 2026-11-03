@@ -32,7 +32,7 @@ import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { BLOG_PRODUCTS_MAX, getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
-import { articleStaticHTML, homeStaticHTML, publicListItem, publicPost, readNext } from "@/lib/blog-magazine.mjs";
+import { articleStaticHTML, homeStaticHTML, pickSeo, publicListItem, publicPost, readNext } from "@/lib/blog-magazine.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
 import { ogStamp } from "@/lib/og-card";
 import { renderNotFoundPage } from "@/lib/notfound-page";
@@ -212,11 +212,12 @@ export function renderBlogPostPage(
       offSale: (id: string) => !!opts.offSale?.has(id),
     },
   );
-  // the Google pair is per language (pickLang: this language, else Russian);
-  // the excerpt, then the text, stand in only when neither was written — the
-  // same ladder setHead() in app.js runs once the SPA takes the page over
-  const desc = clip(pickLang(post.seoDesc, code) || excerpt || bodyText, 158);
-  const seoTitleRaw = pickLang(post.seoTitle, code);
+  // the Google pair is per language (pickSeo: this language's own; Russian
+  // only on a page the article was never translated for); the excerpt, then
+  // the text, stand in when there is none — the same ladder setHead() in
+  // app.js runs once the SPA takes the page over
+  const desc = clip(pickSeo(post.seoDesc, post.title, code) || excerpt || bodyText, 158);
+  const seoTitleRaw = pickSeo(post.seoTitle, post.title, code);
   // this language's tags — never a Russian chip on the Estonian page (pickTags)
   const tags = pickTags(post.tags, post.tagsI18n, code);
   /* The owner's SEO title wins over the article's own one even when it is too

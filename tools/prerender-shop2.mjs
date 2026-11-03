@@ -71,7 +71,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 // …and the magazine's pages, the same builders src/lib/blog-page.ts draws them with
-import { articleStaticHTML, homeStaticHTML, publicListItem, publicPost, readNext } from "../src/lib/blog-magazine.mjs";
+import { articleStaticHTML, homeStaticHTML, pickSeo, publicListItem, publicPost, readNext } from "../src/lib/blog-magazine.mjs";
 // наборы: the set prices the owner edits in the admin, which nothing
 // regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
 import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles-export.mjs";
@@ -1970,11 +1970,12 @@ function blogPostPage(post, lang) {
       offSale: blogOffSale,
     },
   );
-  // the Google pair is per language (pickLang: this language, else Russian),
-  // and the excerpt, then the text, stand in only when neither was written —
-  // the same ladder setHead() in app.js runs once the SPA takes the page over
-  const desc = clip(pickLang(post.seoDesc, code) || excerpt || bodyText, 158);
-  const seoTitleRaw = pickLang(post.seoTitle, code);
+  // the Google pair is per language (pickSeo: this language's own; Russian
+  // only on a page the article was never translated for), and the excerpt,
+  // then the text, stand in when there is none — the same ladder setHead()
+  // in app.js runs once the SPA takes the page over
+  const desc = clip(pickSeo(post.seoDesc, post.title, code) || excerpt || bodyText, 158);
+  const seoTitleRaw = pickSeo(post.seoTitle, post.title, code);
   /* the owner's SEO title wins even when too long for «— REMPIRE», as in
      setHead() (app.js) and src/lib/blog-page.ts */
   const pageTitle = fitTitle(seoTitleRaw || title, (seoTitleRaw || title) + " — REMPIRE");

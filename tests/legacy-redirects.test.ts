@@ -194,6 +194,16 @@ describe("one 301 for everything that is not the page", () => {
     expect(legacyTarget("/pages/something-else")).toEqual({ path: "/pages/contact", reason: "info-unknown" });
   });
 
+  it("sends /contact without /pages/ to the contact page — Merchant Center's customer-service link", () => {
+    expect(legacyTarget("/contact")).toEqual({ path: "/pages/contact", reason: "info" });
+    expect(resolve("/contact/")).toEqual({ path: "/pages/contact", hops: 1 });
+    expect(resolve("/en/contact/")).toEqual({ path: "/pages/contact", hops: 1 });
+    expect(resolve("/ru/contact")).toEqual({ path: "/ru/pages/contact", hops: 1 });
+    expect(resolve("/et/contact-us")).toEqual({ path: "/et/pages/contact", hops: 1 });
+    // a deeper address under it is still nothing the shop knows
+    expect(legacyTarget("/contact/form")).toBeNull();
+  });
+
   it("sends the old blog and its articles to the blog", () => {
     expect(legacyTarget("/blogs/blog")?.path).toBe("/blogs/news");
     expect(legacyTarget("/et/blogs/news/the-ultimate-guide-on-how-to-moisturize-your-skin-for-a-healthy-glow")?.path)

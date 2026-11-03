@@ -296,6 +296,28 @@ describe("the connector, end to end", () => {
     expect((await getPostBySlug(out.slug))!.title.RU).toBe("Kevin.Murphy: шампуни");
   });
 
+  it("stores each language's own Google pair; a translation sent without one clears the old (03.11.2026)", async () => {
+    const t = await tokens();
+    const out = JSON.parse((await tool(t.access_token, "save_draft", {
+      ru: { title: "Шампуни System 4", body: "<p>Текст.</p>", seo_title: "System 4: какой шампунь", seo_description: "Как выбрать номер." },
+      et: { title: "System 4 šampoonid", body: "<p>Tekst.</p>", seo_title: "System 4: milline šampoon", seo_description: "Kuidas numbrit valida." },
+      en: { title: "System 4 shampoos", body: "<p>Text.</p>", seo_title: "System 4: which shampoo", seo_description: "How to pick the number." },
+    })).text);
+    let p = await getPostBySlug(out.slug);
+    expect(p!.seoTitle).toEqual({ RU: "System 4: какой шампунь", ET: "System 4: milline šampoon", EN: "System 4: which shampoo" });
+    expect(p!.seoDesc).toEqual({ RU: "Как выбрать номер.", ET: "Kuidas numbrit valida.", EN: "How to pick the number." });
+
+    // the top-level pair is still the Russian one; an English text re-sent bare drops its stale pair, Estonian is kept
+    await tool(t.access_token, "save_draft", {
+      slug: out.slug, seo_title: "System 4 №1–№4",
+      ru: { title: "Шампуни System 4", body: "<p>Текст.</p>" },
+      en: { title: "System 4 shampoos, again", body: "<p>New text.</p>" },
+    });
+    p = await getPostBySlug(out.slug);
+    expect(p!.seoTitle).toEqual({ RU: "System 4 №1–№4", ET: "System 4: milline šampoon", EN: "" });
+    expect(p!.seoDesc).toEqual({ RU: "Как выбрать номер.", ET: "Kuidas numbrit valida.", EN: "" });
+  });
+
   it("holds «drafts only» in the write itself — an article published in between is not touched", async () => {
     const made = await upsertPost({ title: { RU: "Черновик" }, body: { RU: "<p>Текст.</p>" } });
     await publishPost(made.id);

@@ -1150,6 +1150,76 @@
       }
     },
     {
+      "id": "shop-blog-head-own-lang",
+      "area": "shop",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "EN",
+      "title": "Заголовок статьи во вкладке — на языке страницы",
+      "steps": [
+        "Открыть rempireshop.com/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy.",
+        "Посмотреть заголовок вкладки браузера.",
+        "Открыть ту же статью на /et/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy, потом на /ru/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy."
+      ],
+      "expect": [
+        "Английская вкладка: «System 4 Shampoos No. 1, 2, 3 and 4 …».",
+        "На эстонской — по-эстонски, без русских букв.",
+        "Русская вкладка: «System 4 №1–№4: какой шампунь выбрать — REMPIRE»."
+      ],
+      "why": "Четыре статьи Рената, сохранённые через Claude, уходили в Google с русским заголовком и описанием на английской и эстонской страницах.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-03T16:03:36.000Z",
+      "en": {
+        "title": "An article's tab title is in the page's language",
+        "steps": [
+          "Open rempireshop.com/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy.",
+          "Look at the browser tab's title.",
+          "Open the same article at /et/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy, then at /ru/blogs/news/shampuni-system-4-o1-o2-o3-o4-kakoy-vybrat-i-kak-uhazhivat-za-kozhey-golovy."
+        ],
+        "expect": [
+          "The English tab reads «System 4 Shampoos No. 1, 2, 3 and 4 …».",
+          "On the Estonian one it is in Estonian, with no Russian letters.",
+          "The Russian tab reads «System 4 №1–№4: какой шампунь выбрать — REMPIRE»."
+        ],
+        "why": "Four of Renat's articles, saved through Claude, went to Google with a Russian title and description on their English and Estonian pages."
+      }
+    },
+    {
+      "id": "shop-contact-short-address",
+      "area": "shop",
+      "who": "dim",
+      "device": "any",
+      "lang": "any",
+      "title": "Короткий адрес /contact",
+      "steps": [
+        "Открыть rempireshop.com/contact.",
+        "Открыть rempireshop.com/ru/contact."
+      ],
+      "expect": [
+        "Открылась страница контактов, адрес стал /pages/contact — не 404.",
+        "Русский адрес ведёт на /ru/pages/contact."
+      ],
+      "why": "Этот адрес стоял в Merchant Center как страница службы поддержки и отдавал 404.",
+      "risk": "low",
+      "writes": false,
+      "mark": "new",
+      "markedAt": "2026-11-03T16:03:36.000Z",
+      "en": {
+        "title": "The short address /contact",
+        "steps": [
+          "Open rempireshop.com/contact.",
+          "Open rempireshop.com/ru/contact."
+        ],
+        "expect": [
+          "The contact page opens and the address becomes /pages/contact — not a 404.",
+          "The Russian address leads to /ru/pages/contact."
+        ],
+        "why": "Merchant Center listed this address as the customer-service page, and it answered 404."
+      }
+    },
+    {
       "id": "shop-blog-card-add",
       "area": "shop",
       "who": "renat",

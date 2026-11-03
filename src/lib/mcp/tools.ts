@@ -683,6 +683,7 @@ export const TOOLS: ToolDef[] = [
       "publishes it himself. Without `slug` it creates a new draft; with the slug of an existing DRAFT it replaces the languages " +
       "you send and keeps everything else (cover, the languages you leave out). A published article cannot be changed here. " +
       "`ru` is required; `et` and `en` are optional translations — without them the owner translates in the editor with one button. " +
+      "Each language you send carries its own Google pair (`seo_title`, `seo_description` in that language) — always send them with a translation. " +
       "`body` is HTML using only <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <br>, <a> (markdown is accepted too). " +
       "Link a product with the page address search_products gave for that language; put a product card on a line of its own as " +
       '<p><a data-product="ID"></a></p> right after the paragraph that recommends it. Links and cards for products the shop ' +
@@ -713,8 +714,8 @@ export const TOOLS: ToolDef[] = [
           description: "Which chip on the blog's home the article sits under: hair, beard, styling, skin (face and body) or studio " +
             "(the salon itself). Optional — left out, the shop picks it from the article's words and products, and the owner can change it.",
         },
-        seo_title: { type: "string", maxLength: 70, description: "Russian Google title, at most 60 characters." },
-        seo_description: { type: "string", maxLength: 170, description: "Russian Google description, at most 155 characters." },
+        seo_title: { type: "string", maxLength: 70, description: "Russian Google title, at most 60 characters (the same as ru.seo_title)." },
+        seo_description: { type: "string", maxLength: 170, description: "Russian Google description, at most 155 characters (the same as ru.seo_description)." },
       },
       required: ["ru"],
       additionalProperties: false,
@@ -725,6 +726,8 @@ export const TOOLS: ToolDef[] = [
             title: { type: "string" },
             excerpt: { type: "string", description: "One or two sentences for the blog list and search results." },
             body: { type: "string", description: "The article, HTML." },
+            seo_title: { type: "string", maxLength: 70, description: "Google title in THIS language, at most 60 characters. Send it with every translation." },
+            seo_description: { type: "string", maxLength: 170, description: "Google description in THIS language, at most 155 characters. Send it with every translation." },
           },
           required: ["title", "body"],
           additionalProperties: false,
@@ -1704,7 +1707,7 @@ async function uploadLink(args: Record<string, unknown>): Promise<ToolResult> {
   });
 }
 
-type LangIn = { title?: unknown; excerpt?: unknown; body?: unknown };
+type LangIn = { title?: unknown; excerpt?: unknown; body?: unknown; seo_title?: unknown; seo_description?: unknown };
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
@@ -1756,11 +1759,13 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
   const showAsk = typeof args.show_sources === "boolean" ? args.show_sources : undefined;
   const title = { RU: "", ET: "", EN: "" }, excerpt = { RU: "", ET: "", EN: "" }, body = { RU: "", ET: "", EN: "" };
   const named: string[] = [];
+  const sent: L3[] = [];
   for (const l of LANGS3) {
     const g = given[l];
     if (g && text(g.title, 200) && text(g.body, BODY_MAX * 2)) {
       const shaped = shopBody(text(g.body, BODY_MAX * 2), l, byId, photos);
       if (shaped.html.length > BODY_MAX) return no(`The ${l} text is too long for the shop (${shaped.html.length} characters, at most ${BODY_MAX}). Shorten it.`);
+      sent.push(l);
       title[l] = text(g.title, 200);
       excerpt[l] = text(g.excerpt, 500);
       body[l] = shaped.html;
@@ -1785,6 +1790,21 @@ async function saveDraft(args: Record<string, unknown>): Promise<ToolResult> {
   const seoDesc = { ...(was?.seoDesc ?? { RU: "", ET: "", EN: "" }) };
   if (text(args.seo_title, 70)) seoTitle.RU = text(args.seo_title, 70);
   if (text(args.seo_description, 170)) seoDesc.RU = text(args.seo_description, 170);
+  /* …and each language's own pair (03.11.2026). Only the Russian one went in
+     before, so an article Claude translated itself kept a Russian headline on
+     its Estonian and English pages: the editor's translate button, which
+     writes those pairs, was never pressed. A translation sent without its
+     pair clears the old one — the page then uses that language's title. */
+  for (const l of sent) {
+    const st = text(given[l]?.seo_title, 70), sd = text(given[l]?.seo_description, 170);
+    if (l === "RU") {
+      if (st) seoTitle.RU = st;
+      if (sd) seoDesc.RU = sd;
+    } else {
+      seoTitle[l] = st;
+      seoDesc[l] = sd;
+    }
+  }
 
   let saved: Post;
   try {
