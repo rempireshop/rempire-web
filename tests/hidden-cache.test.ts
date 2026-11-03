@@ -36,7 +36,8 @@ describe("hidden-products cache", () => {
   it("a price or a name edit leaves the cached list alone", async () => {
     await upsertOverride(id, { price: 12.5 });
     await upsertOverride(id, { name: "Другое имя" });
-    expect(nextCache.revalidateTag).not.toHaveBeenCalled();
+    // the shop feeds' tag drops on every override write (src/lib/feed-cache.ts); the hidden list's does not
+    expect(nextCache.revalidateTag).not.toHaveBeenCalledWith(HIDDEN_CACHE_TAG);
   });
 
   it("the route files its answer under the tag; a failure is never cached", async () => {

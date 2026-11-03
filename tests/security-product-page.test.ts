@@ -372,7 +372,8 @@ describe("the security headers over the shop's pages", () => {
     const redirects = await nextConfig.redirects!();
     /* Shopify's scheme, 08.10.2026: «/» is a page (the shell, routed to its
        file), and no config redirect answers it any more. */
-    expect(redirects.find((r) => r.source === "/")).toBeUndefined();
+    // (Dim's own domain sends its «/» to the shop — tests/dim-host-redirect.test.ts)
+    expect(redirects.find((r) => r.source === "/" && !r.has)).toBeUndefined();
     const rw = (await nextConfig.rewrites!()) as { afterFiles: { source: string; destination: string }[] };
     expect(rw.afterFiles.find((r) => r.source === "/")).toMatchObject({ destination: "/shop2/index.html" });
 

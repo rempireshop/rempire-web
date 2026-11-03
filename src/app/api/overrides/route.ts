@@ -4,14 +4,16 @@
  * order, video, the photo gallery he uploaded) and the shop settings (chat bot
  * on/off, the home-page banner, mail flows, shipping rules).
  *
- * Public and cached at the edge for half a minute — a price change is visible
- * within 30 s, and a burst of shoppers costs one query. "Public" is meant
- * literally, so only the keys in PUBLIC_SETTINGS below leave the server.
+ * Public and cached at the edge until something behind it changes — any write
+ * to its tables drops the copy (src/lib/feed-cache.ts), ten minutes at most —
+ * so a burst of shoppers costs one query. "Public" is meant literally, so
+ * only the keys in PUBLIC_SETTINGS below leave the server.
  *
  * When there is no database the shop must still work, so the answer is a plain
  * 503 with {ok:false}; public/shop2/app.js falls back to its localStorage copy.
  */
 import { mergeContent } from "@/lib/content";
+import { FEED_CACHE_HEADERS } from "@/lib/feed-cache";
 import { getOverrides, getSettings } from "@/lib/orders";
 import { getDescriptionOverrides } from "@/lib/product-descriptions";
 import { getSeoOverrides } from "@/lib/product-seo";
@@ -164,7 +166,7 @@ export async function GET() {
         custom,
         settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts, google_signin: googleSignInOn() },
       },
-      { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
+      { headers: FEED_CACHE_HEADERS },
     );
   } catch (err) {
     console.error("[api/overrides] unavailable:", err);

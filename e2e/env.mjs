@@ -51,11 +51,17 @@ export function adminPasswordHash(password = E2E_ADMIN_PASSWORD) {
 
 /**
  * Everything above this line describes a throwaway server on localhost.
- * Everything below describes the two **real** deployments, and the smoke suite
+ * Everything below describes the **real** deployment, and the smoke suite
  * (e2e/smoke.spec.ts, playwright.smoke.config.ts) is the only thing that reads
- * it. Nothing here is a secret — both are public addresses anybody can type
+ * it. Nothing here is a secret — it is a public address anybody can type
  * into a browser — which is deliberate and is what lets the GitHub workflow
  * run without a single repository secret.
+ *
+ * There was a staging address too, rempireshop.diipsolutions.eu, and it was
+ * the suite's default. Since 03.11.2026 that host carries Dim's handover page
+ * only and sends every shop page to rempireshop.com (next.config.ts), so the
+ * suite has no default any more: name the shop — the live one, a preview's
+ * URL or a localhost — every time.
  *
  * They live in this file rather than in the smoke config because that is what
  * this file is: a task asked for the port and the credentials to stay in one
@@ -65,7 +71,6 @@ export function adminPasswordHash(password = E2E_ADMIN_PASSWORD) {
  * `X-Robots-Tag` to demand (docs/seo.md, "The three noindex layers"), and
  * next.config.ts's own allowlist is written against exactly this host.
  */
-export const SMOKE_STAGING_URL = "https://rempireshop.diipsolutions.eu";
 export const SMOKE_PRODUCTION_URL = "https://rempireshop.com";
 
 /**
@@ -97,13 +102,11 @@ export function normaliseBaseUrl(raw) {
 }
 
 /**
- * Where the smoke suite points. `SMOKE_BASE_URL` wins; staging is the default
- * because it is the deployment nobody has to think twice about — pointing at
- * the live shop is a thing you should have to type (tools/smoke.mjs, and the
- * `target` input on .github/workflows/smoke.yml, both make you).
+ * Where the smoke suite points: `SMOKE_BASE_URL`, which tools/smoke.mjs and
+ * .github/workflows/smoke.yml set. No default — see above.
  */
 export function smokeBaseUrl() {
-  return normaliseBaseUrl(process.env.SMOKE_BASE_URL || SMOKE_STAGING_URL);
+  return normaliseBaseUrl(process.env.SMOKE_BASE_URL);
 }
 
 /**

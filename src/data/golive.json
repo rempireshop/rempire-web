@@ -1658,12 +1658,12 @@
       "who": [
         "dim"
       ],
-      "status": "done",
-      "title": "Vercel — остаётся на Hobby",
-      "detail": "Решение Дима 12.10. Вход — через GitHub rempireshop. Ничего не меняем.",
+      "status": "doing",
+      "title": "Vercel — Pro с 03.11, потом обратно на Hobby",
+      "detail": "03.11 Vercel предупредил: 90 % бесплатного процессорного времени (4 часа за 30 дней); после 100 % магазин встаёт. Дим перевёл проект на Pro ($20 в месяц), чтобы этого не случилось, и мы урезали нагрузку: проверка перед страницей идёт только там, где нужна, цены и наборы держит кэш Vercel, боты, собирающие тексты для обучения ИИ, закрыты (поисковые боты ИИ — нет). Вернуть на Hobby можно, когда расход за 30 дней будет заметно меньше 4 часов и меньше 8 минут в день: Vercel → Settings → Billing → Downgrade. Иначе магазин встанет сразу. Учти: по правилам Vercel Hobby — только для некоммерческих сайтов. Вход — через GitHub rempireshop.",
       "en": {
-        "title": "Vercel — stays on Hobby",
-        "detail": "Dim's decision, 12.10. Sign-in is through GitHub rempireshop. Nothing changes."
+        "title": "Vercel — Pro since 03.11, then back to Hobby",
+        "detail": "03.11 Vercel warned: 90% of the free CPU time (4 hours per 30 days); past 100% the shop stops. Dim moved the project to Pro ($20 a month) so it would not, and the load was cut: the check before a page runs only where it is needed, Vercel's cache keeps prices and sets, and the bots that collect text to train AI are blocked (AI search bots are not). It can go back to Hobby once the 30-day total is well under 4 hours and under 8 minutes a day: Vercel → Settings → Billing → Downgrade. Sooner, and the shop stops at once. Note: Vercel's terms keep Hobby for non-commercial sites. Sign-in is through GitHub rempireshop."
       }
     },
     {
@@ -1769,10 +1769,10 @@
       ],
       "status": "todo",
       "title": "Список расходов в месяц — в документ Рената",
-      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; Vercel, Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
+      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; Vercel — Pro $20 в месяц с 03.11, пока не вернём на Hobby (см. «Vercel — Pro с 03.11»); Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
       "en": {
         "title": "Monthly costs — into Renat's document",
-        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; Vercel, Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
+        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; Vercel — Pro, $20 a month since 03.11, until it goes back to Hobby (see «Vercel — Pro since 03.11»); Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
       }
     },
     {

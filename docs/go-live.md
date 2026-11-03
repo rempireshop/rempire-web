@@ -30,6 +30,15 @@ this file, so this document stays the spine — but the page is what gets worked
 from a phone, and it is where Claude ticks an item off as the work lands
 (`PUT /api/golive/`). Change this file and the page's file together.
 
+**Since 03.11.2026 the staging domain is not a copy of the shop any more** (Dim:
+everything but the handover page off his domain). On
+`rempireshop.diipsolutions.eu` every page address answers a 301 to the same
+address on rempireshop.com; only `/handover`, the panel (`/admin`,
+`/admin/scan`, `/shop2/admin/` — Renat's home-screen app and its push), the API
+(the parcel webhook is registered there) and files stay (`next.config.ts`,
+`tests/dim-host-redirect.test.ts`). The rows below that say the domain «stays
+with no redirect» describe the day of the switch.
+
 ---
 
 ## Stage 0 — before anything else

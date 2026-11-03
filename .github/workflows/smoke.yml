@@ -32,13 +32,13 @@
 #      shop a customer, and a suite that mails somebody 24 times a day stops
 #      being read by the second week.
 #
-#   3. `workflow_dispatch` — the button, for either shop.
+#   3. `workflow_dispatch` — the button.
 #
 # Since the switch (08.10.2026, 22:55) the live shop IS what this workflow
-# watches: rempireshop.com serves the production build, and the staging name
-# rempireshop.diipsolutions.eu is only an alias of the same build with a
-# noindex header — its sitemaps name rempireshop.com, its robots.txt is the
-# production policy, so a run against it fails on those by design. A
+# watches: rempireshop.com serves the production build. The old staging name
+# rempireshop.diipsolutions.eu carries Dim's handover page only since
+# 03.11.2026 and sends every shop page to rempireshop.com (next.config.ts), so
+# it is no longer a target at all. A
 # production deploy and the twice-daily schedule therefore test
 # rempireshop.com; a deploy of anything else (a preview) is tested at its own
 # address when that answers, and skipped when it does not. The checks are
@@ -69,7 +69,7 @@ on:
         required: true
         default: production
         type: choice
-        options: [staging, production]
+        options: [production]
 
 concurrency:
   group: smoke-${{ github.ref }}
@@ -112,12 +112,11 @@ jobs:
           DEPLOYED_URL: ${{ github.event.deployment_status.environment_url }}
           DEPLOYED_ENV: ${{ github.event.deployment.environment }}
           CHOICE: ${{ github.event.inputs.target }}
-          STAGING: https://rempireshop.diipsolutions.eu
           PRODUCTION: https://rempireshop.com
         run: |
           RUN=yes
           if [ "$EVENT" = "workflow_dispatch" ]; then
-            [ "$CHOICE" = "staging" ] && URL="$STAGING" || URL="$PRODUCTION"
+            URL="$PRODUCTION"
           elif [ "$EVENT" = "deployment_status" ]; then
             if [ "$DEPLOYED_ENV" = "Production" ]; then
               URL="$PRODUCTION"

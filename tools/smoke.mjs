@@ -3,9 +3,12 @@
  * Runs the deployed-shop smoke suite (e2e/smoke.spec.ts,
  * playwright.smoke.config.ts) against a base URL you name.
  *
- *   npm run smoke                                   # staging
  *   npm run smoke -- https://rempireshop.com        # the live shop
- *   npm run smoke -- --headed --debug               # any playwright flag
+ *   npm run smoke -- http://localhost:3300          # a local `next start`
+ *   npm run smoke -- https://rempireshop.com --headed --debug   # any playwright flag
+ *
+ * There is no default since 03.11.2026: the staging host the suite used to
+ * fall back to now carries Dim's handover page only (e2e/env.mjs).
  *
  * Why a Node script rather than a bare `playwright test` in package.json: the
  * base URL reaches the config through an environment variable, and the
@@ -23,7 +26,7 @@
  * pointed at a shop that is already running.
  */
 import { spawn } from "node:child_process";
-import { SMOKE_STAGING_URL, normaliseBaseUrl } from "../e2e/env.mjs";
+import { normaliseBaseUrl } from "../e2e/env.mjs";
 
 /* The base URL, if given at all, is the FIRST argument; everything after it is
    handed to Playwright untouched, so `--headed`, `-g robots` and friends work
@@ -35,11 +38,11 @@ const argv = process.argv.slice(2);
 const target = argv[0] && !argv[0].startsWith("-") ? argv[0] : "";
 const passThrough = target ? argv.slice(1) : argv;
 
-const base = normaliseBaseUrl(target || process.env.SMOKE_BASE_URL || SMOKE_STAGING_URL);
+const base = normaliseBaseUrl(target || process.env.SMOKE_BASE_URL);
 
 /* Said out loud, every run. A smoke suite is the one suite where "which shop
    did that just talk to?" is a question worth never having to ask. */
-console.log(`[smoke] ${base}${target ? "" : "  (default — pass a URL to point somewhere else)"}`);
+console.log(`[smoke] ${base}`);
 
 const child = spawn(
   "npx",

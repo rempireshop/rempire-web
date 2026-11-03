@@ -6,7 +6,7 @@ search («In stock · Rempire, Mardi 1»), at no cost. These are **free local
 listings**, and they need two things the shop did not have before:
 
 1. the salon's **Google Business Profile** linked to Merchant Center
-   **5819586565** (not done yet, 02.11.2026);
+   **5819586565** (done 02.11.2026: Renat approved the link);
 2. a **local inventory feed**: one line per product size, saying which store
    has it and whether it is on the shelf.
 
@@ -56,11 +56,16 @@ cached for one hour, like the product feeds.
 1. Make sure the salon **has** a Google Business Profile at Mardi 1, 10145
    Tallinn, and that it is **verified**. Without verification nothing below
    works.
-2. Give the profile a **store code**. Open the profile → **Edit profile** →
-   **Business information** → **Advanced** → **Store code** (check the
-   wording). The code can be any short text, for example `RMP-MARDI1`. Write
-   it down **exactly**: Google compares it letter for letter, and upper and
-   lower case count.
+2. Give the profile a **store code**. In Google Search, the profile's panel
+   «Ваша компания в Google» → the **⋮** right of «Качество профиля» →
+   **Настройки профиля компании** → **Расширенные настройки** → **Код
+   магазина** ✏️ → Save (English: ⋮ → Business Profile settings → Advanced
+   settings → Shop code). It is **not** under «Изменить профиль» — that
+   editor has no such field. On a laptop the panel's photo can cover the ⋮.
+   Google may already have given the profile a long numeric code; then use
+   that one. The code can be any short text. Write it down **exactly**:
+   Google compares it letter for letter, and upper and lower case count.
+   **Done 03.11.2026: Renat set `MARDI1`** (the field was empty).
 
 ### 2. Link the profile to Merchant Center
 

@@ -1,9 +1,9 @@
 /**
  * GET /api/bundles — the curated sets («Наборы») the shop is selling right now.
  *
- * Public and cached at the edge for half a minute, exactly like
- * /api/overrides/: an edit in the admin shows up in the shop within 30 s, and
- * a burst of shoppers costs one query.
+ * Public and cached at the edge exactly like /api/overrides/, under the same
+ * tag: a write to the sets drops the copy (src/lib/feed-cache.ts), and a
+ * burst of shoppers costs one query.
  *
  * Active sets only. A set the owner switched off is not "hidden by CSS" — it
  * never leaves the server. (Order pricing is a different question and reads
@@ -21,6 +21,7 @@
  * sitting in somebody's cart still be priced and paid for.
  */
 import { listBundles } from "@/lib/bundles";
+import { FEED_CACHE_HEADERS } from "@/lib/feed-cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +31,7 @@ export async function GET() {
     const bundles = await listBundles({ activeOnly: true });
     return Response.json(
       { ok: true, bundles },
-      { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
+      { headers: FEED_CACHE_HEADERS },
     );
   } catch (err) {
     console.error("[api/bundles] unavailable:", err);

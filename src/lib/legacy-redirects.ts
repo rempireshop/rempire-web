@@ -109,7 +109,7 @@ type Cat = keyof typeof CAT_HANDLES;
    `habemepalsamid` is the beard one and is listed separately), and the
    shaving handles (`shaving`, `raseerimine`, `aftershave`, …) go to «Уход за
    бородой», which is where the shop keeps Proraso. */
-const COLLECTION_CAT: Readonly<Record<string, Cat | "brands">> = {
+export const COLLECTION_CAT: Readonly<Record<string, Cat | "brands">> = {
   /* hair */
   shampoo: "hair", shampoonid: "hair", "shampuni-dlya-volos": "hair",
   conditioner: "hair", "konditsionery-dlya-volos": "hair", palsamid: "hair",
@@ -178,7 +178,7 @@ const PRODUCT_ALIAS: Readonly<Record<string, string>> = {
 
 /* Shopify's own blog articles. None survived the move; their address keeps
    answering — with the blog — instead of the article route's 404. */
-const SHOPIFY_ARTICLES: ReadonlySet<string> = new Set([
+export const SHOPIFY_ARTICLES: ReadonlySet<string> = new Set([
   "the-ultimate-guide-on-how-to-moisturize-your-skin-for-a-healthy-glow",
 ]);
 

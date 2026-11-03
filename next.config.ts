@@ -148,6 +148,9 @@ function prerenderedRewrites() {
  */
 const MONTONIO = "https://stargate.montonio.com https://sandbox-stargate.montonio.com";
 
+/** Dim's own name for this deployment — see redirects() below. */
+const DIM_HOST = { type: "host" as const, value: "(?:www\\.)?rempireshop\\.diipsolutions\\.eu" };
+
 /* Cloudflare Web Analytics beacon — analytics agent, docs/analytics.md. The
  * owner adds the site in Cloudflare and pastes the token that comes back over
  * the CF_BEACON_TOKEN placeholder in public/shop2/index.html; the script tag
@@ -304,6 +307,18 @@ const nextConfig: NextConfig = {
       { source: "/:page(test|cards|golive)", headers: LOOSE_HEADERS },
       { source: "/:page(test|cards|golive)/:path*", headers: LOOSE_HEADERS },
       { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
+      /* An unprefixed page is the English page for most visitors and a 302 to
+         /ru/… or /et/… for a browser whose cookie or Accept-Language asks for
+         Russian or Estonian (src/middleware.ts) — so no cache between here
+         and the browser may hand one visitor's answer to another. The
+         middleware said so itself on every such page until 03.11.2026; it no
+         longer runs where it has nothing to do (src/lib/middleware-matcher.ts),
+         so the header is here, for the same addresses its language step
+         reads. */
+      {
+        source: "/((?!api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|cards$|test$|golive$|handover$).*)",
+        headers: [{ key: "Vary", value: "Accept-Language, Cookie" }],
+      },
       /* Keep search engines out of everything that is not the shop's own
          domain. `missing` inverts the host test into an ALLOWLIST: the header
          is sent unless the host is rempireshop.com or www.rempireshop.com, so
@@ -379,6 +394,36 @@ const nextConfig: NextConfig = {
      /karty — the page is Russian, so a Russian spelling is a fair guess. */
   async redirects() {
     return [
+      /* rempireshop.diipsolutions.eu is Dim's own name for this deployment. It
+         carries his handover page and nothing of the shop — «anything what was
+         done for Rempire other than the hand-off page /handover should [not]
+         remain» (Dim, 03.11.2026) — so every other page there moves to the
+         same address on the shop, in one 301 and before the middleware runs.
+         Left as they are: /handover; the panel — /admin and the September
+         /shop2/admin/ the middleware moves to it on the same host — because
+         Renat's home-screen panel and its push live on this host (docs/
+         go-live.md) and the handover page shares its marks only with a
+         signed-in panel here (src/lib/golive.ts); the API, which Montonio's
+         shipping webhook is registered on (a redirect loses a POST); and
+         Next's own files and every file with an extension, which those pages
+         load. */
+      { source: "/", has: [DIM_HOST], destination: "https://rempireshop.com/", statusCode: 301 },
+      {
+        source: "/:path((?!handover$|(?:shop2/)?admin(?:/|$)|api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$).+)",
+        has: [DIM_HOST],
+        destination: "https://rempireshop.com/:path",
+        statusCode: 301,
+      },
+      /* A canonical page asked for with a trailing slash: ONE 301 to the page.
+         The middleware moves every other slashed address, but since
+         03.11.2026 it does not run for the canonical pages, and Next matches
+         the middleware without the slash — src/lib/middleware-matcher.ts
+         (slashRedirects) says why and writes the file. */
+      ...(JSON.parse(readFileSync(path.join(process.cwd(), "src", "data", "slash-redirects.json"), "utf8")) as Array<{
+        source: string;
+        destination: string;
+        statusCode: 301;
+      }>),
       { source: "/tests", destination: "/test", permanent: false },
       { source: "/checklist", destination: "/test", permanent: false },
       { source: "/card", destination: "/cards", permanent: false },

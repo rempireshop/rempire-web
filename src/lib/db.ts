@@ -237,10 +237,41 @@ function driver(): Promise<Raw> {
   return g.__rempireDb;
 }
 
+/**
+ * The shop's public feeds are kept by the CDN until the data behind them
+ * changes (src/lib/feed-cache.ts), and this is the one place every write
+ * passes — so a statement that wrote one of their tables drops them here,
+ * after it succeeded, whichever route or tool sent it. Loaded lazily: db.ts
+ * is also the door of scripts that have no Next.js around them.
+ */
+let feedCache: Promise<typeof import("@/lib/feed-cache")> | null = null;
+async function afterFeedWrite(): Promise<void> {
+  try {
+    feedCache ??= import("@/lib/feed-cache");
+    (await feedCache).refreshFeedCache();
+  } catch (err) {
+    feedCache = null;
+    console.error("[db] could not drop the cached shop feeds:", err);
+  }
+}
+/**
+ * The tables the two feeds are made of: per-product overrides (price, stock
+ * word, texts, photos, hidden), the public settings, the owner's own
+ * products, the counted shelf behind the stock word, and the sets.
+ */
+export const FEED_TABLES = ["product_overrides", "settings", "custom_products", "stock_levels", "stock_moves", "bundles"] as const;
+const FEED_WRITE = new RegExp("\\b(?:insert\\s+into|update|delete\\s+from)\\s+(?:" + FEED_TABLES.join("|") + ")\\b", "i");
+
+/** Does this statement write one of FEED_TABLES? */
+export function writesShopFeed(sql: string): boolean {
+  return FEED_WRITE.test(sql);
+}
+
 /** Run one statement. Returns the rows (empty array for writes). */
 export async function query<T = Row>(sql: string, params?: unknown[]): Promise<T[]> {
   const db = await driver();
   const res = await db.query(sql, params);
+  if (writesShopFeed(sql)) await afterFeedWrite();
   return (res.rows || []) as T[];
 }
 
@@ -256,7 +287,16 @@ export async function exec(sql: string): Promise<void> {
 /** Run several statements as one transaction; throwing rolls the lot back. */
 export async function withTx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
   const db = await driver();
-  return db.tx(fn);
+  let wroteFeed = false;
+  const out = await db.tx((q) =>
+    fn((sql, params) => {
+      if (writesShopFeed(sql)) wroteFeed = true;
+      return q(sql, params);
+    }),
+  );
+  /* after the commit: a rolled-back transaction threw above and changed nothing */
+  if (wroteFeed) await afterFeedWrite();
+  return out;
 }
 
 /* Two helpers written for a health check that was never built —

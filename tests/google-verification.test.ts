@@ -78,9 +78,11 @@ describe("google-site-verification", () => {
     // the address is answered by the shell's own file…
     const { afterFiles } = await cfg.rewrites();
     expect(afterFiles.find((r) => r.source === "/")?.destination).toBe("/shop2/index.html");
-    // …and nothing moves it first: no config redirect, and no 301 at the edge
-    // (Googlebot sends no Accept-Language and no cookie, so no language 302 either)
-    expect((await cfg.redirects()).find((r) => r.source === "/")).toBeUndefined();
+    // …and nothing moves it first: no config redirect on the shop's domain (Dim's
+    // own one sends its «/» to the shop — tests/dim-host-redirect.test.ts), and no
+    // 301 at the edge (Googlebot sends no Accept-Language and no cookie, so no
+    // language 302 either)
+    expect((await cfg.redirects()).find((r) => r.source === "/" && !(r as { has?: unknown }).has)).toBeUndefined();
     expect(legacyTarget("/")).toBeNull();
   });
 });
