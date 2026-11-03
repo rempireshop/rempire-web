@@ -6,6 +6,8 @@
  * rule does nothing at all. Resolved the way Next resolves next.config.ts's
  * redirects — the same matcher, host test and destination compiler.
  */
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
 import { matchHas, prepareDestination } from "next/dist/shared/lib/router/utils/prepare-destination";
@@ -91,10 +93,19 @@ describe("the go-live file behind /handover", () => {
   it("is handed to the shop's 404 on rempireshop.com and on any other host", async () => {
     for (const origin of ["https://rempireshop.com", "https://www.rempireshop.com", "https://rempire-web.vercel.app"]) {
       /* /golive/ never gets this far: the middleware moves the slash first,
-         to /golive, which is no page at all */
-      for (const path of ["/golive/index.html", "/golive/handover.html"]) {
-        expect(await beforeFiles(origin + path), origin + path).toBe("/golive");
+         to /golive */
+      for (const path of ["/golive", "/golive/index.html", "/golive/handover.html"]) {
+        expect(await beforeFiles(origin + path), origin + path).toBe("/golive-gone");
       }
+    }
+  });
+
+  it("sends it to an address with nothing on disk, so the 404 is the catch-all's", async () => {
+    /* Rewritten to /golive itself, Vercel's file check found public/golive/
+       and served its index.html: 200 on rempireshop.com (76c9fb2d). */
+    const { beforeFiles: rules } = (await nextConfig.rewrites!()) as { beforeFiles: Rewrite[] };
+    for (const r of rules) {
+      expect(existsSync(path.join(__dirname, "..", "public", r.destination)), r.destination).toBe(false);
     }
   });
 

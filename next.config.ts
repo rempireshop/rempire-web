@@ -428,12 +428,15 @@ const nextConfig: NextConfig = {
      The one `beforeFiles` rule keeps the go-live file off the shop's domain.
      /handover reads public/golive/index.html, and a file under public/ is
      served on every host this deployment answers — so on any host but Dim's,
-     any file under /golive/ is handed to the shop's 404, the same answer
-     /golive itself gets (and /golive/, which the middleware moves to it).
-     Dim, 03.11.2026: his pages do not belong on rempireshop.com. */
+     /golive and any file under it are handed to the shop's 404 (and /golive/,
+     which the middleware moves to /golive). Dim, 03.11.2026: his pages do not
+     belong on rempireshop.com. The destination is an address with NOTHING on
+     disk: rewritten to /golive itself, Vercel's file check found the folder
+     and served its index.html — /golive answered 200 on the first deploy of
+     this rule (76c9fb2d), and the smoke suite caught it. */
   async rewrites() {
     return {
-      beforeFiles: [{ source: "/golive/:path*", missing: [DIM_HOST], destination: "/golive" }],
+      beforeFiles: [{ source: "/golive/:path*", missing: [DIM_HOST], destination: "/golive-gone" }],
       afterFiles: prerenderedRewrites(),
       fallback: [],
     };
