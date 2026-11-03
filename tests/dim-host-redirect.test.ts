@@ -31,6 +31,23 @@ async function resolve(url: string): Promise<{ to: string; status: number } | nu
   return null;
 }
 
+type Rewrite = { source: string; destination: string; has?: never[]; missing?: never[] };
+
+/** Where a `beforeFiles` rewrite — the phase that runs before a file under
+    public/ is served — sends a request, or null. */
+async function beforeFiles(url: string): Promise<string | null> {
+  const u = new URL(url);
+  const req = constructRequest({ url, headers: { host: u.host } });
+  const rewrites = (await nextConfig.rewrites!()) as { beforeFiles: Rewrite[] };
+  for (const r of rewrites.beforeFiles) {
+    const params = getPathMatch(r.source, { strict: true, removeUnnamedParams: true, regexModifier: undefined })(u.pathname);
+    if (!params) continue;
+    if (!(r.has || r.missing ? matchHas(req as never, {}, r.has, r.missing) : {})) continue;
+    return r.destination;
+  }
+  return null;
+}
+
 describe("Dim's own domain carries the handover page only", () => {
   const DIM = "https://rempireshop.diipsolutions.eu";
 
@@ -42,6 +59,8 @@ describe("Dim's own domain carries the handover page only", () => {
       ["/et/blogs/news/some-article", "https://rempireshop.com/et/blogs/news/some-article"],
       ["/shop2/c/hair/", "https://rempireshop.com/shop2/c/hair/"],
       ["/test", "https://rempireshop.com/test"],
+      ["/golive", "https://rempireshop.com/golive"],
+      ["/cards", "https://rempireshop.com/cards"],
     ]) {
       expect(await resolve(DIM + from), from).toEqual({ to, status: 301 });
     }
@@ -59,8 +78,33 @@ describe("Dim's own domain carries the handover page only", () => {
   });
 
   it("does nothing on the shop's own domain", async () => {
-    for (const path of ["/", "/collections/hair-care", "/handover", "/test"]) {
+    for (const path of ["/", "/collections/hair-care", "/handover", "/test", "/golive", "/cards", "/card", "/karty"]) {
       expect(await resolve("https://rempireshop.com" + path), path).toBeNull();
+    }
+  });
+});
+
+/* /handover is public/golive/index.html, and a file under public/ answers on
+   every host the deployment has — so the file itself is turned away anywhere
+   but Dim's address (Dim, 03.11.2026: his pages are not the shop's). */
+describe("the go-live file behind /handover", () => {
+  it("is handed to the shop's 404 on rempireshop.com and on any other host", async () => {
+    for (const origin of ["https://rempireshop.com", "https://www.rempireshop.com", "https://rempire-web.vercel.app"]) {
+      /* /golive/ never gets this far: the middleware moves the slash first,
+         to /golive, which is no page at all */
+      for (const path of ["/golive/index.html", "/golive/handover.html"]) {
+        expect(await beforeFiles(origin + path), origin + path).toBe("/golive");
+      }
+    }
+  });
+
+  it("is left to the file on Dim's address, and nothing else is touched", async () => {
+    for (const url of [
+      "https://rempireshop.diipsolutions.eu/golive/index.html", "https://www.rempireshop.diipsolutions.eu/golive/index.html",
+      "https://rempireshop.diipsolutions.eu/handover", "https://rempireshop.com/handover", "https://rempireshop.com/",
+      "https://rempireshop.com/shop2/app.js", "https://rempireshop.com/brand/og-golive.png",
+    ]) {
+      expect(await beforeFiles(url), url).toBeNull();
     }
   });
 });

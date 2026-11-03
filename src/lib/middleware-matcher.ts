@@ -88,7 +88,7 @@ function otherPages(end: "$" | "/"): string[] {
     `${ANY_PREFIX}blogs/news(?:/(?!(?:${articles.join("|")})${end})${SLUG})?`,
     `${ANY_PREFIX}(?:search|account|cart|checkout(?:/done)?)`,
     "admin(?:/scan)?",
-    "cards|golive|handover",
+    "handover",
   ];
 }
 
@@ -132,7 +132,7 @@ export function slashRedirects(): Array<{ source: string; destination: string; s
 }
 
 /** The unprefixed storefront addresses — where the language step can act. */
-const UNPREFIXED = `/((?!${NEVER}|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|(?:cards|golive|handover)$).*)`;
+const UNPREFIXED = `/((?!${NEVER}|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|handover$).*)`;
 const RU_OR_ET = "(?:[rR][uU]|[eE][tT])";
 const ASKS_RU_OR_ET = `.*${RU_OR_ET}.*`;
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * The link-preview cards for the hand-written pages under public/ — /cards/
- * and /golive/ — the ones Dim actually pastes into Telegram. (/guide/ went on
- * 25.10.2026, /test/ on 03.11.2026, and their cards with them.)
+ * The link-preview card for the hand-written page under public/ — /golive/,
+ * which Dim's /handover is — the one he actually pastes into Telegram.
+ * (/guide/ went on 25.10.2026, /test/ and /cards/ on 03.11.2026, and their
+ * cards with them.)
  *
  *   node tools/og-pages.mjs
  *
@@ -117,12 +118,6 @@ async function tower(height) {
 }
 
 const PAGES = [
-  {
-    file: "og-cards.png",
-    head: "КАРТОЧКА ТОВАРА",
-    sub: ["Как магазин показывает цену", "и кнопку «В корзину»."],
-    badges: ["ВЫБРАНО 09.09", "ЗОНЫ НАЖАТИЯ", "ЦВЕТА САЙТА"],
-  },
   {
     file: "og-golive.png",
     head: "ЗАПУСК",

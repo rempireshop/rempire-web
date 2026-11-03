@@ -131,8 +131,10 @@ export function phaseOf(item: GoliveItem): string {
  * rempireshop.diipsolutions.eu is an alias of this Vercel project — so the
  * line is drawn by host: /handover is rewritten only there (next.config.ts),
  * and this route hands phase C's rows and marks only to a request for that
- * host. rempireshop.com/golive gets phases A and B and nothing else, and a
- * mark on a phase-C row sent there is refused as an unknown item.
+ * host. A signed-in request to rempireshop.com gets phases A and B and
+ * nothing else, and a mark on a phase-C row sent there is refused as an
+ * unknown item. (The /golive page itself left rempireshop.com on 03.11.2026;
+ * the route still answers there, behind the admin session.)
  */
 export const HANDOVER_PHASE = "c";
 export const HANDOVER_HOSTS: ReadonlySet<string> = new Set(["rempireshop.diipsolutions.eu"]);

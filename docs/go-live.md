@@ -29,6 +29,9 @@ actually close. It is built from `src/data/golive.json`, which is written out of
 this file, so this document stays the spine — but the page is what gets worked
 from a phone, and it is where Claude ticks an item off as the work lands
 (`PUT /api/golive/`). Change this file and the page's file together.
+Since 03.11.2026 the page is gone from rempireshop.com (404, its file
+included); what is left of it is phase C, Dim's `/handover` on
+rempireshop.diipsolutions.eu.
 
 **Since 03.11.2026 the staging domain is not a copy of the shop any more** (Dim:
 everything but the handover page off his domain). On

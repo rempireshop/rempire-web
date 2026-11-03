@@ -87,19 +87,13 @@ function prerenderedRewrites() {
      routed even before the first prerender. */
   if (!out.some((r) => r.source === "/")) out.push({ source: "/", destination: "/shop2/index.html" });
 
-  /* The hand-written pages under public/ that are not part of the shop:
-     /cards (the product-card options) and /golive (what is left before
-     launch, and the lock on the domain switch). /guide, the old overview for
-     Renat, was removed on 25.10.2026 at Dim's word, and /test, the acceptance
-     checklist, on 03.11.2026 («should not exist on this domain … no need to
-     track it anymore»). Neither Vercel nor `next start` serves a directory's
-     index.html for a slashless address, and no page address has a slash any
-     more. */
-  for (const page of ["cards", "golive"]) {
-    if (existsSync(path.join(PUBLIC, page, "index.html"))) {
-      out.push({ source: `/${page}`, destination: `/${page}/index.html` });
-    }
-  }
+  /* The hand-written pages under public/ that were not part of the shop are
+     gone from rempireshop.com: /guide, the old overview for Renat, on
+     25.10.2026 at Dim's word; /test, the acceptance checklist, on 03.11.2026
+     («should not exist on this domain … no need to track it anymore»); and
+     /cards (the product-card options) and /golive (the launch list) the same
+     day, because Dim's pages do not belong on the shop's domain. What is left
+     of them is the one below. */
   /* /handover — the go-live page showing phase C alone, Dim's handover of the
      shop to Renat (09.11.2026). On Dim's own address ONLY: «do not make it on
      rempireshop.com» (Dim, 12.10.2026). rempireshop.diipsolutions.eu is an
@@ -126,9 +120,9 @@ function prerenderedRewrites() {
  *                 (/, /products/…, /ru/…, /admin), so the strict policy is the
  *                 DEFAULT and the loose one is the named exception: the API
  *                 (a few routes answer HTML of their own — the unsubscribe
- *                 page, the letter previews) and the two hand-written pages
- *                 (/cards, /golive), which carry an inline
- *                 script each, keep 'unsafe-inline'. Both are ours, neither
+ *                 page, the letter previews) and the one hand-written page
+ *                 (/handover, and its file under /golive/ on Dim's address),
+ *                 which carries an inline script, keep 'unsafe-inline'. Both are ours, neither
  *                 renders untrusted input; the admin panel — the one screen a
  *                 stranger's text reaches — is on the strict policy.
  *   · styles    — app.js writes style="…" attributes on nearly every row, so
@@ -301,12 +295,11 @@ const nextConfig: NextConfig = {
          the rule that turns the class of innerHTML mistakes the audit found
          into a broken layout instead of a takeover. */
       { source: "/:path*", headers: SHOP_HEADERS },
-      /* The API, the prototype's leftover files under /shop/ and the two
-         hand-written pages: see the note above. */
+      /* The API, the prototype's leftover files under /shop/ and the one
+         hand-written page, on Dim's address only: see the note above. */
       { source: "/api/:path*", headers: LOOSE_HEADERS },
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
-      { source: "/:page(cards|golive)", headers: LOOSE_HEADERS },
-      { source: "/:page(cards|golive)/:path*", headers: LOOSE_HEADERS },
+      { source: "/golive/:path*", has: [DIM_HOST], headers: LOOSE_HEADERS },
       { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
       /* An unprefixed page is the English page for most visitors and a 302 to
          /ru/… or /et/… for a browser whose cookie or Accept-Language asks for
@@ -317,7 +310,7 @@ const nextConfig: NextConfig = {
          so the header is here, for the same addresses its language step
          reads. */
       {
-        source: "/((?!api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|cards$|golive$|handover$).*)",
+        source: "/((?!api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|handover$).*)",
         headers: [{ key: "Vary", value: "Accept-Language, Cookie" }],
       },
       /* Keep search engines out of everything that is not the shop's own
@@ -388,11 +381,9 @@ const nextConfig: NextConfig = {
   },
   /* The shop's own moves — /shop2/…, /shop/…, Shopify's other spellings, a
      trailing slash — are src/middleware.ts's: they are lookups, and each is
-     ONE 301. What is left here are the hand-written pages at the name a human
-     types: a page whose whole job is to be opened on a phone from a chat
-     message cannot 404 on the singular — /card for /cards — or on /karty,
-     the page is Russian, so a Russian spelling is a fair guess. (/tests and
-     /checklist pointed at /test, removed on 03.11.2026.) */
+     ONE 301. What is left here is Dim's own address and the slashed
+     canonical pages. (/tests and /checklist pointed at /test, and /card and
+     /karty at /cards, all removed on 03.11.2026.) */
   async redirects() {
     return [
       /* rempireshop.diipsolutions.eu is Dim's own name for this deployment. It
@@ -425,8 +416,6 @@ const nextConfig: NextConfig = {
         destination: string;
         statusCode: 301;
       }>),
-      { source: "/card", destination: "/cards", permanent: false },
-      { source: "/karty", destination: "/cards", permanent: false },
     ];
   },
   /* The prerendered files are `afterFiles` rewrites: a file on disk beats
@@ -434,10 +423,17 @@ const nextConfig: NextConfig = {
      product and blog pages (src/app/{,ru/,et/}products/[id],
      src/app/{,ru/,et/}blogs/news/…) and, last, src/app/[...path], which
      serves the shell for the screens that live only in the browser (/search,
-     /checkout, /admin …) and the shop's 404 for everything else. */
+     /checkout, /admin …) and the shop's 404 for everything else.
+
+     The one `beforeFiles` rule keeps the go-live file off the shop's domain.
+     /handover reads public/golive/index.html, and a file under public/ is
+     served on every host this deployment answers — so on any host but Dim's,
+     any file under /golive/ is handed to the shop's 404, the same answer
+     /golive itself gets (and /golive/, which the middleware moves to it).
+     Dim, 03.11.2026: his pages do not belong on rempireshop.com. */
   async rewrites() {
     return {
-      beforeFiles: [],
+      beforeFiles: [{ source: "/golive/:path*", missing: [DIM_HOST], destination: "/golive" }],
       afterFiles: prerenderedRewrites(),
       fallback: [],
     };

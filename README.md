@@ -127,7 +127,8 @@ migrations when `DATABASE_URL` is set). After a deploy, run the smoke suite
 against the live site: `npm run smoke -- https://rempireshop.com`.
 
 The go-live record is `docs/launch-runbook.md` (steps 0–8 and «The URL
-move») and the owner's `/golive` page.
+move»). The `/golive` page left rempireshop.com on 03.11.2026; its phase C
+is Dim's `/handover`, on rempireshop.diipsolutions.eu only.
 
 ## Brand
 

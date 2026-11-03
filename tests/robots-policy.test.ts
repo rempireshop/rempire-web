@@ -86,7 +86,7 @@ describe("production", () => {
       "Disallow: /admin\nDisallow: /checkout\nDisallow: /cart\nDisallow: /account\nDisallow: /search\n" +
       "Disallow: /ru/checkout\nDisallow: /ru/cart\nDisallow: /ru/account\nDisallow: /ru/search\n" +
       "Disallow: /et/checkout\nDisallow: /et/cart\nDisallow: /et/account\nDisallow: /et/search\n" +
-      "Disallow: /api/\nDisallow: /golive\n",
+      "Disallow: /api/\n",
     );
     expect(PROD.trimEnd().endsWith("Sitemap: " + SITEMAP)).toBe(true);
   });

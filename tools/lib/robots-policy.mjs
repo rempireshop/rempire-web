@@ -13,17 +13,15 @@
    Shopify's own Disallow lines, at Shopify's own addresses. The old /shop2/…
    addresses are deliberately NOT here: they answer with a 301 now, and a
    crawler has to be allowed to fetch one to learn where the page went. */
-/* The one at the end is ours, not the shop's: /golive, the launch checklist.
-   It carries a `noindex` meta of its own, which is the authoritative half —
-   this list is what keeps it out of the crawl in the first place. It was
-   missing until 19.09.2026: audit F18. /guide, the manual written for the
-   owner, was removed on 25.10.2026 and /test, his acceptance list, on
-   03.11.2026 — both left this list so a crawler can fetch the 404 and drop
-   the address. */
+/* None of ours is left. /golive, the launch checklist, was listed from
+   19.09.2026 (audit F18) until it left the shop's domain on 03.11.2026; /guide,
+   the manual written for the owner, was removed on 25.10.2026 and /test, his
+   acceptance list, on 03.11.2026. Each left this list so a crawler can fetch
+   the 404 and drop the address. */
 export const NO_INDEX_PATHS = [
   "/admin",
   ...["", "/ru", "/et"].flatMap(pre => ["/checkout", "/cart", "/account", "/search"].map(p => pre + p)),
-  "/api/", "/golive"
+  "/api/"
 ];
 /* …and inside /api/, the read-only answers a page is drawn from. Googlebot
    renders the page (it reads the DOM app.js leaves, not the file), and with

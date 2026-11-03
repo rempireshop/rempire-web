@@ -304,18 +304,21 @@ describe("the security headers over the shop's pages", () => {
     }
     // nothing anywhere loosened past what the audit accepted: 'unsafe-inline' for
     // scripts only on the rules that need it — the API (some routes answer HTML
-    // of their own), the prototype's leftover files and the two hand-written
-    // pages with an inline script each — never eval, never hashes
+    // of their own), the prototype's leftover files and the one hand-written
+    // page with an inline script — never eval, never hashes
     const inlineScript = rules
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
     expect(inlineScript).toEqual([
-      "/api/:path*", "/shop/:path*", "/:page(cards|golive)", "/:page(cards|golive)/:path*",
+      "/api/:path*", "/shop/:path*", "/golive/:path*",
       "/handover",
       "/api/admin/mail/preview/:path*",
     ]);
-    // …and /handover (the go-live page's phase C) on Dim's own address only, never rempireshop.com
+    // …and /handover (the go-live page's phase C) and its file on Dim's own address only, never rempireshop.com
     expect(rules.find((r) => r.source === "/handover")?.has).toEqual([{ type: "host", value: "rempireshop.diipsolutions.eu" }]);
+    expect(rules.find((r) => r.source === "/golive/:path*")?.has).toEqual([
+      { type: "host", value: "(?:www\\.)?rempireshop\\.diipsolutions\\.eu" },
+    ]);
     // 'unsafe-eval' exists nowhere at all. It used to be granted to
     // /prototypes/*, the design archive that compiled its own JSX in the
     // browser; that archive was deleted on 07.09 with the rest of the
