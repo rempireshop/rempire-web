@@ -186,7 +186,7 @@ function shopPages(): string[] {
   ];
   const out: string[] = [];
   for (const lang of ["EN", "RU", "ET"]) for (const rest of rests) out.push(publicPath(lang, rest));
-  out.push("/admin", "/admin/scan", "/cards", "/test", "/golive", "/handover");
+  out.push("/admin", "/admin/scan", "/cards", "/golive", "/handover");
   return out;
 }
 
@@ -227,7 +227,7 @@ describe("middleware matcher", () => {
       ["/ru/", "/ru"], ["/et/", "/et"], ["/collections/hair-care/", "/collections/hair-care"],
       ["/ru/collections/vse-tovary/?utm_source=x", "/ru/collections/vse-tovary?utm_source=x"],
       ["/collections/kevin-murphy/", "/collections/kevin-murphy"], ["/blogs/news/", "/blogs/news"],
-      ["/et/policies/refund-policy/", "/et/policies/refund-policy"], ["/admin/", "/admin"], ["/test/", "/test"],
+      ["/et/policies/refund-policy/", "/et/policies/refund-policy"], ["/admin/", "/admin"], ["/cards/", "/cards"],
     ]) {
       expect(slashTarget(from), from).toBe(to);
       expect(legacyTarget(from.split("?")[0], from.includes("?") ? "?" + from.split("?")[1] : "")?.path, from).toBe(to);
@@ -287,7 +287,7 @@ describe("middleware matcher", () => {
       ["/et", ASKS[4]], ["/et/collections/juuksehooldus", ASKS[4]], ["/et/collections/kevin-murphy", ASKS[9]],
       ["/blogs/news", ASKS[1]], ["/ru/blogs/news/kak-uhazhivat-za-borodoy-zimoy", ASKS[3]],
       ["/pages/contact", ASKS[1]], ["/ru/policies/refund-policy", ASKS[3]], ["/et/policies/shipping-policy", ASKS[4]],
-      ["/admin", ASKS[3]], ["/handover", ASKS[3]], ["/test", ASKS[8]],
+      ["/admin", ASKS[3]], ["/handover", ASKS[3]], ["/cards", ASKS[8]],
     ];
     for (const [address, ask] of quiet) {
       expect(acts(address, ask), `${address} [${ask.name}] — the middleware would act`).toBe(false);

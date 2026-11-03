@@ -18,7 +18,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { LOGIN_DELAY_MAX_MS, resetLoginDelays, resetRateLimits, setLoginSleeper } from "@/lib/auth";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
 import { PLAN as GOLIVE_PLAN } from "@/lib/golive";
-import { PLAN as TEST_PLAN } from "@/lib/testplan";
 import { setupDb, teardownDb } from "./helpers";
 import {
   CRON_SECRET,
@@ -72,8 +71,6 @@ let F: Fixtures;
 let restoreEnv: () => void = () => {};
 const BODIES = hostileBodies();
 const PAGINATION = ["?limit=0", "?limit=-1", "?limit=1e9", "?limit=abc", "?limit=1&limit=2", "?limit=" + "9".repeat(400)];
-/** An id the checklist really has — see the /api/testplan/ rows below. */
-const TESTPLAN_ITEM = TEST_PLAN.items[0].id;
 /** An id the go-live list really has — see the /api/golive/ rows below. */
 const GOLIVE_ITEM = GOLIVE_PLAN.items[0].id;
 /* A Web Push subscription of the right SHAPE — the endpoint is a real push
@@ -138,14 +135,7 @@ function routes(): RouteCase[] {
        the cancelled alerts live in tests/consent.test.ts. */
     { name: "GET /api/mail/unsubscribe/", path: "/api/mail/unsubscribe/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/mail/unsubscribe/route"), jsonBody: false, queries: ["", "?u=&t=", "?u=junk&t=junk", `?u=${Buffer.from("fuzz@example.com|marketing|RU").toString("base64url")}&t=forged`, `?u=${Buffer.from("fuzz@example.com|marketing|RU").toString("base64url")}&t=`, "?u=%00&t=%00", `?u=${"A".repeat(3000)}&t=${"B".repeat(3000)}`] },
     { name: "POST /api/mail/unsubscribe/", path: "/api/mail/unsubscribe/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/mail/unsubscribe/route"), jsonBody: false, req: { raw: "List-Unsubscribe=One-Click", contentType: "application/x-www-form-urlencoded" }, queries: ["", "?u=junk&t=junk", `?u=${Buffer.from("fuzz@example.com|backstock|ET").toString("base64url")}&t=forged`] },
-    /* The acceptance checklist at /test/. GET is public on purpose (a tester
-       with no session still has to see the list); PUT is the admin half and is
-       listed with the other locked routes below. The item id is read off the
-       plan rather than written out — src/data/testplan.json is replaced
-       wholesale, and a hardcoded id here would quietly stop fuzzing the
-       validation and start fuzzing the "unknown id" branch only. */
-    { name: "GET /api/testplan/", path: "/api/testplan/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route") },
-    /* The go-live list at /golive/, the same shape: GET is public (the owner
+    /* The go-live list at /golive/: GET is public (the owner
        has to see what is left before he signs in anywhere), PUT is the admin
        half and is listed with the locked routes below. */
     { name: "GET /api/golive/", path: "/api/golive/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/golive/route") },
@@ -230,9 +220,6 @@ function routes(): RouteCase[] {
     { deep: true, name: "PUT /api/admin/overrides/", path: "/api/admin/overrides/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/overrides/route"), auth: "admin", req: admin, body: { id: PRODUCT.id, price: 9.9, stock: "in", seoTitle: "t", seoDesc: "d", subcat: "s", varImg: [0], videoUrl: "https://x/y", gallery: [{ url: "/a.webp", thumb: "/a.webp", alt: "" }], proPrice: 5, description: { RU: "о" }, seo: { RU: { title: "t", desc: "d" }, ET: { title: "e" } } } },
     { name: "GET /api/admin/settings/", path: "/api/admin/settings/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin },
     { deep: true, name: "PUT /api/admin/settings/", path: "/api/admin/settings/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin, body: { chatbot: true, bundles: false, hero: null, flows: { abandoned: true }, pricing: { proDiscountPct: 20 }, gift_amounts: [25, 50, 100] } },
-    /* The answers half of /api/testplan/ — the same route as the public GET
-       above, so it is listed here for its lock rather than for its path. */
-    { name: "PUT /api/testplan/", path: "/api/testplan/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route"), auth: "admin", req: admin, body: { answers: { [TESTPLAN_ITEM]: { status: "ok", note: "работает, но кнопка мелкая", at: "2026-09-08T10:00:00.000Z", by: "renat" } } } },
     /* The marks half of /api/golive/ — the same route as the public GET above,
        so it is listed here for its lock rather than for its path. This is also
        the call Claude makes from a terminal to tick an item off. */

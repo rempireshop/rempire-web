@@ -418,7 +418,8 @@ export const SETTINGS_CLEAR_KEYS = [
 /** Settings rows deleted by key only when a flag says so. */
 export const SETTINGS_ASK_KEYS = {
   /* The 164-check acceptance list Renat and Dim filled in on two phones
-     (src/lib/testplan.ts, one row, key `testplan_answers`). It has «test» in
+     (one row, key `testplan_answers`; its page /test and the code that wrote
+     the row were removed on 03.11.2026, the row itself was not). It has «test» in
      the name and it is NOT shop data — it is the record that the shop was
      checked, which is worth more the day after go-live than the day before.
      One row, invisible to every customer, costs nothing to keep. Kept by

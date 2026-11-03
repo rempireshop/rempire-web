@@ -17,11 +17,11 @@ headers, and nothing that costs money.
 **The fourth layer is a person.** Everything no robot can reach — real money at
 a real bank, a letter landing in somebody's inbox rather than in spam, Apple
 Pay on an actual iPhone, a parcel a machine has to accept, and a thumb on a
-375 px screen — is a hand-run checklist: **[`docs/testplan.md`](testplan.md)**
-(who tests what, in what order, and what must never be run on the live shop),
-with the 158 checks themselves in `src/data/testplan.json`, their shape pinned
-by `tests/testplan.test.ts`, and the page the testers actually use at `/test/`
-(`public/test/index.html`, its storage in `tests/testplan-route.test.ts`).
+375 px screen — was a hand-run checklist at `/test/`, walked by Renat and Dim
+before and after launch. Dim removed it on 03.11.2026 («no need to track it
+anymore»): the page, its API, its 296 checks and their tests are gone from
+the repository (the history keeps them, last in `9dd7e412`). A person still
+tests what no robot can reach — from now on without a list in the repo.
 "What could not be automated, and why" below is the list of holes; the test
 plan is what fills them.
 
@@ -414,8 +414,7 @@ coverage now instead of the workaround it briefly needed.
 
 ## What could not be automated, and why
 
-*Each of these is a hole a person has to walk through by hand;
-[`docs/testplan.md`](testplan.md) is who walks it and in what order.*
+*Each of these is a hole a person has to walk through by hand.*
 
 - **`/api/assistant` admin-mode-without-cookie is a 401, literally.** The
   route checks `OPENAI_API_KEY` *before* it checks the admin cookie
@@ -950,9 +949,7 @@ gone because Postgres blinked.
 | `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
 | `e2e/admin-sections.spec.ts` | The six «Ещё» sections after the phase-3 redesign: every one drawing on desktop **and** on a phone with no page error and no sideways scroll, plus one real action each — approve a Pro request from the row, publish a review with its undo, create a promo code, switch a gift denomination on and see it on `/gift/`, save a letter's subject, publish a post, change a tariff through the confirm card and take it back from the journal — see above |
 | `e2e/blog.spec.ts` | The storefront blog, desktop **and** mobile: tiles show the pointer, an article's crumbs start where the listing's do and its product cards keep their foot row whole (ET), and home → Blog → article paints from the idle prefetch / sessionStorage while `/api/blog/` is held for 4 s (docs/blog.md «Откуда берутся данные») |
-| `e2e/testplan.spec.ts`, `tests/testplan.test.ts` | `/test/` — the acceptance checklist Renat and Dim fill in (`public/test/index.html`, `src/data/testplan.json`, `src/app/api/testplan/route.ts`). The spec runs on desktop **and** `mobile-safari`, and drives the one thing the page may not do: an answer given with nobody signed in survives a reload from localStorage, an answer given signed in comes back after the device's own copy is wiped, and answers collected signed out are pushed up the moment a session appears. It also drives the language switch, because the page is one checklist in two languages (Russian for Renat, English for Dim, both answering the same ids): the switch really changes the language, an answer given in one is still there in the other — locally and off the server — and the Russian is word for word what it was. The vitest half covers the plan's shape (including that every row and every area has its English half, with the same number of steps), the merge (two phones, newer `at` wins), the 401, the 413 and the id the plan does not have |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
-| `docs/testplan.md`, `src/data/testplan.json`, `tests/testplan.test.ts` | The hand-run layer: the page a tester reads, the 158 checks it renders, and the test that keeps the data loadable — unique ids, a real area on every item, legal enum values, non-empty steps and an expectation |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the Chromium e2e suite sharded into 3 parallel jobs (each with its own server and database), and the `safari` job running `--project=mobile-safari` on WebKit; see its own comments |
 
 ## Фаззинг API (`tests/fuzz-*.test.ts`)

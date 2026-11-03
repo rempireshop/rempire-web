@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * The link-preview cards for the hand-written pages under public/ — /test/,
- * /cards/, /guide/ and /golive/ — the ones Dim actually pastes into Telegram.
+ * The link-preview cards for the hand-written pages under public/ — /cards/
+ * and /golive/ — the ones Dim actually pastes into Telegram. (/guide/ went on
+ * 25.10.2026, /test/ on 03.11.2026, and their cards with them.)
  *
  *   node tools/og-pages.mjs
  *
@@ -12,8 +13,8 @@
  * wrong because that PNG is a shipped file with no generator behind it.
  *
  * Hence this. **Every number on these cards is read from the data, not typed
- * here**: the check count comes from src/data/testplan.json and the product
- * count from src/data/catalogue.min.json. Re-run the tool and the cards tell
+ * here**: the launch-item count comes from src/data/golive.json and the
+ * product count from src/data/catalogue.min.json. Re-run the tool and the cards tell
  * the truth again; nothing can drift the way «95 товаров» drifted.
  *
  * The output is committed, like /og-shop.png and /brand/og-default.png: a
@@ -47,10 +48,8 @@ const INK = "#1C1A00";
 const MUTED = "#5F5B45";
 
 /* ---------- the facts, read rather than typed --------------------------- */
-const plan = JSON.parse(await readFile(path.join(ROOT, "src/data/testplan.json"), "utf8"));
 const catalogue = JSON.parse(await readFile(path.join(ROOT, "src/data/catalogue.min.json"), "utf8"));
 const golive = JSON.parse(await readFile(path.join(ROOT, "src/data/golive.json"), "utf8"));
-const CHECKS = plan.items.length;
 const PRODUCTS = (Array.isArray(catalogue) ? catalogue : catalogue.items).length;
 /* the launch items only — phase C (Dim's handover) lives on his own address,
    never on the shop's card (src/lib/golive.ts HANDOVER_PHASE) */
@@ -119,16 +118,6 @@ async function tower(height) {
 
 const PAGES = [
   {
-    file: "og-test.png",
-    head: "ПРИЁМКА",
-    sub: ["Что проверяем перед запуском —", "по пунктам, с телефона."],
-    badges: [
-      `${CHECKS} ${plural(CHECKS, "ПУНКТ", "ПУНКТА", "ПУНКТОВ")}`,
-      "RU · EN",
-      "ОТВЕТЫ СОХРАНЯЮТСЯ",
-    ],
-  },
-  {
     file: "og-cards.png",
     head: "КАРТОЧКА ТОВАРА",
     sub: ["Как магазин показывает цену", "и кнопку «В корзину»."],
@@ -159,4 +148,4 @@ for (const p of PAGES) {
     .toFile(out);
   console.log(`  /brand/${p.file}  ${p.head} · ${p.badges.join(" · ")}`);
 }
-console.log(`drawn from the data: ${CHECKS} checks, ${PRODUCTS} products, ${LAUNCH} launch items`);
+console.log(`drawn from the data: ${PRODUCTS} products, ${LAUNCH} launch items`);

@@ -982,13 +982,10 @@ test.describe(`deployed shop — ${BASE}`, () => {
       [`/en-lv/products/${id}`, `/products/${id}`, 301],
       /* …and a Merchant Center link to it keeps its campaign, minus Shopify's own parameters */
       [`/en-lv/products/${id}?country=LV&currency=EUR&utm_source=google`, `/products/${id}?utm_source=google`, 301],
-      /* The names a human types for the hand-written pages (next.config.ts).
-         Dim asked for the checklist as /tests twice, from his phone, and got
-         a 404 both times — a page whose whole job is to be opened from a chat
-         message cannot fail on the plural. 307, because nothing should have
-         cached them. */
-      ["/tests", "/test", 307],
-      ["/checklist", "/test", 307],
+      /* The names a human types for the hand-written pages (next.config.ts):
+         a page whose whole job is to be opened from a chat message cannot
+         fail on the singular or the Russian spelling. 307, because nothing
+         should have cached them. */
       ["/card", "/cards", 307],
       ["/karty", "/cards", 307],
     ];
@@ -999,6 +996,11 @@ test.describe(`deployed shop — ${BASE}`, () => {
       expect(location, `${from} should move to ${to}`).toBe(abs(to));
       const landed = await get(request, location);
       expect(landed.status(), `${from} → ${to}: the target should be the page itself — one hop, no more`).toBe(200);
+    }
+    /* The acceptance checklist and its two spellings are gone — «should not
+       exist on this domain» (Dim, 03.11.2026) — and so is its API. */
+    for (const gone of ["/test", "/tests", "/checklist", "/api/testplan/"]) {
+      expect((await get(request, abs(gone))).status(), `${gone} should be gone`).toBe(404);
     }
   });
 
@@ -1075,8 +1077,8 @@ test.describe(`deployed shop — ${BASE}`, () => {
        (docs/audit/security-api.md H5). The files those pages load, still
        under /shop2/ (assets did not move), carry it too. The named exceptions
        keep 'unsafe-inline': the API (a few routes answer HTML of their own),
-       the prototype's leftovers under /shop/ and the three hand-written pages
-       (/test, /cards, /golive). /admin is asked anonymously, like
+       the prototype's leftovers under /shop/ and the two hand-written pages
+       (/cards, /golive). /admin is asked anonymously, like
        everything here: the shell at 200, the panel's door still shut. */
     const cases: Array<{ url: string; strict: boolean }> = [
       { url: abs("/"), strict: true },

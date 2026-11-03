@@ -3,7 +3,8 @@
  * owns each line, and what is still holding the switch to the live domain.
  *
  * The server half of public/golive/index.html, built on the same three
- * decisions as src/lib/testplan.ts, for the same reasons:
+ * decisions as the acceptance checklist's src/lib/testplan.ts (removed with
+ * /test on 03.11.2026), for the same reasons:
  *
  *   · the list itself is a committed file (src/data/golive.json), written out
  *     of docs/go-live.md and replaced wholesale whenever that document moves.
@@ -55,8 +56,8 @@ export type Status = "todo" | "doing" | "blocked" | "done";
 export const STATUSES: readonly Status[] = ["todo", "doing", "blocked", "done"];
 const STATUS_SET: ReadonlySet<string> = new Set(STATUSES);
 
-/** The English half of a row, carried inside the row it translates — same
-    reason as src/lib/testplan.ts: one list, one set of ids, one document. */
+/** The English half of a row, carried inside the row it translates: one
+    list, one set of ids, one document. */
 export type GoliveText = { title: string; detail: string };
 
 export type GolivePhase = { id: string; name: string; note: string; en: GoliveText & { name: string; note: string } };

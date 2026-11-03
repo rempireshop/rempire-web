@@ -4,7 +4,8 @@
  *   GET  /api/golive/   → { ok, plan, signedIn, states, gate }
  *   PUT  /api/golive/   ← { states: { "<item-id>": {status, note, at, by} } }
  *
- * Shaped after /api/testplan/, one route and one audience:
+ * Shaped after the acceptance checklist's /api/testplan/ (removed with /test
+ * on 03.11.2026), one route and one audience:
  *
  *   · GET requires the admin session. It used to be public, on the argument
  *     that the page has to be usable before anyone signs in — that being the

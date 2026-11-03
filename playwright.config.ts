@@ -44,7 +44,7 @@ import { adminPasswordHash, E2E_BASE_URL, E2E_PORT, E2E_SESSION_SECRET } from ".
  * that named no --project at all.
  */
 const SAFARI_SPECS =
-  /[\\/](catalogue|product|checkout|checkout-wallet-account|invoice|payments|storefront-sweep-2|home|blog|blog-magazine|sets|giftcard|account|account-settings|account-privacy|account-order-details|addresses|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/;
+  /[\\/](catalogue|product|checkout|checkout-wallet-account|invoice|payments|storefront-sweep-2|home|blog|blog-magazine|sets|giftcard|account|account-settings|account-privacy|account-order-details|addresses|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/;
 
 /** `e2e/<name>.spec.ts` for each name, as one pattern anchored on the separator. */
 const specs = (...names: string[]) => new RegExp(`[\\\\/](${names.join("|")})\\.spec\\.ts$`);
@@ -242,11 +242,6 @@ export default defineConfig({
       // sweep-checkout is in for its one phone-layout test (the rest of that
       // file skips itself off the desktop project), and storefront-sweep-2
       // because its own beforeEach already asks for this project by name
-      /* `testplan` is here for the same reason the storefront specs are: the
-         acceptance checklist at /test/ is a page Renat fills in on an iPhone,
-         so the engine that has to keep its answers between reloads is the one
-         he actually uses — Safari, whose private mode is also the browser that
-         refuses localStorage outright. */
       testMatch: SAFARI_SPECS,
     },
     /* Desktop Safari, when the browser happens to be installed: the storefront

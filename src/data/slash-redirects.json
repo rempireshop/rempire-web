@@ -20,7 +20,7 @@
     "statusCode": 301
   },
   {
-    "source": "/:page((?:ru/|et/)?(?:pages/contact|policies/privacy-policy|policies/refund-policy|policies/shipping-policy|policies/terms-of-service)|(?:ru/|et/)?blogs/news(?:/(?!(?:the-ultimate-guide-on-how-to-moisturize-your-skin-for-a-healthy-glow)/)[a-z0-9]+(?:-[a-z0-9]+)*)?|(?:ru/|et/)?(?:search|account|cart|checkout(?:/done)?)|admin(?:/scan)?|cards|test|golive|handover)/",
+    "source": "/:page((?:ru/|et/)?(?:pages/contact|policies/privacy-policy|policies/refund-policy|policies/shipping-policy|policies/terms-of-service)|(?:ru/|et/)?blogs/news(?:/(?!(?:the-ultimate-guide-on-how-to-moisturize-your-skin-for-a-healthy-glow)/)[a-z0-9]+(?:-[a-z0-9]+)*)?|(?:ru/|et/)?(?:search|account|cart|checkout(?:/done)?)|admin(?:/scan)?|cards|golive|handover)/",
     "destination": "/:page",
     "statusCode": 301
   }

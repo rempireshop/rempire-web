@@ -13,7 +13,7 @@
  *
  * So the number travels instead, and it has to be easy to take: the number
  * itself copies on a tap (with the same «Номер платежа скопирован ✓» toast as
- * the button beside it), and the checklist asks for exactly that.
+ * the button beside it).
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -21,9 +21,6 @@ import { describe, expect, it } from "vitest";
 
 const src = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8")
   .replace(/\r\n/g, "\n");
-const plan = JSON.parse(readFileSync(fileURLToPath(new URL("../src/data/testplan.json", import.meta.url)), "utf8")) as {
-  items: Array<{ id: string; steps: string[]; expect: string[]; en: { steps: string[]; expect: string[] } }>;
-};
 
 function slice(name: string): string {
   const start = src.indexOf(`function ${name}(`);
@@ -80,16 +77,5 @@ describe("the payment number copies on a tap", () => {
   it("a manual mark and a salon sale still show no number", () => {
     expect(admPayRefHTML({ provider: "montonio", ref: "manual" })).toBe("");
     expect(admPayRefHTML({ provider: "pos", ref: "x-1" })).toBe("");
-  });
-});
-
-describe("the checklist asks for what the card does", () => {
-  const item = plan.items.find((i) => i.id === "order-card-payment");
-
-  it("does not promise a link to the payment at the bank", () => {
-    expect(item).toBeDefined();
-    const all = [...item!.expect, ...item!.en.expect].join("\n");
-    expect(all, "the checklist still promises a link Montonio does not offer").not.toMatch(/ссылка на этот платёж|link to that payment/i);
-    expect(all).toMatch(/скопирован/);
   });
 });

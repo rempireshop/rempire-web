@@ -88,13 +88,14 @@ function prerenderedRewrites() {
   if (!out.some((r) => r.source === "/")) out.push({ source: "/", destination: "/shop2/index.html" });
 
   /* The hand-written pages under public/ that are not part of the shop:
-     /cards (the product-card options), /test (the acceptance checklist Renat
-     and Dim fill in) and /golive (what is left before launch, and the lock on
-     the domain switch). /guide, the old overview for Renat, was removed on
-     25.10.2026 at Dim's word. Neither Vercel nor `next start` serves a
-     directory's index.html for a slashless address, and no page address has
-     a slash any more. */
-  for (const page of ["cards", "test", "golive"]) {
+     /cards (the product-card options) and /golive (what is left before
+     launch, and the lock on the domain switch). /guide, the old overview for
+     Renat, was removed on 25.10.2026 at Dim's word, and /test, the acceptance
+     checklist, on 03.11.2026 («should not exist on this domain … no need to
+     track it anymore»). Neither Vercel nor `next start` serves a directory's
+     index.html for a slashless address, and no page address has a slash any
+     more. */
+  for (const page of ["cards", "golive"]) {
     if (existsSync(path.join(PUBLIC, page, "index.html"))) {
       out.push({ source: `/${page}`, destination: `/${page}/index.html` });
     }
@@ -125,8 +126,8 @@ function prerenderedRewrites() {
  *                 (/, /products/…, /ru/…, /admin), so the strict policy is the
  *                 DEFAULT and the loose one is the named exception: the API
  *                 (a few routes answer HTML of their own — the unsubscribe
- *                 page, the letter previews) and the three hand-written pages
- *                 (/test, /cards, /golive), which carry an inline
+ *                 page, the letter previews) and the two hand-written pages
+ *                 (/cards, /golive), which carry an inline
  *                 script each, keep 'unsafe-inline'. Both are ours, neither
  *                 renders untrusted input; the admin panel — the one screen a
  *                 stranger's text reaches — is on the strict policy.
@@ -300,12 +301,12 @@ const nextConfig: NextConfig = {
          the rule that turns the class of innerHTML mistakes the audit found
          into a broken layout instead of a takeover. */
       { source: "/:path*", headers: SHOP_HEADERS },
-      /* The API, the prototype's leftover files under /shop/ and the three
+      /* The API, the prototype's leftover files under /shop/ and the two
          hand-written pages: see the note above. */
       { source: "/api/:path*", headers: LOOSE_HEADERS },
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
-      { source: "/:page(test|cards|golive)", headers: LOOSE_HEADERS },
-      { source: "/:page(test|cards|golive)/:path*", headers: LOOSE_HEADERS },
+      { source: "/:page(cards|golive)", headers: LOOSE_HEADERS },
+      { source: "/:page(cards|golive)/:path*", headers: LOOSE_HEADERS },
       { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
       /* An unprefixed page is the English page for most visitors and a 302 to
          /ru/… or /et/… for a browser whose cookie or Accept-Language asks for
@@ -316,7 +317,7 @@ const nextConfig: NextConfig = {
          so the header is here, for the same addresses its language step
          reads. */
       {
-        source: "/((?!api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|cards$|test$|golive$|handover$).*)",
+        source: "/((?!api(?:/|$)|_next/|.*\\.[A-Za-z0-9]+$|ru(?:/|$)|et(?:/|$)|admin(?:/|$)|cards$|golive$|handover$).*)",
         headers: [{ key: "Vary", value: "Accept-Language, Cookie" }],
       },
       /* Keep search engines out of everything that is not the shop's own
@@ -388,10 +389,10 @@ const nextConfig: NextConfig = {
   /* The shop's own moves — /shop2/…, /shop/…, Shopify's other spellings, a
      trailing slash — are src/middleware.ts's: they are lookups, and each is
      ONE 301. What is left here are the hand-written pages at the name a human
-     types. Dim asked for the checklist twice as /tests before anyone noticed
-     the page is at /test; a page whose whole job is to be opened on a phone
-     from a chat message cannot 404 on the plural. Same for /cards, and for
-     /karty — the page is Russian, so a Russian spelling is a fair guess. */
+     types: a page whose whole job is to be opened on a phone from a chat
+     message cannot 404 on the singular — /card for /cards — or on /karty,
+     the page is Russian, so a Russian spelling is a fair guess. (/tests and
+     /checklist pointed at /test, removed on 03.11.2026.) */
   async redirects() {
     return [
       /* rempireshop.diipsolutions.eu is Dim's own name for this deployment. It
@@ -424,8 +425,6 @@ const nextConfig: NextConfig = {
         destination: string;
         statusCode: 301;
       }>),
-      { source: "/tests", destination: "/test", permanent: false },
-      { source: "/checklist", destination: "/test", permanent: false },
       { source: "/card", destination: "/cards", permanent: false },
       { source: "/karty", destination: "/cards", permanent: false },
     ];
