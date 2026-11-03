@@ -65,10 +65,17 @@ const CYR = /[А-Яа-яЁё]/;
 
 describe("«Для Google»: «все три языка» first, and each language's own fill back", () => {
   const esc = (s: string) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-  const body = new Function("esc", "S", "admLangBarHTML", "admLangHas", "ED_LANGS",
+  const body = new Function("esc", "S", "admLangBarHTML", "admLangHas", "ED_LANGS", "admAutosaveHintHTML", "edAsKey",
     `${lineDecl("ED_SEO_FILL")}\n${fn("edSeoPair")}\n${fn("edSeoBody")}\nreturn edSeoBody;`,
-  )(esc, { goodsSeoLang: "et" }, () => "<div data-langbar></div>", () => false, []) as (p: unknown, id: string) => string;
+  )(esc, { goodsSeoLang: "et" }, () => "<div data-langbar></div>", () => false, [],
+    (key: string) => `<span class="adm-ashint" data-ashint="${key}" hidden></span>`,
+    (p: { id: string }, f: string) => `ed:${p.id}:${f}`) as (p: unknown, id: string) => string;
   const html = body({ id: "touchable", brand: "Kevin.Murphy", seoOv: {} }, "touchable");
+
+  it("has the one line a refused Google text is told in (wrong_language), except on «Новый товар»", () => {
+    expect(html.match(/data-ashint="ed:touchable:seo"/g) ?? []).toHaveLength(1);
+    expect(body({ id: "touchable", brand: "Kevin.Murphy", seoOv: {} }, "new")).not.toContain("data-ashint");
+  });
 
   it("keeps «все три языка» as the one main button of the fold", () => {
     expect(html.match(/data-admseoall="touchable"/g) ?? []).toHaveLength(1);

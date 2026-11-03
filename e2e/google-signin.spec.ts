@@ -28,6 +28,14 @@ const FEED = /\/api\/overrides\/?(\?.*)?$/;
 test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop" || !functionalProject(testInfo), "functional spec — desktop project, see docs/testing.md");
 });
+/* A test can end with googleOn()'s handler still fetching — the checkout asks
+   the feed twice (loadShipRules, loadServerOverrides) and the last assertion
+   needs only the first. Closing the page then disposes that response under
+   the handler, and «Response has been disposed» failed a test whose every
+   check had passed (CI full run, 03.11.2026). */
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+});
 
 /** The feed as a deployment with a Google client answers it — the real answer, plus the one flag. */
 async function googleOn(page: Page): Promise<void> {
@@ -165,10 +173,28 @@ test.describe("«Продолжить с Google» — on", () => {
   test("the checkout's contact step offers it to a shopper who is not signed in, in every language", async ({ page }) => {
     await googleOn(page);
     await fillBasket(page);
+    /* The profile ask answers 401 on every visit of a shopper who is not
+       signed in. That answer used to redraw the slot regardless, swapping the
+       button for an identical node a moment after the first paint — a measure
+       taken across the swap came back null (CI full run, 03.11.2026). It is
+       held here until the button on screen is marked, then let through: the
+       mark must still be on the button after it. */
+    const ME = /\/api\/account\/me\/?(\?.*)?$/;
+    let letMeThrough = () => {};
+    let meGate = Promise.resolve();
+    await page.route(ME, async (route) => { await meGate; await route.continue(); });
     for (const lang of LANGS) {
+      meGate = new Promise<void>((r) => { letMeThrough = r; });
+      const me = page.waitForResponse((r) => ME.test(r.url()));
       await open(page, shopUrl(lang.seg, "/checkout/"), "checkout");
       const btn = page.locator("[data-co-google] a[data-gsignin]");
       await expect(btn).toBeVisible();
+      await btn.evaluate((el) => { (el as HTMLElement & { __e2eTag?: string }).__e2eTag = "first"; });
+      letMeThrough();
+      expect((await me).status()).toBe(401);
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      expect(await page.evaluate(() => (document.querySelector("[data-co-google] a[data-gsignin]") as (HTMLElement & { __e2eTag?: string }) | null)?.__e2eTag),
+        "the signed-out answer redrew the button").toBe("first");
       await expect(btn).toHaveText(CO_LABEL[lang.code]);
       await expect(btn).toHaveAttribute("href", startHref(shopUrl(lang.seg, "/checkout/")));
       // above the order's own e-mail box

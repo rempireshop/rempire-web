@@ -156,7 +156,10 @@ test.describe("the checkout takes a scoped code off the matching lines only", ()
     await twoBrandBasket(page);
     await page.locator("[data-promo]").fill(code);
     await page.locator("[data-applypromo]").click();
-    await expect(page.locator("[data-promooff]"), "the code did not apply").toBeVisible();
+    /* Generous on purpose: `next dev` compiles a route on its first hit, and
+       while it does every request waits — the check answered in 8077 ms
+       behind such a compile, 77 ms past the default (CI full run, 03.11.2026). */
+    await expect(page.locator("[data-promooff]"), "the code did not apply").toBeVisible({ timeout: 20_000 });
 
     /* Ten per cent of the Kevin.Murphy line, not of the basket. PRODUCT's
        first size is the one a fresh «В корзину» adds, and PRODUCT_2 has one

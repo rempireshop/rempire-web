@@ -20811,8 +20811,16 @@
     pending
       .then(function (j) {
         /* signed out after all (a 401 has just dropped acctHint): the
-           checkout may offer «Продолжить с Google» now */
-        if (!j || !j.ok) { coGooglePatch(); return; }
+           checkout may offer «Продолжить с Google» now — unless it already
+           does. A 401 is the answer every visit of a shopper who is not
+           signed in gets, and redrawn regardless, the slot swapped the button
+           for an identical one a moment after the first paint, and a tap
+           that began on the old node could end on the new one (CI full run,
+           03.11.2026: the button measured as gone mid-swap). */
+        if (!j || !j.ok) {
+          if (!document.querySelector("[data-co-google] [data-gsignin]")) coGooglePatch();
+          return;
+        }
         apiSeen(true);
         // On checkout this only ever needs to reveal/update the loyalty row
         // in the summary — S.ship.name/phone prefill (acctApply, only into
@@ -43343,6 +43351,10 @@
       '<div class="adm-descgrid">' +
         '<div class="adm-descgrid__box">' +
           box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
+          /* the one line a refused text gets (README § 2) — «В эстонском тексте
+             остались русские слова…» (edTyped) had no place to go until
+             03.11.2026, and the owner read only «Не сохранено — проверьте поле» */
+          (id === "new" ? "" : admAutosaveHintHTML(edAsKey(p, "desc"))) +
         "</div>" +
         '<div class="adm-descprev">' +
           '<div class="adm-descprev__h"><span class="adm-descprev__k">Так увидит покупатель</span>' +
@@ -43685,7 +43697,9 @@
       "</div>" +
       edSeoPair(p, "ru", "data-edseot", "data-edseod", ov.RU || {}, lang === "ru") +
       edSeoPair(p, "et", "data-edseotet", "data-edseodet", ov.ET || {}, lang === "et") +
-      edSeoPair(p, "en", "data-edseoten", "data-edseoden", ov.EN || {}, lang === "en");
+      edSeoPair(p, "en", "data-edseoten", "data-edseoden", ov.EN || {}, lang === "en") +
+      // …and the same line for the six Google boxes, which save as one value too
+      (id === "new" ? "" : admAutosaveHintHTML(edAsKey(p, "seo")));
   }
   /** «2 из 3 языков» — a count, so it goes through its own UI_RX rule. */
   function edSeoSummary(ov) {

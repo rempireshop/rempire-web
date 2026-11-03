@@ -196,10 +196,20 @@ test.describe("sweep — goods editor", () => {
       // One language at a time — the tabs decide which box is on screen.
       await toSection(page, "desc");
       await typeAndLeave(page, page.locator("[data-eddescru]"), `Описание ${HTML_BOMB}`);
+      await assertClean(page, w, "goods RU description saved");
+      // Russian words in the Estonian or English text are refused since
+      // 29.10.2026 (fe1b5d0b, `wrong_language`): one Russian line under the
+      // box, nothing saved. EMOJI ends in «тест», so it is that refusal here.
       await page.locator('[data-eddesclang="et"]').click();
-      await typeAndLeave(page, page.locator("[data-eddescet]"), EMOJI);
+      await page.locator("[data-eddescet]").fill(EMOJI);
+      await page.locator("[data-eddescet]").blur();
+      await expect(hint(page, subject, "desc"), "Russian in the Estonian text was saved").toContainText("эстонском");
+      w.reset();   // Chromium logs the server's 400 as a console error of its own
+      // Garbage that is not Russian goes through: emoji, and a thousand letters.
+      await typeAndLeave(page, page.locator("[data-eddescet]"), "🎉💇‍♀️🧴 proov");
+      await expect(hint(page, subject, "desc")).toBeHidden();
       await page.locator('[data-eddesclang="en"]').click();
-      await typeAndLeave(page, page.locator("[data-eddescen]"), LONG);
+      await typeAndLeave(page, page.locator("[data-eddescen]"), "W".repeat(1000));
       await page.locator('[data-eddesclang="ru"]').click();
       // the AI buttons the owner writes with are here and reachable
       await expect(page.locator(`[data-admdescgen="${subject}"]`)).toBeVisible();
