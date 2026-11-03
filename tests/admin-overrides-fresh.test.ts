@@ -102,6 +102,7 @@ function rig(opts: { screen: string; admin: boolean | null; meDone?: boolean; se
     function demoSave() {}
     function applyDemoOverrides() {}
     function render() { calls.push("render"); }
+    function feedOnSearchBox() { return false; }
     function admGateSettled() {}
     function patchDelivery() {}
     function patchSummary() {}

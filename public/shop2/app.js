@@ -14287,6 +14287,7 @@
       S.cart = S.cart.filter(function (l) { return l.type !== "bundle" || !!bundleById(l.id); });
       if (S.cart.length !== before) persist();
       if (S.screen === "checkout") { patchSummary(); return; }
+      if (feedOnSearchBox()) return;
       render();
     }).catch(bundlesUnanswered);
   }
@@ -48413,10 +48414,11 @@
       // whose own /api/overrides/ fetch this one duplicates at boot time).
       // Every other screen still gets the full rebuild: a new hero, a
       // catalogue price change, the chatbot toggle, etc. are not scoped to
-      // any one container the way checkout's own blocks are.
+      // any one container the way checkout's own blocks are — except the
+      // search box while it is being typed in (feedOnSearchBox).
       if (bootHeld) return;   // the first paint is waiting for exactly this answer
       if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
-      else render();
+      else if (!feedOnSearchBox()) render();
       /* This answer can take a LINE out of the basket — a product the owner
          has hidden since, one of his own the feed no longer carries
          (adoptServer's two filters). render() re-mounts the overlay only when
@@ -54312,9 +54314,9 @@
            it is left has to be left by the shopper, not by the rebuild */
         : af.hasAttribute("data-acctf") ? '[data-acctf="' + af.getAttribute("data-acctf") + '"]'
         /* The search screen's box. Typing in it no longer renders at all
-           (patchSearch), but a background answer landing mid-word still
-           does — and that one must not leave the shopper's caret on the
-           floor either. */
+           (patchSearch), nor do the two boot feeds (feedOnSearchBox), but
+           any other background answer landing mid-word still does — and
+           that one must not leave the shopper's caret on the floor either. */
         : af.hasAttribute("data-search2") ? "[data-search2]"
         : null;
       if (!sel) return;
@@ -54839,6 +54841,24 @@
     translateTree(box);
     patchHeader();
     setHead();
+  }
+  /* …and the same box while a background answer lands under it: the two
+     feeds read at boot (/api/overrides/, /api/bundles/) answer whenever they
+     answer, and again when the tab comes back (refreshFeeds) — on a slow
+     phone that is mid-word. Each used to end in a full render(), which
+     rebuilt the box; the focus render() hands back then lands on a new node,
+     and the keyboard folds exactly as it did for Renat. While the shopper is
+     in the box, what a feed can change here — the results, the header's
+     badge, the bottom bar's, the assistant switched on — is repainted and
+     the box is left standing. True when it handled the answer; anywhere
+     else the caller renders. */
+  function feedOnSearchBox() {
+    var af = document.activeElement;
+    if (S.screen !== "search" || !af || !af.hasAttribute || !af.hasAttribute("data-search2") || !bodySlot.contains(af)) return false;
+    patchSearch();
+    patchNav();
+    mountChat();
+    return true;
   }
 
   function patchCatalog() {

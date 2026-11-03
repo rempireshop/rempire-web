@@ -308,8 +308,10 @@ for (const lang of LANGS) {
       await clientNav(page, shopUrl(lang.seg, "/blog/"));
       await expectScreen(page, "blog", { screen: "blog", lang: L });
       // The list is fetched after the first paint — wait for it to settle so
-      // the audit sees the real screen and not "Загружаем…".
-      await expect(page.locator(".bloglist, .blogcard, .empty, .muted").first()).toBeVisible();
+      // the audit sees the real screen and not the skeleton tiles. Since the
+      // magazine (02.11.2026) a settled list is an article card, the carousel
+      // on top of it, or the «no articles» line.
+      await expect(page.locator(".bmag__card, .hero__slide[data-on='1'], .bmag .muted").first()).toBeVisible();
       await check(page, w, { screen: "blog", lang: L });
 
       const postCtx: Ctx = { screen: `blogpost:${blogSlug}`, lang: L };

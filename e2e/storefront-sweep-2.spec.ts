@@ -827,15 +827,22 @@ test.describe("the Estonian blog is «Blogi»", () => {
      Since SEO pack 1 (09.10.2026, c430838a) the tab is no longer the bare
      section word: it is the approved title for the blog from
      src/lib/seo-copy.mjs, the one the server-rendered page carries too. The
-     section word still names the blog in the nav and in the crumbs. */
-  test("the tab and the breadcrumb say «Blogi» too", async ({ page }) => {
+     section word still names the blog in the nav and in its heading. Since
+     the magazine (02.11.2026, d86bb693) the listing has no crumbs — the
+     design Dim approved has none — so the crumb read here is an article's
+     «Blogi / …», the one link back the magazine kept. */
+  test("the tab, the heading and an article's breadcrumb say «Blogi» too", async ({ page }) => {
     await page.goto(shopUrl("/et", "/blog/"));
     await waitForScreen(page, "blog");
     expect(await page.title()).toBe(seoCopy().blog.ET[0]);
     await expect(page.locator("[data-nav-blog]")).toHaveText("Blogi");
-    await expect(page.locator(".crumbs")).toContainText("Blogi");
+    await expect(page.locator(".bmag__h")).toHaveText("Blogi");
     // the old label must not survive anywhere on the page
     expect(await page.evaluate(() => document.body.innerText)).not.toMatch(/\bBlog\b(?!i)/);
+
+    await page.locator(".bmag__card[data-go-blog]").first().click();
+    await waitForScreen(page, "blogpost");
+    await expect(page.locator(".bmag-post__crumbs a")).toHaveText("Blogi");
   });
 });
 
@@ -1135,13 +1142,29 @@ test.describe("search — the box survives its own results", () => {
     });
   }
 
+  /* Focused first, tagged second. The two boot feeds (/api/overrides/,
+     /api/bundles/) can still be on their way when the screen is up — on a
+     cold dev server /api/bundles/ waits behind the /api/blog compile — and
+     an answer that lands BEFORE the box has the focus rebuilds the screen.
+     Harmless to a shopper (no keyboard is up yet), but it takes a tag set on
+     the old box with it. From the focus on, an answer leaves the box standing
+     (feedOnSearchBox in app.js); the test after this one holds an answer back
+     to prove exactly that. */
+  async function focusAndTag(page: import("@playwright/test").Page) {
+    const box = page.locator("[data-search2]");
+    await box.focus();
+    await expect(box).toBeFocused();
+    await page.evaluate(() => {
+      (document.activeElement as HTMLInputElement & { __e2eTag?: string }).__e2eTag = "renat";
+    });
+    return box;
+  }
+
   test("typing and clearing keep the very same input focused", async ({ page }) => {
     // the Estonian shop, where he hit it
     await page.goto(shopUrl("/et", "/search/"));
     await waitForScreen(page, "search");
-    const box = page.locator("[data-search2]");
-    await expect(box).toBeVisible();
-    await box.evaluate((el) => { (el as HTMLInputElement & { __e2eTag?: string }).__e2eTag = "renat"; });
+    const box = await focusAndTag(page);
 
     // real keystrokes, trailing space and all
     await box.pressSequentially("rasvased ", { delay: 20 });
@@ -1158,6 +1181,33 @@ test.describe("search — the box survives its own results", () => {
     expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "" });
     // an empty box is back to the popular queries
     await expect(page.locator("[data-searchres] [data-q]").first()).toBeVisible();
+  });
+
+  /* The same finding by another road (03.11.2026). Each boot feed used to end
+     in a full render() whenever it answered, and on a slow phone that is
+     mid-word: the box was rebuilt under the shopper's thumb and the keyboard
+     folded. The sets' answer is held back here until the shopper is typing —
+     the overrides' one is not, because the first paint may wait for it. */
+  test("a boot feed landing mid-word leaves the box standing", async ({ page }) => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    await page.route((url) => url.pathname === "/api/bundles/", async (route) => {
+      await held;
+      await route.continue();
+    });
+    await page.goto(shopUrl("/et", "/search/"));
+    await waitForScreen(page, "search");
+    const box = await focusAndTag(page);
+
+    await box.pressSequentially("rasva", { delay: 20 });
+    const landed = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/bundles/");
+    release();
+    await landed;
+    // a render() is coalesced into the next frame — give it two
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))));
+    await box.pressSequentially("sed ", { delay: 20 });
+    expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "rasvased " });
+    await expect(page.locator("[data-searchres] [data-q]")).toHaveCount(0);
   });
 });
 

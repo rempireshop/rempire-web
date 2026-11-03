@@ -59,6 +59,7 @@ describe("loadServerOverrides: an open drawer after the feed drops a line", () =
       var OV_PUB = null;
       function ovPublicWay() { return "take"; }   // a shopper: the feed is the shop
       function loadAdminOverrides() {}
+      function feedOnSearchBox() { return false; }   // not the search screen
       ${slice("loadServerOverrides")}
       return loadServerOverrides();
     `;
