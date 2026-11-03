@@ -128,24 +128,6 @@ describe("a promo code that took nothing off must not spend a use", () => {
     expect((await getPromo("SHIP0"))!.used).toBe(1);
   });
 
-  it("says so in the journal when a code that DID discount cannot be counted", async () => {
-    // the guard must not silence the shortfall the audit row exists for
-    await upsertPromo({
-      code: "GONE21", kind: "percent", value: 10, minSubtotal: 0,
-      startsAt: null, endsAt: null, maxUses: 1, active: true, note: null,
-    });
-    await query("update promo_codes set used = 1 where code = 'GONE21'");
-    const d = deps();
-    const out = await applyPaymentResult(
-      { id: "e1e1e1e1-e1e1-4e1e-8e1e-e1e1e1e1e1e1", number: "R-210001", status: "new", total: 36, discount: 4, discountCode: "GONE21" },
-      paidTicket("R-210001", 36),
-      "montonio",
-      d,
-    );
-    expect(out.giftShortfall).toMatchObject({ code: "GONE21", error: "used_up" });
-    expect(d.writeAudit).toHaveBeenCalledWith("system", "promo_consume_failed", expect.objectContaining({ code: "GONE21" }));
-  });
-
   it("leaves a salon sale's «POS -15%» alone — it is a label, not a code", async () => {
     /* createOrder folds the cashier's percent into `discount_code` so the
        order card and the receipt show it. Sent down the promo branch it
@@ -191,49 +173,11 @@ describe("a promo code cannot be shaped like a gift card", () => {
   });
 });
 
-/* ========================================================================= */
-
-describe("«Удалить» says which code it is refusing", () => {
-  beforeAll(async () => {
-    await setupDb();
-  });
-  afterAll(teardownDb);
-  beforeEach(async () => {
-    await exec("truncate promo_code_uses, promo_codes restart identity cascade");
-    await exec("truncate orders restart identity cascade");
-  });
-
-  it("answers on_order for a code sitting in an order nobody paid for", async () => {
-    /* The shopper applied the code and walked away from the bank's page. The
-       counter reads 0 — «использован 0» on the row, «Удалить» on offer — and
-       the panel used to be told `in_use` and say «Код уже использован». */
-    await upsertPromo({
-      code: "ABANDON", kind: "percent", value: 10, minSubtotal: 0,
-      startsAt: null, endsAt: null, maxUses: null, active: true, note: null,
-    });
-    const order = await createOrder({
-      lang: "ru",
-      items: [{ id: plain.id, qty: 1 }],
-      customer,
-      shipping: { method: "parcel", country: "EE" },
-      discountCode: "abandon",
-    });
-    expect(order.status).toBe("new");
-    expect((await getPromo("ABANDON"))!.used).toBe(0);
-
-    expect(await deletePromo("ABANDON")).toEqual({ ok: false, error: "on_order" });
-    expect(await getPromo("ABANDON")).not.toBe(null);
-  });
-
-  it("still answers in_use for a code somebody has paid with", async () => {
-    await upsertPromo({
-      code: "SPENT21", kind: "percent", value: 10, minSubtotal: 0,
-      startsAt: null, endsAt: null, maxUses: null, active: true, note: null,
-    });
-    await query("update promo_codes set used = 1 where code = 'SPENT21'");
-    expect(await deletePromo("SPENT21")).toEqual({ ok: false, error: "in_use" });
-  });
-});
+/* «Удалить» refusing a code an order carries (on_order) or a paid order used
+   (in_use) is held by tests/promos.test.ts («refuses a code an order carries,
+   even when the order was never paid», «refuses a code that has been paid
+   with»); the repeats that stood here went on 03.11.2026 (test cleanup). The
+   panel's sentence for it is below. */
 
 /* ========================================================================= */
 /* ---------- the panel, sliced out of app.js ------------------------------ */

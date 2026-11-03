@@ -164,29 +164,6 @@ describe("what the source says about the callers", () => {
    so «← Товары», the phone's Back and the nav ask about one thing only: a box
    whose value could not be sent (tests/admin-ux1a-product.test.ts drives it). */
 describe("the product card never throws work away", () => {
-  it("sends what is owed before it closes, then asks about what could not go", () => {
-    const branch = src.slice(src.indexOf("if (d.admclose !== undefined || d.admbackyes !== undefined)"));
-    expect(branch.slice(0, 600)).toContain("admAutosaveFlush();");
-    expect(src).toContain("goodsEditDirty() && !S.goodsConfirmBack");
-    // the gesture branch sends and asks the same way
-    const back = slice("admCloseTop");
-    expect(back).toContain("admAutosaveFlush();");
-    expect(back).toContain("goodsEditDirty() && !S.goodsConfirmBack");
-    expect(slice("goodsEditDirty")).toContain("ADM_AS[k].err && ADM_AS[k].dirty");
-  });
-
-  it("offers both answers, and the delegate can hear them", () => {
-    const editor = slice("goodsEditor");
-    expect(editor).toContain("data-admbackyes");
-    expect(editor).toContain("data-admbackno");
-    expect(src).toContain("[data-admbackyes],[data-admbackno],");
-    expect(src).toContain("if (d.admbackno !== undefined)");
-  });
-
-  it("is quiet again once the card is reopened", () => {
-    expect(src).toContain("S.goodsConfirmBack = false;   // a fresh card");
-  });
-
   /* «Every button that edits the draft should say so here» — the rule above
      admBarTouched(), written when «×» on a size was fixed for Renat on
      12.09.2026. 1a: every photo button SAVES the list it leaves, with

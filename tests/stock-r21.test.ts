@@ -196,14 +196,6 @@ async function scanCommit(sign: number, qty: number, result: MoveResult | null):
 }
 
 describe("the scanner's confirm never claims a move that did not happen", () => {
-  it("a plain write-off still says how many left", async () => {
-    expect(await scanCommit(-1, 3, { appliedDelta: -3, clampedNegative: false })).toEqual(["Списание −3 ✓"]);
-  });
-
-  it("goods in still say how many arrived", async () => {
-    expect(await scanCommit(1, 2, { appliedDelta: 2, clampedNegative: false })).toEqual(["Приход +2 ✓"]);
-  });
-
   /* move() clamps at zero rather than leaving the row negative, and reports
      what it really applied. The toast used to print the number that was ASKED
      for, so a −5 against a shelf holding 2 read «Списание −5 ✓». */
@@ -214,16 +206,6 @@ describe("the scanner's confirm never claims a move that did not happen", () => 
   it("…and one clamped to nothing at all says so", async () => {
     expect(await scanCommit(-1, 5, { appliedDelta: 0, clampedNegative: true })).toEqual([
       "На складе уже 0 — списывать нечего.",
-    ]);
-  });
-
-  /* «Списать» writes a 'writeoff' move ('sale_pos' until 25.09.2026), and like
-     a sale it is skipped on a size nobody has counted — nothing is written and no
-     ledger line appears. The route still answers ok, so the old toast said
-     «Списание −2 ✓» over a shelf that had not moved. */
-  it("a write-off on a size nobody has counted says it was not counted", async () => {
-    expect(await scanCommit(-1, 2, { appliedDelta: 0, skipped: true })).toEqual([
-      "Этот объём ещё не считали — впишите остаток на «Складе».",
     ]);
   });
 

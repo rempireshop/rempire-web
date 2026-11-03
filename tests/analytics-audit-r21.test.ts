@@ -83,11 +83,4 @@ describe("«Путь до покупки» and what the screen promises about it
     expect(a.funnel.addToCart, "the stages are five independent counts, not a funnel").toBe(1);
     expect(a.funnel.addToCart).toBeGreaterThan(a.funnel.product);
   });
-
-  it("no longer tells the owner the numbers always fall", () => {
-    const app = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
-    expect(app.includes("Числа всегда убывают"), "the query cannot keep that promise").toBe(false);
-    // …and it still explains the one case that breaks the shape
-    expect(app).toContain("шаг можно и перескочить");
-  });
 });

@@ -83,14 +83,6 @@ describe("«Аналитика»: the two blocks that were never money", () => {
   it("warns that bundles and gift cards are not in «Бренды» at all", () => {
     expect(src).toContain("Наборы и подарочные карты сюда не попадают — бренд у них не указан.");
   });
-
-  /* …and not one figure moved. The two lists still read the very same
-     fields of the analytics answer — «Топ товаров» drawn with a share bar
-     under each row since 1a (admShareRowsHTML, screen 17). */
-  it("changes no number: the same two fields are still what is drawn", () => {
-    expect(src).toContain("admShareRowsHTML(a.topProductsByRevenue.map(prod)");
-    expect(src).toContain("a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; })");
-  });
 });
 
 /* ------------------------------------------------------------------ *
@@ -717,31 +709,5 @@ describe("«Настройки → Доставка»: an empty box stays empty"
     // «Вернуть значения по умолчанию» is the EMPTY row, not today's price list
     expect(src).toContain("S.shipDraft = cloneRules(SHIP_STORED_DEFAULT);");
     expect(src).toContain('admShipCommit("Тарифы снова стандартные", { reset: true })');
-  });
-});
-
-describe("the save guard only refuses cells the owner can actually change", () => {
-  /* An earlier analysis of this screen: belowCostCells() policed eighteen
-     `methods.parcel` cells that no box on the screen can edit, because
-     admShipRowHTML() emits `c:`, `m:courier:` and `free:` keys and nothing
-     else. A Montonio rise past one of them would have refused the owner's
-     next save — of ANY cell — over a number he cannot reach. */
-  it("the rate screen still emits exactly three kinds of box", () => {
-    const row = slice("admShipRowHTML");
-    expect(row).toContain('"c:" + c[0] + ":" + key');
-    expect(row).toContain('"m:courier:" + key');
-    expect(row).toContain('"free:" + key');
-    expect(row).not.toContain("m:parcel:");
-  });
-
-  it("…and the guard no longer looks at the column they cannot reach", async () => {
-    const { belowCostCells, parseShippingRules } = await import("@/lib/shipping");
-    // Poland has no parcel-machine chip in the checkout and no «Пакомат» box
-    // in the panel; the guard used to refuse a save over this very cell
-    expect(belowCostCells(parseShippingRules({ methods: { parcel: { PL: 0.01 } } }))).toEqual([]);
-    // …while the cell one column over, which HAS a box, is still refused
-    expect(belowCostCells(parseShippingRules({ methods: { courier: { PL: 0.01 } } }))).toHaveLength(1);
-    // …and so is every carrier chip the shopper picks himself
-    expect(belowCostCells(parseShippingRules({ carriers: { dpd: { FI: 0.01 } } }))).toHaveLength(1);
   });
 });

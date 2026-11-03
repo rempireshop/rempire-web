@@ -1,8 +1,8 @@
 /**
  * Every chip that prints a number has to survive the translator.
  *
- * The panel's chips are one text node — «Все 334», «Придержаны 2» — so the
- * dictionary's entry for the bare word never matches them; each needs a
+ * The panel's chips were one text node then — «Все 334», «Придержаны 2» — so
+ * the dictionary's entry for the bare word never matched them; each needed a
  * `UI_RX` rule of its own. On 19.09.2026 three screens grew numbers without
  * one: «Заказы» gained «Придержаны», and «Склад» and «Каталог» started
  * printing a count on all four of their chips. The English panel then showed
@@ -10,11 +10,9 @@
  * before a demo: «"придержаны" on english site. also "russian" text in
  * products page.»
  *
- * `tools/i18n-gaps.mjs` cannot catch this. It reads the SOURCE for Russian
- * literals, and «Все 334» exists only at run time — the label and the count
- * are glued together by the renderer. So the check has to be this one: take
- * the real label tables out of app.js, glue a number on the way the renderer
- * does, and put the result through the panel's own translator.
+ * Since the 1a redesign the label and the count are separate nodes, so what
+ * has to survive the translator is every label in the real tables — taken out
+ * of app.js and put through the panel's own translator below.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -90,22 +88,11 @@ describe("a chip with a number on it is still translated", () => {
     expect(HIST.length, "the «История склада» chips").toBe(7);
   });
 
-  for (const [name, list] of [...CHIPS, ["«Склад» FILTERS", STOCK] as [string, string[]]]) {
-    for (const label of list) {
-      for (const lang of ["ET", "EN"]) {
-        it(`${name}: «${label} 7» in ${lang}`, () => {
-          const got = tr(`${label} 7`, lang);
-          expect(got, `«${label} 7» came back untranslated in ${lang}`).not.toMatch(/[А-Яа-яЁё]/);
-          // …and the number survived the rule's own $1
-          expect(got, `«${label} 7» lost its count in ${lang}`).toContain("7");
-        });
-      }
-    }
-  }
-
-  /* The bare labels still have to work too: «Придержаны» hides when it is
-     empty and «Все» has never carried a number. */
-  it("translates the bare labels as well", () => {
+  /* Since the 1a redesign every chip draws its label and its count as two
+     nodes (`<span>label</span> <b>count</b>`), so the translator only ever
+     sees the bare label. The 42 «<label> 7» cases that stood here checked the
+     glued form no screen draws any more — removed 03.11.2026 (test cleanup). */
+  it("translates every chip label", () => {
     for (const [, list] of [...CHIPS, ["", STOCK] as [string, string[]]]) {
       for (const label of list) {
         for (const lang of ["ET", "EN"]) {

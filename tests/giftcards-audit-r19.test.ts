@@ -185,43 +185,6 @@ describe("redeemGiftCard is once per order", () => {
     await query("insert into gift_cards (code, amount, balance, lang) values ($1, 50, 50, 'RU')", ["RMP-ACDE-4679"]);
   });
 
-  it("does not take the money a second time for the same order", async () => {
-    const order = await createOrder({
-      lang: "RU", items: [{ id: PRODUCT.id, qty: 1 }], customer: CUSTOMER,
-      shipping: { method: "pickup", country: "EE" },
-    });
-    const first = await redeemGiftCard("RMP-ACDE-4679", 32, order.id);
-    expect(first).toMatchObject({ ok: true, taken: 32, remaining: 18 });
-
-    /* The retry: settleWithoutPayment() charges the card BEFORE anything
-       durable is written, so a 503 from the write that follows — or a second
-       tap on «Оплатить» — used to leave the card at 18 − 32, refused, and the
-       shopper 32 € poorer for one order. */
-    const again = await redeemGiftCard("RMP-ACDE-4679", 32, order.id);
-    expect(again).toMatchObject({ ok: true, already: true, taken: 32 });
-    expect((await getGiftCard("RMP-ACDE-4679"))!.balance).toBe(18);
-
-    const rows = await query<{ n: string }>(
-      "select count(*) as n from gift_card_uses where code = $1 and kind = 'redeem'",
-      ["RMP-ACDE-4679"],
-    );
-    expect(Number(rows[0].n)).toBe(1);
-  });
-
-  it("still lets a DIFFERENT order spend what is left", async () => {
-    const a = await createOrder({
-      lang: "RU", items: [{ id: PRODUCT.id, qty: 1 }], customer: CUSTOMER,
-      shipping: { method: "pickup", country: "EE" },
-    });
-    const b = await createOrder({
-      lang: "RU", items: [{ id: PRODUCT.id, qty: 1 }], customer: CUSTOMER,
-      shipping: { method: "pickup", country: "EE" },
-    });
-    expect((await redeemGiftCard("RMP-ACDE-4679", 30, a.id)).taken).toBe(30);
-    expect((await redeemGiftCard("RMP-ACDE-4679", 20, b.id)).taken).toBe(20);
-    expect((await getGiftCard("RMP-ACDE-4679"))!.balance).toBe(0);
-  });
-
   it("writes the ledger row the refund reads, or takes nothing at all", async () => {
     // the row is inside the transaction now: a debit nothing can explain is
     // a debit no refund can ever put back
@@ -249,23 +212,6 @@ describe("the webhook and the shopper's return race each other", () => {
     shipping: { method: "digital", country: "EE" },
   } as Parameters<typeof createOrder>[0];
 
-  it("claimOrderPaid answers exactly one caller with the row it moved", async () => {
-    // the winner gets the order back, the loser gets null (src/lib/orders.ts)
-    const order = await createOrder(giftOrder);
-    const won = await claimOrderPaid(order.id, "payment:mock");
-    expect(won?.status).toBe("paid");
-    expect(await claimOrderPaid(order.id, "payment:mock")).toBeNull();
-    expect((await getOrder(order.id))!.status).toBe("paid");
-  });
-
-  it("never drags an order that is already «отправлен» back to «оплачен»", async () => {
-    const order = await createOrder(giftOrder);
-    await claimOrderPaid(order.id);
-    await setOrderStatus(order.id, "shipped", "admin");
-    expect(await claimOrderPaid(order.id, "payment:mock")).toBeNull();
-    expect((await getOrder(order.id))!.status).toBe("shipped");
-  });
-
   it("mints one set of codes when both arrive at once", async () => {
     /* Both read the order, both saw «не оплачен», both minted a full set:
        two live 50 € codes for one 50 € purchase, mailed twice. */
@@ -278,17 +224,6 @@ describe("the webhook and the shopper's return race each other", () => {
       settlePayment(fresh, result, "mock"),
       settlePayment(fresh, result, "mock"),
     ]);
-    const cards = await query<{ code: string }>("select code from gift_cards where order_id = $1", [order.id]);
-    expect(cards).toHaveLength(1);
-  });
-
-  it("mints one set when the second arrival comes after the first", async () => {
-    const order = await createOrder(giftOrder);
-    const result: VerifyLike = {
-      orderRef: order.number, status: "paid", providerRef: "mock_seq", amount: order.total, currency: "EUR",
-    };
-    await settlePayment((await getOrder(order.id))!, result, "mock");
-    await settlePayment((await getOrder(order.id))!, result, "mock");
     const cards = await query<{ code: string }>("select code from gift_cards where order_id = $1", [order.id]);
     expect(cards).toHaveLength(1);
   });

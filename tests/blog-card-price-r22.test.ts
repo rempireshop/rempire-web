@@ -36,10 +36,7 @@ import { createCustomProduct, setCustomProductActive } from "@/lib/custom-produc
 import { exec } from "@/lib/db";
 import { upsertOverride } from "@/lib/orders";
 import { blogCardIds, fillBlogCardPrices } from "@/lib/seo-head.mjs";
-import {
-  renderPostBody as exportRenderPostBody,
-  sanitizeHtml as exportSanitizeHtml,
-} from "../tools/lib/blog-export.mjs";
+import { renderPostBody as exportRenderPostBody } from "../tools/lib/blog-export.mjs";
 import { setupDb, teardownDb } from "./helpers";
 
 const SHAMPOO = "system-4-bio-botanical-shampoo";
@@ -61,52 +58,50 @@ const liveMarker = (id: string, words = "Bio Botanical Shampoo") =>
     price, no link — nothing a crawler or a reader without JS could see. */
 const bareMarker = (id: string) => `<p><a data-product="${id}"></a></p>`;
 
-/* ---------- 1 + 2: what may be stored, in both sanitisers ---------------- */
+/* ---------- 1 + 2: what may be stored ------------------------------------ */
 
 describe("sanitizeHtml: the marker may say that its price is not its own", () => {
-  /* Run against BOTH copies — src/lib/blog.ts is the real one, and
-     tools/lib/blog-export.mjs is the hand-kept twin the build sanitises with.
-     A drift here is not cosmetic: the prerenderer matches on this attribute,
-     so a twin that drops it prerenders every new card with no price at all. */
-  for (const [where, clean] of [["src/lib/blog.ts", sanitizeHtml], ["tools/lib/blog-export.mjs", exportSanitizeHtml]] as const) {
-    describe(where, () => {
-      it("keeps data-price=\"live\" on a product marker", () => {
-        const out = clean(liveMarker(SHAMPOO));
-        expect(out).toContain(`data-product="${SHAMPOO}"`);
-        expect(out).toContain('data-price="live"');
-        expect(out).toContain("Bio Botanical Shampoo");
-      });
+  /* This ran against both sanitisers while the build had a hand-kept twin;
+     both now re-export src/lib/blog-html.mjs (tests/blog-figure-r22.test.ts
+     holds them to the same functions), so it runs once — 03.11.2026, test
+     cleanup u2. The prerenderer still matches on this attribute: a sanitiser
+     that dropped it would prerender every new card with no price at all. */
+  const clean = sanitizeHtml;
+  it("keeps data-price=\"live\" on a product marker", () => {
+    const out = clean(liveMarker(SHAMPOO));
+    expect(out).toContain(`data-product="${SHAMPOO}"`);
+    expect(out).toContain('data-price="live"');
+    expect(out).toContain("Bio Botanical Shampoo");
+  });
 
-      it("writes the attributes in the one order the renderers match on", () => {
-        expect(clean(liveMarker(SHAMPOO))).toContain(
-          `<a data-product="${SHAMPOO}" data-price="live" href="/ru/products/${SHAMPOO}">`,
-        );
-      });
+  it("writes the attributes in the one order the renderers match on", () => {
+    expect(clean(liveMarker(SHAMPOO))).toContain(
+      `<a data-product="${SHAMPOO}" data-price="live" href="/ru/products/${SHAMPOO}">`,
+    );
+  });
 
-      it("leaves a marker of the old shape exactly as it is", () => {
-        const out = clean(oldMarker(SHAMPOO));
-        expect(out).toContain("Bio Botanical Shampoo — от 12,90 €");
-        expect(out).not.toContain("data-price");
-      });
+  it("leaves a marker of the old shape exactly as it is", () => {
+    const out = clean(oldMarker(SHAMPOO));
+    expect(out).toContain("Bio Botanical Shampoo — от 12,90 €");
+    expect(out).not.toContain("data-price");
+  });
 
-      /* The assistant's marker is stored exactly as it is written, which is
-         what lets an article published before 18.09.2026 come right at the
-         next render with nothing migrated: the id is the whole card, and the
-         href, the words and the price are the renderer's. */
-      it("stores the assistant's bare marker as the bare id it is", () => {
-        expect(clean(bareMarker(SHAMPOO))).toBe(`<p><a data-product="${SHAMPOO}"></a></p>`);
-      });
+  /* The assistant's marker is stored exactly as it is written, which is
+     what lets an article published before 18.09.2026 come right at the
+     next render with nothing migrated: the id is the whole card, and the
+     href, the words and the price are the renderer's. */
+  it("stores the assistant's bare marker as the bare id it is", () => {
+    expect(clean(bareMarker(SHAMPOO))).toBe(`<p><a data-product="${SHAMPOO}"></a></p>`);
+  });
 
-      it("is a closed list of one word, and means nothing without a product", () => {
-        for (const v of ["yes", "lively", "1", "живая", "javascript:alert(1)"]) {
-          const out = clean(`<p><a data-product="${SHAMPOO}" data-price="${v}" href="/x/">x</a></p>`);
-          expect(out, v).not.toContain("data-price");
-        }
-        // an ordinary link may not carry it: it is not an attribute for links
-        expect(clean('<p><a data-price="live" href="https://example.com/">сайт</a></p>')).not.toContain("data-price");
-      });
-    });
-  }
+  it("is a closed list of one word, and means nothing without a product", () => {
+    for (const v of ["yes", "lively", "1", "живая", "javascript:alert(1)"]) {
+      const out = clean(`<p><a data-product="${SHAMPOO}" data-price="${v}" href="/x/">x</a></p>`);
+      expect(out, v).not.toContain("data-price");
+    }
+    // an ordinary link may not carry it: it is not an attribute for links
+    expect(clean('<p><a data-price="live" href="https://example.com/">сайт</a></p>')).not.toContain("data-price");
+  });
 
   it("LIVE is case-insensitive on the way in and normalised on the way out", () => {
     expect(sanitizeHtml(`<a data-product="${SHAMPOO}" data-price="LIVE" href="/x/">x</a>`))

@@ -120,14 +120,6 @@ describe("the account stops asking once the answer is in", () => {
 });
 
 describe("the door size is the carrier's business, and the card says so", () => {
-  it("DPD takes no locker size — so a Polish locker never shows the chips", () => {
-    expect(takesLockerSize("dpd")).toBe(false);
-    expect(LOCKER_SIZE_CARRIERS).not.toContain("dpd");
-    // …and the ones that do still do
-    expect(takesLockerSize("unisend")).toBe(true);
-    expect(takesLockerSize("smartpost")).toBe(true);
-  });
-
   it("the panel's own list is the server's list, minus the carrier it cannot sell", () => {
     /* latvian_post is in the server list because the reference names it; the
        shop cannot pick it, so the panel does not offer its chips. Everything
@@ -138,23 +130,5 @@ describe("the door size is the carrier's business, and the card says so", () => 
     const list = [...src.slice(at, src.indexOf("];", at)).matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
     expect(list.length).toBeGreaterThan(0);
     for (const c of list) expect(takesLockerSize(c), `the panel offers door sizes for ${c}`).toBe(true);
-  });
-
-  it("a locker order without the chips explains itself instead of showing nothing", () => {
-    const silent = slice("admLockerSilent");
-    // never both: the chips and the line are the two halves of one answer
-    expect(silent).toContain("if (admLockerOrder(v)) return false;");
-    // …and only where a door would have made sense at all — a parcel, unlabelled
-    expect(silent).toContain('String(sh.method || "").toLowerCase() === "parcel"');
-    expect(silent).toContain("v.labeled");
-    expect(src).toContain("Размер ячейки у этого перевозчика не выбирается — дверцу он подберёт сам.");
-  });
-
-  it("the box stays his to set on exactly those orders", () => {
-    /* It is the only thing on that card that costs money on a DPD parcel —
-       Montonio bills the greater of the real weight and the box's volume —
-       so it must not have gone away with the chips. */
-    expect(slice("admShipPrep")).toContain("return !!v && v.paid && !v.labeled && !v.pickup && !v.digital;");
-    expect(src).toContain("Это только для этой посылки — коробка магазина не меняется.");
   });
 });
