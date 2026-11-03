@@ -33,7 +33,7 @@ async function signIn(page: Page, email: string, seg = ""): Promise<void> {
 test.describe("account — my data and deleting the account", () => {
   test.use({ extraHTTPHeaders: ipHeaders(252) });
 
-  test("the export downloads this account's file; a paid order still on its way blocks the deletion", async ({ page }) => {
+  test("the export downloads this account's file; a paid order still on its way blocks the deletion", async ({ page, browserName }) => {
     const email = freshEmail("acct-privacy-open");
     // one paid order: «оплачен», not delivered — the deletion must wait for it
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
@@ -47,13 +47,27 @@ test.describe("account — my data and deleting the account", () => {
     await signIn(page, email);
     await expect(page.getByRole("heading", { name: "Данные и аккаунт" })).toBeVisible();
 
-    // «Скачать мои данные» — a plain link; the browser downloads the file with the cookie
-    const [download] = await Promise.all([
-      page.waitForEvent("download"),
-      page.getByRole("link", { name: "Скачать мои данные" }).click(),
-    ]);
-    expect(download.suggestedFilename()).toMatch(/^rempire-mydata-\d{4}-\d{2}-\d{2}\.json$/);
-    const file = JSON.parse(readFileSync(await download.path(), "utf8")) as {
+    // «Скачать мои данные» — a plain link; the browser downloads the file with the cookie.
+    // Playwright's WebKit on Linux (CI's mobile-safari job, 03.11.2026) draws a JSON
+    // attachment as a page instead of downloading it — WebKit on Windows and Chromium
+    // download it — so there the same link is fetched with the page's cookie and the
+    // answer's download headers are read instead of a download event.
+    const link = page.getByRole("link", { name: "Скачать мои данные" });
+    let name: string, text: string;
+    if (browserName === "webkit" && process.platform === "linux") {
+      const res = await page.request.get((await link.getAttribute("href"))!);
+      expect(res.status()).toBe(200);
+      const disposition = res.headers()["content-disposition"] ?? "";
+      expect(disposition, "the export is not sent as a download").toMatch(/^attachment; filename="[^"]+"$/);
+      name = /filename="([^"]+)"/.exec(disposition)![1];
+      text = await res.text();
+    } else {
+      const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+      name = download.suggestedFilename();
+      text = readFileSync(await download.path(), "utf8");
+    }
+    expect(name).toMatch(/^rempire-mydata-\d{4}-\d{2}-\d{2}\.json$/);
+    const file = JSON.parse(text) as {
       email: string;
       orders: Array<{ number: string; status: string }>;
     };
