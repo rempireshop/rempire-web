@@ -250,13 +250,27 @@ export function cheapestPrice(prices, fallback) {
  * sold in ONE named size, whose single price is the file's own `price`, and
  * reading that as a ladder would quietly out-vote the owner's «Цена» in
  * «Товары» and put the pre-override number under an article.
+ *
+ * «Цена» alone on a product the file sells in several sizes moves every
+ * size by the same amount — each keeps its premium over the base — because
+ * that is what the till charges and the feed lists (rungsOf() in
+ * src/lib/merchant-feed.ts, priceItems() in src/lib/orders.ts) and what the
+ * shop page shows. Until 04.11.2026 this left the file's ladder standing, so
+ * a static page and an article card said «от 7,90 €» for a spray the till
+ * sold from 8 €. A saved ladder of ONE rung with no size is «one volume»:
+ * one price, no sizes, the file's ladder silenced (the same exception).
  */
 export function overriddenPrice(filePrice, fileLadder, row) {
-  const own = row && row.sizes && row.sizes.length ? row.sizes.map(r => r.price) : null;
-  const file = Array.isArray(fileLadder) && fileLadder.length > 1 ? fileLadder : [];
-  const ladder = own || file;
+  const rungs = row && row.sizes && row.sizes.length ? row.sizes : null;
+  const single = !!rungs && rungs.length === 1 && !rungs[0].size;
   const base = row && row.price != null ? row.price : filePrice;
-  return ladder.length ? cheapestPrice(ladder, base) : { price: base, from: false };
+  if (rungs && !single) return cheapestPrice(rungs.map(r => r.price), base);
+  const file = !single && Array.isArray(fileLadder) && fileLadder.length > 1 ? fileLadder : [];
+  if (!file.length) return { price: base, from: false };
+  const moved = row && row.price != null
+    ? file.map(v => (Number.isFinite(Number(v)) ? round2(row.price + (Number(v) - filePrice)) : row.price))
+    : file;
+  return cheapestPrice(moved, base);
 }
 
 /* ---------- the product card INSIDE an article ---------------------------

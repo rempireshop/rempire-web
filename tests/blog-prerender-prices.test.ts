@@ -57,6 +57,18 @@ describe("overriddenPrice — what a catalogue product costs today", () => {
     expect(overriddenPrice(12, [12], undefined)).toEqual({ price: 12, from: false });
   });
 
+  /* What the till charges: «Цена» alone moves every size by the same amount
+     (rungsOf() in src/lib/merchant-feed.ts) — System 4 Chitosan, 7,90/13,90 €
+     in the file and «Цена» 8, sells at 8/14 €. A saved ladder of one rung
+     with no size is «one volume»: one price, and the file's ladder is out. */
+  it("moves the file's ladder with a lone «Цена», as the till does", () => {
+    expect(overriddenPrice(7.9, [7.9, 13.9], { price: 8, sizes: null })).toEqual({ price: 8, from: true });
+    expect(overriddenPrice(16, [16, 26], { price: 17, sizes: null })).toEqual({ price: 17, from: true });
+    // a lower «Цена» moves it down the same way
+    expect(overriddenPrice(9, [9, 16, 25], { price: 7.5, sizes: null })).toEqual({ price: 7.5, from: true });
+    expect(overriddenPrice(9, [9, 16, 25], { price: 14, sizes: [{ size: "", price: 14 }] })).toEqual({ price: 14, from: false });
+  });
+
   /* «от» means «there is more than one price», not «there is a ladder». */
   it("says «от» only when the prices really differ", () => {
     expect(cheapestPrice([15, 15, 15], 9).from).toBe(false);
@@ -192,15 +204,14 @@ describe("tools/prerender-shop2.mjs blogShelfProduct()", () => {
     expect(solo).toMatchObject({ price: 14, priceFrom: false });
   });
 
-  /* `price` alone is the OLD, single-value override and it speaks only where
-     there is no ladder to speak instead: a product the file sells in three
-     sizes shows «от 9 €» until the owner saves a whole ladder for it, since
-     `price` says nothing about the other two rungs. The same rule the
-     request-time page has had since 17.09.2026 — the point of sharing
-     overriddenPrice() is that this is one decision, not two. */
-  it("leaves the file's ladder standing when the owner has only set «Цена»", () => {
+  /* `price` alone on a product the file sells in three sizes moves the whole
+     ladder: each size keeps its premium over the base, which is what the till
+     charges, the feed lists and the shop page shows (rungsOf() in
+     src/lib/merchant-feed.ts). Until 04.11.2026 the ladder stood still here,
+     so a card said «от 9 €» for a shampoo the till sold from 21,40 €. */
+  it("moves the file's whole ladder when the owner has only set «Цена»", () => {
     expect(shelfProduct(CAT, { [SHAMPOO]: row({ price: 21.4 }) }, SHAMPOO))
-      .toMatchObject({ price: 9, priceFrom: true });
+      .toMatchObject({ price: 21.4, priceFrom: true });
   });
 
   it("takes the owner's whole ladder when he has saved one", () => {
