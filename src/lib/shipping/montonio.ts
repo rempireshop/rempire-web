@@ -1417,6 +1417,79 @@ export function bookingRefusedForSure(err: unknown): boolean {
   return s >= 400 && s < 500 && s !== 408 && s !== 409;
 }
 
+/** «250 мл» → «250ml», «7,5 мл» → «7-5ml» — the size half of a Merchant Center id (sizeSlug, src/lib/merchant-feed.ts). */
+function skuSize(label: string): string {
+  return String(label)
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/мл/g, "ml")
+    .replace(/г/g, "g")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * The `products` array of `POST /shipments`: one row per SKU, never two.
+ *
+ * Montonio files these rows into the store's own product list, keyed by SKU,
+ * and refuses the WHOLE shipment when one request carries a SKU twice:
+ * R-100115 (04.11.2026) held Bio Botanical Shampoo in 75 мл and in 500 мл, the
+ * SKU was the product id on both lines, and every press of «Создать этикетку»
+ * came back `400 product_upsert_failure` with that SKU listed twice. So a
+ * product bought in more than one size gets one SKU per size, in the form the
+ * Merchant Center feed already uses («system-4-bio-botanical-shampoo_75ml»);
+ * a product bought in one size keeps the bare id it has always been sent
+ * under. Two lines that still share a SKU (the same size twice) are one row
+ * with the quantities added.
+ *
+ * Every bound here is Montonio's own (reference § Create Shipment →
+ * products): sku 100, name 255, quantity «Max value is 999». The quantity
+ * ceiling was missing until 18.09.2026, and it is not cosmetic — one line
+ * over 999 makes Montonio answer 400 and **the whole shipment fails to
+ * book**. This array is pick-list and tracking-page metadata, not the
+ * carrier's declaration, so an absurd count losing its exact value is much
+ * cheaper than the parcel losing its booking.
+ */
+export function shipmentProducts(order: Pick<Order, "items" | "currency">): Array<{
+  sku: string;
+  name: string;
+  quantity: number;
+  price: number;
+  currency: string;
+}> {
+  const lines = (order.items ?? []).filter((i) => i.kind !== "gift");
+  const sizes = new Map<string, Set<string>>();
+  for (const i of lines) {
+    const id = String(i.id);
+    if (!sizes.has(id)) sizes.set(id, new Set());
+    sizes.get(id)!.add(String(i.variant ?? "").trim());
+  }
+  const rows = new Map<string, { sku: string; name: string; quantity: number; price: number; currency: string }>();
+  for (const i of lines) {
+    const id = String(i.id);
+    const size = String(i.variant ?? "").trim();
+    const several = (sizes.get(id)?.size ?? 0) > 1;
+    const slug = several ? skuSize(size) : "";
+    const sku = slug ? `${id.slice(0, Math.max(1, 99 - slug.length))}_${slug}`.slice(0, 100) : id.slice(0, 100);
+    const qty = Math.max(1, Math.round(Number(i.qty) || 1));
+    const had = rows.get(sku);
+    if (had) {
+      had.quantity = Math.min(999, had.quantity + qty);
+      continue;
+    }
+    if (rows.size >= 100) continue;
+    const title = String(i.title || i.id);
+    rows.set(sku, {
+      sku,
+      name: (several && size ? `${title}, ${size}` : title).slice(0, 255),
+      quantity: Math.min(999, qty),
+      price: round2(Number(i.price) || 0),
+      currency: order.currency || "EUR",
+    });
+  }
+  return [...rows.values()];
+}
+
 /**
  * Register one order with a carrier through Montonio.
  *
@@ -1468,16 +1541,7 @@ export async function createMontonioShipment(
      book**. This array is pick-list and tracking-page metadata, not the
      carrier's declaration, so an absurd count losing its exact value is much
      cheaper than the parcel losing its booking. */
-  const products = (order.items ?? [])
-    .filter((i) => i.kind !== "gift")
-    .slice(0, 100)
-    .map((i) => ({
-      sku: String(i.id).slice(0, 100),
-      name: String(i.title || i.id).slice(0, 255),
-      quantity: Math.min(999, Math.max(1, Math.round(Number(i.qty) || 1))),
-      price: round2(Number(i.price) || 0),
-      currency: order.currency || "EUR",
-    }));
+  const products = shipmentProducts(order);
 
   const payload: Record<string, unknown> = {
     merchantReference: order.number,

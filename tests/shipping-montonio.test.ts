@@ -670,6 +670,49 @@ describe("creating a shipment", () => {
     ]);
   });
 
+  /**
+   * R-100115, 04.11.2026: one product in two sizes. Both lines went out under
+   * the product id, and Montonio refused the whole shipment —
+   * `400 product_upsert_failure`, the SKU listed twice — on every press.
+   */
+  it("never sends one SKU twice: two sizes of one product get a SKU each", async () => {
+    withKeys();
+    const calls = stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+
+    await createMontonioShipment({
+      ...order,
+      items: [
+        { id: "system-4-bio-botanical-shampoo", kind: "product", title: "Bio Botanical Shampoo", variant: "75 мл", qty: 1, price: 9, sum: 9 },
+        { id: "system-4-bio-botanical-shampoo", kind: "product", title: "Bio Botanical Shampoo", variant: "500 мл", qty: 1, price: 25, sum: 25 },
+        { id: "system-4-bio-botanical-vital-cure", kind: "product", title: "Bio Botanical Vital Cure", variant: "500 мл", qty: 1, price: 26.5, sum: 26.5 },
+      ],
+    } as typeof order);
+
+    const body = bookingBody(calls);
+    expect(body.products).toEqual([
+      { sku: "system-4-bio-botanical-shampoo_75ml", name: "Bio Botanical Shampoo, 75 мл", quantity: 1, price: 9, currency: "EUR" },
+      { sku: "system-4-bio-botanical-shampoo_500ml", name: "Bio Botanical Shampoo, 500 мл", quantity: 1, price: 25, currency: "EUR" },
+      // one size only: the bare id it has always been sent under
+      { sku: "system-4-bio-botanical-vital-cure", name: "Bio Botanical Vital Cure", quantity: 1, price: 26.5, currency: "EUR" },
+    ]);
+    const skus = (body.products as Array<{ sku: string }>).map((p) => p.sku);
+    expect(new Set(skus).size).toBe(skus.length);
+  });
+
+  it("two lines of the same size are one row with the quantities added", async () => {
+    withKeys();
+    const calls = stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+
+    await createMontonioShipment({
+      ...order,
+      items: [order.items[0], { ...order.items[0], qty: 3, sum: 33 }],
+    } as typeof order);
+
+    expect(bookingBody(calls).products).toEqual([
+      { sku: "free-hold", name: "Free.Hold", quantity: 5, price: 11, currency: "EUR" },
+    ]);
+  });
+
   it("resolves a courier service and sends the street address", async () => {
     withKeys();
     const calls = stubFetch([

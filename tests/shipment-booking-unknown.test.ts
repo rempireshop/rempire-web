@@ -360,6 +360,37 @@ describe("«Создать этикетку» when Montonio does not answer in t
     expect(bookings(calls)).toBe(2);
   });
 
+  /* R-100115, 04.11.2026: Montonio's exact answer. A refused BOOKING leaves no
+     shipment behind, so the sentence must not say «the shipment is there,
+     press «Отправить заново»» — it was pressed some twenty-five times. A
+     refusal nobody has words for is quoted in Montonio's own. */
+  it("a refusal the shop has no sentence for is quoted, never «press again, the shipment is there»", async () => {
+    const id = await paidOrder();
+    montonio({
+      create: () =>
+        json(
+          {
+            error: "product_upsert_failure",
+            message: "product_upsert_failure",
+            statusCode: 400,
+            sku: ["system-4-bio-botanical-shampoo", "system-4-bio-botanical-shampoo"],
+            barcode: [],
+          },
+          400,
+        ),
+    });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+
+    const refused = await POST(press(id));
+    expect(refused.status).toBe(502);
+    const body = await refused.json();
+    expect(body).toMatchObject({ ok: false, error: "rejected", reason: "unknown" });
+    expect(body.messages.RU).toContain("product_upsert_failure");
+    expect(body.messages.RU).not.toMatch(/Отправить заново/);
+    expect(body.messages.EN).not.toMatch(/one shipment at Montonio/);
+    expect((await montonioOf(id)).bookingAt).toBeNull();
+  });
+
   it("a 5xx is not a refusal either — the parcel may exist, so the next press waits", async () => {
     const id = await paidOrder();
     const calls = montonio({ create: () => json({ message: "Internal server error" }, 500) });

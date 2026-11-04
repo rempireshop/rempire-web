@@ -98,6 +98,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import {
+  readShipmentRefusal,
   shipmentBookingUnknown,
   shipmentRegistrationFailed,
   type BookingUnknownReason,
@@ -250,8 +251,14 @@ function montonioFailure(err: unknown, what: "create" | "repair"): Response {
        `rejected` carries «400 {…}» from the transport. The codes the panel
        already has a sentence for (not_shippable, point_unresolved,
        no_courier_service, not_configured) keep theirs: they are ours, they
-       are right, and two sources for one message is how they drift. */
-    const reading = err.code === "rejected" ? shipmentRegistrationFailed(err.detail) : null;
+       are right, and two sources for one message is how they drift.
+       readShipmentRefusal, not shipmentRegistrationFailed: a refused BOOKING
+       left no shipment at Montonio, and the latter turns every refusal it
+       cannot name into «the shipment is there, press «Отправить заново»» —
+       R-100115 (04.11.2026) was pressed some twenty-five times against a
+       `400 product_upsert_failure` that no press could change. A refusal
+       nobody has a sentence for is quoted in Montonio's own words. */
+    const reading = err.code === "rejected" ? readShipmentRefusal(err.detail) : null;
     return Response.json(
       {
         ok: false,
