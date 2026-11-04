@@ -1109,10 +1109,16 @@ function productPage(p, lang) {
   /* an Estonian or English pair with Russian in it — saved before the panel
      refused one (29.10.2026) — is not this page's: the generated title wins */
   const ownSeo = code !== "RU" && /[\u0400-\u04FF]/.test((ownPair.title || "") + (ownPair.desc || "")) ? {} : ownPair;
+  /* The price the shop sells it at: the owner's «Цена» over the file's, the
+     same overriddenPrice() the article shelves use. The file's own price
+     stood here until 04.11.2026, so 61 of 217 pages put an old price into
+     the title and the description while the page's offers said the new one
+     (Paul Mitchell Curl: 33 € in the snippet, 25 € on sale). */
+  const sold = overriddenPrice(p.price, p.prices, PRODUCT_OVERRIDES[p.id]);
   const spec = productSpec({
     base: BASE, lang,
     id: p.id, cat: p.cat, catName, brand: p.brand, name,
-    price: p.price, priceFrom: p.priceFrom, stock: p.stock,
+    price: sold.price, priceFrom: sold.from, stock: p.stock,
     seoTitle: ownSeo.title || (code === "EN" && p.seo && p.seo.t ? p.seo.t : ""),
     seoDesc: ownSeo.desc || "",
     body: code === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p, code),

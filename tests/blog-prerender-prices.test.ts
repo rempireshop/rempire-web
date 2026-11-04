@@ -225,6 +225,20 @@ describe("tools/prerender-shop2.mjs blogShelfProduct()", () => {
   });
 });
 
+/* A product's own page puts its price into the Google title and description
+   (productSpec(), since 04.11.2026 also after the owner's own pair). It handed
+   productSpec() the FILE's price, so 61 of 217 static pages showed an old one
+   in the snippet while the page's offers said the owner's — Paul Mitchell
+   Curl: 33 € in the title, 25 € on sale. */
+describe("tools/prerender-shop2.mjs productPage()", () => {
+  it("prices the head with the owner's price, the rule the shelves use", () => {
+    const body = slice("productPage");
+    expect(body).toContain("const sold = overriddenPrice(p.price, p.prices, PRODUCT_OVERRIDES[p.id]);");
+    expect(body).toMatch(/productSpec\(\{[\s\S]*?price: sold\.price, priceFrom: sold\.from,/);
+    expect(body).not.toContain("price: p.price, priceFrom: p.priceFrom");
+  });
+});
+
 /**
  * blogShelfProduct() says «no card» for two quite different reasons, and a
  * card INSIDE the text has to tell them apart: one of them means the address
