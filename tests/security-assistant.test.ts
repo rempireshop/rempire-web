@@ -20,6 +20,8 @@ import { sanitizeAction } from "@/app/api/assistant/actions";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createCustomProduct } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
+import { seoMetaWithPrice, seoPriceText } from "@/lib/seo-copy.mjs";
+import { DESC_MAX, esc } from "@/lib/seo-head.mjs";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const ORIGIN = "https://rempireshop.com";
@@ -272,8 +274,10 @@ describe("the per-language Google pair — capped on the way in, escaped on the 
 
     const { GET: page } = await import("@/app/products/[id]/route");
     const html = await (await page(new Request(`${ORIGIN}/shop2/en/p/${p.id}/`), ctx(p.id))).text();
-    expect(title(html)).toBe("&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt; — REMPIRE");
-    expect(meta(html, "description")).toBe("&quot;&gt;&lt;script&gt;alert(2)&lt;/script&gt;");
+    // the owner's title, then the price (since 04.11.2026)
+    expect(title(html)).toBe("&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt; · " + seoPriceText(9, false, "EN"));
+    expect(meta(html, "description")).toBe(esc(seoMetaWithPrice('"><script>alert(2)</script>', seoPriceText(9, false, "EN"), true, "EN", DESC_MAX)));
+    expect(meta(html, "description").startsWith("&quot;&gt;&lt;script&gt;alert(2)&lt;/script&gt; · ")).toBe(true);
     expect(meta(html, "og:description")).toBe(meta(html, "description"));
     expect(html).not.toContain("<script>alert");
     expect((html.match(/<\/title>/g) || []).length).toBe(1);

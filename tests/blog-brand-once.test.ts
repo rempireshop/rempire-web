@@ -63,7 +63,9 @@ describe("fitTitle — the site's name once, in the server's copy and in app.js'
         stock: "in", body: "<p>Шампунь.</p>", image: "", imageUrls: [],
         seoTitle: "System 4 Bio Botanical Shampoo — REMPIRE", seoDesc: "",
       });
-      expect(count(spec.title), `${lang.code}: ${spec.title}`).toBe(1);
+      // never twice; since 04.11.2026 the price takes the brand's place where it fits
+      expect(count(spec.title), `${lang.code}: ${spec.title}`).toBeLessThanOrEqual(1);
+      expect(spec.title.startsWith("System 4 Bio Botanical Shampoo "), `${lang.code}: ${spec.title}`).toBe(true);
     }
   });
 

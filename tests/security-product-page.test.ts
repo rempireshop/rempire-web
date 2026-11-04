@@ -24,7 +24,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
-import { esc, headBlock } from "@/lib/seo-head.mjs";
+import { seoMetaWithPrice, seoPriceText } from "@/lib/seo-copy.mjs";
+import { DESC_MAX, esc, headBlock } from "@/lib/seo-head.mjs";
 import catalogueMin from "@/data/catalogue.min.json";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
@@ -94,9 +95,11 @@ describe("owner-typed text on a custom product's page", () => {
       // one <title>, ended where the page ends it, the owner's text inside as text
       expect((html.match(/<title>/g) || []).length, seg).toBe(1);
       expect((html.match(/<\/title>/g) || []).length, seg).toBe(1);
-      expect(title(html), seg).toBe(esc("</title><script>alert(4)</script> — REMPIRE"));
+      // the owner's title, then the price (since 04.11.2026), all of it as text
+      expect(title(html), seg).toBe(esc("</title><script>alert(4)</script> · " + seoPriceText(9, false, seg === "en" ? "EN" : "RU")));
       // the meta description closes its own quote, not the owner's
-      expect(meta(html, "description"), seg).toBe(esc('"><script>alert(5)</script>'));
+      const L = seg === "en" ? "EN" : "RU";
+      expect(meta(html, "description"), seg).toBe(esc(seoMetaWithPrice('"><script>alert(5)</script>', seoPriceText(9, false, L), true, L, DESC_MAX)));
       expect(meta(html, "og:title"), seg).toBe(title(html));
 
       // the body: h1, the size list, the description paragraphs
