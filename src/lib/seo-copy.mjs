@@ -1131,7 +1131,10 @@
   function seoMetaWithPrice(meta, priceText, inStock, lang, max) {
     var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
     var base = String(meta).replace(/\.$/, "");
-    if (!priceText) return meta;
+    // a line that names a price already («… на 25 €, 50 €») gets no second
+    // one, and a Russian line standing in on another language's page gets no
+    // Estonian or English tail glued to it
+    if (!priceText || /€/.test(base) || seoForeign(base, lang)) return meta;
     var both = base + " · " + priceText + (inStock ? " · " + w.inStock : "");
     if (both.length <= max) return both;
     var price = base + " · " + priceText;
@@ -1156,6 +1159,31 @@
     var full = core + " · " + priceText;
     if (priceText && full.length <= SEO_TITLE_MAX) return full;
     return seoClip(core, SEO_TITLE_MAX);
+  }
+
+  /**
+   * A title somebody wrote for one product — the owner's «Для Google» pair,
+   * the panel's AI fill, the connector, or the catalogue's old English pair —
+   * with the price after it when it still fits, the same « · от 9 €» every
+   * generated title carries (Dim, 04.11.2026). Until then a written title was
+   * left exactly as written, and since the panel and the connector are told
+   * to leave the price out, 185 of 217 products went to Google as «… —
+   * REMPIRE» with no price at all, while the 30 nobody had written for showed
+   * one. `core` has the site's name taken off already (dropBrand()). "" when
+   * the price does not fit, the title names one already, or it is a Russian
+   * title standing in on an Estonian or English page: the caller then keeps
+   * the title as written.
+   */
+  function seoOwnTitle(core, priceText, lang) {
+    if (!priceText || /€/.test(core) || seoForeign(core, lang)) return "";
+    var full = core + " · " + priceText;
+    return full.length <= SEO_TITLE_MAX ? full : "";
+  }
+
+  /** Russian words on a page that is not Russian — the owner's Russian pair
+      is the fallback wherever he wrote none in the page's language. */
+  function seoForeign(s, lang) {
+    return lang !== "RU" && /[Ѐ-ӿ]/.test(String(s));
   }
 
   /**
@@ -1219,7 +1247,7 @@
 
 export {
   SEO_TITLE_MAX, SEO_DESC_MAX,
-  seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoHead,
+  seoCopy, seoEur, seoClip, seoFreeFrom, seoHouse, seoBrandIntro, seoSub, seoPriceText, seoProductCore, seoProductTitle, seoOwnTitle, seoHead,
   seoOwnSet, seoOwn, seoCatIntro, seoCatLines, seoStandard,
   seoProductTail, seoMetaWithPrice,
   seoSnippetText, seoLead, seoProductMeta,

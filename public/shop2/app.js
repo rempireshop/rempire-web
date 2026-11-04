@@ -13501,8 +13501,16 @@
       c: ["hair", "styling"] },
     { q: /секущ|кончик|otste[ ]lohen|lohenev|split[ ]end/,
       t: /секущ|кончик|split end|otste|lohenev/g, c: ["hair", "styling"] },
-    { q: /зуд|чешет|раздражен[а-я]*[ ]кож|sugele|arritunud|itch|irritated[ ]scalp/,
-      t: /зуд|раздражен|успокаива|чувствительн|itch|irritat|soothing|sensitive|sugele|rahustav|tundlik/g,
+    /* «itch» only at the start of a word, in the query and in the texts
+       alike: unanchored it sat inside «Mitchell», so every Paul Mitchell
+       query was read as an itchy scalp and widened with 48 soothing balms,
+       shaving gels and toners — «paul mitchell tea tree» gave 52 products,
+       the after-shave among them (Renat, 03.11.2026); and a Paul Mitchell
+       text scored an itch hit for its own brand name. The other stems stay
+       as they were: an Estonian compound carries them mid-word
+       («sügelev» → «sugele», «peanahasügelus»). */
+    { q: /зуд|чешет|раздражен[а-я]*[ ]кож|sugele|arritunud|[ ]itch|irritated[ ]scalp/,
+      t: /зуд|раздражен|успокаива|чувствительн|[ ]itch|irritat|soothing|sensitive|sugele|rahustav|tundlik/g,
       c: ["hair", "face", "beard"] },
     { q: /окраш|краш[её]н|varvit|colou?r[ ](treated|protect)|colou?red[ ]hair|блонд|blond|осветл/,
       t: /окраш|цвет волос|блонд|осветл|varvitud|varv|colour|color|blonde|toning/g,
@@ -53419,7 +53427,10 @@
   function seoMetaWithPrice(meta, priceText, inStock, lang, max) {
     var w = seoCopy().productTail[lang] || seoCopy().productTail.EN;
     var base = String(meta).replace(/\.$/, "");
-    if (!priceText) return meta;
+    // a line that names a price already («… на 25 €, 50 €») gets no second
+    // one, and a Russian line standing in on another language's page gets no
+    // Estonian or English tail glued to it
+    if (!priceText || /€/.test(base) || seoForeign(base, lang)) return meta;
     var both = base + " · " + priceText + (inStock ? " · " + w.inStock : "");
     if (both.length <= max) return both;
     var price = base + " · " + priceText;
@@ -53444,6 +53455,31 @@
     var full = core + " · " + priceText;
     if (priceText && full.length <= SEO_TITLE_MAX) return full;
     return seoClip(core, SEO_TITLE_MAX);
+  }
+
+  /**
+   * A title somebody wrote for one product — the owner's «Для Google» pair,
+   * the panel's AI fill, the connector, or the catalogue's old English pair —
+   * with the price after it when it still fits, the same « · от 9 €» every
+   * generated title carries (Dim, 04.11.2026). Until then a written title was
+   * left exactly as written, and since the panel and the connector are told
+   * to leave the price out, 185 of 217 products went to Google as «… —
+   * REMPIRE» with no price at all, while the 30 nobody had written for showed
+   * one. `core` has the site's name taken off already (dropBrand()). "" when
+   * the price does not fit, the title names one already, or it is a Russian
+   * title standing in on an Estonian or English page: the caller then keeps
+   * the title as written.
+   */
+  function seoOwnTitle(core, priceText, lang) {
+    if (!priceText || /€/.test(core) || seoForeign(core, lang)) return "";
+    var full = core + " · " + priceText;
+    return full.length <= SEO_TITLE_MAX ? full : "";
+  }
+
+  /** Russian words on a page that is not Russian — the owner's Russian pair
+      is the fallback wherever he wrote none in the page's language. */
+  function seoForeign(s, lang) {
+    return lang !== "RU" && /[Ѐ-ӿ]/.test(String(s));
   }
 
   /**
@@ -53654,9 +53690,12 @@
          the catalogue's own English pair still serves the EN page when he
          wrote nothing; everything else is built from the product. */
       var so = seoFor(p, S.lang);
-      if (so && so.t) t = fitTitle(so.t, "");
-      else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
-      /* A pair somebody wrote is left exactly as written; then the shop's
+      /* …keeping every word it has, with the price after it where it fits
+         (seoOwnTitle(), Dim 04.11.2026 — the same line productSpec() writes) */
+      var ownT = so && so.t ? so.t : S.lang === "EN" && p.seo && p.seo.t ? p.seo.t : "";
+      if (ownT) t = seoOwnTitle(dropBrand(ownT), priceText, S.lang) || fitTitle(ownT, "");
+      /* A pair somebody wrote keeps every word, the price and «in stock»
+         after it where they fit (seoMetaWithPrice(), as above); then the shop's
          own hand-written line for the products people search for
          (seoProductMeta(), src/lib/seo-copy.mjs); a description cut from the
          product text gets the shouted heading dropped, whole sentences and
@@ -53667,7 +53706,7 @@
          text on the English page — the body the prerender cuts it from too;
          it used to go into the tag raw, markup and all. */
       var handWritten = seoProductMeta(p.id, S.lang);
-      d = so && so.d ? so.d
+      d = so && so.d ? seoMetaWithPrice(seoClip(so.d, DESC_MAX), priceText, !pGoneSeo, S.lang, DESC_MAX)
         : handWritten ? seoMetaWithPrice(handWritten, priceText, !pGoneSeo, S.lang, DESC_MAX)
         : descFromText(seoSnippetText(S.lang === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p)),
           seoProductTail(priceText, !pGoneSeo, S.lang, seoCtx().rules));

@@ -17,7 +17,7 @@
    those once each (docs/seo.md, "The three noindex layers"). */
 
 import { publicPath } from "./shop-paths.mjs";
-import { seoHomeIntro, seoInfoTail, seoLead, seoMetaWithPrice, seoPriceText, seoProductCore, seoProductMeta, seoProductTail, seoProductTitle, seoSetsDesc, seoSnippetText } from "./seo-copy.mjs";
+import { seoHomeIntro, seoInfoTail, seoLead, seoMetaWithPrice, seoPriceText, seoProductCore, seoProductMeta, seoProductTail, seoProductTitle, seoOwnTitle, seoSetsDesc, seoSnippetText } from "./seo-copy.mjs";
 
 /* `seg` is the language's path prefix without its slash. Since 08.10.2026
    English is the unprefixed one — Shopify's scheme, src/lib/shop-paths.mjs —
@@ -1155,20 +1155,25 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
      §1A, src/lib/seo-copy.mjs — the same two calls setHead() makes). */
   const priceText = seoPriceText(price, priceFrom, lang.code);
   let title = seoProductTitle(seoProductCore(id, core, lang.code), priceText);
-  if (seoTitle) title = fitTitle(seoTitle, "");
+  /* a written title keeps every word, and the price follows where it fits
+     (seoOwnTitle(), Dim 04.11.2026) — otherwise it stays as written */
+  if (seoTitle) title = seoOwnTitle(dropBrand(seoTitle), priceText, lang.code) || fitTitle(seoTitle, "");
 
   const text = textForSnippet(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
   const inStock = stock !== "out";
-  /* An owner's or the assistant's own pair is deliberate and is left alone —
-     no price is appended to a sentence somebody wrote on purpose. After it,
+  /* An owner's or the assistant's own pair keeps every word it has; since
+     04.11.2026 (Dim) the price and «in stock» follow it where they still fit,
+     as they follow every other description — the panel and the connector
+     are told to leave the price out, so without this 185 of 217 products
+     reached Google with none (seoMetaWithPrice()). After it,
      the shop's own hand-written line for the products people search for
      (seoProductMeta(), src/lib/seo-copy.mjs — every word kept, the price and
      «in stock» after it where they fit), and only then a description cut
      from the product's text with the whole tail (seoProductTail()). */
   const handWritten = seoProductMeta(id, lang.code);
   const desc = seoDesc
-    ? clip(seoDesc, DESC_MAX)
+    ? seoMetaWithPrice(clip(seoDesc, DESC_MAX), priceText, inStock, lang.code, DESC_MAX)
     : handWritten
       ? seoMetaWithPrice(handWritten, priceText, inStock, lang.code, DESC_MAX)
       : text

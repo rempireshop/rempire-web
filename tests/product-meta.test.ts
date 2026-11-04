@@ -168,9 +168,10 @@ describe("who wins", () => {
   });
 
   it("the owner's own description still wins over it", () => {
-    expect(specFor("system-4-special-shampoo-1", "RU", "Свой текст владельца.").desc).toBe("Свой текст владельца.");
+    // every word of it, and the price after it (Dim, 04.11.2026)
+    expect(specFor("system-4-special-shampoo-1", "RU", "Свой текст владельца.").desc).toBe("Свой текст владельца · от 7,90 € · в наличии");
     // app.js: the owner's pair first, then the hand-written line, then the text
-    expect(APP).toMatch(/d = so && so\.d \? so\.d\s+: handWritten \? seoMetaWithPrice\(handWritten, [^\n]*\n\s+: descFromText\(/);
+    expect(APP).toMatch(/d = so && so\.d \? seoMetaWithPrice\(seoClip\(so\.d, DESC_MAX\), [^\n]*\n\s+: handWritten \? seoMetaWithPrice\(handWritten, [^\n]*\n\s+: descFromText\(/);
   });
 
   it("every other product is still described from its own text", () => {

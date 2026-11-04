@@ -159,7 +159,7 @@ describe("the title ladder", () => {
   });
 });
 
-describe("a pair somebody wrote by hand is left alone", () => {
+describe("a pair somebody wrote by hand keeps every word", () => {
   const spec = (over: { seoTitle?: string; seoDesc?: string }) =>
     productSpec({
       base: BASE, lang: LANGS[0], id: "x", cat: "hair", catName: "Уход за волосами",
@@ -168,11 +168,26 @@ describe("a pair somebody wrote by hand is left alone", () => {
       seoTitle: "", seoDesc: "", ...over,
     });
 
-  it("appends no price to an owner's or the assistant's own description", () => {
+  /* Dim, 04.11.2026: the price follows a written pair where it fits, as it
+     follows every generated one — 185 of 217 products had a written pair and
+     so showed Google no price at all. */
+  it("puts the price after an owner's or the assistant's own pair, where it fits", () => {
     expect(spec({ seoDesc: "Шампунь против выпадения — 30 лет в финских клиниках." }).desc)
-      .toBe("Шампунь против выпадения — 30 лет в финских клиниках.");
+      .toBe("Шампунь против выпадения — 30 лет в финских клиниках · от 9 € · в наличии");
     expect(spec({ seoTitle: "System 4 против выпадения волос" }).title)
-      .toBe("System 4 против выпадения волос — REMPIRE");
+      .toBe("System 4 против выпадения волос · от 9 €");
+    // the site's name a writer typed is not kept in front of the price
+    expect(spec({ seoTitle: "System 4 против выпадения волос — REMPIRE" }).title)
+      .toBe("System 4 против выпадения волос · от 9 €");
+  });
+
+  it("leaves it as written where the price does not fit, or is there already", () => {
+    const long = "System 4 Bio Botanical Shampoo — шампунь для кожи головы"; // 56
+    expect(spec({ seoTitle: long }).title).toBe(long);
+    expect(spec({ seoTitle: "Подарочная карта на 25 € или 50 €" }).title).toBe("Подарочная карта на 25 € или 50 € — REMPIRE");
+    expect(spec({ seoDesc: "Подарочная карта на 25 €, 50 € или 100 €." }).desc).toBe("Подарочная карта на 25 €, 50 € или 100 €.");
+    const full = "Ш".repeat(150) + ".";
+    expect(spec({ seoDesc: full }).desc).toBe(full);
   });
 
   /* 25.10.2026: the price and «в наличии» are back in the tail, and the

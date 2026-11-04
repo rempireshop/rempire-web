@@ -191,7 +191,7 @@ describe("a custom product's page at request time", () => {
     const p = await createCustomProduct(BALM);
     const html = await (await pageFor("", p.id)).text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="en">/);
-    expect(title(html)).toBe("Proraso beard balm — buy in Tallinn — REMPIRE");
+    expect(title(html)).toBe("Proraso beard balm — buy in Tallinn · from €14.90");
     expect(meta(html, "description")).toBe("Бальзам Proraso в Rempire.");
     expect(meta(html, "og:locale")).toBe("en_US");
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/products/${p.id}`);

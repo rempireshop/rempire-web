@@ -177,6 +177,20 @@ describe("what the shopper means", () => {
     expect(res.length).toBeGreaterThan(0);
     expect(names(res.slice(0, 3))).toMatch(/System 4/);
   });
+
+  it("does not read a brand as a concern — «Mitchell» is not an itch (Renat, 03.11.2026)", () => {
+    expect(S.srchConcerns("paul mitchell tea tree")).toHaveLength(0);
+    expect(S.srchConcerns("paul mitchell green tea")).toHaveLength(0);
+    // the concern itself still answers, in English and in Estonian
+    expect(S.srchConcerns("itchy scalp").length).toBeGreaterThan(0);
+    expect(S.srchConcerns("sügelev peanahk").length).toBeGreaterThan(0);
+    // 52 products before, after-shave and face wash among them
+    for (const q of ["paul mitchell tea tree", "paul mitchell green tea"]) {
+      const res = S.searchAll(q);
+      expect(res.length, q).toBeGreaterThan(0);
+      expect(res.every((p) => p.brand === "Paul Mitchell"), `${q}: ${names(res)}`).toBe(true);
+    }
+  });
 });
 
 describe("the product type typed in English or Estonian", () => {
