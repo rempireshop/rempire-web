@@ -1,7 +1,7 @@
 # Research notes, August 2026
 
-Copied on 05.11.2026 from the repository `rempireshop/rempire-api` before it
-was deleted (Dim's decision). That repository held the plan for a separate
+Copied on 05.11.2026 from the repository `rempireshop/rempire-api` before Dim
+deleted it the same day. That repository held the plan for a separate
 ASP.NET Core backend, which was never built: the shop runs entirely in this
 repository. Only the notes were worth keeping. They are a record of what was
 known in August 2026: prices, plans and tariffs here are not current.

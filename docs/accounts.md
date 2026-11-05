@@ -47,7 +47,7 @@ account is billed. The card plan is described below the table.
 | **Cloudflare** | DNS for `rempireshop.com` (nameservers `albert` / `april.ns.cloudflare.com`), Email Routing (info@, shop@ → the shop Gmail), R2 bucket `rempire-media` (photos, at `img.rempireshop.com`) | rempireshopinfo@ | the shop | **Dim's card today → company card at the meeting** (R2 needs a card even at 0 €) | 0 € (Free plan; R2 within the free 10 GB) | member |
 | **Vercel** team «Rempire», project `rempire-web` | Hosting: the site, 104 API routes, two crons, builds of branch `production`, the deploy hook | GitHub `rempireshop` | the shop | Dim's card (Pro since 03.11); none on Hobby | **Pro $20 / month since 03.11.2026**; back to Hobby (free) when usage allows (RUNBOOK §6) | see «Dim's access» below |
 | **Railway** | The Postgres 18 database, and nothing else (EU West) | GitHub `rempireshop` | the shop | **Dim's card today → company card at the meeting** | Hobby, ~$6 / month (02.10 bill: $6.20) | member if the plan allows; otherwise none. Backups do not need it (GitHub secret) |
-| **GitHub** user `rempireshop` | Repositories `rempire-web` (the shop) and `rempire-api` (unused; its notes are in `docs/research-2026-08/`; Dim deletes it); Actions: CI, promote, smoke, backups | rempireshopinfo@ | the shop | — | free; the repo goes **private on 08.11**, and CI fits the free private minutes | `dimnovare` stays a collaborator (push) |
+| **GitHub** user `rempireshop` | Repository `rempire-web` (the shop); `rempire-api` was deleted on 05.11, its notes are in `docs/research-2026-08/`; Actions: CI, promote, smoke, backups | rempireshopinfo@ | the shop | — | free; the repo goes **private on 08.11**, and CI fits the free private minutes | `dimnovare` stays a collaborator (push) |
 | **Resend** | All e-mail from `@rempireshop.com` (region eu-west-1, Ireland) | rempireshopinfo@ | the shop | — | free tier: 100 / day, 3 000 / month | member |
 | **Montonio** | Payments (bank links, cards, wallets), refunds, parcel labels, pickup points; live keys | Renat's own login | Rempire Store OÜ | Renat (contract) | per contract | technical contact, if Renat wants |
 | **OpenAI API** (platform.openai.com) | Shop chat, panel assistant, AI texts, AI search, photo cut-out, build-time search cards | rempireshopinfo@ | the shop | the shop's account (funded 08.10); whose card funded it is still to check (`ho-openai`) | cents a day; set a monthly limit of ~$10 | member, if useful |
@@ -185,4 +185,4 @@ accountant confirm it once.
    confirms, not before 19.11. Renat re-adds the panel to his home screen from
    rempireshop.com first.
 7. ~~`rempire-api`~~ — answered 05.11: a research archive, never deployed.
-   Its notes are in `docs/research-2026-08/`; Dim deletes the repository.
+   Its notes are in `docs/research-2026-08/`; Dim deleted the repository the same day.
