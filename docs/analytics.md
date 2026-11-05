@@ -196,9 +196,14 @@ duplicate to clean up:
   never captured. One exception, since 25.10.2026 (the Google Ads test): a
   visit that landed with `gclid`/`gbraid`/`wbraid` or `utm_source=google-ads`
   is filed as `ads.google.com` for the rest of the tab's session, so the
-  «Источники» list tells an ad click from a search result. Only that fact is
-  kept (a `rmp_ad` flag in sessionStorage, written after statistics are
-  allowed) — never the click id.
+  «Источники» list tells an ad click from a search result. Since 05.11.2026
+  the same goes for the ChatGPT ads campaign: a landing with
+  `utm_source=chatgpt-ads` is filed as `ads.openai.com`, apart from
+  ordinary `chatgpt.com` referrals. Only that fact is kept (a `rmp_ad` flag
+  in sessionStorage holding the source's name, written after statistics are
+  allowed; an older tab's `"1"` still reads as Google) — never the click id.
+  «Источники» counts visits, not orders: which ad led to a purchase is not
+  shown.
 - Bots and crawlers are recognised by User-Agent and never written at all
   (`src/lib/events.ts` `isBotUA`).
 - **90-day retention.** Rows older than 90 days are deleted by

@@ -163,3 +163,8 @@ where it becomes the «what was done» summary.*
 - `rempireshop.com/contact` (also `/ru/contact`, `/contact-us`) opens the contact page instead of a 404 — Merchant Center had that address as the customer-service page (9dd7e412).
 - `/test`, the acceptance checklist, is gone from both domains at Dim's word, with its API (`/api/testplan/`), its checks, its link-preview card, its robots line and its tests. `/tests` and `/checklist` answer 404 too.
 - `/cards` (the product-card options) and `/golive` (the launch list) are gone from rempireshop.com at Dim's word, with `/card`, `/karty`, the `/cards` link-preview card and the `/golive` robots line. The launch list's file stays because Dim's `/handover` is built on it, but on rempireshop.com `/golive/index.html` answers 404 too.
+
+**05.11**
+- Google photos: from 31.01.2027 Merchant Center refuses a main photo under 500 × 500 px. The feed now sends each narrow cut-out on a white square (`public/shop/img/sq/`, `npm run feed:squares`); the site keeps its photo. 16 photos too small to square replaced by the brands' own (17bbc997).
+- Kevin.Murphy SMOOTH.AGAIN.WASH 40 ml and STAYING.ALIVE 40 ml show the front of the bottle — kevinmurphy.com.au's photos, after Renat's photos confirmed his packaging (ff529fa3). Anua BHA 2% toner and Heartleaf foam keep their photos: Renat has the old packaging, Anua's site only the new.
+- «Аналитика» → «Источники»: a visit from the ChatGPT ads campaign (`utm_source=chatgpt-ads`) is filed as `ads.openai.com`, apart from ordinary `chatgpt.com` referrals, the way Google Ads clicks are filed as `ads.google.com`.

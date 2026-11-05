@@ -12495,23 +12495,37 @@
      it at any point in the session still answers "who sent this visitor",
      which is what "top referrer hosts" needs. Host only, never the path or
      query a referring page might have carried (e.g. a Google search term). */
-  /* A click on the shop's own Google Ads (the test of 25.10.2026): Google puts
-     gclid (or gbraid/wbraid) on the landing address and the campaign adds
-     utm_source=google-ads. The referrer alone says google.com — the same as
-     a search result — so such a visit is filed under «ads.google.com» for
+  /* A click on one of the shop's own ads. Google Ads (the test of 25.10.2026)
+     puts gclid (or gbraid/wbraid) on the landing address and the campaign
+     adds utm_source=google-ads; the ChatGPT ads campaign (05.11.2026) adds
+     utm_source=chatgpt-ads. The referrer alone says google.com or
+     chatgpt.com — the same as a search result or an ordinary ChatGPT answer —
+     so such a visit is filed under «ads.google.com» / «ads.openai.com» for
      the rest of the tab's session. The address is read at boot, before
      anything rewrites it; the flag reaches sessionStorage only from
-     refHost(), which only track() calls — after statistics are allowed. */
+     refHost(), which only track() calls — after statistics are allowed.
+     A tab flagged before 05.11 holds "1", which still means Google. */
   var AD_KEY = "rmp_ad";
-  var AD_LANDING = /[?&](gclid|gbraid|wbraid)=|[?&]utm_source=google-ads(&|$)/.test(location.search);
+  var AD_SOURCES = [
+    [/[?&](gclid|gbraid|wbraid)=|[?&]utm_source=google-ads(&|$)/, "ads.google.com"],
+    [/[?&]utm_source=chatgpt-ads(&|$)/, "ads.openai.com"],
+  ];
+  var AD_LANDING = "";
+  for (var adI = 0; adI < AD_SOURCES.length; adI++) {
+    if (AD_SOURCES[adI][0].test(location.search)) { AD_LANDING = AD_SOURCES[adI][1]; break; }
+  }
   function adVisit() {
     try {
-      if (AD_LANDING) sessionStorage.setItem(AD_KEY, "1");
-      return sessionStorage.getItem(AD_KEY) === "1";
+      if (AD_LANDING) sessionStorage.setItem(AD_KEY, AD_LANDING);
+      var v = sessionStorage.getItem(AD_KEY);
+      if (v === "1") return "ads.google.com";
+      for (var i = 0; i < AD_SOURCES.length; i++) if (v === AD_SOURCES[i][1]) return v;
+      return "";
     } catch (e) { return AD_LANDING; }
   }
   function refHost() {
-    if (adVisit()) return "ads.google.com";
+    var ad = adVisit();
+    if (ad) return ad;
     try {
       if (!document.referrer) return "";
       var h = new URL(document.referrer).hostname;
