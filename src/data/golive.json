@@ -2065,10 +2065,10 @@
       ],
       "status": "doing",
       "title": "Встреча: Ренат сам входит в каждый сервис",
-      "detail": "По листу логинов: вход, 2FA на его телефоне, восстановление пароля. Плюс один заказ от начала до конца в панели, один возврат. 05.11: черновик сценария встречи по шагам (порядок: Google → GitHub → пароль панели → Claude → карты → остальные входы → заказ и возврат в панели → подписи) — у Дима.",
+      "detail": "По листу логинов: вход, 2FA на его телефоне, восстановление пароля. Плюс один заказ от начала до конца в панели, один возврат. 05.11: черновик сценария встречи по шагам (порядок: Google → GitHub → пароль панели → Claude → карты → остальные входы → заказ и возврат в панели → подписи) — у Дима. Дим, 05.11: секреты и пароль панели не меняем — на встрече карты фирмы и входы в сервисы по листу.",
       "en": {
         "title": "Meeting: Renat signs into every service himself",
-        "detail": "From the login sheet: sign-in, 2FA on his phone, password recovery. Plus one order from start to finish in the panel, and one return. 05.11: a step-by-step draft of the meeting (order: Google → GitHub → panel password → Claude → cards → the other sign-ins → an order and a return in the panel → signatures) — with Dim."
+        "detail": "From the login sheet: sign-in, 2FA on his phone, password recovery. Plus one order from start to finish in the panel, and one return. 05.11: a step-by-step draft of the meeting (order: Google → GitHub → panel password → Claude → cards → the other sign-ins → an order and a return in the panel → signatures) — with Dim. Dim, 05.11: no secrets and no panel password change — the meeting is the company cards and the sign-ins from the sheet."
       }
     },
     {
@@ -2079,12 +2079,12 @@
         "renat",
         "dim"
       ],
-      "status": "todo",
-      "title": "Свой пароль от панели /admin",
-      "detail": "Ренат придумывает пароль и сам вводит его в tools/hash-password.mjs на компьютере Димы; Дим ставит хеш в Vercel (ADMIN_PASSWORD_HASH) и перезапускает. Старый пароль перестаёт работать.",
+      "status": "done",
+      "title": "Пароль от панели — остаётся прежний",
+      "detail": "Ренат придумывает пароль и сам вводит его в tools/hash-password.mjs на компьютере Димы; Дим ставит хеш в Vercel (ADMIN_PASSWORD_HASH) и перезапускает. Старый пароль перестаёт работать. Дим, 05.11: пароль не меняем. Свой пароль — только если Ренат сам захочет (тот же путь: tools/hash-password.mjs → ADMIN_PASSWORD_HASH).",
       "en": {
-        "title": "His own password for /admin",
-        "detail": "Renat picks a password and types it himself into tools/hash-password.mjs on Dim's computer; Dim puts the hash into Vercel (ADMIN_PASSWORD_HASH) and redeploys. The old password stops working."
+        "title": "The panel password — stays as it is",
+        "detail": "Renat picks a password and types it himself into tools/hash-password.mjs on Dim's computer; Dim puts the hash into Vercel (ADMIN_PASSWORD_HASH) and redeploys. The old password stops working. Dim, 05.11: the password is not changed. His own one only if Renat asks for it (the same path: tools/hash-password.mjs → ADMIN_PASSWORD_HASH)."
       }
     },
     {
@@ -2097,10 +2097,10 @@
       ],
       "status": "todo",
       "title": "Claude Рената: подключить коннектор «Rempire»",
-      "detail": "После своего пароля от панели Ренат в своём Claude добавляет коннектор https://rempireshop.com/api/mcp и входит этим паролем. Подключение Димы с новым паролем перестаёт работать само. Как подключать — docs/claude-connector.md. С 26.10 Claude меняет у товара описание, название, бренд, раздел, тексты для Google, цены (больше 30 % — только после «да» Рената) и остаток, создаёт новые товары скрытыми и меняет тексты страниц разделов и брендов (они же — в «Настройках → Тексты страниц»). Проверено вживую 26.10 через Claude Димы: новый товар скрытым, дубль отклонён, остаток 7→8; всё убрано из базы. Сообщение Ренату с примерами отправлено 26.10.",
+      "detail": "Ренат в своём Claude добавляет коннектор https://rempireshop.com/api/mcp и входит паролем от панели (он не меняется — Дим, 05.11). Как подключать — docs/claude-connector.md. С 26.10 Claude меняет у товара описание, название, бренд, раздел, тексты для Google, цены (больше 30 % — только после «да» Рената) и остаток, создаёт новые товары скрытыми и меняет тексты страниц разделов и брендов (они же — в «Настройках → Тексты страниц»). Проверено вживую 26.10 через Claude Димы: новый товар скрытым, дубль отклонён, остаток 7→8; всё убрано из базы. Сообщение Ренату с примерами отправлено 26.10.",
       "en": {
         "title": "Renat's Claude: connect the «Rempire» connector",
-        "detail": "Once his own panel password is set, Renat adds the connector https://rempireshop.com/api/mcp in his own Claude and signs in with that password. Dim's connection stops working by itself with the new password. How to connect — docs/claude-connector.md. Since 26.10 Claude changes a product's description, name, brand, section, Google texts, prices (more than 30 % only after Renat's yes) and shelf count, creates new products hidden, and changes the section and brand page texts (also in «Настройки → Тексты страниц»). Tested live on 26.10 through Dim's Claude: a new product hidden, a duplicate refused, a count 7→8; all removed from the database. The message to Renat with examples went out on 26.10."
+        "detail": "Renat adds the connector https://rempireshop.com/api/mcp in his own Claude and signs in with the panel password (it does not change — Dim, 05.11). How to connect — docs/claude-connector.md. Since 26.10 Claude changes a product's description, name, brand, section, Google texts, prices (more than 30 % only after Renat's yes) and shelf count, creates new products hidden, and changes the section and brand page texts (also in «Настройки → Тексты страниц»). Tested live on 26.10 through Dim's Claude: a new product hidden, a duplicate refused, a count 7→8; all removed from the database. The message to Renat with examples went out on 26.10."
       }
     },
     {
@@ -2111,12 +2111,12 @@
         "claude",
         "dim"
       ],
-      "status": "doing",
-      "title": "Новые секреты после передачи",
-      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. В Vercel стоит DATABASE_SSL_NO_VERIFY — по возможности заменить на DATABASE_SSL_CA (docs/backend.md). Клод готовит список и проверяет после замены. 05.11: черновик списка готов — что менять обязательно (пароль панели, SESSION_SECRET, CRON_SECRET), что по желанию, что не трогать и почему.",
+      "status": "done",
+      "title": "Секреты после передачи — не меняем",
+      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. В Vercel стоит DATABASE_SSL_NO_VERIFY — по возможности заменить на DATABASE_SSL_CA (docs/backend.md). Клод готовит список и проверяет после замены. 05.11: черновик списка готов — что менять обязательно (пароль панели, SESSION_SECRET, CRON_SECRET), что по желанию, что не трогать и почему. Дим, 05.11: секреты не меняем — встреча только про карты и входы в сервисы. Как менять, если понадобится, — docs/RUNBOOK.md §9.",
       "en": {
-        "title": "Fresh secrets after the handover",
-        "detail": "A new SESSION_SECRET (every panel sign-in resets), CRON_SECRET; optionally new Resend and photo-storage keys. Vercel has DATABASE_SSL_NO_VERIFY set — replace it with DATABASE_SSL_CA if possible (docs/backend.md). Claude prepares the list and checks after the swap. 05.11: the draft list is ready — what must change (panel password, SESSION_SECRET, CRON_SECRET), what is optional, what to leave and why."
+        "title": "Secrets after the handover — not swapped",
+        "detail": "A new SESSION_SECRET (every panel sign-in resets), CRON_SECRET; optionally new Resend and photo-storage keys. Vercel has DATABASE_SSL_NO_VERIFY set — replace it with DATABASE_SSL_CA if possible (docs/backend.md). Claude prepares the list and checks after the swap. 05.11: the draft list is ready — what must change (panel password, SESSION_SECRET, CRON_SECRET), what is optional, what to leave and why. Dim, 05.11: no secrets are swapped — the meeting is about the cards and the sign-ins only. How to swap one if ever needed — docs/RUNBOOK.md §9."
       }
     },
     {

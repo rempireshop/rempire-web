@@ -1,135 +1,187 @@
-# Rempire — accounts & services registry
+# REMPIRE — accounts and services registry
 
-*Source of truth for "which account is connected to what". Started 03.09.2026.*
+*This file says which outside account does what for the shop, who owns it,
+who pays for it, and how to sign in. It was started 03.09.2026 and
+**refreshed 05.11.2026** for the handover to Renat on 08.11.2026. The
+handover checklist is `src/data/golive.json` (rows `ho-*`, shown at
+`/handover` on Dim's host).*
 
-**Rules**
-- **No passwords in this file — ever.** Passwords, 2FA/TOTP secrets, API keys and recovery codes live only in the shared password-manager vault (Bitwarden org "Rempire", free for 2 users). This file is the map; the vault is the keys.
-- Every service is registered on **rempireshopinfo@gmail.com** (the shop's Google account, owned by Rempire Store OÜ). Recovery address of that Google account = blackboxestonia@gmail.com (Renat's personal). Dim holds the shop account during the build; at launch every login is in Renat's vault.
-- Dim's own accounts (dimnovare@ / dim.novare@gmail.com; contact address info@diipsolutions.eu) are added as *members/collaborators* where that is free — never as the owner of anything that is the business.
-- Card on file: Dim's card temporarily where a service demands one at signup (Railway); switched to the company card at launch.
+**Related files.**
+
+- Environment variable names and what each one does: `README.md` (the one
+  canonical list; values are never written down).
+- What to do when a service fails: `docs/RUNBOOK.md`.
+- Renat's own plain-Russian list of the same services:
+  `docs/renat-services.md`. It still says Vercel is free; see the Vercel row
+  below.
+
+## Rules
+
+- **No passwords, 2FA secrets, API keys or recovery codes in this file or in
+  the repository.**
+  - They go on the **login sheet**. Dim fills it in by hand on his own
+    computer and gives it to Renat in person (`ho-logins-sheet`).
+  - There is no shared password manager (Bitwarden was dropped on 25.10).
+- **One identity.** Almost every service is registered on, or signed into
+  through, the shop's Google account **rempireshopinfo@gmail.com**.
+  - The recovery address is blackboxestonia@gmail.com (Renat's personal).
+  - Two-step verification has been on since 02.11.2026. Keep it on: Google
+    Cloud refuses entry without it.
+  - GitHub user `rempireshop` is the sign-in for Vercel and Railway.
+- **The business owns everything.**
+  - The company is **Rempire Store OÜ** (reg. 12216136, KMKR EE102723858).
+  - The domain's registrant is **THEFLOW OÜ**, which is 100 % Renat's
+    company.
+  - Dim keeps member or collaborator access for paid support only: no
+    ownership, no cards (`ho-access-trim`).
 
 ## Registry
 
-| Service | What it does for the shop | Account / login identity | Owner (final) | Members | Plan / cost | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| Google account rempireshopinfo@gmail.com | Identity for every service below; shop mailbox | — | Renat | Dim (build phase) | free | ✅ exists | set recovery = blackboxestonia@; 2FA via TOTP in vault |
-| Zone.ee (my.zone.eu) | Domain rempireshop.com + DNS (nameservers ns.zone.eu) | blackboxestonia@gmail.com | Renat | dim.novare@gmail.com (user, added 03.09) | domain renewal only | ✅ access | registrant still THEFLOW OÜ / Denis Kuznetsov → change to Rempire Store OÜ («domeeni omaniku vahetus»); ASCIO is Zone's upstream, no separate account. 03.09: DNS snapshot taken before changes (5 records: A→Shopify, www CNAME, 3 NS); 5 new records added, nothing existing touched |
-| Bitwarden org "Rempire" | Shared vault for all secrets | rempireshopinfo@ | Renat | Dim | free (2 users) | ⬜ | create FIRST |
-| GitHub user `rempireshop` (no org — name `rempire` is taken) | Source code: rempire-web (shop), rempire-api | rempireshopinfo@ (GitHub user `rempireshop`) | Renat | dimnovare = collaborator (push) on both repos | free | ✅ repos transferred 03.09 | both repos now github.com/rempireshop/…; old dimnovare URLs redirect; local remotes updated |
-| Railway | **The Postgres database, and nothing else** (corrected 07.09 — the app never moved here; the old plan said "Next.js app + Postgres + volume") | rempireshopinfo@ (login via GitHub) | Renat | Dim via GitHub collaborator | Hobby $5/mo (usage inside credit) | ⬜ | EU West Metal (Amsterdam); card: Dim's temporarily. TLS: Railway signs its Postgres certificate with a private CA — see `DATABASE_SSL_CA` below |
-| Vercel | **Production hosting** (corrected 07.09): the app, all ~70 API routes, the static shop, the two cron jobs, the deploy on push. Hobby forbids commercial use and this shop is commercial — **needs Pro, $20/mo**; see `docs/HOSTING.md` | rempireshopinfo@ (login via GitHub) | Renat | — | Hobby free — **should be Pro** | ✅ project `rempire-web` imported 03.09 (team Rempire) | auto-deploys from github.com/rempireshop/rempire-web main — Hobby rule: only commits authored by the account owner deploy, so local git identity = «Rempire Store» (rempireshop no-reply address); Diip's old project also still auto-deploys from the same repo (staging stays in sync); env vars still empty (OPENAI_API_KEY, TELEGRAM_*, RESEND_*, later DATABASE_URL etc.); staging domain rempireshop.diipsolutions.eu now served by the Rempire project (moved 03.09, TLS ok); Diip's old Vercel project deleted 03.09 (Dim's OK); Telegram bot, if Renat wants it, will be created fresh on the shop account |
-| Vercel Blob `rempire-qa` | Questionnaire answers + feedback JSON (a few KB) | Diip's Vercel team | — | — | free | ⬜ delete | nothing reads it since 07.09; `@vercel/blob` removed from the code 25.10.2026 — Dim deletes the store on Diip's team (handover row `ho-blob-cleanup`) |
-| Resend | Transactional e-mail from @rempireshop.com (5 templates) | rempireshopinfo@ | Renat | Dim (member) | free tier (3k mails/mo) | ✅ domain verified 03.09 | rempireshop.com added 03.09.2026, region Ireland (eu-west-1), tracking off; DKIM/SPF-CNAME/DMARC in Zone, Resend auto-checks; MX «receiving» deliberately NOT added |
-| Google Search Console | Search positions, indexing, 301 watch after switch | rempireshopinfo@ (Google) | Renat | dim.novare@ (owner via own TXT) | free | ✅ verified 03.09 (TXT) | domain property sc-domain:rempireshop.com; TXT must stay in Zone; dim.novare@ is an owner. 05.09: Google Cloud project `rempire-shop` + service account gsc-reader@rempire-shop.iam.gserviceaccount.com (Restricted user on the property) for the admin's Analytics block — key + env vars pending, see docs/analytics.md |
-| Google Merchant Center | Google Shopping feeds /feed/google-en.xml, -et, -ru (live, docs/merchant-feed.md) | rempireshopinfo@ (Google) | Renat | Dim | free listings | ⬜ at switch | account 5819586565; added beside the six Shopify sources on switch day, Shopify ones removed once ours are approved |
-| Google Analytics 4 | Visits, conversion | rempireshopinfo@ (Google) | Renat | Dim | free | ⬜ at switch | |
-| Google Cloud project «Rempire shop» (`rempire-shop`) → Google Auth Platform | Customers' «Продолжить с Google» sign-in (account page; checkout when signed out); the e-mailed code login stays | rempireshopinfo@ (Google; 2-step verification on since 02.11 — the console refuses entry without it) | Renat | — | free | ✅ live 02.11.2026 | Branding: app name REMPIRE, support + developer e-mail rempireshopinfo@, home/privacy/terms pages on rempireshop.com, authorised domain rempireshop.com, no logo (a logo triggers brand review; Google shows «continue to rempireshop.com» until the optional Verification Center check). Audience External, In production, scopes openid/email/profile only (no Google review). Web client «REMPIRE shop login»: JS origin https://rempireshop.com; redirect URIs https://rempireshop.com/api/account/google/callback and http://localhost:3300/api/account/google/callback — a domain change needs a new redirect URI. Public client ID only (`GOOGLE_CLIENT_ID` below); the client secret is unused and stored nowhere. Same project holds the gsc-reader service account (Search Console row). Never delete the project. docs/google-login.md |
-| Google Business Profile | Salon on Maps → link to shop | rempireshopinfo@ (Google) | Renat | — | free | ⬜ later | masterplan item |
-| Payment provider (Montonio Starter / MakeCommerce) | Bank links + cards + Apple/Google Pay + shipping labels | company onboarding by Renat | Renat (Rempire Store OÜ) | Dim (technical contact) | 10–12 €/mo + per txn | ⬜ after pick | KYC: company data, IBAN, Renat's ID |
-| OpenAI (API) | AI assistants (shop chat, admin) | Dim's account now → rempireshopinfo@ at launch | Renat | Dim | usage (cents/day) | ⬜ move at launch | key rotated on move |
-| Telegram bot @rempireshop_bot | Pushes questionnaire/feedback to Dim | created by Dim (BotFather) | Dim → transferable | — | free | ✅ | transfer via BotFather at launch if wanted |
-| Cloudflare | Global CDN/WAF in front of the shop — "worldwide" phase | rempireshopinfo@ | Renat | Dim | free | ⬜ later | needs nameserver move from Zone; not before launch |
-| Cloudflare R2 bucket `rempire-media` | Photos the owner uploads from the admin (product galleries, banner picture) | rempireshopinfo@ (same Cloudflare account) | Renat | Dim | free tier (10 GB, egress always free) | ⬜ create | EU jurisdiction; public via custom domain `media.rempireshop.com` (needs the nameserver move) or the temporary `pub-….r2.dev`; API token scoped «Object Read & Write» to this bucket only. Setup + env names: docs/media.md |
-| Shopify (legacy) | Old shop, closes 1 month after switch | Renat's | Renat | dim.novare@ (collaborator) | ~46 €/mo now | ✅ live | do NOT touch until switch; Parcely app cancelled with it |
+«Owner» is the account that owns the service. «Pays» is whose card or
+account is billed. The card plan is described below the table.
 
-## Creation order (03.09)
-1. Shop Google account: get its password from Renat (in person / Telegram secret chat), set recovery = blackboxestonia@, enable 2FA (TOTP secret into the vault).
-2. Bitwarden org → invite Dim → put the Google login + TOTP in it.
-3. GitHub: user for rempireshopinfo@ → org `rempire` → add dimnovare as owner → transfer rempire-web, rempire-api.
-4. Railway: sign in with the GitHub account → empty project "rempire" (EU) → card → Dim wires services later.
-5. Vercel: sign in with GitHub → import rempire-web from the org (Hobby) → env vars → staging domain.
-6. ✅ Resend → domain added, records in Zone (03.09) → verification pending (auto).
-7. ✅ Google Search Console → domain property verified via TXT (03.09); add dim.novare@ as owner.
-8. Later, in this order: payment provider (after pick), Merchant Center + GA4 (at switch), OpenAI move + Vercel→(stays Hobby) / Railway card switch (at launch), Cloudflare (worldwide phase).
+| Service | What it does for the shop | Sign-in | Owner | Pays | Cost | Dim after 08.11 |
+|---|---|---|---|---|---|---|
+| **Google account** rempireshopinfo@gmail.com | Identity for the services below; the shop's mailbox (info@ and shop@ forward here) | password + 2FA on Renat's phone | Renat | — | free | none; only through the services he is a member of |
+| **Zone.ee** (my.zone.eu) | Registrar for `rempireshop.com`; paid to **31.05.2027**, renewed yearly | blackboxestonia@gmail.com (THEFLOW's own Zone account; the Diip Solutions account has shared access) | THEFLOW OÜ (Renat) | Renat, when the yearly bill comes | yearly fee (amount not recorded here) | partner or user for support (`ho-zone-registrant`) |
+| **Cloudflare** | DNS for `rempireshop.com` (nameservers `albert` / `april.ns.cloudflare.com`), Email Routing (info@, shop@ → the shop Gmail), R2 bucket `rempire-media` (photos, at `img.rempireshop.com`) | rempireshopinfo@ | the shop | **Dim's card today → company card at the meeting** (R2 needs a card even at 0 €) | 0 € (Free plan; R2 within the free 10 GB) | member |
+| **Vercel** team «Rempire», project `rempire-web` | Hosting: the site, 104 API routes, two crons, builds of branch `production`, the deploy hook | GitHub `rempireshop` | the shop | not recorded (Dim moved the team to Pro on 03.11) — open question 1 | **Pro $20 / month since 03.11.2026**; back to Hobby (free) when usage allows (RUNBOOK §6) | see «Dim's access» below |
+| **Railway** | The Postgres 18 database, and nothing else (EU West) | GitHub `rempireshop` | the shop | **Dim's card today → company card at the meeting** | Hobby, ~$6 / month (02.10 bill: $6.20) | member if the plan allows; otherwise none. Backups do not need it (GitHub secret) |
+| **GitHub** user `rempireshop` | Repositories `rempire-web` (the shop) and `rempire-api` (open question 7); Actions: CI, promote, smoke, backups | rempireshopinfo@ | the shop | — | free; the repo goes **private on 08.11**, and CI fits the free private minutes | `dimnovare` stays a collaborator (push) |
+| **Resend** | All e-mail from `@rempireshop.com` (region eu-west-1, Ireland) | rempireshopinfo@ | the shop | — | free tier: 100 / day, 3 000 / month | member |
+| **Montonio** | Payments (bank links, cards, wallets), refunds, parcel labels, pickup points; live keys | Renat's own login | Rempire Store OÜ | Renat (contract) | per contract | technical contact, if Renat wants |
+| **OpenAI API** (platform.openai.com) | Shop chat, panel assistant, AI texts, AI search, photo cut-out, build-time search cards | rempireshopinfo@ | the shop | the shop's account (funded 08.10); whose card funded it is still to check (`ho-openai`) | cents a day; set a monthly limit of ~$10 | member, if useful |
+| **OpenAI Ads** (ads.openai.com, beta) | Test campaign «REMPIRE campaign», serving since 05.11 ~11:30; clicks; 25 countries | rempireshopinfo@ | the shop | **Mastercard …0731: Dim's card today → company card at the meeting** | €65 for the whole campaign (the platform minimum); charged at €3 or on 30.11 | none needed |
+| **Google Search Console** `sc-domain:rempireshop.com` | Indexing, search figures in «Аналитика» (via service account `gsc-reader@rempire-shop.iam.gserviceaccount.com`) | rempireshopinfo@ | the shop | — | free | user; Dim's own owner verification should become a «Full user» |
+| **Google Merchant Center** 5819586565 | Reads `/feed/google-en.xml` and `/feed/google-ru.xml` daily; free listings; returns policy (24 EU countries, 30 days) | rempireshopinfo@ | the shop | — | free | user |
+| **Google Ads** «Rempire Shop» 892-756-4570 | Test campaign «Test Shopping EE», 25.10–15.11.2026, Shopping, 25 countries since 05.11 | rempireshopinfo@ | the shop | **Mastercard …0731: Dim's card today → company card at the meeting**; billed after the ads run | ≤ €20 for the test; after 15.11 Renat decides | user (Standard), if Renat continues |
+| **Google Cloud** project «Rempire shop» (`rempire-shop`) | Google Auth Platform for customers' «Продолжить с Google» (live 02.11; web client «REMPIRE shop login»); the GSC service account | rempireshopinfo@ (2SV required) | the shop | — | free | IAM member, if needed; **never delete the project** |
+| **Google Business Profile** | The salon on Maps | rempireshopinfo@ | Renat | — | free | none. The shop's local-inventory feed stays off until `settings.gbp_store_code` is set. |
+| **Bing Webmaster Tools** | Bing indexing; IndexNow pings from the shop need no account | rempireshopinfo@ | the shop | — | free | user |
+| **Telegram bot** @rempireshop_bot | «New order» pings to the owner's chat | Renat (BotFather) | Renat | — | free | none |
+| **Claude connector «Rempire»** (`https://rempireshop.com/api/mcp`) | Renat's own Claude edits texts, names, prices, stock and page texts (`docs/claude-connector.md`) | the panel password | the shop | Renat (his own Claude plan) | — | Dim's connection ends when the panel password changes |
+| **Web Push** (VAPID) | Order pings to the owner's phone and computer | keys in Vercel only | the shop | — | free | — |
+| **Pinterest** | Domain verification tag only (`PINTEREST_DOMAIN_VERIFY`) | — | Renat | — | free | — |
+| **Stripe** | Card payments of the old Shopify shop | Renat's | Renat | — | no monthly fee | none. Close around the end of January 2027, after the dispute window (`ho-stripe`). |
+| **Shopify** (legacy) | The old shop | Renat's | Renat | — | was ~46 € / month | **closed 29.10.2026**; orders and customers exported first |
+| **Vercel Blob** `rempire-qa` (on Diip's team, not the shop's) | Questionnaire answers from the prototype days; unused since 07.09 | Dim | Diip | — | free | Dim deletes it (`ho-blob-cleanup`) |
+| **rempireshop.diipsolutions.eu** | Dim's own host on the same Vercel project: `/handover`, the panel and the API; every shop page 301s to rempireshop.com | Dim's DNS (diipsolutions.eu) | Dim | — | — | open question 6 |
 
-## DNS — rempireshop.com (Zone.ee), state after 03.09.2026
+### The card plan
 
-Existing (untouched, live Shopify): `A @ → 23.227.38.65`, `CNAME www → shops.myshopify.com`, `NS ×3` (ns.zone.eu / ns2.zone.ee / ns3.zonedata.net). No MX existed.
+- **Moves to Renat's company card at the handover meeting.** Railway,
+  Cloudflare, Google Ads and OpenAI Ads are on Dim's card today (Google Ads
+  and OpenAI Ads share Mastercard …0731).
+  - Railway first: a failed payment stops the database, and with it the
+    shop.
+  - `golive.json` rows `ho-google-ads` and `ho-openai-ads` still call card
+    …0731 Renat's. Correct them.
+- **Not recorded yet:** Vercel Pro (open question 1) and the card that funds
+  the OpenAI API (`ho-openai`).
+- **Renat's already:** Montonio, Stripe and the domain renewal.
 
-Added 03.09.2026 (new names only):
+### Monthly costs (from the handover notes, 05.11.2026)
 
-| Type | Host | Value | For |
+| Item | Cost |
+|---|---|
+| Vercel | $20 / month while on Pro; 0 on Hobby |
+| Railway | ~$6 / month |
+| OpenAI API | cents a day |
+| Montonio | per contract |
+| Domain (Zone.ee) | once a year |
+| Google Ads | test only, ≤ €20 until 15.11, then Renat's decision |
+| OpenAI Ads | €65 once for the test campaign |
+| Resend, Cloudflare, GitHub, Google tools, Bing, Telegram | free |
+| Shopify | 0 since 29.10 (was ~46 € / month) |
+
+## Dim's access after the handover
+
+The rule (`ho-access-trim`, `ho-members`): the shop's account owns every
+service; Dim stays only where support needs him, as a member or
+collaborator, with no ownership and no cards on file.
+
+| Where | Dim's access | Note |
+|---|---|---|
+| GitHub `rempire-web` | collaborator `dimnovare` (push) | He needs it to push fixes. A collaborator on a personal repository cannot change its settings. Visibility changes need the `rempireshop` account, and GitHub asks for a code e-mailed to rempireshopinfo@ (`ho-github-private`). |
+| Vercel | to decide | On Pro, every team member is a paid seat (check current pricing). On Hobby a team has one member. Options: Renat signs in when Dim needs the dashboard, or Dim becomes a paid member. Pushes deploy through GitHub either way. |
+| Railway | to decide | Only needed for restores and the CA export. A restore needs a new database, so someone signed in as the shop. |
+| Cloudflare, Resend, Search Console, Merchant Center, Google Ads, Google Cloud, Bing | member / user | Check each one at the meeting (`ho-members`). Remove Dim as an *owner* wherever he is one (Search Console). |
+| Zone.ee | partner or user, for support | `ho-zone-registrant` |
+| Panel `/admin` | none of his own | The panel has one password, Renat's. Dim signs in only when Renat gives him the password for a support task. |
+| Alerts | `DEV_ALERT_TO` defaults to info@diipsolutions.eu | Build-watch, backup-watch and hide-watch letters and the Monday content report keep reaching Dim. Keep it for paid support or change it (open question 5). |
+| Telegram, Montonio, Stripe | none | Renat's |
+
+## DNS — `rempireshop.com` (Cloudflare)
+
+The nameservers moved from Zone.ee to Cloudflare on 03.09.2026. The source of
+truth is Cloudflare → `rempireshop.com` → DNS. **Touch nothing here without a
+reason.**
+
+| Type | Name | Points at | For |
 |---|---|---|---|
-| TXT | @ | `google-site-verification=KUVTHWQUdqKHip0q8VUKTRnAj9L6isKgUsWE4163wNM` | Search Console ownership — never delete |
-| TXT | resend._domainkey | `p=MIGf…IDAQAB` (DKIM public key, full value in Resend → Domains) | Resend DKIM |
-| CNAME | rsend | rsend-euw1.forge.rmta.net | Resend SPF / return-path |
-| CNAME | send | send.forge.rmta.net | Resend sending subdomain |
-| TXT | _dmarc | `v=DMARC1; p=none;` | DMARC monitor-only (tighten to quarantine later) |
+| A | `@` | `76.76.21.21` (DNS only) | Vercel |
+| CNAME | `www` | the Vercel value shown in the project (DNS only) | Vercel; `www` redirects to the bare domain |
+| CNAME / R2 custom domain | `img` | R2 bucket `rempire-media` | photos (`R2_PUBLIC_BASE`, since 21.09) |
+| TXT | `@` | `google-site-verification=…` | Search Console ownership; **never delete** |
+| TXT | `resend._domainkey` | DKIM public key | Resend |
+| CNAME | `send`, `rsend` | Resend's forge hosts | Resend sending and return path |
+| TXT | `_dmarc` | `v=DMARC1; p=none;` | DMARC, monitor only |
+| MX ×3, TXT (SPF), DKIM | `@` | written by Cloudflare | Email Routing (info@, shop@ → rempireshopinfo@gmail.com) |
 
-Not added on purpose: `MX @ → inbound-smtp.eu-west-1.amazonaws.com` (Resend inbound). Adding it would route all mail for @rempireshop.com to Resend — separate decision. At the shop switch: change `A @` and `CNAME www` to the new host; everything above stays.
+There is deliberately **no** MX for Resend inbound. Adding one would send all
+`@rempireshop.com` mail to Resend instead of the Gmail.
 
-## Environment variables (Vercel → rempire-web → Settings → Environment Variables, Production + Preview)
+## Company invoices — data the owner keeps in the panel
 
-Values are never written here. Names only, grouped by what stops working without them.
+Company invoices («По счёту — для компаний», `docs/payments.md` §10) need no
+extra service. They need these fields, filled in the panel:
 
-| Name | Needed for | Who sets it | Status 03.09 |
+| Setting | Stored as | Needed for |
+|---|---|---|
+| «Настройки» → «О компании» → «Реквизиты»: legal name, reg. code, KMKR, address | `settings.content.company` | The seller block on every invoice (Rempire Store OÜ · 12216136 · EE102723858 · Mardi 1, 10145 Tallinn) |
+| Same page: **IBAN** and **Банк** | `settings.content.company.iban` / `.bankName` | Payment details on the invoice. Company invoices are paid by transfer, not through Montonio, so this is the account the money lands on. Check it is filled. |
+| «Настройки» → «О компании» → «Счета для компаний»: prefix, payment term | `settings.invoice` (default `{prefix:"A-", dueDays:7}`) | Numbers like `A-2026-0001` and the payment term |
+
+The business register's address is Pärnu mk, Paikuse alev, Käärasoo tee 43,
+86604. Renat chose Mardi 1 for documents (`docs/RENAT-ANSWERS.md`). Have his
+accountant confirm it once.
+
+## Renewals, limits and who hears about them
+
+| What | Limit / renewal | If missed | Who is told |
 |---|---|---|---|
-| OPENAI_API_KEY | customer chat + admin assistant | Dim (key from platform.openai.com, shop account) | ✅ set |
-| OPENAI_MODEL | model for the shop chat, admin assistant, text generation and AI search; default `gpt-6-luna` when unset (`src/lib/openai-chat.ts`, since 16.10.2026). **If it is set to `gpt-4.1-mini` or any gpt-4o / gpt-4.1 model, delete it or set `gpt-6-luna`** — those shut down in the API on 14.01.2027. Check: `GET https://rempireshop.com/api/search/` echoes the model in use | Dim | optional |
-| RESEND_API_KEY | all customer e-mails + order pings | Dim (Resend → API keys) | ✅ set |
-| RESEND_FROM / MAIL_REPLY_TO | sender «Rempire <shop@rempireshop.com>», reply-to info@rempireshop.com (forwards to the shop Gmail via Cloudflare Email Routing) | Dim | ✅ MAIL_REPLY_TO=info@rempireshop.com (03.09) |
-| RESEND_TO | **where the owner's own pings go** — the «new order» letter (src/lib/notify.ts, called from src/lib/mail-hooks.ts). **Value: `shop@rempireshop.com`** — Dim's answer 07.09; Cloudflare Email Routing already forwards that address to the shop's Gmail (see the Cloudflare section below), so nothing else has to be set up for it. **There is no default any more**: unset, the ping is simply not sent and `[notify] RESEND_TO is not set …` goes to the Vercel log. Nothing else in the shop reads it — customer letters go to the customer, from RESEND_FROM | Dim (in Vercel) | ⬜ **not set** — no owner pings until it is |
-| TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID | «new order» pings to a Telegram chat (optional; e-mail ping works without) | Dim, later a bot on the shop account | ⬜ optional |
-| DATABASE_URL | orders, admin login, overrides, reviews, gift cards (without it the shop runs in demo/localStorage mode) | Dim, from Railway Postgres (`DATABASE_PUBLIC_URL`, project «rempire», EU West) | ✅ 03.09, migrations applied |
-| DATABASE_SSL_CA | **the preferred answer for Railway.** Railway's Postgres signs its certificate with a private CA it generates per database, so Node cannot verify it against the public trust store. Export it once — `railway ssh --project … --service … --environment … -- export-ssl-ca > postgres-root.crt` — and paste the file's text here; the connection is then authenticated, not just encrypted. It is a public certificate, safe to hold as an env var (the private keys must never leave the database). docs/backend.md, "TLS to the database" | Dim (in Vercel) | ⬜ not set |
-| DATABASE_SSL_NO_VERIFY | fallback, **security-shaped**. `1` connects to the database without checking its certificate at all. Since 07.09 this and `DATABASE_SSL_CA` are the only things that decide — the invisible host-name exemption for `*.rlwy.net` / `*.railway.app` was removed (docs/audit/2026-09-07-cleanup.md). Use it only if the CA export above is not possible | Dim (in Vercel) | ⬜ not set — watch the first deploy after 07.09 |
-| SESSION_SECRET | admin cookie + mock-payment tickets (32+ random chars) | Dim | ✅ |
-| ADMIN_PASSWORD_HASH | admin login (`node tools/hash-password.mjs`) | Dim | ✅ |
-| PUBLIC_BASE_URL | absolute links in e-mails, payment return URLs, sitemap/robots | Dim | ✅ = https://rempireshop.diipsolutions.eu (domain moved to the Rempire project 03.09 evening) |
-| CRON_SECRET | daily flows job `/api/cron/flows/` (abandoned cart, back-in-stock, birthday) — Vercel cron sends `Authorization: Bearer <secret>` | Dim | ✅ 03.09 |
-| DEPLOY_HOOK_URL | the shop asks Vercel for a fresh build: nightly (from `/api/cron/events-retention/`) and after an article is published, unpublished, deleted or edited while live — src/lib/rebuild.ts. A Vercel Deploy Hook (Settings → Git → Deploy Hooks, branch `main`); Production only. Without it nothing is rebuilt automatically | Dim | ✅ 09.10 |
-| GSC_SERVICE_ACCOUNT_JSON / GSC_SITE_URL | Search Console data in admin «Аналитика» (service account added as a GSC user; site `sc-domain:rempireshop.com`) — see docs/analytics.md | Dim | ⬜ |
-| GOOGLE_CLIENT_ID | customers' «Продолжить с Google» sign-in — the public web client ID from the Google Cloud project `rempire-shop` (not a secret; it is in every sign-in address). Unset = no button and `/api/account/google/*` answers 404; removing it + Redeploy switches the feature off. No client secret exists — never add one. docs/google-login.md | Dim (Production) | ✅ 02.11.2026 |
-| PAYMENT_PROVIDER | `montonio` / `mock`. Unset = Montonio if its keys exist, otherwise **payments are off** (503 `not_configured`) — the test «bank» is never a silent default, see docs/payments.md | Dim | ✅ montonio |
-| MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY / MONTONIO_ENV | Montonio sandbox → live (`sandbox` / `live`) | Dim (sandbox), Renat's account (live) | ✅ sandbox; e2e test order R-100002 paid + confirmation mail 03.09; all carriers activated in the Montonio store 03.09 (Omniva, Unisend, DPD, Venipak, Montonio International, SmartPosti); business verification (KYC) still pending — Renat |
-| R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_PUBLIC_BASE | photo uploads from the admin — product galleries, the banner picture (without them the upload button is greyed out and nothing else changes) | Dim (bucket `rempire-media`, bucket-scoped «Object Read & Write» token, see docs/media.md) | ✅ set 03.09 |
+| Domain `rempireshop.com` | yearly; paid to **31.05.2027** | site and mail stop | Zone.ee mails the account holder |
+| Railway | monthly card payment | the database, and with it checkout and the panel, stops | Railway mails the shop account |
+| Database backups | `backup.yml` twice a day; artifacts 30 days | no restore point | a failed run mails the workflow's owner; no backup for 36 h → `DEV_ALERT_TO` (`runBackupWatch`) |
+| Vercel | Pro: billed monthly. Hobby: 4 h Fluid Active CPU per 30 days, then the project pauses; 10 GB deployment storage; 4.5 MB per request or response | on Hobby: the shop pauses | Vercel mails the account owner (the shop Gmail). A failed build turns «Promote to production» red, and GitHub mails the pusher. A failed deploy-hook build mails `DEV_ALERT_TO` (`runBuildWatch`). |
+| GitHub Actions | free while public; 2 000 minutes / month once private | checks stop; the shop keeps running, but nothing new deploys | GitHub mails the account |
+| Resend | 100 / day, 3 000 / month | customer letters stop past the cap; marketing stops first (the shop's own budget) | the owner gets a push or Telegram notice at the daily limit |
+| OpenAI API | prepaid credit / monthly limit | AI features fail politely; the shop works | OpenAI mails the account |
+| Cloudflare R2 | free 10 GB | uploads stop | Cloudflare mails the account |
+| Montonio | contract | payments and labels stop | Montonio mails Renat |
+| Google Ads | post-paid card | the campaign pauses | Google mails rempireshopinfo@ |
+| Merchant Center photos | main photo ≥ 500 × 500 from 31.01.2027 | items limited or refused | Merchant Center (RUNBOOK §7) |
 
-## Cloudflare (added 03.09.2026, account rempireshopinfo@)
+**Drills that prove the alert roads.**
 
-Zone `rempireshop.com` created on the Free plan; records replicated 1:1 from Zone (A + www → Shopify as **DNS only**, Resend DKIM/CNAMEs, Google TXT, DMARC). Nameservers `albert.ns.cloudflare.com` / `april.ns.cloudflare.com` — switched at Zone 03.09 evening, resolvers confirmed, live shop unchanged. Email Routing: destination rempireshopinfo@gmail.com verified; rules info@ / shop@ → that mailbox; MX ×3 + SPF + DKIM records written by Cloudflare 03.09 (status Syncing → Enabled). Gmail «Send as» info@rempireshop.com via smtp.resend.com done + verified by Gmail (03.09). R2: subscription added, bucket `rempire-media` (WEUR), public dev URL https://pub-cb5b2acfd95a42a89fe5b418936afeea.r2.dev (= R2_PUBLIC_BASE; later custom media.rempireshop.com), API token created by Dim (Object Read & Write, bucket-scoped).
+- GitHub → Actions → «Alert drill» → Run workflow. It fails on purpose and
+  mails whoever pressed it.
+- `POST /api/admin/alert-drill/` from a signed-in admin tab. It sends one
+  test letter to `DEV_ALERT_TO`.
 
+## Open questions (for Dim)
 
-## Company invoices — what has to be filled in, and where (06.09.2026)
-
-«По счёту — для компаний» (docs/payments.md § 10) adds **no environment
-variable and no external service**: the invoice PDF is rendered by the app
-itself and sent through the Resend key that is already set. What it does need
-is data the owner types in the admin, so it belongs in this registry as a
-checklist rather than as a row in the table above.
-
-| Setting (admin) | Stored as | Needed for | Status |
-|---|---|---|---|
-| «Настройки → О компании → Реквизиты»: **IBAN** and **Банк** | `settings.content.company.iban` / `.bankName` (`bankName` is new) | An invoice without them has no payment details — the admin card and the PDF both say so out loud | ⬜ blank; Renat's business account at ??? — the same IBAN Montonio KYC needs |
-| «Настройки → О компании → Счета для компаний»: number prefix, payment term | `settings.invoice` (`{prefix:"A-", dueDays:7}` by default) | Invoice numbers `A-2026-0001` and the «оплатите в течение N дней» promise | ✅ defaults work out of the box |
-| «Настройки → О компании → Реквизиты»: legal name, reg. code, KMKR, address | `settings.content.company` | Printed as the seller on every invoice | ✅ Rempire Store OÜ · 12216136 · EE102723858 · Mardi 1, 10145 Tallinn |
-
-Two things for Renat, both money-shaped:
-
-- **Which address goes on the invoices.** The business register has
-  Pärnu mk, Paikuse alev, Käärasoo tee 43, 86604; the site and the invoices
-  print Mardi 1, 10145 Tallinn. In round 2 (23.08.2026) Renat chose
-  Mardi 1 for documents (`docs/RENAT-ANSWERS.md`), and the code takes whatever
-  is in the settings — nothing is hard-coded. Worth one confirmation from his
-  accountant before the first invoice goes out.
-- **The bank account.** Company invoices are paid by transfer, not through
-  Montonio, so the IBAN in «Реквизиты» is the account the money actually lands
-  on. It is the only field of the whole flow that cannot be guessed and cannot
-  be wrong.
-
-## Renewals, limits and alerts after the handover (29.10.2026)
-
-What can run out, expire or stop the shop, and who hears about it. Checked 29.10.2026; ⚠ = a decision or a check still open.
-
-| What | Limit / renewal | What happens if missed | Who is told |
-|---|---|---|---|
-| Domain rempireshop.com (Zone.ee) | yearly; ⚠ check the date in my.zone.eu (registered June 2022) | the whole shop and its mail stop | Zone mails blackboxestonia@ (Renat) |
-| Vercel (team Rempire, Hobby) | free; 10 GB deployment storage (retention 1 day / 1 week, see memory of 23.09); ⚠ Hobby terms are non-commercial — Pro $20/mo is the compliant plan | over the cap old deployments are deleted (site stays up); a failed build keeps the last good one | Vercel mails only the account owner (the shop Gmail, no forwarding). So the shop watches its own builds: a failed build of a push turns «Promote to production» red (mails the pusher); a failed deploy-hook build mails info@diipsolutions.eu from the daily cron (src/lib/build-watch.ts) |
-| Railway Postgres (Hobby $5/mo) | 16 MB used; **no built-in backups on Hobby** | data loss without a backup | `.github/workflows/backup.yml` makes one a night (needs the two secrets, docs/backup.md); Pro $20/mo would add Railway's own |
-| GitHub (user rempireshop) | Actions: unlimited while the repo is public; private = 2 000 free minutes/month — CI ~15 min a push, the weekly browser suite ~50, smoke 2×/day ~2, backup ~3 a night ≈ 700–900 a month | over the minutes, checks stop running (the shop does not) | GitHub mails the account; failed checks mail the workflow owner ⚠ notification routing → info@diipsolutions.eu |
-| Resend (free) | 3 000 mails/month, 100/day | customer letters stop past the cap | Resend dashboard only |
-| OpenAI API | pay-as-you-go; ⚠ key still on Dim's account → move to the shop's (handover) | the assistant, AI search and texts fail politely; the shop works | OpenAI billing mails the key owner |
-| Cloudflare (Email Routing, R2 media) | free; R2 10 GB | photos stop uploading / mail forwarding stops | Cloudflare mails rempireshopinfo@ |
-| Montonio | contract fee monthly | payments and labels stop | Montonio mails Renat |
-| Google Ads | post-paid, Renat's card …0731 | campaign pauses | Google mails rempireshopinfo@ |
-
-**Alerts that reach Dim:** to his own GitHub account (the pusher / last editor of the schedule) — a red CI, a red «Promote to production» (Vercel could not build the push), a red deployed-smoke check, a failed backup; to info@diipsolutions.eu directly — a deploy-hook or nightly build that never went live, a hook nobody calls, no database backup for 36 hours (src/lib/build-watch.ts, daily 07:00 UTC), and the Monday letter «Что поправить на сайте» (copy; src/lib/content-report.ts, `DEV_ALERT_TO`). **Drills** that prove each road: GitHub → Actions → «Alert drill» → Run workflow (fails on purpose, mails whoever pressed it); the build-alert road: `POST /api/admin/alert-drill/` from a signed-in admin tab (one «REMPIRE — alert test» letter to `DEV_ALERT_TO`, with what the watch sees on the live build).
+1. **Vercel Pro.** Whose card pays the $20, and does it move to the company
+   card at the meeting like the others?
+2. ~~Card …0731~~ — answered 05.11: Dim's; the handover rows say so.
+3. ~~Zone.ee~~ — answered 05.11: THEFLOW OÜ is Renat's company, the sign-in
+   is blackboxestonia@, and moving the domain to Rempire Store OÜ is optional.
+4. **`RESEND_TO`, `VAPID_*`, `TELEGRAM_*`.** Are they all set in Vercel
+   Production? The owner gets no order pings through any road that is
+   missing.
+5. **`DEV_ALERT_TO`.** Keep info@diipsolutions.eu for paid support, or point
+   it elsewhere?
+6. **`rempireshop.diipsolutions.eu`.** Keep it on the shop's Vercel project
+   after the handover (it serves `/handover`), or remove the domain?
+7. **`rempire-api`.** What is this repository, and should it be archived or
+   deleted?
