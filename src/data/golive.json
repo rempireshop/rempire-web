@@ -1781,14 +1781,15 @@
       "blocking": false,
       "id": "ho-openai-ads",
       "who": [
-        "dim"
+        "dim",
+        "renat"
       ],
-      "status": "todo",
-      "title": "Реклама в ChatGPT (OpenAI Ads) — черновик ждёт карту",
-      "detail": "05.11 по просьбе Димы собран черновик «REMPIRE campaign» в ads.openai.com (бета): цель — клики (тега конверсий OpenAI на сайте нет); бюджет 65 € на всю кампанию — минимум площадки, без даты конца; 25 стран доставки; объявление ведёт на rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; у ссылки метка utm_source=chatgpt-ads, utm_campaign=chatgpt-eu — переходы видны в «Аналитике». Осталось Диме: жёлтая полоса «Finish set up» → карта, имя на карте, адрес (OpenAI временно блокирует 45 €); решить «Creative enhancement» — ИИ сам переписывает и переводит текст объявления без проверки, совет — выключить; затем Publish. «Set up later» на шаге оплаты не нажимать — в первый раз оно удалило кампанию.",
+      "status": "doing",
+      "title": "Реклама в ChatGPT (OpenAI Ads) — идёт с 05.11, 65 € всего, карта Рената …0731",
+      "detail": "Кампания «REMPIRE campaign» в ads.openai.com (бета), показывается с 05.11 ~11:30: цель — клики (тега конверсий OpenAI на сайте нет); бюджет 65 € на всю кампанию — минимум площадки, без даты конца; 25 стран доставки; объявление ведёт на rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; у ссылки метка utm_source=chatgpt-ads, utm_campaign=chatgpt-eu — переходы видны в «Аналитике». Карта — Mastercard …0731 (Рената, та же, что в Google Рекламе); списание при 3 € или 30.11. Показывается только пользователям бесплатного ChatGPT и Go; в ЕС реклама не персональная — по теме текущего чата. После публикации и группа объявлений, и само объявление были выключены — их включили (Дим и Клод); если статус снова «Not serving», навести на красную точку — там причина. «Set up later» на шаге оплаты не нажимать — в первый раз оно удалило кампанию. Итог — когда 65 € потрачены; дальше решает Ренат.",
       "en": {
-        "title": "ChatGPT ads (OpenAI Ads) — a draft waiting for a card",
-        "detail": "On 05.11, at Dim's request, a draft «REMPIRE campaign» was built at ads.openai.com (beta): objective — clicks (the site has no OpenAI conversion tag); budget 65 € for the whole campaign — the platform's minimum, no end date; the 25 delivery countries; the ad leads to rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; the link carries utm_source=chatgpt-ads, utm_campaign=chatgpt-eu, so its visits show in «Аналитика». Left for Dim: the yellow «Finish set up» bar → card, name on card, address (OpenAI places a temporary 45 € hold); decide «Creative enhancement» — AI rewrites and translates the ad text with no review, advice: switch it off; then Publish. Never press «Set up later» at the billing step — the first time it deleted the campaign."
+        "title": "ChatGPT ads (OpenAI Ads) — running since 05.11, 65 € in total, Renat's card …0731",
+        "detail": "Campaign «REMPIRE campaign» at ads.openai.com (beta), serving since 05.11 ~11:30: objective — clicks (the site has no OpenAI conversion tag); budget 65 € for the whole campaign — the platform's minimum, no end date; the 25 delivery countries; the ad leads to rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; the link carries utm_source=chatgpt-ads, utm_campaign=chatgpt-eu, so its visits show in «Аналитика». Card — Mastercard …0731 (Renat's, the same as Google Ads); charged at 3 € or on 30.11. Shown only to Free and Go ChatGPT users; in the EU ads are not personalised — they follow the current chat's topic. Publishing left both the ad group and the ad itself switched off — they were switched on (Dim and Claude); if the status is «Not serving» again, hover the red dot for the reason. Never press «Set up later» at the billing step — the first time it deleted the campaign. The result — once the 65 € is spent; after that it is Renat's call."
       }
     },
     {
