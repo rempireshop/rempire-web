@@ -317,6 +317,38 @@ describe("getAnalyticsSummary", () => {
     expect(a.traffic.referrers.find((r) => r.host === "google.com")?.sessions).toBe(1);
   });
 
+  it("counts the shop's own ads: visits and the paid orders of those visits, never the server's revenue row", async () => {
+    // a Google-ad session that bought (two views, one purchase)
+    await event({ at: days(1), sid: "ad-g1", type: "view", ref: "ads.google.com" });
+    await event({ at: days(1), sid: "ad-g1", type: "view", ref: "ads.google.com" });
+    await event({ at: days(1), sid: "ad-g1", type: "purchase", value: 52.5, ref: "ads.google.com" });
+    // a second Google-ad session that only looked
+    await event({ at: days(2), sid: "ad-g2", type: "view", ref: "ads.google.com" });
+    // two ChatGPT-ad sessions, one order
+    await event({ at: days(1), sid: "ad-c1", type: "view", ref: "ads.openai.com" });
+    await event({ at: days(1), sid: "ad-c2", type: "view", ref: "ads.openai.com" });
+    await event({ at: days(1), sid: "ad-c2", type: "purchase", value: 33.9, ref: "ads.openai.com" });
+    // the server's authoritative row is not a session and must not double the count
+    await event({ at: days(1), sid: "server", type: "purchase", value: 33.9, ref: "ads.openai.com" });
+    // outside the 7-day range, and an ordinary referrer: neither belongs here
+    await event({ at: days(20), sid: "ad-g3", type: "purchase", value: 99, ref: "ads.google.com" });
+    await event({ at: days(1), sid: "org1", type: "purchase", value: 10, ref: "chatgpt.com" });
+
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.ads).toEqual([
+      { source: "google", host: "ads.google.com", sessions: 2, orders: 1, revenue: 52.5 },
+      { source: "chatgpt", host: "ads.openai.com", sessions: 2, orders: 1, revenue: 33.9 },
+    ]);
+  });
+
+  it("lists both ad campaigns even before either brought anyone", async () => {
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.ads).toEqual([
+      { source: "google", host: "ads.google.com", sessions: 0, orders: 0, revenue: 0 },
+      { source: "chatgpt", host: "ads.openai.com", sessions: 0, orders: 0, revenue: 0 },
+    ]);
+  });
+
   it("counts chat opens in range", async () => {
     await event({ at: days(1), sid: "s1", type: "chat" });
     await event({ at: days(20), sid: "s1", type: "chat" }); // outside 7d

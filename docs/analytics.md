@@ -202,8 +202,14 @@ duplicate to clean up:
   ordinary `chatgpt.com` referrals. Only that fact is kept (a `rmp_ad` flag
   in sessionStorage holding the source's name, written after statistics are
   allowed; an older tab's `"1"` still reads as Google) — never the click id.
-  «Источники» counts visits, not orders: which ad led to a purchase is not
-  shown.
+  «Источники» counts visits, not orders. The fold «Реклама: переходы и
+  заказы» (`qAdTraffic()` in `src/lib/analytics.ts`, since 05.11.2026) adds
+  the orders: for each campaign, the sessions that landed from it and the
+  done screen's `purchase` rows of those sessions (count and sum of `value`).
+  It reads the same anonymous rows and collects nothing new, so it never says
+  *which* order came from an ad, and it undercounts: no statistics consent, a
+  blocked beacon, an order finished in another tab or paid by invoice are
+  invisible to it. The server's `purchase` row (sid `server`) is left out.
 - Bots and crawlers are recognised by User-Agent and never written at all
   (`src/lib/events.ts` `isBotUA`).
 - **90-day retention.** Rows older than 90 days are deleted by

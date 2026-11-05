@@ -182,8 +182,27 @@ export type AnalyticsSummary = {
     countries: Array<{ country: string; sessions: number }>;
     referrers: Array<{ host: string; sessions: number }>;
   };
+  /** «Реклама: переходы и заказы» — always both rows, Google first. See qAdTraffic(). */
+  ads: AdTraffic[];
   chatOpens: number;
 };
+
+/** One of the shop's own ad campaigns, as the storefront files its visits (AD_SOURCES in app.js). */
+export type AdTraffic = {
+  source: "google" | "chatgpt";
+  host: "ads.google.com" | "ads.openai.com";
+  /** Sessions that landed from the ad and were counted (statistics allowed). */
+  sessions: number;
+  /** Of those sessions, paid orders reported by the done screen. */
+  orders: number;
+  /** Their totals, euro. */
+  revenue: number;
+};
+
+const AD_HOSTS: ReadonlyArray<Pick<AdTraffic, "source" | "host">> = [
+  { source: "google", host: "ads.google.com" },
+  { source: "chatgpt", host: "ads.openai.com" },
+];
 
 /* ---------- individual queries --------------------------------------------
  * Each takes {from, to, prevFrom} as Date objects (pg accepts a Date param
@@ -539,6 +558,52 @@ async function qTopReferrers(from: Date, to: Date) {
   return rows.map((r) => ({ host: r.ref, sessions: int(r.sessions) }));
 }
 
+/* «Реклама: переходы и заказы» — what the shop's own ads brought, read from
+   the events table only. No new data is collected for it, which is the point
+   (Dim, 05.11.2026: «if this is not visible to client and is running in the
+   background»):
+
+     · a visit that landed from an ad is filed under «ads.google.com» or
+       «ads.openai.com» for the rest of its tab (AD_SOURCES / refHost() in
+       app.js), and only after the shopper allowed statistics, like every
+       other event;
+     · the done screen's own `purchase` event, sent when the bank brings the
+       shopper back with `s=paid`, carries that same `ref` and the order total
+       in `value` — so "orders from the ad" is the purchase rows of those
+       sessions. The server's authoritative `purchase` row (sid 'server',
+       src/lib/payments/apply.ts) has no referrer and is left out.
+
+   It undercounts by design: a shopper who declined statistics, a blocked
+   beacon, an order finished in another tab or paid by invoice are all
+   invisible here. Nothing ties a row to an order or a person — the panel shows
+   counts and a sum, never which order it was. Both campaigns are always
+   listed, so a zero reads as a zero rather than as a missing row. */
+async function qAdTraffic(from: Date, to: Date): Promise<AdTraffic[]> {
+  const rows = await query<{ ref: string; sessions: string; orders: string; revenue: string | null }>(
+    `select ref,
+            count(distinct sid) filter (where type = 'view') as sessions,
+            count(*) filter (where type = 'purchase') as orders,
+            coalesce(sum(value) filter (where type = 'purchase'), 0) as revenue
+     from events
+     where at >= $1 and at < $2
+       and type in ('view', 'purchase')
+       and sid is not null and sid <> 'server'
+       and ref = any($3::text[])
+     group by 1`,
+    [from, to, AD_HOSTS.map((h) => h.host)],
+  );
+  return AD_HOSTS.map((h) => {
+    const r = rows.find((x) => x.ref === h.host);
+    return {
+      source: h.source,
+      host: h.host,
+      sessions: int(r?.sessions),
+      orders: int(r?.orders),
+      revenue: money(r?.revenue),
+    };
+  });
+}
+
 async function qChatOpens(from: Date, to: Date) {
   const rows = await query<{ n: string }>(
     "select count(*) as n from events where type = 'chat' and at >= $1 and at < $2",
@@ -555,7 +620,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
   const [
     ordersSummary, revenueByDay, topProductsByRevenue, brandRevenue, funnel, topProductsByViews,
     viewedNotBought, search, promoUsage, giftCards, abandonedCarts, lowStock,
-    device, countries, referrers, chatOpens, cartsReturned,
+    device, countries, referrers, chatOpens, cartsReturned, ads,
   ] = await Promise.all([
     qOrdersSummary(from, to, prevFrom),
     qRevenueByDay(from, to),
@@ -574,6 +639,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
     qTopReferrers(from, to),
     qChatOpens(from, to),
     qCartsReturned(from, to),
+    qAdTraffic(from, to),
   ]);
 
   // the owner's own products: a name and a brand instead of a bare `c-…` id
@@ -638,6 +704,7 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
     cartsReturned,
     lowStock,
     traffic: { device, countries, referrers },
+    ads,
     chatOpens,
   };
 }

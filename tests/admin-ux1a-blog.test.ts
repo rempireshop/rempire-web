@@ -495,6 +495,35 @@ describe("«Аналитика»: the comparison in words (screen 17)", () => {
     expect(kpi("Выручка", "190 €", null, "", "7d")).toContain("нет данных для сравнения");
   });
 
+  it("«Реклама: переходы и заказы» names both campaigns in Renat's words, with the sum only when there is an order", () => {
+    const more = new Function(
+      `function admStatsFoldHTML(key, title, lead, rows, empty) { return "<fold " + key + ">" + (rows.length ? rows.map(function (r) { return r[0] + " = " + r[1]; }).join(" | ") : empty) + "</fold>"; }
+       function admFoldHTML() { return ""; }
+       function admPairsHTML() { return ""; }
+       function admPct() { return ""; }
+       function admGscHTML() { return ""; }
+       function admGscSummaryHTML() { return ""; }
+       function countryName(c) { return c; }
+       function eur(n) { return n.toFixed(2).replace(".", ",") + " €"; }
+       ${slice("admStatsMoreHTML")} return admStatsMoreHTML;`,
+    )() as (a: unknown) => string;
+    const base = {
+      traffic: { device: { mobile: 0, desktop: 0 }, countries: [], referrers: [] },
+      zeroResultTerms: [], brandRevenue: [], promoUsage: [], viewedNotBought: [], searchTerms: [],
+      abandonedCarts: 0, cartsReturned: 0, giftCards: { sold: { count: 0, amount: 0 }, redeemed: { count: 0, amount: 0 } }, chatOpens: 0,
+    };
+    const html = more({
+      ...base,
+      ads: [
+        { source: "google", host: "ads.google.com", sessions: 12, orders: 0, revenue: 0 },
+        { source: "chatgpt", host: "ads.openai.com", sessions: 40, orders: 2, revenue: 86.4 },
+      ],
+    });
+    expect(html).toContain("<fold ads>Реклама Google = переходов 12 · заказов 0 | Реклама ChatGPT = переходов 40 · заказов 2 · 86,40 €</fold>");
+    // a summary from before the field existed (a cached answer) reads as «no data», not as a crash
+    expect(more(base)).toContain("<fold ads>Пока нет данных</fold>");
+  });
+
   it("names the fourth number for what it is, and keeps every list the screen had, folded", () => {
     const screen = slice("admStatsScreen") + slice("admStatsMoreHTML");
     expect(screen).toContain('admKpiHTML("Покупают"');

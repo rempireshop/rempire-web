@@ -32783,6 +32783,15 @@
       admStatsFoldHTML("refs", "С каких сайтов приходят",
         "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.",
         a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }), "Пока нет данных", true) +
+      /* the shop's own ads: visits and the paid orders of those visits, from
+         the anonymous events alone (qAdTraffic() in src/lib/analytics.ts) —
+         counts and a sum, never which order it was */
+      admStatsFoldHTML("ads", "Реклама: переходы и заказы",
+        "Сколько человек пришло по вашей рекламе в Google и ChatGPT и сколько из них оплатили заказ. Считаются только гости, которые разрешили статистику, и заказы, оплаченные в той же вкладке, — настоящих заказов может быть больше. Сколько потрачено на рекламу, видно в кабинетах Google и ChatGPT.",
+        (a.ads || []).map(function (r) {
+          return [r.source === "google" ? "Реклама Google" : "Реклама ChatGPT",
+            "переходов " + (r.sessions || 0) + " · заказов " + (r.orders || 0) + (r.orders ? " · " + eur(r.revenue) : "")];
+        }), "Пока нет данных", true) +
       admStatsFoldHTML("viewed", "Смотрят, но не покупают",
         "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
         a.viewedNotBought.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Таких товаров нет", true) +
