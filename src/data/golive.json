@@ -1769,11 +1769,26 @@
         "renat"
       ],
       "status": "doing",
-      "title": "Google Реклама — тест 20 € до 08.11, карта Рената …0731",
-      "detail": "Кампания «Test Shopping EE»: Google Покупки, только Эстония, 25.10–08.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,25 € за клик; всё остальное — «Исключено» (ставит Дим). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 08.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. 26.10, вечер: 0 показов за полтора дня — при этом кампания и группа «Допущено», все 83 товара трёх брендов допущены без замечаний, по оплате предупреждений нет. Следующая проверка ~29.10; если по-прежнему 0 — поднять ставку или добавить бренды (решает Дим). 29.10: 0 кликов. 28.10 в 21:50 сбой панели скрыл 75 товаров, среди них все три бренда теста — до восстановления 29.10 в 14:37 их не было ни в магазине, ни в Google.",
+      "title": "Google Реклама — тест 20 € до 15.11, карта Рената …0731",
+      "detail": "Кампания «Test Shopping EE»: Google Покупки, 25.10–15.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,70 € за клик; всё остальное — «Исключено». Страны — с 05.11 все 25, куда магазин доставляет (ЕС без Кипра и Мальты). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 15.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. Как шло: 25.10 — старт, только Эстония, ставка 0,25 €. 26.10 и 29.10 — 0 показов, 0 кликов; 28.10 в 21:50 сбой панели скрыл 75 товаров, среди них все три бренда теста — до 29.10 14:37 их не было ни в магазине, ни в Google. 02.11 — 2 показа, 0 кликов: Дим поднял ставку до 0,70 €, добавил Латвию, Литву и оба фида (EN и RU), конец перенёс на 15.11. 05.11 — все 25 стран доставки (Дим); бюджет тот же, поэтому 20 € могут кончиться раньше 15.11.",
       "en": {
-        "title": "Google Ads — 20 € test until 08.11, Renat's card …0731",
-        "detail": "Campaign «Test Shopping EE»: Google Shopping, Estonia only, 25.10–08.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.25 € a click; everything else — «Excluded» (Dim sets it). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 08.11 — the test's result goes into «What was done»; after that the ads are Renat's call. 26.10, evening: 0 impressions in a day and a half — while the campaign and ad group are «Eligible», all 83 products of the three brands are eligible with no issues, and billing shows no warning. Next check ~29.10; if still 0 — raise the bid or add brands (Dim decides). 29.10: 0 clicks. On 28.10 at 21:50 a panel glitch hid 75 products, all three test brands among them — absent from the shop and Google until restored on 29.10 at 14:37."
+        "title": "Google Ads — 20 € test until 15.11, Renat's card …0731",
+        "detail": "Campaign «Test Shopping EE»: Google Shopping, 25.10–15.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.70 € a click; everything else — «Excluded». Countries — since 05.11 all 25 the shop delivers to (the EU without Cyprus and Malta). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 15.11 — the test's result goes into «What was done»; after that the ads are Renat's call. How it went: 25.10 — start, Estonia only, 0.25 € a click. 26.10 and 29.10 — 0 impressions, 0 clicks; on 28.10 at 21:50 a panel glitch hid 75 products, all three test brands among them — absent from the shop and Google until 29.10 at 14:37. 02.11 — 2 impressions, 0 clicks: Dim raised the bid to 0.70 €, added Latvia, Lithuania and both feeds (EN and RU), and moved the end to 15.11. 05.11 — all 25 delivery countries (Dim); the budget is unchanged, so the 20 € may run out before 15.11."
+      }
+    },
+    {
+      "area": "ho-money",
+      "blocking": false,
+      "id": "ho-openai-ads",
+      "who": [
+        "dim"
+      ],
+      "status": "todo",
+      "title": "Реклама в ChatGPT (OpenAI Ads) — черновик ждёт карту",
+      "detail": "05.11 по просьбе Димы собран черновик «REMPIRE campaign» в ads.openai.com (бета): цель — клики (тега конверсий OpenAI на сайте нет); бюджет 65 € на всю кампанию — минимум площадки, без даты конца; 25 стран доставки; объявление ведёт на rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; у ссылки метка utm_source=chatgpt-ads, utm_campaign=chatgpt-eu — переходы видны в «Аналитике». Осталось Диме: жёлтая полоса «Finish set up» → карта, имя на карте, адрес (OpenAI временно блокирует 45 €); решить «Creative enhancement» — ИИ сам переписывает и переводит текст объявления без проверки, совет — выключить; затем Publish. «Set up later» на шаге оплаты не нажимать — в первый раз оно удалило кампанию.",
+      "en": {
+        "title": "ChatGPT ads (OpenAI Ads) — a draft waiting for a card",
+        "detail": "On 05.11, at Dim's request, a draft «REMPIRE campaign» was built at ads.openai.com (beta): objective — clicks (the site has no OpenAI conversion tag); budget 65 € for the whole campaign — the platform's minimum, no end date; the 25 delivery countries; the ad leads to rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; the link carries utm_source=chatgpt-ads, utm_campaign=chatgpt-eu, so its visits show in «Аналитика». Left for Dim: the yellow «Finish set up» bar → card, name on card, address (OpenAI places a temporary 45 € hold); decide «Creative enhancement» — AI rewrites and translates the ad text with no review, advice: switch it off; then Publish. Never press «Set up later» at the billing step — the first time it deleted the campaign."
       }
     },
     {
@@ -1785,10 +1800,10 @@
       ],
       "status": "todo",
       "title": "Список расходов в месяц — в документ Рената",
-      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; Vercel — Pro $20 в месяц с 03.11, пока не вернём на Hobby (см. «Vercel — Pro с 03.11»); Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
+      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; реклама в ChatGPT — 65 € один раз, если её запустят; Vercel — Pro $20 в месяц с 03.11, пока не вернём на Hobby (см. «Vercel — Pro с 03.11»); Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
       "en": {
         "title": "Monthly costs — into Renat's document",
-        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; Vercel — Pro, $20 a month since 03.11, until it goes back to Hobby (see «Vercel — Pro since 03.11»); Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
+        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; ChatGPT ads — 65 € once, if launched; Vercel — Pro, $20 a month since 03.11, until it goes back to Hobby (see «Vercel — Pro since 03.11»); Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
       }
     },
     {
@@ -1820,6 +1835,22 @@
       "en": {
         "title": "Merchant Center: our feeds «Approved» → switch off Shopify's",
         "detail": "Done 16.10: our EN and RU feeds — 607 of 629 items approved (the rest are Google policy cases such as CBD); Dim deleted Shopify's six sources. There is no Estonian feed: Merchant Center offers no Estonian language. 26.10: the sets are in the feed too — one item per set (set-…), at the set's price, with the products' own photos; before, Google found two sets by itself and refused them for lacking delivery. Google wrongly flagged 28 items as «prescription drugs» — limited in France and Germany only. 29.10: 27 products (83 offers) flagged as «prescription drugs» again — after the new AI descriptions with ingredients, acids and precautions; no further review can be requested. The feed now gives Google only the headline and first paragraph; the product page keeps the whole text. CBD Daily is Google's rule, text cannot fix it. 30.10: the «prescription drugs» flags are gone (Limited 97 → 4), 628 approved. Products Google found by itself (117, 105 of them Malta from the Shopify days — the shop does not deliver there) are hidden: Data sources → «Found by Google» → ⋮. CBD Daily stays as it is — no special rules for single products (Dim)."
+      }
+    },
+    {
+      "area": "ho-data",
+      "blocking": false,
+      "id": "ho-mc-photos",
+      "who": [
+        "claude",
+        "renat"
+      ],
+      "status": "doing",
+      "title": "Google: главное фото не меньше 500 × 500 с 31.01.2027",
+      "detail": "Письмо Google 04.11: с 31.01.2027 Merchant Center не показывает товар, если главное фото меньше 500 × 500. Сделано 05.11: узкие фото уходят в Google на белом квадрате (npm run feed:squares, папка public/shop/img/sq/; на сайте — прежнее фото); 16 мелких фото заменены фото с сайтов брендов. Ренат прислал фото своих упаковок: Kevin.Murphy SMOOTH.AGAIN.WASH 40 мл и STAYING.ALIVE 40 мл совпадают с фото бренда — поставлены фото kevinmurphy.com.au (теперь видно название, а не обратная сторона); у Anua BHA 2% тоника и Heartleaf Quercetinol пенки у Рената старая упаковка, а у Anua на сайте только новая — оставлены прежние фото (старая упаковка, в Google на белом квадрате). Ждёт Рената: какая упаковка у Creed Original Vetiver и замечания по фото с ⚠ из сообщения 05.11. Кто меняет фото в public/shop/img/ — потом npm run feed:squares, иначе тест feed-squares красный. Фото, которые Ренат загружает в панели, на квадрат не ставятся — загружать не меньше 1000 px по короткой стороне.",
+      "en": {
+        "title": "Google: main photo at least 500 × 500 from 31.01.2027",
+        "detail": "Google's mail of 04.11: from 31.01.2027 Merchant Center stops showing a product whose main photo is under 500 × 500. Done 05.11: narrow photos go to Google on a white square (npm run feed:squares, folder public/shop/img/sq/; the site keeps its photo); 16 tiny photos replaced by the brands' own. Renat sent photos of his packaging: Kevin.Murphy SMOOTH.AGAIN.WASH 40 ml and STAYING.ALIVE 40 ml match the brand's — the kevinmurphy.com.au photos are in (the name now shows, not the back); his Anua BHA 2% toner and Heartleaf Quercetinol foam are the old packaging while Anua's site shows only the new — the old photos stay (old packaging, on a white square for Google). Waiting on Renat: which packaging his Creed Original Vetiver has, and any remarks on the ⚠ photos in the 05.11 message. Whoever changes a photo in public/shop/img/ runs npm run feed:squares afterwards, or the feed-squares test goes red. Photos Renat uploads in the panel are not squared — upload them at least 1000 px on the short side."
       }
     },
     {
