@@ -24,6 +24,7 @@
     "pack:migrations": "node tools/pack-migrations.mjs",
     "pack:content": "node tools/pack-content.mjs",
     "pack:feed": "node tools/pack-feed.mjs",
+    "feed:squares": "node tools/feed-squares.mjs",
     "cards:snapshot": "node tools/search-cards-snapshot.mjs",
     "montonio:routes": "node tools/montonio-route-grid.mjs",
     "pack:legal": "node tools/pack-legal.mjs",

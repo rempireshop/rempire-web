@@ -210,9 +210,17 @@ is what to do about it:
      appears anyway, tell Dim, and in **Settings → Automatic improvements →
      item updates** (check the wording) switch off automatic **price**
      updates so Google cannot «correct» a price down.
-   - **Image too small:** some product photos are narrow bottle cut-outs,
-     only 109–249 pixels on the short side. Google's minimum is 100, so they
-     pass, but bigger photos would do better.
+   - **Image too small (for upcoming enforcement):** from 31 January 2027
+     Google refuses a main photo under 500 × 500 pixels. The shop's photos
+     are narrow bottle cut-outs, so since 05.11.2026 the feed sends Google a
+     copy of each small one on a white square (`public/shop/img/sq/`, made by
+     `npm run feed:squares`); the site keeps the cut-out. After adding or
+     replacing a photo in `public/shop/img/`, run `npm run feed:squares` —
+     `tests/feed-squares.test.ts` fails until you do. Photos Renat uploads in
+     the panel are not squared: upload them at least 1000 px on the short side
+     (all of them were on 05.11.2026). If the
+     warning still shows a month after a change, open one product and check
+     which image link Google read.
 4. In **Settings → Data sources**, click each of our sources. The last fetch
    should say it succeeded, with about 322 products for the EN and ET
    feeds. If a fetch failed, press **Fetch now** again later.

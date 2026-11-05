@@ -278,7 +278,8 @@ describe("the items", () => {
         expect(desc.length, id).toBeGreaterThan(10);
         expect(desc.length, id).toBeLessThanOrEqual(5000);
         expect(one(it, "link"), id).toMatch(new RegExp("^https://rempireshop\\.com" + segs[lang] + "[^/?]+(\\?size=[a-z0-9-]+)?$"));
-        expect(one(it, "image_link"), id).toMatch(/^https:\/\/rempireshop\.com\/shop\/img\/[^?]+\.webp(\?v=\d+)?$/);
+        /* the shop's own photo, or its white square when the photo is under 500 px (tools/feed-squares.mjs) */
+        expect(one(it, "image_link"), id).toMatch(/^https:\/\/rempireshop\.com\/shop\/img\/(?:[^?/]+\.webp(\?v=\d+)?|sq\/[^?/]+\.jpg)$/);
         for (const extra of it.fields.additional_image_link ?? []) expect(extra).toMatch(/^https:\/\//);
         expect((it.fields.additional_image_link ?? []).length).toBeLessThanOrEqual(10);
         expect(["in_stock", "out_of_stock"]).toContain(one(it, "availability"));
@@ -500,7 +501,11 @@ describe("sets («Наборы»)", () => {
     const shampoo250 = byProduct(list, SHAMPOO).find((it) => one(it, "size") === "250 ml")!;
     const balm = byProduct(list, PRORASO)[0];
     expect(one(set, "image_link")).toBe(one(shampoo250, "image_link"));
-    expect(set.fields.additional_image_link).toContain(one(balm, "image_link"));
+    /* the extra photos are the cut-outs themselves; only g:image_link is squared */
+    const photoOf = (u: string | undefined) => String(u).replace(/\/shop\/img\/sq\/([^/]+)\.jpg$/, "/shop/img/$1.webp");
+    expect((set.fields.additional_image_link ?? []).map(photoOf)).toContainEqual(
+      expect.stringContaining(photoOf(one(balm, "image_link")).replace(/\?v=\d+$/, "")),
+    );
     expect(one(set, "image_link")).not.toMatch(/\/og\//);
   });
 

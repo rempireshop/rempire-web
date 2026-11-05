@@ -63,6 +63,7 @@ import { createHash } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import catalogueFeed from "@/data/catalogue.feed.json";
 import variantData from "@/data/catalogue.variants.json";
+import feedSquares from "@/data/feed-squares.json";
 import { BUNDLE_MIN_ITEMS, listBundles, type Bundle, type BundleItemOut } from "@/lib/bundles";
 import { listCustomProducts, type CustomProduct } from "@/lib/custom-products";
 import { query } from "@/lib/db";
@@ -224,6 +225,20 @@ function absUrl(base: string, u: string): string {
 
 /** Merchant Center reads JPEG, PNG, GIF, BMP, TIFF and WebP — never SVG (a custom product's placeholder tower is one). */
 const usableImage = (u: string) => !!u && !/\.svg(\?|#|$)/i.test(u);
+
+/**
+ * The main photo as Google gets it. From 31.01.2027 Merchant Center refuses a
+ * g:image_link under 500 × 500 px, and the shop's cut-outs of tall bottles
+ * are 320 × 900. tools/feed-squares.mjs puts each such photo on a white
+ * square in public/shop/img/sq/ and lists it in src/data/feed-squares.json;
+ * a listed shop photo goes out as its square. Only the main image: the rule
+ * reads g:image_link alone, and the site keeps the cut-out.
+ */
+const SQUARED = new Set<string>(feedSquares as string[]);
+export function googleImage(u: string): string {
+  const m = /^((?:https?:\/\/[^/]+)?)\/shop\/img\/([^/?#]+)\.webp(?:[?#].*)?$/i.exec(u);
+  return m && SQUARED.has(m[2]) ? `${m[1]}/shop/img/sq/${m[2]}.jpg` : u;
+}
 
 /* ---------- ids --------------------------------------------------------- */
 
@@ -1040,7 +1055,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
         /* each size opens on itself — sizeFromQuery() in public/shop2/app.js;
            one address for all sizes shows the first size's price to Google */
         el("g:link", slug ? `${link}?size=${encodeURIComponent(slug)}` : link),
-        el("g:image_link", absUrl(base, main)),
+        el("g:image_link", absUrl(base, googleImage(main))),
         ...more.map((u) => el("g:additional_image_link", absUrl(base, u))),
         el("g:availability", available ? "in_stock" : "out_of_stock"),
         el("g:price", eurText(r.price)),
@@ -1125,7 +1140,7 @@ export function buildFeed(opts: FeedOptions): { xml: string; stats: FeedStats } 
       el("g:title", title),
       el("g:description", description),
       el("g:link", base + langPath(seg, "/set/" + encodeURIComponent(b.id) + "/")),
-      el("g:image_link", absUrl(base, photos[0])),
+      el("g:image_link", absUrl(base, googleImage(photos[0]))),
       ...photos.slice(1, 11).map((u) => el("g:additional_image_link", absUrl(base, u))),
       el("g:availability", offer.available ? "in_stock" : "out_of_stock"),
       el("g:price", eurText(offer.price)),
