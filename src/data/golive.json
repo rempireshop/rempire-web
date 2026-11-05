@@ -1596,10 +1596,10 @@
       ],
       "status": "doing",
       "title": "Лист с логинами — Дим заполняет и отдаёт лично",
-      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит. Отдельный менеджер паролей (Bitwarden) не заводим — Дим, 25.10. 05.11: Клод дополняет шаблон текущими сервисами (паролей в файле ещё нет — Дим, 05.11).",
+      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит. Отдельный менеджер паролей (Bitwarden) не заводим — Дим, 25.10. 05.11: шаблон обновлён — 18 сервисов (добавлены Google Реклама, реклама в ChatGPT, Google Cloud, коннектор Claude, Stripe; Shopify убран), чьи карты менять на встрече, владелец домена THEFLOW OÜ. Паролей в файле нет — их вписывает Дим от руки.",
       "en": {
         "title": "Login sheet — Dim fills it in and hands it over in person",
-        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim writes the passwords in himself, on his own computer, and hands it to Renat in person — not in a chat, not by mail. Claude never sees the passwords. No separate password manager (Bitwarden) — Dim, 25.10. 05.11: Claude brings the template up to the current services (no passwords in the file yet — Dim, 05.11)."
+        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim writes the passwords in himself, on his own computer, and hands it to Renat in person — not in a chat, not by mail. Claude never sees the passwords. No separate password manager (Bitwarden) — Dim, 25.10. 05.11: template updated — 18 services (Google Ads, ChatGPT ads, Google Cloud, the Claude connector and Stripe added; Shopify removed), which cards to swap at the meeting, the domain owner THEFLOW OÜ. No passwords in the file — Dim writes them in by hand."
       }
     },
     {
@@ -2000,12 +2000,12 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Что сделано · как сейчас · что можно сделать дальше",
-      "detail": "Одна страница: итоги проекта, известные проблемы, идеи на будущее — основа следующего проекта с Rempire.",
+      "detail": "Одна страница: итоги проекта, известные проблемы, идеи на будущее — основа следующего проекта с Rempire. 05.11: черновик на одну страницу («что сделано · как сейчас · что дальше») — Дим проверяет и дополняет изменениями до 08.11.",
       "en": {
         "title": "What was done · where it stands · what could come next",
-        "detail": "One page: the project's results, known issues, ideas for later — the start of the next Rempire project."
+        "detail": "One page: the project's results, known issues, ideas for later — the start of the next Rempire project. 05.11: a one-page draft («what was done · where it stands · what comes next») — Dim checks it and adds the changes up to 08.11."
       }
     },
     {
@@ -2031,12 +2031,12 @@
       "who": [
         "dim"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Условия поддержки после 08.11",
-      "detail": "Дим — платная поддержка: как связаться, что входит, за сколько отвечает. Документ Димы; Клод может набросать черновик.",
+      "detail": "Дим — платная поддержка: как связаться, что входит, за сколько отвечает. Документ Димы; Клод может набросать черновик. 05.11: Клод написал черновик (что входит, что нет, как писать, сроки ответа); цену, часы и сроки вписывает Дим.",
       "en": {
         "title": "Support terms after 08.11",
-        "detail": "Dim is paid support: how to reach him, what is included, how fast he answers. Dim's document; Claude can draft it."
+        "detail": "Dim is paid support: how to reach him, what is included, how fast he answers. Dim's document; Claude can draft it. 05.11: Claude drafted it (what is included, what is not, how to reach Dim, reply times); Dim fills in the price, hours and reply times."
       }
     },
     {
@@ -2063,12 +2063,12 @@
         "dim",
         "renat"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Встреча: Ренат сам входит в каждый сервис",
-      "detail": "По листу логинов: вход, 2FA на его телефоне, восстановление пароля. Плюс один заказ от начала до конца в панели, один возврат.",
+      "detail": "По листу логинов: вход, 2FA на его телефоне, восстановление пароля. Плюс один заказ от начала до конца в панели, один возврат. 05.11: черновик сценария встречи по шагам (порядок: Google → GitHub → пароль панели → Claude → карты → остальные входы → заказ и возврат в панели → подписи) — у Дима.",
       "en": {
         "title": "Meeting: Renat signs into every service himself",
-        "detail": "From the login sheet: sign-in, 2FA on his phone, password recovery. Plus one order from start to finish in the panel, and one return."
+        "detail": "From the login sheet: sign-in, 2FA on his phone, password recovery. Plus one order from start to finish in the panel, and one return. 05.11: a step-by-step draft of the meeting (order: Google → GitHub → panel password → Claude → cards → the other sign-ins → an order and a return in the panel → signatures) — with Dim."
       }
     },
     {
@@ -2111,12 +2111,12 @@
         "claude",
         "dim"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Новые секреты после передачи",
-      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. В Vercel стоит DATABASE_SSL_NO_VERIFY — по возможности заменить на DATABASE_SSL_CA (docs/backend.md). Клод готовит список и проверяет после замены.",
+      "detail": "Новый SESSION_SECRET (все входы в панель сбросятся), CRON_SECRET; по желанию — новые ключи Resend и хранилища фото. В Vercel стоит DATABASE_SSL_NO_VERIFY — по возможности заменить на DATABASE_SSL_CA (docs/backend.md). Клод готовит список и проверяет после замены. 05.11: черновик списка готов — что менять обязательно (пароль панели, SESSION_SECRET, CRON_SECRET), что по желанию, что не трогать и почему.",
       "en": {
         "title": "Fresh secrets after the handover",
-        "detail": "A new SESSION_SECRET (every panel sign-in resets), CRON_SECRET; optionally new Resend and photo-storage keys. Vercel has DATABASE_SSL_NO_VERIFY set — replace it with DATABASE_SSL_CA if possible (docs/backend.md). Claude prepares the list and checks after the swap."
+        "detail": "A new SESSION_SECRET (every panel sign-in resets), CRON_SECRET; optionally new Resend and photo-storage keys. Vercel has DATABASE_SSL_NO_VERIFY set — replace it with DATABASE_SSL_CA if possible (docs/backend.md). Claude prepares the list and checks after the swap. 05.11: the draft list is ready — what must change (panel password, SESSION_SECRET, CRON_SECRET), what is optional, what to leave and why."
       }
     },
     {
