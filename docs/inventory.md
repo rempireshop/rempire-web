@@ -361,7 +361,7 @@ dump the catalogue was partly built from). **As of this writing every one of
 those 153 harvested variants carries `barcode: "NA"`** — Renat's Shopify
 catalogue has no real barcodes on record anywhere the Admin API could see
 (confirmed by reading the full dump; see
-`../rempire-api/docs/BARCODE-SCANNING.md`, "Barcode VALUES are not in the
+`research-2026-08/BARCODE-SCANNING.md`, "Barcode VALUES are not in the
 public Shopify data"). So a fresh run seeds zero real EANs — that is the
 correct, honest result today, not a bug. EANs from here on come from scanning
 in the admin ("assign mode": scan an unknown code → search → «Привязать»), or

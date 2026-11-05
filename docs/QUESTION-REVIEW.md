@@ -11,7 +11,7 @@ Every question on `/qa2` had to pass three tests:
 3. **Is he the right person?** Some answers belong to his accountant, his
    POS vendor, or a lawyer.
 
-The catalogue audit on 22.08 (`rempire-api/docs/SHOPIFY-CATALOGUE-AUDIT.md`)
+The catalogue audit on 22.08 (`docs/research-2026-08/SHOPIFY-CATALOGUE-AUDIT.md`)
 changed the answers to test 1 for several drafts. Three were cut.
 
 ## Cut

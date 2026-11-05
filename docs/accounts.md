@@ -45,9 +45,9 @@ account is billed. The card plan is described below the table.
 | **Google account** rempireshopinfo@gmail.com | Identity for the services below; the shop's mailbox (info@ and shop@ forward here) | password + 2FA on Renat's phone | Renat | — | free | none; only through the services he is a member of |
 | **Zone.ee** (my.zone.eu) | Registrar for `rempireshop.com`; paid to **31.05.2027**, renewed yearly | blackboxestonia@gmail.com (THEFLOW's own Zone account; the Diip Solutions account has shared access) | THEFLOW OÜ (Renat) | Renat, when the yearly bill comes | yearly fee (amount not recorded here) | partner or user for support (`ho-zone-registrant`) |
 | **Cloudflare** | DNS for `rempireshop.com` (nameservers `albert` / `april.ns.cloudflare.com`), Email Routing (info@, shop@ → the shop Gmail), R2 bucket `rempire-media` (photos, at `img.rempireshop.com`) | rempireshopinfo@ | the shop | **Dim's card today → company card at the meeting** (R2 needs a card even at 0 €) | 0 € (Free plan; R2 within the free 10 GB) | member |
-| **Vercel** team «Rempire», project `rempire-web` | Hosting: the site, 104 API routes, two crons, builds of branch `production`, the deploy hook | GitHub `rempireshop` | the shop | not recorded (Dim moved the team to Pro on 03.11) — open question 1 | **Pro $20 / month since 03.11.2026**; back to Hobby (free) when usage allows (RUNBOOK §6) | see «Dim's access» below |
+| **Vercel** team «Rempire», project `rempire-web` | Hosting: the site, 104 API routes, two crons, builds of branch `production`, the deploy hook | GitHub `rempireshop` | the shop | Dim's card (Pro since 03.11); none on Hobby | **Pro $20 / month since 03.11.2026**; back to Hobby (free) when usage allows (RUNBOOK §6) | see «Dim's access» below |
 | **Railway** | The Postgres 18 database, and nothing else (EU West) | GitHub `rempireshop` | the shop | **Dim's card today → company card at the meeting** | Hobby, ~$6 / month (02.10 bill: $6.20) | member if the plan allows; otherwise none. Backups do not need it (GitHub secret) |
-| **GitHub** user `rempireshop` | Repositories `rempire-web` (the shop) and `rempire-api` (open question 7); Actions: CI, promote, smoke, backups | rempireshopinfo@ | the shop | — | free; the repo goes **private on 08.11**, and CI fits the free private minutes | `dimnovare` stays a collaborator (push) |
+| **GitHub** user `rempireshop` | Repositories `rempire-web` (the shop) and `rempire-api` (unused; its notes are in `docs/research-2026-08/`; Dim deletes it); Actions: CI, promote, smoke, backups | rempireshopinfo@ | the shop | — | free; the repo goes **private on 08.11**, and CI fits the free private minutes | `dimnovare` stays a collaborator (push) |
 | **Resend** | All e-mail from `@rempireshop.com` (region eu-west-1, Ireland) | rempireshopinfo@ | the shop | — | free tier: 100 / day, 3 000 / month | member |
 | **Montonio** | Payments (bank links, cards, wallets), refunds, parcel labels, pickup points; live keys | Renat's own login | Rempire Store OÜ | Renat (contract) | per contract | technical contact, if Renat wants |
 | **OpenAI API** (platform.openai.com) | Shop chat, panel assistant, AI texts, AI search, photo cut-out, build-time search cards | rempireshopinfo@ | the shop | the shop's account (funded 08.10); whose card funded it is still to check (`ho-openai`) | cents a day; set a monthly limit of ~$10 | member, if useful |
@@ -65,7 +65,7 @@ account is billed. The card plan is described below the table.
 | **Stripe** | Card payments of the old Shopify shop | Renat's | Renat | — | no monthly fee | none. Close around the end of January 2027, after the dispute window (`ho-stripe`). |
 | **Shopify** (legacy) | The old shop | Renat's | Renat | — | was ~46 € / month | **closed 29.10.2026**; orders and customers exported first |
 | **Vercel Blob** `rempire-qa` (on Diip's team, not the shop's) | Questionnaire answers from the prototype days; unused since 07.09 | Dim | Diip | — | free | Dim deletes it (`ho-blob-cleanup`) |
-| **rempireshop.diipsolutions.eu** | Dim's own host on the same Vercel project: `/handover`, the panel and the API; every shop page 301s to rempireshop.com | Dim's DNS (diipsolutions.eu) | Dim | — | — | open question 6 |
+| **rempireshop.diipsolutions.eu** | Dim's own host on the same Vercel project: `/handover`, the panel and the API; every shop page 301s to rempireshop.com | Dim's DNS (diipsolutions.eu) | Dim | — | — | removed when Dim confirms, not before 19.11 (`staging-host`) |
 
 ### The card plan
 
@@ -108,7 +108,7 @@ collaborator, with no ownership and no cards on file.
 | Cloudflare, Resend, Search Console, Merchant Center, Google Ads, Google Cloud, Bing | member / user | Check each one at the meeting (`ho-members`). Remove Dim as an *owner* wherever he is one (Search Console). |
 | Zone.ee | partner or user, for support | `ho-zone-registrant` |
 | Panel `/admin` | none of his own | The panel has one password, Renat's. Dim signs in only when Renat gives him the password for a support task. |
-| Alerts | `DEV_ALERT_TO` defaults to info@diipsolutions.eu | Build-watch, backup-watch and hide-watch letters and the Monday content report keep reaching Dim. Keep it for paid support or change it (open question 5). |
+| Alerts | `DEV_ALERT_TO` defaults to info@diipsolutions.eu | Build-watch, backup-watch and hide-watch letters and the Monday content report keep reaching Dim. Moves to rempireshopinfo@gmail.com after the handover, once Dim confirms (`ho-access-trim`). |
 | Telegram, Montonio, Stripe | none | Renat's |
 
 ## DNS — `rempireshop.com` (Cloudflare)
@@ -171,17 +171,18 @@ accountant confirm it once.
 
 ## Open questions (for Dim)
 
-1. **Vercel Pro.** Whose card pays the $20, and does it move to the company
-   card at the meeting like the others?
+1. ~~Vercel Pro~~ — answered 05.11: Dim's card pays it. The goal is Hobby,
+   which takes no card; the company card only if Pro has to stay.
 2. ~~Card …0731~~ — answered 05.11: Dim's; the handover rows say so.
 3. ~~Zone.ee~~ — answered 05.11: THEFLOW OÜ is Renat's company, the sign-in
    is blackboxestonia@, and moving the domain to Rempire Store OÜ is optional.
 4. **`RESEND_TO`, `VAPID_*`, `TELEGRAM_*`.** Are they all set in Vercel
    Production? The owner gets no order pings through any road that is
    missing.
-5. **`DEV_ALERT_TO`.** Keep info@diipsolutions.eu for paid support, or point
-   it elsewhere?
-6. **`rempireshop.diipsolutions.eu`.** Keep it on the shop's Vercel project
-   after the handover (it serves `/handover`), or remove the domain?
-7. **`rempire-api`.** What is this repository, and should it be archived or
-   deleted?
+5. ~~`DEV_ALERT_TO`~~ — answered 05.11: rempireshopinfo@gmail.com after the
+   handover, changed only once Dim confirms.
+6. ~~`rempireshop.diipsolutions.eu`~~ — answered 05.11: removed when Dim
+   confirms, not before 19.11. Renat re-adds the panel to his home screen from
+   rempireshop.com first.
+7. ~~`rempire-api`~~ — answered 05.11: a research archive, never deployed.
+   Its notes are in `docs/research-2026-08/`; Dim deletes the repository.

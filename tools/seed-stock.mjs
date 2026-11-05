@@ -12,7 +12,7 @@
  * tools/build-catalogue-full.mjs). As of this writing every one of those
  * files carries `variants[].barcode: "NA"` — Renat's Shopify catalogue has
  * no real barcodes entered anywhere the Admin API could see (confirmed by
- * reading all 153 harvested variants; see ../rempire-api/docs/
+ * reading all 153 harvested variants; see docs/research-2026-08/
  * BARCODE-SCANNING.md, "Barcode VALUES are not in the public Shopify data").
  * So this run seeds EAN-less rows for the whole catalogue — that is the
  * correct, honest result today, not a bug. Re-running it later (after a

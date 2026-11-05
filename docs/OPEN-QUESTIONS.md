@@ -18,7 +18,7 @@ support it (nor does MakeCommerce). PayPal direct in Estonia is 3.4% + €0.35
 Ask him how many customers have actually asked for PayPal before we design
 around it. If it is genuinely required, SEB/EveryPay (PayPal at €0.10/tx,
 cards 1.35%) becomes the stronger single-provider answer; otherwise stay on
-Montonio Core. Full analysis: `rempire-api/docs/PAYMENT-PROVIDERS.md`.
+Montonio Core. Full analysis: `docs/research-2026-08/PAYMENT-PROVIDERS.md`.
 
 ## A. Blocks the architecture — ask Renat directly
 
