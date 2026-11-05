@@ -256,7 +256,7 @@ export const TOOLS: ToolDef[] = [
       type: "object",
       properties: {
         query: { type: "string", description: "Words to look for: a brand, a product name, a type («шампунь», «beard oil»)." },
-        limit: { type: "integer", minimum: 1, maximum: 25, description: "How many to return, 12 by default." },
+        limit: { type: "integer", minimum: 1, maximum: 50, description: "How many to return, 12 by default, 50 at most. «found» is how many match in all — when it is more than came back, ask again with a bigger limit or one more word." },
         include_hidden: {
           type: "boolean",
           description: "Also the owner's own products nobody sees yet (made with create_product) — to change them. Never link one in an article.",
@@ -773,15 +773,25 @@ function pick(t: Record<string, string> | undefined, l: L3): string {
 export async function runTool(name: string, args: Record<string, unknown>): Promise<ToolResult> {
   if (name === "search_products") {
     const q = typeof args.query === "string" ? args.query.slice(0, 200) : "";
-    const limit = Math.max(1, Math.min(25, Math.floor(Number(args.limit) || 12)));
+    const limit = Math.max(1, Math.min(50, Math.floor(Number(args.limit) || 12)));
     const { base, list } = await productsNow();
     /* the owner's hidden products only when asked for — an article never
        names one (shopBody() drops a link to anything not in the shop) */
     const hidden = args.include_hidden === true ? await hiddenOwn() : [];
     const hiddenIds = new Set(hidden.map((p) => p.id));
-    const found = searchProducts([...list, ...hidden], q, limit);
-    if (!found.length) return ok({ found: 0, products: [], hint: "Nothing matches every word — try the brand alone, or fewer words." });
-    return ok({ found: found.length, products: found.map((p) => brief(base, p, hiddenIds.has(p.id))) });
+    /* «found» is every match, not the page that came back: on 05.11.2026 a
+       Paul Mitchell article was written from «found: 25» of 36, and the two
+       products Renat had just added (last in the list) were never seen */
+    const all = searchProducts([...list, ...hidden], q, Infinity);
+    if (!all.length) return ok({ found: 0, products: [], hint: "Nothing matches every word — try the brand alone, or fewer words." });
+    const found = all.slice(0, limit);
+    const more = all.length - found.length;
+    return ok({
+      found: all.length,
+      shown: found.length,
+      ...(more > 0 ? { more: `${more} more match and are not listed — ask again with limit ${Math.min(50, all.length)}${all.length > 50 ? ", or add a word (a line like «Tea Tree», a type like «шампунь»)" : ""}.` } : {}),
+      products: found.map((p) => brief(base, p, hiddenIds.has(p.id))),
+    });
   }
 
   if (name === "get_product") {

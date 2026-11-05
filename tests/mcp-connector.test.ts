@@ -254,6 +254,25 @@ describe("the connector, end to end", () => {
     expect(sections.brands.find((b: { name: string }) => b.name === "Kevin.Murphy")).toBeTruthy();
   });
 
+  /* 05.11.2026: a Paul Mitchell article was written from «found: 25» when the
+     brand had 36 — the two products Renat had added the day before came last
+     and were never seen. «found» counts every match; «more» says how to see the rest. */
+  it("says how many match in all, and how to see the ones that did not come back", async () => {
+    const t = await tokens();
+    const few = JSON.parse((await tool(t.access_token, "search_products", { query: "Kevin.Murphy", limit: 3 })).text);
+    expect(few.shown).toBe(3);
+    expect(few.products).toHaveLength(3);
+    expect(few.found).toBeGreaterThan(3);
+    expect(few.more).toContain(`${few.found - 3} more`);
+    expect(few.more).toContain(`limit ${Math.min(50, few.found)}`);
+    const every = JSON.parse((await tool(t.access_token, "search_products", { query: "Kevin.Murphy", limit: 50 })).text);
+    expect(every.shown).toBe(Math.min(50, few.found));
+    expect(every.found).toBe(few.found);
+    if (every.found <= 50) expect(every.more).toBeUndefined();
+    const one = JSON.parse((await tool(t.access_token, "search_products", { query: "angel wash" })).text);
+    expect(one.more).toBeUndefined();
+  });
+
   it("saves a new draft with the shop's links and cards, never published, and lists it", async () => {
     const t = await tokens();
     const r = await tool(t.access_token, "save_draft", {
