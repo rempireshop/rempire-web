@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "docs/go-live.md",
-  "asOf": "2026-10-29",
+  "asOf": "2026-11-05",
   "phases": [
     {
       "id": "a",
@@ -1596,10 +1596,10 @@
       ],
       "status": "doing",
       "title": "Лист с логинами — Дим заполняет и отдаёт лично",
-      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит. Отдельный менеджер паролей (Bitwarden) не заводим — Дим, 25.10.",
+      "detail": "Клод сделал шаблон (Word, по сервисам: что делает, адрес входа, логин, где 2FA, восстановление). Пароли Дим вписывает сам, на своём компьютере, и отдаёт Ренату лично — не в чат и не почтой. Клод пароли не видит. Отдельный менеджер паролей (Bitwarden) не заводим — Дим, 25.10. 05.11: Клод дополняет шаблон текущими сервисами (паролей в файле ещё нет — Дим, 05.11).",
       "en": {
         "title": "Login sheet — Dim fills it in and hands it over in person",
-        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim writes the passwords in himself, on his own computer, and hands it to Renat in person — not in a chat, not by mail. Claude never sees the passwords. No separate password manager (Bitwarden) — Dim, 25.10."
+        "detail": "Claude made the template (Word, per service: what it does, sign-in address, login, where the 2FA is, recovery). Dim writes the passwords in himself, on his own computer, and hands it to Renat in person — not in a chat, not by mail. Claude never sees the passwords. No separate password manager (Bitwarden) — Dim, 25.10. 05.11: Claude brings the template up to the current services (no passwords in the file yet — Dim, 05.11)."
       }
     },
     {
@@ -1642,12 +1642,12 @@
         "renat",
         "dim"
       ],
-      "status": "todo",
-      "title": "Домен: владелец — Rempire Store OÜ",
-      "detail": "В Zone.ee владелец rempireshop.com всё ещё THEFLOW OÜ / Denis Kuznetsov. Смена владельца («domeeni omaniku vahetus») — подтверждают обе стороны, может занять несколько дней. Начать сейчас. Потом Дим — партнёр только для поддержки. Продление — раз в год, платит Ренат, когда придёт счёт (Дим, 25.10).",
+      "status": "done",
+      "title": "Домен: владелец — THEFLOW OÜ, фирма Рената",
+      "detail": "rempireshop.com в Zone.ee: владелец THEFLOW OÜ (16320586) — с 21.08.2024 на 100 % фирма Рената, почта владельца blackboxestonia@. Оплачен до 31.05.2027; продление раз в год, платит Ренат, когда придёт счёт. Дим видит домен через доступ, который THEFLOW открыл аккаунту Diip Solutions в Zone, — на встрече оставить для поддержки или убрать («Eemalda domeeni ligipääs»). Перевести на Rempire Store OÜ — по желанию, не обязательно: в своём My Zone → Domeenid → rempireshop.com → «Domeeni kontaktid» → карандаш → владелец Rempire Store OÜ (12216136); поставить галочку «не блокировать перенос на 60 дней»; старая и новая почта получают ссылку — подтвердить за 5 дней (проверено 05.11).",
       "en": {
-        "title": "Domain: the owner becomes Rempire Store OÜ",
-        "detail": "At Zone.ee the owner of rempireshop.com is still THEFLOW OÜ / Denis Kuznetsov. The owner change («domeeni omaniku vahetus») needs both sides to confirm and can take days. Start now. After that Dim is a partner for support only. Renewal is once a year; Renat pays when the bill comes (Dim, 25.10)."
+        "title": "Domain: the owner is THEFLOW OÜ, Renat's company",
+        "detail": "rempireshop.com at Zone.ee: the owner is THEFLOW OÜ (16320586), 100% Renat's company since 21.08.2024, owner e-mail blackboxestonia@. Paid until 31.05.2027; renewal once a year, Renat pays when the bill comes. Dim sees the domain through access THEFLOW shared with the Diip Solutions Zone account; at the meeting keep it for support or remove it («Eemalda domeeni ligipääs»). Moving it to Rempire Store OÜ is optional: in his own My Zone → Domeenid → rempireshop.com → «Domeeni kontaktid» → pencil → owner Rempire Store OÜ (12216136); tick «do not transfer-lock for 60 days»; the old and the new e-mail each get a link to confirm within 5 days (checked 05.11)."
       }
     },
     {
@@ -1676,10 +1676,10 @@
       ],
       "status": "doing",
       "title": "Vercel — Pro с 03.11, потом обратно на Hobby",
-      "detail": "03.11 Vercel предупредил: 90 % бесплатного процессорного времени (4 часа за 30 дней); после 100 % магазин встаёт. Дим перевёл проект на Pro ($20 в месяц), чтобы этого не случилось, и мы урезали нагрузку: проверка перед страницей идёт только там, где нужна, цены и наборы держит кэш Vercel, боты, собирающие тексты для обучения ИИ, закрыты (поисковые боты ИИ — нет). Вернуть на Hobby можно, когда расход за 30 дней будет заметно меньше 4 часов и меньше 8 минут в день: Vercel → Settings → Billing → Downgrade. Иначе магазин встанет сразу. Учти: по правилам Vercel Hobby — только для некоммерческих сайтов. Вход — через GitHub rempireshop.",
+      "detail": "03.11 Vercel предупредил: 90 % бесплатного процессорного времени (4 часа за 30 дней); после 100 % магазин встаёт. Дим перевёл проект на Pro ($20 в месяц), чтобы этого не случилось, и мы урезали нагрузку: проверка перед страницей идёт только там, где нужна, цены и наборы держит кэш Vercel, боты, собирающие тексты для обучения ИИ, закрыты (поисковые боты ИИ — нет). Вернуть на Hobby можно, когда расход за 30 дней будет заметно меньше 4 часов и меньше 8 минут в день: Vercel → Settings → Billing → Downgrade. Иначе магазин встанет сразу. Учти: по правилам Vercel Hobby — только для некоммерческих сайтов. Вход — через GitHub rempireshop. 05.11: за 7 дней функции потратили около 25–30 мин процессорного времени (4–6 мин в день). Две трети — запросы витрины (цены и настройки, скрытые товары, наборы, отзывы, блог): кэш держал их только 10 минут, а покупатель заходит раз в несколько минут, поэтому почти каждый визит запускал функции заново. Правка (Дим, 05.11, в работе): держать эти ответы в кэше сутки и сбрасывать при каждом изменении в панели, отзывы тоже кэшировать. Через 1–2 дня после неё — проверить расход и решить про Hobby. Если Pro останется, на встрече — карта фирмы и здесь.",
       "en": {
         "title": "Vercel — Pro since 03.11, then back to Hobby",
-        "detail": "03.11 Vercel warned: 90% of the free CPU time (4 hours per 30 days); past 100% the shop stops. Dim moved the project to Pro ($20 a month) so it would not, and the load was cut: the check before a page runs only where it is needed, Vercel's cache keeps prices and sets, and the bots that collect text to train AI are blocked (AI search bots are not). It can go back to Hobby once the 30-day total is well under 4 hours and under 8 minutes a day: Vercel → Settings → Billing → Downgrade. Sooner, and the shop stops at once. Note: Vercel's terms keep Hobby for non-commercial sites. Sign-in is through GitHub rempireshop."
+        "detail": "03.11 Vercel warned: 90% of the free CPU time (4 hours per 30 days); past 100% the shop stops. Dim moved the project to Pro ($20 a month) so it would not, and the load was cut: the check before a page runs only where it is needed, Vercel's cache keeps prices and sets, and the bots that collect text to train AI are blocked (AI search bots are not). It can go back to Hobby once the 30-day total is well under 4 hours and under 8 minutes a day: Vercel → Settings → Billing → Downgrade. Sooner, and the shop stops at once. Note: Vercel's terms keep Hobby for non-commercial sites. Sign-in is through GitHub rempireshop. 05.11: over 7 days the functions used about 25–30 min of CPU (4–6 min a day). Two thirds is the storefront's own requests (prices and settings, hidden products, sets, reviews, the blog): the cache kept them only 10 minutes while a shopper comes every few minutes, so almost every visit ran the functions again. The fix (Dim, 05.11, in progress): keep these answers cached for a day and drop them on every panel change, and cache reviews too. 1–2 days after it — check the usage and decide on Hobby. If Pro stays, the company card goes on here too at the meeting."
       }
     },
     {
@@ -1722,10 +1722,10 @@
       ],
       "status": "doing",
       "title": "Старое хранилище Vercel Blob «rempire-qa» — удалить",
-      "detail": "Лежит на команде Diip в Vercel, ответы опросника времён прототипа. Код магазина его не читает с 07.09. Пакет @vercel/blob из кода убран 25.10. Осталось Диму: удалить само хранилище (по желанию — сначала выгрузить).",
+      "detail": "Лежит на команде Diip в Vercel, ответы опросника времён прототипа. Код магазина его не читает с 07.09. Пакет @vercel/blob из кода убран 25.10. Осталось Диму: удалить само хранилище (по желанию — сначала выгрузить). Дим, 05.11: удалить. Vercel → команда Diip → Storage → «rempire-qa» → Settings → Delete.",
       "en": {
         "title": "Old Vercel Blob store «rempire-qa» — delete",
-        "detail": "Sits on Diip's Vercel team: questionnaire answers from the prototype days. The shop's code has not read it since 07.09. The @vercel/blob package left the code on 25.10. Left for Dim: delete the store itself (exporting it first if he wants)."
+        "detail": "Sits on Diip's Vercel team: questionnaire answers from the prototype days. The shop's code has not read it since 07.09. The @vercel/blob package left the code on 25.10. Left for Dim: delete the store itself (exporting it first if he wants). Dim, 05.11: delete it. Vercel → the Diip team → Storage → «rempire-qa» → Settings → Delete."
       }
     },
     {
@@ -1738,10 +1738,10 @@
       ],
       "status": "todo",
       "title": "Railway (база данных) — карта фирмы",
-      "detail": "Сейчас карта Димы. Если оплата не пройдёт, магазин остановится — поэтому заменить заранее. Тариф Hobby, ~6 $ в месяц (счёт 02.10 — 6,20 $).",
+      "detail": "Сейчас карта Димы. Если оплата не пройдёт, магазин остановится — поэтому заменить заранее. Тариф Hobby, ~6 $ в месяц (счёт 02.10 — 6,20 $). Подтверждено 05.11: карта Димы. Счёт 02.11 — 1,20 $.",
       "en": {
         "title": "Railway (the database) — the company card",
-        "detail": "Dim's card today. If a payment fails, the shop stops — so swap it early. Hobby plan, ~6 $ a month (the 02.10 bill was 6.20 $)."
+        "detail": "Dim's card today. If a payment fails, the shop stops — so swap it early. Hobby plan, ~6 $ a month (the 02.10 bill was 6.20 $). Confirmed 05.11: Dim's card. The 02.11 bill was 1.20 $."
       }
     },
     {
@@ -1754,10 +1754,10 @@
       ],
       "status": "todo",
       "title": "Cloudflare — карта Димы → карта фирмы (хранилище фото)",
-      "detail": "Для хранилища фото (R2) Cloudflare требует карту даже на бесплатном тарифе. Сейчас там карта Димы (Дим, 25.10) — заменить на карту фирмы: Cloudflare → Billing → Payment info. Расход сейчас 0 €.",
+      "detail": "Для хранилища фото (R2) Cloudflare требует карту даже на бесплатном тарифе. Сейчас там карта Димы (Дим, 25.10) — заменить на карту фирмы: Cloudflare → Billing → Payment info. Расход сейчас 0 €. Подтверждено 05.11: карта Димы.",
       "en": {
         "title": "Cloudflare — Dim's card → the company card (photo storage)",
-        "detail": "Cloudflare wants a card for the photo storage (R2) even on the free tier. It holds Dim's card today (Dim, 25.10) — swap in the company card: Cloudflare → Billing → Payment info. The bill today is 0 €."
+        "detail": "Cloudflare wants a card for the photo storage (R2) even on the free tier. It holds Dim's card today (Dim, 25.10) — swap in the company card: Cloudflare → Billing → Payment info. The bill today is 0 €. Confirmed 05.11: Dim's card."
       }
     },
     {
@@ -1769,11 +1769,11 @@
         "renat"
       ],
       "status": "doing",
-      "title": "Google Реклама — тест 20 € до 15.11, карта Рената …0731",
-      "detail": "Кампания «Test Shopping EE»: Google Покупки, 25.10–15.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,70 € за клик; всё остальное — «Исключено». Страны — с 05.11 все 25, куда магазин доставляет (ЕС без Кипра и Мальты). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, Ренат согласен её использовать (25.10). Оплата по факту, после показов. 15.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. Как шло: 25.10 — старт, только Эстония, ставка 0,25 €. 26.10 и 29.10 — 0 показов, 0 кликов; 28.10 в 21:50 сбой панели скрыл 75 товаров, среди них все три бренда теста — до 29.10 14:37 их не было ни в магазине, ни в Google. 02.11 — 2 показа, 0 кликов: Дим поднял ставку до 0,70 €, добавил Латвию, Литву и оба фида (EN и RU), конец перенёс на 15.11. 05.11 — все 25 стран доставки (Дим); бюджет тот же, поэтому 20 € могут кончиться раньше 15.11.",
+      "title": "Google Реклама — тест 20 € до 15.11, карта Димы …0731 → карта фирмы",
+      "detail": "Кампания «Test Shopping EE»: Google Покупки, 25.10–15.11, всего не больше 20 €. Товары — System 4 и Paul Mitchell (так попросил Ренат) и Captain Fawcett, ставка 0,70 € за клик; всё остальное — «Исключено». Страны — с 05.11 все 25, куда магазин доставляет (ЕС без Кипра и Мальты). Аккаунт «Rempire Shop» (892-756-4570) на rempireshopinfo@. Карта — Mastercard …0731, это карта Димы (Дим, 05.11); на встрече Ренат ставит карту фирмы и убирает карту Димы. Оплата по факту, после показов. 15.11 — итог теста в «Что сделано»; дальше рекламу решает Ренат. Как шло: 25.10 — старт, только Эстония, ставка 0,25 €. 26.10 и 29.10 — 0 показов, 0 кликов; 28.10 в 21:50 сбой панели скрыл 75 товаров, среди них все три бренда теста — до 29.10 14:37 их не было ни в магазине, ни в Google. 02.11 — 2 показа, 0 кликов: Дим поднял ставку до 0,70 €, добавил Латвию, Литву и оба фида (EN и RU), конец перенёс на 15.11. 05.11 — все 25 стран доставки (Дим); бюджет тот же, поэтому 20 € могут кончиться раньше 15.11. 05.11 к 13:00, за 2 ч 20 мин после расширения в 10:40: 133 показа, 3 клика (Германия, Франция, Греция), 1,72 €, клик в среднем 0,57 €; заказов с рекламы пока нет. Все 25 стран, те же три бренда и ставка 0,70 € остаются (Дим, 05.11).",
       "en": {
-        "title": "Google Ads — 20 € test until 15.11, Renat's card …0731",
-        "detail": "Campaign «Test Shopping EE»: Google Shopping, 25.10–15.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.70 € a click; everything else — «Excluded». Countries — since 05.11 all 25 the shop delivers to (the EU without Cyprus and Malta). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, Renat agreed to its use (25.10). Billed after the fact, once ads have run. 15.11 — the test's result goes into «What was done»; after that the ads are Renat's call. How it went: 25.10 — start, Estonia only, 0.25 € a click. 26.10 and 29.10 — 0 impressions, 0 clicks; on 28.10 at 21:50 a panel glitch hid 75 products, all three test brands among them — absent from the shop and Google until 29.10 at 14:37. 02.11 — 2 impressions, 0 clicks: Dim raised the bid to 0.70 €, added Latvia, Lithuania and both feeds (EN and RU), and moved the end to 15.11. 05.11 — all 25 delivery countries (Dim); the budget is unchanged, so the 20 € may run out before 15.11."
+        "title": "Google Ads — 20 € test until 15.11, Dim's card …0731 → the company card",
+        "detail": "Campaign «Test Shopping EE»: Google Shopping, 25.10–15.11, 20 € in total at most. Products — System 4 and Paul Mitchell (Renat's ask) and Captain Fawcett, 0.70 € a click; everything else — «Excluded». Countries — since 05.11 all 25 the shop delivers to (the EU without Cyprus and Malta). Account «Rempire Shop» (892-756-4570) on rempireshopinfo@. Card — Mastercard …0731, which is Dim's (Dim, 05.11); at the meeting Renat adds the company card and removes Dim's. Billed after the fact, once ads have run. 15.11 — the test's result goes into «What was done»; after that the ads are Renat's call. How it went: 25.10 — start, Estonia only, 0.25 € a click. 26.10 and 29.10 — 0 impressions, 0 clicks; on 28.10 at 21:50 a panel glitch hid 75 products, all three test brands among them — absent from the shop and Google until 29.10 at 14:37. 02.11 — 2 impressions, 0 clicks: Dim raised the bid to 0.70 €, added Latvia, Lithuania and both feeds (EN and RU), and moved the end to 15.11. 05.11 — all 25 delivery countries (Dim); the budget is unchanged, so the 20 € may run out before 15.11. 05.11 by 13:00, 2 h 20 min after the 10:40 expansion: 133 impressions, 3 clicks (Germany, France, Greece), 1.72 €, 0.57 € a click on average; no order from the ads yet. All 25 countries, the same three brands and the 0.70 € bid stay (Dim, 05.11)."
       }
     },
     {
@@ -1785,11 +1785,11 @@
         "renat"
       ],
       "status": "doing",
-      "title": "Реклама в ChatGPT (OpenAI Ads) — идёт с 05.11, 65 € всего, карта Рената …0731",
-      "detail": "Кампания «REMPIRE campaign» в ads.openai.com (бета), показывается с 05.11 ~11:30: цель — клики (тега конверсий OpenAI на сайте нет); бюджет 65 € на всю кампанию — минимум площадки, без даты конца; 25 стран доставки; объявление ведёт на rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; у ссылки метка utm_source=chatgpt-ads, utm_campaign=chatgpt-eu — переходы видны в «Аналитике» → «Источники» как ads.openai.com (визиты, не заказы). Карта — Mastercard …0731 (Рената, та же, что в Google Рекламе); списание при 3 € или 30.11. Показывается только пользователям бесплатного ChatGPT и Go; в ЕС реклама не персональная — по теме текущего чата. После публикации и группа объявлений, и само объявление были выключены — их включили (Дим и Клод); если статус снова «Not serving», навести на красную точку — там причина. «Set up later» на шаге оплаты не нажимать — в первый раз оно удалило кампанию. Итог — когда 65 € потрачены; дальше решает Ренат.",
+      "title": "Реклама в ChatGPT (OpenAI Ads) — идёт с 05.11, 65 € всего, карта Димы …0731 → карта фирмы",
+      "detail": "Кампания «REMPIRE campaign» в ads.openai.com (бета), показывается с 05.11 ~11:30: цель — клики (тега конверсий OpenAI на сайте нет); бюджет 65 € на всю кампанию — минимум площадки, без даты конца; 25 стран доставки; объявление ведёт на rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; у ссылки метка utm_source=chatgpt-ads, utm_campaign=chatgpt-eu — переходы видны в «Аналитике» → «Источники» как ads.openai.com (визиты, не заказы). Карта — Mastercard …0731 (Димы, та же, что в Google Рекламе; на встрече — карта фирмы); списание при 3 € или 30.11. Показывается только пользователям бесплатного ChatGPT и Go; в ЕС реклама не персональная — по теме текущего чата. После публикации и группа объявлений, и само объявление были выключены — их включили (Дим и Клод); если статус снова «Not serving», навести на красную точку — там причина. «Set up later» на шаге оплаты не нажимать — в первый раз оно удалило кампанию. Итог — когда 65 € потрачены; дальше решает Ренат.",
       "en": {
-        "title": "ChatGPT ads (OpenAI Ads) — running since 05.11, 65 € in total, Renat's card …0731",
-        "detail": "Campaign «REMPIRE campaign» at ads.openai.com (beta), serving since 05.11 ~11:30: objective — clicks (the site has no OpenAI conversion tag); budget 65 € for the whole campaign — the platform's minimum, no end date; the 25 delivery countries; the ad leads to rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; the link carries utm_source=chatgpt-ads, utm_campaign=chatgpt-eu, so its visits show in «Аналитика» → «Источники» as ads.openai.com (visits, not orders). Card — Mastercard …0731 (Renat's, the same as Google Ads); charged at 3 € or on 30.11. Shown only to Free and Go ChatGPT users; in the EU ads are not personalised — they follow the current chat's topic. Publishing left both the ad group and the ad itself switched off — they were switched on (Dim and Claude); if the status is «Not serving» again, hover the red dot for the reason. Never press «Set up later» at the billing step — the first time it deleted the campaign. The result — once the 65 € is spent; after that it is Renat's call."
+        "title": "ChatGPT ads (OpenAI Ads) — running since 05.11, 65 € in total, Dim's card …0731 → the company card",
+        "detail": "Campaign «REMPIRE campaign» at ads.openai.com (beta), serving since 05.11 ~11:30: objective — clicks (the site has no OpenAI conversion tag); budget 65 € for the whole campaign — the platform's minimum, no end date; the 25 delivery countries; the ad leads to rempireshop.com — «Salon-picked hair care / Shop professional hair care from REMPIRE in Tallinn.»; the link carries utm_source=chatgpt-ads, utm_campaign=chatgpt-eu, so its visits show in «Аналитика» → «Источники» as ads.openai.com (visits, not orders). Card — Mastercard …0731 (Dim's, the same as Google Ads; the company card goes on at the meeting); charged at 3 € or on 30.11. Shown only to Free and Go ChatGPT users; in the EU ads are not personalised — they follow the current chat's topic. Publishing left both the ad group and the ad itself switched off — they were switched on (Dim and Claude); if the status is «Not serving» again, hover the red dot for the reason. Never press «Set up later» at the billing step — the first time it deleted the campaign. The result — once the 65 € is spent; after that it is Renat's call."
       }
     },
     {
@@ -1799,12 +1799,12 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Список расходов в месяц — в документ Рената",
-      "detail": "Railway ~6 $, OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; реклама в ChatGPT — 65 € один раз, если её запустят; Vercel — Pro $20 в месяц с 03.11, пока не вернём на Hobby (см. «Vercel — Pro с 03.11»); Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия.",
+      "detail": "Railway 1–6 $ (02.10 — 6,20 $, 02.11 — 1,20 $), OpenAI — центы в день, Montonio — по договору, домен — раз в год; Google Реклама — только если Ренат продолжит после теста; реклама в ChatGPT — 65 € один раз, если её запустят; Vercel — Pro $20 в месяц с 03.11, пока не вернём на Hobby (см. «Vercel — Pro с 03.11»); Resend, Cloudflare, GitHub, Google, Bing — бесплатно; Shopify ~46 € — до закрытия. 05.11: список идёт в руководство Рената (Google Документ).",
       "en": {
         "title": "Monthly costs — into Renat's document",
-        "detail": "Railway ~6 $, OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; ChatGPT ads — 65 € once, if launched; Vercel — Pro, $20 a month since 03.11, until it goes back to Hobby (see «Vercel — Pro since 03.11»); Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes."
+        "detail": "Railway 1–6 $ (02.10 — 6.20 $, 02.11 — 1.20 $), OpenAI — cents a day, Montonio — per the contract, the domain — once a year; Google Ads — only if Renat goes on after the test; ChatGPT ads — 65 € once, if launched; Vercel — Pro, $20 a month since 03.11, until it goes back to Hobby (see «Vercel — Pro since 03.11»); Resend, Cloudflare, GitHub, Google, Bing — free; Shopify ~46 € — until it closes. 05.11: the list goes into Renat's manual (a Google Doc)."
       }
     },
     {
@@ -1955,12 +1955,12 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Руководство Рената — по-русски, для телефона",
-      "detail": "Обновить «Сервисы магазина», «Неделя Рената» и /guide: заказы, возвраты (Nova Post — за счёт покупателя), этикетки, склад, цены, блог, что смотреть раз в неделю, что делать, если что-то сломалось.",
+      "detail": "Обновить «Сервисы магазина», «Неделя Рената» и /guide: заказы, возвраты (Nova Post — за счёт покупателя), этикетки, склад, цены, блог, что смотреть раз в неделю, что делать, если что-то сломалось. 05.11: пишется заново по текущей панели. Будет Google Документом на Диске магазина (rempireshopinfo@), копия — в репозитории (Дим, 05.11).",
       "en": {
         "title": "Renat's manual — in Russian, for the phone",
-        "detail": "Refresh «Сервисы магазина», «Неделя Рената» and /guide: orders, returns (Nova Post — the customer's cost), labels, stock, prices, the blog, what to check weekly, what to do when something breaks."
+        "detail": "Refresh «Сервисы магазина», «Неделя Рената» and /guide: orders, returns (Nova Post — the customer's cost), labels, stock, prices, the blog, what to check weekly, what to do when something breaks. 05.11: being rewritten against the current panel. It will be a Google Doc in the shop's Drive (rempireshopinfo@), with a copy in the repository (Dim, 05.11)."
       }
     },
     {
@@ -1972,10 +1972,10 @@
       ],
       "status": "doing",
       "title": "Claude и Помощник — что умеют и как спрашивать",
-      "detail": "Отдельная бумага для Рената: что умеют оба, только Помощник, только Claude, чего не делает никто; 7 правил, как спрашивать; готовые фразы; что делать, если «текст не прошёл проверку». Черновик 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; перед передачей сверить с магазином. Короткое сообщение Ренату (что умеют, примеры, правила) отправлено 26.10.",
+      "detail": "Отдельная бумага для Рената: что умеют оба, только Помощник, только Claude, чего не делает никто; 7 правил, как спрашивать; готовые фразы; что делать, если «текст не прошёл проверку». Черновик 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; перед передачей сверить с магазином. Короткое сообщение Ренату (что умеют, примеры, правила) отправлено 26.10. 05.11: обновляется под то, что Claude и Помощник умеют сейчас; тоже Google Документом.",
       "en": {
         "title": "Claude and the assistant — what they do and how to ask",
-        "detail": "A paper of its own for Renat: what both do, the assistant only, Claude only, neither; 7 rules on how to ask; ready phrases; what to do when «the text did not pass the shop's check». Draft 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; check against the shop before the handover. The short message to Renat (what they do, examples, rules) went out on 26.10."
+        "detail": "A paper of its own for Renat: what both do, the assistant only, Claude only, neither; 7 rules on how to ask; ready phrases; what to do when «the text did not pass the shop's check». Draft 26.10 — Rempire/handover/drafts/handover-doc-ai-helpers-draft-2026-10-26.md; check against the shop before the handover. The short message to Renat (what they do, examples, rules) went out on 26.10. 05.11: being updated to what Claude and the assistant do today; also as a Google Doc."
       }
     },
     {
@@ -1985,12 +1985,12 @@
       "who": [
         "claude"
       ],
-      "status": "todo",
+      "status": "doing",
       "title": "Техническая документация — для поддержки",
-      "detail": "README, карта системы (SYSTEM-MAP устарела с 06.09), аккаунты и переменные Vercel, деплой и ночная пересборка, расписания, и пошагово: сайт не открывается, оплата не проходит, письма не приходят, восстановить базу. Search Console в «Аналитике» подключён (GSC_SERVICE_ACCOUNT_JSON и GSC_SITE_URL стоят в Vercel, 25.10).",
+      "detail": "README, карта системы (SYSTEM-MAP устарела с 06.09), аккаунты и переменные Vercel, деплой и ночная пересборка, расписания, и пошагово: сайт не открывается, оплата не проходит, письма не приходят, восстановить базу. Search Console в «Аналитике» подключён (GSC_SERVICE_ACCOUNT_JSON и GSC_SITE_URL стоят в Vercel, 25.10). 05.11: README, SYSTEM-MAP, RUNBOOK («что делать, если…») и список аккаунтов обновляются для следующего разработчика (Дим, 05.11).",
       "en": {
         "title": "Technical documentation — for support",
-        "detail": "README, the system map (SYSTEM-MAP stale since 06.09), accounts and Vercel variables, deploys and the nightly rebuild, schedules, and step by step: the site does not open, a payment fails, mails do not arrive, restore the database. Search Console in «Аналитика» is connected (GSC_SERVICE_ACCOUNT_JSON and GSC_SITE_URL are set in Vercel, 25.10)."
+        "detail": "README, the system map (SYSTEM-MAP stale since 06.09), accounts and Vercel variables, deploys and the nightly rebuild, schedules, and step by step: the site does not open, a payment fails, mails do not arrive, restore the database. Search Console in «Аналитика» is connected (GSC_SERVICE_ACCOUNT_JSON and GSC_SITE_URL are set in Vercel, 25.10). 05.11: README, SYSTEM-MAP, a RUNBOOK («what to do when…») and the accounts list are being updated for the next developer (Dim, 05.11)."
       }
     },
     {
@@ -2047,12 +2047,12 @@
         "claude",
         "dim"
       ],
-      "status": "todo",
-      "title": "С 03.11 — только исправления",
-      "detail": "Решение Димы 29.10. Новые функции — после передачи, в следующем проекте. До 08.11 меняем только то, что сломано. Документы — примерно с 02.11.",
+      "status": "doing",
+      "title": "С 03.11 до 08.11 — только исправления",
+      "detail": "Решение Димы 29.10. Новые функции — после передачи, в следующем проекте. До 08.11 меняем только то, что сломано. Документы — примерно с 02.11. Дим, 05.11: держим до 08.11. Исключение — правка кэша Vercel (05.11), чтобы вернуться на Hobby.",
       "en": {
-        "title": "From 03.11 — fixes only",
-        "detail": "Dim's decision, 29.10. New features come after the handover, in the next project. Until 08.11 only what is broken changes. The documents — from about 02.11."
+        "title": "From 03.11 to 08.11 — fixes only",
+        "detail": "Dim's decision, 29.10. New features come after the handover, in the next project. Until 08.11 only what is broken changes. The documents — from about 02.11. Dim, 05.11: it holds until 08.11. The one exception is the Vercel cache fix (05.11), to get back to Hobby."
       }
     },
     {
