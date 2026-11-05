@@ -9,13 +9,23 @@
  * for /api/overrides/ — the most expensive route of the shop — and 264 calls,
  * 16 s, for /api/bundles/.
  *
- * Now both are filed under one tag and kept for ten minutes, and src/lib/db.ts
- * drops the tag after any statement that writes one of its FEED_TABLES — the
- * owner's panel, «Помощник», the Claude connector, a sale taking stock off the
- * shelf, whichever door the write leaves by. Same mechanism as
- * src/lib/hidden-cache.ts and src/lib/blog-cache.ts (which says how the tag
- * works on Vercel). FEED_CACHE_MAX_S bounds the one case the tag cannot see:
- * a script that writes the database from outside the app.
+ * Now both are filed under one tag, and src/lib/db.ts drops the tag after
+ * any statement that writes one of its FEED_TABLES — the owner's panel,
+ * «Помощник», the Claude connector, a sale taking stock off the shelf,
+ * whichever door the write leaves by; POST /api/admin/migrate drops it after
+ * a migration, which writes through exec() and not query(). Same mechanism
+ * as src/lib/hidden-cache.ts and src/lib/blog-cache.ts (which says how the
+ * tag works on Vercel). FEED_CACHE_MAX_S bounds the one case the tag cannot
+ * see — a script that writes the database from outside the app
+ * (tools/go-live-reset.mjs, tools/seed-stock.mjs) — and a purge that failed;
+ * a deploy starts every CDN copy afresh as well.
+ *
+ * Kept for a day since 05.11.2026, ten minutes before that. The shop has a
+ * visitor every few minutes, spread over several CDN regions, each with its
+ * own copy: ten minutes ran out between two visitors, so almost every boot
+ * still ran the function (2,100 calls and 6 min of CPU a week for
+ * /api/overrides/ alone, the shop's most expensive route). Freshness never
+ * came from the clock — it comes from the tag.
  *
  * The browser's side is unchanged: no max-age, the same 120-second
  * stale-while-revalidate, and app.js asks with `cache: "no-store"`
@@ -24,7 +34,7 @@
 import { revalidateTag } from "next/cache";
 
 export const FEED_CACHE_TAG = "shop-feed";
-export const FEED_CACHE_MAX_S = 600;
+export const FEED_CACHE_MAX_S = 86400;
 
 /** The headers /api/overrides/ and /api/bundles/ answer a good feed with. */
 export const FEED_CACHE_HEADERS: Readonly<Record<string, string>> = {

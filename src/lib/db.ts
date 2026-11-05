@@ -267,11 +267,34 @@ export function writesShopFeed(sql: string): boolean {
   return FEED_WRITE.test(sql);
 }
 
+/**
+ * The same, for the product pages' reviews (src/lib/reviews-cache.ts): a new
+ * review, the owner's approve or reject, an account erasure renaming its
+ * author — any statement that writes `reviews` drops the CDN's copies.
+ */
+let reviewsCache: Promise<typeof import("@/lib/reviews-cache")> | null = null;
+async function afterReviewsWrite(): Promise<void> {
+  try {
+    reviewsCache ??= import("@/lib/reviews-cache");
+    (await reviewsCache).refreshReviewsCache();
+  } catch (err) {
+    reviewsCache = null;
+    console.error("[db] could not drop the cached reviews:", err);
+  }
+}
+const REVIEWS_WRITE = /\b(?:insert\s+into|update|delete\s+from)\s+reviews\b/i;
+
+/** Does this statement write the `reviews` table? */
+export function writesReviews(sql: string): boolean {
+  return REVIEWS_WRITE.test(sql);
+}
+
 /** Run one statement. Returns the rows (empty array for writes). */
 export async function query<T = Row>(sql: string, params?: unknown[]): Promise<T[]> {
   const db = await driver();
   const res = await db.query(sql, params);
   if (writesShopFeed(sql)) await afterFeedWrite();
+  if (writesReviews(sql)) await afterReviewsWrite();
   return (res.rows || []) as T[];
 }
 
@@ -288,14 +311,17 @@ export async function exec(sql: string): Promise<void> {
 export async function withTx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
   const db = await driver();
   let wroteFeed = false;
+  let wroteReviews = false;
   const out = await db.tx((q) =>
     fn((sql, params) => {
       if (writesShopFeed(sql)) wroteFeed = true;
+      if (writesReviews(sql)) wroteReviews = true;
       return q(sql, params);
     }),
   );
   /* after the commit: a rolled-back transaction threw above and changed nothing */
   if (wroteFeed) await afterFeedWrite();
+  if (wroteReviews) await afterReviewsWrite();
   return out;
 }
 

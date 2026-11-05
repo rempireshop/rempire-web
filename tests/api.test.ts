@@ -105,7 +105,7 @@ describe("api routes", () => {
     const { GET } = await import("@/app/api/overrides/route");
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toContain("s-maxage=600");
+    expect(res.headers.get("cache-control")).toContain("s-maxage=86400");
     expect(res.headers.get("vercel-cache-tag")).toBe("shop-feed");
     const body = await res.json();
     expect(body.ok).toBe(true);

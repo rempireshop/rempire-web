@@ -18,7 +18,8 @@
  * tabs hear it (storage), drop their copy, and ask past every cache
  * (`&fresh=<time>`); the profile is also asked on the way into the cabinet
  * and the pages that show prices; and GET /api/reviews is cached at the CDN
- * for thirty seconds and not in the browser.
+ * — thirty seconds then, until a review changes since 05.11.2026
+ * (src/lib/reviews-cache.ts) — and not in the browser.
  *
  * The shop's functions are cut out of public/shop2/app.js by source text and
  * run over a stand-in localStorage and fetch.
@@ -188,7 +189,7 @@ describe("the profile: asked again when the panel changed it, and on the way int
   });
 });
 
-describe("GET /api/reviews: thirty seconds at the CDN, nothing in the browser", () => {
+describe("GET /api/reviews: kept at the CDN until a review changes, nothing in the browser", () => {
   beforeAll(async () => { await setupDb(); });
   afterAll(teardownDb);
 
@@ -196,7 +197,9 @@ describe("GET /api/reviews: thirty seconds at the CDN, nothing in the browser", 
     const { GET } = await import("@/app/api/reviews/route");
     const res = await GET(new Request("http://localhost/api/reviews/?product=system-4-bio-botanical-shampoo"));
     expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toBe("public, max-age=0, s-maxage=30");
+    // a day at the CDN under a tag every review write drops (tests/reviews-cache.test.ts)
+    expect(res.headers.get("cache-control")).toBe("public, max-age=0, s-maxage=86400");
+    expect(res.headers.get("vercel-cache-tag")).toBe("reviews");
     // the bust parameter is only a new address: the answer is the same
     const busted = await GET(new Request("http://localhost/api/reviews/?product=system-4-bio-botanical-shampoo&fresh=123"));
     expect(await busted.json()).toEqual(await res.json());

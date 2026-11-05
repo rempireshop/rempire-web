@@ -240,7 +240,7 @@ describe("a hidden catalogue product, without a rebuild", () => {
     const res = await GET();
     expect(res.status).toBe(200);
     // kept by the CDN under a tag a hide drops (tests/hidden-cache.test.ts)
-    expect(res.headers.get("cache-control")).toBe("public, s-maxage=600");
+    expect(res.headers.get("cache-control")).toBe("public, s-maxage=86400");
     expect(res.headers.get("vercel-cache-tag")).toBe("hidden-products");
     expect(await res.json()).toEqual({ ok: true, ids: [plain.id] });
 

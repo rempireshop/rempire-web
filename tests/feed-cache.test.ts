@@ -80,7 +80,7 @@ describe("shop feed cache", () => {
       const ok: Response = await GET();
       expect(ok.status, path).toBe(200);
       expect(ok.headers.get("vercel-cache-tag"), path).toBe(FEED_CACHE_TAG);
-      expect(ok.headers.get("cache-control"), path).toBe("public, s-maxage=600, stale-while-revalidate=120");
+      expect(ok.headers.get("cache-control"), path).toBe("public, s-maxage=86400, stale-while-revalidate=120");
     }
     const db = await import("@/lib/db");
     const spy = vi.spyOn(db, "query").mockRejectedValue(new Error("down"));

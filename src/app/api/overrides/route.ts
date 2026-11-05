@@ -5,7 +5,7 @@
  * on/off, the home-page banner, mail flows, shipping rules).
  *
  * Public and cached at the edge until something behind it changes — any write
- * to its tables drops the copy (src/lib/feed-cache.ts), ten minutes at most —
+ * to its tables drops the copy (src/lib/feed-cache.ts), a day at most —
  * so a burst of shoppers costs one query. "Public" is meant literally, so
  * only the keys in PUBLIC_SETTINGS below leave the server.
  *

@@ -16,13 +16,23 @@
  * flipped in the panel still takes effect on the next request — Dim's
  * «hidden without any deploys or rebuilds» (08.09.2026) holds. Same
  * mechanism as src/lib/blog-cache.ts, which says how the tag works.
- * HIDDEN_CACHE_MAX_S bounds the worst case: a purge that failed costs at
- * most that long.
+ * HIDDEN_CACHE_MAX_S bounds the worst case: a purge that failed, or a script
+ * writing `hidden` from outside the app, costs at most that long — or until
+ * the next deploy, which starts every CDN copy afresh.
+ *
+ * upsertOverride() is the only statement in the app that writes `hidden`
+ * (product_overrides is also written by product-descriptions.ts and
+ * product-seo.ts, never that column, and nothing deletes its rows), and POST
+ * /api/admin/migrate drops the tag after a migration. Kept for a day since
+ * 05.11.2026, ten minutes before that: ten minutes ran out between two
+ * visitors in each CDN region, so most product pages still ran the function
+ * (6,500 calls a week). Whoever adds another write to `hidden` must call
+ * refreshHiddenCache() after it, or a hide waits up to a day.
  */
 import { revalidateTag } from "next/cache";
 
 export const HIDDEN_CACHE_TAG = "hidden-products";
-export const HIDDEN_CACHE_MAX_S = 600;
+export const HIDDEN_CACHE_MAX_S = 86400;
 
 /** The headers /api/overrides/hidden/ answers a good list with. */
 export const HIDDEN_CACHE_HEADERS: Readonly<Record<string, string>> = {

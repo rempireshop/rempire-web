@@ -3,11 +3,12 @@ import { clientIp, rateLimit } from "@/lib/auth";
 import { sessionEmail } from "@/lib/customers";
 import { fingerprintOf, type IdempotentAnswer, readIdempotencyKey, runOnce } from "@/lib/idempotency";
 import { addReview, approvedReviews, ratingFor, validateReview } from "@/lib/reviews";
+import { REVIEWS_CACHE_HEADERS } from "@/lib/reviews-cache";
 
 /**
  * GET  /api/reviews/?product=<id>   → { ok, reviews: [...], avg, n }
- *        approved reviews only; cached at the CDN for thirty seconds, not
- *        in the browser — see REVIEWS_CACHE below.
+ *        approved reviews only; kept by the CDN until a review changes, not
+ *        in the browser — see the note on GET below.
  *
  * POST /api/reviews/  { product, name, rating, text, lang, consent, website }
  *        → { ok: true, status: "pending" }
@@ -66,16 +67,21 @@ function ipHash(ip: string): string | null {
  * came next: the owner published a review, opened the product, saw nothing,
  * opened it again (Dim, 26.09.2026, people-reviews: «works but takes time»).
  *
- * Now: thirty seconds at the CDN, which still turns a burst of shoppers into
- * one query, and nothing in the browser (`max-age=0`) or past the thirty
- * seconds. Two small indexed reads (approvedReviews, ratingFor) are what a
- * miss costs. The owner's own browser does not wait even that: the panel
- * tells the shop's tabs a review changed, and they ask with `&fresh=<time>`,
- * a URL no copy holds (shopPoke in public/shop2/app.js). The route ignores
- * the parameter; it exists only to be a new address.
+ * Then (26.09.2026): thirty seconds at the CDN, nothing in the browser
+ * (`max-age=0`) or past the thirty seconds. But one address per product on a
+ * shop with a visitor every few minutes meant thirty seconds were nearly
+ * always over, and every product page ran this function again (2,700 calls
+ * a week — Vercel's CPU allowance, 05.11.2026).
+ *
+ * Now (src/lib/reviews-cache.ts, REVIEWS_CACHE_HEADERS): kept by the CDN for
+ * a day under a tag, and the tag is dropped by every write to `reviews` —
+ * src/lib/db.ts sees each statement — so the owner's «Опубликовать» reaches
+ * the next request the way it did with thirty seconds, without the wait.
+ * Still nothing in the browser (`max-age=0`) and no stale-while-revalidate.
+ * The owner's own browser asks with `&fresh=<time>` after a change in the
+ * panel, a URL no copy holds (shopPoke in public/shop2/app.js). The route
+ * ignores the parameter; it exists only to be a new address.
  */
-const REVIEWS_CACHE = "public, max-age=0, s-maxage=30";
-
 export async function GET(req: Request) {
   const product = new URL(req.url).searchParams.get("product") || "";
   if (!product) return Response.json({ ok: false, error: "no_product" }, { status: 400 });
@@ -84,12 +90,14 @@ export async function GET(req: Request) {
     const [reviews, rating] = await Promise.all([approvedReviews(product), ratingFor(product)]);
     return Response.json(
       { ok: true, reviews, avg: rating.avg, n: rating.n },
-      { headers: { "cache-control": REVIEWS_CACHE } },
+      { headers: REVIEWS_CACHE_HEADERS },
     );
   } catch (err) {
     console.error("reviews GET failed", err);
-    // the product page must still render — an empty list is the honest answer
-    return Response.json({ ok: true, reviews: [], avg: 0, n: 0, degraded: true });
+    /* the product page must still render — an empty list is the honest
+       answer, and one no copy may keep: a day of «no reviews» after a
+       minute's outage */
+    return Response.json({ ok: true, reviews: [], avg: 0, n: 0, degraded: true }, { headers: NO_STORE });
   }
 }
 
