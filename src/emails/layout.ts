@@ -94,6 +94,46 @@ export interface BrandOverride {
   email?: string;
   /** The owner's own extra footer line, per language. */
   note?: Partial<Record<Lang, string>>;
+  /**
+   * The salon's opening hours — `settings.content.hours` (Настройки →
+   * Контент), per weekday "" (not set), "closed" or "10:00–19:00". Only the
+   * «Заказ готов к выдаче» letter prints them (./order-ready.ts).
+   */
+  hours?: Partial<Record<WeekDay, string>>;
+}
+
+export const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+export type WeekDay = (typeof WEEK_DAYS)[number];
+
+const DAY_SHORT: Record<Lang, Record<WeekDay, string>> = {
+  ru: { mon: "Пн", tue: "Вт", wed: "Ср", thu: "Чт", fri: "Пт", sat: "Сб", sun: "Вс" },
+  et: { mon: "E", tue: "T", wed: "K", thu: "N", fri: "R", sat: "L", sun: "P" },
+  en: { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" },
+};
+
+/**
+ * The open days in one line — «Вт–Сб 10:00–19:00», «Пн–Пт 10:00–19:00 · Сб
+ * 11:00–16:00»: neighbouring days with the same hours run together, a closed
+ * day or one the owner left blank is simply not named. "" when no day has
+ * hours, and then the letter prints no hours line at all.
+ */
+export function brandHours(lang: Lang): string {
+  const h = OVERRIDE.hours ?? {};
+  const open = (d: WeekDay) => {
+    const v = String(h[d] ?? "").trim();
+    return v && v.toLowerCase() !== "closed" ? v : "";
+  };
+  const days = DAY_SHORT[lang];
+  const runs: string[] = [];
+  for (let i = 0; i < WEEK_DAYS.length; i++) {
+    const v = open(WEEK_DAYS[i]);
+    if (!v) continue;
+    let j = i;
+    while (j + 1 < WEEK_DAYS.length && open(WEEK_DAYS[j + 1]) === v) j++;
+    runs.push(`${days[WEEK_DAYS[i]]}${j > i ? `–${days[WEEK_DAYS[j]]}` : ""} ${v}`);
+    i = j;
+  }
+  return runs.join(" · ");
 }
 
 let OVERRIDE: BrandOverride = {};

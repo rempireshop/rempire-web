@@ -20,6 +20,7 @@ import { renderOrderCancelled } from "./order-cancelled";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderPosReceipt } from "./pos-receipt";
 import { renderOrderShipped } from "./order-shipped";
+import { renderOrderReady } from "./order-ready";
 import { renderOrderUnpaid } from "./order-unpaid";
 import { renderPartnerWelcome } from "./partner-welcome";
 import type {
@@ -34,6 +35,7 @@ import type {
 export * from "./types";
 export { renderOrderConfirmed } from "./order-confirmed";
 export { renderOrderShipped } from "./order-shipped";
+export { renderOrderReady } from "./order-ready";
 export { renderOrderCancelled } from "./order-cancelled";
 export type { ClosedKind, ClosedOptions } from "./order-cancelled";
 export { renderOrderUnpaid } from "./order-unpaid";
@@ -84,6 +86,7 @@ export type {
 export const TEMPLATE_IDS = [
   "order-confirmed",
   "order-shipped",
+  "order-ready",
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
@@ -111,6 +114,7 @@ export function isTemplateId(v: unknown): v is TemplateId {
 export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "order-confirmed": "Заказ принят",
   "order-shipped": "Заказ отправлен",
+  "order-ready": "Заказ готов к выдаче",
   "order-unpaid": "Заказ ждёт оплаты",
   "order-cancelled": "Заказ отменён",
   "order-refunded": "Деньги возвращены",
@@ -375,6 +379,7 @@ export function demoValues(
     case "invoice-reminder":
     case "invoice-cancelled":
     case "order-confirmed":
+    case "order-ready":
       return withOrder;
     case "abandoned-cart":
       return { ...shop, name: "Renat", total: money(demoCart(L).total) };
@@ -421,6 +426,9 @@ export function renderDemo(
         code: "CE123456789EE",
         carrier: "Omniva",
       });
+    /* demoOrder() is a pickup order already — the one kind this letter is for */
+    case "order-ready":
+      return renderOrderReady({ ...demoOrder(L), status: "shipped" }, L);
     case "order-unpaid":
       return renderOrderUnpaid({ ...demoOrder(L), status: "new" }, L, {
         daysLeft: 4,

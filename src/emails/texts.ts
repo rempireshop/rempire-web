@@ -36,6 +36,9 @@ import type { Lang } from "./types";
 export const MAIL_TEXT_TEMPLATES = [
   "order-confirmed",
   "order-shipped",
+  /* 06.11.2026. The pickup order's own second letter — «Заказ принят» had
+     promised it for months and nothing sent it (R-100116). */
+  "order-ready",
   "order-unpaid",
   "order-cancelled",
   "order-refunded",
@@ -162,6 +165,23 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       subject: "Order {order} has shipped — Rempire",
       intro: "Your order no. {order} has been handed to the carrier and is on its way.",
       signature: "Tracking usually starts working a few hours after the parcel is handed over.",
+    },
+  },
+  "order-ready": {
+    ru: {
+      subject: "Заказ {order} готов к выдаче — Rempire",
+      intro: "Ваш заказ № {order} собран и ждёт вас в студии.",
+      signature: "Есть вопрос по заказу? Просто ответьте на это письмо — мы на связи.",
+    },
+    et: {
+      subject: "Tellimus {order} on järeletulekuks valmis — Rempire",
+      intro: "Teie tellimus nr {order} on kokku pandud ja ootab teid stuudios.",
+      signature: "Küsimus tellimuse kohta? Vastake lihtsalt sellele kirjale — oleme olemas.",
+    },
+    en: {
+      subject: "Order {order} is ready for pickup — Rempire",
+      intro: "Your order no. {order} is packed and waiting for you at the studio.",
+      signature: "A question about the order? Just reply to this e-mail — we read it.",
     },
   },
   /* The three letters an order gets when it does NOT end in a parcel: the

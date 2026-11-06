@@ -60,6 +60,12 @@ export function carrierHasParcel(status: unknown): boolean {
   return CARRIER_HAS_PARCEL.includes(String(status ?? "").trim().toLowerCase());
 }
 
+/** Collected at the salon counter — `shipping.method` "pickup", as checkout stores it. */
+export function isPickupOrder(order: Pick<Order, "shipping">): boolean {
+  const s = order.shipping as unknown as Record<string, unknown> | null | undefined;
+  return !!s && typeof s === "object" && String(s.method ?? "").trim().toLowerCase() === "pickup";
+}
+
 /** The two statuses after «Отправлен» — a step back from either is not a hand-over. */
 export function handedOver(status: string): boolean {
   return status === "shipped" || status === "delivered";
@@ -89,6 +95,14 @@ export function shippedBefore(order: Pick<Order, "shipping">): boolean {
  */
 export async function sendShippedLetter(order: Order): Promise<void> {
   try {
+    /* A pickup order has no parcel: its «Отправлен» is «Готов к выдаче» in the
+       panel (06.11.2026), and what the customer is owed is «Заказ готов к
+       выдаче» — the letter «Заказ принят» promised — not a tracking letter. */
+    if (isPickupOrder(order)) {
+      const { onOrderReady } = await import("@/lib/mail-hooks");
+      await onOrderReady(order);
+      return;
+    }
     const { onOrderShipped } = await import("@/lib/mail-hooks");
     const shipment = shipmentOnOrder(order);
     await onOrderShipped(

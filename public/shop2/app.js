@@ -2505,6 +2505,16 @@
       "Проверьте платёж в Montonio": "Kontrollige makset Montonios",
       "Карта ушла на почту ✓": "Kaart läks e-postiga teele ✓",
       "Выдать в салоне": "Anna salongis üle",
+      // 06.11.2026: a pickup order's «Готов к выдаче» step and its letter
+      "Готов к выдаче": "Valmis üleandmiseks",
+      "Готов": "Valmis",
+      "готов к выдаче": "valmis üleandmiseks",
+      "Собрать заказ": "Pane tellimus kokku",
+      "Соберите заказ и нажмите «Готов к выдаче» — клиенту уйдёт письмо, что его можно забрать.": "Pange tellimus kokku ja vajutage «Valmis üleandmiseks» — klient saab kirja, et sellele võib järele tulla.",
+      "Клиент уже здесь — «Выдан клиенту» без письма": "Klient on juba kohal — «Kliendile üle antud» ilma kirjata",
+      "Клиенту ушло письмо «Заказ готов к выдаче». Когда заберёт — нажмите «Выдан клиенту».": "Klient sai kirja «Tellimus on valmis». Kui ta tellimuse ära viib, vajutage «Kliendile üle antud».",
+      "Заказ готов к выдаче": "Tellimus on valmis",
+      "когда вы нажмёте «Готов к выдаче» на заказе с самовывозом": "kui vajutate järeletulekuga tellimusel «Valmis üleandmiseks»",
       "«Отправить заново» — Montonio повторит это же отправление.": "«Saada uuesti» — Montonio kordab sama saadetist.",
       "Отправлен без этикетки": "Teele saadetud ilma sildita",
       "Отправлен без этикетки?": "Teele saadetud ilma sildita?",
@@ -6228,6 +6238,16 @@
       "Проверьте платёж в Montonio": "Check the payment in Montonio",
       "Карта ушла на почту ✓": "The card has gone by e-mail ✓",
       "Выдать в салоне": "Hand over in the salon",
+      // 06.11.2026: a pickup order's «Готов к выдаче» step and its letter
+      "Готов к выдаче": "Ready for pickup",
+      "Готов": "Ready",
+      "готов к выдаче": "ready for pickup",
+      "Собрать заказ": "Pack the order",
+      "Соберите заказ и нажмите «Готов к выдаче» — клиенту уйдёт письмо, что его можно забрать.": "Pack the order and press «Ready for pickup» — the customer gets an e-mail that it can be collected.",
+      "Клиент уже здесь — «Выдан клиенту» без письма": "The customer is already here — «Handed to the customer» with no e-mail",
+      "Клиенту ушло письмо «Заказ готов к выдаче». Когда заберёт — нажмите «Выдан клиенту».": "The customer got the e-mail «Ready for pickup». When they collect it, press «Handed to the customer».",
+      "Заказ готов к выдаче": "Ready for pickup",
+      "когда вы нажмёте «Готов к выдаче» на заказе с самовывозом": "when you press «Ready for pickup» on a pickup order",
       "«Отправить заново» — Montonio повторит это же отправление.": "«Send again» — Montonio repeats the same shipment.",
       "Отправлен без этикетки": "Shipped without a label",
       "Отправлен без этикетки?": "Shipped without a label?",
@@ -20004,6 +20024,9 @@
   }
   function acctOrderRow(o) {
     var st = ACCT_ORDER_STATE[o.status] || ["принят", "chip--low"];
+    /* a pickup order's `shipped` is «готов к выдаче» — it is on the salon
+       shelf, not on its way (06.11.2026) */
+    if (o.status === "shipped" && o.details && o.details.delivery && o.details.delivery.method === "pickup") st = ["готов к выдаче", "chip--ok"];
     /* A refund the shop has SENT and the bank has not confirmed. Montonio
        answers «принято» at once and the real answer comes days later, so until
        it does the order is still «оплачен» and this screen said nothing had
@@ -24899,7 +24922,11 @@
        отправлен», with a tracking number it does not have, about nothing. */
     if (v.digital) return "";
     if (SRV.stepBusy === v.id) return '<button class="' + cls + '" disabled>Сохраняем…</button>';
-    if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
+    /* A pickup order (06.11.2026): «Готов к выдаче» first — the customer's
+       «Заказ готов к выдаче» letter, through the same `shipped` step a parcel
+       uses (src/lib/ship-order.ts) — then «Выдан клиенту». */
+    if (v.paid && v.pickup) return '<button class="' + cls + '" data-admready="' + esc(v.id) + '">Готов к выдаче</button>';
+    if (v.shipped && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
     if (v.paid && !v.labeled && !v.digital) {
       /* A parcel the carrier refused is sent AGAIN, not created: the route
          PATCHes the same shipment (Montonio, 24.09.2026). */
@@ -25271,9 +25298,11 @@
     var paidish = v.paid || v.shipped || v.delivered;
     var steps;
     if (v.pickup) {
+      // three since 06.11.2026: the «Готов к выдаче» letter is a step of its own
       steps = [
         ["Оплачен", paidish ? "done" : "now", ""],
-        ["Выдан", v.delivered ? "done" : paidish ? "now" : "todo", ""]
+        ["Готов", v.shipped || v.delivered ? "done" : v.paid ? "now" : "todo", ""],
+        ["Выдан", v.delivered ? "done" : v.shipped ? "now" : "todo", ""]
       ];
     } else {
       var left = v.shipped || v.delivered;
@@ -25462,8 +25491,19 @@
     if (v.unpaid) return { key: "unpaid", title: "Ждёт оплаты", sub: "Заказ ещё не оплачен — отправлять нечего." };
     // an all-gift-card order: the card is in the inbox the moment it is paid
     if (v.digital) return { key: "digital", done: "Карта ушла на почту ✓" };
+    /* A pickup order: pack it, press «Готов к выдаче» — the letter «Заказ
+       принят» promised goes out (06.11.2026, R-100116 waited for it) — then
+       hand it over. A customer who is already standing at the counter needs
+       no letter: the link under the step closes the order at once. */
     if (v.paid && v.pickup) {
-      return { key: "pickup", title: "Выдать в салоне", sub: "Клиент забирает заказ в салоне. Письмо не отправляется.",
+      return { key: "pickup", title: "Собрать заказ",
+        sub: "Соберите заказ и нажмите «Готов к выдаче» — клиенту уйдёт письмо, что его можно забрать.",
+        after: '<button class="adm-link adm-next__alt" type="button" data-admdelivered="' + esc(v.id) + '">Клиент уже здесь — «Выдан клиенту» без письма</button>',
+        btn: admOrderStepBtn(v, false) };
+    }
+    if (v.shipped && v.pickup) {
+      return { key: "pickup", title: "Выдать в салоне",
+        sub: "Клиенту ушло письмо «Заказ готов к выдаче». Когда заберёт — нажмите «Выдан клиенту».",
         btn: admOrderStepBtn(v, false) };
     }
     if (v.paid && !v.labeled) {
@@ -28393,6 +28433,9 @@
     /* since 28.09.2026 the carrier's scan sends it by itself (src/lib/ship-order.ts);
        the press is the fallback for a parcel that left without one */
     ["order-shipped", "Заказ отправлен", "когда перевозчик примет посылку или вы нажмёте «Отправлен»", ""],
+    /* A pickup order's own second letter (06.11.2026): «Заказ принят» promised
+       it and nothing sent it (R-100116). Always on — it is that promise. */
+    ["order-ready", "Заказ готов к выдаче", "когда вы нажмёте «Готов к выдаче» на заказе с самовывозом", ""],
     /* The three letters an order gets when it never becomes a parcel. The
        reminder and the cancellation share one switch: reminding without ever
        letting the order go, or letting it go with no warning, is neither of
@@ -48705,7 +48748,12 @@
       id: o.id, number: o.number,
       date: String(o.createdAt || "").slice(0, 10).split("-").reverse().join("."),
       who: o.name || o.email || "—", items: n, sum: o.total,
-      ship: srvShipLabel(o.shipping), state: SRV_STATES[o.status] || SRV_STATES.new, srv: o
+      ship: srvShipLabel(o.shipping),
+      /* a pickup order's `shipped` is «Готов к выдаче» (06.11.2026) — nothing was sent anywhere */
+      state: o.status === "shipped" && o.shipping && String(o.shipping.method || "").toLowerCase() === "pickup"
+        ? ["shipped", "готов к выдаче", "--muted"]
+        : SRV_STATES[o.status] || SRV_STATES.new,
+      srv: o
     };
   }
   function loadSrvOrders(force, afterWrite) {
@@ -55624,7 +55672,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admready],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -56026,6 +56074,20 @@
       render(); refocus('[data-shipbox="length"]'); return;
     }
     if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
+    /* «Готов к выдаче» on a pickup order (06.11.2026): the `shipped` step,
+       applied at once like a labelled parcel's «Отправлен» — the letter it
+       sends is known to the word, and it waits ten seconds on the server for
+       the toast's «Вернуть». */
+    if (d.admready) {
+      var rRow = admOrderById(d.admready);
+      if (!rRow || !rRow.pickup) return;
+      var rEntry = demoApply({
+        type: "order_status", id: rRow.id, number: rRow.number, value: "shipped", prev: rRow.status
+      });
+      render();
+      toast(rRow.number + " готов к выдаче · письмо уйдёт через 10 с", rEntry);
+      return;
+    }
     if (d.admdelivered) {
       var dRow = admOrderById(d.admdelivered);
       if (!dRow) return;

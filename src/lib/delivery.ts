@@ -159,12 +159,19 @@ export function looksOnTheWay(status: unknown): boolean {
 
 type ShippedRow = { id: string; number: string; shipping: unknown; updated_at: string | Date };
 
-/** Orders that are `shipped` and have been for at least an hour. */
+/**
+ * Orders that are `shipped` and have been for at least an hour — parcels.
+ * A pickup order is `shipped` too once it is «Готов к выдаче» (06.11.2026),
+ * and it is nobody's parcel: it waits on the salon shelf until the customer
+ * comes, so neither a carrier's word nor «через N дней» may close it — only
+ * «Выдан клиенту».
+ */
 async function shippedOrders(limit: number): Promise<ShippedRow[]> {
   return query<ShippedRow>(
     `select id, number, shipping, updated_at
        from orders
       where status = 'shipped'
+        and lower(coalesce(shipping ->> 'method', '')) <> 'pickup'
       order by updated_at
       limit ${Math.max(1, Math.min(200, limit))}`,
   );

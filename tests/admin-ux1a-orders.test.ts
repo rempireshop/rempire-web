@@ -7,7 +7,7 @@
  *     words for every state an order can be in, the Glossary's verbs;
  *   · «⋯» — every rare action that used to stand on the card is still there,
  *     with the data-* hook it always had;
- *   · the progress line — four dots, two for a pickup, the skipped label;
+ *   · the progress line — four dots, three for a pickup, the skipped label;
  *   · the note saving itself through PATCH { note } (no «Сохранить заметку»);
  *   · the held letters: «Отправлен»/cancel toasts that say ten seconds, and
  *     «Написать клиенту» with «Вернуть» that really stops the letter;
@@ -101,11 +101,23 @@ describe("«Заказ» — the ONE next step, in the Glossary's words", () => 
     expect(nx.help).toContain("отнесите посылку в пакомат");
   });
 
-  it("on its way: «Доставлен»; a pickup: «Выдан клиенту»", () => {
+  /* 06.11.2026: a pickup order is packed, then «Готов к выдаче» — the letter
+     «Заказ принят» promised (R-100116 waited for it) — then «Выдан клиенту». */
+  it("on its way: «Доставлен»; a pickup: «Готов к выдаче», then «Выдан клиенту»", () => {
     expect(card.next(order({ status: "shipped", paid: false, shipped: true, labeled: true })).btn).toContain('data-admdelivered="o1"');
     const pick = card.next(order({ pickup: true }));
-    expect(pick.btn).toContain(">Выдан клиенту<");
-    expect(pick.after).toBeUndefined();
+    expect(pick.title).toBe("Собрать заказ");
+    expect(pick.btn).toContain('data-admready="o1"');
+    expect(pick.btn).toContain(">Готов к выдаче<");
+    // a customer already at the counter: closed at once, no letter
+    expect(pick.after).toContain('data-admdelivered="o1"');
+    expect(pick.after).toContain("без письма");
+    const ready = card.next(order({ pickup: true, status: "shipped", paid: false, shipped: true }));
+    expect(ready.title).toBe("Выдать в салоне");
+    expect(ready.sub).toContain("«Заказ готов к выдаче»");
+    expect(ready.btn).toContain('data-admdelivered="o1"');
+    expect(ready.btn).toContain(">Выдан клиенту<");
+    expect(ready.after).toBeUndefined();
   });
 
   it("an awaited invoice: «Отметить оплаченным» is the dark button and the invoice line the card's body", () => {
@@ -183,11 +195,14 @@ describe("«Заказ» — the progress line", () => {
     expect(lis(html)).toEqual(["done", "skip", "done", "now"]);
     expect(html).toContain("без этикетки");
   });
-  it("two dots for a pickup — «Оплачен · Выдан»", () => {
+  it("three dots for a pickup — «Оплачен · Готов · Выдан»", () => {
     const html = card.steps(order({ pickup: true }));
-    expect(lis(html)).toEqual(["done", "now"]);
-    expect(html).toContain("adm-prog--2");
+    expect(lis(html)).toEqual(["done", "now", "todo"]);
+    expect(html).toContain("adm-prog--3");
+    expect(html).toContain("Готов");
     expect(html).toContain("Выдан");
+    expect(lis(card.steps(order({ pickup: true, status: "shipped", paid: false, shipped: true })))).toEqual(["done", "done", "now"]);
+    expect(lis(card.steps(order({ pickup: true, status: "delivered", paid: false, delivered: true })))).toEqual(["done", "done", "done"]);
   });
 });
 
@@ -510,7 +525,8 @@ describe("«Заказы»", () => {
       order(),                                                         // «Создать этикетку»
       order({ labeled: true }),                                        // «Отправлен»
       order({ status: "shipped", paid: false, shipped: true }),        // «Доставлен»
-      order({ pickup: true }),                                         // «Выдан клиенту»
+      order({ pickup: true }),                                         // «Готов к выдаче»
+      order({ pickup: true, status: "shipped", paid: false, shipped: true }), // «Выдан клиенту»
       order({ shipRefused: true }),                                    // «Отправить заново»
       order({ status: "new", paid: false, unpaid: true, invoice: { number: "A-1" } }),
     ];
@@ -520,7 +536,8 @@ describe("«Заказы»", () => {
       expect(hook(a), JSON.stringify(v)).toBe(hook(row.next(v).btn));
     }
     expect(acts(order())).toContain(">Создать этикетку<");
-    expect(acts(order({ pickup: true }))).toContain(">Выдан клиенту<");
+    expect(acts(order({ pickup: true }))).toContain(">Готов к выдаче<");
+    expect(acts(order({ pickup: true, status: "shipped", paid: false, shipped: true }))).toContain(">Выдан клиенту<");
   });
 
   it("«Отправлен без этикетки» is the card's only — never a second button in the row", () => {

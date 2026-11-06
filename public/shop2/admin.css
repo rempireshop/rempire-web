@@ -968,6 +968,8 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
   list-style: none; margin: 0; padding: 0; max-width: 620px;
 }
 .adm-prog--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 320px; }
+/* a pickup order since 06.11.2026: Оплачен → Готов → Выдан */
+.adm-prog--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 480px; }
 .adm-prog__s { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; text-align: center; }
 .adm-prog__dot { width: 12px; height: 12px; box-sizing: border-box; border: 2px solid var(--a-edge); background: var(--a-paper); }
 .adm-prog__s--done .adm-prog__dot { background: var(--a-ink); border-color: var(--a-ink); }
@@ -979,6 +981,7 @@ body[data-screen="admin"], body[data-screen="scan"] { background: var(--a-paper)
 .adm-prog__c { margin-top: -5px; font-size: 11px; line-height: 14px; color: var(--a-muted); }
 .adm-prog__rule { position: absolute; z-index: 0; top: 5px; left: 12.5%; right: 12.5%; height: 2px; background: var(--a-rule); list-style: none; }
 .adm-prog--2 .adm-prog__rule { left: 25%; right: 25%; }
+.adm-prog--3 .adm-prog__rule { left: 16.667%; right: 16.667%; }
 .adm-prog__rule i { display: block; height: 100%; background: var(--a-ink); }
 @media (max-width: 899px) { .adm-prog__l { font-size: 12px; white-space: normal; overflow-wrap: anywhere; } }
 

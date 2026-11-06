@@ -14,6 +14,7 @@
 import { renderOrderCancelled, type ClosedKind } from "@/emails/order-cancelled";
 import { renderOrderConfirmed } from "@/emails/order-confirmed";
 import { renderOrderShipped } from "@/emails/order-shipped";
+import { renderOrderReady } from "@/emails/order-ready";
 import { renderOrderUnpaid } from "@/emails/order-unpaid";
 import { renderPosReceipt } from "@/emails/pos-receipt";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
@@ -121,6 +122,7 @@ export async function loadBrand(): Promise<void> {
         et: content.emailFooter.ET,
         en: content.emailFooter.EN,
       },
+      hours: content.hours,
     });
   } catch (err) {
     console.warn("[mail-hooks] shop details unavailable, using defaults", err);
@@ -575,6 +577,31 @@ export async function onOrderUnpaid(
     return { ok: res.ok, skipped: res.skipped, reason: res.error, id: res.id };
   } catch (err) {
     console.error("[mail-hooks] onOrderUnpaid failed", err);
+    return { ok: false, reason: "exception" };
+  }
+}
+
+/**
+ * A pickup order is packed and waiting at the salon — «Заказ готов к выдаче»,
+ * the letter «Заказ принят» promises every pickup customer (06.11.2026,
+ * R-100116). Sent from the same «Отправлен» door a parcel uses
+ * (src/lib/ship-order.ts), so it is held, journalled and undone the same way.
+ */
+export async function onOrderReady(order: OrderLike): Promise<MailHookResult> {
+  try {
+    const to = customerEmail(order);
+    if (!to) return { ok: true, skipped: true, reason: "no_customer_email" };
+
+    await loadBrand();
+    const lang = langOf(order);
+    const mail = renderOrderReady(order, lang);
+    const res = await sendRendered(to, mail, {
+      tags: { template: "order-ready" },
+      idempotencyKey: `ready:${orderNumber(order)}`,
+    });
+    return { ok: res.ok, skipped: res.skipped, reason: res.error, id: res.id };
+  } catch (err) {
+    console.error("[mail-hooks] onOrderReady failed", err);
     return { ok: false, reason: "exception" };
   }
 }

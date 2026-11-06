@@ -155,6 +155,7 @@ await onOrderPaid(order);           // returns, never throws
 | `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language — or «Чек о продаже в салоне» when `order.channel === "pos"`, because a till sale is finished and the goods left with the customer — plus the shop's own Telegram + e-mail ping through `notify.ts`, plus the gift cards bought in the order (below). |
 | `issueOrderGiftCards(order)` | the payment routes see "paid" for an order that is already paid — a webhook retry, the shopper's return after the webhook | the gift-card half of `onOrderPaid` on its own: mint the cards bought in the order (idempotent — existing cards win) and mail each to its recipient, Resend key `gift:<code>`. No customer letter, no ping. Exists so a crash between the status write and the hook cannot leave a paid order without its cards. |
 | `onOrderShipped(order, tracking)` | parcel handed to the carrier | «Заказ отправлен» with the tracking code and a carrier link. `tracking` is a bare code string, or `{ code, url?, carrier? }`. |
+| `onOrderReady(order)` | a **pickup** order moved to `shipped` — «Готов к выдаче» on the order card | «Заказ готов к выдаче»: the items and the total, the salon address, the opening hours from Настройки → Контент (none set → no hours line), «назовите номер заказа». Resend key `ready:<number>`. `sendShippedLetter()` (src/lib/ship-order.ts) picks it instead of `onOrderShipped` whenever `shipping.method` is `pickup` (06.11.2026: «Заказ принят» promised it and nothing sent it — R-100116). |
 | `onOrderClosed(order, { kind, amount? })` | the order is cancelled, or money went back | «Заказ отменён» (`kind: "cancelled"`) or «Деньги возвращены» (`kind: "refunded"`, `amount` = what actually left). One renderer, two openings. Called from «Отменить заказ» and «Изменить статус вручную» in the admin (`PATCH /api/admin/orders/<id>`), from «Вернуть деньги», the refund webhook and the morning re-check of a pending refund (`settleRefund()`: «Возврат отправлен», `kind: "refund_sent"`, on a first PENDING; «Деньги возвращены» once, when the refund becomes done — 27.09.2026), and from the cron when an unpaid order runs out of time. Until 07.09.2026 none of those said anything at all to the customer. |
 | `onOrderUnpaid(order, { daysLeft, payUrl })` | an unpaid order is a few days old | «Заказ ждёт оплаты», with a button back to that order's own failed receipt — the screen that carries «Оплатить ещё раз» and the choice of another method. Only the daily cron sends it (`runUnpaidOrders()`, docs/flows.md). |
 
@@ -200,6 +201,7 @@ variant and a jsonb address still renders a correct letter.
 |---|---|---|
 | `order-confirmed` | `renderOrderConfirmed(order, lang)` | service |
 | `order-shipped` | `renderOrderShipped(order, lang, tracking)` | service |
+| `order-ready` | `renderOrderReady(order, lang)` | service — a pickup order is packed and waiting at the salon |
 | `order-unpaid` | `renderOrderUnpaid(order, lang, {daysLeft, payUrl})` | service — the reminder before an unpaid order is let go |
 | `order-cancelled` | `renderOrderCancelled(order, lang, {kind:"cancelled"})` | service |
 | `order-refunded` | `renderOrderCancelled(order, lang, {kind:"refunded", amount})` | service — same renderer, the other opening |
@@ -332,7 +334,7 @@ Storage is one settings row, written through the ordinary
 { "mail_texts": { "order-confirmed": { "et": { "subject": "…", "intro": "…", "signature": "…" } } } }
 ```
 
-Eleven letters are editable — `order-confirmed`, `order-shipped`,
+Twelve letters are editable — `order-confirmed`, `order-shipped`, `order-ready`,
 `order-unpaid`, `order-cancelled`, `order-refunded`, `pos-receipt`, `abandoned-cart`,
 `back-in-stock`, `birthday`, `login-code`,
 `partner-welcome` — in `ru`, `et`,
@@ -348,6 +350,7 @@ into the row.
 |---|---|---|---|
 | `order-confirmed` | «Заказ R-1 принят — Rempire» | the paragraph after «Здравствуйте, Имя!» | «Есть вопрос по заказу? …» |
 | `order-shipped` | «Заказ R-1 отправлен — Rempire» | same | «Трек-номер начинает отслеживаться…» |
+| `order-ready` | «Заказ R-1 готов к выдаче — Rempire» | same | «Есть вопрос по заказу? …» |
 | `order-unpaid` | «Заказ R-1 ждёт оплаты — Rempire» | same | «Что-то пошло не так при оплате? …» |
 | `order-cancelled` | «Заказ R-1 отменён — Rempire» | same | «Если это ошибка или вы хотите оформить заказ заново…» |
 | `order-refunded` | «Возврат по заказу R-1 — Rempire» | same | «Если деньги не придут в течение пяти рабочих дней…» |

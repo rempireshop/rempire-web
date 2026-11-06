@@ -28,6 +28,7 @@ import {
   renderOrderCancelled,
   renderPosReceipt,
   renderOrderConfirmed,
+  renderOrderReady,
   renderOrderShipped,
   renderOrderUnpaid,
   renderPartnerWelcome,
@@ -113,6 +114,8 @@ const TEXT: Record<Lang, SampleText> = {
 export const SAMPLE_BRAND: BrandOverride = {
   email: "info@rempireshop.com",
   note: { ru: TEXT.ru.note, et: TEXT.et.note, en: TEXT.en.note },
+  // the salon's real week (Настройки → Контент, 06.11.2026) — «Заказ готов к выдаче» prints it
+  hours: { mon: "closed", tue: "10:00–19:00", wed: "10:00–19:00", thu: "10:00–19:00", fri: "10:00–19:00", sat: "10:00–19:00", sun: "closed" },
 };
 
 /** A paid order: two lines, one of them a set; an Omniva parcel machine; a
@@ -250,6 +253,14 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
           code: "CE123456789EE",
           carrier: "omniva",
         });
+      /* The pickup order's second letter: the sample order goes to a parcel
+         machine, so it is collected at the salon here instead — the one kind
+         of order this letter is ever sent for (src/lib/ship-order.ts). */
+      case "order-ready":
+        return renderOrderReady(
+          { ...sampleOrder(lang), status: "shipped", shipping: { method: "pickup", country: "EE" }, shipping_price: 0 },
+          lang,
+        );
       /* The three letters an order gets when it never becomes a parcel. The
          unpaid reminder points at the same failed receipt the real one does;
          the refund names a partial sum on purpose, because that is the case

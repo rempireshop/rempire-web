@@ -209,7 +209,7 @@ function lockerWord(
  * were three places to forget on the day the salon moves. It is written the
  * same way in all three letters, because a street address is not translated.
  */
-function pickupPlace(): string {
+export function pickupPlace(): string {
   return [BRAND.name, brandAddress()].filter(Boolean).join(", ");
 }
 
