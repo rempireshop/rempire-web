@@ -199,9 +199,21 @@
     var t = s.titles || {};
     return (" " + [t.RU, t.ET, t.EN, s.title].join(" ") + " ").toLowerCase().replace(/ё/g, "е");
   }
+  /* A set for a problem is no gift unless the shopper names the problem —
+     PROBLEM in shop-sets.ts, the same words: «что подарить жене» got
+     «Редеющие волосы» on the live chat (07.11.2026). */
+  var PROBLEM_RX = /редеющ|редеют|выпад|лысе|перхот|жирн|чувствит|поврежд|hõren|kõõm|rasun|tundlik|kahjust|väljalang|thinning|hair loss|dandruff|oily|greasy|sensitive|damaged/i;
+  var MEN_TITLE_RX = /мужчин|mehe|\bmen\b|\bman\b|\bhim\b/i;
+  /** «beard» when most of a set's products are beard care — «Подарочный набор Rempire» is filed under body. */
+  function setMostlyBeard(s) {
+    var n = 0;
+    s.items.forEach(function (id) { if (CATALOGUE.some(function (p) { return p.id === id && p.cat === "beard"; })) n++; });
+    return s.items.length > 0 && n / s.items.length >= 0.6;
+  }
   function setFits(s, q, cap) {
     if (cap && s.price > cap) return false;
-    if (WOMAN_RX.test(q) && (s.cat === "beard" || /мужчин|mehe|\bmen\b/i.test(setTitles(s)))) return false;
+    if (WOMAN_RX.test(q) && (s.cat === "beard" || MEN_TITLE_RX.test(setTitles(s)) || setMostlyBeard(s))) return false;
+    if (GIFT_RX.test(q) && PROBLEM_RX.test(setTitles(s)) && !PROBLEM_RX.test(q)) return false;
     return true;
   }
   /** «набор для бороды» → the sets whose name has «бород», then the beard section's, at most `max`. */

@@ -60,6 +60,14 @@ export const TOPIC_KW: Array<[RegExp, string[]]> = [
   [/глаз|под глаз|silm|\beyes?\b/i, ["eye"]],
   [/чувствит|раздраж|tundlik|sensitive/i, ["sensitive"]],
 ];
+/** A question about a gift. */
+export const GIFT_ASK = /подар|kingi|kink|\bgifts?\b|\bpresent\b/i;
+/* What a gift that names no section is chosen from: perfume, body care, skin
+   care and merch — as the chat's offline answer does (chat.js). Without
+   them «что подарить жене до 60 €?» matched no section, the slice was the
+   first rows of the file, and the chat offered no product at all
+   (07.11.2026). */
+const GIFT_CATS = ["perfume", "body", "face", "merch"];
 /** The shop sections a question is about (CAT_KW), in table order. */
 export function questionCats(text: string): string[] {
   const q = String(text || "").toLowerCase();
@@ -81,6 +89,7 @@ export function relevantProducts(text: string, opts: { limit?: number; fill?: nu
   const fill = opts.fill ?? 24;
   const q = String(text || "").toLowerCase();
   const cats = new Set(CAT_KW.filter(([re]) => re.test(q)).map(([, c]) => c));
+  if (!cats.size && GIFT_ASK.test(q)) for (const c of GIFT_CATS) cats.add(c);
   const toks = q.split(/[^a-zа-яёõäöüšž0-9.]+/i).filter((w) => w.length > 2);
   /* the topic's own name words (TOPIC_KW) count a little more than a word the
      shopper typed: «после» in «уход после татуировки» is in every «лосьон после

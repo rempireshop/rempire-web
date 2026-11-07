@@ -996,14 +996,18 @@ three-language texts, the shop chat, and AI help for search.
   overridable with `OPENAI_MODEL`. `reasoning_effort: "none"` is sent for
   reasoning models; the cap goes as `max_completion_tokens`.
 - **Assistant** (`POST /api/assistant/`, `src/app/api/assistant/route.ts`,
-  `PROMPT_V = 31`).
+  `PROMPT_V = 32`).
   - Shop mode: public, same-origin, 10 msg/min/IP, 400 tokens, catalogue
     slice and blog.
   - Shop sets (`shop-sets.ts`): `loadShopSets()` reads the active, in-stock
     sets (none when `settings.bundles` is off). The prompt gets a SETS block.
     `fittingSets()` writes `bundle_ids`: set/gift questions get up to 3 sets,
     product answers get 1–2 holding sets. The widget draws only ids that
-    `window.rempireSets()` (app.js) still has.
+    `window.rempireSets()` (app.js) still has. `allowedSet()` applies to every
+    path, including the model's own picks. It keeps the budget, gives a woman
+    no beard or men's set, and never offers a problem set as a gift unless
+    the question names the problem. chat.js `setFits` mirrors it. Gift
+    questions get `GIFT_RULE` and a perfume/body/face/merch slice.
   - Topic words (`TOPIC_KW`, `catalogue-slice.ts` and chat.js) map question
     words to name words («тату» → tattoo).
   - Admin mode: needs the admin cookie **and** an `Origin` header; 2 500

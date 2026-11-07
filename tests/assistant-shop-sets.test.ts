@@ -91,6 +91,43 @@ describe("which sets an answer carries (fittingSets)", () => {
   });
 });
 
+/* The live chat, 07.11.2026, right after the sets went in: «что подарить
+   жене до 60 €?» got the thinning-hair set and no product, «kinkekomplekte?»
+   the dandruff set. A gift is for a person the shop knows nothing about. */
+describe("a gift is never a set for a problem the shopper did not name", () => {
+  it("the model's own pick of a problem set is dropped for a gift", () => {
+    const out = fittingSets(SETS, { question: "Что подарить жене до 60 €?", productIds: [], catOf, modelIds: ["scalp-oily", "tattoo-care"] });
+    expect(out).not.toContain("scalp-oily");
+    expect(out).toContain("tattoo-care");
+  });
+  it("«kinkekomplekte?» — the gift set, not the dandruff one", () => {
+    const out = fittingSets(SETS, { question: "Kas teil on kinkekomplekte?", productIds: [], catOf, modelIds: ["gift-rempire", "scalp-oily"] });
+    expect(out[0]).toBe("gift-rempire");
+    expect(out).not.toContain("scalp-oily");
+  });
+  it("a gift for someone with dandruff may be the dandruff set", () => {
+    expect(fittingSets(SETS, { question: "Подарок маме, у неё перхоть", productIds: [], catOf })).toContain("scalp-oily");
+  });
+  it("not a gift — the problem set is offered as before", () => {
+    expect(fittingSets(SETS, { question: "Есть набор от перхоти?", productIds: [], catOf })).toContain("scalp-oily");
+  });
+  it("the section fallback keeps the rule too", () => {
+    const out = fittingSets(SETS, { question: "подарок жене", productIds: ["s4-sh1", "s4-x"], catOf: (id) => CAT[id] ?? "hair" });
+    expect(out).not.toContain("scalp-oily");
+  });
+  it("a set named for men is no gift for a woman («Gift for him»)", () => {
+    const him = [set("gift-men", "body", "Подарок мужчине", ["naxos"], 40, "Kingitus mehele", "Gift for him")];
+    expect(fittingSets(him, { question: "a gift for my wife", productIds: [], catOf, modelIds: ["gift-men"] })).toEqual([]);
+    expect(fittingSets(him, { question: "Что подарить мужу?", productIds: [], catOf })).toEqual(["gift-men"]);
+  });
+  it("the products of the slice do not pick a gift's sets", () => {
+    const shown = setsForPrompt(SETS, { question: "Что подарить жене?", productIds: ["hyd-wash", "s4-sh1", "yu-foam"], catOf }).map((s) => s.id);
+    expect(shown).not.toContain("hydrate");
+    expect(shown).not.toContain("scalp-oily");
+    expect(shown).not.toContain("tattoo-care");
+  });
+});
+
 describe("which sets the model is shown (setsForPrompt)", () => {
   it("«уход после татуировки» — the tattoo set, by its Russian name", () => {
     expect(setsForPrompt(SETS, { question: "Нужен уход после татуировки", productIds: [], catOf }).map((s) => s.id))
@@ -114,6 +151,13 @@ describe("the chat's catalogue slice finds a topic asked in Russian (TOPIC_KW)",
   it("…and «kiharad» or «кудрявые волосы» the curl line", () => {
     const ids = relevantProducts("шампунь для кудрявых волос").slice(0, 12).map((p) => p.id);
     expect(ids.some((id) => /curl/i.test(id))).toBe(true);
+  });
+  it("a gift that names no section — perfume, body, skin care and merch, not the first rows of the file", () => {
+    const rows = relevantProducts("Что подарить жене до 60 €?").slice(0, 24);
+    expect(rows.every((p) => ["perfume", "body", "face", "merch"].includes(p.c))).toBe(true);
+    expect(rows.some((p) => p.c === "perfume")).toBe(true);
+    // a gift that names its section keeps it
+    expect(relevantProducts("подарок для бороды").slice(0, 8).every((p) => p.c === "beard")).toBe(true);
   });
 });
 
@@ -213,6 +257,14 @@ describe("the shop chat with the shop's sets", () => {
     expect(prompt).not.toMatch(/men's grooming e-shop/i);
     expect(prompt).toContain("for women and men alike");
     expect(prompt).toContain("Never say or imply the shop is only for men");
+    expect(prompt).toContain("- A GIFT: unless the customer says what the person needs");
+  });
+
+  it("the gift rule goes only with a gift question", async () => {
+    const sent = stubOpenAI({ reply: "Возьмите масло.", product_ids: [] });
+    const { POST } = await import("@/app/api/assistant/route");
+    await POST(ask("посоветуйте масло для бороды"));
+    expect(sent[0].messages[0].content).not.toContain("- A GIFT:");
   });
 
   it("a set with a sold-out part is not offered", async () => {

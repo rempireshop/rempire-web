@@ -17,7 +17,9 @@
  * active sets, none while «Наборы» is switched off, none that is sold out
  * (loadShopSets). Pure apart from loadShopSets().
  */
-import { questionCats } from "@/lib/catalogue-slice";
+import { GIFT_ASK, questionCats } from "@/lib/catalogue-slice";
+
+export { GIFT_ASK };
 
 export type Lang3 = "RU" | "ET" | "EN";
 export type ShopSet = {
@@ -34,12 +36,18 @@ export type ShopSet = {
 /* `\b` is an ASCII boundary — next to a Cyrillic letter it never matches —
    so the Russian whole words are fenced with look-arounds instead. */
 export const SET_ASK = /набор|комплект|komplekt|\bkits?\b|\bsets?\b|bundle|(?<![а-яё])сет(?![а-яё])/i;
-/** …or for a gift. */
-export const GIFT_ASK = /подар|kingi|kink|\bgifts?\b|\bpresent\b/i;
 /** A gift for a woman: a set of beard care is not one. */
 const WOMAN_ASK = /девушк|женщин|(?<![а-яё])жен[аеуы](?![а-яё])|(?<![а-яё])мам[аеуы]?(?![а-яё])|подруг|сестр|бабушк|naise|tüdruk|emale|\bema\b|sõbranna|\bwom[ae]n\b|\bgirl|\bwife\b|\bmother\b|\bmum\b|\bmom\b|\bher\b/i;
 /** A set whose own name says it is a gift. */
 const GIFT_TITLE = /подар|kink|gift/i;
+/** A set whose name says it is for men («Подарок мужчине», «Gift for him»). */
+const MEN_TITLE = /мужчин|mehe|\bmen\b|\bman\b|\bhim\b/i;
+/* A set for a problem: thinning hair, dandruff, an oily or sensitive scalp,
+   damaged hair. It is no gift unless the shopper names the problem: asked
+   «что подарить жене до 60 €?», the live chat offered «Редеющие волосы»,
+   and «kinkekomplektid?» got the dandruff set (07.11.2026). The same words
+   in a question mean the shopper named it. */
+const PROBLEM = /редеющ|редеют|выпад|лысе|перхот|жирн|чувствит|поврежд|hõren|kõõm|rasun|tundlik|kahjust|väljalang|thinning|hair loss|dandruff|oily|greasy|sensitive|damaged/i;
 const STOP = new Set(["для", "что", "есть", "хочу", "нужен", "нужна", "нужно", "можно", "какой", "какие", "посоветуй", "посоветуйте", "подскажи", "after", "with", "something", "have", "what", "midagi", "mida", "jaoks", "kohta"]);
 
 /** «до 50 €», «kuni 50», «under €50» → 50. */
@@ -90,10 +98,24 @@ export type SetContext = {
 
 type Scored = { set: ShopSet; score: number; hold: number; extra: number };
 
+const titles = (s: ShopSet) => s.title.RU + " " + s.title.ET + " " + s.title.EN;
+
+/** Whether a set may be offered for this question at all — every path keeps
+    it, the model's own picks included: within the budget; for a woman, no
+    beard or men's set; for a gift, no set for a problem the shopper did not
+    name. */
+function allowedSet(s: ShopSet, q: string, catOf: (id: string) => string | undefined): boolean {
+  const cap = budgetOf(q);
+  if (cap !== null && s.price > cap) return false;
+  if (WOMAN_ASK.test(q) && (s.cat === "beard" || mainCat(s.items, catOf) === "beard" || MEN_TITLE.test(titles(s)))) return false;
+  if (GIFT_ASK.test(q) && PROBLEM.test(titles(s)) && !PROBLEM.test(q)) return false;
+  return true;
+}
+
 /* How well one set fits: its name has the question's words (×3), it holds
-   the offered products (×2 each), it is a gift set and a gift was asked for
-   (+3), it is in the section the question is about (+1). Sets out of the
-   budget, and beard sets for a gift to a woman, do not fit at all. */
+   the offered products (×holdWeight each), it is a gift set and a gift was
+   asked for (+3), it is in the section the question is about (+1). A set
+   allowedSet() refuses does not fit at all. */
 function scoreSets(sets: ShopSet[], ctx: SetContext, holdWeight: number): Scored[] {
   const q = ctx.question || "";
   const ids = ctx.productIds ?? [];
@@ -101,15 +123,12 @@ function scoreSets(sets: ShopSet[], ctx: SetContext, holdWeight: number): Scored
   const stems = nameStems(q);
   const cats = new Set(questionCats(q));
   const gift = GIFT_ASK.test(q);
-  const woman = WOMAN_ASK.test(q);
-  const cap = budgetOf(q);
   return sets
-    .filter((s) => cap === null || s.price <= cap)
-    .filter((s) => !(woman && (s.cat === "beard" || mainCat(s.items, catOf) === "beard" || /мужчин|mehe|\bmen\b|\bman\b/i.test(s.title.RU + " " + s.title.ET + " " + s.title.EN))))
+    .filter((s) => allowedSet(s, q, catOf))
     .map((set) => {
       const hold = set.items.filter((id) => ids.includes(id)).length;
       let score = nameHits(set, stems) * 3 + hold * holdWeight;
-      if (gift && GIFT_TITLE.test(set.title.RU + " " + set.title.ET + " " + set.title.EN)) score += 3;
+      if (gift && GIFT_TITLE.test(titles(set))) score += 3;
       if (cats.has(set.cat)) score += 1;
       return { set, score, hold, extra: set.items.length - hold };
     })
@@ -120,8 +139,12 @@ function scoreSets(sets: ShopSet[], ctx: SetContext, holdWeight: number): Scored
 /** The sets the model is shown for this question — at most `max`. A plain
     «наборы?» with nothing more to go on gets the shelf from the top. */
 export function setsForPrompt(sets: ShopSet[], ctx: SetContext, max = 8): ShopSet[] {
-  const ranked = scoreSets(sets, ctx, 1).map((x) => x.set);
-  if (!ranked.length && SET_ASK.test(ctx.question)) return sets.slice(0, max);
+  /* For a gift, the products of the slice say nothing about the person: the
+     slice is the shop's gift shelf, and the sets that happened to hold one of
+     its rows were offered as if they fit (07.11.2026). */
+  const q = ctx.question || "";
+  const ranked = scoreSets(sets, ctx, GIFT_ASK.test(q) ? 0 : 1).map((x) => x.set);
+  if (!ranked.length && SET_ASK.test(q)) return sets.filter((s) => allowedSet(s, q, ctx.catOf ?? (() => undefined))).slice(0, max);
   return ranked.slice(0, max);
 }
 
@@ -139,10 +162,12 @@ export function setLines(sets: ShopSet[], lang: Lang3): string {
  * Only ids from `sets` — the shop's own list — ever come back.
  */
 export function fittingSets(sets: ShopSet[], ctx: SetContext & { modelIds?: unknown }): string[] {
-  const known = new Set(sets.map((s) => s.id));
+  const q = ctx.question || "";
+  const catOf = ctx.catOf ?? (() => undefined);
+  // the model's picks pass the same rule as the rest: a prompt is only a request
+  const known = new Set(sets.filter((s) => allowedSet(s, q, catOf)).map((s) => s.id));
   const chosen = (Array.isArray(ctx.modelIds) ? ctx.modelIds : [])
     .filter((id): id is string => typeof id === "string" && known.has(id));
-  const q = ctx.question || "";
   const ids = ctx.productIds ?? [];
   const want = SET_ASK.test(q) ? 3 : GIFT_ASK.test(q) ? 2 : ids.length ? 1 : 0;
   const out = [...new Set(chosen)].slice(0, Math.max(want, 2));
@@ -156,10 +181,9 @@ export function fittingSets(sets: ShopSet[], ctx: SetContext & { modelIds?: unkn
     out.push(x.set.id);
   }
   if (out.length < want && ids.length && !SET_ASK.test(q)) {
-    const cat = mainCat(ids, ctx.catOf ?? (() => undefined));
-    const cap = budgetOf(q);
+    const cat = mainCat(ids, catOf);
     const same = sets
-      .filter((s) => cat && s.cat === cat && !out.includes(s.id) && (cap === null || s.price <= cap))
+      .filter((s) => cat && s.cat === cat && !out.includes(s.id) && allowedSet(s, q, catOf))
       .sort((a, b) => b.save - a.save);
     if (same[0]) out.push(same[0].id);
   }
