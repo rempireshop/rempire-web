@@ -8,7 +8,7 @@
  */
 const SHIMS = {
   "/tools/lib/overrides-export.mjs": ["fetchProductOverrides", "fetchOwnProducts", "fetchStockEans"],
-  "/tools/lib/bundles-export.mjs": ["fetchBundlePrices"],
+  "/tools/lib/bundles-export.mjs": ["fetchBundleRows"],
   "/tools/lib/blog-export.mjs": ["fetchPublishedPosts"],
   "/tools/lib/settings-export.mjs": ["fetchSettings"],
 };

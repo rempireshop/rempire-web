@@ -40,14 +40,14 @@ const CATALOGUE = JSON.parse(readFileSync(path.join(ROOT, "src", "data", "catalo
 async function snapshot(out) {
   if (!process.env.DATABASE_URL) throw new Error("snapshot needs DATABASE_URL (node --env-file=.env.railway.txt …)");
   const ov = await import("./lib/overrides-export.mjs");
-  const { fetchBundlePrices } = await import("./lib/bundles-export.mjs");
+  const { fetchBundleRows } = await import("./lib/bundles-export.mjs");
   const { fetchPublishedPosts } = await import("./lib/blog-export.mjs");
   const { fetchSettings } = await import("./lib/settings-export.mjs");
   const data = {
     fetchProductOverrides: await ov.fetchProductOverrides(),
     fetchOwnProducts: await ov.fetchOwnProducts(),
     fetchStockEans: await ov.fetchStockEans(),
-    fetchBundlePrices: await fetchBundlePrices(),
+    fetchBundleRows: await fetchBundleRows(),
     fetchPublishedPosts: await fetchPublishedPosts(),
     fetchSettings: await fetchSettings(SETTING_KEYS),
   };
@@ -65,11 +65,14 @@ const strings = (v, fn) =>
   typeof v === "string" ? fn(v) : Array.isArray(v) ? v.map((x) => strings(x, fn)) :
   v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, strings(x, fn)])) : v;
 const FIRST = CATALOGUE.find((p) => p.c === "hair").id;
-const setItems = (d) => {
-  /* the sets' parts, as public/shop/bundles.js (the file's sets) names them */
-  const src = readFileSync(path.join(ROOT, "public", "shop", "bundles.js"), "utf8");
-  return [...new Set([...src.matchAll(/"id":\s*"([a-z0-9-]+)"/g)].map((m) => m[1]).filter((id) => CATALOGUE.some((p) => p.id === id)))];
+const rowItems = (r) => {
+  const v = typeof r.items === "string" ? (() => { try { return JSON.parse(r.items); } catch { return []; } })() : r.items;
+  return Array.isArray(v) ? v : [];
 };
+/* the sets' parts, as the table names them (what the build reads since 07.11.2026) */
+const setItems = (d) =>
+  [...new Set((d.fetchBundleRows || []).flatMap((r) => rowItems(r).map((it) => String(it.productId ?? it.id ?? ""))))]
+    .filter((id) => CATALOGUE.some((p) => p.id === id));
 
 const SCENARIOS = {
   baseline: () => {},
@@ -115,11 +118,20 @@ const SCENARIOS = {
   "own product: in a section that does not exist": (d) => {
     d.fetchOwnProducts = [...(d.fetchOwnProducts || []), { id: "c-chaos-cat", brand: "B", name: "N", cat: "nosuchsection", sub: "", price: 5, img: "/x.webp", stock: "in", custom: true }];
   },
-  /* fetchBundlePrices() is { id: { price, discountPct, active } } */
-  "sets: none in the database": (d) => { d.fetchBundlePrices = {}; },
-  "sets: every one switched off": (d) => { Object.values(d.fetchBundlePrices || {}).forEach((b) => (b.active = false)); },
+  /* fetchBundleRows() is the bundles table, `select *` — one row per set */
+  "sets: none in the database": (d) => { d.fetchBundleRows = []; },
+  "sets: every one switched off": (d) => { (d.fetchBundleRows || []).forEach((b) => (b.active = false)); },
   "sets: price above the parts, and nonsense": (d) => {
-    Object.values(d.fetchBundlePrices || {}).forEach((b, i) => { b.price = i % 2 ? 9999 : null; b.discountPct = i % 2 ? null : 150; });
+    (d.fetchBundleRows || []).forEach((b, i) => { b.price = i % 2 ? 9999 : null; b.discount_pct = i % 2 ? null : 150; });
+  },
+  /* validateBundle() refuses all of this on save; a row written some other
+     way, or a part the catalogue has since lost, must still not break a page */
+  "sets: a part gone from the catalogue, blank names, odd items": (d) => {
+    const rows = d.fetchBundleRows || [];
+    if (rows[0]) rows[0].items = [...rowItems(rows[0]), { productId: "no-such-product", variant: 7, qty: 2 }];
+    if (rows[1]) Object.assign(rows[1], { name_ru: "", name_et: null, name_en: `"&<>" 💈`, desc_ru: null, image: "no-such-product" });
+    if (rows[2]) rows[2].items = "not json";
+    if (rows[3]) rows[3].items = [{ productId: rowItems(rows[3])[0]?.productId, variant: -3, qty: 0 }];
   },
   "blog: every post unpublished": (d) => { d.fetchPublishedPosts = []; },
   "blog: a cover that cannot be fetched": (d) => {

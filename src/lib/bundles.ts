@@ -24,8 +24,10 @@
  *
  * The static twins (public/shop/bundles.js, src/data/bundles.json) are not
  * deleted: they are the offline fallback for a shop running with no database
- * at all, and what tools/prerender-shop2.mjs still builds the /sets/ pages
- * from at build time.
+ * at all, and what tools/prerender-shop2.mjs builds the /sets/ pages from when
+ * IT has no database. With one (every deploy), the build reads this table and
+ * expands it the way expand() below does — tools/lib/bundles-export.mjs, held
+ * to the same numbers by tests/bundles-export.test.ts.
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";

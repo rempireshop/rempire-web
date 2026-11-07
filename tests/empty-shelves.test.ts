@@ -20,7 +20,8 @@
  *   · the server: /blogs/news and /collections/sets answer 404 while empty, and
  *     an empty `bundles` table no longer falls back to the file at the till;
  *   · the prerender: which sets get pages is the table's answer, not the
- *     file's (liveBundles()).
+ *     file's (setsFromRows(), since 07.11.2026 the whole set and not only
+ *     which ids — tests/bundles-export.test.ts).
  *
  * The browser pieces are sliced out of public/shop2/app.js by source text and
  * run against stubs, as tests/blog-panel-shop.test.ts does — retyping them
@@ -35,7 +36,7 @@ import { notFoundPageResponse } from "@/lib/notfound-page";
 import { createOrder, OrderError } from "@/lib/orders";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
-import { applyBundlePrices, liveBundles } from "../tools/lib/bundles-export.mjs";
+import { setsFromRows } from "../tools/lib/bundles-export.mjs";
 import { setupDb, teardownDb } from "./helpers";
 
 const src = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
@@ -407,26 +408,30 @@ describe("an empty shelf's address is the 404 screen — once the shop knows", (
 /* ---------- the prerender: which sets get pages ------------------------- */
 
 describe("the prerender writes set pages only for sets the table sells", () => {
-  const file = [{ id: "a", sum: 10, price: 9 }, { id: "b", sum: 10, price: 9 }, { id: "c", sum: 10, price: 9 }];
+  const cat = [{ id: "p1", brand: "B", name: "One", price: 10, img: "/1.webp" }, { id: "p2", brand: "B", name: "Two", price: 10, img: "/2.webp" }];
+  const parts = [{ productId: "p1" }, { productId: "p2" }];
 
-  it("keeps the file's list when there was no database to ask", () => {
-    expect(liveBundles(file, null)).toEqual(file);
+  it("falls back to the file only when there was no database to ask", () => {
+    const tool = readFileSync(new URL("../tools/prerender-shop2.mjs", import.meta.url), "utf8");
+    expect(tool).toMatch(/const BUNDLES = BUNDLE_ROWS\s*\?\s*setsFromRows\(/);
   });
 
   it("writes none for an empty table — the shop after the go-live reset", () => {
-    expect(liveBundles(file, {})).toEqual([]);
+    expect(setsFromRows([], cat)).toEqual([]);
   });
 
   it("writes the ones on sale, and prices them from the table", () => {
-    const rows = { a: { price: 7, discountPct: null, active: true }, b: { price: null, discountPct: null, active: false } };
-    const out = applyBundlePrices(liveBundles(file, rows), rows);
+    const out = setsFromRows([
+      { id: "a", name_ru: "А", items: parts, price: "7", active: true, sort: 1 },
+      { id: "b", name_ru: "Б", items: parts, price: null, active: false, sort: 2 },
+    ], cat);
     expect(out.map((b: { id: string }) => b.id)).toEqual(["a"]);
     expect(out[0].price).toBe(7);
   });
 
   it("puts the build's set ids on every page it writes, the shell included", () => {
     const tool = readFileSync(new URL("../tools/prerender-shop2.mjs", import.meta.url), "utf8");
-    expect(tool).toContain("liveBundles(");
+    expect(tool).toContain("setsFromRows(");
     expect(tool).toContain("${blogDataScript(spec.lang.code)}${setsDataScript()}");
     expect(tool).toContain("spec.content + blogDataScript(spec.lang.code) + setsDataScript()");
     const check = readFileSync(new URL("../tools/check-prerender.mjs", import.meta.url), "utf8");

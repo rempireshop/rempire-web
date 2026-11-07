@@ -34,6 +34,11 @@ import {
 import { setUrls } from "@/lib/indexnow.mjs";
 import { submitIndexNow } from "@/lib/indexnow-ping";
 import { getOverrides, writeAuditSafe } from "@/lib/orders";
+/* Every set on sale has a static page, a sitemap row and an og:image, all
+   written by the build from the table (tools/lib/bundles-export.mjs) — so a
+   saved set asks for one, the way a published article and a renamed product
+   do. Coalesced and best-effort: src/lib/rebuild.ts. */
+import { requestRebuild } from "@/lib/rebuild";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -96,6 +101,7 @@ export async function POST(req: Request) {
     });
     // a set on sale is a page; the engines hear it changed (live shop only, fire-and-forget)
     if (bundle.active) submitIndexNow(setUrls(bundle.id));
+    requestRebuild("bundle-set");
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] write failed:", err);
@@ -117,6 +123,7 @@ export async function PATCH(req: Request) {
       if (body.order.some((x) => typeof x !== "string")) return bad("bad_body");
       const bundles = await reorderBundles(body.order as string[]);
       await writeAuditSafe("admin", "bundle.reorder", { order: body.order });
+      requestRebuild("bundle-reorder");
       return Response.json({ ok: true, bundles }, { headers: NO_STORE });
     }
 
@@ -127,6 +134,7 @@ export async function PATCH(req: Request) {
     if (!bundle) return bad("not_found", 404);
     await writeAuditSafe("admin", "bundle.active", { id: bundle.id, active: bundle.active });
     submitIndexNow(setUrls(bundle.id));   // on sale or off: its page appeared or went
+    requestRebuild("bundle-active");
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] patch failed:", err);
@@ -146,6 +154,7 @@ export async function DELETE(req: Request) {
     if (!bundle) return bad("not_found", 404);
     await writeAuditSafe("admin", "bundle.delete", { id: bundle.id });
     submitIndexNow(setUrls(bundle.id));   // its page now answers 404
+    requestRebuild("bundle-delete");
     return Response.json({ ok: true, bundle }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/bundles] delete failed:", err);

@@ -44,13 +44,16 @@ const loadObj = async (file, name) => {
 const LEGAL = (await loadObj("legal.js", "LEGAL")) || {};
 const LEGAL_SLUGS = Object.keys(LEGAL);
 const BUNDLES_FILE = (await loadObj("bundles.js", "BUNDLES")) || [];
-/* Which of the file's sets the prerender wrote pages for. Since 28.09.2026 it
-   is the ones the database still sells (liveBundles() in
-   tools/lib/bundles-export.mjs) — none at all after the go-live reset — and
-   the run says which in the #setsdata block it puts on every page, the shell
-   included. The shell is read for it here: a check that assumed the whole
-   file would fail every build of a shop whose sets were deleted. A shell with
-   no such block was written before the list existed, and means the file. */
+/* Which sets the prerender wrote pages for. With a database it is every set
+   the table sells (setsFromRows() in tools/lib/bundles-export.mjs, since
+   07.11.2026) — most of them sets the file has never heard of, and none at
+   all after the go-live reset — and the run says which in the #setsdata block
+   it puts on every page, the shell included. The shell is read for it here,
+   and every id in it is checked: a check that walked the file would pass a
+   build that wrote no page for a set made in the panel, and fail every build
+   of a shop whose sets were deleted. Only the id is read off each one. A
+   shell with no such block was written before the list existed, and means
+   the file. */
 const SETS_WRITTEN = (() => {
   try {
     const src = readFileSync(path.join(SHOP2, "index.html"), "utf8");
@@ -59,7 +62,7 @@ const SETS_WRITTEN = (() => {
     return Array.isArray(ids) ? new Set(ids.map(String)) : null;
   } catch { return null; }
 })();
-const BUNDLES = SETS_WRITTEN ? BUNDLES_FILE.filter((b) => SETS_WRITTEN.has(b.id)) : BUNDLES_FILE;
+const BUNDLES = SETS_WRITTEN ? [...SETS_WRITTEN].map((id) => ({ id })) : BUNDLES_FILE;
 
 /* Every og:image the tool writes is meant to be a 1 200×630 file that is
    actually on disk — that is the whole promise behind declaring

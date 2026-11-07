@@ -452,7 +452,10 @@ finds them. Renat edits; shoppers read and search.
 - **Sets («Наборы»).** `bundles` (`120_bundles.sql`, `src/lib/bundles.ts`;
   routes `GET /api/bundles/` and `GET|POST|PATCH|DELETE /api/admin/bundles/`).
   The static `public/shop/bundles.js` and `src/data/bundles.json` remain the
-  offline copy and the prerender source. Sets are in the Merchant feed.
+  offline copy and the prerender source for a build with no database; with
+  one, the prerender reads the table (`tools/lib/bundles-export.mjs`
+  `setsFromRows`, held equal to `expand()` by `tests/bundles-export.test.ts`),
+  and a set save in the panel requests a rebuild. Sets are in the Merchant feed.
 - **Stock word.** `src/lib/stock-word.ts` is the panel's «Заканчивается» rule
   on the server, held equal to app.js by `tests/overview-low-parity.test.ts`.
 - **Search.** The shop's passes run in this order:

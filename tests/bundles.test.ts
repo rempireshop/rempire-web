@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BUNDLES, DISCOUNT } from "../tools/bundles.config.mjs";
 import { buildBundles, loadCatalogue, sizePrice, to90 } from "../tools/build-bundles.mjs";
-import { applyBundlePrices } from "../tools/lib/bundles-export.mjs";
 
 /**
  * The sets are generated, not hand-written, so what is worth testing is the
@@ -163,43 +162,7 @@ describe("bundles", () => {
   });
 });
 
-/**
- * …and what the /sets/ pages are actually written from.
- *
- * The generator's file is a snapshot. Renat edits a set price in «Товары →
- * Наборы», which writes the `bundles` table and nothing else — no step in the
- * build regenerates public/shop/bundles.js from it — so the price baked into
- * every prerendered set page, its <title>, its meta description and its
- * schema.org Offer stayed at whatever the last deploy had. The live shop
- * corrects itself from GET /api/bundles/ at boot; the Offer a search engine
- * quotes does not. tools/lib/bundles-export.mjs is the step that brings the
- * table's price into the build.
- */
-describe("the set prices the prerender writes", () => {
-  const priced = () => [{ id: "duo", sum: 39, price: 33.9, save: 5.1, pct: 13 }];
-
-  it("takes the price from the table when there is a row for the set", () => {
-    const [out] = applyBundlePrices(priced(), { duo: { price: 29.9, discountPct: null } });
-    expect(out.price).toBe(29.9);
-    expect(out.save).toBe(9.1); // 39 − 29,90
-    expect(out.pct).toBe(23);
-    expect(out.sum).toBe(39); // what the parts cost is still the catalogue's
-  });
-
-  it("works out the price from a percent when that is what the row stores", () => {
-    const [out] = applyBundlePrices(priced(), { duo: { price: null, discountPct: 20 } });
-    expect(out.price).toBe(31.2);
-    expect(out.save).toBe(7.8);
-  });
-
-  it("leaves a set alone when the database said nothing about it", () => {
-    expect(applyBundlePrices(priced(), {})).toEqual(priced());
-    expect(applyBundlePrices(priced(), { duo: { price: null, discountPct: null } })).toEqual(priced());
-  });
-
-  it("is what the prerender actually builds its pages from", () => {
-    const tool = readFileSync(new URL("tools/prerender-shop2.mjs", root), "utf8");
-    expect(tool).toContain("applyBundlePrices(");
-    expect(tool).toContain("fetchBundlePrices()");
-  });
-});
+/* What the /sets/ pages are written from when there IS a database — the
+   table's sets, whole, not this file with the table's price laid over it — is
+   tests/bundles-export.test.ts (07.11.2026). This file is the generator's,
+   which still writes the fallback a build without a database uses. */

@@ -72,9 +72,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { containingCrop, coverImgStyle, fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 // …and the magazine's pages, the same builders src/lib/blog-page.ts draws them with
 import { articleStaticHTML, homeStaticHTML, pickSeo, publicListItem, publicPost, readNext } from "../src/lib/blog-magazine.mjs";
-// наборы: the set prices the owner edits in the admin, which nothing
-// regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
-import { applyBundlePrices, fetchBundlePrices, liveBundles } from "./lib/bundles-export.mjs";
+// наборы: the sets as the owner keeps them in «Товары → Наборы», which
+// nothing regenerates public/shop/bundles.js for — see tools/lib/bundles-export.mjs.
+import { fetchBundleRows, setsFromRows } from "./lib/bundles-export.mjs";
 /* «Цена» and «Показывать в магазине» as the owner last saved them. Every list
    of products this file writes — an article's shelf and every grid on the
    storefront — is a set of links into /p/ addresses, and a hidden product's
@@ -322,28 +322,25 @@ function legalFor(slug, code) {
   return LEGAL[slug] || null;
 }
 
-/* The sets, from the generated file — and then, when there is a database to
-   ask, with the price the owner has since set in «Товары → Наборы» on them.
-   Nothing regenerates public/shop/bundles.js after an admin edit, so without
-   this the <title>, the meta description and the schema.org Offer of every
-   /set/ page kept the price of the last deploy while the shop charged the new
-   one. See tools/lib/bundles-export.mjs. */
-/* …and only the ones the table still sells (liveBundles(), 28.09.2026): after
-   the go-live reset the table is empty and the file's eight are sets the owner
-   called made up, so an empty table writes no /sets/ pages at all — the same
-   way an empty blog writes no /blog/ pages. No database → the file, as ever. */
-const BUNDLE_ROWS = await fetchBundlePrices();
-const BUNDLES = applyBundlePrices(
-  liveBundles(
-    await (async () => {
+/* The sets: what «Товары → Наборы» sells, read whole from the table when there
+   is a database to ask — names, texts, parts, photo, order and price — and
+   expanded against this run's catalogue (setsFromRows() in
+   tools/lib/bundles-export.mjs). Until 07.11.2026 only the PRICE came from the
+   table, laid over the September file: the 30 sets Renat had made in the panel
+   got no page and no sitemap row, and the 7 the file knew were described with
+   their old parts at their new price.
+   An empty table (the shop after the go-live reset) writes no /sets/ pages at
+   all — the same way an empty blog writes no /blog/ pages. No database → the
+   generated file, as a local run has always had. */
+const BUNDLE_ROWS = await fetchBundleRows();
+const BUNDLES = BUNDLE_ROWS
+  ? setsFromRows(BUNDLE_ROWS, CATALOGUE, PRODUCT_OVERRIDES)
+  : await (async () => {
       try {
         return new Function(await readFile(path.join(SHOP, "bundles.js"), "utf8") + "\nreturn BUNDLES;")() || [];
       } catch { return []; }
-    })(),
-    BUNDLE_ROWS,
-  ),
-  BUNDLE_ROWS,
-);
+    })();
+if (BUNDLE_ROWS) console.log("  sets from the database: " + BUNDLES.length + " on sale");
 if (BUNDLE_ROWS && !BUNDLES.length) console.log("  (no set on sale in the database — no /sets/ pages this run)");
 const bundleText = (b, field, code) => (b[field] && (b[field][code] || b[field].RU)) || "";
 
@@ -1060,9 +1057,12 @@ if (sharp) {
     try { await drawCard(f, [p.img]); }
     catch (e) { console.warn("! og card for " + p.id + ": " + e.message); }
   }
+  /* A set's card is redrawn every run, not kept like a product's: the owner
+     re-fills a set in the panel under the same id, and a card kept from an
+     earlier run shows the parts it no longer holds (07.11.2026 — the cards
+     are not in git either, .gitignore). */
   for (const b of BUNDLES) {
     const f = path.join(OGDIR, "set-" + b.id + ".jpg");
-    if (existsSync(f)) continue;
     try { await drawCard(f, (b.images || []).slice(0, 3)); }
     catch (e) { console.warn("! og card for set " + b.id + ": " + e.message); }
   }

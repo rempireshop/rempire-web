@@ -44,6 +44,12 @@ src/data/prerendered-routes.json
 # same tool but are NOT ignored: they are drawn once from images that are in
 # the repo, and committing them keeps them out of every future build. Delete
 # one and the next `npm run prerender` draws it again.
+# The exception is a set's card (og/set-<id>.jpg): a set is the owner's, made
+# and re-filled in «Товары → Наборы», and the build draws its card from the
+# parts the table holds today (tools/lib/bundles-export.mjs). A committed card
+# is never redrawn — «Борода — стартовый набор» went on showing the soap it no
+# longer contains — so these are drawn fresh by every build instead.
+public/shop/og/set-*.jpg
 
 # generated at build by tools/copy-vendor.mjs (prebuild) from node_modules/leaflet
 public/vendor/leaflet/
