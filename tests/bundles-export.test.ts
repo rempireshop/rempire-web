@@ -19,10 +19,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import variants from "@/data/catalogue.variants.json";
 import { query } from "@/lib/db";
-import { listBundles, upsertBundle, validateBundle, type Bundle } from "@/lib/bundles";
+import { listBundles, unsafeSitePath, upsertBundle, validateBundle, type Bundle } from "@/lib/bundles";
 import { upsertOverride } from "@/lib/orders";
 import { loadCatalogue } from "../tools/build-bundles.mjs";
-import { setPartPrice, setsFromRows } from "../tools/lib/bundles-export.mjs";
+import { safeSetImage, setPartPrice, setsFromRows } from "../tools/lib/bundles-export.mjs";
 import { overrideRow } from "../tools/lib/overrides-export.mjs";
 import { setupDb, teardownDb } from "./helpers";
 
@@ -132,6 +132,20 @@ describe("setsFromRows — the sets the build writes pages for", () => {
     expect(setsFromRows([row({ items: four, price: "50" })], CAT)[0].images).toEqual([
       "/shop/img/oil.webp", "/shop/img/balm.webp", "/shop/img/wax.webp",
     ]);
+  });
+
+  it("never hands the card drawer a path that climbs out of public/ — the parts' photos instead", () => {
+    const parts = setsFromRows([row()], CAT)[0].images;
+    for (const image of ["/../../etc/passwd", "/shop/../../x.png", "/shop\\..\\x.png", "/shop/%2e%2e/x.png", '/x.png" onerror="y', "//"]) {
+      expect(setsFromRows([row({ image })], CAT)[0].images, image).toEqual(parts);
+    }
+    expect(setsFromRows([row({ image: "/shop/img/own-set.webp" })], CAT)[0].images).toEqual(["/shop/img/own-set.webp"]);
+  });
+
+  it("refuses on save every site path the build would refuse (unsafeSitePath ⇔ safeSetImage)", () => {
+    for (const s of ["/shop/img/a.webp", "/../x", "/a/../b", "/a/..", "/a\\b", "/a%2e%2e/b", "/a%2Fb", "/a..b/c.webp", "https://x.example/a/../b"]) {
+      expect(unsafeSitePath(s), s).toBe(!/^(https?:)?\/\//.test(s) && safeSetImage(s) === null);
+    }
   });
 
   it("leaves a missing translation empty, for the page to fall back to Russian", () => {

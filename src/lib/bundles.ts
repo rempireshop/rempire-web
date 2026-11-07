@@ -393,6 +393,14 @@ function text(v: unknown, max: number): string {
   return String(v ?? "").replace(CONTROL, " ").trim().slice(0, max);
 }
 
+/** A site path («/shop/img/…») that could step outside the site's files:
+ *  a «..» segment, a backslash, or either one percent-encoded. Held equal to
+ *  safeSetImage() in tools/lib/bundles-export.mjs by tests/bundles-export.test.ts. */
+export function unsafeSitePath(s: string): boolean {
+  if (/^(https?:)?\/\//i.test(s)) return false;
+  return /\\|%2e|%5c|%2f/i.test(s) || /(^|\/)\.\.(\/|$)/.test(s);
+}
+
 /**
  * The only door a write goes through. Returns a clear code rather than a
  * sentence: the admin panel and the tests both map it to their own words.
@@ -490,7 +498,11 @@ export function validateBundle(
   if (effective >= sum) return { ok: false, error: "price_too_high" };
 
   const imageRaw = text(b.image, 400);
-  if (imageRaw && !BY_ID.has(imageRaw) && !/^(https?:)?\/\/|^\//.test(imageRaw)) {
+  /* A product id, a web address, or a file of the site's own. Since
+     07.11.2026 the build draws the set's link-preview card from this value
+     (tools/lib/bundles-export.mjs), so a site path that climbs out of public/
+     («/../…», a backslash, an encoded dot) is refused here as well as there. */
+  if (imageRaw && !BY_ID.has(imageRaw) && (!/^(https?:)?\/\/|^\//.test(imageRaw) || unsafeSitePath(imageRaw))) {
     return { ok: false, error: "bad_image" };
   }
 

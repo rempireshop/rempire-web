@@ -185,6 +185,11 @@ describe("validateBundle", () => {
     expect(validateBundle(draft({ image: A.id })).ok).toBe(true);
     expect(validateBundle(draft({ image: "/shop/img/x.webp" })).ok).toBe(true);
     expect(validateBundle(draft({ image: "javascript:alert(1)" }))).toMatchObject({ error: "bad_image" });
+    /* the build draws the set's card from a site path (07.11.2026): none may climb out of public/ */
+    for (const image of ["/../../etc/passwd", "/shop/../../x.png", "/shop/img/..", "/shop\\..\\x.png", "/shop/%2e%2e/x.png", "/shop%2f..%2fx"]) {
+      expect(validateBundle(draft({ image })), image).toMatchObject({ error: "bad_image" });
+    }
+    expect(validateBundle(draft({ image: "https://img.rempireshop.com/sets/a..b.jpg" })).ok).toBe(true);
   });
 
   it("survives hostile shapes without throwing", () => {

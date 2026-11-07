@@ -134,6 +134,24 @@ function partStock(p, row) {
 const worst = (list) => (list.includes("out") ? "out" : list.includes("low") ? "low" : "in");
 
 /**
+ * The owner's chosen photo, if it is one the build may use: a web address, or
+ * a path of the site's own that cannot climb out of public/ — no «..», no
+ * backslash, neither one percent-encoded (unsafeSitePath() in
+ * src/lib/bundles.ts refuses the same on save). drawCard() reads a site path
+ * off the disk, so this is what keeps a row written around the panel from
+ * pointing the build at a file outside public/. Anything else → null, and the
+ * set falls back to its parts' photos.
+ */
+export function safeSetImage(v) {
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  if (/^(https?:)?\/\//i.test(s)) return /^(https?:)?\/\/[^\s"'<>]+$/i.test(s) ? s : null;
+  if (!s.startsWith("/")) return null;
+  if (/\\|%2e|%5c|%2f/i.test(s) || /(^|\/)\.\.(\/|$)/.test(s) || /[\s"'<>]/.test(s)) return null;
+  return s;
+}
+
+/**
  * The sets on sale, in the panel's order, in the shape public/shop/bundles.js
  * has always had — which is the shape every set reader in the prerender (the
  * /sets/ grid, the /set/ page, its Offer, the sitemap, the og:image, #setsdata)
@@ -180,7 +198,7 @@ export function setsFromRows(rows, catalogue, overrides = {}) {
       const save = round2(Math.max(0, sum - price));
 
       const chosen = r.image
-        ? (/^(https?:)?\/\/|^\//.test(String(r.image)) ? String(r.image) : (byId.get(String(r.image)) || {}).img)
+        ? (/^(https?:)?\/\/|^\//.test(String(r.image)) ? safeSetImage(r.image) : (byId.get(String(r.image)) || {}).img || null)
         : null;
       const images = chosen ? [chosen] : items.map((it) => it.img).filter(Boolean).slice(0, 3);
 

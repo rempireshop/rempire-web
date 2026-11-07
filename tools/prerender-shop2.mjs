@@ -970,7 +970,14 @@ async function drawCard(file, sources) {
   const gap = 36;
   const layers = [];
   for (const src of sources) {
-    const buf = await sharp(path.join(PUB, src.replace(/^\//, "").split("?")[0]))
+    /* Only a file under public/ is read. A web address (an owner's upload, a
+       set's chosen photo) is not fetched here, and a path that resolves
+       outside public/ is refused — the caller's catch then keeps the page's
+       fallback card. */
+    if (/^(https?:)?\/\//i.test(String(src))) throw new Error("not a file of the site: " + src);
+    const file_ = path.resolve(PUB, String(src).replace(/^\//, "").split("?")[0]);
+    if (!file_.startsWith(PUB + path.sep)) throw new Error("outside public/: " + src);
+    const buf = await sharp(file_)
       .resize(box.w, box.h, { fit: "inside", withoutEnlargement: false })
       .png().toBuffer();
     const m = await sharp(buf).metadata();
