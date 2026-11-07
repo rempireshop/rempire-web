@@ -89,7 +89,9 @@
       nudge: "Подобрать уход? Спросите ассистента", nudgeClose: "Закрыть подсказку",
       wide: "Развернуть", narrow: "Свернуть",
       // the article card above the products (articleCard) and the pinned article (openChatAbout)
-      fromBlog: "Из нашего блога", askAbout: "Спросите об этой статье — например, что из неё подойдёт вам."
+      fromBlog: "Из нашего блога", askAbout: "Спросите об этой статье — например, что из неё подойдёт вам.",
+      // a set row (setRow) and the rules' answer to «набор…» (rulesReply)
+      setEb: "Набор", save: "выгода ", sets: "Готовые наборы — вместе дешевле:"
     },
     ET: {
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
@@ -103,7 +105,8 @@
       aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates ",
       nudge: "Vajad abi valikul? Küsi abiliselt", nudgeClose: "Sule vihje",
       wide: "Laienda", narrow: "Ahenda",
-      fromBlog: "Meie blogist", askAbout: "Küsi selle artikli kohta — näiteks, mis sellest sulle sobib."
+      fromBlog: "Meie blogist", askAbout: "Küsi selle artikli kohta — näiteks, mis sellest sulle sobib.",
+      setEb: "Komplekt", save: "sääst ", sets: "Valmis komplektid — koos soodsam:"
     },
     EN: {
       title: "Rempire assistant", hint: "Demo: I understand simple phrases",
@@ -117,7 +120,8 @@
       aria: "Chat with the assistant", close: "Close", send: "Send", from: "from ",
       nudge: "Need help choosing? Ask the assistant", nudgeClose: "Close the tip",
       wide: "Expand", narrow: "Shrink",
-      fromBlog: "From our blog", askAbout: "Ask about this article — for example, what in it would suit you."
+      fromBlog: "From our blog", askAbout: "Ask about this article — for example, what in it would suit you.",
+      setEb: "Set", save: "you save ", sets: "Ready-made sets — cheaper together:"
     }
   };
 
@@ -146,6 +150,85 @@
     [/воск|vaha|wax/i, /воск/],
     [/паст|pasta|paste/i, /паста/]
   ];
+  /* The same table as TOPIC_KW in src/lib/catalogue-slice.ts — a shopper's
+     word → the word the product names use («татуировка» → «Tattoo»). Keep the
+     two in step, as CATS_KW above. */
+  var TOPIC_KW = [
+    [/тату|татуир|tätov|tattoo/i, ["tattoo"]],
+    [/обезбол|онемен|numb|pain relief/i, ["numb"]],
+    [/солнц|загар|päike|sunscreen|\bsun\b|\bspf\b/i, ["sun"]],
+    [/кудр|локон|вьющ|lokk|curl/i, ["curl"]],
+    [/блонд|осветл|blond/i, ["blond"]],
+    [/объ[её]м|тонк(ие|их) волос|kohev|maht|volume|fine hair|thin hair/i, ["plump", "thick"]],
+    [/восстан|поврежд|taast|kahjust|repair|damage/i, ["repair"]],
+    [/окраш|цвет|värvi|colou?r/i, ["colour", "color"]],
+    [/пушат|пушист|гладк|выпрям|sile|frizz|smooth|straight/i, ["smooth"]],
+    [/морщин|возраст|korts|wrinkle|anti-?age/i, ["wrinkle"]],
+    [/увлажн|сух|niisut|kuiv|hydrat|moistur|\bdry\b/i, ["hydrat", "moist"]],
+    [/глаз|под глаз|silm|\beyes?\b/i, ["eye"]],
+    [/чувствит|раздраж|tundlik|sensitive/i, ["sensitive"]]
+  ];
+
+  /* ---- the shop's own sets (Dim, 07.11.2026) --------------------------------
+     The same rule the route keeps for the model's answers (fittingSets in
+     src/app/api/assistant/shop-sets.ts), in small, for the answers given
+     without a key: a «набор…» question gets the shop's sets, not two loose
+     bottles called a set; a list of products gets the one set holding most of
+     them. The list is app.js's own (window.rempireSets) — the Sets page's,
+     empty while «Наборы» is switched off. */
+  var SET_ASK_RX = /набор|комплект|komplekt|\bkits?\b|\bsets?\b|bundle/i;
+  var GIFT_RX = /подар|kingi|kink|\bgifts?\b|\bpresent\b/i;
+  var GIFT_TITLE_RX = /подар|kink|gift/i;
+  // no look-behind in this file: an older Safari refuses the whole script for one
+  var WOMAN_RX = /девушк|женщин|(?:^|[^а-яё])жен[аеуы](?![а-яё])|(?:^|[^а-яё])мам[аеуы]?(?![а-яё])|подруг|сестр|naise|tüdruk|emale|\bwom[ae]n\b|\bgirl|\bwife\b|\bmother\b/i;
+  function shopSets() {
+    try { return typeof window.rempireSets === "function" ? window.rempireSets() || [] : []; }
+    catch (e) { return []; }
+  }
+  function setStems(q) {
+    var out = [];
+    String(q).toLowerCase().split(/[^a-zа-яёõäöüšž0-9]+/i).forEach(function (w) {
+      var glued = w.match(/^([a-zõäöüšž]{3,})komplekt/);
+      if (glued) w = glued[1];
+      if (w.length < 4 || SET_ASK_RX.test(w) || /^(для|что|есть|хочу|нужен|нужна|midagi|mida|jaoks|with|something)$/.test(w)) return;
+      out.push(w.length > 5 ? w.slice(0, 5) : w);
+    });
+    return out;
+  }
+  function setTitles(s) {
+    var t = s.titles || {};
+    return (" " + [t.RU, t.ET, t.EN, s.title].join(" ") + " ").toLowerCase().replace(/ё/g, "е");
+  }
+  function setFits(s, q, cap) {
+    if (cap && s.price > cap) return false;
+    if (WOMAN_RX.test(q) && (s.cat === "beard" || /мужчин|mehe|\bmen\b/i.test(setTitles(s)))) return false;
+    return true;
+  }
+  /** «набор для бороды» → the sets whose name has «бород», then the beard section's, at most `max`. */
+  function setsFor(q, sets, max) {
+    var stems = setStems(q), cap = money(q), cat = null;
+    for (var i = 0; i < CATS_KW.length; i++) if (CATS_KW[i][0].test(q)) { cat = CATS_KW[i][1]; break; }
+    var ok = sets.filter(function (s) { return setFits(s, q, cap); });
+    var scored = ok.map(function (s) {
+      var hay = setTitles(s), n = 0;
+      stems.forEach(function (st) { if (hay.indexOf(st.replace(/ё/g, "е")) >= 0) n += 3; });
+      if (cat && s.cat === cat) n += 1;
+      if (GIFT_RX.test(q) && GIFT_TITLE_RX.test(hay)) n += 3;
+      return [n, s];
+    }).filter(function (e) { return e[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; });
+    return (scored.length ? scored.map(function (e) { return e[1]; }) : ok).slice(0, max);
+  }
+  /** The one set holding most of `items` — fewer other things in it breaks a tie. */
+  function holdingSet(items, sets, q, skip) {
+    var ids = items.map(function (p) { return p.id; }), cap = money(q), best = null, bestN = 0, bestExtra = 0;
+    sets.forEach(function (s) {
+      if (skip.indexOf(s.id) >= 0 || !setFits(s, q, cap)) return;
+      var n = s.items.filter(function (id) { return ids.indexOf(id) >= 0; }).length;
+      var extra = s.items.length - n;
+      if (n > bestN || (n && n === bestN && extra < bestExtra)) { best = s; bestN = n; bestExtra = extra; }
+    });
+    return best;
+  }
 
   /* The budget in «подарок до 50 €» — and in «Gift under €50», which is the
      widget's OWN English chip: the euro sign sits between the word and the
@@ -160,14 +243,36 @@
   function inStock(p) { return p.stock !== "out"; }
   function pick(list, n) { return list.filter(inStock).slice(0, n || 4); }
 
+  /* The shop's sets first, then the products as before (matchProducts), then
+     the set that holds them — see «the shop's own sets» above. */
   function match(q) {
+    var sets = shopSets();
+    if (sets.length && SET_ASK_RX.test(q)) {
+      var found = setsFor(q, sets, 3);
+      if (found.length) return { kind: "sets", items: [], sets: found };
+    }
+    var r = matchProducts(q, sets.length > 0);
+    if (r.kind === "list" && r.items && r.items.length && sets.length) {
+      var add = [];
+      if (GIFT_RX.test(q)) {
+        var gift = setsFor(q, sets.filter(function (s) { return GIFT_TITLE_RX.test(setTitles(s)); }), 1)[0];
+        if (gift) add.push(gift);
+      }
+      var hold = holdingSet(r.items, sets, q, add.map(function (s) { return s.id; }));
+      if (hold) add.push(hold);
+      r.sets = add.slice(0, 2);
+    }
+    return r;
+  }
+  function matchProducts(q, haveSets) {
     var cap = money(q);
     var cat = null, typeRe = null;
     for (var i = 0; i < CATS_KW.length; i++) if (CATS_KW[i][0].test(q)) { cat = CATS_KW[i][1]; break; }
     for (var j = 0; j < TYPE_KW.length; j++) if (TYPE_KW[j][0].test(q)) { typeRe = TYPE_KW[j][1]; break; }
 
-    // «набор» / set / komplekt — assemble a small kit within the budget
-    if (/набор|комплект|komplekt|kit|\bset\b/i.test(q)) {
+    // «набор» / set / komplekt — assemble a small kit within the budget, but
+    // only in a shop with no sets of its own on sale (match() answers first)
+    if (!haveSets && /набор|комплект|komplekt|kit|\bset\b/i.test(q)) {
       var base = CATALOGUE.filter(function (p) { return inStock(p) && (!cat || p.cat === cat); });
       var kit = [], types = ["шампунь", "кондиционер", "масло", "паста", "бальзам"], budget = cap || 60;
       for (var t = 0; t < types.length && kit.length < 3; t++) {
@@ -193,9 +298,16 @@
     // free-text tokens against name+brand
     if (pool.length === CATALOGUE.length || (!cat && !typeRe)) {
       var toks = q.toLowerCase().split(/[^a-zа-яё0-9õäöüšž.]+/i).filter(function (w) { return w.length > 2; });
+      /* …and the words the names use for the topic (TOPIC_KW): «тату» finds
+         «Tattoo». They count more than a word the shopper typed, as on the
+         server (relevantProducts): «после» in «уход после татуировки» is in
+         every «бальзам после бритья», «tattoo» only in what was asked. */
+      var topic = [];
+      TOPIC_KW.forEach(function (e) { if (e[0].test(q)) e[1].forEach(function (w) { if (toks.indexOf(w) < 0 && topic.indexOf(w) < 0) topic.push(w); }); });
       var scored = CATALOGUE.map(function (p) {
         var hay = (p.brand + " " + p.name).toLowerCase(), s = 0;
         toks.forEach(function (w) { if (hay.indexOf(w) >= 0) s++; });
+        topic.forEach(function (w) { if (hay.indexOf(w) >= 0) s += 2; });
         return [s, p];
       }).filter(function (e) { return e[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; });
       if (scored.length) return { kind: "list", items: pick(scored.map(function (e) { return e[1]; })) };
@@ -329,6 +441,23 @@
       '<button class="sbot__mini sbot__mini--ghost" data-go-product="' + p.id + '">' + tt().open + "</button></span>" +
       "</div>";
   }
+  /* A set, drawn like a product row: its photo, «Набор» over its name, the
+     price with the parts' sum struck through and the saving (only when it
+     really is cheaper — bundleSaved() in app.js), and the two buttons. Both
+     are the shop's own: [data-addbundle] puts the whole set in the cart and
+     [data-go-bundle] opens its page, exactly as on the Sets page. */
+  function setRow(s) {
+    var t = tt();
+    return '<div class="sbot__prod sbot__prod--set">' +
+      '<span class="sbot__ph" style="background-image:url(\'' + (s.img || "") + '\')"></span>' +
+      '<span class="sbot__pn"><span class="sbot__eb">' + esc(t.setEb) + "</span>" + esc(s.title) +
+        '<span class="sbot__pp">' + eur(s.price) +
+          (s.saved ? ' <s class="sbot__was">' + eur(s.sum) + "</s> · " + esc(t.save) + eur(s.sum - s.price) : "") +
+        "</span></span>" +
+      '<span class="sbot__pact"><button class="sbot__mini" data-addbundle="' + esc(s.id) + '">' + t.add + "</button>" +
+      '<button class="sbot__mini sbot__mini--ghost" data-go-bundle="' + esc(s.id) + '">' + t.open + "</button></span>" +
+      "</div>";
+  }
   /* The shop prompt asks the assistant to finish an answer with the article's
      own address — «add its link at the end of your reply as a bare relative
      path: /blogs/news/<slug>» (src/app/api/assistant/route.ts) — and the
@@ -386,6 +515,8 @@
   }
   function rulesReply(q) {
     var r = match(q), t = tt();
+    // the shop's own sets, for «набор…» — the list is in stock already (rempireSets)
+    if (r.kind === "sets") { bubble("bot", t.sets + r.sets.map(setRow).join("")); return; }
     /* Nothing to show is not «вот что подходит:» with a blank under it. Every
        branch of match() ends in pick(), which drops what is out of stock, so
        a shelf that is empty right now can empty any of them — and both of the
@@ -398,7 +529,8 @@
         '<button class="sbot__mini sbot__all" data-addall="' + r.items.map(function (p) { return p.id; }).join(",") + '">' + t.addAll + "</button>");
       return;
     }
-    bubble("bot", (r.kind === "none" ? t.none : t.found) + r.items.map(productRow).join(""));
+    bubble("bot", (r.kind === "none" ? t.none : t.found) + r.items.map(productRow).join("") +
+      (r.sets || []).map(setRow).join(""));
   }
   function reply(q) {
     convo.push({ role: "user", content: q });
@@ -448,9 +580,16 @@
            first, then its products, then «Добавить всё в корзину» — the order
            of the design (Assist.dc.html). Any other answer is drawn exactly as
            before: the sentence and the product rows. */
+        /* …and the shop's sets under them (bundle_ids — fittingSets() in
+           src/app/api/assistant/shop-sets.ts), each looked up in the shop's
+           own list: a set switched off or sold out since is left out. */
+        var setsNow = shopSets(), setById = {};
+        setsNow.forEach(function (s) { setById[s.id] = s; });
+        var sets = (Array.isArray(j.bundle_ids) ? j.bundle_ids : []).map(function (id) { return setById[id]; })
+          .filter(Boolean).slice(0, 3);
         var art = articleCard(j.article);
         bubble("bot", withBlogLinks(esc(text)) + art + prods.map(productRow).join("") +
-          (art ? addAllButton(prods) : ""));
+          (art ? addAllButton(prods) : "") + sets.map(setRow).join(""));
         runAction(j.action);
       })
       .catch(function () { wait.remove(); if (gen === convoGen) rulesReply(q); });

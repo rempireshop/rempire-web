@@ -81,7 +81,7 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(30);   // r30: the shop chat reads the blog — salon guides in its prompt (blog-digest.ts)
+    expect(body.v).toBe(31);   // r31: the shop chat offers the shop's own sets (shop-sets.ts), and is no longer told the shop is men's only
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);

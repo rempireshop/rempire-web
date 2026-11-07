@@ -385,7 +385,10 @@ function assembled(text) {
 /* chat.js is not covered by the app.js dictionary at all — it carries its own
    RU/ET/EN table. Only two things there are not gaps. */
 function chatWhy(fr, fn) {
-  if (fn === "match") return INTENTIONAL[1][1];
+  // matchProducts() since 07.11.2026, when match() began answering with the shop's sets first
+  if (fn === "match" || fn === "matchProducts") return INTENTIONAL[1][1];
+  // the ё→е fold a set's name is matched in (setTitles), never shown
+  if (fn === "setTitles" && fr.text === "е") return "ё→е fold for matching a set's name — never shown";
   if (fr.kind === "aria-label") {
     return "written in Russian in the markup, then set from T by paintLabels() on load and on every open";
   }

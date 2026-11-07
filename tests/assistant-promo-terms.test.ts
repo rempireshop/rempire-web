@@ -145,7 +145,7 @@ describe("POST /api/assistant — a promo code from a plain request carries no d
 
   it("the prompt's example is no longer a set of defaults, and it says the terms are the owner's to name", async () => {
     const { body, system } = await ask([{ role: "user", content: "сделай промокод CLAUDETEST10 на 10 %" }], promo("CLAUDETEST10", 10));
-    expect(body.v).toBe(30);   // r30: the shop chat reads the blog — salon guides in its prompt (blog-digest.ts)
+    expect(body.v).toBe(31);   // r31: the shop chat offers the shop's own sets (shop-sets.ts), and is no longer told the shop is men's only
     const example = system.slice(system.indexOf('{"type":"create_promo"'), system.indexOf("\n", system.indexOf('{"type":"create_promo"')));
     expect(example, "the example still carries a date").not.toMatch(/endsAt|2026-09-30/);
     expect(example, "the example still carries a cap").not.toMatch(/maxUses|100/);

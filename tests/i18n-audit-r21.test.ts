@@ -533,6 +533,11 @@ function chatHarness(fetchStub: () => Promise<unknown>): ChatHarness {
     var pinned = null;
     function articleCard() { return ""; }
     function addAllButton() { return ""; }
+    /* …and two of 07.11.2026, the shop's sets under the products
+       (bundle_ids): the shop's list and the row. Their own tests are
+       tests/assistant-shop-sets.test.ts and e2e/chatbot.spec.ts. */
+    function shopSets() { return []; }
+    function setRow() { return ""; }
     var fetch = FETCH;
     ${fn(chat, "reply", "public/shop2/chat.js")}
     ${fn(chat, "paintPanel", "public/shop2/chat.js")}

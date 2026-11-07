@@ -36,6 +36,41 @@ const CAT_KW: Array<[RegExp, string]> = [
   [/футболк|мерч|särk|merch|shirt|tee|декор|decor/i, "merch"],
 ];
 
+/* What a shopper's word means in a product's name. The names carry the
+   brand's own English words («Tattoo Balm», «Killer.Curls», «HYDRATE-ME») and
+   a Russian type tail («— бальзам»), so a question asked in Russian or
+   Estonian about the topic matches neither: «уход после татуировки» scored
+   every Yumain product 1 and the chat told the shopper the shop had nothing
+   for tattoos while four were in stock (07.11.2026). Each entry: the words a
+   question may use → the words the names use. Every target word is in at
+   least one name in the catalogue file (checked 07.11.2026). Keep in step
+   with TOPIC_KW in public/shop2/chat.js. */
+export const TOPIC_KW: Array<[RegExp, string[]]> = [
+  [/тату|татуир|tätov|tattoo/i, ["tattoo"]],
+  [/обезбол|онемен|numb|pain relief/i, ["numb"]],
+  [/солнц|загар|päike|sunscreen|\bsun\b|\bspf\b/i, ["sun"]],
+  [/кудр|локон|вьющ|lokk|curl/i, ["curl"]],
+  [/блонд|осветл|blond/i, ["blond"]],
+  [/объ[её]м|тонк(ие|их) волос|kohev|maht|volume|fine hair|thin hair/i, ["plump", "thick"]],
+  [/восстан|поврежд|taast|kahjust|repair|damage/i, ["repair"]],
+  [/окраш|цвет|värvi|colou?r/i, ["colour", "color"]],
+  [/пушат|пушист|гладк|выпрям|sile|frizz|smooth|straight/i, ["smooth"]],
+  [/морщин|возраст|korts|wrinkle|anti-?age/i, ["wrinkle"]],
+  [/увлажн|сух|niisut|kuiv|hydrat|moistur|\bdry\b/i, ["hydrat", "moist"]],
+  [/глаз|под глаз|silm|\beyes?\b/i, ["eye"]],
+  [/чувствит|раздраж|tundlik|sensitive/i, ["sensitive"]],
+];
+/** The shop sections a question is about (CAT_KW), in table order. */
+export function questionCats(text: string): string[] {
+  const q = String(text || "").toLowerCase();
+  return CAT_KW.filter(([re]) => re.test(q)).map(([, c]) => c);
+}
+/** The name words a question's topic stands for (TOPIC_KW), once each. */
+export function topicWords(text: string): string[] {
+  const q = String(text || "");
+  return [...new Set(TOPIC_KW.filter(([re]) => re.test(q)).flatMap(([, w]) => w))];
+}
+
 /**
  * The rows that fit `text`, best first. `limit` caps the strong matches;
  * `fill` is how many rows come back at least, padded with the next-best
@@ -47,11 +82,16 @@ export function relevantProducts(text: string, opts: { limit?: number; fill?: nu
   const q = String(text || "").toLowerCase();
   const cats = new Set(CAT_KW.filter(([re]) => re.test(q)).map(([, c]) => c));
   const toks = q.split(/[^a-zа-яёõäöüšž0-9.]+/i).filter((w) => w.length > 2);
+  /* the topic's own name words (TOPIC_KW) count a little more than a word the
+     shopper typed: «после» in «уход после татуировки» is in every «лосьон после
+     бритья», «tattoo» is only in what the question is about */
+  const topic = topicWords(q).filter((w) => !toks.includes(w));
   const scored = CAT.map((p) => {
     let s = 0;
     if (cats.has(p.c)) s += 2;
     const hay = (p.b + " " + p.n + " " + p.id).toLowerCase();
     for (const t of toks) if (hay.includes(t)) s += 3;
+    for (const t of topic) if (hay.includes(t)) s += 4;
     if (p.s !== "out") s += 1;
     return [s, p] as const;
   }).sort((a, b) => b[0] - a[0]);

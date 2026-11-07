@@ -14333,6 +14333,22 @@
     if (!setsOn()) return [];   // owner switched sets off (admin → Настройки → Магазин)
     return setsShelf();
   }
+  /* The shop chat (chat.js) draws a set as one of its own rows, from this
+     list and nothing else: the sets this page would show, in stock right
+     now, the name in the language on screen, the first photo of the card
+     (Dim, 07.11.2026 — the chat offers the shop's own sets). Its answer may
+     name a set this list no longer has (switched off, sold out since): the
+     chat leaves that one out. */
+  window.rempireSets = function () {
+    return allBundles().filter(function (b) { return bundleStock(b) !== "out"; }).map(function (b) {
+      return {
+        id: b.id, cat: b.cat, title: bundleTitle(b), titles: b.title || {},
+        items: (b.items || []).map(function (it) { return it.id; }),
+        price: Number(b.price), sum: Number(b.sum), saved: bundleSaved(b),
+        img: (b.images && b.images[0]) || ""
+      };
+    });
+  };
   /* Deliberately NOT filtered: see the note above. bundleById() answers for a
      cart line whose set is hidden, switched off, or both. */
   function bundleById(id) {

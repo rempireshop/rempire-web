@@ -105,7 +105,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(30);   // r30: the shop chat reads the blog — salon guides in its prompt (blog-digest.ts)
+    expect(body.v).toBe(31);   // r31: the shop chat offers the shop's own sets (shop-sets.ts), and is no longer told the shop is men's only
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];

@@ -350,6 +350,118 @@ test("an answer from a salon article shows the article card above its products, 
   expect(new URL(page.url()).pathname).toBe(`/ru/blogs/news/${SLUG}`);
 });
 
+/* Dim, 07.11.2026: a shopper who asks for a set is offered the shop's own
+   sets, and an answer with products carries a fitting set under them. With no
+   key (this suite) the rules answer: «набор для бороды» lists ready-made sets
+   from window.rempireSets() (app.js) — the same list the Sets page draws —
+   each row with the shop's own [data-addbundle] / [data-go-bundle]. */
+test("offline: «набор для бороды» answers with the shop's sets; «Открыть» opens the set, «В корзину» adds it", async ({ page }) => {
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("набор для бороды");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const answer = panel.locator(".sbot__msg--bot").filter({ has: page.locator(".sbot__prod--set") });
+  await expect(answer).toHaveCount(1);
+  await expect(answer).toContainText("Готовые наборы — вместе дешевле:");
+  const rows = answer.locator(".sbot__prod--set");
+  expect(await rows.count()).toBeGreaterThanOrEqual(1);
+  // every row is a set the shop has, never loose products dressed up as one
+  const ids = await rows.locator("[data-go-bundle]").evaluateAll((els) => els.map((e) => e.getAttribute("data-go-bundle")));
+  const shelf = await page.evaluate(() => (window as unknown as { rempireSets: () => Array<{ id: string; cat: string }> }).rempireSets());
+  for (const id of ids) expect(shelf.map((s) => s.id)).toContain(id);
+  expect(shelf.find((s) => s.id === ids[0])?.cat).toBe("beard");
+  await expect(rows.first().locator(".sbot__eb")).toHaveText("Набор");
+  await expect(answer.locator(".sbot__prod:not(.sbot__prod--set)")).toHaveCount(0);
+
+  await rows.first().getByRole("button", { name: "В корзину" }).click();
+  await expect(page.locator("[data-cartbadge]").first()).not.toHaveText(/^0?$/);
+
+  await rows.first().getByRole("button", { name: "Открыть" }).click();
+  await waitForScreen(page, "bundle");
+});
+
+test("offline: a product answer carries a fitting set under the products", async ({ page }) => {
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("масло для бороды");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const answer = panel.locator(".sbot__msg--bot").filter({ has: page.locator(".sbot__prod") }).last();
+  await expect(answer.locator(".sbot__prod:not(.sbot__prod--set)").first()).toBeVisible();
+  const sets = answer.locator(".sbot__prod--set");
+  expect(await sets.count()).toBeGreaterThanOrEqual(1);
+  expect(await sets.count()).toBeLessThanOrEqual(2);
+  // the sets come after the products
+  const kinds = await answer.evaluate((el) =>
+    Array.from(el.querySelectorAll(".sbot__prod")).map((n) => (n.classList.contains("sbot__prod--set") ? "set" : "prod")),
+  );
+  expect(kinds.indexOf("set")).toBeGreaterThan(kinds.lastIndexOf("prod"));
+});
+
+/* «уход после татуировки» scored every Yumain product 1 before 07.11.2026 —
+   the names say «Tattoo», the question «татуировки» — and the chat said the
+   shop had nothing. TOPIC_KW (chat.js, catalogue-slice.ts) maps the word. */
+test("offline: a tattoo question finds the Yumain tattoo care", async ({ page }) => {
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("Нужен уход после татуировки");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const answer = panel.locator(".sbot__msg--bot").filter({ has: page.locator(".sbot__prod") }).last();
+  // evaluateAll does not wait: the reply has to be on screen first
+  await expect(answer.locator("[data-go-product]").first()).toBeVisible();
+  const ids = await answer.locator("[data-go-product]").evaluateAll((els) => els.map((e) => e.getAttribute("data-go-product")));
+  // the first rows are the tattoo care, not «бальзам после бритья» (which only shares «после»)
+  expect(ids[0]).toMatch(/^yumain-.*tattoo/);
+  expect(ids.filter((id) => /^yumain-/.test(String(id))).length).toBeGreaterThanOrEqual(2);
+});
+
+/* The AI path: the route names the sets in bundle_ids (fittingSets(),
+   src/app/api/assistant/shop-sets.ts) and the widget draws each from the
+   shop's own list, under the products. An id the shop does not have is left
+   out — the list on screen is the authority, not the answer. */
+test("an answer with bundle_ids draws the shop's set under the products; an unknown id draws nothing", async ({ page }) => {
+  await page.route("**/api/assistant/**", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+    }
+    await route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({
+        reply: "Масло и бальзам — а вместе они дешевле в наборе.",
+        product_ids: [PRODUCT.id, PRODUCT_2.id],
+        bundle_ids: ["beard-start", "no-such-set"],
+      }),
+    });
+  });
+
+  await page.goto(shopUrl("", "/"));
+  await waitForScreen(page, "home");
+  await page.getByRole("button", { name: "Чат с помощником" }).click();
+  const panel = page.getByRole("region", { name: "Чат с помощником" });
+  await panel.locator("[data-in]").fill("что для бороды");
+  await panel.getByRole("button", { name: "Отправить" }).click();
+
+  const answer = panel.locator(".sbot__msg--bot").filter({ has: page.locator(".sbot__prod--set") });
+  await expect(answer).toHaveCount(1);
+  const kinds = await answer.evaluate((el) =>
+    Array.from(el.querySelectorAll(".sbot__prod")).map((n) => (n.classList.contains("sbot__prod--set") ? "set" : "prod")),
+  );
+  expect(kinds).toEqual(["prod", "prod", "set"]);
+  const set = answer.locator(".sbot__prod--set");
+  await expect(set.locator("[data-go-bundle]")).toHaveAttribute("data-go-bundle", "beard-start");
+  await expect(set.locator("[data-addbundle]")).toHaveAttribute("data-addbundle", "beard-start");
+  await expect(set).toContainText("Борода — стартовый набор");
+  await expect(answer.locator('[data-go-bundle="no-such-set"]')).toHaveCount(0);
+});
+
 /* window.openChatAbout(slug, title) — the door the blog article page's
    «Спросить об этой статье» opens the chat through (chat.js). It pins the
    article: the chat opens with it on top, and every question then carries
