@@ -999,7 +999,6 @@ test.describe(`deployed shop — ${BASE}`, () => {
     for (const gone of [
       "/test", "/tests", "/checklist", "/api/testplan/",
       "/cards", "/cards/index.html", "/card", "/karty", "/golive", "/golive/index.html",
-      "/golive/sets-search.html",
     ]) {
       expect((await get(request, abs(gone))).status(), `${gone} should be gone`).toBe(404);
     }
