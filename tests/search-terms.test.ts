@@ -281,6 +281,8 @@ type Shop = {
   /** What app.js runs on `pagehide` and on the page going out of sight. */
   flushSearchTrack: () => void;
   setQuery: (q: string) => void;
+  /** What searchSetPlan() returns — null: the query has nothing to do with sets. */
+  setSetPlan: (p: { rule: number | string; sets?: unknown[]; prods?: unknown[] } | null) => void;
   tracked: () => Array<{ type: string; extra: Record<string, unknown> }>;
   renders: () => number;
   terms: () => Record<string, string[]>;
@@ -319,8 +321,12 @@ function shop(fetchImpl: unknown, timers: "now" | "held" = "now"): Shop {
       var t = aiTermsFor(S.query);
       return new Array(t.length ? 7 : 0);
     }
+    /* No sets unless a test hands in the plan searchSetPlan() would make. */
+    var SET_PLAN = null;
+    function searchSetPlan() { return SET_PLAN; }
     ${slice("srchNorm")}
     ${slice("aiTermsFor")}
+    ${slice("searchShownCount")}
     ${slice("scheduleSearchTrack")}
     ${slice("trackSearch")}
     ${slice("askSearchAI")}
@@ -329,6 +335,7 @@ function shop(fetchImpl: unknown, timers: "now" | "held" = "now"): Shop {
     this.flushSearchTrack = flushSearchTrack;
     this.AI_TERMS = AI_TERMS;
     this.setQuery = function (q) { S.query = q; };
+    this.setSetPlan = function (p) { SET_PLAN = p; };
     this.tracked = function () { return TRACKED; };
     this.renders = function () { return RENDERS; };
     this.terms = function () { return AI_TERMS; };
@@ -397,6 +404,27 @@ describe("the storefront asking, and the search event that waits for the answer"
     await flush();
     expect(f).not.toHaveBeenCalled();
     expect(s.tracked()).toEqual([{ type: "search", extra: { path: "davines", value: 7 } }]);
+  });
+
+  it("counts the sets a query was answered with — «наборы» is no «searched, found nothing»", async () => {
+    const f = answer(["oily"]);
+    const s = shop(f);
+    // rule 1: no product matches «наборы», the eight sets are the answer
+    s.setSetPlan({ rule: 1, sets: new Array(8) });
+    s.setQuery("наборы");
+    s.scheduleSearchTrack();
+    await flush();
+    expect(f).not.toHaveBeenCalled();
+    expect(s.tracked()).toEqual([{ type: "search", extra: { path: "наборы", value: 8 } }]);
+
+    // rule 2 with no set for the topic: the topic's products are what is shown
+    const g = answer([]);
+    const t = shop(g);
+    t.setSetPlan({ rule: 2, sets: [], prods: new Array(3) });
+    t.setQuery("набор парфюма");
+    t.scheduleSearchTrack();
+    await flush();
+    expect(t.tracked()[0].extra).toEqual({ path: "набор парфюма", value: 3 });
   });
 
   it("keeps the page when the network, the rate limit or the model says no", async () => {

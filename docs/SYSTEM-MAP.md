@@ -467,6 +467,13 @@ finds them. Renat edits; shoppers read and search.
 
   If nothing matches, `askSearchAI` runs (`POST /api/search/`: model terms,
   never shown; same-origin, 12/min/IP; `src/lib/search-terms.ts`).
+- **Sets in the search (since 07.11).** `searchSetPlan()` picks one of four
+  rules from the query (the set word alone, the set word with a topic,
+  words from a set's name, anything else) and `searchResultsHTML()` draws
+  it. It reads `allBundles()`, so it shows the same sets as the Sets page.
+  Sets never enter the product grid. `searchShownCount()` is the count that
+  analytics files and that the AI-ask threshold uses. `pdpSetsHTML()` draws
+  «Входит в наборы» on a product page. See `docs/features.md` §2c.
 - **Search cards (since 01.11).** `tools/pack-search-cards.mjs`, in
   `prebuild`, has the model write a per-product card and answer every known
   shopper phrase. The phrases come from Search Console,

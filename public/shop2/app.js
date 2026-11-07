@@ -108,6 +108,10 @@
       "Наборы показаны ✓": "Komplektid näidatakse ✓", "Наборы скрыты ✓": "Komplektid peidetud ✓",
       /* наборы: the admin's «Товары → Наборы» and the sets-off screens */
       "Наборы сейчас недоступны": "Komplektid pole praegu saadaval",
+      /* наборы in the search and «Входит в наборы» on a product page (07.11.2026) */
+      "Раздел «Наборы»": "Rubriik «Komplektid»", "Подходящих наборов пока нет.": "Sobivaid komplekte veel pole.",
+      "Ниже — товары по теме.": "Allpool on selle teema tooted.", "Нужен один товар —": "Vaja on ainult üht toodet —",
+      "Посмотрите категории:": "Vaata kategooriaid:", "Весь раздел": "Kogu rubriik", "Входит в наборы": "Sisaldub komplektides",
       "Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.": "Me ei pane praegu komplekte kokku. Kõik nende tooted on poes eraldi olemas.",
       "Перейти в каталог": "Ava kataloog",
       "Набор не найден": "Komplekti ei leitud",
@@ -3889,6 +3893,10 @@
       "Наборы показаны ✓": "Sets shown ✓", "Наборы скрыты ✓": "Sets hidden ✓",
       /* наборы: the admin's «Товары → Наборы» and the sets-off screens */
       "Наборы сейчас недоступны": "Sets are not available right now",
+      /* наборы in the search and «Входит в наборы» on a product page (07.11.2026) */
+      "Раздел «Наборы»": "The Sets section", "Подходящих наборов пока нет.": "No matching sets yet.",
+      "Ниже — товары по теме.": "Here are the products on this topic.", "Нужен один товар —": "Need just one product —",
+      "Посмотрите категории:": "Browse the categories:", "Весь раздел": "Whole section", "Входит в наборы": "Also in sets",
       "Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.": "We are not assembling sets at the moment. Every product from them is in the shop separately.",
       "Перейти в каталог": "Go to the catalogue",
       "Набор не найден": "Set not found",
@@ -8036,6 +8044,14 @@
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^1 товар$/, { ET: "1 toode", EN: "1 product" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
+    /* наборы in the search (07.11.2026): the count, and rule 4's line under
+       the products (searchSetsHintHTML) — «в 1 наборе», «в 21 наборе», «в 5 наборах» */
+    [/^1 набор$/, { ET: "1 komplekt", EN: "1 set" }],
+    [/^(\d+) набор(?:|а|ов)$/, { ET: "$1 komplekti", EN: "$1 sets" }],
+    [/^Эти товары есть и в 1 наборе, от (.+)$/, { ET: "Need tooted on ka 1 komplektis, alates $1", EN: "These products also come in 1 set, from $1" }],
+    [/^Эти товары есть и в (\d+) [а-я]+, от (.+)$/, { ET: "Need tooted on ka $1 komplektis, alates $2", EN: "These products also come in $1 sets, from $2" }],
+    [/^Этот товар есть и в 1 наборе, от (.+)$/, { ET: "See toode on ka 1 komplektis, alates $1", EN: "This product also comes in 1 set, from $1" }],
+    [/^Этот товар есть и в (\d+) [а-я]+, от (.+)$/, { ET: "See toode on ka $1 komplektis, alates $2", EN: "This product also comes in $1 sets, from $2" }],
     // the blog (02.11.2026): «9 мин чтения», «Все 34 товара» («6 статей» is above, «Обзор»'s own)
     [/^(\d+) мин чтения$/, { ET: "$1 min lugemist", EN: "$1 min read" }],
     // …and the «+» of a product card inside an article (blogProductHTML) — the name is already the reader's language
@@ -12934,11 +12950,12 @@
          number that lands in the events table has to be the number the
          shopper really ended up seeing, or a query the assistant rescued
          would sit in «Искали, но не нашли» for ever. */
-      if (searchResults().length >= SRCH_WIDEN) { trackSearch(q, false); return; }
+      if (searchShownCount() >= SRCH_WIDEN) { trackSearch(q, false); return; }
       askSearchAI(q, function (rescued) { trackSearch(q, rescued); });
     }, 700);
   }
-  /** One search row: the query, how many products it ended up showing, and —
+  /** One search row: the query, how many products it ended up showing (and
+      sets, since they came into the search — searchShownCount), and —
       when the model is what found them — the marker «ai» in `product_id`.
       db/migrations/080_events.sql leaves that column free on a search row,
       and the owner's «Искали, но не нашли» is `value = 0`, so a query that
@@ -12948,7 +12965,7 @@
     if (searchOwed !== q) return;   // filed already, as the page was left (flushSearchTrack)
     searchOwed = "";
     if (String(S.query || "").trim() !== q) return;   // typed on: a later run reports
-    var body = { path: q, value: searchResults().length };
+    var body = { path: q, value: searchShownCount() };
     if (rescued) body.productId = "ai";
     track("search", body);
   }
@@ -12969,7 +12986,7 @@
     }
     if (!searchOwed || searchOwed !== q) return;
     searchOwed = "";
-    var body = { path: q, value: searchResults().length };
+    var body = { path: q, value: searchShownCount() };
     if (aiTermsFor(q).length) body.productId = "ai";
     track("search", body);
   }
@@ -13885,6 +13902,162 @@
     return res;
   }
 
+  /* ---------- sets in the search (Renat's OK, 07.11.2026) -----------------
+     The plan he approved (drawn on Dim's own page in 99a4bef1, taken down
+     once this was built):
+     the search reads every query against four rules, top down, and the first
+     that fits decides the screen.
+       1. only the word «набор» (наборы · komplektid · sets · kit) — the sets
+          ARE the answer: all of them, with a chip per section, and the box
+          stays where it is, so «наборы борода» narrows it to rule 2;
+       2. «набор» and a topic (набор для бороды · kinkekomplekt · beard
+          starter kit) — only the sets for that topic, a set whose whole name
+          was typed first; none — one line saying so and the topic's products;
+       3. words from a set's NAME (barberism · booze & baccy · борода) — the
+          products first as before, then up to four of those sets;
+       4. everything else — the products exactly as before, and one quiet line
+          under the last card when those products also come in sets.
+     Never mixed into the product grid: a 47 € set matching «beard oil» on one
+     word would sit between the 15 € oils the shopper asked for (option A, which
+     the plan turned down).
+
+     One list, the same one the «Наборы» page draws: allBundles(). A set Renat
+     edits, hides or switches off moves here with no other change, and the
+     switch itself («Наборы на сайте» off) answers here the way the sets page
+     does. «For a topic» means the topic's own products — searchFor() on the
+     words left once the set word is gone — so the sets in rule 2 are the sets
+     that hold what rule 4 found for the same words, and the line rule 4 prints
+     is a link to exactly that list. */
+  // srchNorm() spelling: ё folded, õäöü folded, lower case
+  var SRCH_SET_WORD = /^(набор[а-я]*|комплект[а-я]*|nabor[a-z]*|komplekt[a-z]*|sets?|kits?|bundles?)$/;
+  // Estonian glues the set onto its topic: «kinkekomplekt» is gift + set
+  var SRCH_SET_GLUED = /^([a-z]{3,})komplekt[a-z]*$/;
+  // «все наборы», «all sets», «kõik komplektid» ask for the whole shelf
+  var SRCH_SET_ALL = /^(все|all|koik)$/;
+  /** The set word, if the query has one, and the words around it. */
+  function srchSetQuery(query) {
+    var words = srchWords(query), set = false, rest = [];
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i], m = null;
+      if (SRCH_SET_WORD.test(w)) { set = true; continue; }
+      if ((m = SRCH_SET_GLUED.exec(w))) { set = true; rest.push(m[1]); continue; }
+      rest.push(w);
+    }
+    if (set) rest = rest.filter(function (w) { return !SRCH_SET_ALL.test(w); });
+    return { set: set, rest: rest };
+  }
+  /** A set's name in all three languages, in srchNorm() spelling. */
+  function bundleNameNorm(b) {
+    var t = (b && b.title) || {};
+    return srchNorm([t.RU || "", t.ET || "", t.EN || ""].join(" "));
+  }
+  /** Is every one of these words the start of a word in the set's name? */
+  function bundleNameHas(b, words) {
+    if (!words.length) return false;
+    var n = bundleNameNorm(b);
+    for (var i = 0; i < words.length; i++) if (n.indexOf(" " + srchStem(words[i])) < 0) return false;
+    return true;
+  }
+  /** «Написали целиком»: the whole of one of its names is in the query. */
+  function bundleNameTyped(b, query) {
+    var qn = srchNorm(query), t = (b && b.title) || {}, langs = ["RU", "ET", "EN"];
+    for (var i = 0; i < langs.length; i++) {
+      var n = t[langs[i]] ? srchNorm(t[langs[i]]) : "";
+      if (n.trim() && qn.indexOf(n) >= 0) return true;
+    }
+    return false;
+  }
+  /** The words rule 3 compares with the names: the query's own, small talk
+      out. A query that is nothing but small talk («и», «for») names no set. */
+  function srchNameWords(query) {
+    return srchNorm(query).split(" ").filter(function (w) {
+      return (w.length > 1 || /[0-9]/.test(w)) && !SRCH_STOP.test(w);
+    }).slice(0, 8);
+  }
+  /** The sets on show that hold at least one of these products. */
+  function bundlesHolding(products) {
+    if (!products.length) return [];
+    var ids = {};
+    for (var i = 0; i < products.length; i++) ids[products[i].id] = true;
+    return allBundles().filter(function (b) {
+      return (b.items || []).some(function (it) { return ids[it.id]; });
+    });
+  }
+  /** The products for some words other than the box's own — the topic of
+      rule 2. The very passes searchResults() runs, remembered the same way. */
+  var SRCH_TOPIC_LAST = { key: "", res: null };
+  function searchTopic(words) {
+    var q = words.join(" ").trim().toLowerCase();
+    if (!q) return [];
+    var ai = aiTermsFor(q), key = SRCH_GEN + "|" + q + "|" + ai.join(",");
+    if (SRCH_TOPIC_LAST.key === key) return SRCH_TOPIC_LAST.res;
+    var res = searchFor(q, q, ai);
+    SRCH_TOPIC_LAST = { key: key, res: res };
+    return res;
+  }
+  /** The section most of these products belong to — three in five or more —
+      or "" when they are spread over several. */
+  function srchMainCat(products) {
+    if (!products.length) return "";
+    var n = {}, best = "", top = 0;
+    for (var i = 0; i < products.length; i++) {
+      var c = products[i].cat;
+      n[c] = (n[c] || 0) + 1;
+      if (n[c] > top) { top = n[c]; best = c; }
+    }
+    return top / products.length >= 0.6 && CAT_NAMES[best] ? best : "";
+  }
+  function bundleInCat(b, cat) {
+    if (b.cat === cat) return true;
+    return (b.items || []).some(function (it) { var p = bundleItemProduct(it); return !!p && p.cat === cat; });
+  }
+  /** Which rule this query falls under, and what it shows — or null for the
+      search exactly as it was (no sets known yet: the screen is drawn again
+      when /api/bundles/ answers). */
+  function searchSetPlan() {
+    var query = S.query, sq = srchSetQuery(query), list = allBundles();
+    if (sq.set) {
+      var prods = sq.rest.length ? searchTopic(sq.rest) : [];
+      // switched off, or a shop with no set at all: what the sets page says
+      if (!setsOn() || (setsKnown() && !list.length)) return { rule: "off", prods: prods };
+      if (!list.length) return null;
+      if (!sq.rest.length) return { rule: 1, sets: list };
+      var typed = [], named = [], held = [], hold = bundlesHolding(prods);
+      for (var i = 0; i < list.length; i++) {
+        var b = list[i];
+        if (bundleNameTyped(b, query)) typed.push(b);
+        else if (bundleNameHas(b, sq.rest)) named.push(b);
+        else if (hold.indexOf(b) >= 0) held.push(b);
+      }
+      var sets = typed.concat(named, held), cat = srchMainCat(prods);
+      /* The section names the sets only when every one of them belongs to it
+         — its own section, or a part from it: «подарочный набор» finds
+         mostly perfume, and the gift set it lists holds none. */
+      var setsCat = cat && sets.every(function (b) { return bundleInCat(b, cat); }) ? cat : "";
+      return { rule: 2, sets: sets, prods: prods, cat: cat, setsCat: setsCat };
+    }
+    if (!list.length) return null;
+    var words = srchNameWords(query);
+    var byName = words.length ? list.filter(function (b) { return bundleNameHas(b, words); }) : [];
+    if (byName.length) return { rule: 3, sets: byName.slice(0, 4) };
+    return { rule: 4, sets: bundlesHolding(searchResults()) };
+  }
+  /** What the screen shows for the query, products and sets together — the
+      number the search row reports (trackSearch), so «наборы» showing 37 sets
+      is not filed under «Искали, но не нашли». */
+  function searchShownCount() {
+    var plan = searchSetPlan();
+    if (!plan || plan.rule === 4) return searchResults().length;
+    if (plan.rule === 1) return plan.sets.length;
+    if (plan.rule === 2) return plan.sets.length || plan.prods.length;
+    if (plan.rule === 3) return searchResults().length + plan.sets.length;
+    return plan.prods.length;   // off
+  }
+  function plSets(n) { return n + " " + pl(n, "набор", "набора", "наборов"); }
+  /** The set word in the language the box is typed in — the link rule 4
+      prints puts it in the box, and the box shows it. */
+  function srchSetWord() { return S.lang === "ET" ? "komplektid" : S.lang === "EN" ? "sets" : "наборы"; }
+
   // ---------- components ----------
   /* Product photos are local and background-stripped, so no blend mode is
      needed to hide a white backing — which also means nothing breaks when a
@@ -14396,6 +14569,28 @@
     return '<section class="sec sec--bundles"><div class="sec__head"><h2 class="sec__title">' + title +
       '</h2><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></div>' +
       '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div></section>";
+  }
+
+  /* «Входит в наборы» on a product page, under the buy button (the plan Renat
+     approved on 07.11.2026, with the sets in the search): the sets on sale
+     that hold this product, each with its price, the parts' sum and the
+     saving — the one place a shopper weighs the bottle against the set. A
+     set that cannot be assembled right now is left out, as under a category
+     (bundlesForCatalog). Four at most; the shop has none in more than three. */
+  function pdpSetsHTML(p) {
+    var list = allBundles().filter(function (b) {
+      return bundleStock(b) !== "out" && (b.items || []).some(function (it) { return it.id === p.id; });
+    });
+    if (!list.length) return "";
+    return '<div class="pdpsets"><h2 class="pdpsets__h">Входит в наборы</h2>' + list.slice(0, 4).map(function (b) {
+      return '<a class="pdpsets__row" href="' + linkHref("bundle", b.id) + '" data-go-bundle="' + b.id + '">' +
+        '<span class="pdpsets__ph">' + bundleStack(b, "bstack--line") + "</span>" +
+        '<span class="pdpsets__txt"><span class="card__brand">Набор</span>' +
+          '<span class="pdpsets__nm">' + esc(bundleTitle(b)) + "</span>" +
+          '<span class="num pdpsets__pr"><span>' + eur(b.price) + "</span>" +
+            (bundleSaved(b) ? ' <s class="bwas">' + eur(b.sum) + "</s> " + '<span class="pdpsets__save">выгода ' + eur(b.save) + "</span>" : "") +
+          "</span></span></a>";
+    }).join("") + (list.length > 4 ? '<a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a>' : "") + "</div>";
   }
 
   /* Sets switched off, but the address still exists — somebody's bookmark, a
@@ -16953,6 +17148,7 @@
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
+          pdpSetsHTML(p) +
           '<div class="pdp__ship">' + esc(pdpShipLine()) + "</div>" +
           /* The live shop's own description when we have it (harvested — all
              95 products); the old placeholder text only where we somehow
@@ -19949,30 +20145,122 @@
      its own box in the markup, because the input must outlive every keystroke
      — see patchSearch() below. */
   function searchResultsHTML() {
+    if (!S.query.trim()) return searchIdleHTML();
+    var plan = searchSetPlan();
+    if (plan && plan.rule === 1) return searchSetsAllHTML(plan.sets);
+    if (plan && plan.rule === 2) return searchSetsTopicHTML(plan);
+    if (plan && plan.rule === "off") return searchSetsOffHTML(plan.prods);
     var res = searchResults();
-    return !S.query.trim()
-      // every chip must actually return something — «воск» returned nothing
-      // because the catalogue has no wax
-      /* The chip carries the query in the language it is READ in. Its label
-         is a text node, so translateTree() turned «шампунь» into «shampoo» on
-         the English shop — but data-q is not a text node and stayed Russian,
-         so tapping «shampoo» searched «шампунь» and put that in the box
-         (Renat, 17.09.2026). One word in two places is one word too many:
-         trText() answers for both, and the search itself reads all three
-         languages (searchWide), so every chip still finds what it promises. */
-      ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) {
-          var shown = trText(q, S.lang);
-          return '<button class="link" data-q="' + esc(shown) + '">' + esc(shown) + "</button>";
-        }).join(" · ") + "</p>"
-      : res.length
-        ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
-        : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
-          '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
-          '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<a class="btn btn--ghost btn--sm" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") + "</div>" +
-          // content: the contact line follows «Настройки → Контент» like the
-          // footer does — this was the last place still printing the Gmail
-          '<p class="muted">Напишите нам — поможем подобрать замену: ' +
-            [cPhoneHTML("link"), cMailHTML("link")].filter(Boolean).join(" · ") + "</p></div>";
+    if (!res.length && !(plan && plan.rule === 3)) return searchEmptyHTML();
+    var sets = plan ? plan.sets : [];
+    if (plan && plan.rule === 3) {
+      return '<p class="muted num" style="margin-bottom:16px">' +
+          (res.length ? "<span>" + res.length + " " + plural(res.length) + "</span> · " : "") +
+          "<span>" + plSets(sets.length) + "</span></p>" +
+        (res.length ? '<div class="grid">' + res.map(cardHTML).join("") + "</div>" : "") +
+        bundleGridHTML(sets, "Наборы");
+    }
+    return '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>" +
+      (sets.length ? searchSetsHintHTML(res, sets) : "");
+  }
+  /* Rule 1: the shelf itself. The same intro as the «Наборы» page, a chip per
+     section that has sets (the box keeps the query — a chip only narrows),
+     and every set in the panel's order. */
+  function searchSetsAllHTML(list) {
+    var pick = S.srchSets && S.srchSets.q === srchNorm(S.query) ? S.srchSets.cat : "";
+    var counts = {}, order = [];
+    list.forEach(function (b) {
+      var c = b.cat || "";
+      if (!counts[c]) { counts[c] = 0; order.push(c); }
+      counts[c]++;
+    });
+    // the biggest section first, ties in the panel's order (sort is stable)
+    order.sort(function (a, b) { return counts[b] - counts[a]; });
+    if (!counts[pick]) pick = "";
+    var shown = pick ? list.filter(function (b) { return (b.cat || "") === pick; }) : list;
+    var chip = function (id, label, n) {
+      return '<button class="scchip" data-srchsets="' + esc(id) + '" aria-current="' + (pick === id) + '">' +
+        esc(label) + ' <span class="num">' + n + "</span></button>";
+    };
+    return '<div class="srchmeta"><span class="muted num">' + plSets(list.length) + "</span>" +
+        '<a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Раздел «Наборы»</a></div>' +
+      '<p class="sec__intro">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p>' +
+      (order.length > 1
+        ? '<div class="subcats" role="group" aria-label="Наборы">' + chip("", "Все", list.length) +
+          order.map(function (c) { return chip(c, SET_CAT_SHORT[c] || CAT_NAMES[c] || c, counts[c]); }).join("") + "</div>"
+        : "") +
+      '<div class="grid">' + shown.map(bundleCardHTML).join("") + "</div>";
+  }
+  // the chips' own short names — the section's full one is too long for a chip
+  var SET_CAT_SHORT = { hair: "Волосы", beard: "Борода", styling: "Стайлинг", face: "Лицо", body: "Тело" };
+  /* Rule 2: the sets for a topic, or — none — one line and the topic's own
+     products under it, never «ничего не нашлось». */
+  function searchSetsTopicHTML(plan) {
+    var catName = plan.cat ? CAT_NAMES[plan.cat] : "";
+    if (!plan.sets.length) {
+      if (!plan.prods.length) return searchEmptyHTML();
+      return '<div class="empty srchnone"><p><b>Подходящих наборов пока нет.</b></p><p class="muted">Ниже — товары по теме.</p>' +
+          '<p><a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></p></div>' +
+        '<section class="sec sec--bundles srchtopic"><div class="sec__head"><h2 class="sec__title">' + esc(catName || "Товары") + "</h2>" +
+          (catName ? '<a class="link" href="' + linkHref("cat", plan.cat) + '" data-go-cat="' + plan.cat + '">Весь раздел</a>' : "") + "</div>" +
+        '<div class="grid">' + plan.prods.map(cardHTML).join("") + "</div></section>";
+    }
+    var setsCatName = plan.setsCat ? CAT_NAMES[plan.setsCat] : "";
+    return '<div class="srchmeta"><span class="muted num"><span>' + plSets(plan.sets.length) + "</span>" +
+        (setsCatName ? " · <span>" + esc(setsCatName) + "</span>" : "") + "</span>" +
+        '<a class="link" href="' + linkHref("go", "bundles") + '" data-go="bundles">Все наборы</a></div>' +
+      '<div class="grid">' + plan.sets.map(bundleCardHTML).join("") + "</div>" +
+      // the way to one product of the kind: its section, when the sets have one
+      (setsCatName
+        ? '<p class="muted srchfoot"><span>Нужен один товар —</span> ' +
+          '<a class="link" href="' + linkHref("cat", plan.setsCat) + '" data-go-cat="' + plan.setsCat + '">' + esc(setsCatName) + "</a></p>"
+        : "");
+  }
+  /* «Наборы на сайте» off, or no set at all: what the «Наборы» page says, the
+     ways on into the shop — and the topic's products when there was a topic. */
+  function searchSetsOffHTML(prods) {
+    return '<div class="empty"><p><b>Наборы сейчас недоступны</b></p><p class="muted">Посмотрите категории:</p>' +
+        '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<a class="btn btn--ghost btn--sm" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") + "</div></div>" +
+      (prods.length
+        ? '<p class="muted num" style="margin:24px 0 16px">' + prods.length + " " + plural(prods.length) + '</p><div class="grid">' + prods.map(cardHTML).join("") + "</div>"
+        : "");
+  }
+  /* Rule 4's one line under the last card: these products come in sets too.
+     A link to rule 2 for the same words — the very sets counted here. */
+  function searchSetsHintHTML(res, sets) {
+    var from = Math.min.apply(null, sets.map(function (b) { return Number(b.price) || 0; }));
+    var n = sets.length, word = pl(n, "наборе", "наборах", "наборах"), price = eur(from);
+    // two whole sentences, so each is one UI_RX key («в 1 наборе», «в 21 наборе», «в 5 наборах»)
+    var text = res.length === 1
+      ? "Этот товар есть и в " + n + " " + word + ", от " + price
+      : "Эти товары есть и в " + n + " " + word + ", от " + price;
+    return '<p class="srchhint"><button class="link" data-q="' + esc(srchSetWord() + " " + S.query.trim()) + '">' + text + "</button></p>";
+  }
+  // every chip must actually return something — «воск» returned nothing
+  // because the catalogue has no wax
+  /* The chip carries the query in the language it is READ in. Its label
+     is a text node, so translateTree() turned «шампунь» into «shampoo» on
+     the English shop — but data-q is not a text node and stayed Russian,
+     so tapping «shampoo» searched «шампунь» and put that in the box
+     (Renat, 17.09.2026). One word in two places is one word too many:
+     trText() answers for both, and the search itself reads all three
+     languages (searchWide), so every chip still finds what it promises. */
+  /* .srchpop names these chips for the tests — since 07.11 a result list
+     can carry a data-q of its own (the «есть и в наборах» line). */
+  function searchIdleHTML() {
+    return '<p class="muted srchpop">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) {
+      var shown = trText(q, S.lang);
+      return '<button class="link" data-q="' + esc(shown) + '">' + esc(shown) + "</button>";
+    }).join(" · ") + "</p>";
+  }
+  function searchEmptyHTML() {
+    return '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
+      '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
+      '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<a class="btn btn--ghost btn--sm" href="' + linkHref("cat", c.id) + '" data-go-cat="' + c.id + '">' + c.name + "</a>"; }).join("") + "</div>" +
+      // content: the contact line follows «Настройки → Контент» like the
+      // footer does — this was the last place still printing the Gmail
+      '<p class="muted">Напишите нам — поможем подобрать замену: ' +
+        [cPhoneHTML("link"), cMailHTML("link")].filter(Boolean).join(" · ") + "</p></div>";
   }
   function screenSearch() {
     return '<div class="wrap"><section class="sec">' +
@@ -55672,7 +55960,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admready],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admtopback],[data-admsaveretry],[data-admhelp],[data-admfold],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-lockersize],[data-shipboxopen],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-srchsets],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herokind],[data-heroside],[data-herofocus],[data-herocut],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-coverfit],[data-coverreset],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admdescsplit],[data-edfmt],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipmontonio],[data-shipclear],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipcountry],[data-shippickup],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-posdisc],[data-pospay],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-mailbackyes],[data-mailbackno],[data-promokind],[data-promoscope],[data-promoprodpick],[data-promoproddel],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-goodsclear],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admphotouse],[data-admmatopen],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admready],[data-admreturndone],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admcartsave],[data-admmbsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-admbackyes],[data-admbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-mailsample],[data-notifytest],[data-shippreview],[data-admvoicelang],[data-pushon],[data-pushoff],[data-pushtest],[data-pushdrop],[data-stockscan],[data-scanmode],[data-scancam],[data-bundleshow],[data-bundledraftnew],[data-bundledraftdrop],[data-admblogmenu],[data-admblogprodadd],[data-appsrecheck],[data-appscheckpay],[data-shipaccept],[data-shiprow],[data-setmore],[data-herotr],[data-contenttr],[data-ptlang],[data-pttr],[data-hoursall],[data-admundosrv],[data-parcelsize],[data-edstock],[data-edqtystep],[data-goodsvis],[data-goodsnewreset],[data-admhomebrand],[data-admhomebrandsgo],[data-blogchip],[data-blogask],[data-blogshelf],[data-blogfeatured],[data-blogshowsrc],[data-blogsrcadd],[data-blogsrcdel],[data-bnewback],[data-bnewblank],[data-bnewsheet],[data-bnewlinkok],[data-bnewtextok],[data-bnewdel],[data-bnewpdfok],[data-bnewretick],[data-bnewlib],[data-bnewlibadd],[data-bnewsrc],[data-bnewwrite],[data-bnewlang],[data-bnewtr],[data-bnewcover],[data-bnewpicdel],[data-bnewproddel],[data-bnewedit],[data-bnewprodadd],[data-bnewpreview],[data-bnewpublish],[data-bnewlibdel]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -58339,6 +58627,14 @@
     // «Маркетинг → Рассылка»: every data-news* button, in one place (newsClick)
     if (newsClick(t, d)) return;
 
+    /* a section chip on the search screen's sets (rule 1): narrows the
+       shelf in place, the box and its query untouched (searchSetsAllHTML) */
+    if (d.srchsets !== undefined) {
+      S.srchSets = { q: srchNorm(S.query), cat: d.srchsets };
+      patchSearch();
+      refocus('[data-srchsets="' + d.srchsets + '"]');
+      return;
+    }
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
     /* The skip link: into the first control of the step that is open, which
        is the e-mail box on step 1, the country on step 2 and the first

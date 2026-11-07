@@ -1087,7 +1087,7 @@ test.describe("search — the box survives its own results", () => {
     expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "rasvased " });
     // the results underneath really did repaint — the popular-query chips of
     // the empty state are gone
-    await expect(page.locator("[data-searchres] [data-q]")).toHaveCount(0);
+    await expect(page.locator("[data-searchres] .srchpop [data-q]")).toHaveCount(0);
     // …and the query still rides on the address, as it did before
     await expect(page).toHaveURL(/\/search\?q=rasvased/);
 
@@ -1096,7 +1096,7 @@ test.describe("search — the box survives its own results", () => {
     await page.keyboard.press("Backspace");
     expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "" });
     // an empty box is back to the popular queries
-    await expect(page.locator("[data-searchres] [data-q]").first()).toBeVisible();
+    await expect(page.locator("[data-searchres] .srchpop [data-q]").first()).toBeVisible();
   });
 
   /* The same finding by another road (03.11.2026). Each boot feed used to end
@@ -1123,7 +1123,7 @@ test.describe("search — the box survives its own results", () => {
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))));
     await box.pressSequentially("sed ", { delay: 20 });
     expect(await boxState(page)).toEqual({ present: true, sameNode: true, focused: true, value: "rasvased " });
-    await expect(page.locator("[data-searchres] [data-q]")).toHaveCount(0);
+    await expect(page.locator("[data-searchres] .srchpop [data-q]")).toHaveCount(0);
   });
 });
 

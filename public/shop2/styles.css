@@ -2539,6 +2539,35 @@ button, a, summary, label { touch-action: manipulation; }
 .bitem__out { flex-shrink: 0; }
 .bitem__pr { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
 
+/* ---------- наборы in the search and on a product page (07.11.2026) ----------
+   app.js searchSetsAllHTML / searchSetsTopicHTML / searchSetsHintHTML and
+   pdpSetsHTML. The count and its link share one line; the line under a grid
+   is set off by the same hairline .pdp__ship uses, so it reads as a footnote
+   to the products and never as one more card. */
+.srchmeta {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 6px 16px; margin-bottom: 16px;
+}
+.srchfoot, .srchhint { margin: 24px 0 0; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 13.5px; }
+.srchhint .link { font-size: 13.5px; text-align: left; }
+.srchtopic { padding-top: 28px; }
+.pdpsets { margin: 0 0 20px; }
+.pdpsets__h {
+  font-size: 11.5px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 4px;
+}
+.pdpsets__row {
+  display: flex; align-items: center; gap: 12px; padding: 8px 0;
+  border-top: 1px solid var(--rule-soft); color: inherit; text-decoration: none;
+}
+.pdpsets__row:first-of-type { border-top: 0; }
+.pdpsets__ph { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.pdpsets__txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pdpsets__nm { font-size: 13.5px; line-height: 1.35; overflow-wrap: anywhere; }
+.pdpsets__row:hover .pdpsets__nm { text-decoration: underline; text-underline-offset: 3px; }
+.pdpsets__pr { font-size: 13.5px; font-weight: 600; }
+.pdpsets__save { font-size: 12px; font-weight: 400; color: var(--ok); }
+
 /* ---------- подарочная карта ---------- */
 .gifttile {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
