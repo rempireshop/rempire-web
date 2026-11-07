@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Наборы в поиске</title>
+<meta name="description" content="Как показывать наборы в поиске Rempire: четыре правила и экраны телефона и компьютера на сегодняшних наборах. Макет, на сайте ничего не изменено.">
+<meta property="og:title" content="Наборы в поиске — предложение">
+<meta property="og:description" content="Четыре правила и экраны на сегодняшних наборах Rempire. Макет: на сайте ничего не изменено.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Golos+Text:wght@400;500;600&display=swap">
+<style>
+/* This page is Dim's, not the shop's: it lives on rempireshop.diipsolutions.eu only
+   (public/golive/ is turned away on every other host — next.config.ts). Generated
+   07.11.2026 from the live sets; a picture of a proposal, so it stays light like the
+   shop it draws and carries no script. */
+:root{
+  --ink:#1c1a00; --muted:#6f6b57; --paper:#ffffff; --ground:#ecebe4; --ground-2:#e2e0d6;
+  --line:rgba(28,26,0,.15); --mark:#1f4fd1; --mark-soft:rgba(31,79,209,.08); --no:#b3261e; --no-soft:rgba(179,38,30,.07);
+  --display:Oswald,"Golos Text",system-ui,sans-serif; --sans:"Golos Text",ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.55 var(--sans);font-variant-numeric:tabular-nums}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--mark);outline-offset:3px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+@media (max-width:640px){.wrap{padding:0 16px}}
+
+/* top */
+.top{border-bottom:1px solid var(--line);background:var(--paper)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:space-between;padding-top:12px;padding-bottom:12px;font-size:13px;color:var(--muted)}
+.top b{font-family:var(--display);font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:var(--ink);font-size:13px}
+.stamp{display:inline-flex;align-items:center;gap:8px}
+.stamp i{width:8px;height:8px;border-radius:50%;background:var(--mark)}
+
+.hero{padding:48px 0 28px}
+.eyebrow{margin:0 0 10px;font-family:var(--display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.06em;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,6vw,60px);letter-spacing:.04em}
+.lead{max-width:62ch;margin:18px 0 0;font-size:19px;line-height:1.5}
+.lead b{font-weight:600}
+.sub{max-width:66ch;margin:12px 0 0;color:var(--muted)}
+
+/* the rules at a glance */
+.rt{margin:28px 0 8px;background:var(--paper);border:1px solid var(--line)}
+.rt__head,.rt__row{display:grid;grid-template-columns:44px minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,1fr);gap:18px;padding:14px 18px}
+.rt__head{font-family:var(--display);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--ink)}
+.rt__row{text-decoration:none;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.rt__row:last-child{border-bottom:0}
+.rt__row:hover{background:var(--mark-soft)}
+.rt__n{font-family:var(--display);font-size:26px;font-weight:500;line-height:1}
+.rt__c b{display:block;font-weight:600;margin-bottom:4px}
+.rt__ex{color:var(--muted);font-size:13.5px}
+.rt__now{color:var(--muted)}
+.rt__foot{margin:10px 0 0;font-size:14px;color:var(--muted)}
+@media (max-width:820px){
+  .rt__head{display:none}
+  .rt__row{grid-template-columns:34px minmax(0,1fr);gap:6px 12px}
+  .rt__row .rt__c:nth-child(3),.rt__row .rt__c:nth-child(4){grid-column:2}
+  .rt__now::before{content:"Сейчас: ";color:var(--ink)}
+}
+
+/* a rule */
+section{scroll-margin-top:16px}
+.rule{display:grid;grid-template-columns:minmax(0,1fr) min(410px,100%);gap:28px 56px;align-items:start;padding:56px 0;border-top:1px solid var(--line)}
+.rule:first-of-type{border-top:0}
+.rule h2{font-size:clamp(24px,3.2vw,34px)}
+.rule__text{max-width:58ch;padding-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 22px}
+.q{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 9px;background:var(--paper);border:1px solid var(--line);font-size:14px}
+.q::before{content:"";width:12px;height:12px;border:1.6px solid var(--muted);border-radius:50%;flex:none;box-shadow:3px 3px 0 -1.6px var(--paper),4px 4px 0 -1.4px var(--muted)}
+.facts{margin:0;display:grid;gap:16px}
+.facts dt{font-family:var(--display);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.facts dd{margin:0}
+.facts__now{padding:12px 14px;background:var(--ground-2);border-left:3px solid var(--muted)}
+@media (max-width:900px){.rule{grid-template-columns:minmax(0,1fr);padding:40px 0}}
+
+/* device frames */
+.dev{margin:0;min-width:0}
+.dev figcaption{margin-top:10px;font-size:12.5px;color:var(--muted);text-align:center;letter-spacing:.02em}
+.dev--phone{width:min(410px,100%);justify-self:center}
+.dev--phone .dev__screen{height:760px;overflow-y:auto;overscroll-behavior:contain;border:10px solid var(--ink);border-radius:38px;background:#fff;scrollbar-width:thin}
+@media (max-width:640px){.dev--phone .dev__screen{height:640px;border-width:7px;border-radius:30px}}
+.dev--desk{width:100%;background:var(--paper);border:1px solid var(--ink);box-shadow:0 18px 40px -28px rgba(28,26,0,.45)}
+.dev__bar{display:flex;align-items:center;gap:7px;padding:9px 14px;border-bottom:1px solid var(--line);background:#f6f5f0}
+.dev__bar i{width:10px;height:10px;border-radius:50%;background:var(--ground-2)}
+.dev__bar span{margin-left:12px;flex:1;max-width:520px;padding:3px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dev__scroll{overflow-x:auto}
+.dev--desk .dev__screen{min-width:1040px}
+.dev--desk figcaption{padding:0 0 12px}
+.note{display:block;margin:0 0 12px;padding:10px 12px;font-size:13.5px;line-height:1.45}
+.note--no{background:var(--no-soft);border-left:3px solid var(--no);color:var(--ink)}
+.note--no b{color:var(--no)}
+.note--new{background:var(--mark-soft);border-left:3px solid var(--mark)}
+.note--new b{color:var(--mark)}
+
+.band{padding:56px 0;border-top:1px solid var(--line)}
+.band h2{font-size:clamp(24px,3.2vw,34px)}
+.band > .wrap > p{max-width:64ch}
+.desks{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;margin-top:28px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px;margin-top:28px;justify-items:center}
+.pair .rule__text{padding:0}
+@media (max-width:900px){.pair{grid-template-columns:minmax(0,1fr)}}
+.case{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;justify-items:center;width:100%;min-width:0}
+.case p{margin:0;max-width:44ch;text-align:left;justify-self:stretch}
+.case h3{font-size:18px;justify-self:stretch}
+
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:24px}
+.col{background:var(--paper);border:1px solid var(--line);padding:18px 20px}
+.col h3{font-size:16px;letter-spacing:.12em;margin-bottom:8px}
+.col p{margin:0;font-size:15px}
+.col--no{border-top:3px solid var(--no)}
+.col--yes{border-top:3px solid var(--mark)}
+.col--one{border-top:3px solid var(--ink)}
+@media (max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}}
+.endnote{padding:28px 0 56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+.endnote p{margin:0 0 6px;max-width:72ch}
+
+/* ---------- the shop, as it draws itself (shop2/styles.css) ---------- */
+.m{display:flex;flex-direction:column;min-height:100%;background:#fff;color:#1c1a00;font:15px/1.5 "Golos Text",system-ui,sans-serif;text-align:left}
+.m *{box-sizing:border-box}
+.m-head{border-bottom:1px solid rgba(28,26,0,.15);background:#fff}
+.m-head__row{display:flex;align-items:center;gap:10px 18px;padding:10px 16px}
+.m-logo{display:inline-flex;align-items:center;gap:9px;flex:none}
+.m-logo__svg{height:34px;width:auto}
+.m-logo__word{font-family:Oswald,sans-serif;font-weight:600;font-size:15px;letter-spacing:.3em;text-transform:uppercase;padding-left:2px}
+.m-lang{margin-left:auto;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.14em}
+.m-nav{display:flex;gap:18px;padding:0 16px;white-space:nowrap;overflow:hidden;font-size:13.5px;color:#6f6b57;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent)}
+.m-nav span{padding:11px 0;flex:none}
+.m-main{flex:1;padding:20px 16px 28px}
+.m-h1{margin:0 0 10px;font-family:Oswald,"Golos Text",sans-serif;text-transform:uppercase;letter-spacing:.18em;font-weight:600;font-size:21px;line-height:1.15}
+.m-q{margin:0 0 16px;font-size:16px;padding:10px 12px;border:1px solid #1c1a00;box-shadow:inset 0 0 0 1px #1c1a00;background:#fff}
+.m-meta{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin:0 0 12px;color:#6f6b57;font-size:13.5px}
+.m-ul{color:#1c1a00;border-bottom:1px solid rgba(28,26,0,.35);font-size:13px;white-space:nowrap}
+.m-blurb{margin:0 0 16px;font-size:14px;color:#6f6b57}
+.m-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.m-chip{min-height:44px;display:inline-flex;align-items:center;padding:0 15px;border:1px solid #1c1a00;font-family:Oswald,sans-serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase}
+.m-chip.is-on{background:#1c1a00;color:#fdfcf9}
+.m-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 16px}
+.m-grid--one{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.m-card{display:flex;flex-direction:column;gap:3px;min-width:0}
+.m-img{position:relative;display:block;aspect-ratio:1/1;background:#fff;margin-bottom:9px;overflow:hidden}
+.m-full{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.m-st{position:absolute;object-fit:contain}
+.m-st--0{left:4%;top:8%;width:62%;height:72%}
+.m-st--1{left:22%;top:4%;width:62%;height:84%}
+.m-st--2{left:42%;top:10%;width:56%;height:82%}
+.m-st--n0{left:5%;top:7%;width:63%;height:77%}
+.m-st--n1{left:32%;top:10%;width:63%;height:82%}
+.m-st--one{inset:0;width:100%;height:100%}
+.m-pct{position:absolute;left:0;top:0;z-index:1;background:#1c1a00;color:#fff;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.1em;padding:3px 7px}
+.m-badge{position:absolute;left:6px;top:6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border:1px solid currentColor;color:#6f6b57;background:#fff}
+.m-kick{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6f6b57;margin:0}
+.m-name{font-size:13px;line-height:1.35;margin:4px 0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:35px}
+.m-buy{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:auto;padding-top:6px}
+.m-price{font-size:13px;font-weight:600;white-space:nowrap}
+.m-price s{color:#6f6b57;font-weight:400;margin-left:5px}
+.m-price em{font-style:normal;font-weight:400;color:#6f6b57;margin-left:4px}
+.m-cta{border-bottom:1px solid rgba(28,26,0,.4);font-size:11px;line-height:1.5}
+.m-cta--muted{color:#6f6b57;border-color:rgba(28,26,0,.25)}
+.m-more{display:flex;flex-direction:column;align-items:center;gap:10px;margin:32px 0 0;color:#6f6b57;font-size:12.5px}
+.m-spin{width:22px;height:22px;border:2px solid rgba(28,26,0,.15);border-top-color:#1c1a00;border-radius:50%}
+.m-foot{margin:28px 0 0;font-size:13.5px;color:#6f6b57}
+.m-foot--rule{padding-top:14px;border-top:1px solid rgba(28,26,0,.15)}
+.m-sect{display:flex;justify-content:space-between;align-items:baseline;margin:36px 0 14px;padding-top:16px;border-top:1px solid #1c1a00}
+.m-sect__h{font-family:Oswald,sans-serif;font-weight:600;font-size:15px;letter-spacing:.18em;text-transform:uppercase}
+.m-empty{margin:0 0 8px;font-size:14.5px}
+.m-empty p{margin:0 0 6px}
+.m-empty b{font-weight:600}
+.m-cats{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:0}
+.m-cats li{padding:13px 0;border-bottom:1px solid rgba(28,26,0,.15)}
+.m-tabs{position:sticky;bottom:0;display:flex;background:#fff;border-top:1px solid #1c1a00;margin-top:auto}
+.m-tab{flex:1;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6f6b57;position:relative}
+.m-tab.is-on{color:#1c1a00}
+.m-tab.is-on::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:#1c1a00}
+.m-card--flag .m-img{outline:2px solid #b3261e;outline-offset:-2px}
+.m-flag{position:absolute;right:6px;top:6px;z-index:1;background:#b3261e;color:#fff;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px}
+/* product page */
+.m-crumbs{margin:0 0 14px;font-size:12.5px;color:#6f6b57}
+.m-pimg{position:relative;aspect-ratio:1/1;margin:0 0 16px}
+.m-pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.m-ptitle{margin:4px 0 8px;font-size:20px;line-height:1.3}
+.m-pprice{margin:0;font-size:20px;font-weight:600}
+.m-tax{margin:4px 0 16px;font-size:12.5px;color:#6f6b57}
+.m-btn{display:flex;align-items:center;justify-content:center;min-height:50px;background:#1c1a00;color:#fdfcf9;font-family:Oswald,sans-serif;font-size:13px;letter-spacing:.18em;text-transform:uppercase}
+.m-in{margin:26px 0 0;padding:16px 0 0;border-top:1px solid #1c1a00}
+.m-in.new{outline:2px dashed #1f4fd1;outline-offset:6px}
+.m-in__h{margin:0 0 12px;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.18em;text-transform:uppercase}
+.m-in__row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(28,26,0,.15)}
+.m-in__img{position:relative;display:block;aspect-ratio:1/1}
+.m-in__txt{display:flex;flex-direction:column;min-width:0}
+.m-in__txt .m-name{min-height:0;margin:2px 0 4px}
+/* desktop */
+.m--desk .m-wrap{max-width:1240px;margin:0 auto;width:100%}
+.m--desk .m-head__row{padding:12px 28px}
+.m--desk .m-nav{padding:0 28px 9px;-webkit-mask-image:none;mask-image:none;overflow:visible}
+.m--desk .m-main{padding:28px 28px 48px}
+.m-hq{flex:1 1 180px;display:flex;align-items:center;gap:9px;min-height:42px;padding:0 2px;border-bottom:1px solid rgba(28,26,0,.28);color:#6f6b57;font-size:14px}
+.m-hq span{color:#1c1a00}
+.m-icons{display:inline-flex;align-items:center;gap:14px;margin-left:auto}
+.m-icons .m-lang{margin-left:0}
+.m--desk .m-h1{font-size:26px;margin-bottom:16px}
+.m--desk .m-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:40px 24px}
+.m--desk .m-name{font-size:14px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><b>Rempire</b><span class="stamp"><i></i>Макет · на сайте ничего не изменено · данные магазина на 07.11.2026</span></div></header>
+
+<main>
+<div class="wrap">
+  <section class="hero" aria-labelledby="h">
+    <p class="eyebrow">Поиск · Наборы · предложение</p>
+    <h1 id="h">Наборы в поиске</h1>
+    <p class="lead"><b>Да — но только когда покупатель ищет набор или называет его.</b> Во всех остальных случаях товары остаются первыми, и ничего не меняется.</p>
+    <p class="sub">Поиск проверяет запрос по четырём правилам сверху вниз и применяет первое, которое подходит. Экраны ниже нарисованы стилями магазина на сегодняшних 37 наборов — с настоящими названиями, ценами и фото. Нажмите на правило, чтобы перейти к его экрану.</p>
+    <div class="rt" role="list">
+      <div class="rt__head" aria-hidden="true"><span>№</span><span>Покупатель пишет</span><span>Поиск показывает</span><span>Сейчас на сайте</span></div>
+      <a class="rt__row" role="listitem" href="#r1">
+  <span class="rt__n">1</span>
+  <span class="rt__c"><b>Только слово «набор»</b><span class="rt__ex">наборы · komplektid · sets · kit</span></span>
+  <span class="rt__c">Все наборы — это и есть результаты: кнопки разделов и ссылка на страницу «Наборы». На другую страницу не переводим: строка поиска остаётся, и «наборы борода» сужает список.</span>
+  <span class="rt__c rt__now">«наборы» — 2 случайных товара. «sets» — 1 парфюм.</span>
+</a><a class="rt__row" role="listitem" href="#r2">
+  <span class="rt__n">2</span>
+  <span class="rt__c"><b>Слово «набор» и тема</b><span class="rt__ex">набор для бороды · kinkekomplekt · beard starter kit</span></span>
+  <span class="rt__c">Только подходящие наборы (для бороды — 7). Набор, название которого написали целиком, стоит первым. Если подходящих нет — одна строка об этом, а под ней товары по теме (крайний случай ниже).</span>
+  <span class="rt__c rt__now">«набор для бороды», «подарочный набор», «gift set» — «ничего не найдено».</span>
+</a><a class="rt__row" role="listitem" href="#r3">
+  <span class="rt__n">3</span>
+  <span class="rt__c"><b>Слова из названия набора</b><span class="rt__ex">barberism · booze &amp; baccy · killer.curls · борода</span></span>
+  <span class="rt__c">Сначала товары. Под ними блок «Наборы»: до 4 наборов, в названии которых есть все слова запроса, и ссылка «Все наборы».</span>
+  <span class="rt__c rt__now">«barberism» — 3 товара. Набор Barberism не показывается.</span>
+</a><a class="rt__row" role="listitem" href="#r4">
+  <span class="rt__n">4</span>
+  <span class="rt__c"><b>Всё остальное: слова о товарах</b><span class="rt__ex">beard oil · шампунь · Davines</span></span>
+  <span class="rt__c">Только товары, в том же порядке, что сейчас. Если эти товары есть и в наборах — одна спокойная строка после последней карточки: «Эти масла есть и в 7 наборов, от 47,47 €».</span>
+  <span class="rt__c rt__now">«beard oil» — 12 масел. Это правильно, оставляем.</span>
+</a>
+    </div>
+    <p class="rt__foot">Правила одни для русского, эстонского и английского.</p>
+  </section>
+
+  <section class="rule" id="r1" aria-labelledby="r1-h">
+  <div class="rule__text">
+    <p class="eyebrow">Правило 1</p>
+    <h2 id="r1-h">Только слово «набор»</h2>
+    <p class="chips"><span class="q">наборы</span><span class="q">komplektid</span><span class="q">sets</span><span class="q">kit</span></p>
+    <dl class="facts">
+      <div><dt>Поиск показывает</dt><dd>Все наборы — это и есть результаты: кнопки разделов и ссылка на страницу «Наборы». На другую страницу не переводим: строка поиска остаётся, и «наборы борода» сужает список.</dd></div>
+      <div class="facts__now"><dt>Сейчас на сайте</dt><dd>«наборы» — 2 случайных товара. «sets» — 1 парфюм.</dd></div>
+      <div><dt>Почему</dt><dd>Человек написал одно слово «наборы» — он хочет увидеть наборы, а не догадываться, где они.</dd></div>
+    </dl>
+  </div>
+  <figure class="dev dev--phone" id="s-r1">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «наборы»">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">наборы</div>
+        <div class="m-meta"><span>37 наборов</span><span class="m-ul">Раздел «Наборы»</span></div><p class="m-blurb">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p><div class="m-chips"><span class="m-chip is-on">Все · 37</span><span class="m-chip">Волосы · 23</span><span class="m-chip">Борода · 6</span><span class="m-chip">Стайлинг · 4</span><span class="m-chip">Тело · 2</span><span class="m-chip">Лицо · 2</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Борода — стартовый набор</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/yumain-aftercare-washing-foam-expert-care-for-your-tattoos-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/yumain-tattoo-balm-the-ultimate-care-for-your-tattoos-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/yumain-tattoo-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Уход за татуировкой</span>
+  <span class="m-buy"><span class="m-price">30,08 €<s>32 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/night-rider-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--n0"><img src="/shop/img/kevin-murphy-session-spray-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--n1"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Стайлинг — паста и спрей</span>
+  <span class="m-buy"><span class="m-price">36,66 €<s>39 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарочный набор Rempire</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/kevin-murphy-young-again-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/kevin-murphy-young-again-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Kevin.Murphy YOUNG.AGAIN — уход целиком</span>
+  <span class="m-buy"><span class="m-price">86,48 €<s>92 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/cosrx-aloe-sun-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Лицо — три шага</span>
+  <span class="m-buy"><span class="m-price">57,60 €<s>61,28 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/killer-curls-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/killer-curls-rinse-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/killer-curls-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Кудри — Kevin.Murphy Killer.Curls</span>
+  <span class="m-buy"><span class="m-price">80,84 €<s>86 €</s></span><span class="m-cta">В корзину</span></span>
+</div></div>
+<p class="m-more"><span class="m-spin"></span>Ещё 29 наборов — подгружаются при прокрутке</p>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «наборы»</figcaption>
+</figure>
+</section>
+<section class="rule" id="r2" aria-labelledby="r2-h">
+  <div class="rule__text">
+    <p class="eyebrow">Правило 2</p>
+    <h2 id="r2-h">Слово «набор» и тема</h2>
+    <p class="chips"><span class="q">набор для бороды</span><span class="q">kinkekomplekt</span><span class="q">beard starter kit</span></p>
+    <dl class="facts">
+      <div><dt>Поиск показывает</dt><dd>Только подходящие наборы (для бороды — 7). Набор, название которого написали целиком, стоит первым. Если подходящих нет — одна строка об этом, а под ней товары по теме (крайний случай ниже).</dd></div>
+      <div class="facts__now"><dt>Сейчас на сайте</dt><dd>«набор для бороды», «подарочный набор», «gift set» — «ничего не найдено».</dd></div>
+      <div><dt>Почему</dt><dd>Сейчас покупатель, готовый взять набор, видит «ничего не найдено» — хотя подходящие наборы есть.</dd></div>
+    </dl>
+  </div>
+  <figure class="dev dev--phone" id="s-r2">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «набор для бороды»">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">набор для бороды</div>
+        <div class="m-meta"><span>7 наборов · уход за бородой</span><span class="m-ul">Все наборы</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Борода — стартовый набор</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарочный набор Rempire</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Booze &amp; Baccy — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/rough-rider-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Мужчина: мытьё, укладка, борода</span>
+  <span class="m-buy"><span class="m-price">62,04 €<s>66 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/davines-softening-shaving-gel-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Бритьё без раздражения</span>
+  <span class="m-buy"><span class="m-price">55,93 €<s>59,50 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/davines-hair-beard-body-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/handmade-soap-666-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарок мужчине</span>
+  <span class="m-buy"><span class="m-price">47,47 €<s>50,50 €</s></span><span class="m-cta">В корзину</span></span>
+</div></div>
+<p class="m-foot">Нужен один товар — <span class="m-ul">Уход за бородой</span></p>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «набор для бороды»</figcaption>
+</figure>
+</section>
+<section class="rule" id="r3" aria-labelledby="r3-h">
+  <div class="rule__text">
+    <p class="eyebrow">Правило 3</p>
+    <h2 id="r3-h">Слова из названия набора</h2>
+    <p class="chips"><span class="q">barberism</span><span class="q">booze &amp; baccy</span><span class="q">killer.curls</span><span class="q">борода</span></p>
+    <dl class="facts">
+      <div><dt>Поиск показывает</dt><dd>Сначала товары. Под ними блок «Наборы»: до 4 наборов, в названии которых есть все слова запроса, и ссылка «Все наборы».</dd></div>
+      <div class="facts__now"><dt>Сейчас на сайте</dt><dd>«barberism» — 3 товара. Набор Barberism не показывается.</dd></div>
+      <div><dt>Почему</dt><dd>Человек ищет линейку или бренд. Товары остаются первыми, а набор той же линейки — рядом, а не спрятан.</dd></div>
+    </dl>
+  </div>
+  <figure class="dev dev--phone" id="s-r3">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «barberism»">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">barberism</div>
+        <div class="m-meta"><span>3 товара · 1 набор</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Sid Sottung Barberism® Beard Balm — бальзам</span>
+  <span class="m-buy"><span class="m-price">24 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Moustache Wax — воск</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div></div>
+<div class="m-sect"><span class="m-sect__h">Наборы</span><span class="m-ul">Все наборы</span></div>
+<div class="m-grid m-grid--one"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div></div>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «barberism»</figcaption>
+</figure>
+</section>
+<section class="rule" id="r4" aria-labelledby="r4-h">
+  <div class="rule__text">
+    <p class="eyebrow">Правило 4</p>
+    <h2 id="r4-h">Всё остальное: слова о товарах</h2>
+    <p class="chips"><span class="q">beard oil</span><span class="q">шампунь</span><span class="q">Davines</span></p>
+    <dl class="facts">
+      <div><dt>Поиск показывает</dt><dd>Только товары, в том же порядке, что сейчас. Если эти товары есть и в наборах — одна спокойная строка после последней карточки: «Эти масла есть и в 7 наборов, от 47,47 €».</dd></div>
+      <div class="facts__now"><dt>Сейчас на сайте</dt><dd>«beard oil» — 12 масел. Это правильно, оставляем.</dd></div>
+      <div><dt>Почему</dt><dd>Здесь человек ищет конкретный товар. Наборы не мешают — только тихая подсказка в самом конце.</dd></div>
+    </dl>
+  </div>
+  <figure class="dev dev--phone" id="s-r4">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «beard oil»">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">beard oil</div>
+        <div class="m-meta"><span>12 товаров</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">нет в наличии</span></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Private Stock — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">16,50 €</span><span class="m-cta m-cta--muted">Сообщить о наличии</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Azur Lime — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Green Refreshing — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Cypress Vetyver — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Wood Spice — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Davines</span>
+  <span class="m-name">Pasta&amp;Love Pre-Shaving &amp; Beard Oil</span>
+  <span class="m-buy"><span class="m-price">22 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Maharajah Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Nebula John Petrucci Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Ricki Hall Booze &amp; Baccy Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Rufus Hound Triumphant Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">The Gentleman's Tipple Whisky Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div></div>
+<p class="m-foot m-foot--rule">Эти масла есть и в <span class="m-ul">7 наборов, от 47,47 €</span></p>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «beard oil»</figcaption>
+</figure>
+</section>
+</div>
+
+<section class="band" aria-labelledby="desk-h">
+  <div class="wrap">
+    <p class="eyebrow">Компьютер</p>
+    <h2 id="desk-h">То же на большом экране</h2>
+    <p>Правила те же, меняется только сетка: четыре карточки в ряд, поиск — в шапке.</p>
+    <div class="desks">
+      <figure class="dev dev--desk" id="s-d1">
+  <div class="dev__bar" aria-hidden="true"><i></i><i></i><i></i><span>rempireshop.com/ru/search?q=наборы</span></div>
+  <div class="dev__scroll">
+  <div class="dev__screen" role="img" aria-label="Компьютер · поиск «наборы» (правило 1)">
+    <div class="m m--desk">
+      <div class="m-head">
+        <div class="m-head__row m-wrap"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-hq"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>наборы</span></span><span class="m-icons"><span class="m-lang">RU</span><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span></div>
+        <div class="m-nav m-wrap"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Уход за лицом</span><span>Уход за телом</span><span>Парфюмерия</span><span>Мерч</span><span>Наборы</span><span>Бренды</span><span>Блог</span></div>
+      </div>
+      <div class="m-main m-wrap">
+        <p class="m-h1">Поиск</p>
+        <div class="m-meta"><span>37 наборов</span><span class="m-ul">Раздел «Наборы»</span></div><p class="m-blurb">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p><div class="m-chips"><span class="m-chip is-on">Все · 37</span><span class="m-chip">Волосы · 23</span><span class="m-chip">Борода · 6</span><span class="m-chip">Стайлинг · 4</span><span class="m-chip">Тело · 2</span><span class="m-chip">Лицо · 2</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Борода — стартовый набор</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/yumain-aftercare-washing-foam-expert-care-for-your-tattoos-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/yumain-tattoo-balm-the-ultimate-care-for-your-tattoos-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/yumain-tattoo-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Уход за татуировкой</span>
+  <span class="m-buy"><span class="m-price">30,08 €<s>32 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/night-rider-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--n0"><img src="/shop/img/kevin-murphy-session-spray-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--n1"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Стайлинг — паста и спрей</span>
+  <span class="m-buy"><span class="m-price">36,66 €<s>39 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарочный набор Rempire</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/kevin-murphy-young-again-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/kevin-murphy-young-again-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Kevin.Murphy YOUNG.AGAIN — уход целиком</span>
+  <span class="m-buy"><span class="m-price">86,48 €<s>92 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/cosrx-aloe-sun-cream-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Лицо — три шага</span>
+  <span class="m-buy"><span class="m-price">57,60 €<s>61,28 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/killer-curls-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/killer-curls-rinse-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/killer-curls-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Кудри — Kevin.Murphy Killer.Curls</span>
+  <span class="m-buy"><span class="m-price">80,84 €<s>86 €</s></span><span class="m-cta">В корзину</span></span>
+</div></div>
+<p class="m-more"><span class="m-spin"></span>Ещё 29 наборов — подгружаются при прокрутке</p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <figcaption>Компьютер · поиск «наборы» (правило 1)</figcaption>
+</figure>
+      <figure class="dev dev--desk" id="s-d3">
+  <div class="dev__bar" aria-hidden="true"><i></i><i></i><i></i><span>rempireshop.com/ru/search?q=barberism</span></div>
+  <div class="dev__scroll">
+  <div class="dev__screen" role="img" aria-label="Компьютер · поиск «barberism» (правило 3)">
+    <div class="m m--desk">
+      <div class="m-head">
+        <div class="m-head__row m-wrap"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-hq"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>barberism</span></span><span class="m-icons"><span class="m-lang">RU</span><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span></div>
+        <div class="m-nav m-wrap"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Уход за лицом</span><span>Уход за телом</span><span>Парфюмерия</span><span>Мерч</span><span>Наборы</span><span>Бренды</span><span>Блог</span></div>
+      </div>
+      <div class="m-main m-wrap">
+        <p class="m-h1">Поиск</p>
+        <div class="m-meta"><span>3 товара · 1 набор</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Sid Sottung Barberism® Beard Balm — бальзам</span>
+  <span class="m-buy"><span class="m-price">24 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Moustache Wax — воск</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div></div>
+<div class="m-sect"><span class="m-sect__h">Наборы</span><span class="m-ul">Все наборы</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div></div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <figcaption>Компьютер · поиск «barberism» (правило 3)</figcaption>
+</figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="edge-h">
+  <div class="wrap">
+    <p class="eyebrow">Крайние случаи</p>
+    <h2 id="edge-h">Когда наборов нет</h2>
+    <div class="pair">
+      <div class="case">
+        <h3>Подходящих наборов нет</h3>
+        <p>«набор парфюма»: наборов с парфюмерией сейчас нет. Одна строка об этом — и сразу сама парфюмерия, а не «ничего не найдено».</p>
+        <figure class="dev dev--phone" id="s-e1">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «набор парфюма»">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">набор парфюма</div>
+        <div class="m-empty"><p><b>Наборов с парфюмерией пока нет.</b></p><p>Ниже — сама парфюмерия. Или <span class="m-ul">все наборы</span>.</p></div>
+<div class="m-sect"><span class="m-sect__h">Парфюмерия</span><span class="m-ul">Весь раздел</span></div>
+<div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">мало</span></span>
+  <span class="m-kick">Xerjoff</span>
+  <span class="m-name">Tony Iommi Monkey Special — парфюм</span>
+  <span class="m-buy"><span class="m-price">190 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Xerjoff</span>
+  <span class="m-name">1861 Naxos Eau de Parfum — парфюм</span>
+  <span class="m-buy"><span class="m-price">190 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">нет в наличии</span></span>
+  <span class="m-kick">Creed</span>
+  <span class="m-name">Aventus Eau de Parfum for Men — парфюм</span>
+  <span class="m-buy"><span class="m-price">199 €</span><span class="m-cta m-cta--muted">Сообщить о наличии</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">мало</span></span>
+  <span class="m-kick">Creed</span>
+  <span class="m-name">Aventus Cologne — парфюм</span>
+  <span class="m-buy"><span class="m-price">185 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/tom-ford-tobacco-vanille-eau-de-parfum-50ml-0.webp" alt="" loading="lazy" class="m-full"><span class="m-badge">нет в наличии</span></span>
+  <span class="m-kick">Tom Ford</span>
+  <span class="m-name">Tobacco Vanille Eau de Parfum — парфюм</span>
+  <span class="m-buy"><span class="m-price">185 €</span><span class="m-cta m-cta--muted">Сообщить о наличии</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">мало</span></span>
+  <span class="m-kick">Versace</span>
+  <span class="m-name">Man Fraiche Eau de Toilette for Men — парфюм</span>
+  <span class="m-buy"><span class="m-price">65 €</span><span class="m-cta">В корзину</span></span>
+</div></div>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «набор парфюма»</figcaption>
+</figure>
+      </div>
+      <div class="case">
+        <h3>Наборы выключены в панели</h3>
+        <p>Если Ренат выключит «Наборы на сайте», поиск говорит то же, что страница «Наборы», и ведёт в разделы.</p>
+        <figure class="dev dev--phone" id="s-e2">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · поиск «наборы», когда наборы выключены">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">наборы</div>
+        <div class="m-empty"><p><b>Наборы сейчас недоступны.</b></p><p>Посмотрите категории:</p>
+<ul class="m-cats"><li>Уход за волосами</li><li>Стайлинг</li><li>Уход за бородой</li><li>Уход за лицом</li></ul></div>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · поиск «наборы», когда наборы выключены</figcaption>
+</figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="pp-h">
+  <div class="wrap">
+    <div class="pair">
+      <div class="case">
+        <p class="eyebrow" style="justify-self:stretch;margin:0">Делаем вместе с поиском</p>
+        <h2 id="pp-h" style="justify-self:stretch">«Входит в наборы» на странице товара</h2>
+        <p>Под кнопкой покупки — наборы, в которых есть этот товар, с ценой и выгодой. Именно здесь покупатель сравнивает один товар с набором. Новый блок обведён синим пунктиром.</p>
+        <figure class="dev dev--phone" id="s-pp">
+  
+  <div class="dev__screen" role="img" aria-label="Телефон · страница товара Barberism® Beard Oil — масло">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        
+        <p class="m-crumbs">Главная / Уход за бородой / Captain Fawcett</p>
+<div class="m-pimg"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy"></div>
+<p class="m-kick">Captain Fawcett</p>
+<p class="m-ptitle">Barberism® Beard Oil — масло</p>
+<p class="m-pprice">17 €</p>
+<p class="m-tax">Налоги включены. Доставка рассчитается при оформлении.</p>
+<span class="m-btn">В корзину</span>
+<div class="m-in new">
+  <p class="m-in__h">Входит в наборы</p>
+  <div class="m-in__row"><span class="m-in__img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"></span>
+    <span class="m-in__txt"><span class="m-kick">Набор</span><span class="m-name">Captain Fawcett Barberism — борода и усы</span><span class="m-price">52,64 €<s>56 €</s> <em>выгода 3,36 €</em></span></span></div><div class="m-in__row"><span class="m-in__img"><img src="/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/rough-rider-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"></span>
+    <span class="m-in__txt"><span class="m-kick">Набор</span><span class="m-name">Мужчина: мытьё, укладка, борода</span><span class="m-price">62,04 €<s>66 €</s> <em>выгода 3,96 €</em></span></span></div>
+</div>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · страница товара Barberism® Beard Oil — масло</figcaption>
+</figure>
+      </div>
+      <div class="case">
+        <p class="eyebrow" style="justify-self:stretch;margin:0">Не делаем</p>
+        <h2 style="justify-self:stretch">Вариант A — наборы вперемешку</h2>
+        <p>Набор за 47,47 € совпадает с маслом за 15 € одним словом и попадает в первые карточки. Человек искал масло, а видит наборы через каждые две карточки.</p>
+        <figure class="dev dev--phone" id="s-a">
+  <p class="note note--no"><b>Не делаем.</b>&nbsp;Красным отмечены наборы, которые попали бы в список масел.</p>
+  <div class="dev__screen" role="img" aria-label="Телефон · вариант A, поиск «beard oil» (не рекомендую)">
+    <div class="m">
+      <div class="m-head">
+        <div class="m-head__row"><span class="m-logo"><svg viewBox="292.24 171.22 265.18 409.8" class="m-logo__svg" fill="currentColor" aria-hidden="true"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></svg><span class="m-logo__word">Rempire</span></span><span class="m-lang">RU</span></div>
+        <div class="m-nav"><span>Все товары</span><span>Уход за волосами</span><span>Стайлинг</span><span>Уход за бородой</span><span>Наборы</span></div>
+      </div>
+      <div class="m-main">
+        <p class="m-h1">Поиск</p><div class="m-q">beard oil</div>
+        <div class="m-meta"><span>19 результатов</span></div><div class="m-grid"><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=5" alt="" loading="lazy" class="m-full"><span class="m-badge">нет в наличии</span></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Private Stock — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">16,50 €</span><span class="m-cta m-cta--muted">Сообщить о наличии</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Azur Lime — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Борода — стартовый набор</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарочный набор Rempire</span>
+  <span class="m-buy"><span class="m-price">49,82 €<s>53 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Green Refreshing — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Cypress Vetyver — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Barberism — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-moustache-wax-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Captain Fawcett Booze &amp; Baccy — борода и усы</span>
+  <span class="m-buy"><span class="m-price">52,64 €<s>56 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Proraso</span>
+  <span class="m-name">Beard Oil Wood Spice — масло для бороды</span>
+  <span class="m-buy"><span class="m-price">15 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Davines</span>
+  <span class="m-name">Pasta&amp;Love Pre-Shaving &amp; Beard Oil</span>
+  <span class="m-buy"><span class="m-price">22 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/rough-rider-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Мужчина: мытьё, укладка, борода</span>
+  <span class="m-buy"><span class="m-price">62,04 €<s>66 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/davines-softening-shaving-gel-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Бритьё без раздражения</span>
+  <span class="m-buy"><span class="m-price">55,93 €<s>59,50 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Maharajah Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Nebula John Petrucci Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card m-card--flag">
+  <span class="m-img"><img src="/shop/img/davines-hair-beard-body-wash-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--0"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--1"><img src="/shop/img/handmade-soap-666-0.webp?v=5" alt="" loading="lazy" class="m-st m-st--2"><span class="m-pct">−6 %</span><span class="m-flag">набор</span></span>
+  <span class="m-kick">Набор</span>
+  <span class="m-name">Подарок мужчине</span>
+  <span class="m-buy"><span class="m-price">47,47 €<s>50,50 €</s></span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Barberism® Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Ricki Hall Booze &amp; Baccy Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">Rufus Hound Triumphant Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div><div class="m-card">
+  <span class="m-img"><img src="/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=5" alt="" loading="lazy" class="m-full"></span>
+  <span class="m-kick">Captain Fawcett</span>
+  <span class="m-name">The Gentleman's Tipple Whisky Beard Oil — масло</span>
+  <span class="m-buy"><span class="m-price">17 €</span><span class="m-cta">В корзину</span></span>
+</div></div>
+      </div>
+      <div class="m-tabs"><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>Главная</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/></svg>Каталог</span><span class="m-tab is-on"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Поиск</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Кабинет</span><span class="m-tab"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Корзина</span></div>
+    </div>
+  </div>
+  <figcaption>Телефон · вариант A, поиск «beard oil» (не рекомендую)</figcaption>
+</figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="sum-h">
+  <div class="wrap">
+    <p class="eyebrow">Итог</p>
+    <h2 id="sum-h">Что решаем</h2>
+    <div class="cols">
+      <div class="col col--no"><h3>Не делаем</h3><p>Вариант A — наборы вперемешку с товарами. Он прячет то, что человек искал, за дорогими карточками.</p></div>
+      <div class="col col--yes"><h3>Делаем вместе с поиском</h3><p>Блок «Входит в наборы» на странице товара, под кнопкой покупки.</p></div>
+      <div class="col col--one"><h3>Один список</h3><p>Поиск берёт те же 37 наборов, что и страница «Наборы»: если Ренат изменит или выключит набор, это сразу видно в обоих местах.</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="endnote"><div class="wrap">
+  <p>Все наборы, цены и фото на экранах взяты из магазина 07.11.2026. Это картинки: строка поиска и кнопки здесь не работают, и сюда не ведёт ни одна ссылка с rempireshop.com.</p>
+  <p>Ничего из этого ещё не сделано и не выложено на сайт.</p>
+</div></footer>
+</body>
+</html>

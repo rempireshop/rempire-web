@@ -6,7 +6,7 @@
  * rule does nothing at all. Resolved the way Next resolves next.config.ts's
  * redirects — the same matcher, host test and destination compiler.
  */
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
@@ -73,7 +73,7 @@ describe("Dim's own domain carries the handover page only", () => {
     for (const path of [
       "/handover", "/admin", "/admin?order=R-1001", "/admin/scan", "/shop2/admin/", "/api/golive/", "/api/admin/session/",
       "/api/shipping/notify/", "/api/payments/notify/", "/_next/static/chunks/x.js", "/shop2/app.js",
-      "/shop2/admin.webmanifest", "/shop2/admin-sw.js", "/golive/index.html", "/icon.svg", "/robots.txt",
+      "/shop2/admin.webmanifest", "/shop2/admin-sw.js", "/golive/index.html", "/golive/sets-search.html", "/icon.svg", "/robots.txt",
     ]) {
       expect(await resolve(DIM + path), path).toBeNull();
     }
@@ -94,7 +94,7 @@ describe("the go-live file behind /handover", () => {
     for (const origin of ["https://rempireshop.com", "https://www.rempireshop.com", "https://rempire-web.vercel.app"]) {
       /* /golive/ never gets this far: the middleware moves the slash first,
          to /golive */
-      for (const path of ["/golive", "/golive/index.html", "/golive/handover.html"]) {
+      for (const path of ["/golive", "/golive/index.html", "/golive/handover.html", "/golive/sets-search.html"]) {
         expect(await beforeFiles(origin + path), origin + path).toBe("/golive-gone");
       }
     }
@@ -112,10 +112,32 @@ describe("the go-live file behind /handover", () => {
   it("is left to the file on Dim's address, and nothing else is touched", async () => {
     for (const url of [
       "https://rempireshop.diipsolutions.eu/golive/index.html", "https://www.rempireshop.diipsolutions.eu/golive/index.html",
+      "https://rempireshop.diipsolutions.eu/golive/sets-search.html",
       "https://rempireshop.diipsolutions.eu/handover", "https://rempireshop.com/handover", "https://rempireshop.com/",
       "https://rempireshop.com/shop2/app.js", "https://rempireshop.com/brand/og-golive.png",
     ]) {
       expect(await beforeFiles(url), url).toBeNull();
+    }
+  });
+});
+
+/* /golive/sets-search.html — Dim's «Наборы в поиске» proposal (07.11.2026), a
+   picture of search screens drawn from the live sets. It rides the go-live
+   folder's host rule above, so it exists on his address only; and it must stay
+   a picture: a working search box there would put test queries into Renat's
+   search report. */
+describe("the sets-in-search proposal page", () => {
+  const doc = readFileSync(path.join(__dirname, "..", "public", "golive", "sets-search.html"), "utf8");
+
+  it("runs nothing and asks for nothing", () => {
+    expect(doc).not.toMatch(/<script/i);
+    expect(doc).not.toMatch(/<(?:input|form|textarea|select|button)\b/i);
+  });
+
+  it("stays out of search engines and loads only the shop's pictures and the fonts", () => {
+    expect(doc).toContain('<meta name="robots" content="noindex, nofollow">');
+    for (const m of doc.matchAll(/(?:src|href)="([^"]+)"/g)) {
+      expect(m[1], m[1]).toMatch(/^(?:\/shop\/img\/|#|https:\/\/fonts\.(?:googleapis|gstatic)\.com)/);
     }
   });
 });
