@@ -553,13 +553,18 @@ const missing = untranslated.filter((r) => !r.why);
 const kept = untranslated.filter((r) => r.why);
 const args = process.argv.slice(2);
 if (args.includes("--json")) {
-  console.log(JSON.stringify({
+  /* No process.exit() after it: on a Linux pipe stdout drains
+     asynchronously, and exiting at once cut `--json --all` (a megabyte) off
+     mid-string — the CI run of 2392a269, 09.11.2026. Windows pipes write
+     synchronously, so it never showed locally. The report below is skipped
+     by the guard instead, and node exits once the write has drained. */
+  process.stdout.write(JSON.stringify({
     total: rows.length, missing: missing.length, intentional: kept.length,
     rows: args.includes("--all") ? rows : missing,
-  }, null, 2));
-  process.exit(0);
-}
+  }, null, 2) + "\n");
+} else report();
 
+function report() {
 const show = args.includes("--all") ? rows : missing;
 const byRegion = new Map();
 for (const r of show) {
@@ -598,3 +603,4 @@ for (const lang of ["ET", "EN"]) {
 const gap = [...dict.et].filter((k) => !dict.en.has(k)).concat([...dict.en].filter((k) => !dict.et.has(k)));
 console.log(`\nET/EN key parity: ${gap.length ? "MISMATCH — " + gap.join(" | ") : "ok (identical key sets)"}`);
 if (!missing.length) console.log("No untranslated interface strings.");
+}
