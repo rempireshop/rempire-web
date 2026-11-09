@@ -313,6 +313,15 @@ const INTENTIONAL = [
   // r16, «Журнал изменений»: the one tail of a journal line with no hole in
   // it, so the ASSEMBLED list below (which keys off the hole) cannot see it
   [/заголовок и описание для Google$/, "tail of «Черновик статьи «…» · …» — rule /^Черновик статьи «(.+)»(.*)$/"],
+  /* 09.11.2026 — the «Новая статья» from materials round (02.11). */
+  [/^(страна|страны|стран|страну|страница|страницы|страниц|фраза не нашлась|фразы не нашлись|фраз не нашлись)$/,
+    "plural word form — pl()/dlvForm() glue it to a number, the composed string is translated"],
+  [/^без картинок$/, "tail of bnewItemNote()'s line — rules /^(\\d+) страниц… · без картинок$/ and the key «PDF · без картинок»"],
+  [/^Образец: «$/, "a text material's name (bnewAddText) — stored with the material, shown data-notr like a file name"],
+  [/^\u0001 фото$/, "a several-photo material's name (bnewAddPhotos, admPhotosToArticle) — stored with it, shown data-notr like a file name"],
+  [/^\[Прикрепил файлы: /, "the chat history the model reads (admConvo) — never painted"],
+  [/^Сохранил в материалы блога: \u0001\. Написать по ним/, "the chat history the model reads (admConvo) — never painted"],
+  [/^A-ZÀ-ÖØ-ÞŠŽА-ЯЁ$/, "a character class kept as a string (DESC_UPPER) — a matcher, never shown"],
 ];
 /* Fragments that are only half of a string the shop assembles at runtime: the
    extractor cuts at the string-literal boundary, the browser does not. Each
@@ -371,6 +380,19 @@ const ASSEMBLED = [
      at the string-literal boundary, which the browser never sees. */
   [/^\nФото появится на странице товара/, "first half of «Фото появится на странице товара… Отменить можно в журнале.» — its own rule"],
   [/^\. Отменить можно в журнале\.$/, "tail of that same line — same rule"],
+  /* 09.11.2026. Each half below was checked against the rule that reads the
+     whole node; the call or ternary between the halves is what cuts them. */
+  [/^Ещё $/, "half of «Ещё 21 страна ЕС» (deliveryPageHTML) — rule /^Ещё (\\d+) стран[аы]? ЕС$/"],
+  [/^ ЕС$/, "tail of that same line — same rule"],
+  [/^Отправляем из Таллинна по Эстонии, в Латвию, Литву, Финляндию и ещё $/,
+    "deliveryPageHTML's intro — rules /^Отправляем из Таллинна … и ещё (\\d+) стран[уы]? ЕС\\. Ниже — …$/"],
+  [/^ ЕС\. Ниже — способы доставки/, "tail of that intro — same rules"],
+  [/^(убрать|вернуть|Строка брендов:) $/, "homeBrandsActionText()'s line — rules /^Строка брендов: (убрать|вернуть) (.+)$/ and the pair"],
+  [/^\s*—\s+из\s*$/, "heroArrowLabel()'s «Следующий баннер — 2 из 5» — rule /^(Предыдущий баннер|…) — (\\d+) из (\\d+)$/"],
+  [/^картинок: $/, "half of bnewItemNote()'s line — rules /^(\\d+) страниц… · картинок: (\\d+)$/ and /^PDF · картинок: (\\d+)$/"],
+  [/^ · страниц с фото: $/, "bnewPickNote()'s line — rules /^(\\d+) страниц… · страниц с фото: (\\d+) · отмечено: (\\d+)$/"],
+  [/^ в материалах — отмечены жёлтым в тексте/, "bnewUnsureText()'s line — rules /^(\\d+) фраз… в материалах — …$/"],
+  [/aria-label="(Фото из материалов|Товары на бежевом)"/, "a cover button cut at its ternary — the aria-label itself is a key"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;
@@ -421,6 +443,16 @@ const INTENTIONAL_FNS = {
   MONTH_RU: "month names for monthLabelRu(), consumed only by the exempted actionText() above",
   // …and the word each review status gets in that same journal line
   REVIEW_STATE_WORD: "the three status words actionText() splices into a journal line — same decision",
+  // the RU branch of a per-language table: its ET and EN branches sit beside it
+  seoCopy: "seoCopy()'s RU branch — the page titles, descriptions and alias of the Russian shop; ET and EN have their own",
+  // word lists the materials writer matches a PDF page's text against (bnewStems)
+  BNEW_STOP: "stop words bnewStems() drops from a topic — matching only, never shown",
+  BNEW_GENERIC: "stems every catalogue page says, so they pick no page — matching only, never shown",
+  BNEW_BRAND_CYR: "Cyrillic spellings of a brand, dropped from a topic — matching only, never shown",
+  trName: "trName()'s own product-name rows — each row carries its ET and EN",
+  seoShouty: "regex sources seoShouty() builds its matchers from — never shown",
+  // a PDF photo's caption: it goes into the Russian article under the picture
+  bnewPair: "a PDF photo page's caption (bnewPair) — written into the Russian article, shown data-notr",
 };
 function intentional(text, fn) {
   if (INTENTIONAL_FNS[fn]) return INTENTIONAL_FNS[fn];

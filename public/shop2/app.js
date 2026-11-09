@@ -3882,6 +3882,103 @@
       "Набор ещё не сохранён — черновик просто исчезнет.": "Komplekt pole veel salvestatud — mustand lihtsalt kaob.",
       "Черновик удалён": "Mustand kustutatud",
       "Товар убран из набора": "Toode eemaldati komplektist",
+      // 09.11.2026 — «Новая статья» from materials, the Помощник's file answers, the ads fold, the journal
+      "Товары в статье — вверху покажем первые 8, внизу все карточками": "Artikli tooted — üleval näitame esimest 8, all kõiki kaartidena",
+      "Товары в статье — покажем вверху статьи и карточками внизу": "Artikli tooted — näitame artikli üleval ja kaartidena all",
+      "На главной блога уже три статьи — снимите одну, чтобы поставить эту.": "Blogi avalehel on juba kolm artiklit — võtke üks maha, et see sinna panna.",
+      "Подобрана по тексту и товарам — выберите свою, если не та.": "Valitud teksti ja toodete järgi — valige oma, kui see ei sobi.",
+      "На главной блога": "Blogi avalehel",
+      "Большая статья наверху блога.": "Suur artikkel blogi üleval.",
+      "Наверху блога уже три статьи — одновременно больше нельзя.": "Blogi üleval on juba kolm artiklit — rohkem korraga ei saa.",
+      "Большая статья наверху блога — до трёх одновременно.": "Suur artikkel blogi üleval — kuni kolm korraga.",
+      "Показать в статье, из чего она написана": "Näita artiklis, millest see on kirjutatud",
+      "Из чего написана — только названия, файлы читателю не видны": "Millest kirjutatud — ainult nimetused, faile lugeja ei näe",
+      "Буклет Kevin.Murphy, PDF": "Kevin.Murphy brošüür, PDF",
+      "+ Строка": "+ Rida",
+      "Пока нет ни одной строки — в статье ничего не покажется.": "Ühtegi rida veel pole — artiklis ei näidata midagi.",
+      "Материалы": "Materjalid",
+      "О чём статья": "Millest artikkel räägib",
+      "Тонкие окрашенные волосы без объёма: какую линию Kevin.Murphy брать и как ухаживать зимой": "Peenikesed värvitud juuksed ilma kohevuseta: millist Kevin.Murphy sarja valida ja kuidas talvel hooldada",
+      "PDF / файл": "PDF / fail",
+      "Текст / образец": "Tekst / näidis",
+      "Добавлено": "Lisatud",
+      "Готово — файлы в материалах блога. Вернитесь в чат с Claude и напишите: «готово».": "Valmis — failid on blogi materjalides. Minge tagasi Claude'i vestlusse ja kirjutage: «valmis».",
+      "Нажмите «PDF / файл» или «Фото» и выберите файлы. У PDF отметьте фото для статьи и нажмите «Готово». Потом вернитесь в чат с Claude и напишите: «готово».": "Vajutage «PDF / fail» või «Fotod» ja valige failid. PDF-is märkige artikli fotod ja vajutage «Valmis». Siis minge tagasi Claude'i vestlusse ja kirjutage: «valmis».",
+      "Пишу черновик…": "Kirjutan mustandit…",
+      "Пишу по-русски, потом переведу на ET и EN. Около минуты — не закрывайте страницу.": "Kirjutan vene keeles, siis tõlgin ET ja EN keelde. Umbes minut — ärge sulgege lehte.",
+      "Дождитесь, пока материалы загрузятся.": "Oodake, kuni materjalid on üles laaditud.",
+      "ИИ напишет на RU, ET и EN, подберёт товары магазина и картинки из материалов. Около минуты. Ничего не публикуется само.": "AI kirjutab RU, ET ja EN keeles ning valib poe tooted ja materjalide pildid. Umbes minut. Midagi ei avaldata iseenesest.",
+      "Писать самому, без материалов": "Kirjutan ise, ilma materjalideta",
+      "Отметьте страницы с фото, которые пригодятся в статье. Подпись — заголовок страницы перед фото.": "Märkige fotodega lehed, mida artiklis vaja läheb. Allkiri on foto eelse lehe pealkiri.",
+      "Отметить по теме": "Märgi teema järgi",
+      "Вставьте текст — заметки, статью, описание": "Kleepige tekst — märkmed, artikkel, kirjeldus",
+      "Это образец — писать так же: тон и длина": "See on näidis — kirjutada samamoodi: toon ja pikkus",
+      "Из библиотеки — материалы прошлых статей": "Raamatukogust — varasemate artiklite materjalid",
+      "В библиотеке пока ничего нет.": "Raamatukogus pole veel midagi.",
+      "в статье": "artiklis",
+      "Удалить материал?": "Kustutada materjal?",
+      "Статьи, уже написанные по нему, не изменятся.": "Selle põhjal juba kirjutatud artiklid ei muutu.",
+      "Материал удалён": "Materjal kustutatud",
+      "Не получилось удалить — попробуйте ещё раз.": "Kustutamine ei õnnestunud — proovige uuesti.",
+      "Вставьте адрес страницы — он начинается с https://": "Kleepige lehe aadress — see algab https://",
+      "Вставьте текст — хотя бы пару предложений.": "Kleepige tekst — vähemalt paar lauset.",
+      "Это не PDF — выберите файл .pdf": "See pole PDF — valige .pdf fail",
+      "Открываю PDF…": "Avan PDF-i…",
+      "PDF · без картинок": "PDF · pilte pole",
+      "страница прочитана": "leht loetud",
+      "образец — писать так же: тон и длина": "näidis — kirjutada samamoodi: toon ja pikkus",
+      "текст": "tekst",
+      "Сохраняю текст…": "Salvestan teksti…",
+      "Загружаю фото…": "Laadin fotosid üles…",
+      "Читаю страницу…": "Loen lehte…",
+      "Нужен адрес, который начинается с https://": "Vaja on aadressi, mis algab https://",
+      "Этот адрес читать нельзя — только открытые страницы в интернете.": "Seda aadressi ei saa lugeda — ainult avalikke lehti internetis.",
+      "Файл по ссылке слишком большой: страница — до 2 МБ, PDF — до 20 МБ, фото — до 12 МБ.": "Lingi taga olev fail on liiga suur: leht — kuni 2 MB, PDF — kuni 20 MB, foto — kuni 12 MB.",
+      "По этой ссылке не страница, не PDF и не фото.": "Selle lingi taga pole leht, PDF ega foto.",
+      "PDF защищён паролем — его не прочитать.": "PDF on parooliga kaitstud — seda ei saa lugeda.",
+      "В этом PDF нет текста, который можно прочитать (похоже на скан).": "Selles PDF-is pole loetavat teksti (paistab olevat skaneering).",
+      "PDF не получилось прочитать.": "PDF-i ei õnnestunud lugeda.",
+      "Фото сохранить нельзя: хранилище фото не подключено.": "Fotot ei saa salvestada: fotode hoidla pole ühendatud.",
+      "Фото по ссылке не получилось прочитать.": "Lingi taga olevat fotot ei õnnestunud lugeda.",
+      "Страницу не получилось прочитать.": "Lehte ei õnnestunud lugeda.",
+      "Нет связи — попробуйте ещё раз.": "Ühendus puudub — proovige uuesti.",
+      "Не получилось прочитать PDF — попробуйте другой файл.": "PDF-i ei õnnestunud lugeda — proovige teist faili.",
+      "Картинка слишком большая для загрузки.": "Pilt on üleslaadimiseks liiga suur.",
+      "Не получилось загрузить картинки — попробуйте ещё раз.": "Pilte ei õnnestunud üles laadida — proovige uuesti.",
+      "Фото сюда загрузить нельзя: хранилище фото не подключено.": "Fotosid ei saa siia üles laadida: fotode hoidla pole ühendatud.",
+      "Фото сюда загрузить нельзя: хранилище не подключено.": "Fotosid ei saa siia üles laadida: hoidla pole ühendatud.",
+      "Не получилось загрузить фото — попробуйте ещё раз.": "Fotosid ei õnnestunud üles laadida — proovige uuesti.",
+      "Не получилось сохранить PDF — попробуйте ещё раз.": "PDF-i ei õnnestunud salvestada — proovige uuesti.",
+      "Не получилось сохранить фото — попробуйте ещё раз.": "Fotosid ei õnnestunud salvestada — proovige uuesti.",
+      "Обложка — выберите": "Kaanepilt — valige",
+      "Фото из материалов": "Foto materjalidest",
+      "Нет фото": "Fotot pole",
+      "Товары на бежевом": "Tooted beežil taustal",
+      "Только заголовок": "Ainult pealkiri",
+      "Перевод не получился.": "Tõlge ei õnnestunud.",
+      "Переводим…": "Tõlgime…",
+      "— под заголовком «": "— pealkirja all: «",
+      "Открыть весь текст в редакторе": "Ava kogu tekst redaktoris",
+      "+ товар": "+ toode",
+      "Помощник в чате будет советовать именно эти товары, когда клиент спросит о теме статьи.": "Vestluse abiline soovitab just neid tooteid, kui klient küsib artikli teema kohta.",
+      "Так статью увидят в магазине": "Nii näevad artiklit poes",
+      "Сохранено": "Salvestatud",
+      "Черновик не дописался до конца — попробуйте ещё раз.": "Mustand ei saanud lõpuni kirjutatud — proovige uuesti.",
+      "Добавьте хотя бы один материал.": "Lisage vähemalt üks materjal.",
+      "Не получилось — попробуйте ещё раз.": "Ei õnnestunud — proovige uuesti.",
+      "Не получилось собрать обложку — выберите другую.": "Kaanepilti ei õnnestunud kokku panna — valige teine.",
+      "Сохранил в материалы блога:": "Salvestasin blogi materjalidesse:",
+      "Фото из PDF возьму по теме статьи.": "PDF-i fotod valin artikli teema järgi.",
+      "Написать по ним статью? Будет черновик — ничего не публикуется само.": "Kas kirjutan nende põhjal artikli? Tuleb mustand — midagi ei avaldata iseenesest.",
+      "Написать по нему статью? Будет черновик — ничего не публикуется само.": "Kas kirjutan selle põhjal artikli? Tuleb mustand — midagi ei avaldata iseenesest.",
+      "Это фото для товара": "See foto on toote jaoks",
+      "Реклама: переходы и заказы": "Reklaam: külastused ja tellimused",
+      "Сколько человек пришло по вашей рекламе в Google и ChatGPT и сколько из них оплатили заказ. Считаются только гости, которые разрешили статистику, и заказы, оплаченные в той же вкладке, — настоящих заказов может быть больше. Сколько потрачено на рекламу, видно в кабинетах Google и ChatGPT.": "Mitu inimest tuli teie Google'i ja ChatGPT reklaamist ja mitu neist maksis tellimuse eest. Arvesse lähevad ainult külastajad, kes lubasid statistikat, ja samas vahekaardis makstud tellimused — tegelikke tellimusi võib olla rohkem. Reklaami kulu näete Google'i ja ChatGPT reklaamikontodes.",
+      "Реклама Google": "Google'i reklaam",
+      "Реклама ChatGPT": "ChatGPT reklaam",
+      "Слишком много товаров скрыто за минуту — этот не скрыт. Проверьте список и попробуйте через минуту.": "Minuti jooksul on peidetud liiga palju tooteid — seda ei peidetud. Kontrollige nimekirja ja proovige minuti pärast uuesti.",
+      "без подраздела": "ilma alajaotiseta",
+      "Черновик по-русски из фактов материалов, их картинки под нужными заголовками, товары магазина — потом на эстонском и английском. Ничего не публикуется само.": "Mustand vene keeles materjalide faktidest, nende pildid õigete pealkirjade all, poe tooted — siis eesti ja inglise keeles. Midagi ei avaldata iseenesest.",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -7610,12 +7707,156 @@
       "Набор ещё не сохранён — черновик просто исчезнет.": "The set isn't saved yet — the draft simply goes.",
       "Черновик удалён": "Draft deleted",
       "Товар убран из набора": "Product taken out of the set",
+      // 09.11.2026 — «Новая статья» from materials, the Помощник's file answers, the ads fold, the journal
+      "Товары в статье — вверху покажем первые 8, внизу все карточками": "Products in the article — the first 8 at the top, all of them as cards at the bottom",
+      "Товары в статье — покажем вверху статьи и карточками внизу": "Products in the article — shown at the top of the article and as cards at the bottom",
+      "На главной блога уже три статьи — снимите одну, чтобы поставить эту.": "The blog's front page already has three articles — take one off to put this one there.",
+      "Подобрана по тексту и товарам — выберите свою, если не та.": "Picked from the text and the products — choose your own if it is wrong.",
+      "На главной блога": "On the blog's front page",
+      "Большая статья наверху блога.": "A big article at the top of the blog.",
+      "Наверху блога уже три статьи — одновременно больше нельзя.": "The top of the blog already has three articles — no more at once.",
+      "Большая статья наверху блога — до трёх одновременно.": "A big article at the top of the blog — up to three at once.",
+      "Показать в статье, из чего она написана": "Show in the article what it was written from",
+      "Из чего написана — только названия, файлы читателю не видны": "Written from — names only, readers do not see the files",
+      "Буклет Kevin.Murphy, PDF": "Kevin.Murphy booklet, PDF",
+      "+ Строка": "+ Line",
+      "Пока нет ни одной строки — в статье ничего не покажется.": "No lines yet — nothing will show in the article.",
+      "Материалы": "Materials",
+      "О чём статья": "What the article is about",
+      "Тонкие окрашенные волосы без объёма: какую линию Kevin.Murphy брать и как ухаживать зимой": "Fine coloured hair with no volume: which Kevin.Murphy line to take and how to care for it in winter",
+      "PDF / файл": "PDF / file",
+      "Текст / образец": "Text / sample",
+      "Добавлено": "Added",
+      "Готово — файлы в материалах блога. Вернитесь в чат с Claude и напишите: «готово».": "Done — the files are in the blog materials. Go back to the chat with Claude and write: “done”.",
+      "Нажмите «PDF / файл» или «Фото» и выберите файлы. У PDF отметьте фото для статьи и нажмите «Готово». Потом вернитесь в чат с Claude и напишите: «готово».": "Press “PDF / file” or “Photos” and choose the files. In a PDF, tick the photos for the article and press “Done”. Then go back to the chat with Claude and write: “done”.",
+      "Пишу черновик…": "Writing the draft…",
+      "Пишу по-русски, потом переведу на ET и EN. Около минуты — не закрывайте страницу.": "Writing in Russian, then translating into ET and EN. About a minute — do not close the page.",
+      "Дождитесь, пока материалы загрузятся.": "Wait until the materials have loaded.",
+      "ИИ напишет на RU, ET и EN, подберёт товары магазина и картинки из материалов. Около минуты. Ничего не публикуется само.": "The AI writes in RU, ET and EN and picks the shop's products and pictures from the materials. About a minute. Nothing is published by itself.",
+      "Писать самому, без материалов": "Write it myself, without materials",
+      "Отметьте страницы с фото, которые пригодятся в статье. Подпись — заголовок страницы перед фото.": "Tick the pages with photos the article can use. The caption is the heading of the page before the photo.",
+      "Отметить по теме": "Tick by topic",
+      "Вставьте текст — заметки, статью, описание": "Paste the text — notes, an article, a description",
+      "Это образец — писать так же: тон и длина": "This is a sample — write the same way: tone and length",
+      "Из библиотеки — материалы прошлых статей": "From the library — materials of earlier articles",
+      "В библиотеке пока ничего нет.": "Nothing in the library yet.",
+      "в статье": "in the article",
+      "Удалить материал?": "Delete the material?",
+      "Статьи, уже написанные по нему, не изменятся.": "Articles already written from it will not change.",
+      "Материал удалён": "Material deleted",
+      "Не получилось удалить — попробуйте ещё раз.": "Could not delete it — try again.",
+      "Вставьте адрес страницы — он начинается с https://": "Paste the page address — it starts with https://",
+      "Вставьте текст — хотя бы пару предложений.": "Paste the text — at least a couple of sentences.",
+      "Это не PDF — выберите файл .pdf": "That is not a PDF — choose a .pdf file",
+      "Открываю PDF…": "Opening the PDF…",
+      "PDF · без картинок": "PDF · no pictures",
+      "страница прочитана": "page read",
+      "образец — писать так же: тон и длина": "sample — write the same way: tone and length",
+      "текст": "text",
+      "Сохраняю текст…": "Saving the text…",
+      "Загружаю фото…": "Uploading the photos…",
+      "Читаю страницу…": "Reading the page…",
+      "Нужен адрес, который начинается с https://": "The address has to start with https://",
+      "Этот адрес читать нельзя — только открытые страницы в интернете.": "This address cannot be read — only public pages on the internet.",
+      "Файл по ссылке слишком большой: страница — до 2 МБ, PDF — до 20 МБ, фото — до 12 МБ.": "The file at the link is too big: a page up to 2 MB, a PDF up to 20 MB, a photo up to 12 MB.",
+      "По этой ссылке не страница, не PDF и не фото.": "This link is not a page, a PDF or a photo.",
+      "PDF защищён паролем — его не прочитать.": "The PDF is password-protected — it cannot be read.",
+      "В этом PDF нет текста, который можно прочитать (похоже на скан).": "This PDF has no text that can be read (it looks like a scan).",
+      "PDF не получилось прочитать.": "Could not read the PDF.",
+      "Фото сохранить нельзя: хранилище фото не подключено.": "The photo cannot be saved: photo storage is not connected.",
+      "Фото по ссылке не получилось прочитать.": "Could not read the photo at the link.",
+      "Страницу не получилось прочитать.": "Could not read the page.",
+      "Нет связи — попробуйте ещё раз.": "No connection — try again.",
+      "Не получилось прочитать PDF — попробуйте другой файл.": "Could not read the PDF — try another file.",
+      "Картинка слишком большая для загрузки.": "The picture is too big to upload.",
+      "Не получилось загрузить картинки — попробуйте ещё раз.": "Could not upload the pictures — try again.",
+      "Фото сюда загрузить нельзя: хранилище фото не подключено.": "Photos cannot be uploaded here: photo storage is not connected.",
+      "Фото сюда загрузить нельзя: хранилище не подключено.": "Photos cannot be uploaded here: storage is not connected.",
+      "Не получилось загрузить фото — попробуйте ещё раз.": "Could not upload the photos — try again.",
+      "Не получилось сохранить PDF — попробуйте ещё раз.": "Could not save the PDF — try again.",
+      "Не получилось сохранить фото — попробуйте ещё раз.": "Could not save the photos — try again.",
+      "Обложка — выберите": "Cover — choose one",
+      "Фото из материалов": "A photo from the materials",
+      "Нет фото": "No photo",
+      "Товары на бежевом": "Products on beige",
+      "Только заголовок": "Title only",
+      "Перевод не получился.": "The translation did not work.",
+      "Переводим…": "Translating…",
+      "— под заголовком «": "— under the heading «",
+      "Открыть весь текст в редакторе": "Open the whole text in the editor",
+      "+ товар": "+ product",
+      "Помощник в чате будет советовать именно эти товары, когда клиент спросит о теме статьи.": "The chat assistant will recommend exactly these products when a customer asks about the article's topic.",
+      "Так статью увидят в магазине": "This is how the article will look in the shop",
+      "Сохранено": "Saved",
+      "Черновик не дописался до конца — попробуйте ещё раз.": "The draft was not finished — try again.",
+      "Добавьте хотя бы один материал.": "Add at least one material.",
+      "Не получилось — попробуйте ещё раз.": "That did not work — try again.",
+      "Не получилось собрать обложку — выберите другую.": "Could not make the cover — choose another.",
+      "Сохранил в материалы блога:": "Saved to the blog materials:",
+      "Фото из PDF возьму по теме статьи.": "I will take the photos from the PDF by the article's topic.",
+      "Написать по ним статью? Будет черновик — ничего не публикуется само.": "Shall I write an article from them? It will be a draft — nothing is published by itself.",
+      "Написать по нему статью? Будет черновик — ничего не публикуется само.": "Shall I write an article from it? It will be a draft — nothing is published by itself.",
+      "Это фото для товара": "This photo is for a product",
+      "Реклама: переходы и заказы": "Ads: visits and orders",
+      "Сколько человек пришло по вашей рекламе в Google и ChatGPT и сколько из них оплатили заказ. Считаются только гости, которые разрешили статистику, и заказы, оплаченные в той же вкладке, — настоящих заказов может быть больше. Сколько потрачено на рекламу, видно в кабинетах Google и ChatGPT.": "How many people came from your ads on Google and ChatGPT, and how many of them paid for an order. Only visitors who allowed statistics are counted, and only orders paid in the same tab — the real number of orders may be higher. What the ads cost is shown in the Google and ChatGPT ad accounts.",
+      "Реклама Google": "Google ads",
+      "Реклама ChatGPT": "ChatGPT ads",
+      "Слишком много товаров скрыто за минуту — этот не скрыт. Проверьте список и попробуйте через минуту.": "Too many products were hidden within a minute — this one was not. Check the list and try again in a minute.",
+      "без подраздела": "no subsection",
+      "Черновик по-русски из фактов материалов, их картинки под нужными заголовками, товары магазина — потом на эстонском и английском. Ничего не публикуется само.": "A draft in Russian from the facts in the materials, their pictures under the right headings, the shop's products — then in Estonian and English. Nothing is published by itself."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* 09.11.2026 (Dim: «I have admin in english … but I have russian
+       text here»): the lines «Новая статья» from materials (02.11), the
+       Помощник's file answers, the ads fold (05.11) and the pickup toast
+       (06.11) compose. They shipped with no ET/EN. tests/i18n-gaps-gate.test.ts
+       now fails on the next one. */
+    [/^Материал (\d+)$/, { ET: "Materjal $1", EN: "Material $1" }],
+    [/^1 страница · картинок: (\d+)$/, { ET: "1 lehekülg · pilte: $1", EN: "1 page · pictures: $1" }],
+    [/^(\d+) (?:страница|страницы|страниц) · картинок: (\d+)$/, { ET: "$1 lehekülge · pilte: $2", EN: "$1 pages · pictures: $2" }],
+    [/^1 страница · без картинок$/, { ET: "1 lehekülg · pilte pole", EN: "1 page · no pictures" }],
+    [/^(\d+) (?:страница|страницы|страниц) · без картинок$/, { ET: "$1 lehekülge · pilte pole", EN: "$1 pages · no pictures" }],
+    [/^PDF · картинок: (\d+)$/, { ET: "PDF · pilte: $1", EN: "PDF · pictures: $1" }],
+    [/^1 страница · страниц с фото: (\d+) · отмечено: (\d+)$/,
+      { ET: "1 lehekülg · fotoga lehti: $1 · märgitud: $2", EN: "1 page · pages with photos: $1 · ticked: $2" }],
+    [/^(\d+) (?:страница|страницы|страниц) · страниц с фото: (\d+) · отмечено: (\d+)$/,
+      { ET: "$1 lehekülge · fotoga lehti: $2 · märgitud: $3", EN: "$1 pages · pages with photos: $2 · ticked: $3" }],
+    [/^Читаю PDF: страница (\d+) из (\d+)$/, { ET: "Loen PDF-i: lehekülg $1 / $2", EN: "Reading the PDF: page $1 of $2" }],
+    [/^Загружаю картинки: (\d+) из (\d+)$/, { ET: "Laadin pilte üles: $1 / $2", EN: "Uploading pictures: $1 of $2" }],
+    [/^Загружаю фото: (\d+) из (\d+)$/, { ET: "Laadin fotosid üles: $1 / $2", EN: "Uploading photos: $1 of $2" }],
+    [/^1 фраза не нашлась в материалах — отмечены жёлтым в тексте\. Проверьте или уберите\.$/,
+      { ET: "1 fraas ei leidunud materjalidest — see on tekstis kollasega märgitud. Kontrollige või eemaldage.",
+        EN: "1 phrase was not found in the materials — it is marked yellow in the text. Check it or take it out." }],
+    [/^(\d+) (?:фраза не нашлась|фразы не нашлись|фраз не нашлись) в материалах — отмечены жёлтым в тексте\. Проверьте или уберите\.$/,
+      { ET: "$1 fraasi ei leidunud materjalidest — need on tekstis kollasega märgitud. Kontrollige või eemaldage.",
+        EN: "$1 phrases were not found in the materials — they are marked yellow in the text. Check them or take them out." }],
+    // a placed picture's line in step 2: «· стр. 3 — под заголовком «» around the heading's own node
+    [/^· стр\. (\d+) — под заголовком «$/, { ET: "· lk $1 — pealkirja all: «", EN: "· p. $1 — under the heading «" }],
+    [/^· стр\. (\d+)$/, { ET: "· lk $1", EN: "· p. $1" }],
+    [/^Товары статьи — (\d+)$/, { ET: "Artikli tooted — $1", EN: "Products in the article — $1" }],
+    [/^Материалов больше, чем помещается в один черновик: прочитано (\d+) тыс\. знаков из (\d+) тыс\. — страницы по теме и к отмеченным картинкам\.$/,
+      { ET: "Materjale on rohkem, kui ühte mustandisse mahub: loetud $1 tuhat märki $2 tuhandest — teemakohased lehed ja märgitud piltide lehed.",
+        EN: "There is more material than one draft holds: $1 thousand characters read out of $2 thousand — the pages on the topic and the ones with the ticked pictures." }],
+    [/^На главной блога уже три статьи: (.+)\. Снимите одну из них, чтобы поставить эту\.$/,
+      { ET: "Blogi avalehel on juba kolm artiklit: $1. Võtke üks neist maha, et see sinna panna.",
+        EN: "The blog's front page already has three articles: $1. Take one of them off to put this one there." }],
+    [/^📎 1 фото$/, { ET: "📎 1 foto", EN: "📎 1 photo" }],
+    [/^📎 (\d+) фото$/, { ET: "📎 $1 fotot", EN: "📎 $1 photos" }],
+    // «Реклама: переходы и заказы»: the row's value, and the fold's summary after the first row's name
+    [/^переходов (\d+) · заказов (\d+) · (.+)$/, { ET: "külastusi: $1 · tellimusi: $2 · $3", EN: "visits: $1 · orders: $2 · $3" }],
+    [/^переходов (\d+) · заказов (\d+)$/, { ET: "külastusi: $1 · tellimusi: $2", EN: "visits: $1 · orders: $2" }],
+    [/^· переходов (\d+) · заказов (\d+) · (.+)$/, { ET: "· külastusi: $1 · tellimusi: $2 · $3", EN: "· visits: $1 · orders: $2 · $3" }],
+    [/^· переходов (\d+) · заказов (\d+)$/, { ET: "· külastusi: $1 · tellimusi: $2", EN: "· visits: $1 · orders: $2" }],
+    [/^(.+) готов к выдаче · письмо уйдёт через 10 с$/,
+      { ET: "$1 valmis üleandmiseks · kiri läheb 10 s pärast", EN: "$1 ready for pickup · the letter leaves in 10 s" }],
+    [/^Подраздел «(.+)»: (.+)$/, { ET: "Alajaotis «$1»: $2", EN: "Subsection «$1»: $2" }],
+    [/^Новая статья из материалов \((\d+)\) на тему «(.+)»$/,
+      { ET: "Uus artikkel materjalidest ($1) teemal «$2»", EN: "A new article from the materials ($1) on «$2»" }],
+    [/^Новая статья из материалов \((\d+)\)$/, { ET: "Uus artikkel materjalidest ($1)", EN: "A new article from the materials ($1)" }],
     /* «Настройки», direction 1a (25.09.2026): the lines the pages compose —
        the index's device count, the folds' summaries, the rate cells, the
        hours, the journal's sign-ins, the report's months. */
@@ -27349,7 +27590,7 @@
       (list.some(function (a) { return a.err; })
         ? '<span class="adm-hint adm-hint--warn">' + esc(list.filter(function (a) { return a.err; })[0].err) + "</span>"
         : reading
-          ? '<span class="adm-hint" data-admattnote data-notr>' + esc(reading.note || "Открываю PDF…") + "</span>"
+          ? '<span class="adm-hint" data-admattnote>' + esc(reading.note || "Открываю PDF…") + "</span>"
           : list.some(function (a) { return a.busy; })
             ? '<span class="adm-hint">Загружаем фото…</span>'
             : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
@@ -27358,7 +27599,8 @@
   /** The line under the strip while a PDF is read — patched in place: a render per page would take the caret out of the box. */
   function admAttNotePaint(att) {
     var el = document.querySelector("[data-admattnote]");
-    if (el && att && att.busy) el.textContent = att.note || "";
+    // patched in place, so translated here — translateTree() does not run on it
+    if (el && att && att.busy) el.textContent = trText(att.note || "", S.lang);
   }
   /* Voice input for the question box (Dim, 10.09.2026). The browser's own
      speech recognition — Chrome on a desktop and on Android, Safari on an
@@ -29695,9 +29937,11 @@
     if (d.featured) { d.featured = false; blogAutosave("change"); render(); return; }
     var on = blogFeaturedOthers(d);
     if (on.length >= BLOG_FEATURED_MAX) {
-      toast("На главной блога уже три статьи: " + on.map(function (p) {
+      var names = on.map(function (p) {
         var t = p.title || {}; return "«" + (t.RU || t.ET || t.EN || p.slug) + "»";
-      }).join(", ") + ". Снимите одну из них, чтобы поставить эту.");
+      }).join(", ");
+      // one sentence around one hole: UI_RX reads the toast whole
+      toast("На главной блога уже три статьи: " + names + ". Снимите одну из них, чтобы поставить эту.");
       return;
     }
     d.featured = true; blogAutosave("change"); render();
@@ -30346,7 +30590,7 @@
       '<div class="adm-bnew__langs" role="tablist" aria-label="Язык">' + ["RU", "ET", "EN"].map(langTab).join("") + "</div>" +
       (st.tr[L] === "err" ? '<div class="adm-error"><span>Перевод не получился.</span><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-bnewtr="' + L + '">Повторить</button></div>' : "") +
       '<div class="adm-bnew__card">' +
-        '<span class="adm-bnew__title" data-notr>' + esc(p.title[L] || (st.tr[L] === "busy" ? "Переводим…" : p.title.RU)) + "</span>" +
+        '<span class="adm-bnew__title" data-notr>' + esc(p.title[L] || (st.tr[L] === "busy" ? trText("Переводим…", S.lang) : p.title.RU)) + "</span>" +
         '<span class="adm-bnew__lead" data-notr>' + esc(p.excerpt[L] || "") + "</span>" +
         pics.map(function (im) {
           var head = heads[im.url];
@@ -50325,8 +50569,8 @@
     // the short form — the model named a topic, the panel writes the article
     // «напиши статью из этого PDF» — the materials library's own writer (startDraftFromMaterials)
     if (a.type === "draft_from_materials") {
-      var nm = (a.materials || []).length;
-      return "Новая статья из материалов (" + nm + ")" + (txt(a.about) ? " на тему «" + txt(a.about) + "»" : "") +
+      var nm = (a.materials || []).length, about = txt(a.about);
+      return (about ? "Новая статья из материалов (" + nm + ") на тему «" + about + "»" : "Новая статья из материалов (" + nm + ")") +
         "\nЧерновик по-русски из фактов материалов, их картинки под нужными заголовками, товары магазина — потом на эстонском и английском. Ничего не публикуется само.";
     }
     if (a.type === "draft_post" && a.topic && !a.title) {
@@ -51445,7 +51689,7 @@
     var list = S.adminAtt || [];
     if (list.some(function (a) { return a.kind === "pdf" && a.busy; })) {
       S.adminHeldQ = q;
-      S.adminAns = { q: S.adminAsk, reply: "Сохраняю PDF в материалы блога — отвечу, как только он прочитается.", local: true };
+      S.adminAns = { q: S.adminAsk, reply: trText("Сохраняю PDF в материалы блога — отвечу, как только он прочитается.", S.lang), local: true };
       admPaintAnswer();
       return true;
     }
@@ -51456,7 +51700,7 @@
     var fresh = photos.filter(function (a) { return !a.use; });
     if (use === "" && fresh.length) {
       S.adminHeldQ = q;
-      S.adminAns = { q: S.adminAsk, reply: "Для чего эти фото?", local: true, choose: "photo" };
+      S.adminAns = { q: S.adminAsk, reply: trText("Для чего эти фото?", S.lang), local: true, choose: "photo" };
       admPaintAnswer();
       return true;
     }
@@ -51470,7 +51714,7 @@
   function admPhotosToArticle(photos, q) {
     photos.forEach(function (a) { a.use = "article"; a.busy = true; });
     S.adminHeldQ = q;
-    S.adminAns = { q: S.adminAsk, reply: "Сохраняю фото в материалы блога…", local: true };
+    S.adminAns = { q: S.adminAsk, reply: trText("Сохраняю фото в материалы блога…", S.lang), local: true };
     render();
     var files = photos.map(function (a) { return a.file; }).filter(Boolean);
     var item = bnewNewItem("image", files.length === 1 ? String(files[0].name || "Фото").slice(0, 200) : files.length + " фото");
@@ -51480,7 +51724,7 @@
       if (!m) {
         photos.forEach(function (a) { a.use = ""; });
         S.adminHeldQ = "";
-        S.adminAns = { q: S.adminAsk, reply: item.note || "Не получилось сохранить фото — попробуйте ещё раз.", local: true };
+        S.adminAns = { q: S.adminAsk, reply: trText(item.note || "Не получилось сохранить фото — попробуйте ещё раз.", S.lang), local: true };
         render();
         return;
       }
@@ -51543,10 +51787,13 @@
     if (!q && typeof admAskFlight !== "undefined" && admAskFlight) return;
     mats.forEach(function (x) { x.told = true; });
     var noPics = mats.some(function (x) { return x.kind === "pdf" && x.item && !(x.item.images || []).length && bnewPhotos(x.item).length; });
-    var reply = "Сохранил в материалы блога:\n" +
-      mats.map(function (x) { return "• «" + x.name + "» — " + bnewItemNote(x.item || { kind: x.kind, images: [] }); }).join("\n") + "\n" +
-      (noPics ? "Фото из PDF возьму по теме статьи. " : "") +
-      "Написать по " + (mats.length > 1 ? "ним" : "нему") + " статью? Будет черновик — ничего не публикуется само.";
+    // drawn data-notr like every answer (admReplyHTML), so put in the panel's language here
+    var T = function (t) { return trText(t, S.lang); };
+    var reply = T("Сохранил в материалы блога:") + "\n" +
+      mats.map(function (x) { return "• «" + x.name + "» — " + T(bnewItemNote(x.item || { kind: x.kind, images: [] })); }).join("\n") + "\n" +
+      (noPics ? T("Фото из PDF возьму по теме статьи.") + " " : "") +
+      T(mats.length > 1 ? "Написать по ним статью? Будет черновик — ничего не публикуется само."
+        : "Написать по нему статью? Будет черновик — ничего не публикуется само.");
     var label = q || "📎 " + mats.map(function (x) { return x.name; }).join(", ");
     S.adminAsk = label;
     // the model hears it too: «напиши статью по этому» next is about these — by

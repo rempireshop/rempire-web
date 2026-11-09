@@ -82,8 +82,12 @@ const tr = new Function("S", "LANG", `
 /* ---------- 1. the block reads in the panel's language ---------- */
 
 describe("«Описание» on an ET or EN panel — no Russian left in the block", () => {
-  type Row = { text: string; fn: string; lines: number[]; kind: string };
-  const gaps = JSON.parse(execFileSync(process.execPath, ["tools/i18n-gaps.mjs", "--json"], { cwd: ROOT, encoding: "utf8" })) as { rows: Row[] };
+  type Row = { text: string; fn: string; lines: number[]; kind: string; et: string | null; en: string | null; why: string | null };
+  /* --all: every Russian fragment the tool met, covered or not. Without it
+     the report lists the gaps only, and since 09.11.2026 there are none
+     (tests/i18n-gaps-gate.test.ts) — an empty list would prove nothing. */
+  const gaps = JSON.parse(execFileSync(process.execPath, ["tools/i18n-gaps.mjs", "--json", "--all"], { cwd: ROOT, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 })) as { rows: Row[] };
+  const missing = (r: Row) => (!r.et || !r.en) && !r.why;
   const FNS = new Set([
     "edSecDesc", "edDescBody", "edTrLabel", "edFmtBarHTML", "edDescPrevHTML", "edDescPrevPaint", "edDescShopHTML", "edDescShopOpen",
     "edDescSplitHTML", "edDescSplitPaint", "edDescSplitApply", "edDescSplitUndo", "edDescSplitCheck", "edFmt", "edFmtBold", "edFmtHead",
@@ -100,7 +104,7 @@ describe("«Описание» on an ET or EN panel — no Russian left in the b
     for (const f of FNS) expect(APP, f).toContain(`function ${f}(`);
   });
   it("tools/i18n-gaps.mjs finds nothing untranslated in it", () => {
-    const left = gaps.rows.filter((r) => FNS.has(r.fn) || r.lines.some((l) => l >= from && l <= to))
+    const left = gaps.rows.filter((r) => missing(r) && (FNS.has(r.fn) || r.lines.some((l) => l >= from && l <= to)))
       .map((r) => `${r.lines.join(",")} ${r.fn}: ${r.text.slice(0, 90)}`);
     expect(left).toEqual([]);
   });
