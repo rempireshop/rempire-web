@@ -250,7 +250,47 @@ async function slugExists(slug: string, excludeId?: string): Promise<boolean> {
   const rows = excludeId
     ? await query<{ n: number }>("select 1 as n from posts where slug = $1 and id <> $2 limit 1", [slug, excludeId])
     : await query<{ n: number }>("select 1 as n from posts where slug = $1 limit 1", [slug]);
-  return rows.length > 0;
+  if (rows.length > 0) return true;
+  /* An article's OLD address is taken too (migration 229): Google may still
+     rank it, and it must keep leading to that article — not to a new one that
+     happens to share the title. Its own old address an article may take back. */
+  const aliases = await aliasQuery<{ n: number }>(
+    excludeId
+      ? ["select 1 as n from post_slug_aliases where slug = $1 and post_id <> $2 limit 1", [slug, excludeId]]
+      : ["select 1 as n from post_slug_aliases where slug = $1 limit 1", [slug]],
+  );
+  return aliases.length > 0;
+}
+
+/**
+ * Every read and write of post_slug_aliases goes through here. A deploy
+ * applies migrations in `postbuild` and carries on when one fails, so the
+ * table can be missing for a while: then an old address answers 404 as it
+ * did before 229, and a save in the panel still saves — an article must never
+ * fail to save over a redirect.
+ */
+async function aliasQuery<T>([sql, params]: [string, unknown[]]): Promise<T[]> {
+  try {
+    return await query<T>(sql, params);
+  } catch (err) {
+    console.error("[blog] post_slug_aliases unavailable:", err);
+    return [];
+  }
+}
+
+/**
+ * The current slug of the published article that used to answer at `slug` —
+ * or null. Read only after `slug` itself found no published article, so a
+ * live article always wins over an old address that happens to match it.
+ */
+export async function getRenamedSlug(slug: string): Promise<string | null> {
+  const rows = await aliasQuery<{ slug: string }>([
+    `select p.slug from post_slug_aliases a join posts p on p.id = a.post_id
+     where a.slug = $1 and p.status = 'published' and p.deleted_at is null and p.slug <> $1
+     limit 1`,
+    [slug],
+  ]);
+  return rows[0]?.slug ?? null;
 }
 
 /** `base`, or `base-2`, `base-3`, … — the first one nobody else has. */
@@ -620,16 +660,20 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
   if ((!input.id || titleGiven) && !title.RU && !title.ET && !title.EN) throw new BlogError("title_required");
 
   let wantedSlug: string;
+  /* The row as it is before this save: its slug, and whether it was ever
+     live — a published address that moves keeps answering (below). */
+  let before: { slug: string; published_at: string | Date | null } | undefined;
   if (input.id) {
+    const current = await query<{ slug: string; published_at: string | Date | null }>(
+      "select slug, published_at from posts where id = $1 and deleted_at is null",
+      [input.id],
+    );
+    before = current[0];
     if (typeof input.slug === "string" && input.slug.trim()) {
       wantedSlug = input.slug;
     } else {
-      const current = await query<{ slug: string }>(
-        "select slug from posts where id = $1 and deleted_at is null",
-        [input.id],
-      );
-      if (!current.length) throw new BlogError("not_found");
-      wantedSlug = current[0].slug;
+      if (!before) throw new BlogError("not_found");
+      wantedSlug = before.slug;
     }
   } else {
     wantedSlug = typeof input.slug === "string" && input.slug.trim() ? input.slug : title.RU || title.ET || title.EN;
@@ -692,6 +736,21 @@ export async function upsertPost(input: PostInput, opts: { onlyDraft?: boolean }
        only by the read before it: an article published in the admin between
        the two is not a row this update can touch. */
     if (!rows.length) throw new BlogError(opts.onlyDraft ? "not_draft" : "not_found");
+    /* A new address for an article that has been live: the old one goes on
+       answering, with a 301 to wherever the article is now (migration 229 —
+       09.11.2026, Google still ranked the System 4 article's first address
+       at 3.8 while it answered 404). Taking back an old address of its own
+       makes that one the page again. */
+    if (before && before.slug !== slug && before.published_at) {
+      await aliasQuery([
+        `insert into post_slug_aliases (slug, post_id) values ($1, $2)
+         on conflict (slug) do update set post_id = excluded.post_id, created_at = now()`,
+        [before.slug, input.id],
+      ]);
+    }
+    if (before && before.slug !== slug) {
+      await aliasQuery(["delete from post_slug_aliases where slug = $1 and post_id = $2", [slug, input.id]]);
+    }
     return toPost(rows[0]);
   }
 

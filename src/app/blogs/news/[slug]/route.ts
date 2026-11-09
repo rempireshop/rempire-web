@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ slug: string }> };
 
-export async function GET(_req: Request, ctx: Ctx) {
+export async function GET(req: Request, ctx: Ctx) {
   const { slug } = await ctx.params;
-  return blogPostPageResponse(slug, "");
+  return blogPostPageResponse(slug, "", new URL(req.url).search);
 }

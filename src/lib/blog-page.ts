@@ -30,7 +30,7 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
-import { BLOG_PRODUCTS_MAX, getPublishedBySlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
+import { BLOG_PRODUCTS_MAX, getPublishedBySlug, getRenamedSlug, listPublished, pickLang, renderPostBody, type Post, type PostSummary } from "@/lib/blog";
 import { BLOG_CACHE_HEADERS } from "@/lib/blog-cache";
 import { articleStaticHTML, homeStaticHTML, pickSeo, publicListItem, publicPost, readNext } from "@/lib/blog-magazine.mjs";
 import { customMinByIds, type MinWithVariants } from "@/lib/custom-products";
@@ -458,7 +458,7 @@ async function shelfProducts(
 }
 
 /** GET /{,ru/,et/}blogs/news/<slug> for a slug the prerender did not write. `seg` is the language prefix: "" English, "ru", "et". */
-export async function blogPostPageResponse(slug: string, seg: string): Promise<Response> {
+export async function blogPostPageResponse(slug: string, seg: string, search = ""): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
   if (!lang) return html(shell, 200, "public, max-age=0, must-revalidate");
@@ -467,14 +467,26 @@ export async function blogPostPageResponse(slug: string, seg: string): Promise<R
 
   let post: Post | null;
   let list: { posts: PostSummary[]; total: number; featured?: PostSummary[] };
+  let renamed: string | null = null;
   try {
     post = await getPublishedBySlug(clean);
     list = post ? await listPublished(1, 10) : { posts: [], total: 0, featured: [] };
+    if (!post) renamed = await getRenamedSlug(clean);
   } catch (err) {
     /* No database: the shell it is — app.js asks the API itself, and shows
        «временно недоступен» if that fails too; a 5xx would show nothing. */
     console.error("[blog-page] post unavailable:", err);
     return html(shell, 200, NO_STORE);
+  }
+  /* An address the article had before it was renamed (migration 229): one
+     301 to where it is now, in the same language, the query riding along —
+     Google moves the rank over instead of dropping a page it still shows. */
+  if (!post && renamed) {
+    const to = hrefOf(seg)(renamed) + (search && search !== "?" ? search : "");
+    return new Response(null, {
+      status: 301,
+      headers: { location: to, "cache-control": PAGE_CACHE, ...BLOG_CACHE_HEADERS },
+    });
   }
   if (!post) return html(noindexShell(shell), 404, NO_STORE);
 

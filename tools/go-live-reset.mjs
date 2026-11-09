@@ -146,6 +146,14 @@ export const PLAN = [
       "and product cards are columns, not child tables.",
   },
   {
+    table: "post_slug_aliases",
+    verdict: "keep",
+    why:
+      "An article's old addresses (229_blog_slug_aliases.sql, 09.11.2026): a published article that got a new " +
+      "slug keeps answering at the old one with a 301, because Google still ranks it. Part of the posts they " +
+      "belong to — always kept with them.",
+  },
+  {
     table: "blog_materials",
     verdict: "keep",
     why:

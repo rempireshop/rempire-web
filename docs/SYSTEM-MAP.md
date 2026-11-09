@@ -1075,6 +1075,11 @@ assistant, or by Renat's own Claude through the connector.
   Sources an article is written *from*: pdf, image, link or text. Links are
   fetched through the SSRF guard (`safe-fetch.ts`, `blog-material-link.ts`);
   PDFs are read by `src/lib/pdf-text.ts`.
+- **Old addresses** (`post_slug_aliases`, `229`). When a published article
+  gets a new slug, `upsertPost()` keeps the old one. The article page
+  (`blogPostPageResponse()`) answers 301 there, to the article's current
+  address in the same language. An old address stays taken, like a deleted
+  article's slug.
 - **Routes.**
   - Admin: `GET|POST|PATCH|DELETE /api/admin/blog/`,
     `POST /api/admin/blog/draft` (a Russian draft from materials, or ET/EN
@@ -1449,7 +1454,8 @@ schema reaches production without anyone running SQL by hand.
   - `201`: mail_sends_daily;
   - `213`: cart_returns;
   - `217`: owner_alerts;
-  - `228`: blog_materials.
+  - `228`: blog_materials;
+  - `229`: post_slug_aliases.
 
   The other migrations add columns, indexes and data fixes.
 - **Applying migrations.**
