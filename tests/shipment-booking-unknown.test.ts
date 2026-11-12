@@ -389,6 +389,17 @@ describe("«Создать этикетку» when Montonio does not answer in t
     expect(body.messages.RU).not.toMatch(/Отправить заново/);
     expect(body.messages.EN).not.toMatch(/one shipment at Montonio/);
     expect((await montonioOf(id)).bookingAt).toBeNull();
+
+    /* …and Montonio's own words are in OUR journal, not only in the function
+       log (Hobby keeps that one hour — 12.11.2026). One row per press, as the
+       admin, nothing that alerts. */
+    const rows = await journal("shipment.refused");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].actor).toBe("admin");
+    expect(rows[0].payload).toMatchObject({ orderId: id, provider: "montonio", step: "create", status: 400, reason: "unknown" });
+    expect(String(rows[0].payload.number)).toMatch(/^R-/);
+    expect(String(rows[0].payload.detail)).toContain("product_upsert_failure");
+    expect(await journal("shipment.create")).toHaveLength(0);
   });
 
   it("a 5xx is not a refusal either — the parcel may exist, so the next press waits", async () => {

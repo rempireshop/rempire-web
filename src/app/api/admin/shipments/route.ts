@@ -243,7 +243,7 @@ async function storedSinceRead(orderId: string): Promise<Response> {
 }
 
 /** A Montonio call that failed, as the panel reads it — booking and repair alike. */
-function montonioFailure(err: unknown, what: "create" | "repair"): Response {
+async function montonioFailure(err: unknown, what: "create" | "repair", order: Order): Promise<Response> {
   if (err instanceof MontonioShippingError) {
     const status = err.code === "not_configured" ? 501 : CLIENT_ERRORS.has(err.code) ? 400 : 502;
     console.error(`[api/admin/shipments] montonio refused the ${what}:`, err.code, err.detail);
@@ -259,6 +259,24 @@ function montonioFailure(err: unknown, what: "create" | "repair"): Response {
        `400 product_upsert_failure` that no press could change. A refusal
        nobody has a sentence for is quoted in Montonio's own words. */
     const reading = err.code === "rejected" ? readShipmentRefusal(err.detail) : null;
+    /* …and Montonio's own words are kept in OUR journal, not only in the
+       function log. R-100115 was solved from Vercel's runtime log, the one
+       place the raw «400 {…}» lived — a log Vercel keeps for a day on Pro and
+       for one hour on Hobby (12.11.2026, before the move back). A quiet row:
+       the owner was shown the refusal the moment he pressed, so it raises no
+       alert (src/lib/owner-alerts.ts); the journal prints `detail` verbatim
+       beside the order number (auditTextHTML). */
+    if (err.code === "rejected") {
+      await writeAuditSafe("admin", "shipment.refused", {
+        orderId: order.id,
+        number: order.number,
+        provider: "montonio",
+        step: what,
+        status: err.status,
+        detail: err.detail,
+        reason: reading?.reason,
+      });
+    }
     return Response.json(
       {
         ok: false,
@@ -365,7 +383,7 @@ async function repairRefused(order: Order, existing: MontonioShipment & Record<s
   } catch (err) {
     // nothing changed at Montonio that we know of: the button must work again at once
     await releaseRepairSlot(order.id).catch(() => {});
-    return montonioFailure(err, "repair");
+    return montonioFailure(err, "repair", order);
   }
 
   const at = new Date().toISOString();
@@ -564,7 +582,7 @@ export async function POST(req: Request) {
     }
     // Montonio refused for sure, or nothing was sent: the button must work again at once
     await releaseShipmentSlot(order.id).catch(() => {});
-    return montonioFailure(err, "create");
+    return montonioFailure(err, "create", order);
   }
 
   try {

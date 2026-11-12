@@ -606,6 +606,8 @@
         "Tagasimakse ei jõudnud kliendini",
       "Перевозчик не принял посылку":
         "Vedaja ei võtnud pakki vastu",
+      "Montonio не принял этикетку":
+        "Montonio ei võtnud silti vastu",
       "Посылка снова отправлена перевозчику":
         "Pakk saadeti vedajale uuesti",
       "Montonio не ответил вовремя — посылка могла создаться":
@@ -4471,6 +4473,8 @@
         "The refund did not reach the customer",
       "Перевозчик не принял посылку":
         "The carrier would not take the parcel",
+      "Montonio не принял этикетку":
+        "Montonio refused the label",
       "Посылка снова отправлена перевозчику":
         "The parcel was sent to the carrier again",
       "Montonio не ответил вовремя — посылка могла создаться":
@@ -15063,9 +15067,10 @@
        2. this tab's sessionStorage — what the API answered earlier in the
           session, per language (blogStoreRead/blogStoreWrite);
        3. the API — asked on idle right after boot for the current language
-          (blogPrefetchSoon), then for each listed article's body, one at a
-          time (blogPrefetchPosts), and again the moment a tile is hovered,
-          pressed or focused (blogPrefetchPost).
+          (blogPrefetchSoon), then — once the shopper is in the blog — for
+          each listed article's body, one at a time (blogPrefetchPosts), and
+          again the moment a tile is hovered, pressed or focused
+          (blogPrefetchPost).
      Whatever painted from 1 or 2 is checked against the API in the
      background and repainted only when something really differs
      (blogSyncList/blogSyncPost) — so an article published today shows up
@@ -15346,21 +15351,38 @@
     return p;
   }
   /* The bodies of the listed articles, one at a time on idle, so the tile
-     the shopper eventually presses opens at once. Skipped on a metered
-     connection (Save-Data) — the bodies are small, but they are not asked for
-     — and on a line that is not known to be fast (blogFastNet). */
+     the shopper eventually presses opens at once — asked for only while the
+     shopper is IN the blog (the list or an article). Every tile that opens an
+     article (data-go-blog) is drawn on those two screens and nowhere else, so
+     a body fetched from the home page, a product or the catalogue was one
+     nobody could press yet: until 12.11.2026 every page view on a fast line
+     asked for all of them — ~600 function calls a week per article on Vercel,
+     a quarter of all the shop's calls, for nothing on screen (the Hobby
+     budget, Dim 12.11.2026). Entering the blog starts the chain (the render
+     hook), leaving it stops the chain at the next body; the list itself is
+     still asked for on every page (blogPrefetchSoon), so «Блог» opens at once.
+     Skipped on a metered connection (Save-Data) — the bodies are small, but
+     they are not asked for — and on a line that is not known to be fast
+     (blogFastNet). */
+  var BLOG_AHEAD = {};   // lang -> true while a chain for that language runs
+  // a chain blogIdle() dropped on the way out must not hold the flag in a page
+  // the back/forward cache brings back
+  window.addEventListener("pageshow", function () { BLOG_AHEAD = {}; });
+  function blogInBlog() { return S.screen === "blog" || S.screen === "blogpost"; }
   function blogPrefetchPosts(lang) {
-    if (blogSaveData() || !blogFastNet()) return;
+    if (!blogInBlog() || BLOG_AHEAD[lang] || blogSaveData() || !blogFastNet()) return;
     var l = S.blogLists[lang];
     if (!l || l.failed) return;
     var queue = l.posts.map(function (p) { return p.slug; }).filter(function (slug) {
       return !S.blogPosts[blogKey(slug, lang)] && !BLOG_INFLIGHT[blogKey(slug, lang)];
     });
+    if (!queue.length) return;
+    BLOG_AHEAD[lang] = true;
     (function next() {
-      if (!queue.length || S.lang !== lang) return;
+      if (!queue.length || S.lang !== lang || !blogInBlog()) { BLOG_AHEAD[lang] = false; return; }
       var slug = queue.shift();
       blogIdle(function () {
-        if (S.lang !== lang) return;
+        if (S.lang !== lang || !blogInBlog()) { BLOG_AHEAD[lang] = false; return; }
         blogSyncPost(lang, slug).then(next, next);
       });
     })();
@@ -15372,7 +15394,8 @@
     blogSyncPost(S.lang, slug);
   }
   /* Right after boot, and after a language switch: the list for the current
-     language, on idle, then the articles behind it. Not in the admin — that
+     language, on idle, then — on the blog's own screens only — the articles
+     behind it (blogPrefetchPosts). Not in the admin — that
      screen has its own list (loadAdminBlog) and its own things to do. */
   function blogPrefetchSoon() {
     var lang = S.lang;
@@ -36085,6 +36108,10 @@
     /* 28.09.2026: the carrier has the parcel of a cancelled or refunded order
        — nothing moved, and it is also a ping on the owner's phone */
     "shipment.closed_moving": "Посылка едет, а заказ отменён или деньги возвращены",
+    /* 12.11.2026: «Создать этикетку» that Montonio refused outright — no
+       parcel was made; the row keeps Montonio's own words (`detail`), which
+       until then lived only in the function log */
+    "shipment.refused": "Montonio не принял этикетку",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "invoice.cancelled": "Счёт отменён", "invoice.reminded": "Напоминание по счёту",
     /* Seven actions the server writes and this table did not name, so the
@@ -54874,6 +54901,10 @@
     // cold miss) — a fresh answer or one already in flight costs nothing
     if (S.screen === "blog") blogSyncList(S.lang);
     if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
+    // …and the bodies behind the tiles, now that there are tiles to press: a
+    // list already fresh from the home page asks for nothing more by itself
+    // (one chain per language; a running one makes this a no-op)
+    if (S.screen === "blog" || S.screen === "blogpost") blogPrefetchPosts(S.lang);
     // (the blog's carousel stays on its story through a redraw by itself: bmagHeroHTML draws S.blogHeroAt)
     // …with the editor open too: on a desktop the list stands beside it (1a, screen 16)
     if (S.screen === "admin" && S.adminTab === "blog") loadAdminBlog(false);
@@ -60758,7 +60789,7 @@
   render();
   lazyForce = false;
   trackNav();   // analytics agent: the very first view of this tab's session
-  blogPrefetchSoon();   // blog: the list, then the articles, on idle — so «Блог» opens at once later
+  blogPrefetchSoon();   // blog: the list on idle (the articles too, on a blog screen) — so «Блог» opens at once later
   /* The slots are filled now, so the static page underneath them has done its
      job. Still one synchronous task — the browser has not painted between the
      two, which is why the swap is invisible. */

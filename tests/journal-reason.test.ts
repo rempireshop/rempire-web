@@ -98,6 +98,10 @@ describe("AUDIT_WORDS — every action the server writes has a Russian word", ()
     expect(WORDS["shipment.registration_failed"]).toBe("Перевозчик не принял посылку");
   });
 
+  it("names a label Montonio refused outright (12.11.2026 — its words kept in the journal)", () => {
+    expect(WORDS["shipment.refused"]).toBe("Montonio не принял этикетку");
+  });
+
   it("holds no word that is itself a dotted code — the panel is in Russian", () => {
     for (const [action, word] of Object.entries(WORDS)) {
       expect(word, `${action} is not translated`).not.toMatch(/^[a-z_]+\.[a-z_]+$/);

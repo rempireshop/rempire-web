@@ -195,13 +195,16 @@ test("every card under an article keeps its foot in the card and its add text wh
 });
 
 /* The blog must not wait for the database. After boot the SPA asks for the
- * list on idle and then for each article, and keeps them in memory and in
- * sessionStorage; from then on «Блог» and a tile paint from that, and the
- * API is only consulted behind the screen. Proven by making the API slow
- * (4 s — a cold Postgres) once the prefetch has landed, and timing what the
- * shopper sees. */
+ * list on idle — on every page, so «Блог» opens at once — and, once the
+ * shopper is in the blog, for each listed article's body; it keeps them in
+ * memory and in sessionStorage, and from then on «Блог» and a tile paint from
+ * that, the API only consulted behind the screen. The bodies are NOT asked
+ * for from the home page: until 12.11.2026 every page view on a fast line
+ * fetched every article — a quarter of the shop's function calls on Vercel —
+ * though no tile that opens one is drawn outside the blog. Proven by making
+ * the API slow (4 s — a cold Postgres) and timing what the shopper sees. */
 for (const lang of LANGS) {
-  test(`home → Blog paints the articles at once while /api/blog/ takes 4 s — ${lang.code}`, async ({ page }) => {
+  test(`home → Blog → article paints at once while /api/blog/ takes 4 s — ${lang.code}`, async ({ page }) => {
     test.setTimeout(60_000);
     /* The articles are fetched ahead only on a line the browser reports as
        fast (blogFastNet in app.js, perf 09.10.2026), and a headless browser on
@@ -213,22 +216,31 @@ for (const lang of LANGS) {
         get: () => ({ effectiveType: "4g", downlink: 10, rtt: 50, saveData: false }),
       });
     });
-    // the waits are armed before the page loads: the idle prefetch can land
-    // before a later waitForResponse would start listening
+    // every article body asked for, from the first request on
+    const bodies: string[] = [];
+    page.on("request", (r) => {
+      if (/\/api\/blog\/[^/?]+\//.test(r.url())) bodies.push(r.url());
+    });
+    // armed before the page loads: the idle prefetch can land before a later
+    // waitForResponse would start listening
     const listPrefetched = page.waitForResponse((r) => /\/api\/blog\/\?lang=/.test(r.url()) && r.status() === 200);
-    const postsPrefetched = Promise.all(
-      SLUGS.map((slug) => page.waitForResponse((r) => r.url().includes(`/api/blog/${slug}/`) && r.status() === 200, { timeout: 30_000 })),
-    );
     await page.goto(shopUrl(lang.seg, "/"));
     await waitForScreen(page, "home");
     await listPrefetched;
-    await postsPrefetched;
+    // blogIdle() gives an idle callback 2.5 s at most — a chain started from
+    // the home page would have asked for its first body by now
+    await page.waitForTimeout(3000);
+    expect(bodies, "the home page asked for article bodies no tile there can open").toEqual([]);
 
-    // from here on the database is "cold"
-    await page.route("**/api/blog/**", async (route) => {
+    // from here on the list is "cold"; the bodies, asked for once the blog is
+    // on screen, are not yet
+    await page.route(/\/api\/blog\/\?lang=/, async (route) => {
       await new Promise((r) => setTimeout(r, 4000));
       await route.continue();
     });
+    const postsPrefetched = Promise.all(
+      SLUGS.map((slug) => page.waitForResponse((r) => r.url().includes(`/api/blog/${slug}/`) && r.status() === 200, { timeout: 30_000 })),
+    );
 
     const t0 = Date.now();
     await page.locator("[data-nav-blog]").click();
@@ -240,6 +252,14 @@ for (const lang of LANGS) {
     await expect(page.locator('.hero__slide[data-on="1"]')).toBeVisible();
     expect(Date.now() - t0, "the list waited for the API").toBeLessThan(3500);
     await expect(page.locator(".blog__sk"), "a skeleton was shown although the list was known").toHaveCount(0);
+
+    // the listing asked for the bodies behind its tiles — and now the
+    // database is "cold" for them too
+    await postsPrefetched;
+    await page.route("**/api/blog/**", async (route) => {
+      await new Promise((r) => setTimeout(r, 4000));
+      await route.continue();
+    });
 
     // a tile the pointer reached (or that was prefetched on idle) opens with its body, not a skeleton
     const t1 = Date.now();
