@@ -20,8 +20,9 @@
 #      just deployed. Filtered to `success` below, so a failed build does not
 #      produce a second red mark saying the same thing. This is the trigger
 #      that answers "did what we just shipped survive contact with the CDN" —
-#      for a preview; a production deploy is answered by trigger 4 instead
-#      (the job's `if:` below says why).
+#      for a preview, and for a panel or nightly rebuild of production; a
+#      fresh push to production is answered by trigger 4 instead («Choose the
+#      base URL» below says why and how they are told apart).
 #
 #   2. `schedule` — three times a day, because the interesting half of what this
 #      suite watches can break with nobody pushing anything: the Railway
@@ -84,15 +85,10 @@ jobs:
     timeout-minutes: 15
     # A deployment_status event fires for every state Vercel reports — queued,
     # building, error, success. Only the last one has a deployment behind it
-    # worth testing, and `environment_url` is only populated then.
-    # A PRODUCTION deploy is not tested from here at all (12.11.2026): only
-    # «Promote to production» moves the production branch, and it runs this
-    # same suite itself once Vercel reports that build (trigger 4) — the run
-    # that mails whoever pushed. Testing it here as well ran every push twice
-    # against the same rempireshop.com (17 duplicate runs in the week to
-    # 12.11). Panel rebuilds never reach GitHub, so nothing is lost; the
-    # schedule still covers the live shop between pushes.
-    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment != 'Production')
+    # worth testing, and `environment_url` is only populated then. (A fresh
+    # production push is skipped one step further down — see «Choose the base
+    # URL».)
+    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
 
     steps:
       # Which shop, and whether to go at all. The whole decision is one step so
@@ -104,7 +100,16 @@ jobs:
       #   · a deploy to the Production environment tests rempireshop.com — the
       #     reported per-deployment URL is behind Vercel's deployment protection
       #     (a stranger gets its SSO page), and the live domain is the same
-      #     build;
+      #     build — EXCEPT the build of a fresh push (12.11.2026): «Promote to
+      #     production» runs this same suite for it itself (trigger 4, the run
+      #     that mails whoever pushed), and testing it here as well ran every
+      #     push twice (17 duplicate runs in the week to 12.11). A fresh push
+      #     is told apart by time: Vercel creates the GitHub deployment when
+      #     that build finishes, so its first `success` is seconds old. A panel
+      #     edit's rebuild and the nightly one post a NEW `success` to the
+      #     deployment of the last push — hours or days old — and those are
+      #     still tested here: they are where Renat's data meets the build
+      #     (a red one with no push behind it is his edit, not code);
       #   · any other deploy (a preview) is tested at the URL Vercel reported if
       #     that answers 200, and skipped with a notice if it does not — never
       #     quietly swapped for a different shop;
@@ -120,6 +125,8 @@ jobs:
           EVENT: ${{ github.event_name }}
           DEPLOYED_URL: ${{ github.event.deployment_status.environment_url }}
           DEPLOYED_ENV: ${{ github.event.deployment.environment }}
+          DEPLOYMENT_AT: ${{ github.event.deployment.created_at }}
+          STATUS_AT: ${{ github.event.deployment_status.created_at }}
           CHOICE: ${{ github.event.inputs.target }}
           PRODUCTION: https://rempireshop.com
         run: |
@@ -129,6 +136,15 @@ jobs:
           elif [ "$EVENT" = "deployment_status" ]; then
             if [ "$DEPLOYED_ENV" = "Production" ]; then
               URL="$PRODUCTION"
+              # a date missing or unparsable counts as old: test rather than
+              # skip (GNU date reads "" as today's midnight, hence the -n)
+              D=0; S=0
+              [ -n "$DEPLOYMENT_AT" ] && D=$(date -d "$DEPLOYMENT_AT" +%s 2>/dev/null || echo 0)
+              [ -n "$STATUS_AT" ] && S=$(date -d "$STATUS_AT" +%s 2>/dev/null || echo 0)
+              if [ "$D" -gt 0 ] && [ "$S" -gt 0 ] && [ $((S - D)) -lt 600 ]; then
+                RUN=no
+                echo "::notice::A fresh push's production build — «Promote to production» smoke-tests it in its own run."
+              fi
             else
               URL="${DEPLOYED_URL%/}"
               CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL/" || echo 000)

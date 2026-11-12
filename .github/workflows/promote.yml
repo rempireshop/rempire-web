@@ -21,8 +21,10 @@
 # Then it waits for Vercel: the build of that commit is reported back to GitHub
 # as a Production deployment. A failed build turns this run red, and a red run
 # mails whoever pushed — the only way a failed Vercel build reaches anyone but
-# the shop's own Gmail (Vercel mails the account owner only). Hook builds,
-# which never reach GitHub, are watched by src/lib/build-watch.ts.
+# the shop's own Gmail (Vercel mails the account owner only). Hook builds
+# (panel edits, the nightly rebuild) start no run here and are watched by
+# src/lib/build-watch.ts; they DO reach GitHub, though — as a new `success`
+# on the last push's deployment, which smoke.yml tests (checked 12.11.2026).
 name: Promote to production
 
 on:
