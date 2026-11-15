@@ -242,6 +242,8 @@
         "Ostukorv ja keel on teie brauseris: ilma nendeta pood ei tööta. Kontole sisse logides lisandub turvaline küpsis.",
       "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
         "Külastusstatistika on teie valik: juhuslik külastusnumber, ilma nimeta, kaob koos vahekaardiga.",
+      "Реклама Meta (Facebook, Instagram) — по вашему выбору: пиксель видит просмотры товаров, корзину и покупки.":
+        "Meta reklaam (Facebook, Instagram) on teie valik: piksel näeb vaadatud tooteid, ostukorvi ja oste.",
       "Принять всё": "Nõustun kõigega",
       "Только необходимое": "Ainult vajalik",
       /* «Данные и аккаунт» at the foot of «Кабинет» and the «Удалить аккаунт»
@@ -4120,6 +4122,8 @@
         "Your basket and language live in your browser: the shop cannot work without them. Signing in adds a secure session cookie.",
       "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
         "Visit statistics are up to you: a random visit number, no name attached, gone when the tab closes.",
+      "Реклама Meta (Facebook, Instagram) — по вашему выбору: пиксель видит просмотры товаров, корзину и покупки.":
+        "Meta ads (Facebook, Instagram) are up to you: the pixel sees the products you view, your basket and your purchases.",
       "Принять всё": "Accept all",
       "Только необходимое": "Only what is needed",
       /* «Данные и аккаунт» at the foot of «Кабинет» and the «Удалить аккаунт»
@@ -12830,6 +12834,11 @@
          /api/track/ (db/migrations/080_events.sql: no cookie, no name, no
          e-mail, gone when the tab closes), and, on the live domain only,
          Cloudflare Web Analytics. Both wait for an answer here.
+       · Meta ads (since 15.11.2026), off until they are allowed. The Meta
+         Pixel (mountPixel() below) tells Meta which products were viewed,
+         what went into the basket, the checkout opening and a paid order's
+         value, so Renat's Facebook/Instagram ads can be measured. It is a
+         third party with its own cookies, so it waits for the same answer.
        · Nothing else loads on its own. The video is click-to-load and the
          parcel-point map fetches its tiles only when the shopper opens the
          map view — said in the banner because it is the honest thing to say,
@@ -12838,50 +12847,66 @@
      The choice lives in localStorage under one key and is remembered until
      the shopper changes it — «Данные и cookie» in the footer reopens the
      banner. The wording below is plain and factual; a lawyer should read it
-     before the shop opens (docs/audit/2026-09-07-storefront.md). */
+     before the shop opens (docs/audit/2026-09-07-storefront.md).
+
+     One choice covers both optional lines (Dim, 15.11.2026: «Принять всё»
+     allows statistics and Meta ads, «Только необходимое» refuses both).
+     `v: 2` is an answer given with the Meta line on screen. A `v: 1` answer
+     predates it: «Только необходимое» then still means "nothing optional",
+     Meta included, so it stands; «Принять всё» was a yes to statistics only,
+     so that visitor keeps the statistics and is asked once more. */
   var CONSENT_LS = "rempire-consent";
-  /** `{v, analytics, at}` — null until the shopper has answered. */
+  /** `{v, analytics, ads?, at}` — null until the shopper has answered. */
   function consentRead() {
     try {
       var c = JSON.parse(localStorage.getItem(CONSENT_LS));
       return c && typeof c === "object" && typeof c.analytics === "boolean" ? c : null;
     } catch (e) { return null; }
   }
+  /** An answer to the banner as it reads today (see above), or null. */
+  function consentCurrent() {
+    var c = consentRead();
+    return c && (c.v >= 2 || !c.analytics) ? c : null;
+  }
   function consentAnalytics() { var c = consentRead(); return !!(c && c.analytics); }
+  function consentAds() { var c = consentRead(); return !!(c && c.v >= 2 && c.ads === true); }
   /* Not answered yet, or reopened from the footer. The banner never covers
      the checkout or the receipt — a shopper mid-payment is the last person
      who should be reading about statistics, and on a phone the bar would sit
      over «Оплатить» — nor the owner's own two screens. */
   function consentShown() {
     if (S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan") return false;
-    return S.consentOpen || !consentRead();
+    return S.consentOpen || !consentCurrent();
   }
-  function consentSave(analytics) {
+  function consentSave(all) {
+    var hadAds = consentAds();
     try {
-      localStorage.setItem(CONSENT_LS, JSON.stringify({ v: 1, analytics: !!analytics, at: Date.now() }));
+      localStorage.setItem(CONSENT_LS, JSON.stringify({ v: 2, analytics: !!all, ads: !!all, at: Date.now() }));
     } catch (e) {}
     S.consentOpen = false;
     paintConsent();
     // saying yes starts the beacon now rather than on the next page load
-    if (analytics) mountCfBeacon();
+    if (all) mountCfBeacon();
+    pixelConsent(hadAds, !!all);
   }
   var consentPainted = "";
   function paintConsent() {
     /* The language is part of the key: the bar can sit there for as long as
        the shopper leaves it, and translateTree() only runs on a repaint —
        without this, switching language left it in the language before. */
-    var key = consentShown() ? (consentRead() ? "open-again" : "first") + "|" + S.lang : "";
+    var key = consentShown() ? (consentCurrent() ? "open-again" : "first") + "|" + S.lang : "";
     if (key === consentPainted) return;
     consentPainted = key;
     cbSlot.innerHTML = key ? consentHTML() : "";
     translateTree(cbSlot);
   }
   function consentHTML() {
-    var c = consentRead();
+    var c = consentCurrent();
     return '<div class="cbanner" role="region" aria-label="Данные и cookie"><div class="cbanner__box">' +
       '<p class="cbanner__t">Что мы храним</p>' +
       '<p class="cbanner__x">Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.</p>' +
       '<p class="cbanner__x">Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.</p>' +
+      '<p class="cbanner__x">Реклама Meta (Facebook, Instagram) — по вашему выбору: пиксель видит просмотры товаров, корзину и покупки.</p>' +
       '<div class="cbanner__acts">' +
         '<button class="btn btn--sm" data-consent="all"' + (c && c.analytics ? ' aria-current="true"' : "") + ">Принять всё</button>" +
         '<button class="btn btn--ghost btn--sm" data-consent="need"' + (c && !c.analytics ? ' aria-current="true"' : "") + ">Только необходимое</button>" +
@@ -13151,6 +13176,123 @@
   }
   mountCfBeacon();
 
+  /* ---------- Meta Pixel (15.11.2026) -------------------------------------
+
+     Renat's pixel, for his Facebook/Instagram ads. Meta's own install text
+     says "paste this <script> into the <head> of every page"; that cannot be
+     done here, twice over:
+
+       · the shop's CSP (next.config.ts) refuses every inline script, so the
+         pasted snippet would simply not run. The same small stub is built
+         below instead, and fbevents.js is the one file loaded, from
+         connect.facebook.net — allowed in script-src for the shop's pages;
+       · the snippet fires on load, before anybody was asked. In the EU a
+         third party's advertising cookie needs a yes first, so nothing here
+         happens until the consent banner holds one (consentAds(): «Принять
+         всё» on a `v: 2` banner — see the consent block above).
+
+     Where it loads: rempireshop.com only (like the Cloudflare beacon: not
+     Dim's address, not a preview, not localhost — `rmp-pixel-test` in
+     localStorage opens localhost for the e2e spec), and never on the owner's
+     screens: the panel and the scanner send Meta nothing.
+
+     What it sends — Meta's four e-commerce events and nothing else:
+       PageView once per real navigation (trackNav), ViewContent on a product
+       page, AddToCart, InitiateCheckout when the checkout opens, and
+       Purchase on a paid receipt with the order's value in EUR and the order
+       number as eventID (Meta merges duplicates by it, and a later
+       server-side Conversions API would reuse it). content_ids are the
+       product ids — the Merchant Center feed's item_group_id (a product in
+       several sizes) or g:id (one size), so a Meta catalogue built from that
+       feed matches them.
+     · autoConfig off: no automatic button-click or page-metadata events —
+       the banner promises product views, the basket and purchases.
+     · disablePushState: Meta's script would count every history.pushState as
+       one more PageView; trackNav() already sends exactly one. */
+  var PIXEL_ID = "1082368324784460";
+  function pixelHost() {
+    if (/(^|\.)rempireshop\.com$/.test(location.hostname)) return true;
+    try { return location.hostname === "localhost" && localStorage.getItem("rmp-pixel-test") === "1"; }
+    catch (e) { return false; }
+  }
+  function pixelOff() { return S.screen === "admin" || S.screen === "scan"; }
+  /** Builds Meta's stub and loads fbevents.js once; true when fbq is ready to take calls. */
+  function mountPixel() {
+    try {
+      if (window.fbq) return true;
+      if (!consentAds() || !pixelHost() || pixelOff()) return false;
+      var n = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      window.fbq = n;
+      if (!window._fbq) window._fbq = n;
+      n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+      n.disablePushState = true;
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = "https://connect.facebook.net/en_US/fbevents.js";
+      document.head.appendChild(s);
+      n("set", "autoConfig", false, PIXEL_ID);
+      n("init", PIXEL_ID);
+      return true;
+    } catch (e) { return false; }
+  }
+  /** One standard event; silent without the shopper's yes or on the owner's screens. */
+  function pixel(name, params, eventId) {
+    try {
+      if (!consentAds() || pixelOff() || !mountPixel()) return;
+      if (eventId) window.fbq("track", name, params || {}, { eventID: eventId });
+      else window.fbq("track", name, params || {});
+    } catch (e) { /* the pixel must never be why a click failed */ }
+  }
+  /* The banner's answer changed. A new yes counts the page the shopper is on
+     (its PageView went by before they were asked); a yes taken back stops
+     the script that is already loaded from sending anything more. */
+  function pixelConsent(before, now) {
+    try {
+      if (now && !before) {
+        if (window.fbq) window.fbq("consent", "grant");
+        pixelNav();
+      } else if (!now && before && window.fbq) {
+        window.fbq("consent", "revoke");
+      }
+    } catch (e) {}
+  }
+  function pixelProduct(p, si) {
+    var many = !!(p && p.sizes && p.sizes.length > 1);
+    var price = p ? Number(sizePrice(p, si)) : NaN;
+    var out = { content_ids: [p.id], content_type: many ? "product_group" : "product", currency: "EUR" };
+    if (isFinite(price) && price >= 0) out.value = price;
+    return out;
+  }
+  function pixelNav() {
+    pixel("PageView");
+    if (S.screen === "product" && S.productId) {
+      var p = byIdOrNull(S.productId);   // byId() falls back to the first product
+      if (p) pixel("ViewContent", pixelProduct(p, S.size));
+    }
+  }
+  function pixelAdd(p, si) { if (p) pixel("AddToCart", pixelProduct(p, si)); }
+  function pixelCheckout() {
+    var ids = [], items = 0;
+    (S.cart || []).forEach(function (l) {
+      items += Number(l.qty) || 1;
+      if (!l.type && ids.indexOf(l.id) < 0) ids.push(l.id);
+    });
+    var v = Number(cartSum());
+    var params = { content_ids: ids, content_type: "product_group", num_items: items, currency: "EUR" };
+    if (isFinite(v) && v >= 0) params.value = v;
+    pixel("InitiateCheckout", params);
+  }
+  /* Once per order in this browser: a reload of the receipt, or the bank's
+     redirect landing twice, must not be a second sale in Renat's reports. */
+  function pixelPurchase(number, total) {
+    if (!number || !isFinite(total) || total < 0) return;
+    try {
+      if (localStorage.getItem("rmp_px_paid") === number) return;
+      if (consentAds()) localStorage.setItem("rmp_px_paid", number);
+    } catch (e) {}
+    pixel("Purchase", { value: total, currency: "EUR" }, number);
+  }
+
   /* "view" (whatever screen this is) plus "product" when it is a product
      page — called once per real navigation from go(), from the popstate
      handler and once at boot, never from render() itself (render() also
@@ -13168,6 +13310,7 @@
        устройства» — the page, which is what is left after the «?». */
     track("view", { path: String(pathFor() || "").split("?")[0] });
     if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
+    pixelNav();   // Meta Pixel: PageView, and ViewContent on a product page
     /* search: a reload, a shared link or the Back button lands on the search
        screen with a query already in the address — nobody typed, so the input
        handler never ran and neither the search event nor the assistant's pass
@@ -22374,6 +22517,7 @@
     cartPush.off = false;   // a new basket — see addToCart()
     pushCart();
     track("add_to_cart", { productId: p.id, value: sizePrice(p, S.size) });   // analytics agent
+    pixelAdd(p, S.size);
     go("checkout");
   }
   /* The same for a set: since 26.10.2026 the feed lists the sets, and a
@@ -52260,6 +52404,7 @@
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
       track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
+      pixelPurchase(S.done.number, total);   // Meta Pixel: Purchase, value in EUR
     }
     /* …and the basket that was held on the way to the bank (holdCart() in
        payNow()) is settled here, once, on the same one-shot as the beacon
@@ -55878,7 +56023,7 @@
     // it is a product page, plus "checkout" the moment that screen opens —
     // see trackNav()/track() near esc() and docs/analytics.md.
     trackNav();
-    if (screen === "checkout") track("checkout", { value: cartSum() });
+    if (screen === "checkout") { track("checkout", { value: cartSum() }); pixelCheckout(); }
   }
   /* Brands differ per category, so a Davines filter left over from Уход за
      волосами would silently empty Парфюмерия. Category change clears them. */
@@ -56076,6 +56221,7 @@
       ? "Добавлено: " + addedP.name + " · " + addedP.sizes[si]
       : "Добавлено в корзину ✓");
     track("add_to_cart", { productId: id, value: sizePrice(byId(id), si) });   // analytics agent
+    pixelAdd(addedP, si);
   }
 
   /* ---- features: sets and gift cards in the cart --------------------------

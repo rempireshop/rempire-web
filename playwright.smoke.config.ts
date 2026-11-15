@@ -74,14 +74,17 @@ export default defineConfig({
            fires. A write to the real events table is exactly the kind of thing
            the read-only rule forbids, and declining is a cleaner way to stop
            it than intercepting it after the fact.
+         · the same answer keeps the Meta Pixel (15.11.2026) from loading at
+           all, so the suite's page views and receipts never reach Renat's
+           Meta reports as visits or sales.
 
-       The shape is `{v, analytics, at}` — consentRead() in app.js. */
+       The shape is `{v, analytics, ads, at}` — consentRead() in app.js. */
     storageState: {
       cookies: [],
       origins: [
         {
           origin: BASE_URL,
-          localStorage: [{ name: "rempire-consent", value: JSON.stringify({ v: 1, analytics: false, at: 0 }) }],
+          localStorage: [{ name: "rempire-consent", value: JSON.stringify({ v: 2, analytics: false, ads: false, at: 0 }) }],
         },
       ],
     },

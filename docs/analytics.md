@@ -414,6 +414,77 @@ Turning it on is purely additive, never a regression.
 (where the beacon itself reports) in `script-src`/`connect-src`, **for
 `/shop2/*` only** — the strict policy everywhere else is untouched.
 
+## Meta Pixel (since 15.11.2026)
+
+Renat's pixel for Facebook/Instagram ads: ID `1082368324784460` (business
+portfolio «Rempire Original»). Code: `mountPixel()` / `pixel()` in
+`public/shop2/app.js`, below the Cloudflare beacon.
+
+**Why not Meta's pasted snippet.** Meta's install mail says to paste an
+inline `<script>` into every page's `<head>`. The shop's CSP refuses inline
+scripts, so it would not run; and it fires on load, before the visitor was
+asked, which an EU shop may not do with a third party's advertising cookie.
+app.js builds the same stub and loads only `fbevents.js`.
+
+**When it loads** — all three must hold:
+
+- the consent banner holds a `v: 2` «Принять всё» (`consentAds()`). Dim,
+  15.11: one choice covers statistics and Meta ads, and the banner has one
+  more line: «Реклама Meta (Facebook, Instagram) — по вашему выбору: пиксель
+  видит просмотры товаров, корзину и покупки.» A `v: 1` «Принять всё»
+  (given before that line existed) keeps the statistics and is asked once
+  more; a `v: 1` «Только необходимое» stands;
+- the host is `rempireshop.com`: not Dim's address, not a preview, not
+  localhost (`rmp-pixel-test` = `1` in localStorage opens localhost for
+  `e2e/meta-pixel.spec.ts`);
+- the screen is not the panel or the scanner.
+
+**What it sends** — the four events Meta asked for, plus PageView:
+
+| Event | When | Parameters |
+| --- | --- | --- |
+| PageView | every real navigation (`trackNav()`) | — |
+| ViewContent | a product page | `content_ids: [productId]`, `content_type`, `value`, `currency: "EUR"` |
+| AddToCart | «В корзину», and a Google Shopping `?buy=` link | the same |
+| InitiateCheckout | the checkout opens | `content_ids`, `num_items`, `value`, `currency` |
+| Purchase | a paid receipt (`s=paid`) | `value` (the order total), `currency: "EUR"`, eventID = the order number |
+
+- **content_ids:** the product ids. That is the Merchant Center feed's
+  `item_group_id` (several sizes, `content_type: "product_group"`) or `g:id`
+  (one size), so a Meta catalogue fed from the same feed matches them.
+- **Purchase** fires once per order per browser (`rmp_px_paid`): a reload of
+  the receipt is not a second sale.
+- **Off on purpose:**
+  - `autoConfig` is off, so there are no automatic button-click or metadata
+    events.
+  - `disablePushState` is set, so Meta does not add its own PageView on
+    every `pushState`.
+- **Withdrawing consent:** the footer's «Данные и cookie» → «Только
+  необходимое» sends `fbq('consent','revoke')`, and nothing more goes out.
+
+**CSP:** `connect.facebook.net` in `script-src` and `www.facebook.com` +
+`connect.facebook.net` in `connect-src`, on the shop's pages only
+(`next.config.ts`, `META_PIXEL_*`).
+
+**Privacy policy:** RU/ET/EN «Cookie-файлы» name the pixel, Meta Platforms
+Ireland as joint controller (Art. 26 GDPR), the EU–US Data Privacy Framework
+and the way to withdraw (15.11.2026).
+
+**Tests:** `e2e/meta-pixel.spec.ts`, with `connect.facebook.net` answered by
+a stand-in so nothing reaches Meta. The smoke suite answers the banner
+«Только необходимое» (`v: 2, ads: false`), so live smoke runs never show up
+in Renat's reports.
+
+**Not done (yet):**
+
+- **Domain verification** in Business settings → Brand safety → Domains:
+  either the TXT record `facebook-domain-verification=…` at Cloudflare DNS,
+  or a `<meta name="facebook-domain-verification">` in
+  `public/shop2/index.html` (every prerendered page copies its head).
+- **Conversions API (server-side Purchase):** it needs an access token from
+  Events Manager in Vercel env. The eventID is already the order number, so
+  Meta would merge the two.
+
 ## Env vars (document here, never commit values)
 
 | Name | Needed for | Notes |

@@ -309,11 +309,12 @@ describe("the storefront: ?buy= puts it in the basket and opens the checkout", (
     let url = "/ru/products/x" + search;
     const loc = { get search() { return url.slice(url.indexOf("?") >= 0 ? url.indexOf("?") : url.length); }, pathname: "/ru/products/x" };
     const hist = { state: null, replaceState: (_s: unknown, _t: string, u: string) => { url = u; } };
-    new Function("S", "location", "history", "byIdOrNull", "sizeOut", "CART_MAX_QTY", "persist", "cartPush", "pushCart", "track", "sizePrice", "go",
+    new Function("S", "location", "history", "byIdOrNull", "sizeOut", "CART_MAX_QTY", "persist", "cartPush", "pushCart", "track", "sizePrice", "go", "pixelAdd",
       `${slice("buyFromLink")} buyFromLink();`)(
       S, loc, hist, () => product, () => sizeGone, 99,
       () => calls.push("persist"), { off: true }, () => calls.push("pushCart"), () => calls.push("track"), () => 1,
       (s: string) => { calls.push("go:" + s); S.screen = s; },
+      () => {},   // the Meta Pixel's AddToCart (e2e/meta-pixel.spec.ts covers it)
     );
     return { S, calls, url };
   }

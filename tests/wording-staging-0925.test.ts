@@ -55,7 +55,7 @@ describe("the paid receipt of a self-pickup order", () => {
 
   const doneFor = (search: string) =>
     new Function("S", "location", `
-      function track() {} function doneDropHeld() {} function restoreHeldCart() {}
+      function track() {} function pixelPurchase() {} function doneDropHeld() {} function restoreHeldCart() {}
       function doneGiftCards() { return []; }
       ${slice("doneState")}
       ${slice("donePaidNote")}

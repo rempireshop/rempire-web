@@ -118,7 +118,9 @@ export default defineConfig({
        would be measuring a shopper who never agreed to be measured — which
        is a fact about the banner, not about the checkout they are testing.
        The banner's own tests (e2e/storefront-sweep-2.spec.ts) clear this key
-       for themselves and drive it from a genuine first visit. */
+       for themselves and drive it from a genuine first visit. `v: 2` is an
+       answer given with the Meta line on the banner; `ads: false` because the
+       pixel's own spec (e2e/meta-pixel.spec.ts) opts in for itself. */
     /* …and has chosen English on the language switch once (the `rempire_lang`
        cookie). Since 08.10.2026 English is the unprefixed language and the
        edge sends a browser that asks for Russian — which this ru-RU browser
@@ -137,7 +139,7 @@ export default defineConfig({
       origins: [
         {
           origin: E2E_BASE_URL,
-          localStorage: [{ name: "rempire-consent", value: JSON.stringify({ v: 1, analytics: true, at: 0 }) }],
+          localStorage: [{ name: "rempire-consent", value: JSON.stringify({ v: 2, analytics: true, ads: false, at: 0 }) }],
         },
       ],
     },

@@ -97,6 +97,7 @@ function shop(): Shop {
     function navTo() {}
     function trackNav() {}
     function track() {}
+    function pixelCheckout() {}
     function cartSum() { return 0; }
     function acctRefresh() {}
     var acctQ = [], acctInflight = "", acctGen = 0, acctBirthdayT = 0, acctAutoT = {};

@@ -158,6 +158,16 @@ const DIM_HOST = { type: "host" as const, value: "(?:www\\.)?rempireshop\\.diips
 const CF_BEACON_SCRIPT = "https://static.cloudflareinsights.com";
 const CF_BEACON_CONNECT = "https://static.cloudflareinsights.com https://cloudflareinsights.com";
 
+/* Meta Pixel (15.11.2026) — mountPixel() in public/shop2/app.js. fbevents.js
+ * and its per-pixel config script load from connect.facebook.net; the events
+ * go to www.facebook.com/tr as an image (img-src already takes https:) or as
+ * a fetch/beacon, which is what connect-src is for. Meta's own pasted snippet
+ * is an inline <script> and stays refused: app.js builds the same stub, so
+ * script-src keeps no 'unsafe-inline'. The script only loads after the
+ * shopper's «Принять всё»; the shop's pages only, like the beacon above. */
+const META_PIXEL_SCRIPT = "https://connect.facebook.net";
+const META_PIXEL_CONNECT = "https://www.facebook.com https://connect.facebook.net";
+
 function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): string {
   return [
     "default-src 'self'",
@@ -217,7 +227,10 @@ function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_
 
 /** The shop's own policy: no inline script anywhere. */
 const SHOP_HEADERS = [
-  { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
+  {
+    key: "Content-Security-Policy",
+    value: csp(`'self' ${CF_BEACON_SCRIPT} ${META_PIXEL_SCRIPT}`, "'none'", `${CF_BEACON_CONNECT} ${META_PIXEL_CONNECT}`),
+  },
   ...baseSecurityHeaders("DENY", SHOP_PERMISSIONS_POLICY),
 ];
 /** The API's and the hand-written pages': an inline script is allowed, nothing is opened. */
