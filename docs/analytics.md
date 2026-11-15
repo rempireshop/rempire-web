@@ -493,12 +493,16 @@ a stand-in so nothing reaches Meta. The smoke suite answers the banner
 «Только необходимое» (`v: 2, ads: false`), so live smoke runs never show up
 in Renat's reports.
 
+**Domain verification** (Business settings → Brand safety → Domains,
+15.11.2026): the `<meta name="facebook-domain-verification">` tag,
+`META_DOMAIN_VERIFY` in `src/lib/seo-head.mjs`. It rides in
+`verificationMeta()` next to Google's and Pinterest's, so «/» (the shell
+`public/shop2/index.html`) and every generated page carry it. Meta reads only
+the static head, so it must never move into a script.
+`tests/google-verification.test.ts` holds it in place.
+
 **Not done (yet):**
 
-- **Domain verification** in Business settings → Brand safety → Domains:
-  either the TXT record `facebook-domain-verification=…` at Cloudflare DNS,
-  or a `<meta name="facebook-domain-verification">` in
-  `public/shop2/index.html` (every prerendered page copies its head).
 - **Conversions API (server-side Purchase):** it needs an access token from
   Events Manager in Vercel env. The eventID is already the order number, so
   Meta would merge the two.

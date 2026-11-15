@@ -62,6 +62,7 @@ account is billed. The card plan is described below the table.
 | **Claude connector «Rempire»** (`https://rempireshop.com/api/mcp`) | Renat's own Claude edits texts, names, prices, stock and page texts (`docs/claude-connector.md`) | the panel password | the shop | Renat (his own Claude plan) | — | Dim's connection ends when the panel password changes |
 | **Web Push** (VAPID) | Order pings to the owner's phone and computer | keys in Vercel only | the shop | — | free | — |
 | **Pinterest** | Domain verification tag only (`PINTEREST_DOMAIN_VERIFY`) | — | Renat | — | free | — |
+| **Meta** business portfolio «Rempire Original» | Meta Pixel `1082368324784460` (behind the consent banner, `docs/analytics.md` § «Meta Pixel»); domain claim tag `META_DOMAIN_VERIFY` (15.11.2026); Facebook Page «Rempire Shop» + Instagram rempire.shop | Renat's Facebook | Renat | Renat's ads, if he runs them | free (ads extra) | — |
 | **Stripe** | Card payments of the old Shopify shop | Renat's | Renat | — | no monthly fee | none. Close around the end of January 2027, after the dispute window (`ho-stripe`). |
 | **Shopify** (legacy) | The old shop | Renat's | Renat | — | was ~46 € / month | **closed 29.10.2026**; orders and customers exported first |
 | **Vercel Blob** `rempire-qa` (on Diip's team, not the shop's) | Questionnaire answers from the prototype days; unused since 07.09 | Dim | Diip | — | free | Dim deletes it (`ho-blob-cleanup`) |

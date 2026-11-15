@@ -25,6 +25,8 @@ const LIVE_TAGS = [
 const tag = (t: string) => `<meta name="google-site-verification" content="${t}">`;
 /** Pinterest's domain claim (Renat's account, 01.11.2026). */
 const PIN_TAG = '<meta name="p:domain_verify" content="da98ac269635a861219b90cef16af348">';
+/** Meta's domain claim (Rempire Original, 15.11.2026). */
+const META_TAG = '<meta name="facebook-domain-verification" content="6y4ynog0xbvemvk7uqn5iukyw79mcy">';
 
 /** The <head> of a page, and the part of it between the seo markers. */
 function head(html: string): { head: string; seo: string } {
@@ -34,16 +36,18 @@ function head(html: string): { head: string; seo: string } {
 }
 
 describe("google-site-verification", () => {
-  it("carries exactly the three tags the live Shopify home page carries, then Pinterest's", () => {
+  it("carries exactly the three tags the live Shopify home page carries, then Pinterest's and Meta's", () => {
     expect(GOOGLE_SITE_VERIFICATION).toEqual(LIVE_TAGS);
-    expect(verificationMeta()).toBe([...LIVE_TAGS.map(tag), PIN_TAG].join("\n"));
+    expect(verificationMeta()).toBe([...LIVE_TAGS.map(tag), PIN_TAG, META_TAG].join("\n"));
   });
 
-  it("Pinterest's domain claim is in the head of «/» too, inside the generated block", () => {
+  it("Pinterest's and Meta's domain claims are in the head of «/» too, inside the generated block", () => {
     const shell = readFileSync("public/shop2/index.html", "utf8").replace(/\r\n?/g, "\n");
     const { head: h, seo } = head(shell);
-    expect(h.split(PIN_TAG).length - 1).toBe(1);
-    expect(seo).toContain(PIN_TAG);
+    for (const t of [PIN_TAG, META_TAG]) {
+      expect(h.split(t).length - 1, t).toBe(1);
+      expect(seo).toContain(t);
+    }
   });
 
   it("is in the block every page's head is built from, in all three languages", () => {

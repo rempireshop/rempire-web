@@ -740,10 +740,15 @@ export const GOOGLE_SITE_VERIFICATION = [
    01.11.2026). Pinterest reads it off the home page's source, so it rides in
    the same block as Google's. A public token, like those. */
 export const PINTEREST_DOMAIN_VERIFY = "da98ac269635a861219b90cef16af348";
+/* Meta's domain claim for rempireshop.com (business portfolio «Rempire
+   Original», 15.11.2026, for the Meta Pixel and ads). Meta reads it off the
+   home page's static <head> — never one a script writes. A public token. */
+export const META_DOMAIN_VERIFY = "6y4ynog0xbvemvk7uqn5iukyw79mcy";
 export const verificationMeta = () =>
   [
     ...GOOGLE_SITE_VERIFICATION.map(t => `<meta name="google-site-verification" content="${esc(t)}">`),
     `<meta name="p:domain_verify" content="${esc(PINTEREST_DOMAIN_VERIFY)}">`,
+    `<meta name="facebook-domain-verification" content="${esc(META_DOMAIN_VERIFY)}">`,
   ].join("\n");
 
 /* Everything a crawler reads, in one block. The prerender writes it between
