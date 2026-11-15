@@ -13235,10 +13235,49 @@
       return true;
     } catch (e) { return false; }
   }
+  /* A receipt's address can carry what must never reach a third party: `g`,
+     a bought gift card's code with the token of its PDF, and `o`, the order
+     «Оплатить ещё раз» pays for (src/lib/payments/receipt.ts). Meta's script
+     sends the page's full address with every event, so before the first one
+     the receipt is read (doneState() caches it), the whole query is kept for
+     this tab only (doneState() reads it back on a reload), and the address
+     keeps the rest. Security review of 8185aec2, 15.11.2026. */
+  function pixelScrub() {
+    try {
+      if (S.screen !== "done") return;
+      var qs = String(location.search || "");
+      if (!/[?&](g|o)=/.test(qs)) return;
+      doneState();
+      try { sessionStorage.setItem("rmp_done_q", qs); } catch (e) {}
+      var keep = qs.replace(/^\?/, "").split("&").filter(function (kv) {
+        var k = kv.split("=")[0];
+        return kv && k !== "g" && k !== "o";
+      }).join("&");
+      history.replaceState(history.state || null, "", location.pathname + (keep ? "?" + keep : "") + location.hash);
+    } catch (e) {}
+  }
+  /* The script is loaded in this tab (a yes on a shop page) and the screen
+     is now the panel or the scanner: a fresh page there, so no third-party
+     script runs beside the owner's data. /admin is also served without the
+     Meta hosts in its CSP (next.config.ts). Called first thing in render(). */
+  var pixelLeaving = false;
+  function pixelLeaveOwner() {
+    if (!window.fbq || !pixelOff()) return false;
+    if (!pixelLeaving) {
+      pixelLeaving = true;
+      try {
+        location.assign(isOwnerPath(location.pathname) ? location.pathname + location.search
+          : (S.screen === "scan" ? "/admin/scan" : "/admin"));
+      } catch (e) {}
+    }
+    return true;
+  }
   /** One standard event; silent without the shopper's yes or on the owner's screens. */
   function pixel(name, params, eventId) {
     try {
-      if (!consentAds() || pixelOff() || !mountPixel()) return;
+      if (!consentAds() || pixelOff() || !pixelHost()) return;
+      pixelScrub();   // before Meta's script can read the address
+      if (!mountPixel()) return;
       if (eventId) window.fbq("track", name, params || {}, { eventID: eventId });
       else window.fbq("track", name, params || {});
     } catch (e) { /* the pixel must never be why a click failed */ }
@@ -52347,8 +52386,17 @@
   function doneState() {
     if (S.done) return S.done;
     var q = {};
+    /* pixelScrub() takes `g` and `o` out of the address before Meta's script
+       can read it, and keeps the whole query for this tab: a reload of the
+       same receipt (same order number) reads it back from there. */
+    var src = String(location.search || "");
     try {
-      String(location.search || "").replace(/^\?/, "").split("&").forEach(function (kv) {
+      var kept = sessionStorage.getItem("rmp_done_q") || "";
+      var numOf = function (s) { var m = String(s).match(/[?&]n=([^&]*)/); return m ? m[1] : ""; };
+      if (kept && !/[?&](g|o)=/.test(src) && numOf(kept) && numOf(kept) === numOf(src)) src = kept;
+    } catch (e) {}
+    try {
+      src.replace(/^\?/, "").split("&").forEach(function (kv) {
         if (!kv) return;
         var i = kv.indexOf("=");
         q[decodeURIComponent(i < 0 ? kv : kv.slice(0, i))] = i < 0 ? "" : decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " "));
@@ -55089,6 +55137,7 @@
      first paint itself is being held (bootHeld): it draws its own screen. */
   var lazyHeld = false, lazyForce = false;
   function render() {
+    if (pixelLeaveOwner()) return;   // Meta's script never shares a page with the panel
     var hold = bootHeld || lazyForce ? null : lazyHold(S.screen);
     if (bootHeld || hold) {
       if (hold && !lazyHeld) {

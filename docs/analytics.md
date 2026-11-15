@@ -461,6 +461,24 @@ app.js builds the same stub and loads only `fbevents.js`.
     every `pushState`.
 - **Withdrawing consent:** the footer's «Данные и cookie» → «Только
   необходимое» sends `fbq('consent','revoke')`, and nothing more goes out.
+- **The receipt's address** (`pixelScrub()`, security review of 8185aec2):
+  - Meta's script sends the page address with every event, and a paid
+    receipt carries `g` (a bought gift card's code and PDF token); an unpaid
+    one carries `o` (the order id the retry pays).
+  - Both leave the address before the first pixel call. The full query is
+    kept in sessionStorage (`rmp_done_q`), and `doneState()` reads it back
+    on a reload of the same order number.
+- **The panel** (`pixelLeaveOwner()`):
+  - A tab that loaded the pixel on a shop page and then moves to `/admin`
+    or the scanner reloads into a fresh page, so Meta's script never runs
+    beside the owner's data.
+  - `/admin` is also served with its own CSP without the Meta hosts
+    (`ADMIN_HEADERS`).
+- **Events Manager setting (Renat):** «Автоматическое расширенное
+  сопоставление» (Automatic advanced matching) must be **off**. With it on,
+  Meta's script would hash and send the e-mail and phone it finds in form
+  fields, such as a signed-in shopper's checkout, which the banner and the
+  privacy policy do not cover.
 
 **CSP:** `connect.facebook.net` in `script-src` and `www.facebook.com` +
 `connect.facebook.net` in `connect-src`, on the shop's pages only

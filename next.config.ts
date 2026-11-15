@@ -233,6 +233,11 @@ const SHOP_HEADERS = [
   },
   ...baseSecurityHeaders("DENY", SHOP_PERMISSIONS_POLICY),
 ];
+/** The panel's: the shop's own policy, minus the Meta Pixel hosts. */
+const ADMIN_HEADERS = [
+  { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
+  ...baseSecurityHeaders("DENY", SHOP_PERMISSIONS_POLICY),
+];
 /** The API's and the hand-written pages': an inline script is allowed, nothing is opened. */
 const LOOSE_HEADERS = [
   { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
@@ -314,6 +319,13 @@ const nextConfig: NextConfig = {
       { source: "/shop/:path*", headers: LOOSE_HEADERS },
       { source: "/golive/:path*", has: [DIM_HOST], headers: LOOSE_HEADERS },
       { source: "/handover", has: [{ type: "host", value: "rempireshop.diipsolutions.eu" }], headers: LOOSE_HEADERS },
+      /* The panel and its scanner (/admin, /admin/scan — one address in every
+         language): the shop's policy without the Meta Pixel's hosts. The
+         pixel never mounts there (pixelOff() in app.js), and a tab that
+         loaded it on a shop page reloads on the way in (pixelLeaveOwner()),
+         so this is the second lock, not the first. */
+      { source: "/admin", headers: ADMIN_HEADERS },
+      { source: "/admin/:path*", headers: ADMIN_HEADERS },
       /* An unprefixed page is the English page for most visitors and a 302 to
          /ru/… or /et/… for a browser whose cookie or Accept-Language asks for
          Russian or Estonian (src/middleware.ts) — so no cache between here

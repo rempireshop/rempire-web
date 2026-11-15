@@ -26,9 +26,12 @@ const PIXEL_ID = "1082368324784460";
 
 /** Stands in for fbevents.js: every queued and later call lands in window.__px. */
 const FAKE_FBEVENTS = `(function () {
-  var f = window.fbq; window.__px = window.__px || [];
+  var f = window.fbq; window.__px = window.__px || []; window.__pxHref = window.__pxHref || [];
   if (!f) return;
-  f.callMethod = function () { window.__px.push(JSON.parse(JSON.stringify(Array.prototype.slice.call(arguments)))); };
+  f.callMethod = function () {
+    window.__pxHref.push(location.href);   // what the real script would send as the page address
+    window.__px.push(JSON.parse(JSON.stringify(Array.prototype.slice.call(arguments))));
+  };
   (f.queue || []).forEach(function (a) { f.callMethod.apply(f, a); });
   f.queue = [];
 })();`;
@@ -180,9 +183,47 @@ test.describe("with a yes", () => {
 
   test("the owner's panel sends Meta nothing", async ({ page }) => {
     const { loads } = await watchPixel(page);
-    await page.goto(shopUrl("", "/admin/"));
+    const res = await page.goto(shopUrl("", "/admin/"));
     await expect(page.locator("[data-admpw]")).toBeVisible({ timeout: 20_000 });
     await page.waitForTimeout(500);
     expect(loads, "fbevents.js loaded on the admin screen").toHaveLength(0);
+    // …and the panel's own CSP does not even allow it (next.config.ts, ADMIN_HEADERS)
+    expect(res?.headers()["content-security-policy"] ?? "").not.toContain("facebook");
+  });
+
+  /* Security review of 8185aec2: the receipt's address carries a bought gift
+     card's code and PDF token (`g`), and Meta's script sends the page address
+     with every event. */
+  test("a gift card's code never reaches Meta, and the receipt keeps it", async ({ page }) => {
+    await watchPixel(page);
+    const code = "RMP-ABCD-EFGH";
+    await page.goto(`/ru/checkout/done?n=R-100078&s=paid&t=50.00&g=${code}~abcdefghijklmnop1234`);
+    await waitForScreen(page, "done");
+    await expect.poll(() => tracked(page, "Purchase")).toEqual([{ value: 50, currency: "EUR" }]);
+    const hrefs = await page.evaluate(() => (window as unknown as { __pxHref?: string[] }).__pxHref ?? []);
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const h of hrefs) expect(h, "the page address Meta would see").not.toMatch(/RMP-|[?&]g=/);
+    await expect(page.locator(`[data-giftpdf="${code}"]`)).toBeVisible();
+    // a reload of the same receipt still has the gift card (kept for this tab)
+    await page.reload();
+    await waitForScreen(page, "done");
+    await expect(page.locator(`[data-giftpdf="${code}"]`)).toBeVisible();
+  });
+
+  test("a tab that loaded the pixel starts a fresh page on the way into the panel", async ({ page }) => {
+    await watchPixel(page);
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await expect.poll(() => page.evaluate(() => typeof (window as unknown as { fbq?: unknown }).fbq)).toBe("function");
+    // the shop's own Back into the panel — a history move inside the same page
+    await Promise.all([
+      page.waitForEvent("load"),
+      page.evaluate(() => {
+        history.pushState({}, "", "/admin");
+        window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+      }),
+    ]);
+    await expect(page.locator("[data-admpw]")).toBeVisible({ timeout: 20_000 });
+    expect(await page.evaluate(() => typeof (window as unknown as { fbq?: unknown }).fbq)).toBe("undefined");
   });
 });
