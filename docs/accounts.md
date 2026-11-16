@@ -51,7 +51,7 @@ account is billed. The card plan is described below the table.
 | **Resend** | All e-mail from `@rempireshop.com` (region eu-west-1, Ireland) | rempireshopinfo@ | the shop | — | free tier: 100 / day, 3 000 / month | member |
 | **Montonio** | Payments (bank links, cards, wallets), refunds, parcel labels, pickup points; live keys | Renat's own login | Rempire Store OÜ | Renat (contract) | per contract | technical contact, if Renat wants |
 | **OpenAI API** (platform.openai.com) | Shop chat, panel assistant, AI texts, AI search, photo cut-out, build-time search cards | rempireshopinfo@ | the shop | the shop's account (funded 08.10); whose card funded it is still to check (`ho-openai`) | cents a day; set a monthly limit of ~$10 | member, if useful |
-| **OpenAI Ads** (ads.openai.com, beta) | Test campaign «REMPIRE campaign», serving since 05.11 ~11:30; clicks; 25 countries | rempireshopinfo@ | the shop | **Mastercard …0731: Dim's card today → company card at the meeting** | €65 for the whole campaign (the platform minimum); charged at €3 or on 30.11 | none needed |
+| **OpenAI Ads** (ads.openai.com, beta) | Test campaign «REMPIRE campaign», serving since 05.11 ~11:30; clicks; 25 countries | rempireshopinfo@ | the shop | **Mastercard …0731, Renat's card** (Dim, 16.11.2026) | €65 for the whole campaign (the platform minimum); charged at €3 or on 30.11 | none needed |
 | **Google Search Console** `sc-domain:rempireshop.com` | Indexing, search figures in «Аналитика» (via service account `gsc-reader@rempire-shop.iam.gserviceaccount.com`) | rempireshopinfo@ | the shop | — | free | user; Dim's own owner verification should become a «Full user» |
 | **Google Merchant Center** 5819586565 | Reads `/feed/google-en.xml` and `/feed/google-ru.xml` daily; free listings; returns policy (24 EU countries, 30 days) | rempireshopinfo@ | the shop | — | free | user |
 | **Google Ads** «Rempire Shop» 892-756-4570 | Test campaign «Test Shopping EE», 25.10–15.11.2026, Shopping, 25 countries since 05.11 | rempireshopinfo@ | the shop | **Renat's card** (Dim, 16.11.2026); billed after the ads run | ≤ €20 for the test; after 15.11 Renat decides | user (Standard), if Renat continues |
@@ -70,9 +70,9 @@ account is billed. The card plan is described below the table.
 
 ### The card plan
 
-- **Moves to Renat's company card at the handover meeting.** Railway,
-  Cloudflare and OpenAI Ads were on Dim's card (OpenAI Ads on Mastercard
-  …0731). Google Ads is on Renat's card (Dim, 16.11.2026).
+- **Moves to Renat's company card at the handover meeting.** Railway
+  and Cloudflare are on Dim's card. Google Ads and OpenAI Ads share Mastercard
+  …0731, which is Renat's card (Dim, 16.11.2026).
   - Railway first: a failed payment stops the database, and with it the
     shop.
 - **Not recorded yet:** Vercel Pro (open question 1) and the card that funds
@@ -172,7 +172,7 @@ accountant confirm it once.
 
 1. ~~Vercel Pro~~ — answered 05.11: Dim's card pays it. The goal is Hobby,
    which takes no card; the company card only if Pro has to stay.
-2. ~~Card …0731~~ — answered 05.11: Dim's. 16.11 Dim: Google Ads is on Renat's card.
+2. ~~Card …0731~~ — 05.11 the answer was Dim's; corrected 16.11 by Dim: it is Renat's (Google Ads and OpenAI Ads).
 3. ~~Zone.ee~~ — answered 05.11: THEFLOW OÜ is Renat's company, the sign-in
    is blackboxestonia@, and moving the domain to Rempire Store OÜ is optional.
 4. **`RESEND_TO`, `VAPID_*`, `TELEGRAM_*`.** Are they all set in Vercel
