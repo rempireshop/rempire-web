@@ -75,8 +75,6 @@ account is billed. The card plan is described below the table.
   …0731). Google Ads is on Renat's card (Dim, 16.11.2026).
   - Railway first: a failed payment stops the database, and with it the
     shop.
-  - `golive.json` rows `ho-google-ads` and `ho-openai-ads` still call card
-    …0731 Renat's. Correct them.
 - **Not recorded yet:** Vercel Pro (open question 1) and the card that funds
   the OpenAI API (`ho-openai`).
 - **Renat's already:** Montonio, Stripe and the domain renewal.
@@ -174,7 +172,7 @@ accountant confirm it once.
 
 1. ~~Vercel Pro~~ — answered 05.11: Dim's card pays it. The goal is Hobby,
    which takes no card; the company card only if Pro has to stay.
-2. ~~Card …0731~~ — answered 05.11: Dim's; the handover rows say so.
+2. ~~Card …0731~~ — answered 05.11: Dim's. 16.11 Dim: Google Ads is on Renat's card.
 3. ~~Zone.ee~~ — answered 05.11: THEFLOW OÜ is Renat's company, the sign-in
    is blackboxestonia@, and moving the domain to Rempire Store OÜ is optional.
 4. **`RESEND_TO`, `VAPID_*`, `TELEGRAM_*`.** Are they all set in Vercel
