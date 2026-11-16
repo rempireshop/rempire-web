@@ -54,7 +54,7 @@ account is billed. The card plan is described below the table.
 | **OpenAI Ads** (ads.openai.com, beta) | Test campaign «REMPIRE campaign», serving since 05.11 ~11:30; clicks; 25 countries | rempireshopinfo@ | the shop | **Mastercard …0731: Dim's card today → company card at the meeting** | €65 for the whole campaign (the platform minimum); charged at €3 or on 30.11 | none needed |
 | **Google Search Console** `sc-domain:rempireshop.com` | Indexing, search figures in «Аналитика» (via service account `gsc-reader@rempire-shop.iam.gserviceaccount.com`) | rempireshopinfo@ | the shop | — | free | user; Dim's own owner verification should become a «Full user» |
 | **Google Merchant Center** 5819586565 | Reads `/feed/google-en.xml` and `/feed/google-ru.xml` daily; free listings; returns policy (24 EU countries, 30 days) | rempireshopinfo@ | the shop | — | free | user |
-| **Google Ads** «Rempire Shop» 892-756-4570 | Test campaign «Test Shopping EE», 25.10–15.11.2026, Shopping, 25 countries since 05.11 | rempireshopinfo@ | the shop | **Mastercard …0731: Dim's card today → company card at the meeting**; billed after the ads run | ≤ €20 for the test; after 15.11 Renat decides | user (Standard), if Renat continues |
+| **Google Ads** «Rempire Shop» 892-756-4570 | Test campaign «Test Shopping EE», 25.10–15.11.2026, Shopping, 25 countries since 05.11 | rempireshopinfo@ | the shop | **Renat's card** (Dim, 16.11.2026); billed after the ads run | ≤ €20 for the test; after 15.11 Renat decides | user (Standard), if Renat continues |
 | **Google Cloud** project «Rempire shop» (`rempire-shop`) | Google Auth Platform for customers' «Продолжить с Google» (live 02.11; web client «REMPIRE shop login»); the GSC service account | rempireshopinfo@ (2SV required) | the shop | — | free | IAM member, if needed; **never delete the project** |
 | **Google Business Profile** | The salon on Maps | rempireshopinfo@ | Renat | — | free | none. The shop's local-inventory feed stays off until `settings.gbp_store_code` is set. |
 | **Bing Webmaster Tools** | Bing indexing; IndexNow pings from the shop need no account | rempireshopinfo@ | the shop | — | free | user |
@@ -71,8 +71,8 @@ account is billed. The card plan is described below the table.
 ### The card plan
 
 - **Moves to Renat's company card at the handover meeting.** Railway,
-  Cloudflare, Google Ads and OpenAI Ads are on Dim's card today (Google Ads
-  and OpenAI Ads share Mastercard …0731).
+  Cloudflare and OpenAI Ads were on Dim's card (OpenAI Ads on Mastercard
+  …0731). Google Ads is on Renat's card (Dim, 16.11.2026).
   - Railway first: a failed payment stops the database, and with it the
     shop.
   - `golive.json` rows `ho-google-ads` and `ho-openai-ads` still call card
