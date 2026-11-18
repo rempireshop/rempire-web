@@ -22,6 +22,7 @@ import { setupDb, teardownDb } from "./helpers";
 import {
   CRON_SECRET,
   ORIGIN,
+  PARTNER_SECRET,
   PRODUCT,
   PRODUCT_2,
   adminCookieHeader,
@@ -52,7 +53,7 @@ interface RouteCase {
   /** Exported handler names this file drives; anything else must be undefined. */
   exports: string[];
   load: () => Promise<Record<string, unknown>>;
-  auth?: "admin" | "customer" | "cron";
+  auth?: "admin" | "customer" | "cron" | "partner";
   /** Path params for a dynamic segment. */
   params?: Record<string, string>;
   /** A well-formed body, mutated field by field. */
@@ -85,6 +86,10 @@ function routes(): RouteCase[] {
   const admin = { cookie: adminCookieHeader() };
   const cust = { cookie: customerCookieHeader(F.customerEmail) };
   const cron = { headers: { authorization: `Bearer ${CRON_SECRET}` } };
+  const partner = { headers: { authorization: `Bearer ${PARTNER_SECRET}` } };
+  /* a real 1×1 PNG, so the photo route walks past its checks to the (stubbed) model */
+  const tinyPng =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
   const goodOrder = {
     lang: "RU",
     items: [{ id: PRODUCT.id, variant: null, qty: 1 }],
@@ -375,6 +380,10 @@ function routes(): RouteCase[] {
        real, stale, hostile — is a 302 into the shop, never a 5xx. */
     { name: "GET /cart/[...path]/", path: "/cart/x/", method: "GET", exports: ["GET"], load: () => import("@/app/cart/[...path]/route"), jsonBody: false, queries: ["", "?buy=1", "?x=%00"] },
 
+    /* ---- the booking app (docs/partner-api.md) --------------------------- */
+    { name: "GET /api/partner/products/lookup/", path: "/api/partner/products/lookup/", method: "GET", exports: ["GET"], load: () => import("@/app/api/partner/products/lookup/route"), auth: "partner", req: partner, queries: [`?id=${PRODUCT.id}`, `?id=${PRODUCT.id}&variant=%00`, "?q=shampoo", "?q=a", "?q=sh&limit=0", "?q=sh&limit=21", "?q=sh&limit=abc", "?q=sh&limit=1e9", "?barcode=4006381333931", "?barcode=%00", "?barcode=", "?barcode=1&q=sh", "?lang=zz&q=sham", "?q=" + "x".repeat(5000), ""] },
+    { name: "POST /api/partner/products/identify/", path: "/api/partner/products/identify/", method: "POST", exports: ["POST"], load: () => import("@/app/api/partner/products/identify/route"), auth: "partner", req: partner, body: { image: tinyPng, lang: "ru" } },
+
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },
     { name: "POST /api/assistant/", path: "/api/assistant/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true, headers: { origin: "https://rempireshop.com" } }, body: { messages: [{ role: "user", content: "привет" }], lang: "RU", mode: "shop" }, jsonBody: false },
@@ -585,7 +594,7 @@ describe("API fuzzing", () => {
     const expired = "rmp_admin=v1.1000000000000.deadbeef";
     const tampered = adminCookieHeader().replace(/.$/, (c) => (c === "A" ? "B" : "A"));
     const credentials: Array<[string, ReqOpts, RouteCase["auth"][]]> = [
-      ["none", {}, ["admin", "customer", "cron"]],
+      ["none", {}, ["admin", "customer", "cron", "partner"]],
       ["garbage cookie", { cookie: "rmp_admin=%; rmp_cust=%%%" }, ["admin", "customer", "cron"]],
       ["tampered signature", { cookie: tampered }, ["admin", "cron"]],
       ["expired", { cookie: expired }, ["admin", "cron"]],
@@ -593,8 +602,10 @@ describe("API fuzzing", () => {
       // token may ever be replayed as the other (src/lib/customers.ts)
       ["customer cookie", { cookie: customerCookieHeader(F.customerEmail) }, ["admin"]],
       ["admin cookie", { cookie: adminCookieHeader() }, ["customer"]],
-      ["wrong cron secret", { headers: { authorization: "Bearer nope" } }, ["cron"]],
+      ["wrong cron secret", { headers: { authorization: "Bearer nope" } }, ["cron", "partner"]],
       ["no bearer prefix", { headers: { authorization: CRON_SECRET } }, ["cron"]],
+      ["no bearer prefix", { headers: { authorization: PARTNER_SECRET } }, ["partner"]],
+      ["the cron secret", { headers: { authorization: `Bearer ${CRON_SECRET}` } }, ["partner"]],
     ];
     for (const r of routes()) {
       if (!r.auth) continue;

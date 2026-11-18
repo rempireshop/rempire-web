@@ -22,6 +22,8 @@ import { TEST_SECRET } from "./helpers";
 export const ORIGIN = "https://rempireshop.com";
 export const HOST = "rempireshop.com";
 export const CRON_SECRET = "fuzz-cron-secret-0123456789";
+/** The booking app's key to /api/partner/* (src/lib/partner-auth.ts) — a fake, like the cron one. */
+export const PARTNER_SECRET = "fuzz-booking-secret-0123456789";
 
 type Min = { id: string; p: number; s: string };
 const IN_STOCK = (catalogueMin as Min[]).filter((p) => p.s === "in");
@@ -289,6 +291,7 @@ const FUZZ_ENV: Record<string, string> = {
   PAYMENT_PROVIDER: "mock",
   PUBLIC_BASE_URL: ORIGIN,
   CRON_SECRET,
+  BOOKING_API_SECRET: PARTNER_SECRET,
   OPENAI_API_KEY: "sk-fuzz-not-a-real-key",
   RESEND_API_KEY: "re_fuzz_not_a_real_key",
   MAIL_RETRY_DELAY_MS: "0", // no 400 ms nap on a stubbed 5xx

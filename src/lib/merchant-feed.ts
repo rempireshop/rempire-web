@@ -801,6 +801,73 @@ export function shopProducts(input: Pick<FeedInput, "overrides" | "descriptions"
   return out;
 }
 
+/* ---------- one photo per size, for the booking app ---------------------
+
+   What REMPIRE booking shows next to a product a barber is about to sell
+   (src/lib/partner-products.ts, docs/partner-api.md): the photo the product
+   page shows for that size — the same photosOf() — at the size a phone list
+   needs. The owner's upload goes out as its thumbnail; the catalogue's own
+   photos are already small. An SVG (a custom product's placeholder tower) is
+   no photo at all. Hidden and switched-off products are here too: a barber
+   can be holding a bottle the shop has taken off sale. */
+export type SizePhotos = { main: string | null; bySize: Map<string, string> };
+
+export function sizePhotos(overrides: Record<string, Override>, custom: CustomProduct[], base: string): Map<string, SizePhotos> {
+  const thumbs = new Map<string, string>();
+  for (const r of custom) for (const g of r.gallery ?? []) if (g.thumb) thumbs.set(g.url, g.thumb);
+  for (const o of Object.values(overrides)) for (const g of o?.gallery ?? []) if (g.thumb) thumbs.set(g.url, g.thumb);
+  const small = (u: string | undefined): string | null => {
+    if (!u) return null;
+    const t = thumbs.get(u);
+    if (t && usableImage(t)) return absUrl(base, t);
+    return usableImage(u) ? absUrl(base, u) : null;
+  };
+  const products = [...catalogueProducts({}, overrides), ...customProducts(custom.map((r) => ({ ...r, active: true })))];
+  const out = new Map<string, SizePhotos>();
+  for (const p of products) {
+    const o = overrides[p.id];
+    const ladder = rungsOf(p, o);
+    const { photos, varImg } = photosOf(p, o, ladder.length);
+    let main: string | null = null;
+    for (const u of photos) {
+      main = small(u);
+      if (main) break;
+    }
+    const bySize = new Map<string, string>();
+    ladder.forEach((r, i) => {
+      const own = small(photos[varImg[i]]) ?? main;
+      if (own) bySize.set(r.label ?? "", own);
+    });
+    out.set(p.id, { main, bySize });
+  }
+  return out;
+}
+
+/* ---------- one price per size, for the booking app ---------------------
+
+   The price of each size by the till's own rule — rungsOf(), the
+   restatement of priceItems() this feed is priced with, which
+   tests/merchant-feed.test.ts holds to the till item by item — in cents, and
+   keyed like sizePhotos(): product id, then the size label ('' for a product
+   with no sizes). Hidden and switched-off products are here too.
+
+   It is what the booking app is told for a bottle the till will not ring up
+   today — «Показывать в магазине» off, or «нет в наличии» — which the barber
+   can still be holding (src/lib/partner-products.ts). Everything the till
+   does price is priced by priceItems() itself there, never by this. */
+export function sizePrices(overrides: Record<string, Override>, custom: CustomProduct[]): Map<string, Map<string, number>> {
+  const products = [...catalogueProducts({}, overrides), ...customProducts(custom.map((r) => ({ ...r, active: true })))];
+  const out = new Map<string, Map<string, number>>();
+  for (const p of products) {
+    const bySize = new Map<string, number>();
+    for (const r of rungsOf(p, overrides[p.id])) {
+      if (Number.isFinite(r.price) && r.price >= 0) bySize.set(r.label ?? "", Math.round(r.price * 100));
+    }
+    out.set(p.id, bySize);
+  }
+  return out;
+}
+
 /** One item of the feed, as the checkout link has to find it again. */
 export type FeedOffer = {
   /** The Merchant Center id — g:id. */
