@@ -126,6 +126,7 @@ effect. The «In production» column is what the handover notes say as of
 | `ADMIN_PASSWORD_HASH` | The one admin password, as a scrypt digest from `tools/hash-password.mjs`. Changing it also signs out the Claude connector. | set |
 | `PUBLIC_BASE_URL` | Absolute links in letters, payment return URLs, the robots/noindex choice, the prerender base | `https://rempireshop.com` |
 | `CRON_SECRET` | Bearer token Vercel Cron sends to `/api/cron/*`. Without it those routes answer 503. | set |
+| `BOOKING_API_SECRET` | ≥16 chars. Bearer token that REMPIRE booking (rempire.ee) sends to `/api/partner/*`: product lookup and photo match, read-only (`docs/partner-api.md`). Both apps need the same value. Unset or shorter, those routes answer 503. | not set yet |
 | `DEPLOY_HOOK_URL` | Vercel Deploy Hook on branch `production`. The nightly rebuild and the owner's publishes use it (`src/lib/rebuild.ts`). | set (hook «rebuild-production») |
 | `PAYMENT_PROVIDER` | `montonio`, or `mock` for tests only. Unset means Montonio when its keys exist, otherwise payments are off. | `montonio` |
 | `MONTONIO_ACCESS_KEY` / `MONTONIO_SECRET_KEY` / `MONTONIO_ENV` | Montonio payments **and** shipping. `MONTONIO_ENV=live` or `sandbox`. | live keys, `live` |
